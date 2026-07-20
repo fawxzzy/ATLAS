@@ -1,0 +1,11 @@
+{
+  "schema": "atlas.workflow.discovery-fixture.v1",
+  "scenario": "duplicate-task",
+  "seed_from_registry": true,
+  "seed_status": "idle",
+  "seed_pinned": true,
+  "operations": [
+    {"op": "duplicate", "role_id": "atlas.inbox", "runtime_id": "fixture-atlas-inbox-duplicate-001"}
+  ],
+  "leases": []
+}

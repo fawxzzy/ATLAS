@@ -1,0 +1,290 @@
+{
+  "schema": "atlas.workflow.runtime-registry.v1",
+  "manifest_ref": "docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json",
+  "manifest_digest": "sha256:ce75812e75467387b61119abefe75d0ea4068b7946db211e64d74110479f1e72",
+  "observed_at": "2026-07-20",
+  "observation_precision": "day",
+  "discovery": {
+    "sources": [
+      "Codex task-tool list/read readback",
+      "local session and archived-session filename inventory",
+      "canonical profile and root governance",
+      "standing-role bootstrap prompts",
+      "local automation registry"
+    ],
+    "unknown_preserved": true
+  },
+  "bindings": [
+    {
+      "role_id": "atlas.main",
+      "current_runtime_id": "019f52d9-7667-72a3-a5f7-9c0613aedd8f",
+      "runtime_status": "active",
+      "health": "DEGRADED",
+      "archived": false,
+      "title": "ATLAS MAIN",
+      "cwd": "ATLAS_ROOT",
+      "evidence": ["task-tool live readback", "codex-session://2026/07/11/019f52d9-7667-72a3-a5f7-9c0613aedd8f", "pin state unavailable through app-server discovery"],
+      "related_epochs": [
+        {"runtime_id": "019f6d99-1954-7b71-b860-dcc69fc2fd14", "relationship": "historical-work-mode-mirror-not-accepted-role-epoch", "status": "notLoaded-interrupted"},
+        {"runtime_id": "019f6d99-8e97-7920-b141-55ef1a6c32e3", "relationship": "historical-work-mode-mirror-not-accepted-role-epoch", "status": "notLoaded-interrupted"}
+      ]
+    },
+    {
+      "role_id": "atlas.inbox",
+      "current_runtime_id": "019f7de0-3e1d-7433-a760-a9b724174ab6",
+      "runtime_status": "idle",
+      "health": "DEGRADED",
+      "archived": false,
+      "title": "ATLAS INBOX",
+      "cwd": "ATLAS_ROOT",
+      "evidence": ["task-tool live readback", "admission receipt route accepted", "codex-session://2026/07/20/019f7de0-3e1d-7433-a760-a9b724174ab6", "pin state unavailable through app-server discovery"],
+      "related_epochs": []
+    },
+    {
+      "role_id": "atlas.workflow-architect",
+      "current_runtime_id": "019f7df6-8521-7292-a012-297208fce120",
+      "runtime_status": "active",
+      "health": "DEGRADED",
+      "archived": false,
+      "title": "ATLAS WORKFLOW ARCHITECT",
+      "cwd": "ADMITTED_ISOLATED_ATLAS_WORKTREE",
+      "evidence": ["ATLAS-ARCHITECT-RUNTIME-REBIND-001", "ATLAS-ARCHITECT-RUNTIME-REBIND-ADMISSION-RECEIPT-001", "ATLAS-BOOTSTRAP-ARCHIVE-CONTINUITY-001", "docs/registry/ATLAS-WORKFLOW-BOOTSTRAP-CONTINUITY-HANDOFF.v1.json", "codex-session://2026/07/20/019f7df6-8521-7292-a012-297208fce120", "pin state unavailable through app-server discovery"],
+      "related_epochs": [
+        {"runtime_id": "019f7def-ca3b-78d0-bb72-5b5711b2bd51", "relationship": "unavailable-predecessor-epoch", "status": "notLoaded-rollout-missing"},
+        {"runtime_id": "019f7ded-cdb6-7d40-a102-74a70326d81c", "relationship": "coordination-bootstrap-not-implementation-role", "status": "archived"}
+      ]
+    },
+    {
+      "role_id": "atlas.release-control-plane",
+      "current_runtime_id": "019f79ac-bd85-7952-8935-58dfbb77aa20",
+      "runtime_status": "idle",
+      "health": "DEGRADED",
+      "archived": false,
+      "title": "ATLAS PR, CI & Release Control Plane",
+      "cwd": "ATLAS_ROOT",
+      "evidence": ["task-tool live readback", "current standing bootstrap prompt", "codex-session://2026/07/19/019f79ac-bd85-7952-8935-58dfbb77aa20", "pin state unavailable through app-server discovery"],
+      "related_epochs": []
+    },
+    {
+      "role_id": "fawxzzy.questions",
+      "current_runtime_id": "019f75ca-d9c7-7941-b73f-fb06ff2a0459",
+      "runtime_status": "idle",
+      "health": "DEGRADED",
+      "archived": false,
+      "title": "FAWXZZY QUESTIONS",
+      "cwd": "ATLAS_ROOT",
+      "evidence": ["task-tool live readback", "current inbox-routing adoption", "codex-session://2026/07/18/019f75ca-d9c7-7941-b73f-fb06ff2a0459", "pin state unavailable through app-server discovery"],
+      "related_epochs": []
+    },
+    {
+      "role_id": "manual.messages",
+      "current_runtime_id": "019f70b7-fad4-74d2-90e3-e5f34c6fab06",
+      "runtime_status": "idle",
+      "health": "DEGRADED",
+      "archived": false,
+      "title": "MANUAL MESSAGES",
+      "cwd": "ATLAS_ROOT",
+      "evidence": ["task-tool live readback", "current answered-decision routing adoption", "codex-session://2026/07/17/019f70b7-fad4-74d2-90e3-e5f34c6fab06", "early notification-lane prose later superseded by manual-question governance", "pin state unavailable through app-server discovery"],
+      "related_epochs": []
+    },
+    {
+      "role_id": "ai.questions",
+      "current_runtime_id": "019f79de-76cd-7062-9d8b-1b9f5fd6a8ba",
+      "runtime_status": "idle",
+      "health": "DEGRADED",
+      "archived": false,
+      "title": "AI QUESTIONS",
+      "cwd": "ATLAS_ROOT",
+      "evidence": ["task-tool live readback", "current inbox-routing adoption", "codex-session://2026/07/19/019f79de-76cd-7062-9d8b-1b9f5fd6a8ba", "pin state unavailable through app-server discovery"],
+      "related_epochs": []
+    },
+    {
+      "role_id": "fawxzzy.messages",
+      "current_runtime_id": "019f58c4-6d0b-7dc0-a4e3-9f6335f381e1",
+      "runtime_status": "notLoaded",
+      "health": "DEGRADED",
+      "archived": null,
+      "title": "FAWXZZY MESSAGES",
+      "cwd": "ATLAS_ROOT",
+      "evidence": ["task-tool search readback", "later runtime has newer observed update than original notification epoch", "archive and pin state unproven"],
+      "related_epochs": [
+        {"runtime_id": "019f617d-5e04-75d1-b77f-e5cb51d725f2", "relationship": "older-notification-epoch", "status": "notLoaded-archived-session-evidence"}
+      ]
+    },
+    {
+      "role_id": "owner.fitness",
+      "current_runtime_id": "019f58c4-4a9e-7af3-bb3e-06e199884027",
+      "runtime_status": "notLoaded",
+      "health": "DEGRADED",
+      "archived": null,
+      "title": "Fitness",
+      "cwd": "ATLAS_ROOT",
+      "evidence": ["task-tool search readback", "codex-session://2026/07/12/019f58c4-4a9e-7af3-bb3e-06e199884027", "archive and pin state unproven"],
+      "related_epochs": []
+    },
+    {
+      "role_id": "owner.mazer",
+      "current_runtime_id": "019f61a0-6b80-7913-b479-f75f2a8a5b77",
+      "runtime_status": "notLoaded",
+      "health": "DEGRADED",
+      "archived": null,
+      "title": "Mazer",
+      "cwd": "ATLAS_ROOT",
+      "evidence": ["task-tool search readback", "replacement standing-owner bootstrap explicitly replaces approval-blocked surface", "archive and pin state unproven"],
+      "related_epochs": [
+        {"runtime_id": "019f52e6-3b96-78b0-adb4-946b475f4ba6", "relationship": "preserved-approval-checkpoint-predecessor", "status": "notLoaded-archived-session-evidence"}
+      ]
+    },
+    {
+      "role_id": "owner.socials-os",
+      "current_runtime_id": "019f62b0-6fbe-79f0-9c47-a0942feb0825",
+      "runtime_status": "active",
+      "health": "DEGRADED",
+      "archived": false,
+      "title": "Socials OS",
+      "cwd": "SOCIALS_OS_OWNER_PROJECT",
+      "evidence": ["task-tool direct readback", "codex-session://2026/07/14/019f62b0-6fbe-79f0-9c47-a0942feb0825", "pin state unavailable through app-server discovery"],
+      "related_epochs": []
+    },
+    {
+      "role_id": "owner.fawxzzyweb",
+      "current_runtime_id": "019f7614-e612-77d0-b99b-ed1b0d277d1d",
+      "runtime_status": "active",
+      "health": "DEGRADED",
+      "archived": false,
+      "title": "FawxzzyWeb",
+      "cwd": "FAWXZZYWEB_OWNER_PROJECT",
+      "evidence": ["task-tool search readback", "current standing-owner bootstrap", "codex-session://2026/07/18/019f7614-e612-77d0-b99b-ed1b0d277d1d", "pin state unavailable through app-server discovery"],
+      "related_epochs": [
+        {"runtime_id": "019f6c56-3cf2-73d2-9b1b-5bccd0883793", "relationship": "earlier-owner-epoch", "status": "notLoaded"}
+      ]
+    },
+    {
+      "role_id": "platform.supabase-migration",
+      "current_runtime_id": "019f6dad-2cc3-7551-a47d-4b8c912c51ef",
+      "runtime_status": "active",
+      "health": "DEGRADED",
+      "archived": false,
+      "title": "FawxzzyPlatform — Supabase Migration",
+      "cwd": "FAWXZZY_PLATFORM_COORDINATION_PROJECT",
+      "evidence": ["task-tool live search shows original active", "known-current role list names original runtime", "declared replacement is notLoaded, so accepted supersession is unproven", "pin state unavailable through app-server discovery"],
+      "related_epochs": [
+        {"runtime_id": "019f6ffe-1c5b-7f42-ac4d-e666974cae87", "relationship": "declared-replacement-conflicts-with-live-original", "status": "notLoaded"}
+      ]
+    }
+  ],
+  "unbound_runtime_claims": [
+    {
+      "runtime_id": "019f6d9d-a192-7a51-8d2d-463494c87d3a",
+      "title": "DiscordOS",
+      "observed_status": "notLoaded",
+      "standing_contract_claim": true,
+      "admission_state": "NOT_DURABLY_ADMITTED",
+      "disposition": "EMBEDDED_COORDINATION_RUNTIME",
+      "canonical_target_id": "component.discordos",
+      "health": "HELD",
+      "recovery_action": "IGNORE_FOR_ROLE_CREATION",
+      "lifecycle_action_authorized": false,
+      "evidence": ["task-tool live readback", "codex-session://2026/07/16/019f6d9d-a192-7a51-8d2d-463494c87d3a", "canonical workflow profile classifies DiscordOS as an embedded governed service, not a required standing conversation"],
+      "rationale": "The runtime's bootstrap prose claims standing status, but the higher-ranked durable profile explicitly reconstructs DiscordOS as an embedded service. Preserve the runtime and never recreate or lifecycle-mutate it automatically."
+    },
+    {
+      "runtime_id": "019f6dad-8e00-7563-ba96-8b7ceae8fdf9",
+      "title": "GitHub Control Plane",
+      "observed_status": "notLoaded",
+      "standing_contract_claim": true,
+      "admission_state": "NOT_DURABLY_ADMITTED",
+      "disposition": "RELATED_PREDECESSOR_CLAIM",
+      "canonical_target_id": "atlas.release-control-plane",
+      "health": "HELD",
+      "recovery_action": "HOLD_NO_CREATE",
+      "lifecycle_action_authorized": false,
+      "evidence": ["task-tool live readback", "codex-session://2026/07/16/019f6dad-8e00-7563-ba96-8b7ceae8fdf9", "newer ATLAS PR, CI & Release Control Plane is the admitted cross-repository control-plane role"],
+      "rationale": "The older specialist runtime overlaps the admitted release-control-plane role. Treat it as a preserved claimant, not a second required role or an archive candidate."
+    },
+    {
+      "runtime_id": "019f6dac-afc1-7551-a47b-37e2dda95f35",
+      "title": "Atlas Control",
+      "observed_status": "notLoaded",
+      "standing_contract_claim": true,
+      "admission_state": "NOT_DURABLY_ADMITTED",
+      "disposition": "HISTORICAL_PROGRAM_SURFACE",
+      "canonical_target_id": null,
+      "health": "HELD",
+      "recovery_action": "HOLD_NO_CREATE",
+      "lifecycle_action_authorized": false,
+      "evidence": ["task-tool live readback", "codex-session://2026/07/16/019f6dac-afc1-7551-a47b-37e2dda95f35", "no stable logical role admission in current durable governance"],
+      "rationale": "Its umbrella read-model and task-supervision scope is now represented by durable components and ATLAS MAIN contracts, but no accepted supersession or lifecycle receipt exists."
+    },
+    {
+      "runtime_id": "019f6dac-9488-7923-b596-e7f6bd66dc22",
+      "title": "Atlas Clean & Re-sync",
+      "observed_status": "notLoaded",
+      "standing_contract_claim": true,
+      "admission_state": "NOT_DURABLY_ADMITTED",
+      "disposition": "HISTORICAL_PROGRAM_SURFACE",
+      "canonical_target_id": null,
+      "health": "HELD",
+      "recovery_action": "HOLD_NO_CREATE",
+      "lifecycle_action_authorized": false,
+      "evidence": ["task-tool live readback", "codex-session://2026/07/16/019f6dac-9488-7923-b596-e7f6bd66dc22", "workflow profile preserves the Clean and Re-sync program but does not admit this runtime as a required standing role"],
+      "rationale": "Preserve its program evidence as historical continuity; reconstruction must not create a new task from generic standing bootstrap prose alone."
+    },
+    {
+      "runtime_id": "019f6dac-f36e-7b61-8d4d-feec0f4c39b6",
+      "title": "Playbook & Atlas Book",
+      "observed_status": "notLoaded",
+      "standing_contract_claim": true,
+      "admission_state": "NOT_DURABLY_ADMITTED",
+      "disposition": "HISTORICAL_PROGRAM_SURFACE",
+      "canonical_target_id": "component.playbook-observer",
+      "health": "HELD",
+      "recovery_action": "HOLD_NO_CREATE",
+      "lifecycle_action_authorized": false,
+      "evidence": ["task-tool live readback", "codex-session://2026/07/16/019f6dac-f36e-7b61-8d4d-feec0f4c39b6", "current durable architecture reconstructs Playbook observation as a component rather than a required conversation"],
+      "rationale": "The task is preserved as historical program context. Playbook recovery comes from its repository and component contracts unless a new standing-role admission is accepted."
+    },
+    {
+      "runtime_id": "019f6dac-d539-7a92-a65d-d603a0053f7d",
+      "title": "Atlas Runtime",
+      "observed_status": "notLoaded",
+      "standing_contract_claim": true,
+      "admission_state": "NOT_DURABLY_ADMITTED",
+      "disposition": "HISTORICAL_PROGRAM_SURFACE",
+      "canonical_target_id": null,
+      "health": "HELD",
+      "recovery_action": "HOLD_NO_CREATE",
+      "lifecycle_action_authorized": false,
+      "evidence": ["task-tool live readback", "codex-session://2026/07/16/019f6dac-d539-7a92-a65d-d603a0053f7d", "current durable architecture separates Lifeline, Foundation, _stack, schedulers, leases, and runtime placement into component contracts"],
+      "rationale": "The umbrella runtime is not silently promoted to a required role. Its covered services are reconstructed independently from durable artifacts."
+    },
+    {
+      "runtime_id": "019f6dae-99bc-7850-a79e-c1d03e83fc80",
+      "title": "Atlas Development",
+      "observed_status": "notLoaded",
+      "standing_contract_claim": true,
+      "admission_state": "NOT_DURABLY_ADMITTED",
+      "disposition": "HISTORICAL_PROGRAM_SURFACE",
+      "canonical_target_id": null,
+      "health": "HELD",
+      "recovery_action": "HOLD_NO_CREATE",
+      "lifecycle_action_authorized": false,
+      "evidence": ["task-tool live readback", "codex-session://2026/07/16/019f6dae-99bc-7850-a79e-c1d03e83fc80", "development-gate program evidence exists but no current stable logical-role admission exists"],
+      "rationale": "This future development coordinator remains preserved historical evidence; it is not recreated until ATLAS MAIN admits a stable logical role."
+    },
+    {
+      "runtime_id": "019f6dad-f4ac-7c42-b0cf-bd5a58750ee6",
+      "title": "AI Model Routing",
+      "observed_status": "notLoaded",
+      "standing_contract_claim": true,
+      "admission_state": "NOT_DURABLY_ADMITTED",
+      "disposition": "HISTORICAL_PROGRAM_SURFACE",
+      "canonical_target_id": null,
+      "health": "HELD",
+      "recovery_action": "HOLD_NO_CREATE",
+      "lifecycle_action_authorized": false,
+      "evidence": ["task-tool live readback", "codex-session://2026/07/16/019f6dad-f4ac-7c42-b0cf-bd5a58750ee6", "current model and effort floors are reconstructed directly from the canonical workflow profile and role policies"],
+      "rationale": "The specialist runtime is retained as historical evidence, while model-routing policy remains a durable contract rather than a required standing task."
+    }
+  ]
+}

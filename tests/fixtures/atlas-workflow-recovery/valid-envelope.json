@@ -1,0 +1,36 @@
+{
+  "schema": "atlas.workflow.envelope.v1",
+  "kind": "MANUAL_QUESTION",
+  "event_id": "ATLAS-WORKFLOW-MANUAL-QUESTION-001",
+  "payload_digest": "sha256:66194964b3d60e51042d7d600f615c4847f05f05c200d8c4f57124add7b55416",
+  "idempotency_key": "ATLAS-WORKFLOW-MANUAL-QUESTION-001",
+  "source_role_id": "atlas.workflow-architect",
+  "source_runtime": {
+    "thread_id": "019f7df6-8521-7292-a012-297208fce120",
+    "host_id": "local",
+    "title": "ATLAS WORKFLOW ARCHITECT"
+  },
+  "target_role_id": "manual.messages",
+  "correlation": {
+    "source_event_id": "ATLAS-ARCHITECT-RUNTIME-REBIND-001",
+    "question_id": "ATLAS-WORKFLOW-MANUAL-QUESTION-001",
+    "route_back_role_id": "atlas.workflow-architect"
+  },
+  "freshness": {
+    "created_at": "2026-07-20T00:00:00Z",
+    "expires_at": null
+  },
+  "acknowledgement": {
+    "required": true,
+    "status": "PENDING",
+    "receipt_event_id": null
+  },
+  "supersession": {
+    "supersedes_event_ids": [],
+    "superseded_by_event_id": null
+  },
+  "payload": {
+    "project_name": "ATLAS Workflow Recovery",
+    "question": "Should the desktop pin fallback be admitted for a live recovery proof?"
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "contract_version": "atlas.continuity.handoff.v1",
+  "artifact_id": "atlas-bootstrap-archive-continuity-001",
+  "created_at": "2026-07-20T16:10:43.265Z",
+  "source_channel": "codex",
+  "summary": "Durable handoff of the ATLAS workflow-architecture bootstrap mission, root-isolation corrections, worktree collision evidence, authority boundaries, successor ownership, and exact source-task archive authorization.",
+  "repo_refs": [
+    "fawxzzy/ATLAS@60adc2d1ae3aa9de5688109ed1dd7b0d8d8de95d"
+  ],
+  "initiative_refs": [
+    "docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json",
+    "docs/registry/ATLAS-WORKFLOW-LIVE-MAPPING.v1.json"
+  ],
+  "conversation_refs": [
+    {
+      "system": "codex",
+      "conversation_id": "019f7ded-cdb6-7d40-a102-74a70326d81c"
+    },
+    {
+      "system": "codex",
+      "conversation_id": "019f7df6-8521-7292-a012-297208fce120"
+    }
+  ],
+  "durable_facts": [
+    {
+      "id": "mission-two-part",
+      "statement": "The workflow architect mission has two inseparable parts: canonical complete workflow capture plus one-command deterministic idempotent recovery, followed by evidence-based architecture optimization split into AUTO_ALLOWED and MANUAL_REQUIRED actions.",
+      "confidence": "high",
+      "evidence_kind": "chat_summary",
+      "evidence_refs": ["codex-session://2026/07/20/019f7ded-cdb6-7d40-a102-74a70326d81c", "docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json", "docs/audits/ATLAS-WORKFLOW-ARCHITECTURE-AUDIT-2026-07-20.md"],
+      "promotion_target": "receipt"
+    },
+    {
+      "id": "logical-surface-boundaries",
+      "statement": "ATLAS MAIN is the sole authority sink. Inbox, manual-decision, question, notification, release-control, owner, domain, and embedded-service surfaces retain distinct logical contracts; bounded or historical tasks are not automatically standing roles.",
+      "confidence": "high",
+      "evidence_kind": "repo_doc",
+      "evidence_refs": ["docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json", "docs/architecture/ATLAS-WORKFLOW-RECOVERY.md"],
+      "promotion_target": "receipt"
+    },
+    {
+      "id": "root-writer-isolation-correction",
+      "statement": "ATLAS-ROOT-WRITER-ISOLATION-CORRECTION-001 prohibited implementation in the canonical checkout and required a freshly based isolated workflow-architecture worktree with an explicit workdir and collision proof.",
+      "confidence": "high",
+      "evidence_kind": "chat_summary",
+      "evidence_refs": ["codex-session://2026/07/20/019f7ded-cdb6-7d40-a102-74a70326d81c"],
+      "promotion_target": "receipt"
+    },
+    {
+      "id": "worktree-placement-correction",
+      "statement": "ATLAS-ARCHITECT-WORKTREE-PLACEMENT-CORRECTION-001 prohibited handoff or mutation while the Architect was bound to the canonical checkout and required one isolated codex branch from freshly verified origin/main.",
+      "confidence": "high",
+      "evidence_kind": "chat_summary",
+      "evidence_refs": ["codex-session://2026/07/20/019f7ded-cdb6-7d40-a102-74a70326d81c"],
+      "promotion_target": "receipt"
+    },
+    {
+      "id": "canonical-restoration-proof",
+      "statement": "Local-only Windows checkout evidence at correction closeout: canonical C:\\ATLAS was restored to codex/socials-os-control-plane-reconciliation at 1d79d4ac3191dade11a2aa7c40352a5f210d35e2 with 0 tracked changes and 71 scratch paths.",
+      "confidence": "high",
+      "evidence_kind": "manual_observation",
+      "evidence_refs": ["ATLAS-ARCHITECT-ISOLATED-PLACEMENT-RECEIPT-001", "ATLAS-ARCHITECT-RUNTIME-REBIND-001"],
+      "promotion_target": "receipt"
+    },
+    {
+      "id": "remote-base-progression",
+      "statement": "Fresh remote main advanced from 4617c67b367b04dbc287ab2b20b23469e3ec37b7 to 60adc2d1ae3aa9de5688109ed1dd7b0d8d8de95d before the retained isolated implementation lane was created.",
+      "confidence": "high",
+      "evidence_kind": "manual_observation",
+      "evidence_refs": ["ATLAS-ROOT-WRITER-ISOLATION-CORRECTION-001", "ATLAS-ARCHITECT-ISOLATED-PLACEMENT-RECEIPT-001", "ATLAS-ARCHITECT-RUNTIME-REBIND-001"],
+      "promotion_target": "receipt"
+    },
+    {
+      "id": "worktree-race-collision",
+      "statement": "A placement race produced two isolated worktrees from 60adc2d1: local-only C:\\ATLAS-worktrees\\atlas-workflow-architect-001 on codex/atlas-workflow-architect-001 with the Architect implementation, and local-only C:\\ATLAS-worktrees\\workflow-architect-20260720 on codex/atlas-workflow-architect-20260720, clean and held. The Codex handoff also rebound the active runtime into app-owned worktree 192a. Routed or handed-off task placement is never assumed unique without live worktree and runtime readback.",
+      "confidence": "high",
+      "evidence_kind": "manual_observation",
+      "evidence_refs": ["ATLAS-ARCHITECT-WORKTREE-COLLISION-STOP-001", "ATLAS-ARCHITECT-RUNTIME-REBIND-001"],
+      "promotion_target": "receipt"
+    },
+    {
+      "id": "bootstrap-authority-boundary",
+      "statement": "The bootstrap authorized no provider, owner-repository, Supabase/Auth/data, Vercel/production, board, Discord, secret, billing, destructive, or other external mutation.",
+      "confidence": "high",
+      "evidence_kind": "chat_summary",
+      "evidence_refs": ["codex-session://2026/07/20/019f7ded-cdb6-7d40-a102-74a70326d81c"],
+      "promotion_target": "receipt"
+    },
+    {
+      "id": "standing-task-preservation",
+      "statement": "The bootstrap archived no standing task. ATLAS MAIN, both Architect epochs, and every standing task remain outside this source-archive authorization.",
+      "confidence": "high",
+      "evidence_kind": "chat_summary",
+      "evidence_refs": ["ATLAS-BOOTSTRAP-ARCHIVE-CONTINUITY-001"],
+      "promotion_target": "receipt"
+    },
+    {
+      "id": "duplicate-worktree-hold",
+      "statement": "The clean duplicate branch/worktree remains a held lifecycle and cleanup decision unless newer authoritative evidence explicitly reconciles it. This continuity packet does not authorize deletion, pruning, branch removal, attachment, or mutation.",
+      "confidence": "high",
+      "evidence_kind": "chat_summary",
+      "evidence_refs": ["ATLAS-ARCHITECT-WORKTREE-COLLISION-STOP-001", "ATLAS-ARCHITECT-RUNTIME-REBIND-001"],
+      "promotion_target": "receipt"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "archive-bootstrap-source-only",
+      "statement": "Archive only source coordination/bootstrap task 019f7ded-cdb6-7d40-a102-74a70326d81c after this handoff validates, then record exact archive readback without reviving it.",
+      "rationale": "The source task completed placement and handoff, owns no implementation, and no longer serves a continuing purpose.",
+      "status": "accepted",
+      "owner": "atlas.workflow-architect"
+    },
+    {
+      "id": "preserve-all-other-task-lifecycles",
+      "statement": "Do not archive ATLAS MAIN, either Architect epoch, or any standing task through this packet.",
+      "rationale": "Archive authority is exact and source-task-local.",
+      "status": "accepted",
+      "owner": "atlas.workflow-architect"
+    },
+    {
+      "id": "hold-clean-duplicate-worktree",
+      "statement": "Do not remove, prune, delete, attach, stage in, or otherwise mutate the clean duplicate worktree or branch through this packet.",
+      "rationale": "Its lifecycle and cleanup classification remains separately governed.",
+      "status": "deferred",
+      "owner": "atlas.main"
+    }
+  ],
+  "next_actions": [
+    {
+      "id": "archive-source-task",
+      "title": "Archive the exact coordination/bootstrap source task",
+      "scope": "Task 019f7ded-cdb6-7d40-a102-74a70326d81c only, after handoff validation.",
+      "acceptance": ["archive operation succeeds", "task readback reports archived", "live mapping and this handoff record final archived state"],
+      "priority": "p0"
+    },
+    {
+      "id": "continue-successor-work",
+      "title": "Continue the active workflow-architecture implementation and optimization goal",
+      "scope": "Runtime 019f7df6-8521-7292-a012-297208fce120 in the retained isolated implementation lane.",
+      "acceptance": ["no replacement role is created", "canonical and held worktrees remain protected", "recovery proof continues under current authority gates"],
+      "priority": "p1"
+    }
+  ],
+  "open_questions": [],
+  "risks": [
+    {
+      "id": "archive-before-persistence",
+      "statement": "Archiving before durable validation could strand the original mission, corrections, and placement evidence.",
+      "severity": "high",
+      "mitigation": "Validate this handoff and workflow registry before the archive call."
+    },
+    {
+      "id": "archive-scope-widening",
+      "statement": "A broad lifecycle operation could affect a standing task or an Architect epoch.",
+      "severity": "critical",
+      "mitigation": "Call the archive API only for exact task 019f7ded-cdb6-7d40-a102-74a70326d81c and prove readback."
+    },
+    {
+      "id": "duplicate-worktree-cleanup-inference",
+      "statement": "Archiving the source task could be misread as authority to delete the held duplicate branch or worktree.",
+      "severity": "high",
+      "mitigation": "Keep deletion and cleanup explicitly unauthorized in both the handoff and live mapping."
+    }
+  ],
+  "promotion_targets": ["receipt"],
+  "transcript_role": "trace_only",
+  "transcript_refs": [
+    "codex-session://2026/07/20/019f7ded-cdb6-7d40-a102-74a70326d81c",
+    "codex-session://2026/07/20/019f7df6-8521-7292-a012-297208fce120"
+  ],
+  "metadata": {
+    "source_task_id": "019f7ded-cdb6-7d40-a102-74a70326d81c",
+    "source_task_role": "coordination-bootstrap-not-implementation-role",
+    "source_lifecycle": "ARCHIVED",
+    "archive_authority_event_id": "ATLAS-BOOTSTRAP-ARCHIVE-CONTINUITY-001",
+    "archive_authority_payload_digest": "sha256:f51095dacbc5850ac3d93b7ce2a3da43eff642081dc65475d32d383eca993cb4",
+    "successor_role_id": "atlas.workflow-architect",
+    "successor_runtime_id": "019f7df6-8521-7292-a012-297208fce120",
+    "predecessor_architect_runtime_id": "019f7def-ca3b-78d0-bb72-5b5711b2bd51",
+    "archive_readback": {
+      "observed": true,
+      "status": "archived",
+      "observed_at": "2026-07-20T16:14:29.446Z",
+      "evidence": "live app-server archived-list readback returned archived=true and status=notLoaded"
+    }
+  }
+}

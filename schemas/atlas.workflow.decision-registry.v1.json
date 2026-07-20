@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas.workflow.decision-registry.v1",
+  "title": "ATLAS Workflow Decision Registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "observed_at", "source_evidence", "questions"],
+  "properties": {
+    "schema": { "const": "atlas.workflow.decision-registry.v1" },
+    "observed_at": { "type": "string", "minLength": 1 },
+    "source_evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "question_id",
+          "project",
+          "status",
+          "question_payload_digest",
+          "operator_answer",
+          "answer_digest",
+          "answer_event_id",
+          "answer_payload_digest",
+          "answered_at",
+          "transport_state",
+          "atlas_main_route_state",
+          "execution_state",
+          "exact_authority",
+          "authority_denied",
+          "remaining_blockers",
+          "supersedes_event_ids"
+        ],
+        "properties": {
+          "question_id": { "type": "string", "minLength": 8 },
+          "project": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["OPEN", "ANSWERED", "EXPIRED", "SUPERSEDED"] },
+          "question_payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+          "operator_answer": { "type": "string", "minLength": 1 },
+          "answer_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+          "answer_event_id": { "type": "string", "minLength": 8 },
+          "answer_payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+          "answered_at": { "type": "string", "minLength": 1 },
+          "transport_state": { "enum": ["LOCAL", "HELD", "RETAINED", "ROUTED", "ACKNOWLEDGED", "UNKNOWN"] },
+          "atlas_main_route_state": { "enum": ["NOT_REQUIRED", "QUEUED", "ROUTED", "ACKNOWLEDGED", "UNKNOWN"] },
+          "execution_state": { "enum": ["NOT_STARTED", "ACTIVE", "TERMINAL", "NOT_APPLICABLE", "UNKNOWN"] },
+          "exact_authority": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "authority_denied": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "remaining_blockers": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "supersedes_event_ids": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

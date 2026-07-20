@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas.workflow.envelope.v1",
+  "title": "ATLAS Workflow Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "kind",
+    "event_id",
+    "payload_digest",
+    "idempotency_key",
+    "source_role_id",
+    "source_runtime",
+    "target_role_id",
+    "correlation",
+    "freshness",
+    "acknowledgement",
+    "supersession",
+    "payload"
+  ],
+  "properties": {
+    "schema": { "const": "atlas.workflow.envelope.v1" },
+    "kind": {
+      "enum": [
+        "EVENT",
+        "RECEIPT",
+        "MANUAL_QUESTION",
+        "MANUAL_ANSWER",
+        "ROUTE",
+        "ACKNOWLEDGEMENT",
+        "SUPERSESSION"
+      ]
+    },
+    "event_id": { "type": "string", "pattern": "^(onv1_[0-9a-f]{64}|[A-Z0-9][A-Z0-9._-]{7,127})$" },
+    "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "idempotency_key": { "type": "string", "minLength": 8 },
+    "source_role_id": { "type": "string", "minLength": 1 },
+    "source_runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["thread_id", "host_id", "title"],
+      "properties": {
+        "thread_id": { "type": "string", "minLength": 1 },
+        "host_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 }
+      }
+    },
+    "target_role_id": { "type": "string", "minLength": 1 },
+    "correlation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_event_id", "question_id", "route_back_role_id"],
+      "properties": {
+        "source_event_id": { "type": ["string", "null"] },
+        "question_id": { "type": ["string", "null"] },
+        "route_back_role_id": { "type": ["string", "null"] }
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["created_at", "expires_at"],
+      "properties": {
+        "created_at": { "type": "string", "minLength": 1 },
+        "expires_at": { "type": ["string", "null"] }
+      }
+    },
+    "acknowledgement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "status", "receipt_event_id"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "status": { "enum": ["NOT_REQUIRED", "PENDING", "ACKNOWLEDGED", "FAILED"] },
+        "receipt_event_id": { "type": ["string", "null"] }
+      }
+    },
+    "supersession": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supersedes_event_ids", "superseded_by_event_id"],
+      "properties": {
+        "supersedes_event_ids": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "superseded_by_event_id": { "type": ["string", "null"] }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

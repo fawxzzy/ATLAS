@@ -1,0 +1,12 @@
+{
+  "schema": "atlas.workflow.discovery-fixture.v1",
+  "scenario": "active-writer",
+  "seed_from_registry": true,
+  "seed_status": "idle",
+  "seed_pinned": true,
+  "operations": [],
+  "leases": [
+    {"writer_scope": "atlas.inbound-ledger", "logical_role_id": "atlas.inbox", "runtime_thread_id": "lease-owner-a", "status": "active"},
+    {"writer_scope": "atlas.inbound-ledger", "logical_role_id": "atlas.inbox", "runtime_thread_id": "lease-owner-b", "status": "active"}
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "schema": "atlas.workflow.discovery-fixture.v1",
+  "scenario": "unknown-state",
+  "seed_from_registry": true,
+  "seed_status": "idle",
+  "seed_pinned": true,
+  "operations": [],
+  "leases": [],
+  "discovery_error": "fixture discovery API unavailable"
+}

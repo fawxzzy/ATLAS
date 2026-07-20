@@ -1,0 +1,9 @@
+{
+  "schema": "atlas.workflow.discovery-fixture.v1",
+  "scenario": "healthy",
+  "seed_from_registry": true,
+  "seed_status": "idle",
+  "seed_pinned": true,
+  "operations": [],
+  "leases": []
+}
