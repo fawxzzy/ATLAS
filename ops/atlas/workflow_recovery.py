@@ -30,6 +30,7 @@ DECISION_REGISTRY_SCHEMA_REF = "schemas/atlas.workflow.decision-registry.v1.json
 ENVELOPE_SCHEMA_REF = "schemas/atlas.workflow.envelope.v1.json"
 DESKTOP_OBSERVATION_SCHEMA_REF = "schemas/atlas.workflow.desktop-observation.v1.json"
 PLAN_SCHEMA_REF = "schemas/atlas.workflow.recovery-plan.v1.json"
+CREATION_JOURNAL_SCHEMA_REF = "schemas/atlas.workflow.creation-journal.v1.json"
 GENERATED_VIEW_REF = "docs/architecture/ATLAS-WORKFLOW-RECOVERY.md"
 DEFAULT_RUNTIME_REF = "runtime/atlas/workflow-recovery"
 DESKTOP_OBSERVATION_FIXTURE_REF = "tests/fixtures/atlas-workflow-recovery/valid-desktop-observation.json"
@@ -189,6 +190,237 @@ def _assert_schema(value: Any, schema_ref: str, label: str) -> None:
     if errors:
         joined = "\n".join(f"- {item}" for item in errors[:40])
         raise ValidationFailure(f"{label} failed {schema_ref}:\n{joined}")
+
+
+def _atomic_write_bytes(path: Path, value: bytes) -> None:
+    """Replace one runtime artifact atomically within its destination directory."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.{time.time_ns()}.tmp")
+    try:
+        with temporary.open("xb") as handle:
+            handle.write(value)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except OSError as exc:
+        raise WorkflowRecoveryError(f"atomic runtime artifact write failed for {path}: {exc}") from exc
+    finally:
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+class CreationJournal:
+    """Content-addressed retained bindings written before post-create actions."""
+
+    schema = "atlas.workflow.creation-journal.v1"
+
+    def __init__(
+        self,
+        path: Path,
+        manifest: dict[str, Any],
+        durable_registry: dict[str, Any],
+        manifest_digest: str,
+    ) -> None:
+        self.path = path
+        self.manifest = manifest
+        self.durable_registry = durable_registry
+        self.manifest_digest = manifest_digest
+        self.event_id: str | None = None
+        self.payload_digest: str | None = None
+        self.entries: dict[str, dict[str, Any]] = {}
+        if path.exists():
+            self._load()
+
+    @property
+    def bindings(self) -> dict[str, str]:
+        return {role_id: entry["runtime_id"] for role_id, entry in self.entries.items()}
+
+    def _load(self) -> None:
+        envelope = _load_json(self.path)
+        _assert_schema(envelope, CREATION_JOURNAL_SCHEMA_REF, "creation journal")
+        payload_digest = _sha256_bytes(_canonical_bytes(envelope["payload"]))
+        event_id = "onv1_" + payload_digest.removeprefix("sha256:")
+        errors: list[str] = []
+        if envelope["payload_digest"] != payload_digest:
+            errors.append("payload digest mismatch")
+        if envelope["event_id"] != event_id:
+            errors.append("event ID mismatch")
+        payload = envelope["payload"]
+        if payload["manifest_digest"] != self.manifest_digest:
+            errors.append(
+                "manifest digest mismatch: "
+                f"{payload['manifest_digest']} != {self.manifest_digest}"
+            )
+        role_ids = {item["role_id"] for item in self.manifest["roles"]}
+        entry_role_ids = [item["role_id"] for item in payload["entries"]]
+        runtime_ids = [item["runtime_id"] for item in payload["entries"]]
+        if len(entry_role_ids) != len(set(entry_role_ids)):
+            errors.append("role IDs are not unique")
+        if len(runtime_ids) != len(set(runtime_ids)):
+            errors.append("runtime IDs are not unique")
+        unknown_roles = sorted(set(entry_role_ids) - role_ids)
+        if unknown_roles:
+            errors.append(f"unknown logical roles: {unknown_roles}")
+        for entry in payload["entries"]:
+            accepted_digest_hex = entry["accepted_plan_digest"].removeprefix("sha256:")
+            if entry["accepted_plan_id"] != f"awrp1_{accepted_digest_hex}":
+                errors.append(f"{entry['role_id']}: accepted plan ID/digest mismatch")
+            post_apply_plan_id = entry["post_apply_plan_id"]
+            post_apply_plan_digest = entry["post_apply_plan_digest"]
+            if entry["state"] == "CREATED_PENDING_READBACK":
+                if post_apply_plan_id is not None or post_apply_plan_digest is not None:
+                    errors.append(
+                        f"{entry['role_id']}: pending entry cannot bind a post-apply plan"
+                    )
+            elif post_apply_plan_id is None or post_apply_plan_digest is None:
+                errors.append(
+                    f"{entry['role_id']}: confirmed entry requires a post-apply plan"
+                )
+            elif post_apply_plan_id != (
+                "awrp1_" + post_apply_plan_digest.removeprefix("sha256:")
+            ):
+                errors.append(f"{entry['role_id']}: post-apply plan ID/digest mismatch")
+        if errors:
+            raise ValidationFailure(
+                "creation journal validation failed:\n- " + "\n- ".join(errors)
+            )
+        self.event_id = event_id
+        self.payload_digest = payload_digest
+        self.entries = {
+            item["role_id"]: copy.deepcopy(item)
+            for item in payload["entries"]
+        }
+
+    def _write(self) -> None:
+        payload = {
+            "manifest_digest": self.manifest_digest,
+            "no_archive": True,
+            "supersedes_event_id": self.event_id,
+            "entries": [copy.deepcopy(self.entries[role_id]) for role_id in sorted(self.entries)],
+        }
+        payload_digest = _sha256_bytes(_canonical_bytes(payload))
+        event_id = "onv1_" + payload_digest.removeprefix("sha256:")
+        envelope = {
+            "schema": self.schema,
+            "event_id": event_id,
+            "payload_digest": payload_digest,
+            "payload": payload,
+        }
+        _assert_schema(envelope, CREATION_JOURNAL_SCHEMA_REF, "creation journal")
+        _atomic_write_bytes(self.path, _pretty_bytes(envelope))
+        self.event_id = event_id
+        self.payload_digest = payload_digest
+
+    def record_created(
+        self,
+        accepted_plan: dict[str, Any],
+        role_id: str,
+        runtime_id: str,
+        adapter_name: str,
+    ) -> None:
+        existing = self.entries.get(role_id)
+        if existing is not None:
+            if existing["runtime_id"] != runtime_id:
+                raise WorkflowRecoveryError(
+                    f"{role_id}: creation journal collision "
+                    f"{existing['runtime_id']} != {runtime_id}"
+                )
+            return
+        if runtime_id in self.bindings.values():
+            raise WorkflowRecoveryError(
+                f"created runtime {runtime_id} is already retained for another logical role"
+            )
+        self.entries[role_id] = {
+            "role_id": role_id,
+            "runtime_id": runtime_id,
+            "prior_runtime_id": next(
+                item["current_runtime_id"]
+                for item in self.durable_registry["bindings"]
+                if item["role_id"] == role_id
+            ),
+            "accepted_plan_id": accepted_plan["plan_id"],
+            "accepted_plan_digest": accepted_plan["plan_digest"],
+            "created_at": accepted_plan["generated_at"],
+            "adapter": adapter_name,
+            "state": "CREATED_PENDING_READBACK",
+            "post_apply_plan_id": None,
+            "post_apply_plan_digest": None,
+        }
+        self._write()
+
+    def confirm_readback(
+        self,
+        post_apply_plan: dict[str, Any],
+        threads: Iterable["ThreadRecord"],
+    ) -> None:
+        roles = {item["role_id"]: item for item in post_apply_plan["roles"]}
+        returned_runtime_ids = {item.thread_id for item in threads}
+        changed = False
+        for role_id, entry in self.entries.items():
+            role = roles.get(role_id)
+            if (
+                role is None
+                or role["runtime_id"] != entry["runtime_id"]
+                or entry["runtime_id"] not in returned_runtime_ids
+            ):
+                raise WorkflowRecoveryError(
+                    f"{role_id}: retained created runtime {entry['runtime_id']!r} "
+                    "was not returned and bound by post-apply reconciliation"
+                )
+            if (
+                entry["state"] != "READBACK_CONFIRMED"
+                or entry["post_apply_plan_digest"] != post_apply_plan["plan_digest"]
+            ):
+                entry["state"] = "READBACK_CONFIRMED"
+                entry["post_apply_plan_id"] = post_apply_plan["plan_id"]
+                entry["post_apply_plan_digest"] = post_apply_plan["plan_digest"]
+                changed = True
+        if changed:
+            self._write()
+
+    def apply_to(self, adapter: "DiscoveryAdapter", durable_registry: dict[str, Any]) -> None:
+        durable = {item["role_id"]: item for item in durable_registry["bindings"]}
+        durable_runtime_owners = {
+            item["current_runtime_id"]: item["role_id"]
+            for item in durable_registry["bindings"]
+            if item["current_runtime_id"] is not None
+        }
+        unbound_runtime_ids = {
+            item["runtime_id"]
+            for item in durable_registry["unbound_runtime_claims"]
+        }
+        for role_id, runtime_id in self.bindings.items():
+            durable_runtime_id = durable[role_id]["current_runtime_id"]
+            accepted_prior_runtime_id = self.entries[role_id]["prior_runtime_id"]
+            if durable_runtime_id not in {None, runtime_id, accepted_prior_runtime_id}:
+                raise WorkflowRecoveryError(
+                    f"{role_id}: retained created runtime {runtime_id} conflicts with "
+                    f"durable current runtime {durable_runtime_id}"
+                )
+            other_owner = durable_runtime_owners.get(runtime_id)
+            if other_owner is not None and other_owner != role_id:
+                raise WorkflowRecoveryError(
+                    f"{role_id}: retained created runtime {runtime_id} is already the durable current runtime for {other_owner}"
+                )
+            if runtime_id in unbound_runtime_ids:
+                raise WorkflowRecoveryError(
+                    f"{role_id}: retained created runtime {runtime_id} is still classified as an unbound runtime claim"
+                )
+            adapter.binding_overrides[role_id] = runtime_id
+            adapter.retained_creation_bindings[role_id] = runtime_id
+
+    def receipt_summary(self) -> dict[str, Any] | None:
+        if self.event_id is None or self.payload_digest is None:
+            return None
+        return {
+            "path": str(self.path),
+            "event_id": self.event_id,
+            "payload_digest": self.payload_digest,
+            "bindings": self.bindings,
+        }
 
 
 def validate_envelope(envelope: dict[str, Any]) -> dict[str, Any]:
@@ -743,6 +975,7 @@ class DiscoveryAdapter:
     name = "abstract"
     capabilities: dict[str, bool] = {}
     binding_overrides: dict[str, str]
+    retained_creation_bindings: dict[str, str]
 
     def discover(self) -> tuple[list[ThreadRecord], list[dict[str, Any]]]:
         raise NotImplementedError
@@ -777,7 +1010,7 @@ class LiveAppServerAdapter(DiscoveryAdapter):
         "set_title": True,
         "unarchive": True,
         "bootstrap_turn": True,
-        "set_runtime": True,
+        "set_runtime": False,
         "set_pin": False,
         "read_pin": False,
         "archive": False,
@@ -791,6 +1024,7 @@ class LiveAppServerAdapter(DiscoveryAdapter):
         self.timeout_seconds = timeout_seconds
         self.client: JsonRpcAppServer | None = None
         self.binding_overrides = {}
+        self.retained_creation_bindings = {}
         self.cwd_bindings = dict(cwd_bindings or {})
 
     def _resolve_cwd_locator(self, locator: str) -> Path:
@@ -924,6 +1158,10 @@ class LiveAppServerAdapter(DiscoveryAdapter):
     def mutate(self, action: str, role: dict[str, Any], thread: ThreadRecord | None) -> ThreadRecord | None:
         if action in {"SET_PIN", "PROVE_PIN_STATE"}:
             raise WorkflowRecoveryError("Codex app-server exposes neither pin mutation nor pin readback; manual desktop fallback required")
+        if action == "SET_RUNTIME_POLICY":
+            raise WorkflowRecoveryError(
+                "Codex app-server exposes no supported mutation for an existing thread runtime policy"
+            )
         if action == "CREATE":
             with JsonRpcAppServer(self.timeout_seconds) as client:
                 response = client.request(
@@ -951,7 +1189,7 @@ class LiveAppServerAdapter(DiscoveryAdapter):
                 )
             elif action == "REFRESH_REGISTRY":
                 self.binding_overrides[role["role_id"]] = thread.thread_id
-            elif action in {"SET_RUNTIME_POLICY", "POST_CREATE_READBACK", "POST_REPAIR_READBACK", "UPDATE_BINDING"}:
+            elif action in {"POST_CREATE_READBACK", "POST_REPAIR_READBACK", "UPDATE_BINDING"}:
                 pass
             else:
                 raise WorkflowRecoveryError(f"unsupported live action: {action}")
@@ -984,6 +1222,7 @@ class FixtureAdapter(DiscoveryAdapter):
         self.fail_after_mutations = fixture.get("fail_after_mutations")
         self.created_counter = 0
         self.binding_overrides = {}
+        self.retained_creation_bindings = {}
 
     def resolve_role_cwd(self, role: dict[str, Any]) -> str:
         return role["runtime"]["cwd_locator"]
@@ -1104,7 +1343,7 @@ class FixtureAdapter(DiscoveryAdapter):
                 thread_id=f"fixture-created-{role['role_id']}-{self.created_counter}",
                 title=None,
                 status="idle",
-                cwd=None,
+                cwd=role["runtime"]["cwd_locator"],
                 archived=False,
                 pinned=False,
                 preview="",
@@ -1276,6 +1515,24 @@ def build_recovery_plan(
             continue
 
         current = by_id.get(current_id) if current_id else None
+        retained_runtime_id = adapter.retained_creation_bindings.get(role_id)
+        if retained_runtime_id is not None and current is None:
+            results.append(
+                {
+                    "role_id": role_id,
+                    "runtime_id": retained_runtime_id,
+                    "health": "BLOCKED",
+                    "decision": "FAIL_CLOSED_RETAINED_CREATION_NOT_DISCOVERED",
+                    "actions": [],
+                    "reasons": [
+                        "the atomic creation journal retains this runtime ID, but complete discovery did not return it; never create a replacement until identity is reconciled"
+                    ],
+                    "active": None,
+                    "archived": None,
+                    "pinned": None,
+                }
+            )
+            continue
         if (
             current is None
             and role_id in observation_entries
@@ -1365,7 +1622,6 @@ def build_recovery_plan(
                     actions = [
                         "CREATE",
                         "SET_TITLE",
-                        "SET_RUNTIME_POLICY",
                         "SET_PIN",
                         "BOOTSTRAP",
                         "POST_CREATE_READBACK",
@@ -1626,6 +1882,7 @@ def apply_plan(
     plan: dict[str, Any],
     manifest: dict[str, Any],
     adapter: DiscoveryAdapter,
+    creation_journal: CreationJournal | None = None,
 ) -> list[dict[str, Any]]:
     _preflight_apply(plan, adapter)
     roles = {item["role_id"]: item for item in manifest["roles"]}
@@ -1640,15 +1897,30 @@ def apply_plan(
                 before_id = thread.thread_id if thread else None
                 thread = adapter.mutate(action, role, thread)
                 after_id = thread.thread_id if thread else None
-                receipts.append(
-                    {
-                        "role_id": item["role_id"],
-                        "action": action,
-                        "before_runtime_id": before_id,
-                        "after_runtime_id": after_id,
-                        "status": "APPLIED",
-                    }
-                )
+                if action == "CREATE" and after_id:
+                    # Preserve the accepted plan as immutable. The newly created
+                    # runtime is carried separately into post-apply readback and
+                    # registry generation.
+                    adapter.binding_overrides[item["role_id"]] = after_id
+                receipt = {
+                    "role_id": item["role_id"],
+                    "action": action,
+                    "before_runtime_id": before_id,
+                    "after_runtime_id": after_id,
+                    "status": "APPLIED",
+                }
+                receipts.append(receipt)
+                if action == "CREATE" and after_id and creation_journal is not None:
+                    creation_journal.record_created(
+                        plan,
+                        item["role_id"],
+                        after_id,
+                        adapter.name,
+                    )
+                    # The same process must use the durable binding immediately;
+                    # otherwise a failed post-apply discovery could plan a second
+                    # CREATE before a restart has a chance to reload the journal.
+                    adapter.retained_creation_bindings[item["role_id"]] = after_id
     except WorkflowRecoveryError as exc:
         raise PartialCreateFailure(str(exc), receipts) from exc
     return receipts
@@ -1659,17 +1931,25 @@ def build_runtime_registry(
     durable_registry: dict[str, Any],
     plan: dict[str, Any],
     threads: Iterable[ThreadRecord],
+    runtime_id_overrides: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     by_id = {item.thread_id: item for item in threads}
     durable = {item["role_id"]: item for item in durable_registry["bindings"]}
+    runtime_id_overrides = dict(runtime_id_overrides or {})
     bindings: list[dict[str, Any]] = []
     for item in plan["roles"]:
         old = durable[item["role_id"]]
-        runtime = by_id.get(item["runtime_id"]) if item["runtime_id"] else None
+        runtime_id = runtime_id_overrides.get(item["role_id"], item["runtime_id"])
+        runtime = by_id.get(runtime_id) if runtime_id else None
+        applied_binding = item["role_id"] in runtime_id_overrides
+        if applied_binding and runtime is None:
+            raise WorkflowRecoveryError(
+                f"{item['role_id']}: post-apply runtime {runtime_id!r} was not returned by readback; fail closed"
+            )
         bindings.append(
             {
                 "role_id": item["role_id"],
-                "current_runtime_id": item["runtime_id"],
+                "current_runtime_id": runtime_id,
                 "runtime_status": runtime.status if runtime else "missing",
                 "health": item["health"],
                 "archived": runtime.archived if runtime else None,
@@ -1678,6 +1958,11 @@ def build_runtime_registry(
                 "evidence": [
                     f"recovery-plan:{plan['plan_id']}",
                     f"adapter:{plan['adapter']}",
+                    *(
+                        ["post-apply runtime binding returned by complete readback"]
+                        if applied_binding
+                        else []
+                    ),
                     *item["reasons"],
                 ],
                 "related_epochs": old["related_epochs"],
@@ -1840,10 +2125,12 @@ def render_markdown(
         "",
         "A live apply additionally requires `--apply --acceptance <receipt.json>`. The receipt must bind the exact manifest and plan digests and name `atlas.main` as accepter. The current Codex app-server protocol does not expose pin readback or pin mutation, so any role needing pin proof fails closed before creation or repair. `ATLAS-WORKFLOW-MAN-001` rejected a manual fallback: the observation bridge can prove supported activity evidence, but live recovery remains blocked until deterministic pin readback and mutation exist.",
         "",
+        "Creation binds its accepted runtime policy through `thread/start`; the supported app-server contract exposes no mutation for repairing a missing policy on an existing runtime, so that case fails preflight. Live apply must use the canonical runtime output directory. Immediately after `CREATE`, the exact runtime ID is atomically retained in a content-addressed creation journal before any later action can run. A fresh process validates and loads that binding before planning: it reuses the exact ID when discovery returns it and blocks without another create when discovery does not. A successful apply keeps the accepted plan immutable and carries the read-back runtime ID through a separate post-apply binding map into a content-addressed post-apply plan and the live registry. The terminal receipt binds the accepted plan, post-apply plan, and journal event/digest. Terminal health comes from the post-apply plan. If the bound runtime is absent from complete readback, registry generation fails closed.",
+        "",
         "Fixture-safe creation proof:",
         "",
         "```powershell",
-        "python ops/atlas/workflow_recovery.py recover --apply --adapter fixture --fixture tests/fixtures/atlas-workflow-recovery/missing-task.json --acceptance tests/fixtures/atlas-workflow-recovery/fixture-acceptance.json --no-write-runtime",
+        "python ops/atlas/workflow_recovery.py recover --apply --adapter fixture --fixture tests/fixtures/atlas-workflow-recovery/missing-task.json --acceptance tests/fixtures/atlas-workflow-recovery/fixture-acceptance.json --output-dir runtime/atlas/workflow-recovery-fixture --deterministic",
         "```",
         "",
         "## Cold start and rollover summary",
@@ -1852,7 +2139,7 @@ def render_markdown(
         "2. Recover/reuse ATLAS MAIN first. Do not create downstream roles until Main is unique and accepted.",
         "3. Recover queue surfaces in parallel, then owner/control surfaces by non-overlapping writer scope.",
         "4. For a rollover, persist a related epoch, bootstrap the successor with a stable event ID, prove routes/readback, obtain ATLAS MAIN acceptance, then and only then make the predecessor archive-eligible.",
-        "5. On partial create, retain the created ID, stop, and retry by logical role. Never delete it as rollback.",
+        "5. On partial create, atomically journal the created ID before the next action, stop, and retry by logical role. A fresh process must load the journal and either reuse the exact ID or block; never delete it as rollback and never create a replacement while its identity is unresolved.",
         "6. On crash, re-run dry-run. Idempotence derives from role IDs, event IDs, payload digests, and retained runtime IDs—not from chat recollection.",
         "",
         "## Current archive-readiness truth",
@@ -1865,22 +2152,32 @@ def render_markdown(
 
 def _write_runtime_artifacts(
     output_dir: Path,
-    plan: dict[str, Any],
+    accepted_plan: dict[str, Any],
     runtime_registry: dict[str, Any],
     mutation_receipts: list[dict[str, Any]],
+    post_apply_plan: dict[str, Any] | None = None,
+    creation_journal_receipt: dict[str, Any] | None = None,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "plan.json").write_bytes(_pretty_bytes(plan))
+    (output_dir / "plan.json").write_bytes(_pretty_bytes(accepted_plan))
+    if post_apply_plan is not None:
+        (output_dir / "post-apply-plan.json").write_bytes(_pretty_bytes(post_apply_plan))
     (output_dir / "live-registry.json").write_bytes(_pretty_bytes(runtime_registry))
+    terminal_plan = post_apply_plan or accepted_plan
     receipt = {
         "schema": "atlas.workflow.recovery-receipt.v1",
-        "event_id": plan["plan_id"],
-        "payload_digest": plan["plan_digest"],
-        "manifest_digest": plan["manifest_digest"],
-        "mode": plan["mode"],
+        "event_id": accepted_plan["plan_id"],
+        "payload_digest": accepted_plan["plan_digest"],
+        "manifest_digest": accepted_plan["manifest_digest"],
+        "mode": accepted_plan["mode"],
         "no_archive": True,
-        "terminal_status": plan["terminal_status"],
-        "summary": plan["summary"],
+        "terminal_status": terminal_plan["terminal_status"],
+        "summary": terminal_plan["summary"],
+        "accepted_plan_id": accepted_plan["plan_id"],
+        "accepted_plan_digest": accepted_plan["plan_digest"],
+        "post_apply_plan_id": post_apply_plan["plan_id"] if post_apply_plan else None,
+        "post_apply_plan_digest": post_apply_plan["plan_digest"] if post_apply_plan else None,
+        "creation_journal": creation_journal_receipt,
         "mutations": mutation_receipts,
     }
     (output_dir / "RECEIPT.json").write_bytes(_pretty_bytes(receipt))
@@ -1969,6 +2266,7 @@ def _parse_cwd_bindings(values: list[str]) -> dict[str, Path]:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
+    creation_journal: CreationJournal | None = None
     try:
         if args.command == "render":
             manifest = _load_json(ROOT / MANIFEST_REF)
@@ -2030,6 +2328,31 @@ def main(argv: list[str] | None = None) -> int:
                 cwd_bindings=_parse_cwd_bindings(args.cwd_binding),
             )
 
+        output_dir = args.output_dir if args.output_dir.is_absolute() else ROOT / args.output_dir
+        if args.apply and args.adapter == "live" and args.no_write_runtime:
+            raise ValidationFailure(
+                "live apply requires durable runtime output; --no-write-runtime is fixture-only"
+            )
+        canonical_runtime_dir = (ROOT / DEFAULT_RUNTIME_REF).resolve()
+        if (
+            args.apply
+            and args.adapter == "live"
+            and output_dir.resolve() != canonical_runtime_dir
+        ):
+            raise ValidationFailure(
+                "live apply must use the canonical runtime output directory "
+                f"{DEFAULT_RUNTIME_REF} so creation-journal continuity cannot be bypassed"
+            )
+        creation_journal_path = output_dir / "creation-journal.json"
+        if creation_journal_path.exists() or (args.apply and not args.no_write_runtime):
+            creation_journal = CreationJournal(
+                creation_journal_path,
+                manifest,
+                registry,
+                _sha256_file(ROOT / MANIFEST_REF),
+            )
+            creation_journal.apply_to(adapter, registry)
+
         desktop_observation = None
         desktop_observation_current = None
         if args.desktop_observation is not None:
@@ -2068,6 +2391,7 @@ def main(argv: list[str] | None = None) -> int:
             desktop_observation_current=desktop_observation_current,
         )
         mutation_receipts: list[dict[str, Any]] = []
+        post_apply_plan: dict[str, Any] | None = None
         if args.apply:
             if args.acceptance is None:
                 raise ValidationFailure("--acceptance is required for apply")
@@ -2077,29 +2401,61 @@ def main(argv: list[str] | None = None) -> int:
                 plan,
                 allow_fixture_template=args.adapter == "fixture",
             )
-            mutation_receipts = apply_plan(plan, manifest, adapter)
-            refreshed, _ = adapter.discover()
-            threads = refreshed
+            mutation_receipts = apply_plan(
+                plan,
+                manifest,
+                adapter,
+                creation_journal=creation_journal,
+            )
+            post_apply_plan, threads, _ = build_recovery_plan(
+                manifest,
+                registry,
+                adapter,
+                mode="dry-run",
+                deterministic=args.deterministic,
+            )
+            if creation_journal is not None:
+                creation_journal.confirm_readback(post_apply_plan, threads)
 
-        runtime_registry = build_runtime_registry(manifest, registry, plan, threads)
+        registry_plan = post_apply_plan or plan
+        runtime_registry = build_runtime_registry(
+            manifest,
+            registry,
+            registry_plan,
+            threads,
+            runtime_id_overrides=adapter.binding_overrides if args.apply else None,
+        )
         _assert_schema(runtime_registry, REGISTRY_SCHEMA_REF, "generated runtime registry")
         if not args.no_write_runtime:
-            output_dir = args.output_dir if args.output_dir.is_absolute() else ROOT / args.output_dir
-            _write_runtime_artifacts(output_dir, plan, runtime_registry, mutation_receipts)
+            _write_runtime_artifacts(
+                output_dir,
+                plan,
+                runtime_registry,
+                mutation_receipts,
+                post_apply_plan=post_apply_plan,
+                creation_journal_receipt=(
+                    creation_journal.receipt_summary()
+                    if creation_journal is not None
+                    else None
+                ),
+            )
 
         if args.json:
             print(json.dumps(plan, indent=2, ensure_ascii=False, sort_keys=True))
         else:
+            terminal_plan = post_apply_plan or plan
             print(
                 json.dumps(
                     {
-                        "status": plan["terminal_status"],
+                        "status": terminal_plan["terminal_status"],
                         "plan_id": plan["plan_id"],
                         "plan_digest": plan["plan_digest"],
+                        "post_apply_plan_id": post_apply_plan["plan_id"] if post_apply_plan else None,
+                        "post_apply_plan_digest": post_apply_plan["plan_digest"] if post_apply_plan else None,
                         "mode": plan["mode"],
                         "adapter": plan["adapter"],
                         "no_archive": True,
-                        "summary": plan["summary"],
+                        "summary": terminal_plan["summary"],
                         "mutations": len(mutation_receipts),
                     },
                     sort_keys=True,
@@ -2113,6 +2469,7 @@ def main(argv: list[str] | None = None) -> int:
                     "status": "PARTIAL_CREATE",
                     "error": str(exc),
                     "mutation_receipts": exc.mutation_receipts,
+                    "creation_journal": creation_journal.receipt_summary() if creation_journal else None,
                     "rollback": "retain created runtime IDs; retry by logical role; do not delete",
                 },
                 sort_keys=True,

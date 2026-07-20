@@ -124,6 +124,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertTrue(plan["no_archive"])
         self.assertEqual("ATLAS_ROOT", inbox["cwd_locator"])
         self.assertEqual("ATLAS_ROOT", inbox["resolved_cwd"])
+        self.assertNotIn("SET_RUNTIME_POLICY", inbox["actions"])
 
     def test_live_create_and_bootstrap_use_admitted_cwd_and_modern_permissions(self) -> None:
         role = next(item for item in self.manifest["roles"] if item["role_id"] == "owner.socials-os")
@@ -176,6 +177,42 @@ class WorkflowRecoveryTests(unittest.TestCase):
         with self.assertRaisesRegex(RECOVERY.ValidationFailure, "must be absolute"):
             RECOVERY._parse_cwd_bindings([f"{role['runtime']['cwd_locator']}=relative/path"])
 
+    def test_live_existing_runtime_policy_repair_fails_preflight(self) -> None:
+        adapter = RECOVERY.LiveAppServerAdapter()
+        self.assertFalse(adapter.capabilities["set_runtime"])
+        plan = {
+            "roles": [
+                {
+                    "role_id": "atlas.inbox",
+                    "decision": "REPAIR_RUNTIME_POLICY",
+                    "active": False,
+                    "actions": ["SET_RUNTIME_POLICY"],
+                }
+            ]
+        }
+        with self.assertRaisesRegex(
+            RECOVERY.WorkflowRecoveryError,
+            "adapter capability set_runtime is unavailable",
+        ):
+            RECOVERY._preflight_apply(plan, adapter)
+
+    def test_live_apply_requires_canonical_durable_runtime_output(self) -> None:
+        stderr = io.StringIO()
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            with contextlib.redirect_stderr(stderr):
+                exit_code = RECOVERY.main(
+                    [
+                        "recover",
+                        "--apply",
+                        "--adapter",
+                        "live",
+                        "--output-dir",
+                        temporary_directory,
+                    ]
+                )
+        self.assertEqual(2, exit_code)
+        self.assertIn("canonical runtime output directory", stderr.getvalue())
+
     def test_stale_runtime_id_repairs_binding_without_create(self) -> None:
         plan, _ = self.plan("stale-id.json")
         inbox = self.role(plan, "atlas.inbox")
@@ -216,7 +253,10 @@ class WorkflowRecoveryTests(unittest.TestCase):
             deterministic=True,
         )
         inbox = self.role(retry_plan, "atlas.inbox")
-        self.assertIn("UPDATE_BINDING", inbox["actions"])
+        self.assertEqual(
+            created[0].thread_id,
+            adapter.binding_overrides["atlas.inbox"],
+        )
         self.assertNotIn("CREATE", inbox["actions"])
         RECOVERY.apply_plan(retry_plan, self.manifest, adapter)
         final_plan, _, _ = RECOVERY.build_recovery_plan(
@@ -228,6 +268,149 @@ class WorkflowRecoveryTests(unittest.TestCase):
         )
         self.assertEqual("HEALTHY", self.role(final_plan, "atlas.inbox")["health"])
         self.assertEqual(1, len([item for item in adapter.threads if item.role_marker == "atlas.inbox"]))
+
+    def test_partial_create_journal_blocks_duplicate_in_a_fresh_process(self) -> None:
+        plan, adapter = self.plan("partial-create.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            journal_path = Path(temporary_directory) / "creation-journal.json"
+            journal = RECOVERY.CreationJournal(
+                journal_path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            with self.assertRaises(RECOVERY.PartialCreateFailure) as caught:
+                RECOVERY.apply_plan(
+                    plan,
+                    self.manifest,
+                    adapter,
+                    creation_journal=journal,
+                )
+            create_receipt = next(
+                item for item in caught.exception.mutation_receipts if item["action"] == "CREATE"
+            )
+            created_runtime_id = create_receipt["after_runtime_id"]
+            self.assertTrue(journal_path.is_file())
+
+            # Discard all process-local adapter and journal state. A fresh
+            # process that cannot discover the exact retained ID must block,
+            # never schedule another CREATE.
+            retained = RECOVERY.CreationJournal(
+                journal_path,
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            missing_adapter = self.adapter("missing-task.json")
+            retained.apply_to(missing_adapter, self.registry)
+            blocked_plan, _, _ = RECOVERY.build_recovery_plan(
+                self.manifest,
+                self.registry,
+                missing_adapter,
+                mode="dry-run",
+                deterministic=True,
+            )
+            blocked_inbox = self.role(blocked_plan, "atlas.inbox")
+            self.assertEqual(created_runtime_id, blocked_inbox["runtime_id"])
+            self.assertEqual(
+                "FAIL_CLOSED_RETAINED_CREATION_NOT_DISCOVERED",
+                blocked_inbox["decision"],
+            )
+            self.assertNotIn("CREATE", blocked_inbox["actions"])
+
+            # If complete discovery returns the exact ID, the same fresh
+            # journal binding reuses and repairs it without duplication.
+            discoverable_fixture = RECOVERY._load_json(FIXTURES / "missing-task.json")
+            discoverable_fixture["operations"].append(
+                {
+                    "op": "partial_runtime",
+                    "role_id": "atlas.inbox",
+                    "runtime_id": created_runtime_id,
+                    "title": None,
+                    "status": "idle",
+                    "cwd": "ATLAS_ROOT",
+                    "archived": False,
+                    "pinned": False,
+                }
+            )
+            discoverable_adapter = RECOVERY.FixtureAdapter(
+                self.manifest,
+                self.registry,
+                discoverable_fixture,
+            )
+            retained.apply_to(discoverable_adapter, self.registry)
+            repair_plan, _, _ = RECOVERY.build_recovery_plan(
+                self.manifest,
+                self.registry,
+                discoverable_adapter,
+                mode="dry-run",
+                deterministic=True,
+            )
+            repair_inbox = self.role(repair_plan, "atlas.inbox")
+            self.assertEqual(created_runtime_id, repair_inbox["runtime_id"])
+            self.assertNotIn("CREATE", repair_inbox["actions"])
+
+    def test_partial_create_cli_restart_loads_journal_before_planning(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            stderr = io.StringIO()
+            with contextlib.redirect_stderr(stderr):
+                first_exit = RECOVERY.main(
+                    [
+                        "recover",
+                        "--apply",
+                        "--adapter",
+                        "fixture",
+                        "--fixture",
+                        str(FIXTURES / "partial-create.json"),
+                        "--acceptance",
+                        str(FIXTURES / "fixture-acceptance.json"),
+                        "--output-dir",
+                        temporary_directory,
+                        "--deterministic",
+                    ]
+                )
+            self.assertEqual(4, first_exit)
+            partial_receipt = json.loads(stderr.getvalue())
+            journal_receipt = partial_receipt["creation_journal"]
+            self.assertEqual(
+                "fixture-created-atlas.inbox-1",
+                journal_receipt["bindings"]["atlas.inbox"],
+            )
+            self.assertTrue((Path(temporary_directory) / "creation-journal.json").is_file())
+
+            # A second CLI invocation constructs a new fixture adapter. The
+            # only identity carried across invocations is the durable journal.
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                second_exit = RECOVERY.main(
+                    [
+                        "recover",
+                        "--dry-run",
+                        "--adapter",
+                        "fixture",
+                        "--fixture",
+                        str(FIXTURES / "missing-task.json"),
+                        "--output-dir",
+                        temporary_directory,
+                        "--deterministic",
+                    ]
+                )
+            self.assertEqual(0, second_exit)
+            restarted = json.loads(stdout.getvalue())
+            self.assertEqual("BLOCKED", restarted["status"])
+            self.assertEqual(0, restarted["summary"]["create_count"])
+            restarted_plan = RECOVERY._load_json(Path(temporary_directory) / "plan.json")
+            restarted_inbox = self.role(restarted_plan, "atlas.inbox")
+            self.assertEqual(
+                "fixture-created-atlas.inbox-1",
+                restarted_inbox["runtime_id"],
+            )
+            self.assertEqual(
+                "FAIL_CLOSED_RETAINED_CREATION_NOT_DISCOVERED",
+                restarted_inbox["decision"],
+            )
+            self.assertNotIn("CREATE", restarted_inbox["actions"])
 
     def test_retry_fixture_repairs_partial_runtime_without_duplicate(self) -> None:
         plan, _ = self.plan("retry.json")
@@ -277,8 +460,49 @@ class WorkflowRecoveryTests(unittest.TestCase):
 
     def test_fixture_apply_creates_exactly_one_missing_role(self) -> None:
         plan, adapter = self.plan("missing-task.json", mode="apply")
+        accepted_digest = plan["plan_digest"]
+        self.assertIsNone(self.role(plan, "atlas.inbox")["runtime_id"])
         receipts = RECOVERY.apply_plan(plan, self.manifest, adapter)
         self.assertEqual(1, sum(item["action"] == "CREATE" for item in receipts))
+        self.assertEqual(accepted_digest, plan["plan_digest"])
+        self.assertIsNone(self.role(plan, "atlas.inbox")["runtime_id"])
+
+        post_apply_plan, refreshed, _ = RECOVERY.build_recovery_plan(
+            self.manifest,
+            self.registry,
+            adapter,
+            mode="dry-run",
+            deterministic=True,
+        )
+        runtime_registry = RECOVERY.build_runtime_registry(
+            self.manifest,
+            self.registry,
+            post_apply_plan,
+            refreshed,
+            runtime_id_overrides=adapter.binding_overrides,
+        )
+        inbox_binding = next(
+            item for item in runtime_registry["bindings"] if item["role_id"] == "atlas.inbox"
+        )
+        self.assertEqual("fixture-created-atlas.inbox-1", inbox_binding["current_runtime_id"])
+        self.assertEqual("idle", inbox_binding["runtime_status"])
+        self.assertEqual("HEALTHY", inbox_binding["health"])
+
+        without_created_runtime = [
+            item for item in refreshed if item.thread_id != inbox_binding["current_runtime_id"]
+        ]
+        with self.assertRaisesRegex(
+            RECOVERY.WorkflowRecoveryError,
+            "was not returned by readback",
+        ):
+            RECOVERY.build_runtime_registry(
+                self.manifest,
+                self.registry,
+                plan,
+                without_created_runtime,
+                runtime_id_overrides=adapter.binding_overrides,
+            )
+
         final_plan, _, _ = RECOVERY.build_recovery_plan(
             self.manifest,
             self.registry,
@@ -288,6 +512,113 @@ class WorkflowRecoveryTests(unittest.TestCase):
         )
         self.assertEqual("HEALTHY", self.role(final_plan, "atlas.inbox")["health"])
         self.assertEqual(0, final_plan["summary"]["create_count"])
+
+    def test_fixture_cli_writes_immutable_accepted_and_healthy_post_apply_plans(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                exit_code = RECOVERY.main(
+                    [
+                        "recover",
+                        "--apply",
+                        "--adapter",
+                        "fixture",
+                        "--fixture",
+                        str(FIXTURES / "missing-task.json"),
+                        "--acceptance",
+                        str(FIXTURES / "fixture-acceptance.json"),
+                        "--output-dir",
+                        temporary_directory,
+                        "--deterministic",
+                    ]
+                )
+            self.assertEqual(0, exit_code)
+            result = json.loads(stdout.getvalue())
+            self.assertEqual("HEALTHY", result["status"])
+            self.assertEqual(0, result["summary"]["create_count"])
+
+            output_dir = Path(temporary_directory)
+            accepted_plan = RECOVERY._load_json(output_dir / "plan.json")
+            post_apply_plan = RECOVERY._load_json(output_dir / "post-apply-plan.json")
+            runtime_registry = RECOVERY._load_json(output_dir / "live-registry.json")
+            receipt = RECOVERY._load_json(output_dir / "RECEIPT.json")
+            creation_journal = RECOVERY._load_json(output_dir / "creation-journal.json")
+            accepted_inbox = self.role(accepted_plan, "atlas.inbox")
+            post_apply_inbox = self.role(post_apply_plan, "atlas.inbox")
+            registry_inbox = next(
+                item for item in runtime_registry["bindings"] if item["role_id"] == "atlas.inbox"
+            )
+
+            self.assertIsNone(accepted_inbox["runtime_id"])
+            self.assertEqual("fixture-created-atlas.inbox-1", post_apply_inbox["runtime_id"])
+            self.assertEqual("HEALTHY", post_apply_inbox["health"])
+            self.assertEqual(post_apply_inbox["runtime_id"], registry_inbox["current_runtime_id"])
+            self.assertEqual("HEALTHY", receipt["terminal_status"])
+            self.assertEqual(accepted_plan["plan_digest"], receipt["accepted_plan_digest"])
+            self.assertEqual(post_apply_plan["plan_digest"], receipt["post_apply_plan_digest"])
+            self.assertNotEqual(receipt["accepted_plan_digest"], receipt["post_apply_plan_digest"])
+            RECOVERY._assert_schema(
+                creation_journal,
+                RECOVERY.CREATION_JOURNAL_SCHEMA_REF,
+                "test creation journal",
+            )
+            journal_entry = creation_journal["payload"]["entries"][0]
+            self.assertEqual(post_apply_inbox["runtime_id"], journal_entry["runtime_id"])
+            self.assertEqual("READBACK_CONFIRMED", journal_entry["state"])
+            self.assertEqual(post_apply_plan["plan_digest"], journal_entry["post_apply_plan_digest"])
+            self.assertEqual(creation_journal["event_id"], receipt["creation_journal"]["event_id"])
+            self.assertEqual(
+                creation_journal["payload_digest"],
+                receipt["creation_journal"]["payload_digest"],
+            )
+
+    def test_created_runtime_missing_from_post_apply_readback_is_not_confirmed(self) -> None:
+        plan, adapter = self.plan("missing-task.json", mode="apply")
+        manifest_digest = RECOVERY._sha256_file(ROOT / RECOVERY.MANIFEST_REF)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            journal = RECOVERY.CreationJournal(
+                Path(temporary_directory) / "creation-journal.json",
+                self.manifest,
+                self.registry,
+                manifest_digest,
+            )
+            receipts = RECOVERY.apply_plan(
+                plan,
+                self.manifest,
+                adapter,
+                creation_journal=journal,
+            )
+            created_runtime_id = next(
+                item["after_runtime_id"] for item in receipts if item["action"] == "CREATE"
+            )
+            adapter.threads = [
+                item for item in adapter.threads if item.thread_id != created_runtime_id
+            ]
+
+            post_apply_plan, returned_threads, _ = RECOVERY.build_recovery_plan(
+                self.manifest,
+                self.registry,
+                adapter,
+                mode="dry-run",
+                deterministic=True,
+            )
+            post_apply_inbox = self.role(post_apply_plan, "atlas.inbox")
+            self.assertEqual(
+                "FAIL_CLOSED_RETAINED_CREATION_NOT_DISCOVERED",
+                post_apply_inbox["decision"],
+            )
+            self.assertNotIn("CREATE", post_apply_inbox["actions"])
+            with self.assertRaisesRegex(
+                RECOVERY.WorkflowRecoveryError,
+                "was not returned and bound",
+            ):
+                journal.confirm_readback(post_apply_plan, returned_threads)
+
+            persisted = RECOVERY._load_json(journal.path)
+            entry = persisted["payload"]["entries"][0]
+            self.assertEqual("CREATED_PENDING_READBACK", entry["state"])
+            self.assertIsNone(entry["post_apply_plan_id"])
+            self.assertIsNone(entry["post_apply_plan_digest"])
 
     def test_valid_desktop_observation_is_complete_content_addressed_and_pin_unknown(self) -> None:
         observation = self.observation()

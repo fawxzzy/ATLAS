@@ -179,10 +179,12 @@ Optional `--desktop-observation <receipt.json> --desktop-observation-current <he
 
 A live apply additionally requires `--apply --acceptance <receipt.json>`. The receipt must bind the exact manifest and plan digests and name `atlas.main` as accepter. The current Codex app-server protocol does not expose pin readback or pin mutation, so any role needing pin proof fails closed before creation or repair. `ATLAS-WORKFLOW-MAN-001` rejected a manual fallback: the observation bridge can prove supported activity evidence, but live recovery remains blocked until deterministic pin readback and mutation exist.
 
+Creation binds its accepted runtime policy through `thread/start`; the supported app-server contract exposes no mutation for repairing a missing policy on an existing runtime, so that case fails preflight. Live apply must use the canonical runtime output directory. Immediately after `CREATE`, the exact runtime ID is atomically retained in a content-addressed creation journal before any later action can run. A fresh process validates and loads that binding before planning: it reuses the exact ID when discovery returns it and blocks without another create when discovery does not. A successful apply keeps the accepted plan immutable and carries the read-back runtime ID through a separate post-apply binding map into a content-addressed post-apply plan and the live registry. The terminal receipt binds the accepted plan, post-apply plan, and journal event/digest. Terminal health comes from the post-apply plan. If the bound runtime is absent from complete readback, registry generation fails closed.
+
 Fixture-safe creation proof:
 
 ```powershell
-python ops/atlas/workflow_recovery.py recover --apply --adapter fixture --fixture tests/fixtures/atlas-workflow-recovery/missing-task.json --acceptance tests/fixtures/atlas-workflow-recovery/fixture-acceptance.json --no-write-runtime
+python ops/atlas/workflow_recovery.py recover --apply --adapter fixture --fixture tests/fixtures/atlas-workflow-recovery/missing-task.json --acceptance tests/fixtures/atlas-workflow-recovery/fixture-acceptance.json --output-dir runtime/atlas/workflow-recovery-fixture --deterministic
 ```
 
 ## Cold start and rollover summary
@@ -191,7 +193,7 @@ python ops/atlas/workflow_recovery.py recover --apply --adapter fixture --fixtur
 2. Recover/reuse ATLAS MAIN first. Do not create downstream roles until Main is unique and accepted.
 3. Recover queue surfaces in parallel, then owner/control surfaces by non-overlapping writer scope.
 4. For a rollover, persist a related epoch, bootstrap the successor with a stable event ID, prove routes/readback, obtain ATLAS MAIN acceptance, then and only then make the predecessor archive-eligible.
-5. On partial create, retain the created ID, stop, and retry by logical role. Never delete it as rollback.
+5. On partial create, atomically journal the created ID before the next action, stop, and retry by logical role. A fresh process must load the journal and either reuse the exact ID or block; never delete it as rollback and never create a replacement while its identity is unresolved.
 6. On crash, re-run dry-run. Idempotence derives from role IDs, event IDs, payload digests, and retained runtime IDs—not from chat recollection.
 
 ## Current archive-readiness truth
