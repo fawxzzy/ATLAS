@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import contextlib
+import datetime as dt
 import importlib.util
+import io
 import json
 import sys
 import unittest
@@ -40,6 +43,36 @@ class WorkflowRecoveryTests(unittest.TestCase):
 
     def role(self, plan: dict, role_id: str) -> dict:
         return next(item for item in plan["roles"] if item["role_id"] == role_id)
+
+    def observation(self) -> dict:
+        return RECOVERY._load_json(FIXTURES / "valid-desktop-observation.json")
+
+    def observation_now(self) -> dt.datetime:
+        return RECOVERY._parse_utc_timestamp(
+            self.observation()["payload"]["captured_at"],
+            "test observation captured_at",
+        )
+
+    def resign_observation(self, observation: dict) -> dict:
+        digest = RECOVERY._sha256_bytes(RECOVERY._canonical_bytes(observation["payload"]))
+        observation["payload_digest"] = digest
+        observation["observation_id"] = "onv1_" + digest.removeprefix("sha256:")
+        return observation
+
+    def validate_observation(
+        self,
+        observation: dict,
+        *,
+        current: dict | None = None,
+        now: dt.datetime | None = None,
+    ) -> dict:
+        return RECOVERY.validate_desktop_observation(
+            observation,
+            current or observation,
+            self.manifest,
+            self.registry,
+            now=now or self.observation_now(),
+        )
 
     def test_repository_contract_and_generated_view_validate(self) -> None:
         result = RECOVERY.validate_repository()
@@ -201,6 +234,249 @@ class WorkflowRecoveryTests(unittest.TestCase):
         )
         self.assertEqual("HEALTHY", self.role(final_plan, "atlas.inbox")["health"])
         self.assertEqual(0, final_plan["summary"]["create_count"])
+
+    def test_valid_desktop_observation_is_complete_content_addressed_and_pin_unknown(self) -> None:
+        observation = self.observation()
+        result = self.validate_observation(observation)
+        self.assertEqual("PASS", result["status"])
+        self.assertEqual(len(self.manifest["roles"]), result["role_count"])
+        self.assertEqual("UNKNOWN", result["pin_state"])
+        self.assertEqual("UNSUPPORTED", result["pin_capability"])
+        self.assertEqual(observation["observation_id"], result["current_observation_id"])
+        with self.assertRaises(RECOVERY.ValidationFailure):
+            RECOVERY.build_recovery_plan(
+                self.manifest,
+                self.registry,
+                self.adapter("healthy.json"),
+                mode="dry-run",
+                deterministic=True,
+                desktop_observation=observation,
+                observation_now=self.observation_now(),
+            )
+
+    def test_desktop_observation_rejects_malformed_identity_denominator_and_digest(self) -> None:
+        cases: list[tuple[str, dict, str, bool]] = []
+
+        pin = self.observation()
+        pin["payload"]["entries"][0]["pin_state"] = "PINNED"
+        cases.append(("pin", pin, "expected const 'UNKNOWN'", True))
+
+        missing = self.observation()
+        missing["payload"]["entries"].pop()
+        cases.append(("missing-role", missing, "missing required roles", True))
+
+        partial = self.observation()
+        partial["payload"]["entries"].pop()
+        partial["payload"]["required_role_count"] = 12
+        cases.append(("partial-denominator", partial, "partial or over-complete role denominator", True))
+
+        duplicate_role = self.observation()
+        duplicate_role["payload"]["entries"].append(
+            json.loads(json.dumps(duplicate_role["payload"]["entries"][0]))
+        )
+        cases.append(("duplicate-role", duplicate_role, "duplicate role entries", True))
+
+        duplicate_runtime = self.observation()
+        duplicate_runtime["payload"]["entries"][1]["runtime_thread_id"] = (
+            duplicate_runtime["payload"]["entries"][0]["runtime_thread_id"]
+        )
+        cases.append(("duplicate-runtime", duplicate_runtime, "duplicate runtime entries", True))
+
+        wrong_thread = self.observation()
+        wrong_thread["payload"]["entries"][0]["runtime_thread_id"] = "wrong-thread-id"
+        cases.append(("wrong-thread", wrong_thread, "runtime binding mismatch", True))
+
+        wrong_host = self.observation()
+        wrong_host["payload"]["source_host_id"] = "wrong-host"
+        for entry in wrong_host["payload"]["entries"]:
+            entry["source_host_id"] = "wrong-host"
+        cases.append(("wrong-host", wrong_host, "expected const 'local'", True))
+
+        wrong_title = self.observation()
+        wrong_title["payload"]["entries"][0]["source_title"] = "Wrong Title"
+        cases.append(("wrong-title", wrong_title, "source title mismatch", True))
+
+        malformed_status = self.observation()
+        malformed_status["payload"]["entries"][0]["activity"] = "completed"
+        cases.append(("malformed-status", malformed_status, "value is not in enum", True))
+
+        unknown_role = self.observation()
+        unknown_role["payload"]["entries"][0]["role_id"] = "unknown.required-role"
+        cases.append(("unknown-role", unknown_role, "unknown required roles", True))
+
+        bad_digest = self.observation()
+        bad_digest["payload_digest"] = "sha256:" + "a" * 64
+        cases.append(("digest-mismatch", bad_digest, "payload digest mismatch", False))
+
+        for name, observation, expected, resign in cases:
+            with self.subTest(name=name):
+                if resign:
+                    self.resign_observation(observation)
+                with self.assertRaises(RECOVERY.ValidationFailure) as caught:
+                    self.validate_observation(observation)
+                self.assertIn(expected, str(caught.exception))
+
+    def test_desktop_observation_rejects_stale_and_future_timestamps(self) -> None:
+        for name, offset, expected in (
+            ("stale", -301, "is stale"),
+            ("future", 31, "is in the future"),
+        ):
+            with self.subTest(name=name):
+                observation = self.observation()
+                timestamp = self.observation_now() + dt.timedelta(seconds=offset)
+                rendered = timestamp.isoformat().replace("+00:00", "Z")
+                observation["payload"]["captured_at"] = rendered
+                for entry in observation["payload"]["entries"]:
+                    entry["observed_at"] = rendered
+                self.resign_observation(observation)
+                with self.assertRaises(RECOVERY.ValidationFailure) as caught:
+                    self.validate_observation(observation)
+                self.assertIn(expected, str(caught.exception))
+
+    def test_newer_current_receipt_rejects_older_superseded_candidate(self) -> None:
+        older = self.observation()
+        newer = self.observation()
+        later_now = self.observation_now() + dt.timedelta(seconds=1)
+        later_timestamp = later_now.isoformat().replace("+00:00", "Z")
+        newer["payload"]["captured_at"] = later_timestamp
+        newer["payload"]["supersession"]["supersedes_observation_ids"] = [
+            older["observation_id"]
+        ]
+        for entry in newer["payload"]["entries"]:
+            entry["observed_at"] = later_timestamp
+        self.resign_observation(newer)
+
+        current = self.validate_observation(newer, current=newer, now=later_now)
+        self.assertEqual(newer["observation_id"], current["current_observation_id"])
+        with self.assertRaises(RECOVERY.ValidationFailure) as caught:
+            self.validate_observation(older, current=newer, now=later_now)
+        self.assertIn("has been superseded by trusted current observation", str(caught.exception))
+
+    def test_desktop_observation_changes_activity_only_and_cannot_satisfy_pin_apply(self) -> None:
+        observation = self.observation()
+        adapter = self.adapter("healthy.json")
+        for thread in adapter.threads:
+            thread.pinned = None
+        adapter.capabilities = {**adapter.capabilities, "read_pin": False, "set_pin": False}
+        first, _, _ = RECOVERY.build_recovery_plan(
+            self.manifest,
+            self.registry,
+            adapter,
+            mode="apply",
+            deterministic=True,
+            desktop_observation=observation,
+            desktop_observation_current=observation,
+            observation_now=self.observation_now(),
+        )
+        second, _, _ = RECOVERY.build_recovery_plan(
+            self.manifest,
+            self.registry,
+            adapter,
+            mode="apply",
+            deterministic=True,
+            desktop_observation=observation,
+            desktop_observation_current=observation,
+            observation_now=self.observation_now(),
+        )
+        self.assertEqual(first, second)
+        self.assertEqual("UNKNOWN", first["summary"]["desktop_observation"]["pin_state"])
+        self.assertEqual(
+            observation["observation_id"],
+            first["summary"]["desktop_observation"]["current_observation_id"],
+        )
+        self.assertTrue(all(item["pinned"] is None for item in first["roles"]))
+        self.assertTrue(all("SET_PIN" not in item["actions"] for item in first["roles"]))
+        self.assertTrue(all("PROVE_PIN_STATE" in item["actions"] for item in first["roles"]))
+        with self.assertRaises(RECOVERY.WorkflowRecoveryError):
+            RECOVERY._preflight_apply(first, adapter)
+
+        later = self.observation()
+        later_now = self.observation_now() + dt.timedelta(seconds=1)
+        later_timestamp = later_now.isoformat().replace("+00:00", "Z")
+        later["payload"]["captured_at"] = later_timestamp
+        for entry in later["payload"]["entries"]:
+            entry["observed_at"] = later_timestamp
+        self.resign_observation(later)
+        later_plan, _, _ = RECOVERY.build_recovery_plan(
+            self.manifest,
+            self.registry,
+            adapter,
+            mode="apply",
+            deterministic=True,
+            desktop_observation=later,
+            desktop_observation_current=later,
+            observation_now=later_now,
+        )
+        self.assertNotEqual(
+            first["summary"]["desktop_observation"]["payload_digest"],
+            later_plan["summary"]["desktop_observation"]["payload_digest"],
+        )
+        self.assertEqual(first["plan_digest"], later_plan["plan_digest"])
+
+    def test_observed_active_writer_and_discovery_mismatch_fail_closed(self) -> None:
+        active = self.observation()
+        next(item for item in active["payload"]["entries"] if item["role_id"] == "atlas.main")[
+            "activity"
+        ] = "active"
+        self.resign_observation(active)
+        adapter = self.adapter("healthy.json")
+        active_plan, _, _ = RECOVERY.build_recovery_plan(
+            self.manifest,
+            self.registry,
+            adapter,
+            mode="apply",
+            deterministic=True,
+            desktop_observation=active,
+            desktop_observation_current=active,
+            observation_now=self.observation_now(),
+        )
+        main = self.role(active_plan, "atlas.main")
+        self.assertEqual("BLOCKED", main["health"])
+        self.assertEqual("FAIL_CLOSED_OBSERVED_ACTIVE_WRITER", main["decision"])
+        self.assertEqual([], main["actions"])
+        with self.assertRaises(RECOVERY.WorkflowRecoveryError):
+            RECOVERY._preflight_apply(active_plan, adapter)
+
+        missing_adapter = self.adapter("missing-task.json")
+        mismatch_observation = self.observation()
+        mismatch_plan, _, _ = RECOVERY.build_recovery_plan(
+            self.manifest,
+            self.registry,
+            missing_adapter,
+            mode="dry-run",
+            deterministic=True,
+            desktop_observation=mismatch_observation,
+            desktop_observation_current=mismatch_observation,
+            observation_now=self.observation_now(),
+        )
+        inbox = self.role(mismatch_plan, "atlas.inbox")
+        self.assertEqual("UNKNOWN", inbox["health"])
+        self.assertEqual("FAIL_CLOSED_OBSERVATION_DISCOVERY_MISMATCH", inbox["decision"])
+        self.assertNotIn("CREATE", inbox["actions"])
+        with self.assertRaises(RECOVERY.WorkflowRecoveryError):
+            RECOVERY._preflight_apply(mismatch_plan, missing_adapter)
+
+    def test_cli_rejects_desktop_observation_apply(self) -> None:
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            exit_code = RECOVERY.main(
+                [
+                    "recover",
+                    "--apply",
+                    "--adapter",
+                    "fixture",
+                    "--fixture",
+                    str(FIXTURES / "healthy.json"),
+                    "--desktop-observation",
+                    str(FIXTURES / "valid-desktop-observation.json"),
+                    "--desktop-observation-current",
+                    str(FIXTURES / "valid-desktop-observation.json"),
+                    "--no-write-runtime",
+                    "--deterministic",
+                ]
+            )
+        self.assertEqual(2, exit_code)
+        self.assertIn("read-only dry-run input", stderr.getvalue())
 
 
 if __name__ == "__main__":

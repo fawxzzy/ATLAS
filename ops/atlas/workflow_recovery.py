@@ -28,9 +28,14 @@ MANIFEST_SCHEMA_REF = "schemas/atlas.workflow.manifest.v1.json"
 REGISTRY_SCHEMA_REF = "schemas/atlas.workflow.runtime-registry.v1.json"
 DECISION_REGISTRY_SCHEMA_REF = "schemas/atlas.workflow.decision-registry.v1.json"
 ENVELOPE_SCHEMA_REF = "schemas/atlas.workflow.envelope.v1.json"
+DESKTOP_OBSERVATION_SCHEMA_REF = "schemas/atlas.workflow.desktop-observation.v1.json"
 PLAN_SCHEMA_REF = "schemas/atlas.workflow.recovery-plan.v1.json"
 GENERATED_VIEW_REF = "docs/architecture/ATLAS-WORKFLOW-RECOVERY.md"
 DEFAULT_RUNTIME_REF = "runtime/atlas/workflow-recovery"
+DESKTOP_OBSERVATION_FIXTURE_REF = "tests/fixtures/atlas-workflow-recovery/valid-desktop-observation.json"
+
+DESKTOP_OBSERVATION_MAX_AGE_SECONDS = 300
+DESKTOP_OBSERVATION_FUTURE_SKEW_SECONDS = 30
 
 HEALTH_VALUES = (
     "HEALTHY",
@@ -202,6 +207,208 @@ def validate_envelope(envelope: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _parse_utc_timestamp(value: str, label: str) -> dt.datetime:
+    try:
+        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValidationFailure(f"{label} is not a valid ISO-8601 timestamp: {value}") from exc
+    if parsed.tzinfo is None:
+        raise ValidationFailure(f"{label} must include a timezone: {value}")
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def _validate_desktop_observation_receipt(
+    observation: dict[str, Any],
+    manifest: dict[str, Any],
+    registry: dict[str, Any],
+    *,
+    now: dt.datetime | None = None,
+) -> dict[str, Any]:
+    """Validate one immutable, content-addressed task/thread activity receipt."""
+
+    _assert_schema(observation, DESKTOP_OBSERVATION_SCHEMA_REF, "desktop observation")
+    expected_digest = _sha256_bytes(_canonical_bytes(observation["payload"]))
+    errors: list[str] = []
+    if observation["payload_digest"] != expected_digest:
+        errors.append(
+            "payload digest mismatch: "
+            f"{observation['payload_digest']} != {expected_digest}"
+        )
+    expected_observation_id = "onv1_" + expected_digest.removeprefix("sha256:")
+    if observation["observation_id"] != expected_observation_id:
+        errors.append(
+            "observation ID is not derived from the canonical payload digest: "
+            f"{observation['observation_id']} != {expected_observation_id}"
+        )
+    payload = observation["payload"]
+    supersedes = payload["supersession"]["supersedes_observation_ids"]
+    if len(supersedes) != len(set(supersedes)):
+        errors.append("supersedes_observation_ids contains duplicates")
+    if observation["observation_id"] in supersedes:
+        errors.append("observation cannot supersede itself")
+    entries = payload["entries"]
+    roles = {item["role_id"]: item for item in manifest["roles"]}
+    bindings = {item["role_id"]: item for item in registry["bindings"]}
+    expected_role_ids = set(roles)
+    observed_role_ids = [item["role_id"] for item in entries]
+    observed_runtime_ids = [item["runtime_thread_id"] for item in entries]
+
+    if payload["required_role_count"] != len(expected_role_ids):
+        errors.append(
+            "required role count does not match the manifest denominator: "
+            f"{payload['required_role_count']} != {len(expected_role_ids)}"
+        )
+    if len(entries) != len(expected_role_ids):
+        errors.append(
+            "partial or over-complete role denominator: "
+            f"{len(entries)} != {len(expected_role_ids)}"
+        )
+    duplicate_roles = sorted(
+        role_id for role_id, count in Counter(observed_role_ids).items() if count > 1
+    )
+    if duplicate_roles:
+        errors.append("duplicate role entries: " + ", ".join(duplicate_roles))
+    duplicate_runtimes = sorted(
+        runtime_id for runtime_id, count in Counter(observed_runtime_ids).items() if count > 1
+    )
+    if duplicate_runtimes:
+        errors.append("duplicate runtime entries: " + ", ".join(duplicate_runtimes))
+    observed_role_set = set(observed_role_ids)
+    missing_roles = sorted(expected_role_ids - observed_role_set)
+    unknown_roles = sorted(observed_role_set - expected_role_ids)
+    if missing_roles:
+        errors.append("missing required roles: " + ", ".join(missing_roles))
+    if unknown_roles:
+        errors.append("unknown required roles: " + ", ".join(unknown_roles))
+
+    now_utc = (now or dt.datetime.now(dt.timezone.utc)).astimezone(dt.timezone.utc)
+    captured_at = _parse_utc_timestamp(payload["captured_at"], "payload.captured_at")
+
+    def check_freshness(timestamp: dt.datetime, label: str) -> None:
+        age_seconds = (now_utc - timestamp).total_seconds()
+        if age_seconds > DESKTOP_OBSERVATION_MAX_AGE_SECONDS:
+            errors.append(
+                f"{label} is stale by {int(age_seconds)} seconds; "
+                f"maximum is {DESKTOP_OBSERVATION_MAX_AGE_SECONDS}"
+            )
+        if age_seconds < -DESKTOP_OBSERVATION_FUTURE_SKEW_SECONDS:
+            errors.append(
+                f"{label} is in the future by {int(-age_seconds)} seconds; "
+                f"maximum skew is {DESKTOP_OBSERVATION_FUTURE_SKEW_SECONDS}"
+            )
+
+    check_freshness(captured_at, "payload.captured_at")
+    for index, entry in enumerate(entries):
+        role_id = entry["role_id"]
+        observed_at = _parse_utc_timestamp(
+            entry["observed_at"], f"payload.entries[{index}].observed_at"
+        )
+        check_freshness(observed_at, f"payload.entries[{index}].observed_at")
+        if observed_at > captured_at + dt.timedelta(seconds=DESKTOP_OBSERVATION_FUTURE_SKEW_SECONDS):
+            errors.append(f"{role_id}: entry observation is later than the snapshot boundary")
+        if entry["source_host_id"] != payload["source_host_id"]:
+            errors.append(
+                f"{role_id}: source host mismatch: "
+                f"{entry['source_host_id']} != {payload['source_host_id']}"
+            )
+        if role_id not in roles or role_id not in bindings:
+            continue
+        role = roles[role_id]
+        binding = bindings[role_id]
+        expected_runtime_id = binding["current_runtime_id"]
+        if expected_runtime_id is None:
+            errors.append(f"{role_id}: durable registry has no current runtime to observe")
+        elif entry["runtime_thread_id"] != expected_runtime_id:
+            errors.append(
+                f"{role_id}: runtime binding mismatch: "
+                f"{entry['runtime_thread_id']} != {expected_runtime_id}"
+            )
+        expected_title = binding["title"]
+        if expected_title is None or _normalize_title(entry["source_title"]) != _normalize_title(expected_title):
+            errors.append(
+                f"{role_id}: source title mismatch: "
+                f"{entry['source_title']!r} != {expected_title!r}"
+            )
+        aliases = {_normalize_title(item) for item in role["title_aliases"]}
+        if _normalize_title(entry["source_title"]) not in aliases:
+            errors.append(f"{role_id}: source title is not a canonical role alias")
+
+    if errors:
+        raise ValidationFailure(
+            "desktop observation validation failed:\n"
+            + "\n".join(f"- {item}" for item in errors)
+        )
+    return {
+        "status": "PASS",
+        "observation_id": observation["observation_id"],
+        "payload_digest": expected_digest,
+        "role_count": len(entries),
+        "source_host_id": payload["source_host_id"],
+        "captured_at": payload["captured_at"],
+        "pin_state": "UNKNOWN",
+        "pin_capability": "UNSUPPORTED",
+    }
+
+
+def validate_desktop_observation(
+    observation: dict[str, Any],
+    current_observation: dict[str, Any],
+    manifest: dict[str, Any],
+    registry: dict[str, Any],
+    *,
+    now: dt.datetime | None = None,
+) -> dict[str, Any]:
+    """Validate a candidate against a trusted current immutable receipt."""
+
+    candidate = _validate_desktop_observation_receipt(
+        observation,
+        manifest,
+        registry,
+        now=now,
+    )
+    if current_observation is observation:
+        current = candidate
+    else:
+        current = _validate_desktop_observation_receipt(
+            current_observation,
+            manifest,
+            registry,
+            now=now,
+        )
+
+    errors: list[str] = []
+    if candidate["observation_id"] == current["observation_id"]:
+        if candidate["payload_digest"] != current["payload_digest"]:
+            errors.append("candidate and current observation IDs match but payload digests differ")
+    else:
+        superseded_ids = current_observation["payload"]["supersession"][
+            "supersedes_observation_ids"
+        ]
+        if candidate["observation_id"] in superseded_ids:
+            errors.append(
+                "observation has been superseded by trusted current observation "
+                + current["observation_id"]
+            )
+        else:
+            errors.append(
+                "candidate does not match the trusted current observation and the current receipt does not prove cumulative supersession"
+            )
+        candidate_time = _parse_utc_timestamp(candidate["captured_at"], "candidate captured_at")
+        current_time = _parse_utc_timestamp(current["captured_at"], "current captured_at")
+        if current_time < candidate_time:
+            errors.append("trusted current observation predates the candidate")
+
+    if errors:
+        raise ValidationFailure(
+            "desktop observation current-head validation failed:\n"
+            + "\n".join(f"- {item}" for item in errors)
+        )
+    return {
+        **candidate,
+        "current_observation_id": current["observation_id"],
+    }
+
+
 def _validate_relative_ref(reference: str, label: str) -> list[str]:
     if "://" in reference or reference.startswith("local automation:"):
         return []
@@ -232,6 +439,18 @@ def validate_repository(
     _assert_schema(registry, REGISTRY_SCHEMA_REF, "runtime registry")
     _assert_schema(decisions, DECISION_REGISTRY_SCHEMA_REF, "decision registry")
     _assert_schema(bootstrap_continuity, "schemas/atlas.continuity.handoff.v1.json", "bootstrap continuity handoff")
+    observation_fixture = _load_json(ROOT / DESKTOP_OBSERVATION_FIXTURE_REF)
+    observation_fixture_now = _parse_utc_timestamp(
+        observation_fixture["payload"]["captured_at"],
+        "desktop observation fixture captured_at",
+    )
+    validate_desktop_observation(
+        observation_fixture,
+        observation_fixture,
+        manifest,
+        registry,
+        now=observation_fixture_now,
+    )
 
     errors: list[str] = []
     roles = manifest["roles"]
@@ -360,6 +579,7 @@ def validate_repository(
         "manual_questions": len(question_ids),
         "answered_manual_questions": sum(item["status"] == "ANSWERED" for item in decisions["questions"]),
         "bootstrap_source_lifecycle": continuity_meta.get("source_lifecycle"),
+        "desktop_observation_fixture_roles": len(observation_fixture["payload"]["entries"]),
     }
 
 
@@ -895,6 +1115,28 @@ def _actions_for_record(role: dict[str, Any], record: ThreadRecord, *, stale_bin
     return list(dict.fromkeys(actions)), reasons
 
 
+def _apply_desktop_observation_statuses(
+    threads: list[ThreadRecord],
+    observation: dict[str, Any],
+) -> tuple[list[ThreadRecord], set[str]]:
+    """Overlay only supported activity evidence onto already discovered runtimes."""
+
+    observed_threads = copy.deepcopy(threads)
+    by_id = {item.thread_id: item for item in observed_threads}
+    applied_role_ids: set[str] = set()
+    for entry in observation["payload"]["entries"]:
+        record = by_id.get(entry["runtime_thread_id"])
+        if record is None:
+            continue
+        record.status = entry["activity"]
+        record.raw = {
+            **record.raw,
+            "desktop_observation_activity": entry["activity"],
+        }
+        applied_role_ids.add(entry["role_id"])
+    return observed_threads, applied_role_ids
+
+
 def build_recovery_plan(
     manifest: dict[str, Any],
     registry: dict[str, Any],
@@ -902,6 +1144,9 @@ def build_recovery_plan(
     *,
     mode: str,
     deterministic: bool,
+    desktop_observation: dict[str, Any] | None = None,
+    desktop_observation_current: dict[str, Any] | None = None,
+    observation_now: dt.datetime | None = None,
 ) -> tuple[dict[str, Any], list[ThreadRecord], list[dict[str, Any]]]:
     manifest_digest = _sha256_file(ROOT / MANIFEST_REF)
     registry_digest = _sha256_file(ROOT / REGISTRY_REF)
@@ -909,12 +1154,37 @@ def build_recovery_plan(
     roles = {item["role_id"]: item for item in manifest["roles"]}
     generated_at = "DETERMINISTIC" if deterministic else dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
 
+    observation_result: dict[str, Any] | None = None
+    observation_entries: dict[str, dict[str, Any]] = {}
+    if desktop_observation is not None:
+        if desktop_observation_current is None:
+            raise ValidationFailure(
+                "desktop observation requires a trusted current observation receipt"
+            )
+        observation_result = validate_desktop_observation(
+            desktop_observation,
+            desktop_observation_current,
+            manifest,
+            registry,
+            now=observation_now,
+        )
+        observation_entries = {
+            item["role_id"]: item for item in desktop_observation["payload"]["entries"]
+        }
+
     try:
         threads, leases = adapter.discover()
         discovery_error: str | None = None
     except WorkflowRecoveryError as exc:
         threads, leases = [], []
         discovery_error = str(exc)
+
+    observation_applied_roles: set[str] = set()
+    if desktop_observation is not None and discovery_error is None:
+        threads, observation_applied_roles = _apply_desktop_observation_statuses(
+            threads,
+            desktop_observation,
+        )
 
     by_id = {item.thread_id: item for item in threads}
     results: list[dict[str, Any]] = []
@@ -940,6 +1210,27 @@ def build_recovery_plan(
             continue
 
         current = by_id.get(current_id) if current_id else None
+        if (
+            current is None
+            and role_id in observation_entries
+            and observation_entries[role_id]["runtime_thread_id"] == current_id
+        ):
+            results.append(
+                {
+                    "role_id": role_id,
+                    "runtime_id": current_id,
+                    "health": "UNKNOWN",
+                    "decision": "FAIL_CLOSED_OBSERVATION_DISCOVERY_MISMATCH",
+                    "actions": [],
+                    "reasons": [
+                        "validated activity observation names the durable runtime, but primary discovery did not return it; activity evidence cannot establish existence or authorize repair"
+                    ],
+                    "active": None,
+                    "archived": None,
+                    "pinned": None,
+                }
+            )
+            continue
         claims = [item for item in threads if _role_claims(role, item)]
         other_claims = [
             item
@@ -1043,6 +1334,8 @@ def build_recovery_plan(
                 continue
         else:
             actions, reasons = _actions_for_record(role, current, stale_binding=False)
+            if role_id in observation_applied_roles:
+                reasons.append("activity status comes from a validated supported task/thread readback observation")
             if historical_residue:
                 reasons.append(
                     "ignored older exact-title historical residue: "
@@ -1055,6 +1348,18 @@ def build_recovery_plan(
             else:
                 decision = "REUSE_NO_CHANGE"
             health = "HEALTHY" if not actions else "DEGRADED"
+
+        if (
+            role_id in observation_applied_roles
+            and current.active is True
+            and role.get("writer_scope") not in {None, "", "read-only"}
+        ):
+            actions = []
+            health = "BLOCKED"
+            decision = "FAIL_CLOSED_OBSERVED_ACTIVE_WRITER"
+            reasons.append(
+                "validated observation reports an active writer; recovery must not steer, repair, or mutate it"
+            )
 
         assert current is not None
         results.append(
@@ -1125,8 +1430,41 @@ def build_recovery_plan(
         "plan_digest": "",
         "plan_id": "",
     }
+    if observation_result is not None:
+        plan["summary"]["desktop_observation"] = {
+            "present": True,
+            "observation_id": observation_result["observation_id"],
+            "current_observation_id": observation_result["current_observation_id"],
+            "payload_digest": observation_result["payload_digest"],
+            "source_host_id": observation_result["source_host_id"],
+            "captured_at": observation_result["captured_at"],
+            "validated_role_count": observation_result["role_count"],
+            "applied_activity_count": len(observation_applied_roles),
+            "pin_state": "UNKNOWN",
+            "pin_capability": "UNSUPPORTED",
+            "plan_identity_binding": "validated activity effects only",
+        }
+        plan["summary"]["volatile_fields_excluded_from_digest"].extend(
+            [
+                "summary.desktop_observation.observation_id",
+                "summary.desktop_observation.current_observation_id",
+                "summary.desktop_observation.payload_digest",
+                "summary.desktop_observation.source_host_id",
+                "summary.desktop_observation.captured_at",
+            ]
+        )
     digest_source = copy.deepcopy(plan)
     digest_source["generated_at"] = "<volatile>"
+    if observation_result is not None:
+        observation_digest_source = digest_source["summary"]["desktop_observation"]
+        for key in (
+            "observation_id",
+            "current_observation_id",
+            "payload_digest",
+            "source_host_id",
+            "captured_at",
+        ):
+            observation_digest_source[key] = "<volatile>"
     digest_source["plan_digest"] = ""
     digest_source["plan_id"] = ""
     plan_digest = _sha256_bytes(_canonical_bytes(digest_source))
@@ -1175,6 +1513,13 @@ def _load_acceptance(
 
 def _preflight_apply(plan: dict[str, Any], adapter: DiscoveryAdapter) -> None:
     for item in plan["roles"]:
+        if item["decision"] in {
+            "FAIL_CLOSED_OBSERVED_ACTIVE_WRITER",
+            "FAIL_CLOSED_OBSERVATION_DISCOVERY_MISMATCH",
+        }:
+            raise WorkflowRecoveryError(
+                f"{item['role_id']}: {item['decision']}; fail closed"
+            )
         if item["active"] is True and item["actions"]:
             raise WorkflowRecoveryError(f"{item['role_id']}: active runtime has pending repairs; fail closed without steering")
         for action in item["actions"]:
@@ -1408,7 +1753,9 @@ def render_markdown(
         "",
         "The command validates the manifest/schemas/prompts, discovers non-archived and archived tasks, reconciles by stable role ID, detects duplicate/active-writer collisions, emits a deterministic plan digest, refreshes only `runtime/atlas/workflow-recovery/`, and performs no archive or task mutation in dry-run mode.",
         "",
-        "A live apply additionally requires `--apply --acceptance <receipt.json>`. The receipt must bind the exact manifest and plan digests and name `atlas.main` as accepter. The current Codex app-server protocol does not expose pin readback or pin mutation, so any role needing pin proof fails closed before creation or repair. `ATLAS-WORKFLOW-MAN-001` rejected a manual fallback: recovery stays dry-run and fixture-only until deterministic desktop pin/activity readback exists.",
+        "Optional `--desktop-observation <receipt.json> --desktop-observation-current <head.json>` inputs supply a complete, fresh, content-addressed activity snapshot plus the trusted current immutable head produced by a supported external task/thread readback ledger on the v1 `local` host. Each newer head cumulatively names prior receipt IDs in `supersedes_observation_ids`, so an older candidate is rejected without mutating its identity. Observation is dry-run only and can replace only `active`, `idle`, `notLoaded`, or `UNKNOWN` activity provenance on a runtime already returned by primary discovery. Pin state remains exactly `UNKNOWN` with capability `UNSUPPORTED`; private desktop storage, SQLite coupling, UI scraping, and pin inference are prohibited. Receipt/head identity, host, and timestamps are reported but excluded from plan identity; their validated activity effects remain digest-bound.",
+        "",
+        "A live apply additionally requires `--apply --acceptance <receipt.json>`. The receipt must bind the exact manifest and plan digests and name `atlas.main` as accepter. The current Codex app-server protocol does not expose pin readback or pin mutation, so any role needing pin proof fails closed before creation or repair. `ATLAS-WORKFLOW-MAN-001` rejected a manual fallback: the observation bridge can prove supported activity evidence, but live recovery remains blocked until deterministic pin readback and mutation exist.",
         "",
         "Fixture-safe creation proof:",
         "",
@@ -1466,6 +1813,8 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     mode.add_argument("--apply", action="store_true", help="apply an independently accepted plan")
     recover.add_argument("--adapter", choices=("live", "fixture"), default="live")
     recover.add_argument("--fixture", type=Path)
+    recover.add_argument("--desktop-observation", type=Path)
+    recover.add_argument("--desktop-observation-current", type=Path)
     recover.add_argument("--acceptance", type=Path)
     recover.add_argument("--output-dir", type=Path, default=Path(DEFAULT_RUNTIME_REF))
     recover.add_argument("--no-write-runtime", action="store_true")
@@ -1484,6 +1833,13 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="validate one workflow envelope and its canonical payload digest",
     )
     envelope.add_argument("path", type=Path)
+
+    observation = subparsers.add_parser(
+        "validate-desktop-observation",
+        help="validate one complete externally produced task/thread activity observation",
+    )
+    observation.add_argument("path", type=Path)
+    observation.add_argument("--current", type=Path, required=True)
 
     return parser.parse_args(argv)
 
@@ -1517,6 +1873,20 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(result, sort_keys=True))
             return 0
 
+        if args.command == "validate-desktop-observation":
+            manifest = _load_json(ROOT / MANIFEST_REF)
+            registry = _load_json(ROOT / REGISTRY_REF)
+            observation_path = args.path if args.path.is_absolute() else ROOT / args.path
+            current_path = args.current if args.current.is_absolute() else ROOT / args.current
+            result = validate_desktop_observation(
+                _load_json(observation_path),
+                _load_json(current_path),
+                manifest,
+                registry,
+            )
+            print(json.dumps(result, sort_keys=True))
+            return 0
+
         manifest = _load_json(ROOT / MANIFEST_REF)
         registry = _load_json(ROOT / REGISTRY_REF)
         validate_repository(check_generated=True)
@@ -1532,12 +1902,42 @@ def main(argv: list[str] | None = None) -> int:
                 raise ValidationFailure("--fixture is valid only with --adapter fixture")
             adapter = LiveAppServerAdapter(args.timeout_seconds)
 
+        desktop_observation = None
+        desktop_observation_current = None
+        if args.desktop_observation is not None:
+            observation_path = (
+                args.desktop_observation
+                if args.desktop_observation.is_absolute()
+                else ROOT / args.desktop_observation
+            )
+            desktop_observation = _load_json(observation_path)
+            if args.desktop_observation_current is None:
+                raise ValidationFailure(
+                    "--desktop-observation requires --desktop-observation-current from the trusted observation ledger"
+                )
+            current_observation_path = (
+                args.desktop_observation_current
+                if args.desktop_observation_current.is_absolute()
+                else ROOT / args.desktop_observation_current
+            )
+            desktop_observation_current = _load_json(current_observation_path)
+            if args.apply:
+                raise ValidationFailure(
+                    "--desktop-observation is a read-only dry-run input and cannot accompany --apply"
+                )
+        elif args.desktop_observation_current is not None:
+            raise ValidationFailure(
+                "--desktop-observation-current requires --desktop-observation"
+            )
+
         plan, threads, _leases = build_recovery_plan(
             manifest,
             registry,
             adapter,
             mode=mode,
             deterministic=args.deterministic,
+            desktop_observation=desktop_observation,
+            desktop_observation_current=desktop_observation_current,
         )
         mutation_receipts: list[dict[str, Any]] = []
         if args.apply:
