@@ -1047,6 +1047,71 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("repo.socials-os", program["scope_holds"][0]["writer_scope"])
         self.assertNotIn("forbidden_owner_lanes", program)
 
+    def test_bridge_preserves_protected_surface_authority_for_external_mutation(self) -> None:
+        payload = {
+            "canonical_lifecycle_state": "READY",
+            "packet_id": "review-request",
+            "objective": "Verify deployments zero, then create one review request; no production mutation.",
+            "logical_role_id": "atlas.release-control-plane",
+            "repository": "fawxzzy/ATLAS",
+            "writer_scope": "github.fawxzzy.ATLAS.pr146.review.head",
+            "execution_class": "external_mutation",
+            "resource_claims": {
+                "external_writers": ["github:fawxzzy/ATLAS#146:review:head"],
+            },
+            "protected_surface_authorized": True,
+        }
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("atlas.release-control-plane", "release-thread", "idle")),
+            envelopes=[_envelope(payload, idempotency_key="authorized-review-request")],
+        )
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(error=1),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], findings)
+        self.assertIs(program["standing_packets"][0]["protected_surface_authorized"], True)
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(["review-request"], [job["packet_id"] for job in report["selected_jobs"]])
+
+    def test_bridge_keeps_unadmitted_protected_external_mutation_blocked(self) -> None:
+        payload = {
+            "canonical_lifecycle_state": "READY",
+            "packet_id": "unadmitted-deploy",
+            "objective": "Deploy to production.",
+            "logical_role_id": "atlas.release-control-plane",
+            "repository": "fawxzzy/ATLAS",
+            "writer_scope": "github.fawxzzy.ATLAS.deploy",
+            "execution_class": "external_mutation",
+            "resource_claims": {
+                "external_writers": ["github:fawxzzy/ATLAS:deploy"],
+            },
+        }
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("atlas.release-control-plane", "release-thread", "idle")),
+            envelopes=[_envelope(payload, idempotency_key="unadmitted-deploy")],
+        )
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], findings)
+        self.assertIs(program["standing_packets"][0]["protected_surface_authorized"], False)
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual("protected_or_platform_mutation_forbidden", report["blocked_candidates"][0]["blocked_reason"])
+
     def test_reservation_persists_before_duplicate_selection(self) -> None:
         program = _program_payload()
         program["standing_packets"] = [

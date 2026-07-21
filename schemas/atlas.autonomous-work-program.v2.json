@@ -50,6 +50,7 @@
           "runtime_status": { "type": "string", "minLength": 1 },
           "dependencies": { "type": "array", "items": { "type": "string" } },
           "resource_claims": { "type": "object" },
+          "protected_surface_authorized": { "type": "boolean" },
           "authority": {
             "type": "object",
             "required": ["event_id", "payload_digest"],

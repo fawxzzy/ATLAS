@@ -548,6 +548,7 @@ def reconcile_runtime_program(
                 ("execution_class", execution_class),
                 ("dependencies", _string_list(payload.get("dependencies", []))),
                 ("resource_claims", _resource_claims(payload.get("resource_claims"))),
+                ("protected_surface_authorized", payload.get("protected_surface_authorized") is True),
                 ("runtime_thread_id", runtime_thread_id),
                 ("runtime_status", runtime_status),
                 ("authority", OrderedDict([("event_id", event_id), ("payload_digest", payload_digest)])),
@@ -893,6 +894,7 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any]) -> Or
             ("execution_class", execution_class),
             ("dependencies", _string_list(raw.get("dependencies", []))),
             ("resource_claims", _resource_claims(raw.get("resource_claims"))),
+            ("protected_surface_authorized", raw.get("protected_surface_authorized") is True),
             ("cross_marker_signal_applied", False),
             ("authority", raw.get("authority")),
         ]

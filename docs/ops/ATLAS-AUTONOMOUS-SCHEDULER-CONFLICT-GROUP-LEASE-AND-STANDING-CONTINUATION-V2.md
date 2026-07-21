@@ -80,6 +80,9 @@ must declare at least one exact `external_writers` resource, receives the same
 durable mutating lease as source writers, and conflicts on writer scope or an
 overlapping external writer. This lets PR lifecycle control continue beside a
 held root validation scope without weakening same-repository source isolation.
+Canonical envelope ingestion persists `protected_surface_authorized` exactly;
+otherwise protected lifecycle wording remains blocked after handoff even when
+the originating authority admitted that bounded surface.
 
 A root validation hold owns only the checkout being validated. A source writer
 for the same repository may continue from another worktree only when it declares
