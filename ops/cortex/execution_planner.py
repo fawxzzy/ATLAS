@@ -167,8 +167,6 @@ def _repository_identity(value: Any) -> str | None:
     if path.casefold().endswith(".git"):
         path = path[:-4]
     parts = path.split("/")
-    if len(parts) == 1 and parts[0]:
-        return parts[0].casefold()
     if len(parts) != 2 or not all(parts):
         return None
     return "/".join(part.casefold() for part in parts)
@@ -179,9 +177,11 @@ def _external_writer_identity(value: str) -> str:
     if "://" in raw:
         parsed = urlsplit(raw)
         parts = parsed.path.strip("/").split("/")
-        if parsed.hostname and parsed.hostname.casefold() == "github.com" and len(parts) >= 4:
+        if parsed.hostname and parsed.hostname.casefold() == "github.com" and len(parts) >= 3 and parts[2].casefold() == "pull":
+            if len(parts) < 4 or not parts[3].isdigit():
+                return ""
             repository = _repository_identity("/".join(parts[:2]))
-            if repository and parts[2].casefold() == "pull" and parts[3].isdigit():
+            if repository:
                 return f"github-pr:{repository}#{int(parts[3])}"
         return raw.casefold()
     prefix, separator, remainder = raw.partition(":")
@@ -192,9 +192,13 @@ def _external_writer_identity(value: str) -> str:
     repository, pr_separator, pr_number = repository_token.partition("#")
     normalized_repository = _repository_identity(repository)
     if not normalized_repository:
-        return raw.casefold()
-    if pr_separator and pr_number.isdigit():
+        return ""
+    if pr_separator:
+        if not pr_number.isdigit():
+            return ""
         return f"github-pr:{normalized_repository}#{int(pr_number)}"
+    if normalized_prefix == "github-pr":
+        return ""
     normalized = f"{normalized_prefix}:{normalized_repository}"
     if suffix_separator:
         normalized += f":{suffix}"
@@ -235,7 +239,11 @@ def _normalized_claims(job: dict[str, Any]) -> OrderedDict[str, list[str]]:
                 value.append(writer_scope)
         claims[kind] = _string_list(value)
         if kind == "external_writers":
-            claims[kind] = sorted({_external_writer_identity(item) for item in claims[kind]})
+            claims[kind] = sorted(
+                identity
+                for identity in {_external_writer_identity(item) for item in claims[kind]}
+                if identity
+            )
     return claims
 
 
@@ -260,6 +268,19 @@ def _normalize_job(raw: Any) -> tuple[OrderedDict[str, Any] | None, list[Ordered
             blockers.append(_finding("invalid_job_shape", "Job collection field must be an array.", field=field))
     if "resource_claims" in raw and not isinstance(raw["resource_claims"], dict):
         blockers.append(_finding("invalid_job_shape", "resource_claims must be an object."))
+    raw_claims = raw.get("resource_claims") if isinstance(raw.get("resource_claims"), dict) else {}
+    external_writers = raw_claims.get("external_writers", [])
+    if not isinstance(external_writers, list) or any(
+        not isinstance(item, str) or not item.strip() or not _external_writer_identity(item)
+        for item in external_writers
+    ):
+        blockers.append(
+            _finding(
+                "invalid_resource_claim",
+                "External writer claims must use a recognized, complete resource identity.",
+                field="resource_claims.external_writers",
+            )
+        )
     if "writer_scope" in raw and (not isinstance(raw["writer_scope"], str) or not raw["writer_scope"].strip()):
         blockers.append(_finding("invalid_job_shape", "writer_scope must be a non-empty string when supplied."))
     repository = _repository_identity(raw.get("repository"))
@@ -317,20 +338,23 @@ def _collision_kinds(left: OrderedDict[str, Any], right: OrderedDict[str, Any]) 
         and left.get("repository") == right.get("repository")
     )
     if same_repository_mutation:
-        complete_isolation_claims = all(
-            claims.get(kind)
-            for claims in (left_claims, right_claims)
-            for kind in ("worktrees", "files")
-        )
-        worktrees_overlap = any(
-            _patterns_overlap(a, b)
-            for a in left_claims["worktrees"]
-            for b in right_claims["worktrees"]
-        )
-        if not complete_isolation_claims:
-            kinds.append("repository")
-        elif worktrees_overlap:
-            kinds.append("worktrees")
+        if "canonical_workspace" in {left.get("execution_class"), right.get("execution_class")}:
+            kinds.append("canonical_root")
+        else:
+            complete_isolation_claims = all(
+                claims.get(kind)
+                for claims in (left_claims, right_claims)
+                for kind in ("worktrees", "files")
+            )
+            worktrees_overlap = any(
+                _patterns_overlap(a, b)
+                for a in left_claims["worktrees"]
+                for b in right_claims["worktrees"]
+            )
+            if not complete_isolation_claims:
+                kinds.append("repository")
+            elif worktrees_overlap:
+                kinds.append("worktrees")
     return sorted(kinds)
 
 

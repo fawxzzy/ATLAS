@@ -1154,20 +1154,23 @@ def _candidate_conflicts(left: dict[str, Any], right: dict[str, Any]) -> list[st
     left_mutates_repository = left.get("execution_class") in REPOSITORY_MUTATING_EXECUTION_CLASSES
     right_mutates_repository = right.get("execution_class") in REPOSITORY_MUTATING_EXECUTION_CLASSES
     if left_mutates_repository and right_mutates_repository and same_repository:
-        complete_isolation_claims = all(
-            claims.get(kind)
-            for claims in (left_claims, right_claims)
-            for kind in ("worktrees", "files")
-        )
-        worktrees_overlap = any(
-            _patterns_overlap(a, b)
-            for a in left_claims.get("worktrees", [])
-            for b in right_claims.get("worktrees", [])
-        )
-        if not complete_isolation_claims:
-            conflicts.append("repository")
-        elif worktrees_overlap:
-            conflicts.append("worktrees")
+        if "canonical_workspace" in {left.get("execution_class"), right.get("execution_class")}:
+            conflicts.append("canonical_root")
+        else:
+            complete_isolation_claims = all(
+                claims.get(kind)
+                for claims in (left_claims, right_claims)
+                for kind in ("worktrees", "files")
+            )
+            worktrees_overlap = any(
+                _patterns_overlap(a, b)
+                for a in left_claims.get("worktrees", [])
+                for b in right_claims.get("worktrees", [])
+            )
+            if not complete_isolation_claims:
+                conflicts.append("repository")
+            elif worktrees_overlap:
+                conflicts.append("worktrees")
     return sorted(set(conflicts))
 
 

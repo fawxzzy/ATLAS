@@ -936,6 +936,47 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
         self.assertEqual(["atlas-a", "atlas-b"], sorted(job["packet_id"] for job in report["selected_jobs"]))
 
+    def test_canonical_workspace_never_shares_same_repository_worktree_wave(self) -> None:
+        program = _program_payload()
+        canonical = _standing_packet(
+            "atlas-root",
+            role_id="atlas.main",
+            repository="fawxzzy/ATLAS",
+            writer_scope="atlas.root",
+        )
+        canonical["execution_class"] = "canonical_workspace"
+        canonical["resource_claims"] = {
+            "worktrees": ["C:/ATLAS"],
+            "files": ["docs/root/**"],
+        }
+        isolated = _standing_packet(
+            "atlas-isolated",
+            role_id="atlas.workflow-architect",
+            repository="fawxzzy/ATLAS",
+            writer_scope="repo.atlas.isolated",
+        )
+        isolated["resource_claims"] = {
+            "worktrees": ["C:/w/atlas-isolated"],
+            "files": ["ops/isolated/**"],
+        }
+        program["standing_packets"] = [canonical, isolated]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(1, len(report["selected_jobs"]))
+        self.assertEqual("resource_conflict", report["deferred_candidates"][0]["deferred_reason"])
+        self.assertIn(
+            "canonical_root",
+            report["deferred_candidates"][0]["conflicts_with"][0]["resource_kinds"],
+        )
+
     def test_duplicate_packet_id_is_never_dispatched_twice(self) -> None:
         program = _program_payload()
         program["standing_packets"] = [

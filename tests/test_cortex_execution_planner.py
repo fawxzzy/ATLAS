@@ -42,7 +42,7 @@ class CortexExecutionPlannerTests(unittest.TestCase):
             "objective": "Prove one bounded advisory outcome.",
             "project": "atlas",
             "component": "cortex",
-            "repository": "stack",
+            "repository": "fawxzzy/ATLAS",
             "owner": "stack",
             "execution_class": "read_only",
             "allowed_files": [f"ops/cortex/{job_id}.py"],
@@ -247,6 +247,26 @@ class CortexExecutionPlannerTests(unittest.TestCase):
         self.assertFalse(plan["safe_to_admit"])
         self.assertIn("invalid_job_shape", [item["code"] for item in plan["blocked_reasons"]])
 
+    def test_bare_repository_identity_fails_closed(self) -> None:
+        job = self._job("one", execution_class="repo_worktree")
+        job["repository"] = "ATLAS"
+
+        plan, status = self._plan(self._root(), [job])
+
+        self.assertEqual("blocker", status)
+        self.assertFalse(plan["safe_to_admit"])
+        self.assertIn("invalid_job_shape", [item["code"] for item in plan["blocked_reasons"]])
+
+    def test_malformed_github_pr_writer_alias_fails_closed(self) -> None:
+        job = self._job("one", execution_class="repo_worktree")
+        job["resource_claims"] = {"external_writers": ["github-pr:fawxzzy/ATLAS#not-a-number"]}
+
+        plan, status = self._plan(self._root(), [job])
+
+        self.assertEqual("blocker", status)
+        self.assertFalse(plan["safe_to_admit"])
+        self.assertIn("invalid_resource_claim", [item["code"] for item in plan["blocked_reasons"]])
+
     def test_github_pr_url_and_structured_writer_are_one_resource(self) -> None:
         first = self._job("one", execution_class="repo_worktree", writer_scope="repo.stack.one")
         second = self._job("two", execution_class="repo_worktree", writer_scope="repo.stack.two")
@@ -283,6 +303,27 @@ class CortexExecutionPlannerTests(unittest.TestCase):
             self._root(),
             [self._job("one", execution_class="canonical_workspace"), self._job("two", execution_class="canonical_workspace")],
         )
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("canonical_root", plan["collision_risks"][0]["resource_kinds"])
+
+    def test_canonical_workspace_never_shares_same_repository_worktree_wave(self) -> None:
+        canonical = self._job(
+            "canonical",
+            execution_class="canonical_workspace",
+            writer_scope="atlas.root",
+            allowed_files=["docs/root/**"],
+            resource_claims={"worktrees": ["C:/ATLAS"]},
+        )
+        isolated = self._job(
+            "isolated",
+            execution_class="repo_worktree",
+            writer_scope="repo.atlas.isolated",
+            allowed_files=["ops/isolated/**"],
+            resource_claims={"worktrees": ["C:/w/isolated"]},
+        )
+
+        plan, _ = self._plan(self._root(), [canonical, isolated])
+
         self.assertEqual(2, len(plan["execution_waves"]))
         self.assertIn("canonical_root", plan["collision_risks"][0]["resource_kinds"])
 
