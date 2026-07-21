@@ -173,6 +173,7 @@ function workerLease(task, recordedAt) {
     lease_id: `lease-${task.job_id}`,
     job_id: task.job_id,
     component_id: task.component_id,
+    writer_scope: `read.${task.component_id}.owner-lane-canary`,
     status: "released",
     acquired_at: recordedAt,
     expires_at: recordedAt,
