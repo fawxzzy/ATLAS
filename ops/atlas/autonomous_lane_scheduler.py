@@ -994,6 +994,23 @@ def _active_writer_scopes(program: dict[str, Any]) -> set[str]:
     return leased
 
 
+def _active_lease_candidate(
+    lease: dict[str, Any],
+    *,
+    standing_packets: dict[str, dict[str, Any]],
+) -> OrderedDict[str, Any]:
+    packet = standing_packets.get(str(lease.get("packet_id") or ""), {})
+    return OrderedDict(
+        [
+            ("packet_id", lease.get("packet_id")),
+            ("repository", lease.get("repository") or packet.get("repository")),
+            ("writer_scope", lease.get("writer_scope")),
+            ("execution_class", lease.get("execution_class") or packet.get("execution_class")),
+            ("resource_claims", _resource_claims(lease.get("resource_claims") or packet.get("resource_claims"))),
+        ]
+    )
+
+
 def _select_execution_wave(
     *,
     program: dict[str, Any],
@@ -1009,6 +1026,16 @@ def _select_execution_wave(
     max_read_only_value = program.get("max_parallel_read_only", 2)
     max_read_only = max(0, int(2 if max_read_only_value is None else max_read_only_value))
     active_leases = [item for item in program.get("active_leases", []) if isinstance(item, dict)]
+    standing_packets = {
+        str(item.get("packet_id")): item
+        for item in program.get("standing_packets", [])
+        if isinstance(item, dict) and item.get("packet_id")
+    }
+    active_lease_candidates = [
+        (lease, _active_lease_candidate(lease, standing_packets=standing_packets))
+        for lease in active_leases
+        if str(lease.get("status") or "").lower() in {"active", "recovery-required"}
+    ]
     writer_count = sum(
         1
         for lease in active_leases
@@ -1033,6 +1060,25 @@ def _select_execution_wave(
         if missing_dependencies:
             candidate["blocked_reason"] = "dependencies_not_complete"
             candidate["missing_dependencies"] = missing_dependencies
+            blocked.append(candidate)
+            continue
+        lease_conflicts = [
+            (lease, _candidate_conflicts(candidate, leased_candidate))
+            for lease, leased_candidate in active_lease_candidates
+        ]
+        lease_conflicts = [(lease, kinds) for lease, kinds in lease_conflicts if kinds]
+        if lease_conflicts:
+            candidate["blocked_reason"] = "active_lease_resource_conflict"
+            candidate["conflicts_with"] = [
+                OrderedDict(
+                    [
+                        ("packet_id", lease.get("packet_id")),
+                        ("reservation_id", lease.get("reservation_id")),
+                        ("resource_kinds", kinds),
+                    ]
+                )
+                for lease, kinds in lease_conflicts
+            ]
             blocked.append(candidate)
             continue
         conflicts = [
@@ -1330,6 +1376,9 @@ def reserve_selected_jobs(
                         ("logical_role_id", job.get("logical_role_id")),
                         ("runtime_thread_id", packet.get("runtime_thread_id")),
                         ("writer_scope", writer_scope),
+                        ("repository", job.get("repository")),
+                        ("execution_class", job.get("execution_class")),
+                        ("resource_claims", _resource_claims(job.get("resource_claims"))),
                         ("status", "active"),
                         ("acquired_at", reserved_at),
                         ("authority_event_id", authority.get("event_id")),

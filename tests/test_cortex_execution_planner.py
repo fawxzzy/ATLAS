@@ -179,6 +179,44 @@ class CortexExecutionPlannerTests(unittest.TestCase):
         plan, _ = self._plan(self._root(), [first, second])
         self.assertEqual(2, len(plan["execution_waves"]))
 
+    def test_explicit_distinct_scopes_do_not_bypass_same_repository_serialization(self) -> None:
+        first = self._job(
+            "one",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.one",
+            allowed_files=[],
+        )
+        second = self._job(
+            "two",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.two",
+            allowed_files=[],
+        )
+        plan, _ = self._plan(self._root(), [first, second])
+
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("repository", plan["collision_risks"][0]["resource_kinds"])
+
+    def test_explicit_distinct_scopes_share_same_repository_with_proven_isolation(self) -> None:
+        first = self._job(
+            "one",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.one",
+            allowed_files=["ops/cortex/one/**"],
+            resource_claims={"worktrees": ["worktrees/one"]},
+        )
+        second = self._job(
+            "two",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.two",
+            allowed_files=["tests/cortex/two/**"],
+            resource_claims={"worktrees": ["worktrees/two"]},
+        )
+        plan, _ = self._plan(self._root(), [first, second])
+
+        self.assertEqual(1, len(plan["execution_waves"]))
+        self.assertEqual(2, len(plan["execution_waves"][0]["job_ids"]))
+
     def test_canonical_workspace_claim_is_implicit_and_exclusive(self) -> None:
         plan, _ = self._plan(
             self._root(),

@@ -505,6 +505,103 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(["mazer-ready"], [job["packet_id"] for job in report["selected_jobs"]])
         self.assertIn("writer_scope_leased", [item["blocked_reason"] for item in report["blocked_candidates"]])
 
+    def test_active_lease_serializes_unproved_same_repository_scope(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
+            _standing_packet("atlas-b", role_id="atlas.workflow-architect", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.b"),
+        ]
+        program["max_parallel_writers"] = 1
+        first = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, _ = scheduler.reserve_selected_jobs(program=program, report=first)
+        program["max_parallel_writers"] = 2
+        second = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual("fawxzzy/ATLAS", program["active_leases"][0]["repository"])
+        self.assertEqual([], second["selected_jobs"])
+        blocked = next(item for item in second["blocked_candidates"] if item["packet_id"] == "atlas-b")
+        self.assertEqual("active_lease_resource_conflict", blocked["blocked_reason"])
+        self.assertEqual(["repository"], blocked["conflicts_with"][0]["resource_kinds"])
+
+    def test_recovery_lease_serializes_unproved_same_repository_scope(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
+            _standing_packet("atlas-b", role_id="atlas.workflow-architect", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.b"),
+        ]
+        program["max_parallel_writers"] = 1
+        first = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, _ = scheduler.reserve_selected_jobs(program=program, report=first)
+        program["active_leases"][0]["status"] = "recovery-required"
+        program["max_parallel_writers"] = 2
+        second = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], second["selected_jobs"])
+        blocked = next(item for item in second["blocked_candidates"] if item["packet_id"] == "atlas-b")
+        self.assertEqual("active_lease_resource_conflict", blocked["blocked_reason"])
+
+    def test_active_lease_allows_proven_same_repository_isolation(self) -> None:
+        program = _program_payload()
+        left = _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a")
+        left["resource_claims"] = {"worktrees": ["worktrees/atlas-a"], "files": ["ops/atlas/a/**"]}
+        right = _standing_packet(
+            "atlas-b",
+            role_id="atlas.workflow-architect",
+            repository="fawxzzy/ATLAS",
+            writer_scope="repo.atlas.b",
+        )
+        right["resource_claims"] = {"worktrees": ["worktrees/atlas-b"], "files": ["tests/atlas/b/**"]}
+        program["standing_packets"] = [left, right]
+        program["max_parallel_writers"] = 1
+        first = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, _ = scheduler.reserve_selected_jobs(program=program, report=first)
+        program["max_parallel_writers"] = 2
+        second = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(["atlas-b"], [job["packet_id"] for job in second["selected_jobs"]])
+
     def test_zero_read_only_capacity_is_preserved(self) -> None:
         program = _program_payload()
         packet = _standing_packet(

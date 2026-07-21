@@ -23,6 +23,7 @@ CONTRACT_VERSION = "atlas.cortex.execution_planner_contract_registry.v1"
 NO_EXECUTION_AUTHORITY = "no_execution_authority"
 
 EXECUTION_CLASSES = ("read_only", "repo_worktree", "canonical_workspace")
+MUTATING_EXECUTION_CLASSES = {"repo_worktree", "canonical_workspace"}
 TOP_LEVEL_FIELDS = (
     "schema_version", "plan_id", "source_packet", "source_digests", "source_trust_classes",
     "selected_lane", "selected_marker", "selected_packet", "objective", "plan_status",
@@ -243,6 +244,27 @@ def _collision_kinds(left: OrderedDict[str, Any], right: OrderedDict[str, Any]) 
                 kinds.append(kind)
         elif set(values_left).intersection(values_right):
             kinds.append(kind)
+    same_repository_mutation = (
+        left.get("execution_class") in MUTATING_EXECUTION_CLASSES
+        and right.get("execution_class") in MUTATING_EXECUTION_CLASSES
+        and bool(left.get("repository"))
+        and left.get("repository") == right.get("repository")
+    )
+    if same_repository_mutation:
+        complete_isolation_claims = all(
+            claims.get(kind)
+            for claims in (left_claims, right_claims)
+            for kind in ("worktrees", "files")
+        )
+        worktrees_overlap = any(
+            _patterns_overlap(a, b)
+            for a in left_claims["worktrees"]
+            for b in right_claims["worktrees"]
+        )
+        if not complete_isolation_claims:
+            kinds.append("repository")
+        elif worktrees_overlap:
+            kinds.append("worktrees")
     return sorted(kinds)
 
 
