@@ -946,12 +946,29 @@ def _candidate_conflicts(left: dict[str, Any], right: dict[str, Any]) -> list[st
     for kind in ("worktrees", "ports", "browsers", "external_writers"):
         if set(left_claims.get(kind, [])).intersection(right_claims.get(kind, [])):
             conflicts.append(kind)
-    if left.get("repository") == right.get("repository") and any(
+    same_repository = bool(left.get("repository")) and left.get("repository") == right.get("repository")
+    files_overlap = any(
         _patterns_overlap(a, b)
         for a in left_claims.get("files", [])
         for b in right_claims.get("files", [])
-    ):
+    )
+    if same_repository and files_overlap:
         conflicts.append("files")
+    if left_mutates and right_mutates and same_repository:
+        complete_isolation_claims = all(
+            claims.get(kind)
+            for claims in (left_claims, right_claims)
+            for kind in ("worktrees", "files")
+        )
+        worktrees_overlap = any(
+            _patterns_overlap(a, b)
+            for a in left_claims.get("worktrees", [])
+            for b in right_claims.get("worktrees", [])
+        )
+        if not complete_isolation_claims:
+            conflicts.append("repository")
+        elif worktrees_overlap:
+            conflicts.append("worktrees")
     return sorted(set(conflicts))
 
 

@@ -425,6 +425,49 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(1, len(report["selected_jobs"]))
         self.assertEqual("resource_conflict", report["deferred_candidates"][0]["deferred_reason"])
 
+    def test_same_repository_mutations_require_complete_isolation_claims(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
+            _standing_packet("atlas-b", role_id="atlas.workflow-architect", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.b"),
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(1, len(report["selected_jobs"]))
+        self.assertEqual("resource_conflict", report["deferred_candidates"][0]["deferred_reason"])
+        self.assertEqual(["repository"], report["deferred_candidates"][0]["conflicts_with"][0]["resource_kinds"])
+
+    def test_same_repository_mutations_can_share_wave_with_proven_isolation(self) -> None:
+        program = _program_payload()
+        left = _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a")
+        left["resource_claims"] = {"worktrees": ["worktrees/atlas-a"], "files": ["ops/atlas/a/**"]}
+        right = _standing_packet(
+            "atlas-b",
+            role_id="atlas.workflow-architect",
+            repository="fawxzzy/ATLAS",
+            writer_scope="repo.atlas.b",
+        )
+        right["resource_claims"] = {"worktrees": ["worktrees/atlas-b"], "files": ["tests/atlas/b/**"]}
+        program["standing_packets"] = [left, right]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(["atlas-a", "atlas-b"], sorted(job["packet_id"] for job in report["selected_jobs"]))
+
     def test_duplicate_packet_id_is_never_dispatched_twice(self) -> None:
         program = _program_payload()
         program["standing_packets"] = [
