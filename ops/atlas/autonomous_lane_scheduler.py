@@ -427,6 +427,7 @@ def reconcile_runtime_program(
                 for lease in active_leases
                 if str(lease.get("packet_id") or "") == packet_id
                 and str(lease.get("writer_scope") or "") == writer_scope
+                and str(lease.get("reservation_id") or "") == str(payload.get("reservation_id") or "")
                 and str(lease.get("status") or "").lower() in {"active", "recovery-required"}
             ]
             reservation_id = str(payload.get("reservation_id") or "")
@@ -990,8 +991,20 @@ def _select_execution_wave(
     max_writers = max(0, int(4 if max_writers_value is None else max_writers_value))
     max_read_only_value = program.get("max_parallel_read_only", 2)
     max_read_only = max(0, int(2 if max_read_only_value is None else max_read_only_value))
-    writer_count = 0
-    read_only_count = 0
+    active_leases = [item for item in program.get("active_leases", []) if isinstance(item, dict)]
+    writer_count = sum(
+        1
+        for lease in active_leases
+        if str(lease.get("status") or "").lower() in {"active", "recovery-required"}
+    )
+    read_only_count = sum(
+        1
+        for packet in program.get("standing_packets", [])
+        if isinstance(packet, dict)
+        and str(packet.get("execution_class") or "") == "read_only"
+        and str(packet.get("state") or "").upper() == "ACTIVE"
+        and isinstance(packet.get("dispatch_reservation"), dict)
+    )
     for candidate in candidates:
         candidate = OrderedDict(candidate)
         dependencies = set(candidate.get("dependencies", []))
@@ -1159,20 +1172,49 @@ class ProgramLockBusy(RuntimeError):
 @contextmanager
 def _exclusive_program_lock(program_path: Path):
     lock_path = program_path.with_suffix(program_path.suffix + ".lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    handle = lock_path.open("a+b")
+    locked = False
     try:
-        descriptor = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-    except FileExistsError as exc:
-        raise ProgramLockBusy(f"scheduler program is already reserved: {normalize_slashes(str(lock_path))}") from exc
-    try:
-        os.write(descriptor, str(os.getpid()).encode("ascii"))
-        os.close(descriptor)
+        handle.seek(0, os.SEEK_END)
+        if handle.tell() == 0:
+            handle.write(b"\0")
+            handle.flush()
+        handle.seek(0)
+        try:
+            if os.name == "nt":
+                import msvcrt
+
+                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except (OSError, BlockingIOError) as exc:
+            raise ProgramLockBusy(
+                f"scheduler program is already reserved: {normalize_slashes(str(lock_path))}"
+            ) from exc
+        locked = True
+        handle.seek(0)
+        handle.truncate()
+        handle.write(json.dumps({"pid": os.getpid()}).encode("ascii"))
+        handle.flush()
         yield
     finally:
         try:
-            os.close(descriptor)
+            if locked:
+                handle.seek(0)
+                if os.name == "nt":
+                    import msvcrt
+
+                    msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+                else:
+                    import fcntl
+
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
         except OSError:
             pass
-        lock_path.unlink(missing_ok=True)
+        handle.close()
 
 
 def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:

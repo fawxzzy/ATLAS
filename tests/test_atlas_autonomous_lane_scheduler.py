@@ -3,6 +3,9 @@ from __future__ import annotations
 import io
 import hashlib
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -170,8 +173,32 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 with self.assertRaises(scheduler.ProgramLockBusy):
                     with scheduler._exclusive_program_lock(program_path):
                         self.fail("second scheduler unexpectedly acquired the program lock")
+            self.assertTrue(program_path.with_suffix(".json.lock").exists())
 
-        self.assertFalse(program_path.with_suffix(".json.lock").exists())
+    def test_program_lock_recovers_after_process_death(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            program_path = Path(temp_dir) / "program.json"
+            _write(program_path, "{}\n")
+            child = (
+                "import os,sys; "
+                "from pathlib import Path; "
+                "from ops.atlas import autonomous_lane_scheduler as s; "
+                "c=s._exclusive_program_lock(Path(sys.argv[1])); "
+                "c.__enter__(); os._exit(0)"
+            )
+            environment = dict(os.environ)
+            environment["PYTHONDONTWRITEBYTECODE"] = "1"
+            result = subprocess.run(
+                [sys.executable, "-c", child, str(program_path)],
+                cwd=scheduler.ROOT,
+                env=environment,
+                check=False,
+            )
+
+            self.assertEqual(0, result.returncode)
+            self.assertTrue(program_path.with_suffix(".json.lock").exists())
+            with scheduler._exclusive_program_lock(program_path):
+                pass
 
     def test_validation_cleanup_takes_precedence(self) -> None:
         report = scheduler.build_report(
@@ -429,6 +456,57 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(scheduler.STATUS_HOLD, report["status"])
         self.assertEqual("read_only_wave_limit", report["deferred_candidates"][0]["deferred_reason"])
 
+    def test_persisted_active_reservations_count_against_parallel_capacity(self) -> None:
+        program = _program_payload()
+        program["max_parallel_writers"] = 1
+        program["max_parallel_read_only"] = 1
+        active_read = _standing_packet(
+            "active-read",
+            role_id="atlas.runtime",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.runtime.active",
+        )
+        active_read["execution_class"] = "read_only"
+        active_read["state"] = "ACTIVE"
+        active_read["dispatch_reservation"] = {"reservation_id": "rsrv-read"}
+        ready_read = _standing_packet(
+            "ready-read",
+            role_id="atlas.inbox",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.inbox.ready",
+        )
+        ready_read["execution_class"] = "read_only"
+        ready_write = _standing_packet(
+            "ready-write",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness",
+        )
+        program["standing_packets"] = [active_read, ready_read, ready_write]
+        program["active_leases"] = [
+            {
+                "reservation_id": "rsrv-web",
+                "packet_id": "active-web",
+                "writer_scope": "repo.web",
+                "status": "active",
+            }
+        ]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual(
+            {"read_only_wave_limit", "writer_wave_limit"},
+            {item["deferred_reason"] for item in report["deferred_candidates"]},
+        )
+
     def test_active_standing_role_is_never_steered(self) -> None:
         program = _program_payload()
         packet = _standing_packet(
@@ -597,6 +675,56 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("released", program["released_leases"][0]["status"])
         self.assertEqual("turn-fitness-1", program["completed_receipts"][0]["turn_id"])
         self.assertEqual([], program["delivery_intents"])
+
+    def test_terminal_receipt_cannot_release_a_different_reservation(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "fitness-ready",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness",
+        )
+        packet["state"] = "ACTIVE"
+        packet["dispatch_reservation"] = {"reservation_id": "rsrv-receipt"}
+        program["standing_packets"] = [packet]
+        program["active_leases"] = [
+            {
+                "packet_id": "fitness-ready",
+                "writer_scope": "repo.fitness",
+                "status": "active",
+                "reservation_id": "rsrv-other",
+            }
+        ]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-receipt",
+                "packet_id": "fitness-ready",
+                "writer_scope": "repo.fitness",
+                "status": "delivered",
+                "turn_id": "turn-fitness-2",
+            }
+        ]
+        terminal = _envelope(
+            {
+                "canonical_lifecycle_state": "COMPLETED",
+                "terminal": True,
+                "packet_id": "fitness-ready",
+                "writer_scope": "repo.fitness",
+                "reservation_id": "rsrv-receipt",
+                "turn_id": "turn-fitness-2",
+            },
+            idempotency_key="fitness-terminal-mismatch",
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[terminal],
+        )
+
+        self.assertEqual("terminal_lease_correlation_required", findings[0]["code"])
+        self.assertEqual("rsrv-other", program["active_leases"][0]["reservation_id"])
+        self.assertEqual([], program["completed_packets"])
 
     def test_ambiguous_delivery_enters_recovery_without_retry(self) -> None:
         program = _program_payload()
