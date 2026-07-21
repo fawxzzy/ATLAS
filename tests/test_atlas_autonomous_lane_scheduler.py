@@ -244,6 +244,36 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             )
         )
 
+    def test_root_validation_does_not_suppress_disjoint_owner_writer(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "web-source-fix",
+            role_id="owner.fawxzzyweb",
+            repository="fawxzzy/fawxzzyweb",
+            writer_scope="repo.fawxzzyweb",
+        )
+        packet["resource_claims"] = {
+            "files": ["apps/web/**"],
+            "worktrees": ["fawxzzyweb-source-fix"],
+            "ports": [],
+            "browsers": [],
+            "external_writers": [],
+        }
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(error=1),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual("web-source-fix", report["selected_jobs"][0]["packet_id"])
+        self.assertEqual("repo_worktree", report["selected_jobs"][0]["execution_class"])
+
     def test_worker_reconciliation_selected_before_other_packets(self) -> None:
         report = scheduler.build_report(
             root=Path("atlas-root-fixture"),
