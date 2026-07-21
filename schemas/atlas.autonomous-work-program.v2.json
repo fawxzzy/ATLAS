@@ -45,7 +45,7 @@
           "logical_role_id": { "type": "string", "minLength": 1 },
           "repository": { "type": "string", "minLength": 1 },
           "writer_scope": { "type": "string", "minLength": 1 },
-          "execution_class": { "enum": ["read_only", "repo_worktree", "canonical_workspace"] },
+          "execution_class": { "enum": ["read_only", "repo_worktree", "canonical_workspace", "external_mutation"] },
           "runtime_thread_id": { "type": ["string", "null"] },
           "runtime_status": { "type": "string", "minLength": 1 },
           "dependencies": { "type": "array", "items": { "type": "string" } },

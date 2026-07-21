@@ -164,6 +164,10 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             ["prepared", "delivered", "recovery-required"],
             schema["properties"]["delivery_intents"]["items"]["properties"]["status"]["enum"],
         )
+        self.assertIn(
+            "external_mutation",
+            schema["properties"]["standing_packets"]["items"]["properties"]["execution_class"]["enum"],
+        )
 
     def test_program_lock_excludes_concurrent_scheduler_invocation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -273,6 +277,99 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
         self.assertEqual("web-source-fix", report["selected_jobs"][0]["packet_id"])
         self.assertEqual("repo_worktree", report["selected_jobs"][0]["execution_class"])
+
+    def test_root_validation_does_not_suppress_external_mutation(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "pr-review-request",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="github.fawxzzy.ATLAS.pr146.review",
+        )
+        packet["execution_class"] = "external_mutation"
+        packet["resource_claims"] = {
+            "files": [],
+            "worktrees": [],
+            "ports": [],
+            "browsers": [],
+            "external_writers": ["github:fawxzzy/ATLAS#146:review"],
+        }
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(error=1),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(["pr-review-request"], [job["packet_id"] for job in report["selected_jobs"]])
+        self.assertEqual("external_mutation", report["selected_jobs"][0]["execution_class"])
+
+    def test_external_mutation_requires_exact_writer_claim(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "unclaimed-external-write",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="github.fawxzzy.ATLAS.pr146.review",
+        )
+        packet["execution_class"] = "external_mutation"
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual("external_writer_claim_required", report["blocked_candidates"][0]["blocked_reason"])
+
+    def test_external_mutations_serialize_on_exact_writer_claim(self) -> None:
+        program = _program_payload()
+        packets = []
+        for packet_id in ("review-request", "review-reply"):
+            packet = _standing_packet(
+                packet_id,
+                role_id="atlas.release-control-plane",
+                repository="fawxzzy/ATLAS",
+                writer_scope=f"github.fawxzzy.ATLAS.pr146.{packet_id}",
+            )
+            packet["execution_class"] = "external_mutation"
+            packet["resource_claims"] = {
+                "files": [],
+                "worktrees": [],
+                "ports": [],
+                "browsers": [],
+                "external_writers": ["github:fawxzzy/ATLAS#146:review"],
+            }
+            packets.append(packet)
+        program["standing_packets"] = packets
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(1, len(report["selected_jobs"]))
+        self.assertTrue(
+            any(
+                "external_writers" in conflict.get("resource_kinds", [])
+                for item in report["deferred_candidates"]
+                for conflict in item.get("conflicts_with", [])
+            )
+        )
 
     def test_worker_reconciliation_selected_before_other_packets(self) -> None:
         report = scheduler.build_report(

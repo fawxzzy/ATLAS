@@ -53,9 +53,10 @@ PHASE_CONTRACT_FREEZE = "contract_freeze"
 PHASE_SELECTOR = "selector"
 PHASE_HOLD = "hold"
 
-EXECUTION_CLASSES = {"read_only", "repo_worktree", "canonical_workspace"}
+EXECUTION_CLASSES = {"read_only", "repo_worktree", "canonical_workspace", "external_mutation"}
 READY_STATES = {"READY", "ADMITTED", "QUEUED"}
-MUTATING_EXECUTION_CLASSES = {"repo_worktree", "canonical_workspace"}
+MUTATING_EXECUTION_CLASSES = {"repo_worktree", "canonical_workspace", "external_mutation"}
+REPOSITORY_MUTATING_EXECUTION_CLASSES = {"repo_worktree", "canonical_workspace"}
 EVENT_ID_PATTERN = re.compile(r"^onv1_[0-9a-f]{64}$")
 PAYLOAD_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 RESUMABLE_RUNTIME_STATES = {"idle", "notloaded"}
@@ -782,6 +783,8 @@ def _candidate_from_planner_item(
         blocked_reason = "invalid_execution_class"
     elif writer_scope in set(program.get("forbidden_writer_scopes", [])):
         blocked_reason = "writer_scope_forbidden"
+    elif execution_class == "external_mutation" and not _resource_claims(item.get("resource_claims")).get("external_writers"):
+        blocked_reason = "external_writer_claim_required"
     elif execution_class != "read_only" and _is_protected_packet(packet):
         blocked_reason = "protected_or_platform_mutation_forbidden"
     elif requires_external_input:
@@ -849,6 +852,8 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any]) -> Or
         blocked_reason = "writer_scope_forbidden"
     elif not _authority_is_canonical(raw.get("authority")):
         blocked_reason = "canonical_authority_required"
+    elif execution_class == "external_mutation" and not _resource_claims(raw.get("resource_claims")).get("external_writers"):
+        blocked_reason = "external_writer_claim_required"
     elif (
         execution_class != "read_only"
         and _is_protected_packet(packet)
@@ -958,7 +963,9 @@ def _candidate_conflicts(left: dict[str, Any], right: dict[str, Any]) -> list[st
     )
     if same_repository and files_overlap:
         conflicts.append("files")
-    if left_mutates and right_mutates and same_repository:
+    left_mutates_repository = left.get("execution_class") in REPOSITORY_MUTATING_EXECUTION_CLASSES
+    right_mutates_repository = right.get("execution_class") in REPOSITORY_MUTATING_EXECUTION_CLASSES
+    if left_mutates_repository and right_mutates_repository and same_repository:
         complete_isolation_claims = all(
             claims.get(kind)
             for claims in (left_claims, right_claims)

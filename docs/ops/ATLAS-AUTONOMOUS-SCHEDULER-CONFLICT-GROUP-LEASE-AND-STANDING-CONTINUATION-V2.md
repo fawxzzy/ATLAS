@@ -71,6 +71,12 @@ The default scope for a `repo_worktree` job is derived from its repository. A
 conflict groups remain responsible for complete, non-overlapping file,
 worktree, port, browser, and external-writer claims.
 
+An `external_mutation` job does not claim repository files or worktrees. It
+must declare at least one exact `external_writers` resource, receives the same
+durable mutating lease as source writers, and conflicts on writer scope or an
+overlapping external writer. This lets PR lifecycle control continue beside a
+held root validation scope without weakening same-repository source isolation.
+
 ## Continuation behavior
 
 `ATLAS MAIN` consumes all newly READY packets, selects the largest deterministic
