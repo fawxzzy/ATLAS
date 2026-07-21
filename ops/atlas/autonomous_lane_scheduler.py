@@ -1396,31 +1396,71 @@ def build_report(
     safe_to_execute = False
 
     if validation_state["critical"] > 0 or validation_state["error"] > 0:
-        status = STATUS_VALIDATION_CLEANUP
-        decision = DECISION_VALIDATION_CLEANUP
-        routing_mode = DECISION_VALIDATION_CLEANUP
-        selected_marker = "ATLAS root"
-        selected_packet = "ATLAS root validation cleanup"
-        packet_phase = PHASE_SELECTOR
-        selected_packet_source = "validation"
-        stop_reason = "critical_or_error_validation"
-        safe_to_execute = True
-        selected_jobs = [
-            OrderedDict(
-                [
-                    ("marker", "ATLAS root"),
-                    ("lane", "ATLAS root"),
-                    ("packet_id", selected_packet),
-                    ("packet", selected_packet),
-                    ("phase", packet_phase),
-                    ("source", selected_packet_source),
-                    ("logical_role_id", "atlas.main"),
-                    ("repository", "fawxzzy/ATLAS"),
-                    ("writer_scope", "atlas.root"),
-                    ("execution_class", "canonical_workspace"),
-                ]
-            )
+        # Root validation owns atlas.root, but it must not globally suppress
+        # disjoint read-only observation and reconciliation packets.
+        read_only_candidates = [
+            candidate for candidate in sorted_candidates if candidate.get("execution_class") == "read_only"
         ]
+        selected_jobs, wave_blocked, deferred_candidates = _select_execution_wave(
+            program=program,
+            candidates=read_only_candidates,
+        )
+        blocked_candidates.extend(wave_blocked)
+        if selected_jobs:
+            blocked_candidates.append(
+                OrderedDict(
+                    [
+                        ("marker", "ATLAS root"),
+                        ("lane", "ATLAS root"),
+                        ("packet_id", "ATLAS root validation cleanup"),
+                        ("packet", "ATLAS root validation cleanup"),
+                        ("phase", PHASE_SELECTOR),
+                        ("score", 1_000_001),
+                        ("source", "validation"),
+                        ("proof_delta", "validation_cleanup"),
+                        ("blocked_reason", "root_validation_scope_held"),
+                        ("stale_reason", None),
+                        ("file_overlap_risk", "high"),
+                        ("requires_external_input", False),
+                        ("requires_reselection", False),
+                        ("safe", False),
+                        ("classification", "validation_cleanup"),
+                        ("logical_role_id", "atlas.main"),
+                        ("repository", "fawxzzy/ATLAS"),
+                        ("writer_scope", "atlas.root"),
+                        ("execution_class", "canonical_workspace"),
+                        ("dependencies", []),
+                        ("resource_claims", _resource_claims({"files": ["**"]})),
+                        ("cross_marker_signal_applied", False),
+                    ]
+                )
+            )
+        else:
+            status = STATUS_VALIDATION_CLEANUP
+            decision = DECISION_VALIDATION_CLEANUP
+            routing_mode = DECISION_VALIDATION_CLEANUP
+            selected_marker = "ATLAS root"
+            selected_packet = "ATLAS root validation cleanup"
+            packet_phase = PHASE_SELECTOR
+            selected_packet_source = "validation"
+            stop_reason = "critical_or_error_validation"
+            safe_to_execute = True
+            selected_jobs = [
+                OrderedDict(
+                    [
+                        ("marker", "ATLAS root"),
+                        ("lane", "ATLAS root"),
+                        ("packet_id", selected_packet),
+                        ("packet", selected_packet),
+                        ("phase", packet_phase),
+                        ("source", selected_packet_source),
+                        ("logical_role_id", "atlas.main"),
+                        ("repository", "fawxzzy/ATLAS"),
+                        ("writer_scope", "atlas.root"),
+                        ("execution_class", "canonical_workspace"),
+                    ]
+                )
+            ]
     else:
         selected_jobs, wave_blocked, deferred_candidates = _select_execution_wave(
             program=program,

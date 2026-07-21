@@ -187,6 +187,36 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(scheduler.DECISION_VALIDATION_CLEANUP, report["decision"])
         self.assertTrue(report["safe_to_execute"])
 
+    def test_root_validation_does_not_suppress_disjoint_read_only_packet(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "runtime-proof",
+            role_id="atlas.runtime",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.atlas-runtime.proof",
+        )
+        packet["execution_class"] = "read_only"
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(error=1),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(["runtime-proof"], [job["packet_id"] for job in report["selected_jobs"]])
+        self.assertEqual("read_only", report["selected_jobs"][0]["execution_class"])
+        self.assertTrue(
+            any(
+                candidate.get("blocked_reason") == "root_validation_scope_held"
+                for candidate in report["blocked_candidates"]
+            )
+        )
+
     def test_worker_reconciliation_selected_before_other_packets(self) -> None:
         report = scheduler.build_report(
             root=Path("atlas-root-fixture"),
