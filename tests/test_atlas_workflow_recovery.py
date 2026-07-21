@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import copy
 import datetime as dt
+import fnmatch
 import importlib.util
 import io
 import json
@@ -31,12 +32,28 @@ WORKFLOW_PR_PATHS = [
     ".github/workflows/atlas-workflow-recovery.yml",
     "AGENTS.md",
     "README-STACK.md",
+    "stack.yaml",
+    "docs/architecture/ADR-ATLAS-OPERATOR-NOTIFICATION-IDEMPOTENCY-V1.md",
+    "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+    "docs/architecture/ATLAS-EVENT-CONTRACT.md",
+    "docs/architecture/ORCHESTRATION-BOUNDARIES.md",
     "docs/architecture/ATLAS-WORKFLOW-RECOVERY.md",
+    "docs/atlas-book/03-operating-model.md",
+    "docs/atlas-book/07-contracts-and-seams.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/memory/initiatives/initiative-fawxzzy-platform-migration.json",
     "docs/memory/profiles/zachariah_workflow_profile.md",
     "docs/ops/ATLAS-WORKFLOW-RECOVERY-RUNBOOK.md",
     "docs/prompts/atlas-workflow/**",
+    "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json",
+    "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
     "docs/registry/ATLAS-WORKFLOW-*.json",
+    "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
+    "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
+    "docs/runbooks/ATLAS-OPERATOR-NOTIFICATION-IDEMPOTENCY.md",
+    "ops/atlas/operator_notification_idempotency.py",
     "ops/atlas/workflow_recovery.py",
+    "runtime/cortex/kernel.state-model.seed.v1.json",
     "schemas/atlas.continuity.handoff.v1.json",
     "schemas/atlas.workflow.*.json",
     "tests/fixtures/atlas-workflow-recovery/**",
@@ -113,6 +130,33 @@ def _load_github_workflow(text: str | None = None) -> dict[str, object]:
     if not isinstance(payload, dict):
         raise ValueError("workflow root must be an object")
     return payload
+
+
+def _repository_source_truth_refs(manifest: dict[str, object]) -> list[str]:
+    references: set[str] = set()
+    for group in ("roles", "components"):
+        for item in manifest[group]:
+            source_of_truth = item["source_of_truth"]
+            if isinstance(source_of_truth, list):
+                references.update(source_of_truth)
+            else:
+                references.add(source_of_truth)
+    return sorted(
+        reference
+        for reference in references
+        if not reference.startswith("local automation: ")
+        and not reference.startswith("repos/")
+    )
+
+
+def _uncovered_source_truth_refs(
+    patterns: list[str], references: list[str]
+) -> list[str]:
+    return sorted(
+        reference
+        for reference in references
+        if not any(fnmatch.fnmatchcase(reference, pattern) for pattern in patterns)
+    )
 
 
 class WorkflowRecoveryTests(unittest.TestCase):
@@ -290,6 +334,26 @@ class WorkflowRecoveryTests(unittest.TestCase):
     def test_github_workflow_parser_rejects_duplicate_keys(self) -> None:
         with self.assertRaisesRegex(ValueError, "duplicate workflow key: on"):
             _load_github_workflow('{"on": {}, "on": {}}')
+
+    def test_github_workflow_covers_transitive_manifest_source_truth(self) -> None:
+        workflow = _load_github_workflow()
+        patterns = workflow["on"]["pull_request"]["paths"]
+        references = _repository_source_truth_refs(self.manifest)
+        self.assertEqual(22, len(references))
+        self.assertEqual([], _uncovered_source_truth_refs(patterns, references))
+
+    def test_github_workflow_detects_source_truth_filter_deletion(self) -> None:
+        workflow = _load_github_workflow()
+        patterns = [
+            pattern
+            for pattern in workflow["on"]["pull_request"]["paths"]
+            if pattern != "stack.yaml"
+        ]
+        references = _repository_source_truth_refs(self.manifest)
+        self.assertEqual(
+            ["stack.yaml"],
+            _uncovered_source_truth_refs(patterns, references),
+        )
 
     def test_answered_manual_questions_are_retained_without_execution(self) -> None:
         registry = RECOVERY._load_json(ROOT / RECOVERY.DECISION_REGISTRY_REF)
