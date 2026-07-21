@@ -3,12 +3,16 @@ from __future__ import annotations
 """Select deterministic dependency-ready waves under conflict-group leases."""
 
 import argparse
+import hashlib
 import fnmatch
 import json
+import os
 import re
 import subprocess
 import sys
 from collections import OrderedDict
+from contextlib import contextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -54,6 +58,8 @@ READY_STATES = {"READY", "ADMITTED", "QUEUED"}
 MUTATING_EXECUTION_CLASSES = {"repo_worktree", "canonical_workspace"}
 EVENT_ID_PATTERN = re.compile(r"^onv1_[0-9a-f]{64}$")
 PAYLOAD_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+RESUMABLE_RUNTIME_STATES = {"idle", "notloaded"}
+TERMINAL_SUCCESS_STATES = {"ACCEPTED", "COMPLETE", "COMPLETED", "MERGED", "SUCCESS"}
 
 SAFE_CLASSIFICATIONS = {
     planner.CLASS_IMPLEMENTATION_READY,
@@ -196,6 +202,23 @@ def validate_output_path(root: Path, path: str, *, suffix: str) -> tuple[Path | 
     return (root / ref).resolve(), None
 
 
+def validate_input_path(
+    root: Path,
+    path: str,
+    *,
+    suffixes: tuple[str, ...],
+) -> tuple[Path | None, OrderedDict[str, Any] | None]:
+    ref, error = _normalize_ref(path, root)
+    if error is not None or ref is None:
+        return None, error
+    if not ref.endswith(suffixes):
+        return None, _finding("input_suffix_forbidden", "Input path has an unsupported suffix.", path=ref, suffixes=list(suffixes))
+    resolved = (root / ref).resolve()
+    if not resolved.exists():
+        return None, _finding("input_missing", "Input path does not exist.", path=ref)
+    return resolved, None
+
+
 def load_program(root: Path, program_path: str) -> tuple[dict[str, Any] | None, list[OrderedDict[str, Any]]]:
     resolved, error = validate_program_path(root, program_path)
     if error is not None or resolved is None:
@@ -216,7 +239,16 @@ def load_program(root: Path, program_path: str) -> tuple[dict[str, Any] | None, 
                 actual=payload.get("schema_version"),
             )
         )
-    for field in ("standing_packets", "active_leases", "completed_packets"):
+    for field in (
+        "standing_packets",
+        "active_leases",
+        "scope_holds",
+        "delivery_intents",
+        "completed_packets",
+        "completed_receipts",
+        "processed_events",
+        "released_leases",
+    ):
         if field in payload and not isinstance(payload[field], list):
             errors.append(_finding("program_invalid_shape", f"{field} must be an array.", field=field))
     for field in ("max_parallel_writers", "max_parallel_read_only"):
@@ -227,6 +259,356 @@ def load_program(root: Path, program_path: str) -> tuple[dict[str, Any] | None, 
             if not isinstance(lease, dict) or not isinstance(lease.get("writer_scope"), str) or not lease["writer_scope"]:
                 errors.append(_finding("program_invalid_active_lease", "Every active lease entry must name writer_scope."))
     return payload, errors
+
+
+def _canonical_payload_digest(payload: Any) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def _load_json_object(path: Path, *, label: str) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"{label} must be a JSON object")
+    return payload
+
+
+def _load_envelopes(path: Path) -> list[dict[str, Any]]:
+    if path.suffix.lower() == ".jsonl":
+        envelopes: list[dict[str, Any]] = []
+        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            if not line.strip():
+                continue
+            value = json.loads(line)
+            if not isinstance(value, dict):
+                raise ValueError(f"envelope line {line_number} must be a JSON object")
+            envelopes.append(value)
+        return envelopes
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(payload, list):
+        return [item for item in payload if isinstance(item, dict)]
+    if isinstance(payload, dict) and isinstance(payload.get("envelopes"), list):
+        return [item for item in payload["envelopes"] if isinstance(item, dict)]
+    if isinstance(payload, dict):
+        return [payload]
+    raise ValueError("envelope input must be a JSON object, array, or JSONL stream")
+
+
+def apply_delivery_results(
+    *,
+    program: dict[str, Any],
+    results: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[OrderedDict[str, Any]]]:
+    """Settle app-native delivery using exact prepared-intent correlations."""
+
+    findings: list[OrderedDict[str, Any]] = []
+    intents = [item for item in program.get("delivery_intents", []) if isinstance(item, dict)]
+    intent_index = {str(item.get("reservation_id")): item for item in intents if item.get("reservation_id")}
+    leases = [item for item in program.get("active_leases", []) if isinstance(item, dict)]
+    for result in results:
+        reservation_id = str(result.get("reservation_id") or "")
+        intent = intent_index.get(reservation_id)
+        if intent is None:
+            findings.append(_finding("delivery_intent_not_found", "Delivery result has no prepared intent.", reservation_id=reservation_id or None))
+            continue
+        exact_fields = ("packet_id", "runtime_thread_id", "event_id", "payload_digest")
+        if any(str(result.get(field) or "") != str(intent.get(field) or "") for field in exact_fields):
+            findings.append(_finding("delivery_result_correlation_mismatch", "Delivery result does not match its prepared intent.", reservation_id=reservation_id))
+            continue
+        status = str(result.get("status") or "").upper()
+        if status == "DELIVERED":
+            turn_id = result.get("turn_id")
+            if not isinstance(turn_id, str) or not turn_id:
+                findings.append(_finding("delivery_turn_id_required", "Delivered result must include the returned turn_id.", reservation_id=reservation_id))
+                continue
+            prior_turn = intent.get("turn_id")
+            if prior_turn not in {None, turn_id}:
+                findings.append(_finding("delivery_turn_id_collision", "One reservation resolved to multiple turn IDs.", reservation_id=reservation_id))
+                continue
+            intent["status"] = "delivered"
+            intent["turn_id"] = turn_id
+        elif status == "RECOVERY_REQUIRED":
+            intent["status"] = "recovery-required"
+            for lease in leases:
+                if lease.get("reservation_id") == reservation_id:
+                    lease["status"] = "recovery-required"
+        else:
+            findings.append(_finding("delivery_result_status_invalid", "Delivery result status must be DELIVERED or RECOVERY_REQUIRED.", reservation_id=reservation_id))
+    program["delivery_intents"] = intents
+    program["active_leases"] = leases
+    return program, findings
+
+
+def _binding_index(bindings_payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    bindings = bindings_payload.get("bindings", [])
+    if not isinstance(bindings, list):
+        return {}
+    return {
+        str(item["role_id"]): item
+        for item in bindings
+        if isinstance(item, dict) and isinstance(item.get("role_id"), str) and item["role_id"]
+    }
+
+
+def _terminal_success(payload: dict[str, Any]) -> bool:
+    if payload.get("terminal") is not True:
+        return False
+    state = str(payload.get("canonical_lifecycle_state") or payload.get("state") or payload.get("status") or "").upper()
+    tokens = set(state.split("_"))
+    denied = {"BLOCKED", "FAILED", "LATENCY", "PENDING", "UNKNOWN"}
+    return not tokens.intersection(denied) and bool(tokens.intersection(TERMINAL_SUCCESS_STATES | {"PASS"}))
+
+
+def reconcile_runtime_program(
+    *,
+    program: dict[str, Any],
+    bindings_payload: dict[str, Any],
+    envelopes: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[OrderedDict[str, Any]]]:
+    """Build scheduler v2 state from immutable envelopes and standing bindings."""
+
+    reconciled = json.loads(json.dumps(program))
+    reconciled["schema_version"] = PROGRAM_SCHEMA_VERSION
+    reconciled.pop("forbidden_owner_lanes", None)
+    findings: list[OrderedDict[str, Any]] = []
+    bindings = _binding_index(bindings_payload)
+    standing = [item for item in reconciled.get("standing_packets", []) if isinstance(item, dict)]
+    active_leases = [item for item in reconciled.get("active_leases", []) if isinstance(item, dict)]
+    delivery_intents = [item for item in reconciled.get("delivery_intents", []) if isinstance(item, dict)]
+    completed = set(_string_list(reconciled.get("completed_packets", [])))
+    completed_receipts = [item for item in reconciled.get("completed_receipts", []) if isinstance(item, dict)]
+    released = [item for item in reconciled.get("released_leases", []) if isinstance(item, dict)]
+    processed_items = [item for item in reconciled.get("processed_events", []) if isinstance(item, dict)]
+    processed = {
+        str(item.get("event_id")): str(item.get("payload_digest"))
+        for item in processed_items
+        if isinstance(item.get("event_id"), str) and isinstance(item.get("payload_digest"), str)
+    }
+    packets = {str(item.get("packet_id")): item for item in standing if item.get("packet_id")}
+
+    for envelope in envelopes:
+        event_id = envelope.get("event_id")
+        payload_digest = envelope.get("payload_digest")
+        payload = envelope.get("payload")
+        if (
+            not isinstance(event_id, str)
+            or not EVENT_ID_PATTERN.fullmatch(event_id)
+            or not isinstance(payload_digest, str)
+            or not PAYLOAD_DIGEST_PATTERN.fullmatch(payload_digest)
+            or not isinstance(payload, dict)
+        ):
+            findings.append(_finding("noncanonical_envelope", "Envelope identity or payload is not canonical."))
+            continue
+        expected_digest = _canonical_payload_digest(payload)
+        expected_event_id = "onv1_" + expected_digest.removeprefix("sha256:")
+        if payload_digest != expected_digest or event_id != expected_event_id:
+            findings.append(
+                _finding(
+                    "envelope_digest_mismatch",
+                    "Envelope event_id and payload_digest must match canonical payload bytes.",
+                    event_id=event_id,
+                )
+            )
+            continue
+        prior_digest = processed.get(event_id)
+        if prior_digest is not None:
+            if prior_digest != payload_digest:
+                findings.append(_finding("event_identity_collision", "One event_id carried more than one digest.", event_id=event_id))
+            continue
+        processed[event_id] = payload_digest
+        processed_items.append(OrderedDict([("event_id", event_id), ("payload_digest", payload_digest)]))
+
+        packet_id = str(payload.get("packet_id") or "")
+        writer_scope = str(payload.get("writer_scope") or "")
+        if _terminal_success(payload):
+            packet = packets.get(packet_id)
+            matching = [
+                lease
+                for lease in active_leases
+                if str(lease.get("packet_id") or "") == packet_id
+                and str(lease.get("writer_scope") or "") == writer_scope
+                and str(lease.get("status") or "").lower() in {"active", "recovery-required"}
+            ]
+            reservation_id = str(payload.get("reservation_id") or "")
+            turn_id = str(payload.get("turn_id") or "")
+            matching_intents = [
+                intent
+                for intent in delivery_intents
+                if str(intent.get("reservation_id") or "") == reservation_id
+                and str(intent.get("packet_id") or "") == packet_id
+                and str(intent.get("writer_scope") or "") == writer_scope
+                and str(intent.get("turn_id") or "") == turn_id
+                and str(intent.get("status") or "").lower() == "delivered"
+            ]
+            read_only_match = bool(
+                packet
+                and str(packet.get("writer_scope") or "") == writer_scope
+                and str(packet.get("execution_class") or "") == "read_only"
+                and str(packet.get("state") or "").upper() == "ACTIVE"
+                and isinstance(packet.get("dispatch_reservation"), dict)
+            )
+            if (
+                not packet_id
+                or not writer_scope
+                or not reservation_id
+                or not turn_id
+                or len(matching_intents) != 1
+                or (len(matching) != 1 and not read_only_match)
+            ):
+                processed.pop(event_id, None)
+                processed_items = [item for item in processed_items if item.get("event_id") != event_id]
+                findings.append(
+                    _finding(
+                        "terminal_lease_correlation_required",
+                        "Terminal receipt must correlate exactly one active packet and writer-scope lease.",
+                        event_id=event_id,
+                        packet_id=packet_id or None,
+                        writer_scope=writer_scope or None,
+                    )
+                )
+                continue
+            if matching:
+                lease = matching[0]
+                active_leases.remove(lease)
+                released.append(
+                    OrderedDict(
+                        [
+                            ("reservation_id", lease.get("reservation_id")),
+                            ("packet_id", packet_id),
+                            ("writer_scope", writer_scope),
+                            ("status", "released"),
+                            ("receipt_event_id", event_id),
+                        ]
+                    )
+                )
+            completed.add(packet_id)
+            completed_receipts.append(
+                OrderedDict(
+                    [
+                        ("packet_id", packet_id),
+                        ("writer_scope", writer_scope),
+                        ("reservation_id", reservation_id),
+                        ("turn_id", turn_id),
+                        ("receipt_event_id", event_id),
+                        ("receipt_payload_digest", payload_digest),
+                    ]
+                )
+            )
+            packets.pop(packet_id, None)
+            delivery_intents.remove(matching_intents[0])
+            continue
+
+        state = str(payload.get("canonical_lifecycle_state") or payload.get("state") or "").upper()
+        if state not in READY_STATES:
+            continue
+        role_id = str(payload.get("logical_role_id") or "")
+        repository = str(payload.get("repository") or "")
+        execution_class = str(payload.get("execution_class") or "")
+        if not packet_id or not role_id or not repository or not writer_scope or execution_class not in EXECUTION_CLASSES:
+            findings.append(
+                _finding(
+                    "ready_packet_scope_required",
+                    "READY authority must name packet, role, repository, writer scope, and execution class.",
+                    event_id=event_id,
+                )
+            )
+            continue
+        binding = bindings.get(role_id)
+        runtime_thread_id = binding.get("current_runtime_id") if binding else None
+        runtime_status = str(binding.get("runtime_status") or "missing") if binding else "missing"
+        archived = binding.get("archived") if binding else None
+        if archived is True:
+            runtime_status = "archived"
+        if not isinstance(runtime_thread_id, str) or not runtime_thread_id or archived is True:
+            findings.append(
+                _finding(
+                    "standing_binding_unavailable",
+                    "READY packet has no usable unarchived standing runtime binding.",
+                    event_id=event_id,
+                    logical_role_id=role_id,
+                )
+            )
+        candidate = OrderedDict(
+            [
+                ("packet_id", packet_id),
+                ("packet", str(payload.get("objective") or payload.get("packet") or packet_id)),
+                ("state", state),
+                ("logical_role_id", role_id),
+                ("repository", repository),
+                ("writer_scope", writer_scope),
+                ("execution_class", execution_class),
+                ("dependencies", _string_list(payload.get("dependencies", []))),
+                ("resource_claims", _resource_claims(payload.get("resource_claims"))),
+                ("runtime_thread_id", runtime_thread_id),
+                ("runtime_status", runtime_status),
+                ("authority", OrderedDict([("event_id", event_id), ("payload_digest", payload_digest)])),
+                ("idempotency_key", envelope.get("idempotency_key")),
+            ]
+        )
+        prior = packets.get(packet_id)
+        if prior is not None and prior.get("authority") != candidate.get("authority"):
+            findings.append(_finding("packet_identity_collision", "One packet_id carried multiple immutable authorities.", packet_id=packet_id))
+            continue
+        packets[packet_id] = candidate
+
+    for packet in packets.values():
+        binding = bindings.get(str(packet.get("logical_role_id") or ""))
+        if binding:
+            packet["runtime_thread_id"] = binding.get("current_runtime_id")
+            packet["runtime_status"] = "archived" if binding.get("archived") is True else str(binding.get("runtime_status") or "missing")
+
+    preserved_holds = [
+        item
+        for item in reconciled.get("scope_holds", [])
+        if isinstance(item, dict) and item.get("derived_from_runtime_status") is not True
+    ]
+    leased_scopes = {
+        str(lease.get("writer_scope"))
+        for lease in active_leases
+        if str(lease.get("status") or "").lower() in {"active", "recovery-required"}
+    }
+    derived_holds = [
+        OrderedDict(
+            [
+                ("writer_scope", packet.get("writer_scope")),
+                ("logical_role_id", packet.get("logical_role_id")),
+                ("runtime_thread_id", packet.get("runtime_thread_id")),
+                ("status", "active-without-correlated-lease"),
+                ("derived_from_runtime_status", True),
+            ]
+        )
+        for packet in packets.values()
+        if str(packet.get("runtime_status") or "").lower() == "active"
+        and str(packet.get("writer_scope") or "") not in leased_scopes
+    ]
+
+    reconciled["standing_packets"] = [packets[key] for key in sorted(packets) if key not in completed]
+    reconciled["active_leases"] = active_leases
+    reconciled["scope_holds"] = preserved_holds + derived_holds
+    reconciled["delivery_intents"] = delivery_intents
+    reconciled["released_leases"] = released
+    reconciled["completed_packets"] = sorted(completed)
+    reconciled["completed_receipts"] = completed_receipts
+    reconciled["processed_events"] = processed_items
+    reconciled["bridge_findings"] = findings
+    reconciled["source_snapshot_digest"] = _canonical_payload_digest(
+        {
+            "bindings": [
+                {
+                    "role_id": role_id,
+                    "runtime_thread_id": binding.get("current_runtime_id"),
+                    "runtime_status": binding.get("runtime_status"),
+                    "archived": binding.get("archived"),
+                }
+                for role_id, binding in sorted(bindings.items())
+            ],
+            "events": [
+                {"event_id": item.get("event_id"), "payload_digest": item.get("payload_digest")}
+                for item in processed_items
+            ],
+        }
+    )
+    return reconciled, findings
 
 
 def _load_selector(root: Path) -> dict[str, Any]:
@@ -242,6 +624,8 @@ def _load_selector(root: Path) -> dict[str, Any]:
 
 
 def _scope_lock(program: dict[str, Any]) -> OrderedDict[str, Any]:
+    max_writers_value = program.get("max_parallel_writers", 4)
+    max_read_only_value = program.get("max_parallel_read_only", 2)
     return OrderedDict(
         [
             ("scope", "conflict-group-bounded"),
@@ -249,8 +633,8 @@ def _scope_lock(program: dict[str, Any]) -> OrderedDict[str, Any]:
             ("excluded_markers", list(program.get("excluded_markers", []))),
             ("forbidden_writer_scopes", list(program.get("forbidden_writer_scopes", []))),
             ("forbidden_owner_lanes", list(program.get("forbidden_owner_lanes", []))),
-            ("max_parallel_writers", int(program.get("max_parallel_writers", 4) or 4)),
-            ("max_parallel_read_only", int(program.get("max_parallel_read_only", 2) or 2)),
+            ("max_parallel_writers", int(4 if max_writers_value is None else max_writers_value)),
+            ("max_parallel_read_only", int(2 if max_read_only_value is None else max_read_only_value)),
             ("one_writer_per_conflict_group", True),
             ("continue_after_terminal_receipt", True),
         ]
@@ -445,6 +829,8 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any]) -> Or
         item=raw,
         default_root=False,
     )
+    runtime_status = str(raw.get("runtime_status") or "missing").lower()
+    runtime_thread_id = raw.get("runtime_thread_id")
     blocked_reason = None
     if not packet_id or not packet:
         blocked_reason = "standing_packet_identity_required"
@@ -454,6 +840,10 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any]) -> Or
         blocked_reason = "invalid_execution_class"
     elif not repository or not logical_role_id or not writer_scope:
         blocked_reason = "standing_packet_scope_required"
+    elif not isinstance(runtime_thread_id, str) or not runtime_thread_id:
+        blocked_reason = "standing_binding_required"
+    elif runtime_status not in RESUMABLE_RUNTIME_STATES:
+        blocked_reason = "standing_role_active" if runtime_status == "active" else "standing_binding_not_resumable"
     elif writer_scope in set(program.get("forbidden_writer_scopes", [])):
         blocked_reason = "writer_scope_forbidden"
     elif not _authority_is_canonical(raw.get("authority")):
@@ -479,6 +869,8 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any]) -> Or
             ("safe", blocked_reason is None),
             ("classification", str(raw.get("classification") or planner.CLASS_IMPLEMENTATION_READY)),
             ("logical_role_id", logical_role_id),
+            ("runtime_thread_id", runtime_thread_id),
+            ("runtime_status", runtime_status),
             ("repository", repository),
             ("writer_scope", writer_scope),
             ("execution_class", execution_class),
@@ -566,14 +958,22 @@ def _active_writer_scopes(program: dict[str, Any]) -> set[str]:
     leases = program.get("active_leases", [])
     if not isinstance(leases, list):
         return set()
-    return {
+    leased = {
         str(lease.get("writer_scope"))
         for lease in leases
         if isinstance(lease, dict)
-        and str(lease.get("status") or "").lower() == "active"
+        and str(lease.get("status") or "").lower() in {"active", "recovery-required"}
         and isinstance(lease.get("writer_scope"), str)
         and lease["writer_scope"]
     }
+    holds = program.get("scope_holds", [])
+    if isinstance(holds, list):
+        leased.update(
+            str(hold.get("writer_scope"))
+            for hold in holds
+            if isinstance(hold, dict) and isinstance(hold.get("writer_scope"), str) and hold["writer_scope"]
+        )
+    return leased
 
 
 def _select_execution_wave(
@@ -588,7 +988,8 @@ def _select_execution_wave(
     completed = set(_string_list(program.get("completed_packets", [])))
     max_writers_value = program.get("max_parallel_writers", 4)
     max_writers = max(0, int(4 if max_writers_value is None else max_writers_value))
-    max_read_only = max(0, int(program.get("max_parallel_read_only", 2) or 2))
+    max_read_only_value = program.get("max_parallel_read_only", 2)
+    max_read_only = max(0, int(2 if max_read_only_value is None else max_read_only_value))
     writer_count = 0
     read_only_count = 0
     for candidate in candidates:
@@ -749,6 +1150,143 @@ def render_prompt(report: dict[str, Any]) -> str:
         ]
     )
     return "\n".join(lines) + "\n"
+
+
+class ProgramLockBusy(RuntimeError):
+    pass
+
+
+@contextmanager
+def _exclusive_program_lock(program_path: Path):
+    lock_path = program_path.with_suffix(program_path.suffix + ".lock")
+    try:
+        descriptor = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError as exc:
+        raise ProgramLockBusy(f"scheduler program is already reserved: {normalize_slashes(str(lock_path))}") from exc
+    try:
+        os.write(descriptor, str(os.getpid()).encode("ascii"))
+        os.close(descriptor)
+        yield
+    finally:
+        try:
+            os.close(descriptor)
+        except OSError:
+            pass
+        lock_path.unlink(missing_ok=True)
+
+
+def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        with temporary.open("w", encoding="utf-8", newline="\n") as handle:
+            json.dump(payload, handle, indent=2)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def reserve_selected_jobs(
+    *,
+    program: dict[str, Any],
+    report: dict[str, Any],
+) -> tuple[dict[str, Any], list[OrderedDict[str, Any]]]:
+    """Transition selected standing packets to ACTIVE and acquire writer leases."""
+
+    selected = [item for item in report.get("selected_jobs", []) if isinstance(item, dict) and item.get("source") == "standing_task"]
+    if not selected:
+        return program, []
+    standing = [item for item in program.get("standing_packets", []) if isinstance(item, dict)]
+    packet_index = {str(item.get("packet_id")): item for item in standing if item.get("packet_id")}
+    active_leases = [item for item in program.get("active_leases", []) if isinstance(item, dict)]
+    delivery_intents = [item for item in program.get("delivery_intents", []) if isinstance(item, dict)]
+    reservations: list[OrderedDict[str, Any]] = []
+    reserved_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    for job in selected:
+        packet_id = str(job.get("packet_id") or "")
+        packet = packet_index.get(packet_id)
+        if packet is None or str(packet.get("state") or "").upper() not in READY_STATES:
+            raise RuntimeError(f"selected packet is no longer READY: {packet_id}")
+        writer_scope = str(job.get("writer_scope") or "")
+        if any(
+            str(lease.get("writer_scope") or "") == writer_scope
+            and str(lease.get("status") or "").lower() in {"active", "recovery-required"}
+            for lease in active_leases
+        ):
+            raise RuntimeError(f"writer scope became leased before reservation: {writer_scope}")
+        authority = packet.get("authority") if isinstance(packet.get("authority"), dict) else {}
+        reservation_seed = "|".join(
+            [
+                packet_id,
+                writer_scope,
+                str(packet.get("runtime_thread_id") or ""),
+                str(authority.get("event_id") or ""),
+            ]
+        )
+        reservation_id = "rsrv_" + hashlib.sha256(reservation_seed.encode("utf-8")).hexdigest()
+        packet["state"] = "ACTIVE"
+        packet["dispatch_reservation"] = OrderedDict(
+            [
+                ("reservation_id", reservation_id),
+                ("reserved_at", reserved_at),
+                ("runtime_thread_id", packet.get("runtime_thread_id")),
+            ]
+        )
+        reservation = OrderedDict(
+            [
+                ("reservation_id", reservation_id),
+                ("packet_id", packet_id),
+                ("logical_role_id", job.get("logical_role_id")),
+                ("runtime_thread_id", packet.get("runtime_thread_id")),
+                ("writer_scope", writer_scope),
+                ("execution_class", job.get("execution_class")),
+                ("reserved_at", reserved_at),
+            ]
+        )
+        delivery_intents.append(
+            OrderedDict(
+                [
+                    ("reservation_id", reservation_id),
+                    ("packet_id", packet_id),
+                    ("logical_role_id", job.get("logical_role_id")),
+                    ("runtime_thread_id", packet.get("runtime_thread_id")),
+                    ("writer_scope", writer_scope),
+                    ("event_id", authority.get("event_id")),
+                    ("payload_digest", authority.get("payload_digest")),
+                    ("status", "prepared"),
+                    ("prepared_at", reserved_at),
+                    ("turn_id", None),
+                ]
+            )
+        )
+        if job.get("execution_class") in MUTATING_EXECUTION_CLASSES:
+            active_leases.append(
+                OrderedDict(
+                    [
+                        ("reservation_id", reservation_id),
+                        ("packet_id", packet_id),
+                        ("logical_role_id", job.get("logical_role_id")),
+                        ("runtime_thread_id", packet.get("runtime_thread_id")),
+                        ("writer_scope", writer_scope),
+                        ("status", "active"),
+                        ("acquired_at", reserved_at),
+                        ("authority_event_id", authority.get("event_id")),
+                    ]
+                )
+            )
+        job["reservation_id"] = reservation_id
+        job["runtime_thread_id"] = packet.get("runtime_thread_id")
+        reservations.append(reservation)
+
+    program["standing_packets"] = standing
+    program["active_leases"] = active_leases
+    program["delivery_intents"] = delivery_intents
+    report["dispatch_reservations"] = reservations
+    report["program_persisted_before_dispatch"] = True
+    return program, reservations
 
 
 def build_report(
@@ -957,7 +1495,7 @@ def build_report(
             ("prompt_output", prompt_output_path),
             (
                 "next_recommended_command",
-                "python ops/atlas/autonomous_lane_scheduler.py --json --program tmp/atlas/autonomous-work-program.json --max-candidates 30 --output tmp/atlas/autonomous-lane-scheduler.latest.json --prompt-output tmp/atlas/codex-autocomplete-prompt.latest.md",
+                "python ops/atlas/autonomous_lane_scheduler.py --json --program tmp/atlas/autonomous-work-program.json --bindings tmp/atlas/standing-role-bindings.latest.json --envelopes tmp/atlas/autonomous-inbox-events.jsonl --max-candidates 30 --output tmp/atlas/autonomous-lane-scheduler.latest.json --prompt-output tmp/atlas/codex-autocomplete-prompt.latest.md",
             ),
         ]
     )
@@ -968,6 +1506,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Select one deterministic conflict-safe ATLAS execution wave.")
     parser.add_argument("--json", action="store_true", help="Emit JSON output.")
     parser.add_argument("--program", required=True, help="Root-relative operator work-program JSON path.")
+    parser.add_argument("--bindings", help="Root-relative standing-role binding snapshot JSON path.")
+    parser.add_argument("--envelopes", help="Root-relative canonical Inbox envelope JSON or JSONL path.")
+    parser.add_argument("--delivery-results", help="Root-relative app-native delivery result JSON or JSONL path.")
     parser.add_argument("--output", required=True, help="Root-relative tmp/atlas/**.json output path.")
     parser.add_argument("--prompt-output", required=True, help="Root-relative tmp/atlas/**.md prompt output path.")
     parser.add_argument("--max-candidates", type=int, default=30, help="Maximum planner candidates to consider.")
@@ -990,97 +1531,147 @@ def report_exit_code(*, status: str, strict: bool) -> int:
     return 3
 
 
+def _blocked_report(*, args: argparse.Namespace, blockers: list[OrderedDict[str, Any]], stop_reason: str) -> OrderedDict[str, Any]:
+    return OrderedDict(
+        [
+            ("schema_version", SCHEMA_VERSION),
+            ("status", STATUS_BLOCKED),
+            ("decision", DECISION_HOLD),
+            ("routing_mode", DECISION_HOLD),
+            ("selected_marker", None),
+            ("selected_lane", None),
+            ("selected_packet", None),
+            ("packet_phase", PHASE_HOLD),
+            ("selected_packet_source", None),
+            ("requires_reselection_receipt", False),
+            ("reselection_receipt", None),
+            ("candidate_count", 0),
+            ("candidates", []),
+            ("selected_jobs", []),
+            ("execution_waves", []),
+            ("deferred_candidates", []),
+            ("skipped_candidates", []),
+            ("blocked_candidates", blockers),
+            ("validation_state", OrderedDict()),
+            ("git_state", OrderedDict()),
+            ("scope_lock", OrderedDict()),
+            ("authority_denials", AUTHORITY_DENIALS),
+            ("safe_to_execute", False),
+            ("stop_reason", stop_reason),
+            ("prompt_output", args.prompt_output),
+            ("next_recommended_command", None),
+        ]
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     root = atlas_root()
     try:
-        program, program_errors = load_program(root, args.program)
+        program_path, program_path_error = validate_program_path(root, args.program)
         output_path, output_error = validate_output_path(root, args.output, suffix=".json")
         prompt_output_path, prompt_output_error = validate_output_path(root, args.prompt_output, suffix=".md")
-        if program is None or program_errors or output_error is not None or prompt_output_error is not None or output_path is None or prompt_output_path is None:
-            blockers = [error for error in [output_error, prompt_output_error] if error is not None]
-            blockers.extend(program_errors)
-            payload = OrderedDict(
-                [
-                    ("schema_version", SCHEMA_VERSION),
-                    ("status", STATUS_BLOCKED),
-                    ("decision", DECISION_HOLD),
-                    ("routing_mode", DECISION_HOLD),
-                    ("selected_marker", None),
-                    ("selected_lane", None),
-                    ("selected_packet", None),
-                    ("packet_phase", PHASE_HOLD),
-                    ("selected_packet_source", None),
-                    ("requires_reselection_receipt", False),
-                    ("reselection_receipt", None),
-                    ("candidate_count", 0),
-                    ("candidates", []),
-                    ("selected_jobs", []),
-                    ("execution_waves", []),
-                    ("deferred_candidates", []),
-                    ("skipped_candidates", []),
-                    ("blocked_candidates", blockers),
-                    ("validation_state", OrderedDict()),
-                    ("git_state", OrderedDict()),
-                    ("scope_lock", OrderedDict()),
-                    ("authority_denials", AUTHORITY_DENIALS),
-                    ("safe_to_execute", False),
-                    ("stop_reason", "invalid_scheduler_inputs"),
-                    ("prompt_output", args.prompt_output),
-                    ("next_recommended_command", None),
-                ]
+        bindings_path = None
+        envelopes_path = None
+        delivery_results_path = None
+        bindings_error = None
+        envelopes_error = None
+        delivery_results_error = None
+        if bool(args.bindings) != bool(args.envelopes):
+            bindings_error = _finding("bridge_inputs_incomplete", "--bindings and --envelopes must be supplied together.")
+        elif args.bindings and args.envelopes:
+            bindings_path, bindings_error = validate_input_path(root, args.bindings, suffixes=(".json",))
+            envelopes_path, envelopes_error = validate_input_path(root, args.envelopes, suffixes=(".json", ".jsonl"))
+        if args.delivery_results:
+            delivery_results_path, delivery_results_error = validate_input_path(
+                root,
+                args.delivery_results,
+                suffixes=(".json", ".jsonl"),
             )
+        blockers = [
+            error
+            for error in [program_path_error, output_error, prompt_output_error, bindings_error, envelopes_error, delivery_results_error]
+            if error is not None
+        ]
+        if blockers or program_path is None or output_path is None or prompt_output_path is None:
+            payload = _blocked_report(args=args, blockers=blockers, stop_reason="invalid_scheduler_inputs")
             print(json.dumps(payload, indent=2))
             return 2
 
-        if args.allow_reselection:
-            program["allow_reselection"] = True
+        with _exclusive_program_lock(program_path):
+            program, program_errors = load_program(root, args.program)
+            if program is None or program_errors:
+                payload = _blocked_report(args=args, blockers=program_errors, stop_reason="invalid_scheduler_inputs")
+                print(json.dumps(payload, indent=2))
+                return 2
+            loaded_program_digest = _canonical_payload_digest(program)
+            loaded_revision = int(program.get("revision", 0) or 0)
+            bridge_findings: list[OrderedDict[str, Any]] = []
+            if delivery_results_path is not None:
+                program, delivery_findings = apply_delivery_results(
+                    program=program,
+                    results=_load_envelopes(delivery_results_path),
+                )
+                bridge_findings.extend(delivery_findings)
+            if bindings_path is not None and envelopes_path is not None:
+                bindings_payload = _load_json_object(bindings_path, label="bindings")
+                envelopes = _load_envelopes(envelopes_path)
+                program, bridge_findings = reconcile_runtime_program(
+                    program=program,
+                    bindings_payload=bindings_payload,
+                    envelopes=envelopes,
+                )
+            if args.allow_reselection:
+                program["allow_reselection"] = True
 
-        report = build_report(
-            root=root,
-            program=program,
-            max_candidates=args.max_candidates,
-            prompt_output_path=normalize_slashes(args.prompt_output),
-            current_marker=args.current_marker,
-        )
-        prompt_text = render_prompt(report)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        prompt_output_path.parent.mkdir(parents=True, exist_ok=True)
-        prompt_output_path.write_text(prompt_text, encoding="utf-8")
-        print(json.dumps(report, indent=2))
-        return report_exit_code(status=str(report.get("status") or STATUS_INTERNAL_ERROR), strict=args.strict)
-    except Exception as exc:  # pragma: no cover - defensive guard
-        payload = OrderedDict(
-            [
-                ("schema_version", SCHEMA_VERSION),
-                ("status", STATUS_INTERNAL_ERROR),
-                ("decision", DECISION_HOLD),
-                ("routing_mode", DECISION_HOLD),
-                ("selected_marker", None),
-                ("selected_lane", None),
-                ("selected_packet", None),
-                ("packet_phase", PHASE_HOLD),
-                ("selected_packet_source", None),
-                ("requires_reselection_receipt", False),
-                ("reselection_receipt", None),
-                ("candidate_count", 0),
-                ("candidates", []),
-                ("selected_jobs", []),
-                ("execution_waves", []),
-                ("deferred_candidates", []),
-                ("skipped_candidates", []),
-                ("blocked_candidates", [_finding("internal_error", "Unhandled scheduler exception.", error=str(exc))]),
-                ("validation_state", OrderedDict()),
-                ("git_state", OrderedDict()),
-                ("scope_lock", OrderedDict()),
-                ("authority_denials", AUTHORITY_DENIALS),
-                ("safe_to_execute", False),
-                ("stop_reason", "internal_error"),
-                ("prompt_output", args.prompt_output if "args" in locals() else None),
-                ("next_recommended_command", None),
+            report = build_report(
+                root=root,
+                program=program,
+                max_candidates=args.max_candidates,
+                prompt_output_path=normalize_slashes(args.prompt_output),
+                current_marker=args.current_marker,
+            )
+            program, _ = reserve_selected_jobs(program=program, report=report)
+            report["bridge_findings"] = bridge_findings
+            report["dispatch_plan"] = [
+                OrderedDict(
+                    [
+                        ("packet_id", job.get("packet_id")),
+                        ("logical_role_id", job.get("logical_role_id")),
+                        ("runtime_thread_id", job.get("runtime_thread_id")),
+                        ("reservation_id", job.get("reservation_id")),
+                    ]
+                )
+                for job in report.get("selected_jobs", [])
+                if isinstance(job, dict) and job.get("source") == "standing_task"
             ]
+            program_changed = _canonical_payload_digest(program) != loaded_program_digest
+            if program_changed:
+                program["revision"] = loaded_revision + 1
+                _atomic_write_json(program_path, program)
+            report["program_revision"] = program.get("revision", loaded_revision)
+            prompt_text = render_prompt(report)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+            prompt_output_path.parent.mkdir(parents=True, exist_ok=True)
+            prompt_output_path.write_text(prompt_text, encoding="utf-8")
+            print(json.dumps(report, indent=2))
+            return report_exit_code(status=str(report.get("status") or STATUS_INTERNAL_ERROR), strict=args.strict)
+    except ProgramLockBusy as exc:
+        payload = _blocked_report(
+            args=args,
+            blockers=[_finding("program_lock_busy", "Another scheduler invocation owns the atomic reservation lock.", error=str(exc))],
+            stop_reason="program_lock_busy",
         )
+        print(json.dumps(payload, indent=2))
+        return 2
+    except Exception as exc:  # pragma: no cover - defensive guard
+        payload = _blocked_report(
+            args=args,
+            blockers=[_finding("internal_error", "Unhandled scheduler exception.", error=str(exc))],
+            stop_reason="internal_error",
+        )
+        payload["status"] = STATUS_INTERNAL_ERROR
         print(json.dumps(payload, indent=2))
         return 3
 

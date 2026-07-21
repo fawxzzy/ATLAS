@@ -55,6 +55,7 @@ WORKFLOW_PR_PATHS = [
     "ops/atlas/workflow_recovery.py",
     "runtime/cortex/kernel.state-model.seed.v1.json",
     "schemas/atlas.continuity.handoff.v1.json",
+    "schemas/atlas.autonomous-work-program.v2.json",
     "schemas/atlas.workflow.*.json",
     "tests/fixtures/atlas-workflow-recovery/**",
     "tests/test_atlas_workflow_recovery.py",

@@ -79,9 +79,15 @@ Observation can replace activity provenance only for a runtime already returned 
 
 Every material wake consumes all canonically authorized `READY` standing packets in dependency order and dispatches the largest conflict-free wave. A standing role in `IDLE` or `notLoaded` state is resumed through its stable logical role binding; it does not need a dedicated heartbeat automation. An `ACTIVE` role is never steered or duplicated.
 
+Before dispatch, snapshot changed canonical Inbox envelopes to `tmp/atlas/autonomous-inbox-events.jsonl` and current app-native role bindings to `tmp/atlas/standing-role-bindings.latest.json`. Run the autonomous scheduler with both inputs. Send only jobs in its persisted `dispatch_plan`; the scheduler has already transitioned them to `ACTIVE` and atomically acquired their exact mutating writer-scope leases. Never hand-build a replacement standing-packet list.
+
+For each app-native send, persist a delivery result containing the reservation, packet, runtime thread, event, digest, status, and returned turn ID, then rerun the scheduler with `--delivery-results`. If the send outcome is ambiguous, record `RECOVERY_REQUIRED`, inspect complete thread history for the exact event ID, and do not retry until the original delivery is proven absent. Active work without a valid correlated lease becomes a scope hold.
+
 Each terminal receipt releases only the exact correlated lease and immediately triggers selection of the next admitted wave. `BLOCKED`, `REVIEW_LATENCY`, `UNKNOWN`, or an active lease suppresses only that conflict group. Heartbeats remain interruption recovery and must not become the foreground scheduler.
 
 Fail closed when a standing packet lacks a canonical `onv1_` event ID and `sha256:` payload digest, a stable logical role, repository, writer scope, execution class, dependency proof, or a collision-free lease. These checks never widen GitHub, provider, deployment, production, Supabase, or data authority.
+
+A terminal receipt releases capacity only when it explicitly carries `terminal=true` and exactly matches the active `packet_id`, `writer_scope`, reservation ID, and delivered turn ID. `BLOCKED`, `REVIEW_LATENCY`, `UNKNOWN`, malformed, or uncorrelated receipts retain the lease for that scope while unrelated scopes continue.
 10. Initialize the workflow architect and read embedded-service health last. DiscordOS, Foundation, Lifeline, Playbook Observer, Cortex, the service bus, ledgers, and heartbeats are components, not automatically required conversations.
 11. Re-run dry-run. A healthy second run creates no role, sends no bootstrap message, and changes no registry binding.
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import hashlib
 import json
 import tempfile
 import unittest
@@ -67,11 +68,40 @@ def _standing_packet(
         "repository": repository,
         "writer_scope": writer_scope,
         "execution_class": "repo_worktree",
+        "runtime_thread_id": "019f0000-0000-7000-8000-000000000001",
+        "runtime_status": "idle",
         "dependencies": dependencies or [],
         "authority": {
             "event_id": "onv1_" + "a" * 64,
             "payload_digest": "sha256:" + "b" * 64,
         },
+    }
+
+
+def _envelope(payload: dict[str, object], *, idempotency_key: str) -> dict[str, object]:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    digest = hashlib.sha256(encoded).hexdigest()
+    return {
+        "schema": "atlas.workflow.envelope.v1",
+        "kind": "EVENT",
+        "event_id": "onv1_" + digest,
+        "payload_digest": "sha256:" + digest,
+        "idempotency_key": idempotency_key,
+        "payload": payload,
+    }
+
+
+def _bindings(*items: tuple[str, str, str]) -> dict[str, object]:
+    return {
+        "bindings": [
+            {
+                "role_id": role_id,
+                "current_runtime_id": runtime_id,
+                "runtime_status": status,
+                "archived": False,
+            }
+            for role_id, runtime_id, status in items
+        ]
     }
 
 
@@ -107,6 +137,42 @@ def _planner_payload(items: list[dict[str, object]]) -> dict[str, object]:
 
 
 class AutonomousLaneSchedulerTests(unittest.TestCase):
+    def test_work_program_schema_freezes_delivery_and_lease_state(self) -> None:
+        schema = json.loads((scheduler.ROOT / "schemas/atlas.autonomous-work-program.v2.json").read_text(encoding="utf-8"))
+
+        self.assertEqual("atlas.autonomous-work-program.v2", schema["$id"])
+        self.assertEqual(
+            {
+                "schema_version",
+                "revision",
+                "source_snapshot_digest",
+                "standing_packets",
+                "active_leases",
+                "scope_holds",
+                "delivery_intents",
+                "completed_packets",
+                "completed_receipts",
+                "released_leases",
+                "processed_events",
+            },
+            set(schema["required"]),
+        )
+        self.assertEqual(
+            ["prepared", "delivered", "recovery-required"],
+            schema["properties"]["delivery_intents"]["items"]["properties"]["status"]["enum"],
+        )
+
+    def test_program_lock_excludes_concurrent_scheduler_invocation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            program_path = Path(temp_dir) / "program.json"
+            _write(program_path, "{}\n")
+            with scheduler._exclusive_program_lock(program_path):
+                with self.assertRaises(scheduler.ProgramLockBusy):
+                    with scheduler._exclusive_program_lock(program_path):
+                        self.fail("second scheduler unexpectedly acquired the program lock")
+
+        self.assertFalse(program_path.with_suffix(".json.lock").exists())
+
     def test_validation_cleanup_takes_precedence(self) -> None:
         report = scheduler.build_report(
             root=Path("atlas-root-fixture"),
@@ -308,6 +374,263 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
 
         self.assertEqual(["mazer-ready"], [job["packet_id"] for job in report["selected_jobs"]])
         self.assertIn("writer_scope_leased", [item["blocked_reason"] for item in report["blocked_candidates"]])
+
+    def test_zero_read_only_capacity_is_preserved(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "read-only",
+            role_id="atlas.runtime",
+            repository="fawxzzy/ATLAS",
+            writer_scope="atlas.runtime.read-model",
+        )
+        packet["execution_class"] = "read_only"
+        program["standing_packets"] = [packet]
+        program["max_parallel_read_only"] = 0
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual("read_only_wave_limit", report["deferred_candidates"][0]["deferred_reason"])
+
+    def test_active_standing_role_is_never_steered(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "active-owner",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness",
+        )
+        packet["runtime_status"] = "active"
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual("standing_role_active", report["blocked_candidates"][0]["blocked_reason"])
+
+    def test_bridge_maps_idle_and_notloaded_bindings_but_preserves_active(self) -> None:
+        ready_payloads = [
+            {
+                "canonical_lifecycle_state": "READY",
+                "packet_id": "fitness-ready",
+                "objective": "Fitness bounded source correction",
+                "logical_role_id": "owner.fitness",
+                "repository": "fawxzzy/fitness",
+                "writer_scope": "repo.fitness",
+                "execution_class": "repo_worktree",
+            },
+            {
+                "canonical_lifecycle_state": "READY",
+                "packet_id": "mazer-ready",
+                "objective": "Mazer bounded source correction",
+                "logical_role_id": "owner.mazer",
+                "repository": "fawxzzy/mazer",
+                "writer_scope": "repo.mazer",
+                "execution_class": "repo_worktree",
+            },
+            {
+                "canonical_lifecycle_state": "READY",
+                "packet_id": "socials-active",
+                "objective": "Socials bounded source correction",
+                "logical_role_id": "owner.socials-os",
+                "repository": "fawxzzy/socials-os",
+                "writer_scope": "repo.socials-os",
+                "execution_class": "repo_worktree",
+            },
+        ]
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(
+                ("owner.fitness", "fitness-thread", "idle"),
+                ("owner.mazer", "mazer-thread", "notLoaded"),
+                ("owner.socials-os", "socials-thread", "active"),
+            ),
+            envelopes=[_envelope(payload, idempotency_key=f"event-{index}") for index, payload in enumerate(ready_payloads)],
+        )
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual(["fitness-ready", "mazer-ready"], sorted(job["packet_id"] for job in report["selected_jobs"]))
+        self.assertIn("standing_role_active", [item["blocked_reason"] for item in report["blocked_candidates"]])
+        self.assertEqual("repo.socials-os", program["scope_holds"][0]["writer_scope"])
+        self.assertNotIn("forbidden_owner_lanes", program)
+
+    def test_reservation_persists_before_duplicate_selection(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness")
+        ]
+        first = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, reservations = scheduler.reserve_selected_jobs(program=program, report=first)
+        second = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(1, len(reservations))
+        self.assertTrue(first["program_persisted_before_dispatch"])
+        self.assertEqual("ACTIVE", program["standing_packets"][0]["state"])
+        self.assertEqual("active", program["active_leases"][0]["status"])
+        self.assertEqual(scheduler.STATUS_HOLD, second["status"])
+        self.assertEqual("standing_packet_not_ready", second["blocked_candidates"][0]["blocked_reason"])
+
+    def test_terminal_receipt_releases_only_exact_correlated_lease(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness")
+        ]
+        first = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, reservations = scheduler.reserve_selected_jobs(program=program, report=first)
+        intent = program["delivery_intents"][0]
+        terminal = _envelope(
+            {
+                "canonical_lifecycle_state": "COMPLETED",
+                "terminal": True,
+                "packet_id": "fitness-ready",
+                "writer_scope": "repo.fitness",
+                "reservation_id": reservations[0]["reservation_id"],
+                "turn_id": "turn-fitness-1",
+            },
+            idempotency_key="fitness-terminal",
+        )
+        premature, premature_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[terminal],
+        )
+        program, delivery_findings = scheduler.apply_delivery_results(
+            program=premature,
+            results=[
+                {
+                    "reservation_id": reservations[0]["reservation_id"],
+                    "packet_id": "fitness-ready",
+                    "runtime_thread_id": intent["runtime_thread_id"],
+                    "event_id": intent["event_id"],
+                    "payload_digest": intent["payload_digest"],
+                    "status": "DELIVERED",
+                    "turn_id": "turn-fitness-1",
+                }
+            ],
+        )
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[terminal],
+        )
+
+        self.assertEqual("terminal_lease_correlation_required", premature_findings[0]["code"])
+        self.assertEqual([], premature["processed_events"])
+        self.assertEqual([], delivery_findings)
+        self.assertEqual([], findings)
+        self.assertEqual([], program["active_leases"])
+        self.assertEqual(["fitness-ready"], program["completed_packets"])
+        self.assertEqual([], program["standing_packets"])
+        self.assertEqual("released", program["released_leases"][0]["status"])
+        self.assertEqual("turn-fitness-1", program["completed_receipts"][0]["turn_id"])
+        self.assertEqual([], program["delivery_intents"])
+
+    def test_ambiguous_delivery_enters_recovery_without_retry(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness")
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        intent = program["delivery_intents"][0]
+        program, findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {
+                    "reservation_id": reservations[0]["reservation_id"],
+                    "packet_id": "fitness-ready",
+                    "runtime_thread_id": intent["runtime_thread_id"],
+                    "event_id": intent["event_id"],
+                    "payload_digest": intent["payload_digest"],
+                    "status": "RECOVERY_REQUIRED",
+                }
+            ],
+        )
+        retry = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual("recovery-required", program["delivery_intents"][0]["status"])
+        self.assertEqual("recovery-required", program["active_leases"][0]["status"])
+        self.assertEqual(scheduler.STATUS_HOLD, retry["status"])
+
+    def test_nonterminal_receipt_cannot_release_a_lease(self) -> None:
+        program = _program_payload()
+        program["active_leases"] = [
+            {"packet_id": "fitness-ready", "writer_scope": "repo.fitness", "status": "active", "reservation_id": "rsrv-1"}
+        ]
+        blocked = _envelope(
+            {
+                "canonical_lifecycle_state": "BLOCKED",
+                "packet_id": "fitness-ready",
+                "writer_scope": "repo.fitness",
+            },
+            idempotency_key="fitness-blocked",
+        )
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[blocked],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual("active", program["active_leases"][0]["status"])
 
     def test_standing_dependency_requires_completed_receipt(self) -> None:
         program = _program_payload()
@@ -599,3 +922,61 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(scheduler.SCHEMA_VERSION, payload["schema_version"])
         self.assertIn("Execution wave:", prompt_text)
         self.assertIn("Continuation rule:", prompt_text)
+
+    def test_main_atomically_persists_dispatch_before_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            ready = _envelope(
+                {
+                    "canonical_lifecycle_state": "READY",
+                    "packet_id": "fitness-ready",
+                    "objective": "Fitness bounded source correction",
+                    "logical_role_id": "owner.fitness",
+                    "repository": "fawxzzy/fitness",
+                    "writer_scope": "repo.fitness",
+                    "execution_class": "repo_worktree",
+                },
+                idempotency_key="fitness-ready-event",
+            )
+            _write(root / "tmp/atlas/program.json", json.dumps(_program_payload(), indent=2) + "\n")
+            _write(root / "tmp/atlas/bindings.json", json.dumps(_bindings(("owner.fitness", "fitness-thread", "idle")), indent=2) + "\n")
+            _write(root / "tmp/atlas/envelopes.jsonl", json.dumps(ready) + "\n")
+            common_args = [
+                "--json",
+                "--program",
+                "tmp/atlas/program.json",
+                "--bindings",
+                "tmp/atlas/bindings.json",
+                "--envelopes",
+                "tmp/atlas/envelopes.jsonl",
+                "--output",
+                "tmp/atlas/report.json",
+                "--prompt-output",
+                "tmp/atlas/prompt.md",
+            ]
+            with patch.object(scheduler, "atlas_root", return_value=root):
+                with patch.object(scheduler, "_branch_state", return_value=("main", "abc123")):
+                    with patch.object(scheduler, "_parity_state", return_value={"status": "clean", "behind": 0, "ahead": 0}):
+                        with patch.object(scheduler, "_load_selector", return_value=_selector_payload()):
+                            with patch.object(scheduler.ai_work_session_preflight, "build_report", return_value=_preflight_payload()):
+                                with patch.object(scheduler.planner, "build_report", return_value=_planner_payload([])):
+                                    with redirect_stdout(io.StringIO()):
+                                        first_exit = scheduler.main(common_args)
+                                    first_report = json.loads((root / "tmp/atlas/report.json").read_text(encoding="utf-8"))
+                                    persisted = json.loads((root / "tmp/atlas/program.json").read_text(encoding="utf-8"))
+                                    with redirect_stdout(io.StringIO()):
+                                        second_exit = scheduler.main(common_args)
+                                    second_report = json.loads((root / "tmp/atlas/report.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(0, first_exit)
+        self.assertTrue(first_report["program_persisted_before_dispatch"])
+        self.assertEqual("fitness-thread", first_report["dispatch_plan"][0]["runtime_thread_id"])
+        self.assertEqual("ACTIVE", persisted["standing_packets"][0]["state"])
+        self.assertEqual("active", persisted["active_leases"][0]["status"])
+        self.assertEqual("prepared", persisted["delivery_intents"][0]["status"])
+        self.assertEqual(1, persisted["revision"])
+        self.assertRegex(persisted["source_snapshot_digest"], r"^sha256:[0-9a-f]{64}$")
+        self.assertEqual(0, second_exit)
+        self.assertEqual(scheduler.STATUS_HOLD, second_report["status"])
+        self.assertEqual([], second_report["dispatch_plan"])
+        self.assertEqual(1, second_report["program_revision"])

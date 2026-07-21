@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas.autonomous-work-program.v2",
+  "title": "ATLAS Autonomous Work Program v2",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "revision",
+    "source_snapshot_digest",
+    "standing_packets",
+    "active_leases",
+    "scope_holds",
+    "delivery_intents",
+    "completed_packets",
+    "completed_receipts",
+    "released_leases",
+    "processed_events"
+  ],
+  "properties": {
+    "schema_version": { "const": "atlas.autonomous-work-program.v2" },
+    "revision": { "type": "integer", "minimum": 1 },
+    "source_snapshot_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "max_parallel_writers": { "type": "integer", "minimum": 0 },
+    "max_parallel_read_only": { "type": "integer", "minimum": 0 },
+    "standing_packets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "packet_id",
+          "packet",
+          "state",
+          "logical_role_id",
+          "repository",
+          "writer_scope",
+          "execution_class",
+          "runtime_thread_id",
+          "runtime_status",
+          "authority"
+        ],
+        "properties": {
+          "packet_id": { "type": "string", "minLength": 1 },
+          "packet": { "type": "string", "minLength": 1 },
+          "state": { "enum": ["READY", "ADMITTED", "QUEUED", "ACTIVE"] },
+          "logical_role_id": { "type": "string", "minLength": 1 },
+          "repository": { "type": "string", "minLength": 1 },
+          "writer_scope": { "type": "string", "minLength": 1 },
+          "execution_class": { "enum": ["read_only", "repo_worktree", "canonical_workspace"] },
+          "runtime_thread_id": { "type": ["string", "null"] },
+          "runtime_status": { "type": "string", "minLength": 1 },
+          "dependencies": { "type": "array", "items": { "type": "string" } },
+          "resource_claims": { "type": "object" },
+          "authority": {
+            "type": "object",
+            "required": ["event_id", "payload_digest"],
+            "properties": {
+              "event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
+              "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+            },
+            "additionalProperties": false
+          },
+          "dispatch_reservation": { "type": "object" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "active_leases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["reservation_id", "packet_id", "writer_scope", "status"],
+        "properties": {
+          "reservation_id": { "type": "string", "pattern": "^rsrv_[0-9a-f]{64}$" },
+          "packet_id": { "type": "string", "minLength": 1 },
+          "writer_scope": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["active", "recovery-required"] }
+        },
+        "additionalProperties": true
+      }
+    },
+    "scope_holds": { "type": "array", "items": { "type": "object" } },
+    "delivery_intents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "reservation_id",
+          "packet_id",
+          "logical_role_id",
+          "runtime_thread_id",
+          "writer_scope",
+          "event_id",
+          "payload_digest",
+          "status"
+        ],
+        "properties": {
+          "reservation_id": { "type": "string", "pattern": "^rsrv_[0-9a-f]{64}$" },
+          "status": { "enum": ["prepared", "delivered", "recovery-required"] },
+          "turn_id": { "type": ["string", "null"] }
+        },
+        "additionalProperties": true
+      }
+    },
+    "completed_packets": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "completed_receipts": { "type": "array", "items": { "type": "object" } },
+    "released_leases": { "type": "array", "items": { "type": "object" } },
+    "processed_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["event_id", "payload_digest"],
+        "additionalProperties": false,
+        "properties": {
+          "event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
+          "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}
