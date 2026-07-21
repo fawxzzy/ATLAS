@@ -98,7 +98,9 @@ a correlated lease becomes a derived `scope_hold`, never an invented lease.
 Promoting a recovery-required delivery back to `delivered` requires explicit
 `COMPLETE_TARGET_TASK_HISTORY` reconciliation, the exact event identity, and a
 proof that observed effects match the admitted intent. A bare later
-`DELIVERED` status cannot clear recovery state.
+`DELIVERED` status cannot clear recovery state. Successful reconciliation also
+returns the correlated mutating lease to `active`; only the exact terminal
+receipt may release that lease.
 
 Every release receipt must carry `terminal=true`, a successful terminal state,
 the exact `packet_id`, `writer_scope`, reservation ID, and delivered turn ID. No

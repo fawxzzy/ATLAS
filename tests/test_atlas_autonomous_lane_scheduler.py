@@ -1981,6 +1981,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
 
         self.assertEqual([], recovered)
         self.assertEqual("delivered", program["delivery_intents"][0]["status"])
+        self.assertEqual("active", program["active_leases"][0]["status"])
 
     def test_nonterminal_receipt_cannot_release_a_lease(self) -> None:
         program = _program_payload()

@@ -472,6 +472,9 @@ def apply_delivery_results(
                     continue
             intent["status"] = "delivered"
             intent["turn_id"] = turn_id
+            for lease in leases:
+                if lease.get("reservation_id") == reservation_id:
+                    lease["status"] = "active"
         elif status == "RECOVERY_REQUIRED":
             intent["status"] = "recovery-required"
             for lease in leases:
