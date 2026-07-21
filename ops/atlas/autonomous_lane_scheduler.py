@@ -362,11 +362,52 @@ def apply_delivery_results(
     leases = [item for item in program.get("active_leases", []) if isinstance(item, dict)]
     standing = [item for item in program.get("standing_packets", []) if isinstance(item, dict)]
     packet_index = {str(item.get("packet_id")): item for item in standing if item.get("packet_id")}
+    completed_receipts = [item for item in program.get("completed_receipts", []) if isinstance(item, dict)]
     for result in results:
         reservation_id = str(result.get("reservation_id") or "")
         intent = intent_index.get(reservation_id)
         if intent is None:
             packet_id = str(result.get("packet_id") or "")
+            completed_matches = [
+                receipt
+                for receipt in completed_receipts
+                if str(receipt.get("reservation_id") or "") == reservation_id
+                and str(receipt.get("packet_id") or "") == packet_id
+                and isinstance(receipt.get("turn_id"), str)
+                and bool(receipt.get("turn_id"))
+            ]
+            if len(completed_matches) == 1:
+                completed = completed_matches[0]
+                persisted_identity = {
+                    "runtime_thread_id": completed.get("runtime_thread_id"),
+                    "event_id": completed.get("event_id"),
+                    "payload_digest": completed.get("payload_digest"),
+                }
+                if any(
+                    value and str(result.get(field) or "") != str(value)
+                    for field, value in persisted_identity.items()
+                ):
+                    findings.append(
+                        _finding(
+                            "delivery_result_correlation_mismatch",
+                            "Delivery result does not match its completed receipt.",
+                            reservation_id=reservation_id,
+                        )
+                    )
+                    continue
+                status = str(result.get("status") or "").upper()
+                if status == "RECOVERY_REQUIRED":
+                    continue
+                if status == "DELIVERED" and str(result.get("turn_id") or "") == str(completed.get("turn_id") or ""):
+                    continue
+                findings.append(
+                    _finding(
+                        "delivery_result_correlation_mismatch",
+                        "Delivery result does not match its completed receipt.",
+                        reservation_id=reservation_id,
+                    )
+                )
+                continue
             packet = packet_index.get(packet_id)
             authority = packet.get("authority") if isinstance(packet, dict) and isinstance(packet.get("authority"), dict) else {}
             runtime_thread_id = str(packet.get("runtime_thread_id") or "") if isinstance(packet, dict) else ""
@@ -781,6 +822,9 @@ def reconcile_runtime_program(
                         ("writer_scope", writer_scope),
                         ("reservation_id", reservation_id),
                         ("turn_id", turn_id),
+                        ("runtime_thread_id", matching_intents[0].get("runtime_thread_id")),
+                        ("event_id", matching_intents[0].get("event_id")),
+                        ("payload_digest", matching_intents[0].get("payload_digest")),
                         ("receipt_event_id", event_id),
                         ("receipt_payload_digest", payload_digest),
                     ]

@@ -1983,6 +1983,70 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("delivered", program["delivery_intents"][0]["status"])
         self.assertEqual("active", program["active_leases"][0]["status"])
 
+    def test_completed_delivery_journal_replay_is_idempotent(self) -> None:
+        program = _program_payload()
+        program["completed_receipts"] = [
+            {
+                "packet_id": "fitness-complete",
+                "writer_scope": "repo.fitness",
+                "reservation_id": "rsrv_" + "a" * 64,
+                "turn_id": "fitness-turn",
+                "runtime_thread_id": "fitness-thread",
+                "event_id": "onv1_" + "b" * 64,
+                "payload_digest": "sha256:" + "b" * 64,
+            }
+        ]
+        historical = {
+            "reservation_id": "rsrv_" + "a" * 64,
+            "packet_id": "fitness-complete",
+            "runtime_thread_id": "fitness-thread",
+            "event_id": "onv1_" + "b" * 64,
+            "payload_digest": "sha256:" + "b" * 64,
+        }
+
+        program, findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {**historical, "status": "RECOVERY_REQUIRED", "turn_id": None},
+                {**historical, "status": "DELIVERED", "turn_id": "fitness-turn"},
+            ],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual([], program["delivery_intents"])
+        self.assertEqual([], program["active_leases"])
+
+    def test_completed_delivery_journal_replay_rejects_identity_drift(self) -> None:
+        program = _program_payload()
+        program["completed_receipts"] = [
+            {
+                "packet_id": "fitness-complete",
+                "writer_scope": "repo.fitness",
+                "reservation_id": "rsrv_" + "a" * 64,
+                "turn_id": "fitness-turn",
+                "runtime_thread_id": "fitness-thread",
+                "event_id": "onv1_" + "b" * 64,
+                "payload_digest": "sha256:" + "b" * 64,
+            }
+        ]
+
+        _, findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {
+                    "reservation_id": "rsrv_" + "a" * 64,
+                    "packet_id": "fitness-complete",
+                    "runtime_thread_id": "other-thread",
+                    "event_id": "onv1_" + "b" * 64,
+                    "payload_digest": "sha256:" + "b" * 64,
+                    "status": "DELIVERED",
+                    "turn_id": "fitness-turn",
+                }
+            ],
+        )
+
+        self.assertEqual("delivery_result_correlation_mismatch", findings[0]["code"])
+
     def test_nonterminal_receipt_cannot_release_a_lease(self) -> None:
         program = _program_payload()
         program["active_leases"] = [

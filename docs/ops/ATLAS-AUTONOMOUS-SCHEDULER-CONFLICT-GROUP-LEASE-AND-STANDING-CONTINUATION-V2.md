@@ -100,7 +100,9 @@ Promoting a recovery-required delivery back to `delivered` requires explicit
 proof that observed effects match the admitted intent. A bare later
 `DELIVERED` status cannot clear recovery state. Successful reconciliation also
 returns the correlated mutating lease to `active`; only the exact terminal
-receipt may release that lease.
+receipt may release that lease. Completion receipts retain the delivered task,
+event, digest, reservation, and turn identities so replaying an append-only
+delivery journal is idempotent while identity drift still fails closed.
 
 Every release receipt must carry `terminal=true`, a successful terminal state,
 the exact `packet_id`, `writer_scope`, reservation ID, and delivered turn ID. No
