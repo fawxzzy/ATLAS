@@ -158,9 +158,34 @@ class CortexExecutionPlannerTests(unittest.TestCase):
         self.assertEqual(1, len(plan["execution_waves"]))
         self.assertEqual(2, len(plan["execution_waves"][0]["job_ids"]))
 
-    def test_writers_are_serialized_even_without_resource_overlap(self) -> None:
+    def test_same_repository_writers_are_serialized_by_implicit_scope(self) -> None:
         plan, _ = self._plan(self._root(), [self._job("one", execution_class="repo_worktree"), self._job("two", execution_class="repo_worktree")])
         self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("writer_scopes", plan["collision_risks"][0]["resource_kinds"])
+
+    def test_distinct_repository_writers_share_a_wave(self) -> None:
+        first = self._job("one", execution_class="repo_worktree")
+        second = self._job("two", execution_class="repo_worktree")
+        second["repository"] = "fawxzzy/other"
+        second["allowed_files"] = first["allowed_files"]
+        plan, _ = self._plan(self._root(), [first, second])
+        self.assertEqual(1, len(plan["execution_waves"]))
+        self.assertEqual(2, len(plan["execution_waves"][0]["job_ids"]))
+
+    def test_explicit_writer_scope_serializes_cross_repository_jobs(self) -> None:
+        first = self._job("one", execution_class="repo_worktree", writer_scope="external.shared")
+        second = self._job("two", execution_class="repo_worktree", writer_scope="external.shared")
+        second["repository"] = "fawxzzy/other"
+        plan, _ = self._plan(self._root(), [first, second])
+        self.assertEqual(2, len(plan["execution_waves"]))
+
+    def test_canonical_workspace_claim_is_implicit_and_exclusive(self) -> None:
+        plan, _ = self._plan(
+            self._root(),
+            [self._job("one", execution_class="canonical_workspace"), self._job("two", execution_class="canonical_workspace")],
+        )
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("canonical_root", plan["collision_risks"][0]["resource_kinds"])
 
     def test_missing_owner_blocks_admission(self) -> None:
         job = self._job(); job.pop("owner")

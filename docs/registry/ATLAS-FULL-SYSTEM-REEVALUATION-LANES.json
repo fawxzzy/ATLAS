@@ -39,7 +39,7 @@
     "pre_development_gate_rule": "The accepted closing audit is mandatory before the post-preparation Atlas development program opens. It runs only after operational preparation and the Clean and Re-sync marker cluster are terminal, searches all governed surfaces for gaps, missing work, stale assumptions, new ideas, additions, updates, risks, and synergies, and requires every newly discovered preparatory gap to receive and complete its own percentage marker. Development-scope discoveries receive measured backlog lanes and remain queued until the gate opens.",
     "unknown_rule": "Unknown and access-denied evidence stays unknown and is never converted to zero, healthy, complete, or adopted.",
     "authority_rule": "Root governance does not mutate owner repositories or external planes; owner and external mutations require their own authority.",
-    "serialization_rule": "One root writer, one owner-repo writer, and one optional read-only scout; DiscordOS remains one logical board writer.",
+    "serialization_rule": "One root writer and one mutating writer per owner repository or declared external-resource conflict group; distinct scopes and non-colliding read-only scouts may run concurrently; DiscordOS remains one logical board writer.",
     "resume_rule": "Mazer may resume only after explicit ATLAS MAIN RESUME MAZER routing; Fitness remains blocked by Critical secret containment, rotation, and verification."
   },
   "rollup_policy": {

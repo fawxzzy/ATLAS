@@ -24,6 +24,8 @@ def _program_payload() -> dict[str, object]:
         "max_docs_only_streak": 2,
         "max_file_overlap_risk": "medium",
         "allow_reselection": True,
+        "max_parallel_writers": 4,
+        "max_parallel_read_only": 2,
         "allowed_markers": [
             "Cortex Simulation Substrate Readiness",
             "Vercel Platform Observability Governance",
@@ -46,6 +48,30 @@ def _program_payload() -> dict[str, object]:
             "selector",
         ],
         "stop_on": ["critical_validation", "error_validation", "owner_repo_required", "secret_required", "deploy_required", "no_safe_candidate"],
+    }
+
+
+def _standing_packet(
+    packet_id: str,
+    *,
+    role_id: str,
+    repository: str,
+    writer_scope: str,
+    dependencies: list[str] | None = None,
+) -> dict[str, object]:
+    return {
+        "packet_id": packet_id,
+        "packet": f"Execute {packet_id}",
+        "state": "READY",
+        "logical_role_id": role_id,
+        "repository": repository,
+        "writer_scope": writer_scope,
+        "execution_class": "repo_worktree",
+        "dependencies": dependencies or [],
+        "authority": {
+            "event_id": "onv1_" + "a" * 64,
+            "payload_digest": "sha256:" + "b" * 64,
+        },
     }
 
 
@@ -186,7 +212,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertTrue(report["requires_reselection_receipt"])
         self.assertIn("CORTEX-DUAL-MODE-REPLACEMENT-READINESS", report["reselection_receipt"])
 
-    def test_owner_lane_candidate_is_blocked(self) -> None:
+    def test_owner_lane_candidate_without_scope_metadata_is_blocked(self) -> None:
         report = scheduler.build_report(
             root=Path("atlas-root-fixture"),
             program=_program_payload(),
@@ -207,7 +233,174 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         )
 
         self.assertEqual(scheduler.STATUS_HOLD, report["status"])
-        self.assertEqual("owner_lane_forbidden", report["blocked_candidates"][0]["blocked_reason"])
+        self.assertEqual("owner_lane_metadata_required", report["blocked_candidates"][0]["blocked_reason"])
+
+    def test_distinct_standing_writer_scopes_share_one_wave(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness"),
+            _standing_packet("mazer-ready", role_id="owner.mazer", repository="fawxzzy/mazer", writer_scope="repo.mazer"),
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(scheduler.DECISION_EXECUTION_WAVE, report["decision"])
+        self.assertEqual(["fitness-ready", "mazer-ready"], sorted(job["packet_id"] for job in report["selected_jobs"]))
+
+    def test_same_writer_scope_defers_second_packet(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("fitness-a", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness"),
+            _standing_packet("fitness-b", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness"),
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(1, len(report["selected_jobs"]))
+        self.assertEqual("resource_conflict", report["deferred_candidates"][0]["deferred_reason"])
+
+    def test_duplicate_packet_id_is_never_dispatched_twice(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("same-packet", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness"),
+            _standing_packet("same-packet", role_id="owner.mazer", repository="fawxzzy/mazer", writer_scope="repo.mazer"),
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(1, len(report["selected_jobs"]))
+        self.assertIn("duplicate_packet_id", [item["blocked_reason"] for item in report["blocked_candidates"]])
+
+    def test_active_lease_blocks_only_its_writer_scope(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness"),
+            _standing_packet("mazer-ready", role_id="owner.mazer", repository="fawxzzy/mazer", writer_scope="repo.mazer"),
+        ]
+        program["active_leases"] = [{"writer_scope": "repo.fitness", "status": "active"}]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(["mazer-ready"], [job["packet_id"] for job in report["selected_jobs"]])
+        self.assertIn("writer_scope_leased", [item["blocked_reason"] for item in report["blocked_candidates"]])
+
+    def test_standing_dependency_requires_completed_receipt(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet(
+                "ratchet-ready",
+                role_id="platform.supabase-migration",
+                repository="fawxzzy/fawxzzy-platform",
+                writer_scope="program.fawxzzy-platform",
+                dependencies=["source-merge"],
+            )
+        ]
+        blocked = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program["completed_packets"] = ["source-merge"]
+        ready = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_HOLD, blocked["status"])
+        self.assertEqual("dependencies_not_complete", blocked["blocked_candidates"][0]["blocked_reason"])
+        self.assertEqual(scheduler.STATUS_EXECUTE, ready["status"])
+
+    def test_standing_packet_requires_canonical_authority(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness")
+        packet["authority"] = {"event_id": "not-canonical", "payload_digest": "sha256:bad"}
+        program["standing_packets"] = [packet]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual("canonical_authority_required", report["blocked_candidates"][0]["blocked_reason"])
+
+    def test_product_name_does_not_imply_provider_mutation(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "platform-source",
+            role_id="platform.supabase-migration",
+            repository="fawxzzy/fawxzzy-platform",
+            writer_scope="program.fawxzzy-platform",
+        )
+        packet["packet"] = "Fawxzzy Supabase platform source contract correction"
+        program["standing_packets"] = [packet]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+
+    def test_provider_mutation_still_requires_explicit_surface_authority(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "platform-provider",
+            role_id="platform.supabase-migration",
+            repository="fawxzzy/fawxzzy-platform",
+            writer_scope="program.fawxzzy-platform",
+        )
+        packet["packet"] = "Supabase provider mutation"
+        program["standing_packets"] = [packet]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual("protected_or_platform_mutation_forbidden", report["blocked_candidates"][0]["blocked_reason"])
 
     def test_protected_packet_is_blocked(self) -> None:
         report = scheduler.build_report(
@@ -404,4 +597,5 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
 
         self.assertEqual(0, exit_code)
         self.assertEqual(scheduler.SCHEMA_VERSION, payload["schema_version"])
-        self.assertIn("Selected packet:", prompt_text)
+        self.assertIn("Execution wave:", prompt_text)
+        self.assertIn("Continuation rule:", prompt_text)

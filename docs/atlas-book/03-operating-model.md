@@ -254,7 +254,9 @@ Rules:
 - one blocked execution receipt plus one blocked proof or blocker-recheck receipt is the root stop signal for that blocker class
 - before any new pass, recheck whether the exact receipt already exists durably; identical reruns are not a speed strategy
 - when a lane is execution-ready, run execution -> proof or reconciliation -> ratchet as one serial cluster
-- keep one root writer, one owner-repo writer, and at most one read-only scout
+- keep one root writer and one writer per owner-repository or external-resource conflict group; distinct scopes may execute concurrently, with read-only scouts admitted only when their claims do not collide
+- schedule every canonically authorized READY standing packet into the earliest dependency-satisfied conflict-free wave; a blocked lane suppresses only its writer scope
+- treat heartbeats as interruption recovery, never as the cadence engine; terminal receipts trigger immediate lease release and next-wave selection
 - marker movement requires stronger reality, not cleaner narration
 
 Batch types:

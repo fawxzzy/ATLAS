@@ -2,7 +2,7 @@
 # ATLAS workflow architecture and recovery
 
 Canonical manifest: `docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json`
-Manifest digest: `sha256:fe92fec6943c7c11d5170d4e02db5002900b4c19f2bcdfc0647e38bb0a9c1ee0`
+Manifest digest: `sha256:37bee7fc27fbee46fdcc61d608904e7494286e333b884564cf43a58179b9fc56`
 Runtime seed: `docs/registry/ATLAS-WORKFLOW-LIVE-MAPPING.v1.json`
 
 This view is generated from the versioned manifest. Stable logical role IDs are the contract; Codex thread IDs are replaceable runtime epochs refreshed in the live registry.
@@ -19,7 +19,7 @@ This view is generated from the versioned manifest. Stable logical role IDs are 
 
 | Logical role | Human title | Purpose | Writer scope | Creation | Runtime floor | Current epoch | Health seed |
 |---|---|---|---|---|---|---|---|
-| `atlas.main` | ATLAS MAIN | Sole master orchestrator, authority sink, dependency serializer, and acceptance owner for the ATLAS operating system. | `atlas.authority` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f52d9-7667-72a3-a5f7-9c0613aedd8f` | `DEGRADED` |
+| `atlas.main` | ATLAS MAIN | Sole master orchestrator, authority sink, dependency-aware conflict-group scheduler, and acceptance owner for the ATLAS operating system. | `atlas.authority` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f52d9-7667-72a3-a5f7-9c0613aedd8f` | `DEGRADED` |
 | `atlas.inbox` | ATLAS INBOX | Primary inbound aggregation queue for material receipts and coordination events destined for ATLAS MAIN. | `atlas.inbound-ledger` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f7de0-3e1d-7433-a760-a9b724174ab6` | `DEGRADED` |
 | `atlas.workflow-architect` | ATLAS WORKFLOW ARCHITECT | Own the canonical workflow/recovery specification, bounded architecture audit, and reconstruction proof without becoming an operational root. | `atlas.workflow-contracts` | `create_if_missing` | `gpt-5.6-sol/high` | `019f7df6-8521-7292-a012-297208fce120` | `DEGRADED` |
 | `atlas.release-control-plane` | ATLAS PR, CI & Release Control Plane | Stack-wide PR, CI, review, guarded-merge, deployment/readback, and lifecycle surveillance surface. | `external.release-control` | `create_if_missing` | `gpt-5.6-sol/high` | `019f79ac-bd85-7952-8935-58dfbb77aa20` | `DEGRADED` |

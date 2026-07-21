@@ -72,6 +72,16 @@ Observation can replace activity provenance only for a runtime already returned 
 7. Recover ATLAS MAIN first. Do not initialize queues or owners until the root role is unique, readable, unarchived, pinned, and accepted.
 8. Initialize ATLAS INBOX, MANUAL MESSAGES, FAWXZZY QUESTIONS, AI QUESTIONS, and FAWXZZY MESSAGES in parallel only after unique title/role bindings are proven.
 9. Initialize the control plane, domain coordinator, and owners in parallel only across distinct writer scopes. A standing role being active is a hold, not an invitation to steer it.
+
+### Scheduler and standing-task continuation
+
+`ATLAS MAIN` schedules by durable `writer_scope`, dependency, and resource claims. The safety invariant is one mutating lease per conflict group, not one owner writer across the entire stack. A canonical-root writer remains exclusive to the root scope; independent owner repositories and external-resource groups may run concurrently when their declared claims do not overlap.
+
+Every material wake consumes all canonically authorized `READY` standing packets in dependency order and dispatches the largest conflict-free wave. A standing role in `IDLE` or `notLoaded` state is resumed through its stable logical role binding; it does not need a dedicated heartbeat automation. An `ACTIVE` role is never steered or duplicated.
+
+Each terminal receipt releases only the exact correlated lease and immediately triggers selection of the next admitted wave. `BLOCKED`, `REVIEW_LATENCY`, `UNKNOWN`, or an active lease suppresses only that conflict group. Heartbeats remain interruption recovery and must not become the foreground scheduler.
+
+Fail closed when a standing packet lacks a canonical `onv1_` event ID and `sha256:` payload digest, a stable logical role, repository, writer scope, execution class, dependency proof, or a collision-free lease. These checks never widen GitHub, provider, deployment, production, Supabase, or data authority.
 10. Initialize the workflow architect and read embedded-service health last. DiscordOS, Foundation, Lifeline, Playbook Observer, Cortex, the service bus, ledgers, and heartbeats are components, not automatically required conversations.
 11. Re-run dry-run. A healthy second run creates no role, sends no bootstrap message, and changes no registry binding.
 

@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+"""Select deterministic dependency-ready waves under conflict-group leases."""
+
 import argparse
+import fnmatch
 import json
+import re
 import subprocess
 import sys
 from collections import OrderedDict
@@ -16,8 +20,9 @@ from ops._atlas import atlas_root, normalize_slashes
 from ops.atlas import ai_work_session_preflight
 from ops.atlas import marker_aware_next_packet_planner as planner
 
-SCHEMA_VERSION = "atlas.autonomous_lane_scheduler.v1"
-PROGRAM_SCHEMA_VERSION = "atlas.autonomous-work-program.v1"
+SCHEMA_VERSION = "atlas.autonomous_lane_scheduler.v2"
+PROGRAM_SCHEMA_VERSION = "atlas.autonomous-work-program.v2"
+LEGACY_PROGRAM_SCHEMA_VERSION = "atlas.autonomous-work-program.v1"
 
 STATUS_EXECUTE = "execute"
 STATUS_HOLD = "hold"
@@ -32,6 +37,7 @@ DECISION_EXACT_MANIFEST_PACKET = "exact_manifest_packet"
 DECISION_OPERATOR_PROGRAM_PACKET = "operator_program_packet"
 DECISION_CROSS_MARKER_OPPORTUNITY = "cross_marker_opportunity"
 DECISION_PLANNER_CANDIDATE = "planner_candidate"
+DECISION_EXECUTION_WAVE = "execution_wave"
 DECISION_HOLD = "hold"
 
 PHASE_WORKER_RECONCILIATION = "worker_reconciliation"
@@ -42,6 +48,12 @@ PHASE_FIRST_IMPLEMENTATION_ADMISSION = "first_implementation_admission"
 PHASE_CONTRACT_FREEZE = "contract_freeze"
 PHASE_SELECTOR = "selector"
 PHASE_HOLD = "hold"
+
+EXECUTION_CLASSES = {"read_only", "repo_worktree", "canonical_workspace"}
+READY_STATES = {"READY", "ADMITTED", "QUEUED"}
+MUTATING_EXECUTION_CLASSES = {"repo_worktree", "canonical_workspace"}
+EVENT_ID_PATTERN = re.compile(r"^onv1_[0-9a-f]{64}$")
+PAYLOAD_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 SAFE_CLASSIFICATIONS = {
     planner.CLASS_IMPLEMENTATION_READY,
@@ -76,15 +88,15 @@ PROTECTED_TERMS = (
     "archive/",
     "deploy",
     "deployment",
+    "provider mutation",
+    "production mutation",
     "secret",
-    "supabase",
-    "vercel",
     "workflow dispatch",
 )
 AUTHORITY_DENIALS = [
-    "owner-repo-mutation",
-    "platform-mutation",
-    "deploy",
+    "unadmitted-owner-repo-mutation",
+    "unadmitted-platform-mutation",
+    "unadmitted-deploy",
     "secret-handling",
     "workflow-dispatch",
     "final-receipt",
@@ -195,8 +207,25 @@ def load_program(root: Path, program_path: str) -> tuple[dict[str, Any] | None, 
     if not isinstance(payload, dict):
         return None, [_finding("program_invalid_shape", "Program payload must be a JSON object.", path=program_path)]
     errors: list[OrderedDict[str, Any]] = []
-    if payload.get("schema_version") != PROGRAM_SCHEMA_VERSION:
-        errors.append(_finding("program_schema_mismatch", "Program schema_version is not admitted.", expected=PROGRAM_SCHEMA_VERSION, actual=payload.get("schema_version")))
+    if payload.get("schema_version") not in {PROGRAM_SCHEMA_VERSION, LEGACY_PROGRAM_SCHEMA_VERSION}:
+        errors.append(
+            _finding(
+                "program_schema_mismatch",
+                "Program schema_version is not admitted.",
+                expected=[LEGACY_PROGRAM_SCHEMA_VERSION, PROGRAM_SCHEMA_VERSION],
+                actual=payload.get("schema_version"),
+            )
+        )
+    for field in ("standing_packets", "active_leases", "completed_packets"):
+        if field in payload and not isinstance(payload[field], list):
+            errors.append(_finding("program_invalid_shape", f"{field} must be an array.", field=field))
+    for field in ("max_parallel_writers", "max_parallel_read_only"):
+        if field in payload and (not isinstance(payload[field], int) or payload[field] < 0):
+            errors.append(_finding("program_invalid_shape", f"{field} must be a non-negative integer.", field=field))
+    if isinstance(payload.get("active_leases"), list):
+        for lease in payload["active_leases"]:
+            if not isinstance(lease, dict) or not isinstance(lease.get("writer_scope"), str) or not lease["writer_scope"]:
+                errors.append(_finding("program_invalid_active_lease", "Every active lease entry must name writer_scope."))
     return payload, errors
 
 
@@ -215,11 +244,15 @@ def _load_selector(root: Path) -> dict[str, Any]:
 def _scope_lock(program: dict[str, Any]) -> OrderedDict[str, Any]:
     return OrderedDict(
         [
-            ("scope", "ATLAS-root-only"),
+            ("scope", "conflict-group-bounded"),
             ("allowed_markers", list(program.get("allowed_markers", []))),
             ("excluded_markers", list(program.get("excluded_markers", []))),
+            ("forbidden_writer_scopes", list(program.get("forbidden_writer_scopes", []))),
             ("forbidden_owner_lanes", list(program.get("forbidden_owner_lanes", []))),
-            ("one_packet_per_invocation", True),
+            ("max_parallel_writers", int(program.get("max_parallel_writers", 4) or 4)),
+            ("max_parallel_read_only", int(program.get("max_parallel_read_only", 2) or 2)),
+            ("one_writer_per_conflict_group", True),
+            ("continue_after_terminal_receipt", True),
         ]
     )
 
@@ -269,6 +302,45 @@ def _is_stale_packet(packet: str, classification: str) -> bool:
     return classification in {planner.CLASS_HELD, planner.CLASS_STALE, planner.CLASS_NO_ACTION} or lowered.startswith("no immediate") or "already completed" in lowered
 
 
+def _string_list(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return sorted({str(item).replace("\\", "/") for item in value if isinstance(item, str) and item.strip()})
+
+
+def _resource_claims(value: Any) -> OrderedDict[str, list[str]]:
+    raw = value if isinstance(value, dict) else {}
+    return OrderedDict(
+        (kind, _string_list(raw.get(kind, [])))
+        for kind in ("files", "worktrees", "ports", "browsers", "external_writers")
+    )
+
+
+def _authority_is_canonical(value: Any) -> bool:
+    return bool(
+        isinstance(value, dict)
+        and isinstance(value.get("event_id"), str)
+        and EVENT_ID_PATTERN.fullmatch(value["event_id"])
+        and isinstance(value.get("payload_digest"), str)
+        and PAYLOAD_DIGEST_PATTERN.fullmatch(value["payload_digest"])
+    )
+
+
+def _candidate_identity(
+    *,
+    packet: str,
+    item: dict[str, Any],
+    default_root: bool,
+) -> tuple[str | None, str | None, str | None, str | None]:
+    execution_class = str(item.get("execution_class") or ("canonical_workspace" if default_root else ""))
+    repository = str(item.get("repository") or ("fawxzzy/ATLAS" if default_root else "")) or None
+    writer_scope = str(item.get("writer_scope") or ("atlas.root" if default_root else "")) or None
+    logical_role_id = str(item.get("logical_role_id") or ("atlas.main" if default_root else "")) or None
+    if execution_class == "read_only":
+        writer_scope = writer_scope or "read-only"
+    return execution_class or None, repository, writer_scope, logical_role_id
+
+
 def _phase_priority_rank(program: dict[str, Any], phase: str) -> int:
     priorities = list(program.get("phase_priority", []))
     try:
@@ -306,12 +378,25 @@ def _candidate_from_planner_item(
     blocked_reason = None
     stale_reason = None
     requires_external_input = classification in {planner.CLASS_EXTERNAL_PROOF, planner.CLASS_PROOF_GATED, planner.CLASS_OWNER_BLOCKED}
+    owner_metadata_required = _is_owner_lane(packet) and not all(
+        isinstance(item.get(field), str) and str(item[field]).strip()
+        for field in ("repository", "writer_scope", "logical_role_id", "execution_class")
+    )
+    execution_class, repository, writer_scope, logical_role_id = _candidate_identity(
+        packet=packet,
+        item=item,
+        default_root=not _is_owner_lane(packet),
+    )
     if marker and allowed_markers and marker not in allowed_markers:
         blocked_reason = "marker_not_allowed_by_program"
     elif marker in excluded_markers:
         blocked_reason = "marker_excluded_by_program"
-    elif _is_owner_lane(packet):
-        blocked_reason = "owner_lane_forbidden"
+    elif owner_metadata_required:
+        blocked_reason = "owner_lane_metadata_required"
+    elif execution_class not in EXECUTION_CLASSES:
+        blocked_reason = "invalid_execution_class"
+    elif writer_scope in set(program.get("forbidden_writer_scopes", [])):
+        blocked_reason = "writer_scope_forbidden"
     elif _is_protected_packet(packet):
         blocked_reason = "protected_or_platform_mutation_forbidden"
     elif requires_external_input:
@@ -326,6 +411,7 @@ def _candidate_from_planner_item(
         [
             ("marker", marker),
             ("lane", marker),
+            ("packet_id", str(item.get("packet_id") or packet) or None),
             ("packet", packet or None),
             ("phase", phase),
             ("score", score),
@@ -338,7 +424,68 @@ def _candidate_from_planner_item(
             ("requires_reselection", requires_reselection and bool(program.get("allow_reselection"))),
             ("safe", safe),
             ("classification", classification),
+            ("logical_role_id", logical_role_id),
+            ("repository", repository),
+            ("writer_scope", writer_scope),
+            ("execution_class", execution_class),
+            ("dependencies", _string_list(item.get("dependencies", []))),
+            ("resource_claims", _resource_claims(item.get("resource_claims"))),
             ("cross_marker_signal_applied", bool(item.get("cross_marker_signal_applied"))),
+        ]
+    )
+
+
+def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any]) -> OrderedDict[str, Any]:
+    raw = item if isinstance(item, dict) else {}
+    packet = str(raw.get("packet") or raw.get("packet_id") or "")
+    packet_id = str(raw.get("packet_id") or packet)
+    state = str(raw.get("state") or "").upper()
+    execution_class, repository, writer_scope, logical_role_id = _candidate_identity(
+        packet=packet,
+        item=raw,
+        default_root=False,
+    )
+    blocked_reason = None
+    if not packet_id or not packet:
+        blocked_reason = "standing_packet_identity_required"
+    elif state not in READY_STATES:
+        blocked_reason = "standing_packet_not_ready"
+    elif execution_class not in EXECUTION_CLASSES:
+        blocked_reason = "invalid_execution_class"
+    elif not repository or not logical_role_id or not writer_scope:
+        blocked_reason = "standing_packet_scope_required"
+    elif writer_scope in set(program.get("forbidden_writer_scopes", [])):
+        blocked_reason = "writer_scope_forbidden"
+    elif not _authority_is_canonical(raw.get("authority")):
+        blocked_reason = "canonical_authority_required"
+    elif _is_protected_packet(packet) and raw.get("protected_surface_authorized") is not True:
+        blocked_reason = "protected_or_platform_mutation_forbidden"
+    phase = str(raw.get("phase") or PHASE_WORKER_IMPLEMENTATION)
+    return OrderedDict(
+        [
+            ("marker", str(raw.get("marker") or raw.get("lane") or logical_role_id or "")),
+            ("lane", str(raw.get("lane") or raw.get("marker") or logical_role_id or "")),
+            ("packet_id", packet_id or None),
+            ("packet", packet or None),
+            ("phase", phase),
+            ("score", int(raw.get("score") or 100)),
+            ("source", "standing_task"),
+            ("proof_delta", str(raw.get("proof_delta") or "implementation_backed")),
+            ("blocked_reason", blocked_reason),
+            ("stale_reason", None),
+            ("file_overlap_risk", str(raw.get("file_overlap_risk") or _file_overlap_risk(phase))),
+            ("requires_external_input", False),
+            ("requires_reselection", False),
+            ("safe", blocked_reason is None),
+            ("classification", str(raw.get("classification") or planner.CLASS_IMPLEMENTATION_READY)),
+            ("logical_role_id", logical_role_id),
+            ("repository", repository),
+            ("writer_scope", writer_scope),
+            ("execution_class", execution_class),
+            ("dependencies", _string_list(raw.get("dependencies", []))),
+            ("resource_claims", _resource_claims(raw.get("resource_claims"))),
+            ("cross_marker_signal_applied", False),
+            ("authority", raw.get("authority")),
         ]
     )
 
@@ -352,10 +499,143 @@ def _selector_exact_packet(selector: dict[str, Any]) -> tuple[str | None, str | 
 
 
 def _sort_candidates(program: dict[str, Any], candidates: list[OrderedDict[str, Any]]) -> list[OrderedDict[str, Any]]:
-    def key(item: OrderedDict[str, Any]) -> tuple[int, int]:
-        return (_phase_priority_rank(program, str(item.get("phase") or "")), -int(item.get("score") or 0))
+    def key(item: OrderedDict[str, Any]) -> tuple[int, int, str]:
+        return (
+            _phase_priority_rank(program, str(item.get("phase") or "")),
+            -int(item.get("score") or 0),
+            str(item.get("packet_id") or item.get("packet") or ""),
+        )
 
     return sorted(candidates, key=key)
+
+
+def _dedupe_candidates(
+    candidates: list[OrderedDict[str, Any]],
+) -> tuple[list[OrderedDict[str, Any]], list[OrderedDict[str, Any]]]:
+    source_rank = {"selector_current_packet": 0, "standing_task": 1, "planner": 2}
+    ordered = sorted(
+        candidates,
+        key=lambda item: (source_rank.get(str(item.get("source")), 9), str(item.get("packet_id") or "")),
+    )
+    unique: list[OrderedDict[str, Any]] = []
+    duplicates: list[OrderedDict[str, Any]] = []
+    seen: set[str] = set()
+    for candidate in ordered:
+        packet_id = str(candidate.get("packet_id") or "")
+        if packet_id in seen:
+            duplicate = OrderedDict(candidate)
+            duplicate["blocked_reason"] = "duplicate_packet_id"
+            duplicates.append(duplicate)
+            continue
+        seen.add(packet_id)
+        unique.append(candidate)
+    return unique, duplicates
+
+
+def _patterns_overlap(left: str, right: str) -> bool:
+    if left == right or fnmatch.fnmatchcase(left, right) or fnmatch.fnmatchcase(right, left):
+        return True
+    left_prefix = left.split("**", 1)[0]
+    right_prefix = right.split("**", 1)[0]
+    return bool(left_prefix and right_prefix and (left.startswith(right_prefix) or right.startswith(left_prefix)))
+
+
+def _candidate_conflicts(left: dict[str, Any], right: dict[str, Any]) -> list[str]:
+    conflicts: list[str] = []
+    left_mutates = left.get("execution_class") in MUTATING_EXECUTION_CLASSES
+    right_mutates = right.get("execution_class") in MUTATING_EXECUTION_CLASSES
+    if left_mutates and right_mutates and left.get("writer_scope") == right.get("writer_scope"):
+        conflicts.append("writer_scope")
+    if left.get("execution_class") == "canonical_workspace" and right.get("execution_class") == "canonical_workspace":
+        conflicts.append("canonical_root")
+    left_claims = left.get("resource_claims", {})
+    right_claims = right.get("resource_claims", {})
+    for kind in ("worktrees", "ports", "browsers", "external_writers"):
+        if set(left_claims.get(kind, [])).intersection(right_claims.get(kind, [])):
+            conflicts.append(kind)
+    if left.get("repository") == right.get("repository") and any(
+        _patterns_overlap(a, b)
+        for a in left_claims.get("files", [])
+        for b in right_claims.get("files", [])
+    ):
+        conflicts.append("files")
+    return sorted(set(conflicts))
+
+
+def _active_writer_scopes(program: dict[str, Any]) -> set[str]:
+    leases = program.get("active_leases", [])
+    if not isinstance(leases, list):
+        return set()
+    return {
+        str(lease.get("writer_scope"))
+        for lease in leases
+        if isinstance(lease, dict)
+        and str(lease.get("status") or "").lower() == "active"
+        and isinstance(lease.get("writer_scope"), str)
+        and lease["writer_scope"]
+    }
+
+
+def _select_execution_wave(
+    *,
+    program: dict[str, Any],
+    candidates: list[OrderedDict[str, Any]],
+) -> tuple[list[OrderedDict[str, Any]], list[OrderedDict[str, Any]], list[OrderedDict[str, Any]]]:
+    selected: list[OrderedDict[str, Any]] = []
+    blocked: list[OrderedDict[str, Any]] = []
+    deferred: list[OrderedDict[str, Any]] = []
+    active_scopes = _active_writer_scopes(program)
+    completed = set(_string_list(program.get("completed_packets", [])))
+    max_writers_value = program.get("max_parallel_writers", 4)
+    max_writers = max(0, int(4 if max_writers_value is None else max_writers_value))
+    max_read_only = max(0, int(program.get("max_parallel_read_only", 2) or 2))
+    writer_count = 0
+    read_only_count = 0
+    for candidate in candidates:
+        candidate = OrderedDict(candidate)
+        dependencies = set(candidate.get("dependencies", []))
+        missing_dependencies = sorted(dependencies - completed)
+        if candidate.get("writer_scope") in active_scopes:
+            candidate["blocked_reason"] = "writer_scope_leased"
+            blocked.append(candidate)
+            continue
+        if missing_dependencies:
+            candidate["blocked_reason"] = "dependencies_not_complete"
+            candidate["missing_dependencies"] = missing_dependencies
+            blocked.append(candidate)
+            continue
+        conflicts = [
+            (other, _candidate_conflicts(candidate, other))
+            for other in selected
+        ]
+        conflicts = [(other, kinds) for other, kinds in conflicts if kinds]
+        if conflicts:
+            candidate["deferred_reason"] = "resource_conflict"
+            candidate["conflicts_with"] = [
+                OrderedDict(
+                    [
+                        ("packet_id", other.get("packet_id")),
+                        ("resource_kinds", kinds),
+                    ]
+                )
+                for other, kinds in conflicts
+            ]
+            deferred.append(candidate)
+            continue
+        if candidate.get("execution_class") == "read_only":
+            if read_only_count >= max_read_only:
+                candidate["deferred_reason"] = "read_only_wave_limit"
+                deferred.append(candidate)
+                continue
+            read_only_count += 1
+        else:
+            if writer_count >= max_writers:
+                candidate["deferred_reason"] = "writer_wave_limit"
+                deferred.append(candidate)
+                continue
+            writer_count += 1
+        selected.append(candidate)
+    return selected, blocked, deferred
 
 
 def _validation_state(preflight_report: dict[str, Any]) -> OrderedDict[str, Any]:
@@ -384,7 +664,7 @@ def render_prompt(report: dict[str, Any]) -> str:
                 "",
                 "Do not invent fallback work.",
                 f"Stop reason: {report.get('stop_reason')}",
-                "Do not switch into owner repos, deploy surfaces, secrets, or platform mutation.",
+                "Do not invent owner work or widen deploy, secret, provider, or production authority.",
             ]
         ) + "\n"
     if status == STATUS_VALIDATION_CLEANUP:
@@ -400,29 +680,49 @@ def render_prompt(report: dict[str, Any]) -> str:
                 "Required preflight:",
                 *[f"- `{command}`" for command in BASELINE_COMMANDS],
                 "",
-                "One-packet-only rule: do not execute any other lane in this task.",
+                "This cleanup owns the canonical-root writer scope; unrelated admitted owner scopes remain independently schedulable.",
             ]
         ) + "\n"
+    selected_jobs = report.get("selected_jobs", [])
+    if not selected_jobs and report.get("selected_packet"):
+        selected_jobs = [
+            {
+                "packet_id": report.get("selected_packet"),
+                "logical_role_id": "atlas.main",
+                "writer_scope": "atlas.root",
+                "execution_class": "canonical_workspace",
+            }
+        ]
     lines = [
-        "Run the ATLAS autonomous lane scheduler and execute exactly one selected packet.",
+        "Run the selected ATLAS execution wave.",
         "",
-        f"Selected lane: `{report.get('selected_lane')}`",
+        f"Selected jobs: `{len(selected_jobs)}`",
         f"Selected packet: `{report.get('selected_packet')}`",
-        f"Phase: `{report.get('packet_phase')}`",
         f"Routing mode: `{report.get('routing_mode')}`",
         f"Branch: `{report.get('git_state', {}).get('branch')}`",
         f"Head: `{report.get('git_state', {}).get('head')}`",
         "",
-        "Required preflight:",
+        "Execution wave:",
     ]
+    lines.extend(
+        f"- `{job.get('packet_id')}` -> `{job.get('logical_role_id')}` in `{job.get('writer_scope')}` ({job.get('execution_class')})"
+        for job in selected_jobs
+    )
+    lines.extend(
+        [
+        "",
+        "Required preflight:",
+        ]
+    )
     lines.extend(f"- `{command}`" for command in BASELINE_COMMANDS)
     lines.extend(
         [
             "",
             "Scope lock:",
-            "- ATLAS root only.",
-            "- Do not mutate Fitness, Mazer, DiscordOS, Foundation, FawxzzyWeb, Playbook, or Stream owner lanes.",
-            "- Do not touch Vercel, Supabase, deploy, secrets, workflows, `.env*`, `.vercel`, `.playwright-mcp`, or `archive`.",
+            "- Execute only the selected packet identities in their named standing roles and writer scopes.",
+            "- One mutating job per conflict group; distinct conflict groups may run concurrently.",
+            "- An active lease, dependency gap, identity drift, or authority mismatch defers only the affected lane.",
+            "- Do not perform unadmitted provider, production, deployment, secret, workflow, `.env*`, `.vercel`, `.playwright-mcp`, or archive actions.",
             "",
         ]
     )
@@ -442,12 +742,10 @@ def render_prompt(report: dict[str, Any]) -> str:
             "- `python ops/validation/validate_stack.py`",
             "",
             "Commit/push/parity requirements:",
-            "- Stage exact intended files only.",
-            "- Commit with a specific message.",
-            "- Push to `origin main`.",
-            "- Fetch and verify `origin/main...HEAD = 0 0`.",
+            "- Each owner stages only its admitted paths in its admitted worktree and branch.",
+            "- Preserve per-packet commit, publication, review, merge, and provider gates.",
             "",
-            "One-packet-only rule: do not execute a second lane in this task.",
+            "Continuation rule: consume terminal receipts, release only their exact leases, and immediately select the next non-conflicting READY wave without waiting for a heartbeat.",
         ]
     )
     return "\n".join(lines) + "\n"
@@ -496,8 +794,57 @@ def build_report(
         else:
             skipped_candidates.append(candidate)
 
+    standing_packets = program.get("standing_packets", [])
+    if isinstance(standing_packets, list):
+        for item in standing_packets:
+            candidate = _candidate_from_standing_packet(item=item, program=program)
+            if candidate["safe"]:
+                candidates.append(candidate)
+            else:
+                blocked_candidates.append(candidate)
+
+    exact_marker, exact_packet = _selector_exact_packet(selector_report)
+    if exact_packet:
+        exact_phase = _phase_from_packet(
+            exact_packet,
+            str(selector_report.get("selected_current_packet_mode") or ""),
+            planner.CLASS_IMMEDIATE,
+        )
+        candidates.append(
+            OrderedDict(
+                [
+                    ("marker", exact_marker),
+                    ("lane", exact_marker),
+                    ("packet_id", exact_packet),
+                    ("packet", exact_packet),
+                    ("phase", exact_phase),
+                    ("score", 1_000_000),
+                    ("source", "selector_current_packet"),
+                    ("proof_delta", "implementation_backed"),
+                    ("blocked_reason", None),
+                    ("stale_reason", None),
+                    ("file_overlap_risk", _file_overlap_risk(exact_phase)),
+                    ("requires_external_input", False),
+                    ("requires_reselection", False),
+                    ("safe", True),
+                    ("classification", planner.CLASS_IMMEDIATE),
+                    ("logical_role_id", "atlas.main"),
+                    ("repository", "fawxzzy/ATLAS"),
+                    ("writer_scope", "atlas.root"),
+                    ("execution_class", "canonical_workspace"),
+                    ("dependencies", []),
+                    ("resource_claims", _resource_claims({"files": ["**"]})),
+                    ("cross_marker_signal_applied", False),
+                ]
+            )
+        )
+
+    candidate_count = len(candidates) + len(skipped_candidates) + len(blocked_candidates)
+    candidates, duplicate_candidates = _dedupe_candidates(candidates)
+    blocked_candidates.extend(duplicate_candidates)
     sorted_candidates = _sort_candidates(program, candidates)
-    selected_candidate = sorted_candidates[0] if sorted_candidates else None
+    selected_jobs: list[OrderedDict[str, Any]] = []
+    deferred_candidates: list[OrderedDict[str, Any]] = []
     status = STATUS_HOLD
     decision = DECISION_HOLD
     routing_mode = DECISION_HOLD
@@ -510,7 +857,6 @@ def build_report(
     stop_reason = "no_safe_candidate"
     safe_to_execute = False
 
-    exact_marker, exact_packet = _selector_exact_packet(selector_report)
     if validation_state["critical"] > 0 or validation_state["error"] > 0:
         status = STATUS_VALIDATION_CLEANUP
         decision = DECISION_VALIDATION_CLEANUP
@@ -521,24 +867,42 @@ def build_report(
         selected_packet_source = "validation"
         stop_reason = "critical_or_error_validation"
         safe_to_execute = True
-    elif exact_packet:
-        selected_marker = exact_marker
-        selected_packet = exact_packet
-        packet_phase = _phase_from_packet(exact_packet, str(selector_report.get("selected_current_packet_mode") or ""), planner.CLASS_IMMEDIATE)
-        selected_packet_source = "selector_current_packet"
-        decision = DECISION_EXACT_MANIFEST_PACKET
-        routing_mode = decision
-        status = STATUS_EXECUTE
-        stop_reason = None
-        safe_to_execute = True
-    elif selected_candidate is not None:
+        selected_jobs = [
+            OrderedDict(
+                [
+                    ("marker", "ATLAS root"),
+                    ("lane", "ATLAS root"),
+                    ("packet_id", selected_packet),
+                    ("packet", selected_packet),
+                    ("phase", packet_phase),
+                    ("source", selected_packet_source),
+                    ("logical_role_id", "atlas.main"),
+                    ("repository", "fawxzzy/ATLAS"),
+                    ("writer_scope", "atlas.root"),
+                    ("execution_class", "canonical_workspace"),
+                ]
+            )
+        ]
+    else:
+        selected_jobs, wave_blocked, deferred_candidates = _select_execution_wave(
+            program=program,
+            candidates=sorted_candidates,
+        )
+        blocked_candidates.extend(wave_blocked)
+
+    selected_candidate = selected_jobs[0] if selected_jobs else None
+    if status != STATUS_VALIDATION_CLEANUP and selected_candidate is not None:
         selected_marker = str(selected_candidate["marker"] or "")
         selected_packet = str(selected_candidate["packet"] or "")
         packet_phase = str(selected_candidate["phase"] or PHASE_HOLD)
         selected_packet_source = str(selected_candidate["source"] or "planner")
         requires_reselection_receipt = bool(selected_candidate["requires_reselection"])
         reselection_receipt = _reselection_receipt(selected_marker) if requires_reselection_receipt else None
-        if packet_phase == PHASE_WORKER_RECONCILIATION:
+        if len(selected_jobs) > 1:
+            decision = DECISION_EXECUTION_WAVE
+        elif selected_packet_source == "selector_current_packet":
+            decision = DECISION_EXACT_MANIFEST_PACKET
+        elif packet_phase == PHASE_WORKER_RECONCILIATION:
             decision = DECISION_WORKER_RECONCILIATION
         elif packet_phase == PHASE_WORKER_IMPLEMENTATION:
             decision = DECISION_ROUTED_WORKER
@@ -566,8 +930,11 @@ def build_report(
             ("selected_packet_source", selected_packet_source),
             ("requires_reselection_receipt", requires_reselection_receipt),
             ("reselection_receipt", reselection_receipt),
-            ("candidate_count", len(candidates) + len(skipped_candidates) + len(blocked_candidates)),
+            ("candidate_count", candidate_count),
             ("candidates", sorted_candidates),
+            ("selected_jobs", selected_jobs),
+            ("execution_waves", [OrderedDict([("wave", 1), ("packet_ids", [job.get("packet_id") for job in selected_jobs])])] if selected_jobs else []),
+            ("deferred_candidates", deferred_candidates),
             ("skipped_candidates", skipped_candidates),
             ("blocked_candidates", blocked_candidates),
             ("validation_state", validation_state),
@@ -598,7 +965,7 @@ def build_report(
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Select one deterministic ATLAS root packet for autonomous execution.")
+    parser = argparse.ArgumentParser(description="Select one deterministic conflict-safe ATLAS execution wave.")
     parser.add_argument("--json", action="store_true", help="Emit JSON output.")
     parser.add_argument("--program", required=True, help="Root-relative operator work-program JSON path.")
     parser.add_argument("--output", required=True, help="Root-relative tmp/atlas/**.json output path.")
@@ -648,6 +1015,9 @@ def main(argv: list[str] | None = None) -> int:
                     ("reselection_receipt", None),
                     ("candidate_count", 0),
                     ("candidates", []),
+                    ("selected_jobs", []),
+                    ("execution_waves", []),
+                    ("deferred_candidates", []),
                     ("skipped_candidates", []),
                     ("blocked_candidates", blockers),
                     ("validation_state", OrderedDict()),
@@ -696,6 +1066,9 @@ def main(argv: list[str] | None = None) -> int:
                 ("reselection_receipt", None),
                 ("candidate_count", 0),
                 ("candidates", []),
+                ("selected_jobs", []),
+                ("execution_waves", []),
+                ("deferred_candidates", []),
                 ("skipped_candidates", []),
                 ("blocked_candidates", [_finding("internal_error", "Unhandled scheduler exception.", error=str(exc))]),
                 ("validation_state", OrderedDict()),

@@ -49,7 +49,7 @@ AUTHORITY_DENIALS = (
 )
 RESOURCE_KINDS = (
     "files", "generated_artifacts", "schemas", "canonical_root", "worktrees", "ports",
-    "browsers", "external_writers",
+    "browsers", "external_writers", "writer_scopes",
 )
 PROTECTED_PARTS = {"repos", "secrets", "runtime", ".vercel", ".codex", "archive", "archives"}
 FORBIDDEN_PATH_TERMS = ("transcript", "conversation", "private-reasoning", "browser-profile", "account", "health", "payment", "live-platform", "network")
@@ -145,6 +145,19 @@ def _string_list(value: Any) -> list[str]:
     return sorted({str(item).replace("\\", "/") for item in value if isinstance(item, (str, int, float))})
 
 
+def _writer_scope(job: dict[str, Any]) -> str | None:
+    declared = job.get("writer_scope")
+    if isinstance(declared, str) and declared.strip():
+        return declared.strip()
+    execution_class = job.get("execution_class")
+    if execution_class == "canonical_workspace":
+        return "atlas.root"
+    repository = job.get("repository")
+    if execution_class == "repo_worktree" and isinstance(repository, str) and repository.strip():
+        return f"repo.{repository.strip().lower()}"
+    return None
+
+
 def _normalized_claims(job: dict[str, Any]) -> OrderedDict[str, list[str]]:
     raw = job.get("resource_claims") if isinstance(job.get("resource_claims"), dict) else {}
     claims: OrderedDict[str, list[str]] = OrderedDict()
@@ -156,6 +169,14 @@ def _normalized_claims(job: dict[str, Any]) -> OrderedDict[str, list[str]]:
                 value += job.get("allowed_files", []) if isinstance(job.get("allowed_files"), list) else []
         if value is True and kind == "canonical_root":
             value = ["canonical_root"]
+        if kind == "canonical_root" and job.get("execution_class") == "canonical_workspace":
+            value = list(value) if isinstance(value, list) else []
+            value.append("atlas")
+        if kind == "writer_scopes":
+            value = list(value) if isinstance(value, list) else []
+            writer_scope = _writer_scope(job)
+            if writer_scope:
+                value.append(writer_scope)
         claims[kind] = _string_list(value)
     return claims
 
@@ -181,11 +202,14 @@ def _normalize_job(raw: Any) -> tuple[OrderedDict[str, Any] | None, list[Ordered
             blockers.append(_finding("invalid_job_shape", "Job collection field must be an array.", field=field))
     if "resource_claims" in raw and not isinstance(raw["resource_claims"], dict):
         blockers.append(_finding("invalid_job_shape", "resource_claims must be an object."))
+    if "writer_scope" in raw and (not isinstance(raw["writer_scope"], str) or not raw["writer_scope"].strip()):
+        blockers.append(_finding("invalid_job_shape", "writer_scope must be a non-empty string when supplied."))
     candidate_id = _candidate_id(raw)
     candidate = OrderedDict(
         (("job_id", candidate_id), ("source_job_id", raw.get("job_id")), ("objective", raw.get("objective")),
          ("project", raw.get("project")), ("component", raw.get("component")), ("repository", raw.get("repository")),
          ("owner", raw.get("owner")), ("execution_class", execution_class),
+         ("writer_scope", _writer_scope(raw)),
          ("allowed_files", _string_list(raw.get("allowed_files", []))), ("forbidden_files", _string_list(raw.get("forbidden_files", []))),
          ("dependencies", _string_list(raw.get("dependencies", []))), ("resource_claims", _normalized_claims(raw)),
          ("runtime", _canonical(raw.get("runtime", {})) if isinstance(raw.get("runtime", {}), dict) else OrderedDict()),
@@ -213,7 +237,9 @@ def _collision_kinds(left: OrderedDict[str, Any], right: OrderedDict[str, Any]) 
     for kind in RESOURCE_KINDS:
         values_left, values_right = left_claims[kind], right_claims[kind]
         if kind == "files":
-            if any(_patterns_overlap(a, b) for a in values_left for b in values_right):
+            if left.get("repository") == right.get("repository") and any(
+                _patterns_overlap(a, b) for a in values_left for b in values_right
+            ):
                 kinds.append(kind)
         elif set(values_left).intersection(values_right):
             kinds.append(kind)
@@ -378,12 +404,12 @@ def build_plan(*, root: Path, synthesis_path: str | None, bridge_path: str | Non
          ("selected_packet", contract.get("selected_packet")), ("objective", contract.get("objective")),
          ("plan_status", plan_status), ("dependency_graph", edges), ("execution_waves", waves),
          ("job_candidates", candidates),
-         ("project_component_ownership", [OrderedDict((("job_id", c["job_id"]), ("project", c["project"]), ("component", c["component"]), ("repository", c["repository"]), ("owner", c["owner"]))) for c in candidates]),
+         ("project_component_ownership", [OrderedDict((("job_id", c["job_id"]), ("project", c["project"]), ("component", c["component"]), ("repository", c["repository"]), ("owner", c["owner"]), ("writer_scope", c["writer_scope"]))) for c in candidates]),
          ("runtime_recommendation", runtime),
          ("permission_posture", OrderedDict((("full_local_access_is_capability_only", True), ("requested_capability", contract.get("local_capability", "unresolved")), ("planner_cannot_apply_permissions", True)))),
          ("external_action_authority", OrderedDict((("planner_authority", NO_EXECUTION_AUTHORITY), ("requested_authority", authority), ("requested_actions", external_actions), ("denials", list(AUTHORITY_DENIALS))))),
          ("scope_lock", [OrderedDict((("job_id", c["job_id"]), ("allowed_files", c["allowed_files"]), ("forbidden_files", c["forbidden_files"]))) for c in candidates]),
-         ("resource_leases", [OrderedDict((("job_id", c["job_id"]), ("claims", c["resource_claims"]), ("advisory_only", True))) for c in candidates]),
+         ("resource_leases", [OrderedDict((("job_id", c["job_id"]), ("writer_scope", c["writer_scope"]), ("claims", c["resource_claims"]), ("advisory_only", True))) for c in candidates]),
          ("verification_requirements", [OrderedDict((("job_id", c["job_id"]), ("requirements", c["verification_requirements"]))) for c in candidates]),
          ("proof_requirements", [OrderedDict((("job_id", c["job_id"]), ("requirements", c["proof_requirements"]))) for c in candidates]),
          ("commit_requirements", [OrderedDict((("job_id", c["job_id"]), ("requirements", c["commit_requirements"]))) for c in candidates]),
@@ -439,8 +465,7 @@ def _assign_waves(candidates: list[OrderedDict[str, Any]]) -> tuple[list[Ordered
                 occupants = [by_id[item] for item in waves.get(wave, [])]
                 collisions = [(occupant, _collision_kinds(candidate, occupant)) for occupant in occupants]
                 collisions = [(occupant, kinds) for occupant, kinds in collisions if kinds]
-                only_read_only = candidate["execution_class"] == "read_only" and all(item["execution_class"] == "read_only" for item in occupants)
-                if not collisions and (not occupants or only_read_only):
+                if not collisions:
                     break
                 for occupant, kinds in collisions:
                     risks.append(OrderedDict((("jobs", sorted([job_id, occupant["job_id"]])), ("resource_kinds", kinds), ("serialized", True))))

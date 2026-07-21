@@ -623,12 +623,15 @@ Treat these as serialized shared root spines:
 Default operating split:
 
 - one root writer
-- one owner-repo writer
-- one read-only scout
+- one writer per owner repository or declared external-resource conflict group
+- read-only scouts only while their resource claims remain disjoint
 
 Rules:
 
 - do not let two active root-writing passes touch the same shared spine at once
+- do not globally serialize unrelated owner repositories; acquire and release leases by `writer_scope`
+- resume an `IDLE` or `notLoaded` standing role by stable logical role ID when a canonical READY packet exists; do not require a dedicated heartbeat per owner
+- after a terminal receipt, release only its exact lease and immediately dispatch the next dependency-satisfied conflict-free wave
 - if a receipt can land without an immediate shared-spine rewrite, prefer batching that rewrite with the next related ratchet or hygiene pass
 - do not let a read-only scout quietly become a writer without reclassifying the lane
 
