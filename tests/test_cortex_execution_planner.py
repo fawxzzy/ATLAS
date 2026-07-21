@@ -268,11 +268,18 @@ class CortexExecutionPlannerTests(unittest.TestCase):
         self.assertIn("invalid_resource_claim", [item["code"] for item in plan["blocked_reasons"]])
 
     def test_malformed_github_pr_url_aliases_fail_closed(self) -> None:
-        for locator in ("pulls", "pr", "prs", "pull-request", "pullx"):
-            with self.subTest(locator=locator):
+        for locator, number in (
+            ("pulls", "146"),
+            ("pr", "146"),
+            ("prs", "146"),
+            ("pull-request", "146"),
+            ("pullx", "146"),
+            ("pullx", "not-a-number"),
+        ):
+            with self.subTest(locator=locator, number=number):
                 job = self._job("one", execution_class="repo_worktree")
                 job["resource_claims"] = {
-                    "external_writers": [f"https://github.com/fawxzzy/ATLAS/{locator}/146"],
+                    "external_writers": [f"https://github.com/fawxzzy/ATLAS/{locator}/{number}"],
                 }
 
                 plan, status = self._plan(self._root(), [job])

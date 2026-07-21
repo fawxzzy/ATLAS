@@ -501,8 +501,7 @@ def apply_delivery_results(
                     and str(result.get("reconciled_event_id") or "") == str(intent.get("event_id") or "")
                     and result.get("effects_match_intent") is True
                 )
-                legacy_recovery_exact = result.get("reconciled_from_complete_target_history") is True
-                if not (recovery_exact or legacy_recovery_exact):
+                if not recovery_exact:
                     findings.append(
                         _finding(
                             "delivery_recovery_evidence_required",
@@ -1065,9 +1064,7 @@ def _external_writer_identity(value: str) -> str:
                 repository = _repository_identity("/".join(parts[:2]))
                 if repository:
                     return f"github-pr:{repository}#{int(parts[3])}"
-            if locator in {"pr", "prs", "pulls", "pull-request", "pull-requests"} or (
-                locator.startswith("pull") and len(parts) >= 4 and parts[3].isdigit()
-            ):
+            if locator in {"pr", "prs"} or locator.startswith("pull"):
                 return ""
         return raw.casefold()
     prefix, separator, remainder = raw.partition(":")
@@ -2360,6 +2357,9 @@ def main(argv: list[str] | None = None) -> int:
                     envelope
                     for envelope in envelopes
                     if not _terminal_success(envelope.get("payload") if isinstance(envelope.get("payload"), dict) else {})
+                    and not _terminal_cancellation(
+                        envelope.get("payload") if isinstance(envelope.get("payload"), dict) else {}
+                    )
                 ]
                 program, admission_findings = reconcile_runtime_program(
                     program=program,

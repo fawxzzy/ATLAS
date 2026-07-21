@@ -185,9 +185,7 @@ def _external_writer_identity(value: str) -> str:
                 repository = _repository_identity("/".join(parts[:2]))
                 if repository:
                     return f"github-pr:{repository}#{int(parts[3])}"
-            if locator in {"pr", "prs", "pulls", "pull-request", "pull-requests"} or (
-                locator.startswith("pull") and len(parts) >= 4 and parts[3].isdigit()
-            ):
+            if locator in {"pr", "prs"} or locator.startswith("pull"):
                 return ""
         return raw.casefold()
     prefix, separator, remainder = raw.partition(":")
