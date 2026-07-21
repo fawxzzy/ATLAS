@@ -15,6 +15,7 @@ import sys
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 SCHEMA_VERSION = "atlas.cortex.execution_plan.v1"
 SYNTHESIS_SCHEMA_VERSION = "atlas.cortex.chat_style_synthesis_packet.v1"
@@ -146,6 +147,51 @@ def _string_list(value: Any) -> list[str]:
     return sorted({str(item).replace("\\", "/") for item in value if isinstance(item, (str, int, float))})
 
 
+def _repository_identity(value: Any) -> str | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    raw = value.strip().replace("\\", "/")
+    lowered = raw.casefold()
+    if lowered.startswith("git@github.com:"):
+        path = raw.split(":", 1)[1]
+    elif "://" in raw:
+        parsed = urlsplit(raw)
+        if parsed.hostname is None or parsed.hostname.casefold() != "github.com" or parsed.query or parsed.fragment:
+            return None
+        path = parsed.path
+    elif lowered.startswith("github.com/"):
+        path = raw[len("github.com/") :]
+    else:
+        path = raw
+    path = path.strip("/")
+    if path.casefold().endswith(".git"):
+        path = path[:-4]
+    parts = path.split("/")
+    if len(parts) == 1 and parts[0]:
+        return parts[0].casefold()
+    if len(parts) != 2 or not all(parts):
+        return None
+    return "/".join(part.casefold() for part in parts)
+
+
+def _external_writer_identity(value: str) -> str:
+    prefix, separator, remainder = value.strip().partition(":")
+    normalized_prefix = prefix.casefold()
+    if not separator or normalized_prefix not in {"github", "github-pr", "git-branch"}:
+        return value.strip()
+    repository_token, suffix_separator, suffix = remainder.partition(":")
+    repository, pr_separator, pr_number = repository_token.partition("#")
+    normalized_repository = _repository_identity(repository)
+    if not normalized_repository:
+        return value.strip().casefold()
+    normalized = f"{normalized_prefix}:{normalized_repository}"
+    if pr_separator:
+        normalized += f"#{pr_number.casefold()}"
+    if suffix_separator:
+        normalized += f":{suffix}"
+    return normalized
+
+
 def _writer_scope(job: dict[str, Any]) -> str | None:
     declared = job.get("writer_scope")
     if isinstance(declared, str) and declared.strip():
@@ -153,16 +199,10 @@ def _writer_scope(job: dict[str, Any]) -> str | None:
     execution_class = job.get("execution_class")
     if execution_class == "canonical_workspace":
         return "atlas.root"
-    repository = job.get("repository")
-    if execution_class == "repo_worktree" and isinstance(repository, str) and repository.strip():
-        return f"repo.{repository.strip().lower()}"
+    repository = _repository_identity(job.get("repository"))
+    if execution_class == "repo_worktree" and repository:
+        return f"repo.{repository}"
     return None
-
-
-def _repository_identity(value: Any) -> str | None:
-    if not isinstance(value, str) or not value.strip():
-        return None
-    return value.strip().casefold()
 
 
 def _normalized_claims(job: dict[str, Any]) -> OrderedDict[str, list[str]]:
@@ -185,6 +225,8 @@ def _normalized_claims(job: dict[str, Any]) -> OrderedDict[str, list[str]]:
             if writer_scope:
                 value.append(writer_scope)
         claims[kind] = _string_list(value)
+        if kind == "external_writers":
+            claims[kind] = sorted({_external_writer_identity(item) for item in claims[kind]})
     return claims
 
 
@@ -211,10 +253,19 @@ def _normalize_job(raw: Any) -> tuple[OrderedDict[str, Any] | None, list[Ordered
         blockers.append(_finding("invalid_job_shape", "resource_claims must be an object."))
     if "writer_scope" in raw and (not isinstance(raw["writer_scope"], str) or not raw["writer_scope"].strip()):
         blockers.append(_finding("invalid_job_shape", "writer_scope must be a non-empty string when supplied."))
+    repository = _repository_identity(raw.get("repository"))
+    if repository is None:
+        blockers.append(
+            _finding(
+                "invalid_job_shape",
+                "Repository identity must be an owner/repo value or recognized GitHub alias.",
+                field="repository",
+            )
+        )
     candidate_id = _candidate_id(raw)
     candidate = OrderedDict(
         (("job_id", candidate_id), ("source_job_id", raw.get("job_id")), ("objective", raw.get("objective")),
-         ("project", raw.get("project")), ("component", raw.get("component")), ("repository", _repository_identity(raw.get("repository"))),
+         ("project", raw.get("project")), ("component", raw.get("component")), ("repository", repository),
          ("owner", raw.get("owner")), ("execution_class", execution_class),
          ("writer_scope", _writer_scope(raw)),
          ("allowed_files", _string_list(raw.get("allowed_files", []))), ("forbidden_files", _string_list(raw.get("forbidden_files", []))),

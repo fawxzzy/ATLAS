@@ -15,6 +15,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -511,7 +512,7 @@ def reconcile_runtime_program(
         if state not in READY_STATES:
             continue
         role_id = str(payload.get("logical_role_id") or "")
-        repository = str(payload.get("repository") or "")
+        repository = _repository_identity(payload.get("repository"))
         execution_class = str(payload.get("execution_class") or "")
         if not packet_id or not role_id or not repository or not writer_scope or execution_class not in EXECUTION_CLASSES:
             findings.append(
@@ -702,12 +703,59 @@ def _string_list(value: Any) -> list[str]:
     return sorted({str(item).replace("\\", "/") for item in value if isinstance(item, str) and item.strip()})
 
 
+def _repository_identity(value: Any) -> str:
+    if not isinstance(value, str) or not value.strip():
+        return ""
+    raw = value.strip().replace("\\", "/")
+    lowered = raw.casefold()
+    if lowered.startswith("git@github.com:"):
+        path = raw.split(":", 1)[1]
+    elif "://" in raw:
+        parsed = urlsplit(raw)
+        if parsed.hostname is None or parsed.hostname.casefold() != "github.com" or parsed.query or parsed.fragment:
+            return ""
+        path = parsed.path
+    elif lowered.startswith("github.com/"):
+        path = raw[len("github.com/") :]
+    else:
+        path = raw
+    path = path.strip("/")
+    if path.casefold().endswith(".git"):
+        path = path[:-4]
+    parts = path.split("/")
+    if len(parts) == 1 and parts[0]:
+        return parts[0].casefold()
+    if len(parts) != 2 or not all(parts):
+        return ""
+    return "/".join(part.casefold() for part in parts)
+
+
+def _external_writer_identity(value: str) -> str:
+    prefix, separator, remainder = value.strip().partition(":")
+    normalized_prefix = prefix.casefold()
+    if not separator or normalized_prefix not in {"github", "github-pr", "git-branch"}:
+        return value.strip()
+    repository_token, suffix_separator, suffix = remainder.partition(":")
+    repository, pr_separator, pr_number = repository_token.partition("#")
+    normalized_repository = _repository_identity(repository)
+    if not normalized_repository:
+        return value.strip().casefold()
+    normalized = f"{normalized_prefix}:{normalized_repository}"
+    if pr_separator:
+        normalized += f"#{pr_number.casefold()}"
+    if suffix_separator:
+        normalized += f":{suffix}"
+    return normalized
+
+
 def _resource_claims(value: Any) -> OrderedDict[str, list[str]]:
     raw = value if isinstance(value, dict) else {}
-    return OrderedDict(
+    claims = OrderedDict(
         (kind, _string_list(raw.get(kind, [])))
         for kind in ("files", "worktrees", "ports", "browsers", "external_writers")
     )
+    claims["external_writers"] = sorted({_external_writer_identity(item) for item in claims["external_writers"]})
+    return claims
 
 
 def _authority_is_canonical(value: Any) -> bool:
@@ -727,7 +775,7 @@ def _candidate_identity(
     default_root: bool,
 ) -> tuple[str | None, str | None, str | None, str | None]:
     execution_class = str(item.get("execution_class") or ("canonical_workspace" if default_root else ""))
-    repository = str(item.get("repository") or ("fawxzzy/ATLAS" if default_root else "")) or None
+    repository = _repository_identity(item.get("repository") or ("fawxzzy/ATLAS" if default_root else "")) or None
     writer_scope = str(item.get("writer_scope") or ("atlas.root" if default_root else "")) or None
     logical_role_id = str(item.get("logical_role_id") or ("atlas.main" if default_root else "")) or None
     if execution_class == "read_only":
@@ -949,10 +997,6 @@ def _patterns_overlap(left: str, right: str) -> bool:
     left_prefix = left.split("**", 1)[0]
     right_prefix = right.split("**", 1)[0]
     return bool(left_prefix and right_prefix and (left.startswith(right_prefix) or right.startswith(left_prefix)))
-
-
-def _repository_identity(value: Any) -> str:
-    return value.strip().casefold() if isinstance(value, str) else ""
 
 
 def _candidate_conflicts(left: dict[str, Any], right: dict[str, Any]) -> list[str]:

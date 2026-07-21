@@ -84,6 +84,12 @@ Canonical envelope ingestion persists `protected_surface_authorized` exactly;
 otherwise protected lifecycle wording remains blocked after handoff even when
 the originating authority admitted that bounded surface.
 
+Repository identities are canonicalized before scope derivation, persistence,
+and collision checks. GitHub `owner/repo`, HTTPS, SSH, and `.git` aliases map to
+one lowercase owner/repository key; unrecognized URL identities fail closed.
+Structured `github`, `github-pr`, and `git-branch` external-writer claims apply
+the same repository normalization while preserving case-sensitive suffixes.
+
 A root validation hold owns only the checkout being validated. A source writer
 for the same repository may continue from another worktree only when it declares
 bounded file claims and an explicit non-wildcard worktree identity different

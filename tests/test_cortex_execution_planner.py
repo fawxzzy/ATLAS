@@ -222,6 +222,31 @@ class CortexExecutionPlannerTests(unittest.TestCase):
             {item["repository"] for item in plan["project_component_ownership"]},
         )
 
+    def test_repository_url_alias_cannot_bypass_serialization(self) -> None:
+        first = self._job("one", execution_class="repo_worktree", writer_scope="repo.stack.one", allowed_files=[])
+        second = self._job("two", execution_class="repo_worktree", writer_scope="repo.stack.two", allowed_files=[])
+        first["repository"] = "fawxzzy/ATLAS"
+        second["repository"] = "https://github.com/fawxzzy/ATLAS.git"
+
+        plan, _ = self._plan(self._root(), [first, second])
+
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("repository", plan["collision_risks"][0]["resource_kinds"])
+        self.assertEqual(
+            {"fawxzzy/atlas"},
+            {item["repository"] for item in plan["project_component_ownership"]},
+        )
+
+    def test_unrecognized_repository_url_fails_closed(self) -> None:
+        job = self._job("one", execution_class="repo_worktree")
+        job["repository"] = "https://example.com/fawxzzy/ATLAS.git"
+
+        plan, status = self._plan(self._root(), [job])
+
+        self.assertEqual("blocker", status)
+        self.assertFalse(plan["safe_to_admit"])
+        self.assertIn("invalid_job_shape", [item["code"] for item in plan["blocked_reasons"]])
+
     def test_explicit_distinct_scopes_share_same_repository_with_proven_isolation(self) -> None:
         first = self._job(
             "one",

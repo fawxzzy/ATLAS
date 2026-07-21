@@ -499,6 +499,39 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             )
         )
 
+    def test_external_writer_repository_case_variants_are_one_resource(self) -> None:
+        program = _program_payload()
+        packets = []
+        for packet_id, repository_case in (("review-request", "ATLAS"), ("review-reply", "atlas")):
+            packet = _standing_packet(
+                packet_id,
+                role_id="atlas.release-control-plane",
+                repository="fawxzzy/ATLAS",
+                writer_scope=f"github.fawxzzy.ATLAS.pr146.{packet_id}",
+            )
+            packet["execution_class"] = "external_mutation"
+            packet["resource_claims"] = {
+                "external_writers": [f"github:fawxzzy/{repository_case}#146:review"],
+            }
+            packets.append(packet)
+        program["standing_packets"] = packets
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(1, len(report["selected_jobs"]))
+        self.assertIn("external_writers", report["deferred_candidates"][0]["conflicts_with"][0]["resource_kinds"])
+        self.assertEqual(
+            ["github:fawxzzy/atlas#146:review"],
+            report["selected_jobs"][0]["resource_claims"]["external_writers"],
+        )
+
     def test_worker_reconciliation_selected_before_other_packets(self) -> None:
         report = scheduler.build_report(
             root=Path("atlas-root-fixture"),
@@ -766,7 +799,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             planner_report=_planner_payload([]),
         )
 
-        self.assertEqual("fawxzzy/ATLAS", program["active_leases"][0]["repository"])
+        self.assertEqual("fawxzzy/atlas", program["active_leases"][0]["repository"])
         self.assertEqual([], second["selected_jobs"])
         blocked = next(item for item in second["blocked_candidates"] if item["packet_id"] == "atlas-b")
         self.assertEqual("active_lease_resource_conflict", blocked["blocked_reason"])
@@ -826,6 +859,31 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(1, len(report["selected_jobs"]))
         self.assertEqual("resource_conflict", report["deferred_candidates"][0]["deferred_reason"])
         self.assertIn("repository", report["deferred_candidates"][0]["conflicts_with"][0]["resource_kinds"])
+
+    def test_repository_url_alias_cannot_bypass_serialization(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
+            _standing_packet(
+                "atlas-b",
+                role_id="atlas.workflow-architect",
+                repository="https://github.com/fawxzzy/ATLAS.git",
+                writer_scope="repo.atlas.b",
+            ),
+        ]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(1, len(report["selected_jobs"]))
+        self.assertIn("repository", report["deferred_candidates"][0]["conflicts_with"][0]["resource_kinds"])
+        self.assertEqual("fawxzzy/atlas", report["selected_jobs"][0]["repository"])
 
     def test_recovery_lease_serializes_unproved_same_repository_scope(self) -> None:
         program = _program_payload()
