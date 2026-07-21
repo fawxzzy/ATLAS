@@ -723,8 +723,6 @@ def _repository_identity(value: Any) -> str:
     if path.casefold().endswith(".git"):
         path = path[:-4]
     parts = path.split("/")
-    if len(parts) == 1 and parts[0]:
-        return parts[0].casefold()
     if len(parts) != 2 or not all(parts):
         return ""
     return "/".join(part.casefold() for part in parts)
@@ -735,9 +733,11 @@ def _external_writer_identity(value: str) -> str:
     if "://" in raw:
         parsed = urlsplit(raw)
         parts = parsed.path.strip("/").split("/")
-        if parsed.hostname and parsed.hostname.casefold() == "github.com" and len(parts) >= 4:
+        if parsed.hostname and parsed.hostname.casefold() == "github.com" and len(parts) >= 3 and parts[2].casefold() == "pull":
+            if len(parts) < 4 or not parts[3].isdigit():
+                return ""
             repository = _repository_identity("/".join(parts[:2]))
-            if repository and parts[2].casefold() == "pull" and parts[3].isdigit():
+            if repository:
                 return f"github-pr:{repository}#{int(parts[3])}"
         return raw.casefold()
     prefix, separator, remainder = raw.partition(":")
@@ -748,9 +748,13 @@ def _external_writer_identity(value: str) -> str:
     repository, pr_separator, pr_number = repository_token.partition("#")
     normalized_repository = _repository_identity(repository)
     if not normalized_repository:
-        return raw.casefold()
-    if pr_separator and pr_number.isdigit():
+        return ""
+    if pr_separator:
+        if not pr_number.isdigit():
+            return ""
         return f"github-pr:{normalized_repository}#{int(pr_number)}"
+    if normalized_prefix == "github-pr":
+        return ""
     normalized = f"{normalized_prefix}:{normalized_repository}"
     if suffix_separator:
         normalized += f":{suffix}"
@@ -763,7 +767,11 @@ def _resource_claims(value: Any) -> OrderedDict[str, list[str]]:
         (kind, _string_list(raw.get(kind, [])))
         for kind in ("files", "worktrees", "ports", "browsers", "external_writers")
     )
-    claims["external_writers"] = sorted({_external_writer_identity(item) for item in claims["external_writers"]})
+    claims["external_writers"] = sorted(
+        identity
+        for identity in {_external_writer_identity(item) for item in claims["external_writers"]}
+        if identity
+    )
     return claims
 
 
@@ -1126,11 +1134,13 @@ def _active_lease_candidate(
 
 
 def _active_lease_identity_complete(lease: dict[str, Any]) -> bool:
-    return bool(
-        _repository_identity(lease.get("repository"))
-        and lease.get("execution_class") in MUTATING_EXECUTION_CLASSES
-        and isinstance(lease.get("resource_claims"), dict)
-    )
+    if not _repository_identity(lease.get("repository")) or lease.get("execution_class") not in MUTATING_EXECUTION_CLASSES:
+        return False
+    if not isinstance(lease.get("resource_claims"), dict):
+        return False
+    if lease.get("execution_class") == "external_mutation":
+        return bool(_resource_claims(lease.get("resource_claims"))["external_writers"])
+    return True
 
 
 def _select_execution_wave(

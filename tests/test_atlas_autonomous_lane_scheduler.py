@@ -491,6 +491,98 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(scheduler.STATUS_HOLD, report["status"])
         self.assertEqual("external_writer_claim_required", report["blocked_candidates"][0]["blocked_reason"])
 
+    def test_one_segment_repository_identity_is_rejected(self) -> None:
+        program = _program_payload()
+        malformed = _standing_packet(
+            "bare-repository",
+            role_id="atlas.main",
+            repository="ATLAS",
+            writer_scope="repo.atlas.bare",
+        )
+        qualified = _standing_packet(
+            "qualified-repository",
+            role_id="atlas.workflow-architect",
+            repository="fawxzzy/ATLAS",
+            writer_scope="repo.atlas.qualified",
+        )
+        program["standing_packets"] = [malformed, qualified]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(["qualified-repository"], [job["packet_id"] for job in report["selected_jobs"]])
+        blocked = next(item for item in report["blocked_candidates"] if item["packet_id"] == "bare-repository")
+        self.assertEqual("standing_packet_scope_required", blocked["blocked_reason"])
+
+    def test_malformed_github_pr_writer_alias_is_rejected(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "malformed-review-writer",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="github.fawxzzy.ATLAS.pr146.review",
+        )
+        packet["execution_class"] = "external_mutation"
+        packet["resource_claims"] = {
+            "external_writers": ["github-pr:fawxzzy/ATLAS#not-a-number"],
+        }
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual("external_writer_claim_required", report["blocked_candidates"][0]["blocked_reason"])
+
+    def test_claimless_external_active_lease_is_incomplete(self) -> None:
+        program = _program_payload()
+        program["active_leases"] = [
+            {
+                "packet_id": "unknown-external-writer",
+                "reservation_id": "rsrv_unknown",
+                "repository": "fawxzzy/ATLAS",
+                "writer_scope": "github.fawxzzy.ATLAS.unknown",
+                "execution_class": "external_mutation",
+                "resource_claims": {},
+                "status": "active",
+            }
+        ]
+        packet = _standing_packet(
+            "review-request",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="github.fawxzzy.ATLAS.pr146.review",
+        )
+        packet["execution_class"] = "external_mutation"
+        packet["resource_claims"] = {
+            "external_writers": ["github:fawxzzy/ATLAS#146:review"],
+        }
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual("active_lease_identity_incomplete", report["blocked_candidates"][0]["blocked_reason"])
+
     def test_external_mutations_serialize_on_exact_writer_claim(self) -> None:
         program = _program_payload()
         packets = []
