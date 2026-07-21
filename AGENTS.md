@@ -18,8 +18,9 @@ Persistent context
 Routing
 - Single-repo implementation work should be routed into the target repo root.
 - Cross-repo work may touch only the named repos plus stack-level files under the ATLAS root.
-- ATLAS-root sessions are root-governance sessions by default. Fitness, Mazer, and other owner repos are excluded fallback lanes unless the operator explicitly selects an owner-lane packet by name.
-- If the selector, planner, or marker board reports no immediate root packet, stop and report the held root state. Do not switch into Fitness, Mazer, Stripe/Vercel launch work, game work, or owner-repo cleanup as a fallback.
+- ATLAS-root sessions are root-governance sessions by default. Fitness, Mazer, and other owner repos are excluded arbitrary fallback lanes. An owner lane may run only from an explicitly selected packet or a scheduler-admitted `standing_local_source_preparation` packet that satisfies the bounded contract below.
+- If the selector, planner, or marker board reports no immediate root packet and no valid standing local source-preparation packet, stop and report the held root state. Do not invent Fitness, Mazer, Stripe/Vercel launch work, game work, or owner-repo cleanup as a fallback.
+- Standing local source preparation is limited to unstaged edits, tests, documentation, and deterministic generation in one isolated owner worktree at an immutable parent and exact path allowlist. It never authorizes staging, commit, push, branch or PR creation, review requests, merge, workflow or runner actions, provider access, Supabase mutation, deployment, production, or canonical-root mutation.
 - Fitness and Mazer may appear in root outputs only as read-only advisory owner-lane inventory status unless explicitly selected.
 - Stack-level files are:
   - `stack.yaml`
@@ -109,6 +110,7 @@ Operator Continuity
 - Do not stop foreground coordination solely because background tasks are active. Continue monitoring terminal receipts, archiving completed bounded tasks, and dispatching the next non-conflicting admitted lane.
 - Treat heartbeat automations as interruption recovery only, not as a substitute for active execution.
 - On every material wake, consume all canonically authorized READY standing packets in dependency order, dispatch the largest conflict-free wave, and continue after each terminal receipt until no admitted packet remains. `IDLE` and `notLoaded` standing tasks are resumable role bindings, not dead lanes.
+- When no READY packet exists, one bounded read-only selector may derive exact `standing_local_source_preparation` packets from immutable repository evidence. Each packet must name an `owner.*` role, a full parent commit, one isolated worktree, a nonempty exact relative path allowlist mirrored by file claims, `LOCAL_ONLY_UNSTAGED` mode, and `HELD` publication. Generic continuation language is not this authority.
 - Release only the lease named by a terminal receipt. A blocked or latency-bound lease suppresses that conflict group only; it must not stop unrelated READY scopes.
 - When a lane blocks, persist the blocker and advance another ready lane. Use `FAWXZZY MESSAGES` for concise non-blocking operator updates when useful.
 - All root-launched local tasks inherit full local access, network access, live web search, and no approval prompts. Read-only scope is job authority, not a permission downgrade.

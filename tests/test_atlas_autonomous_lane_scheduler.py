@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import io
 import hashlib
 import json
@@ -81,16 +82,51 @@ def _standing_packet(
     }
 
 
-def _envelope(payload: dict[str, object], *, idempotency_key: str) -> dict[str, object]:
+def _envelope(
+    payload: dict[str, object],
+    *,
+    idempotency_key: str,
+    source_role_id: str | None = None,
+) -> dict[str, object]:
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
     digest = hashlib.sha256(encoded).hexdigest()
-    return {
+    envelope = {
         "schema": "atlas.workflow.envelope.v1",
         "kind": "EVENT",
         "event_id": "onv1_" + digest,
         "payload_digest": "sha256:" + digest,
         "idempotency_key": idempotency_key,
         "payload": payload,
+    }
+    if source_role_id is not None:
+        envelope["source_role_id"] = source_role_id
+    return envelope
+
+
+def _standing_local_source_payload() -> dict[str, object]:
+    paths = ["src/feature.py", "tests/test_feature.py"]
+    return {
+        "canonical_lifecycle_state": "READY",
+        "packet_id": "owner-local-source-preparation",
+        "objective": "Prepare the bounded owner source and tests locally; hold publication.",
+        "logical_role_id": "owner.example",
+        "repository": "fawxzzy/example",
+        "writer_scope": "repo.example.local-preparation",
+        "execution_class": "repo_worktree",
+        "authority_class": scheduler.STANDING_LOCAL_SOURCE_PREPARATION,
+        "source_preparation": {
+            "mode": "LOCAL_ONLY_UNSTAGED",
+            "publication": "HELD",
+            "parent_commit": "1" * 40,
+            "path_allowlist": paths,
+        },
+        "resource_claims": {
+            "files": paths,
+            "worktrees": ["example-local-preparation"],
+            "ports": [],
+            "browsers": [],
+            "external_writers": [],
+        },
     }
 
 
@@ -167,6 +203,17 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertIn(
             "external_mutation",
             schema["properties"]["standing_packets"]["items"]["properties"]["execution_class"]["enum"],
+        )
+        standing = schema["properties"]["standing_packets"]["items"]
+        self.assertIn("SUPERSEDED", standing["properties"]["state"]["enum"])
+        self.assertEqual(
+            [scheduler.STANDING_LOCAL_SOURCE_PREPARATION],
+            standing["properties"]["authority_class"]["enum"],
+        )
+        self.assertEqual(32, standing["properties"]["source_preparation"]["properties"]["path_allowlist"]["maxItems"])
+        self.assertEqual(
+            ["source_role_id", "source_preparation"],
+            standing["allOf"][0]["then"]["required"],
         )
         self.assertEqual(
             {
@@ -1267,6 +1314,126 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertIn("standing_role_active", [item["blocked_reason"] for item in report["blocked_candidates"]])
         self.assertEqual("repo.socials-os", program["scope_holds"][0]["writer_scope"])
         self.assertNotIn("forbidden_owner_lanes", program)
+
+    def test_bridge_admits_bounded_standing_local_source_preparation(self) -> None:
+        payload = _standing_local_source_payload()
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("owner.example", "example-thread", "notLoaded")),
+            envelopes=[
+                _envelope(
+                    payload,
+                    idempotency_key="owner-local-source-preparation",
+                    source_role_id="atlas.main",
+                )
+            ],
+        )
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(["owner-local-source-preparation"], [job["packet_id"] for job in report["selected_jobs"]])
+        persisted = program["standing_packets"][0]
+        self.assertEqual(scheduler.STANDING_LOCAL_SOURCE_PREPARATION, persisted["authority_class"])
+        self.assertEqual("atlas.main", persisted["source_role_id"])
+        self.assertEqual("HELD", persisted["source_preparation"]["publication"])
+        prompt = scheduler.render_prompt(report)
+        self.assertIn("keep every change unstaged and publication held", prompt)
+        self.assertIn("Do not stage, commit, push", prompt)
+
+    def test_bridge_rejects_unbounded_standing_local_source_preparation(self) -> None:
+        cases: list[tuple[str, dict[str, object], str]] = []
+
+        wrong_role = _standing_local_source_payload()
+        wrong_role["logical_role_id"] = "atlas.main"
+        cases.append(("standing_owner_role_required", wrong_role, "atlas.main"))
+
+        wrong_execution = _standing_local_source_payload()
+        wrong_execution["execution_class"] = "read_only"
+        cases.append(("standing_repo_worktree_required", wrong_execution, "atlas.main"))
+
+        unsafe_path = _standing_local_source_payload()
+        unsafe_path["source_preparation"] = copy.deepcopy(unsafe_path["source_preparation"])
+        unsafe_path["source_preparation"]["path_allowlist"] = [".github/workflows/release.yml"]
+        unsafe_path["resource_claims"] = copy.deepcopy(unsafe_path["resource_claims"])
+        unsafe_path["resource_claims"]["files"] = [".github/workflows/release.yml"]
+        cases.append(("standing_path_allowlist_unsafe", unsafe_path, "atlas.main"))
+
+        mismatched_files = _standing_local_source_payload()
+        mismatched_files["resource_claims"] = copy.deepcopy(mismatched_files["resource_claims"])
+        mismatched_files["resource_claims"]["files"] = ["src/feature.py"]
+        cases.append(("standing_file_claims_must_match_allowlist", mismatched_files, "atlas.main"))
+
+        duplicate_path = _standing_local_source_payload()
+        duplicate_path["source_preparation"] = copy.deepcopy(duplicate_path["source_preparation"])
+        duplicate_path["source_preparation"]["path_allowlist"] = ["src/feature.py", "src/feature.py"]
+        cases.append(("standing_path_allowlist_not_canonical", duplicate_path, "atlas.main"))
+
+        external_claim = _standing_local_source_payload()
+        external_claim["resource_claims"] = copy.deepcopy(external_claim["resource_claims"])
+        external_claim["resource_claims"]["external_writers"] = ["malformed-external-writer"]
+        cases.append(("standing_external_resource_claim_forbidden", external_claim, "atlas.main"))
+
+        unknown_claim = _standing_local_source_payload()
+        unknown_claim["resource_claims"] = copy.deepcopy(unknown_claim["resource_claims"])
+        unknown_claim["resource_claims"]["gpu"] = ["shared"]
+        cases.append(("standing_resource_claims_invalid", unknown_claim, "atlas.main"))
+
+        cases.append(("standing_source_role_forbidden", _standing_local_source_payload(), "manual.messages"))
+
+        for expected_code, payload, source_role_id in cases:
+            with self.subTest(expected_code=expected_code):
+                program, findings = scheduler.reconcile_runtime_program(
+                    program=_program_payload(),
+                    bindings_payload=_bindings(("owner.example", "example-thread", "idle")),
+                    envelopes=[
+                        _envelope(
+                            payload,
+                            idempotency_key=expected_code,
+                            source_role_id=source_role_id,
+                        )
+                    ],
+                )
+
+                self.assertEqual([], program["standing_packets"])
+                self.assertEqual(expected_code, findings[0]["code"])
+
+    def test_persisted_standing_local_source_preparation_revalidates_authority(self) -> None:
+        packet = _standing_packet(
+            "owner-local-source-preparation",
+            role_id="owner.example",
+            repository="fawxzzy/example",
+            writer_scope="repo.example.local-preparation",
+        )
+        payload = _standing_local_source_payload()
+        packet.update(
+            {
+                "authority_class": payload["authority_class"],
+                "source_preparation": payload["source_preparation"],
+                "resource_claims": payload["resource_claims"],
+            }
+        )
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual("standing_source_role_forbidden", report["blocked_candidates"][0]["blocked_reason"])
 
     def test_bridge_preserves_protected_surface_authority_for_external_mutation(self) -> None:
         payload = {

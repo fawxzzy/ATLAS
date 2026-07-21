@@ -62,6 +62,11 @@ EVENT_ID_PATTERN = re.compile(r"^onv1_[0-9a-f]{64}$")
 PAYLOAD_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 RESUMABLE_RUNTIME_STATES = {"idle", "notloaded"}
 TERMINAL_SUCCESS_STATES = {"ACCEPTED", "COMPLETE", "COMPLETED", "MERGED", "SUCCESS"}
+STANDING_LOCAL_SOURCE_PREPARATION = "standing_local_source_preparation"
+STANDING_LOCAL_SOURCE_ROLES = {"atlas.main", "fawxzzy.questions"}
+COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+MAX_STANDING_LOCAL_SOURCE_PATHS = 32
+STANDING_LOCAL_PROTECTED_PATHS = (".env", ".git/", ".github/workflows/", "secrets/")
 
 SAFE_CLASSIFICATIONS = {
     planner.CLASS_IMPLEMENTATION_READY,
@@ -523,6 +528,20 @@ def reconcile_runtime_program(
                 )
             )
             continue
+        standing_violation = _standing_local_source_preparation_violation(
+            payload,
+            source_role_id=envelope.get("source_role_id"),
+        )
+        if standing_violation:
+            findings.append(
+                _finding(
+                    standing_violation,
+                    "Standing local source-preparation authority failed its bounded packet contract.",
+                    event_id=event_id,
+                    packet_id=packet_id,
+                )
+            )
+            continue
         binding = bindings.get(role_id)
         runtime_thread_id = binding.get("current_runtime_id") if binding else None
         runtime_status = str(binding.get("runtime_status") or "missing") if binding else "missing"
@@ -550,6 +569,9 @@ def reconcile_runtime_program(
                 ("dependencies", _string_list(payload.get("dependencies", []))),
                 ("resource_claims", _resource_claims(payload.get("resource_claims"))),
                 ("protected_surface_authorized", payload.get("protected_surface_authorized") is True),
+                ("authority_class", payload.get("authority_class")),
+                ("source_role_id", envelope.get("source_role_id")),
+                ("source_preparation", payload.get("source_preparation")),
                 ("runtime_thread_id", runtime_thread_id),
                 ("runtime_status", runtime_status),
                 ("authority", OrderedDict([("event_id", event_id), ("payload_digest", payload_digest)])),
@@ -775,6 +797,88 @@ def _resource_claims(value: Any) -> OrderedDict[str, list[str]]:
     return claims
 
 
+def _safe_standing_local_path(path: str) -> bool:
+    normalized = path.replace("\\", "/").strip()
+    lowered = normalized.casefold()
+    if (
+        not normalized
+        or normalized.startswith("/")
+        or re.match(r"^[a-zA-Z]:/", normalized)
+        or any(token in normalized for token in "*?[")
+        or any(part in {"", ".", ".."} for part in normalized.split("/"))
+    ):
+        return False
+    return not any(
+        lowered == prefix.rstrip("/") or lowered.startswith(prefix)
+        for prefix in STANDING_LOCAL_PROTECTED_PATHS
+    )
+
+
+def _standing_local_source_preparation_violation(
+    payload: dict[str, Any],
+    *,
+    source_role_id: Any,
+) -> str | None:
+    authority_class = payload.get("authority_class")
+    if authority_class is None:
+        return None
+    if authority_class != STANDING_LOCAL_SOURCE_PREPARATION:
+        return "standing_authority_class_unknown"
+    if source_role_id not in STANDING_LOCAL_SOURCE_ROLES:
+        return "standing_source_role_forbidden"
+    if not str(payload.get("logical_role_id") or "").startswith("owner."):
+        return "standing_owner_role_required"
+    if payload.get("execution_class") != "repo_worktree":
+        return "standing_repo_worktree_required"
+    if payload.get("protected_surface_authorized") is True:
+        return "standing_protected_surface_forbidden"
+
+    preparation = payload.get("source_preparation")
+    if not isinstance(preparation, dict):
+        return "standing_source_preparation_required"
+    if preparation.get("mode") != "LOCAL_ONLY_UNSTAGED":
+        return "standing_local_unstaged_mode_required"
+    if preparation.get("publication") != "HELD":
+        return "standing_publication_hold_required"
+    if not isinstance(preparation.get("parent_commit"), str) or not COMMIT_SHA_PATTERN.fullmatch(
+        preparation["parent_commit"]
+    ):
+        return "standing_parent_commit_required"
+
+    raw_path_allowlist = preparation.get("path_allowlist")
+    if not isinstance(raw_path_allowlist, list) or not raw_path_allowlist:
+        return "standing_path_allowlist_required"
+    if len(raw_path_allowlist) > MAX_STANDING_LOCAL_SOURCE_PATHS:
+        return "standing_path_allowlist_required"
+    if not all(isinstance(path, str) and path == path.strip().replace("\\", "/") for path in raw_path_allowlist):
+        return "standing_path_allowlist_not_canonical"
+    path_allowlist = _string_list(raw_path_allowlist)
+    if len(path_allowlist) != len(raw_path_allowlist):
+        return "standing_path_allowlist_not_canonical"
+    if not all(_safe_standing_local_path(path) for path in path_allowlist):
+        return "standing_path_allowlist_unsafe"
+
+    raw_claims = payload.get("resource_claims")
+    claim_kinds = {"files", "worktrees", "ports", "browsers", "external_writers"}
+    if not isinstance(raw_claims, dict) or set(raw_claims) - claim_kinds:
+        return "standing_resource_claims_invalid"
+    if any(not isinstance(raw_claims.get(kind, []), list) for kind in claim_kinds):
+        return "standing_resource_claims_invalid"
+    claims = _resource_claims(raw_claims)
+    if claims["files"] != path_allowlist:
+        return "standing_file_claims_must_match_allowlist"
+    if (
+        len(claims["worktrees"]) != 1
+        or not claims["worktrees"][0]
+        or claims["worktrees"][0] in {".", ".."}
+        or any(token in claims["worktrees"][0] for token in "*?[")
+    ):
+        return "standing_isolated_worktree_required"
+    if any(_string_list(raw_claims.get(kind, [])) for kind in ("ports", "browsers", "external_writers")):
+        return "standing_external_resource_claim_forbidden"
+    return None
+
+
 def _authority_is_canonical(value: Any) -> bool:
     return bool(
         isinstance(value, dict)
@@ -925,6 +1029,11 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any]) -> Or
         blocked_reason = "writer_scope_forbidden"
     elif not _authority_is_canonical(raw.get("authority")):
         blocked_reason = "canonical_authority_required"
+    elif standing_violation := _standing_local_source_preparation_violation(
+        raw,
+        source_role_id=raw.get("source_role_id"),
+    ):
+        blocked_reason = standing_violation
     elif execution_class == "external_mutation" and not _resource_claims(raw.get("resource_claims")).get("external_writers"):
         blocked_reason = "external_writer_claim_required"
     elif (
@@ -960,6 +1069,9 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any]) -> Or
             ("dependencies", _string_list(raw.get("dependencies", []))),
             ("resource_claims", _resource_claims(raw.get("resource_claims"))),
             ("protected_surface_authorized", raw.get("protected_surface_authorized") is True),
+            ("authority_class", raw.get("authority_class")),
+            ("source_role_id", raw.get("source_role_id")),
+            ("source_preparation", raw.get("source_preparation")),
             ("cross_marker_signal_applied", False),
             ("authority", raw.get("authority")),
         ]
@@ -1332,6 +1444,24 @@ def render_prompt(report: dict[str, Any]) -> str:
         f"- `{job.get('packet_id')}` -> `{job.get('logical_role_id')}` in `{job.get('writer_scope')}` ({job.get('execution_class')})"
         for job in selected_jobs
     )
+    local_preparation_jobs = [
+        job
+        for job in selected_jobs
+        if job.get("authority_class") == STANDING_LOCAL_SOURCE_PREPARATION
+    ]
+    if local_preparation_jobs:
+        lines.extend(
+            [
+                "",
+                "Standing local source-preparation boundaries:",
+                *[
+                    f"- `{job.get('packet_id')}`: edit only `{', '.join(job.get('source_preparation', {}).get('path_allowlist', []))}` "
+                    "in its claimed isolated worktree; keep every change unstaged and publication held."
+                    for job in local_preparation_jobs
+                ],
+                "- Do not stage, commit, push, create a branch or PR, request review, merge, run workflows, or access external writers/providers.",
+            ]
+        )
     lines.extend(
         [
         "",
@@ -1366,7 +1496,8 @@ def render_prompt(report: dict[str, Any]) -> str:
             "- `python ops/validation/validate_stack.py`",
             "",
             "Commit/push/parity requirements:",
-            "- Each owner stages only its admitted paths in its admitted worktree and branch.",
+            "- Ordinary publication-authorized jobs stage only their admitted paths in their admitted worktree and branch.",
+            "- Standing local source-preparation jobs remain unstaged and local; publication requires a separate exact authority packet.",
             "- Preserve per-packet commit, publication, review, merge, and provider gates.",
             "",
             "Continuation rule: consume terminal receipts, release only their exact leases, and immediately select the next non-conflicting READY wave without waiting for a heartbeat.",

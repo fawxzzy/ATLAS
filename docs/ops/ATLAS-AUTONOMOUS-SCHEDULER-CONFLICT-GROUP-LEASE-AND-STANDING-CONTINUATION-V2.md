@@ -29,6 +29,31 @@ Owner-like prose without this metadata is not inferred into authority. The
 scheduler fails closed instead of treating a textual owner reference as a
 license to mutate that repository.
 
+### Standing local source preparation
+
+The operator may keep idle owner tasks productive through the exact authority
+class `standing_local_source_preparation`. This is not generic owner-repository
+authority. A valid packet must originate from `atlas.main` or
+`fawxzzy.questions`, target an `owner.*` logical role, use `repo_worktree`, and
+carry all of the following:
+
+- `source_preparation.mode` equal to `LOCAL_ONLY_UNSTAGED`;
+- `source_preparation.publication` equal to `HELD`;
+- one immutable lowercase 40-character parent commit;
+- one to 32 exact repository-relative paths, mirrored exactly by `files`
+  resource claims;
+- exactly one explicit non-wildcard isolated-worktree claim;
+- no protected workflow, secret, environment, port, browser, or external-writer
+  claim.
+
+The class admits bounded local edits, tests, documentation, and deterministic
+generation only. It never admits staging, commit, push, branch or pull-request
+creation, review requests, merge, workflow or runner actions, provider access,
+Supabase mutation, deployment, production, or canonical-root mutation.
+Publication requires a separate exact authority packet. The bridge preserves
+the authority class, source role, and preparation contract and revalidates them
+again when selecting a persisted standing packet.
+
 The runtime bridge consumes an explicit standing-role binding snapshot plus
 canonical Inbox JSON or JSONL envelopes. It verifies that each `onv1_` event ID
 and `sha256:` digest matches the canonical payload bytes, deduplicates immutable
@@ -142,7 +167,8 @@ canonical-root mutation beyond the exact admitted packet.
 - `tests/test_atlas_autonomous_lane_scheduler.py` proves canonical standing
   authority, binding-aware idle and notLoaded resumption, active-task
   suppression, dependency gating, atomic reservation, exact terminal release,
-  zero-capacity preservation, protected-term-safe read-only routing,
+  zero-capacity preservation, bounded local-preparation admission and rejection,
+  protected-term-safe read-only routing,
   active-lease isolation, and deterministic multi-scope wave selection.
 - `tests/test_atlas_workflow_recovery.py` and the generated workflow view prove
   that the durable manifest retains per-scope collision handling and standing
