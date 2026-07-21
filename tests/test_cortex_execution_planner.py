@@ -197,6 +197,31 @@ class CortexExecutionPlannerTests(unittest.TestCase):
         self.assertEqual(2, len(plan["execution_waves"]))
         self.assertIn("repository", plan["collision_risks"][0]["resource_kinds"])
 
+    def test_repository_case_variants_cannot_bypass_serialization(self) -> None:
+        first = self._job(
+            "one",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.one",
+            allowed_files=[],
+        )
+        second = self._job(
+            "two",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.two",
+            allowed_files=[],
+        )
+        first["repository"] = "Fawxzzy/ATLAS"
+        second["repository"] = "fawxzzy/atlas"
+
+        plan, _ = self._plan(self._root(), [first, second])
+
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("repository", plan["collision_risks"][0]["resource_kinds"])
+        self.assertEqual(
+            {"fawxzzy/atlas"},
+            {item["repository"] for item in plan["project_component_ownership"]},
+        )
+
     def test_explicit_distinct_scopes_share_same_repository_with_proven_isolation(self) -> None:
         first = self._job(
             "one",

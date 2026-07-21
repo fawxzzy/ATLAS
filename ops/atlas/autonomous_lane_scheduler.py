@@ -259,6 +259,13 @@ def load_program(root: Path, program_path: str) -> tuple[dict[str, Any] | None, 
         for lease in payload["active_leases"]:
             if not isinstance(lease, dict) or not isinstance(lease.get("writer_scope"), str) or not lease["writer_scope"]:
                 errors.append(_finding("program_invalid_active_lease", "Every active lease entry must name writer_scope."))
+                continue
+            if not isinstance(lease.get("repository"), str) or not lease["repository"].strip():
+                errors.append(_finding("program_invalid_active_lease", "Every active lease entry must persist repository."))
+            if lease.get("execution_class") not in MUTATING_EXECUTION_CLASSES:
+                errors.append(_finding("program_invalid_active_lease", "Every active lease entry must persist a mutating execution_class."))
+            if not isinstance(lease.get("resource_claims"), dict):
+                errors.append(_finding("program_invalid_active_lease", "Every active lease entry must persist resource_claims."))
     return payload, errors
 
 
@@ -942,6 +949,10 @@ def _patterns_overlap(left: str, right: str) -> bool:
     return bool(left_prefix and right_prefix and (left.startswith(right_prefix) or right.startswith(left_prefix)))
 
 
+def _repository_identity(value: Any) -> str:
+    return value.strip().casefold() if isinstance(value, str) else ""
+
+
 def _candidate_conflicts(left: dict[str, Any], right: dict[str, Any]) -> list[str]:
     conflicts: list[str] = []
     left_mutates = left.get("execution_class") in MUTATING_EXECUTION_CLASSES
@@ -955,7 +966,9 @@ def _candidate_conflicts(left: dict[str, Any], right: dict[str, Any]) -> list[st
     for kind in ("worktrees", "ports", "browsers", "external_writers"):
         if set(left_claims.get(kind, [])).intersection(right_claims.get(kind, [])):
             conflicts.append(kind)
-    same_repository = bool(left.get("repository")) and left.get("repository") == right.get("repository")
+    left_repository = _repository_identity(left.get("repository"))
+    right_repository = _repository_identity(right.get("repository"))
+    same_repository = bool(left_repository) and left_repository == right_repository
     files_overlap = any(
         _patterns_overlap(a, b)
         for a in left_claims.get("files", [])
@@ -1007,18 +1020,23 @@ def _active_writer_scopes(program: dict[str, Any]) -> set[str]:
 
 def _active_lease_candidate(
     lease: dict[str, Any],
-    *,
-    standing_packets: dict[str, dict[str, Any]],
 ) -> OrderedDict[str, Any]:
-    packet = standing_packets.get(str(lease.get("packet_id") or ""), {})
     return OrderedDict(
         [
             ("packet_id", lease.get("packet_id")),
-            ("repository", lease.get("repository") or packet.get("repository")),
+            ("repository", lease.get("repository")),
             ("writer_scope", lease.get("writer_scope")),
-            ("execution_class", lease.get("execution_class") or packet.get("execution_class")),
-            ("resource_claims", _resource_claims(lease.get("resource_claims") or packet.get("resource_claims"))),
+            ("execution_class", lease.get("execution_class")),
+            ("resource_claims", _resource_claims(lease.get("resource_claims"))),
         ]
+    )
+
+
+def _active_lease_identity_complete(lease: dict[str, Any]) -> bool:
+    return bool(
+        _repository_identity(lease.get("repository"))
+        and lease.get("execution_class") in MUTATING_EXECUTION_CLASSES
+        and isinstance(lease.get("resource_claims"), dict)
     )
 
 
@@ -1037,15 +1055,16 @@ def _select_execution_wave(
     max_read_only_value = program.get("max_parallel_read_only", 2)
     max_read_only = max(0, int(2 if max_read_only_value is None else max_read_only_value))
     active_leases = [item for item in program.get("active_leases", []) if isinstance(item, dict)]
-    standing_packets = {
-        str(item.get("packet_id")): item
-        for item in program.get("standing_packets", [])
-        if isinstance(item, dict) and item.get("packet_id")
-    }
     active_lease_candidates = [
-        (lease, _active_lease_candidate(lease, standing_packets=standing_packets))
+        (lease, _active_lease_candidate(lease))
         for lease in active_leases
         if str(lease.get("status") or "").lower() in {"active", "recovery-required"}
+    ]
+    incomplete_active_leases = [
+        lease
+        for lease in active_leases
+        if str(lease.get("status") or "").lower() in {"active", "recovery-required"}
+        and not _active_lease_identity_complete(lease)
     ]
     writer_count = sum(
         1
@@ -1071,6 +1090,20 @@ def _select_execution_wave(
         if missing_dependencies:
             candidate["blocked_reason"] = "dependencies_not_complete"
             candidate["missing_dependencies"] = missing_dependencies
+            blocked.append(candidate)
+            continue
+        if candidate.get("execution_class") in MUTATING_EXECUTION_CLASSES and incomplete_active_leases:
+            candidate["blocked_reason"] = "active_lease_identity_incomplete"
+            candidate["conflicts_with"] = [
+                OrderedDict(
+                    [
+                        ("packet_id", lease.get("packet_id")),
+                        ("reservation_id", lease.get("reservation_id")),
+                        ("resource_kinds", ["unknown_mutating_scope"]),
+                    ]
+                )
+                for lease in incomplete_active_leases
+            ]
             blocked.append(candidate)
             continue
         lease_conflicts = [

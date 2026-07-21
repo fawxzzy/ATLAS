@@ -39,8 +39,12 @@ steered.
 
 ## Lease behavior
 
-An active lease blocks only its exact `writer_scope`. Multiple active leases
-for one scope remain a collision and block that scope. A terminal correlated
+An active lease persists its repository, mutating execution class, and normalized
+resource claims in addition to its exact `writer_scope`. Missing isolation
+identity is a recovery fault that blocks mutating dispatch instead of falling
+back to a standing packet that may no longer exist. Multiple active leases for
+one scope remain a collision and block that scope. Repository identities are
+canonicalized case-insensitively before collision checks. A terminal correlated
 receipt releases only its exact lease; blocked, latency-bound, or unknown work
 does not release a lease by implication.
 
@@ -115,7 +119,8 @@ canonical-root mutation beyond the exact admitted packet.
 ## Verification surface
 
 - `tests/test_cortex_execution_planner.py` proves implicit writer-scope claims,
-  same-scope serialization, and distinct-repository parallel waves.
+  same-scope serialization, case-insensitive repository identity, and
+  distinct-repository parallel waves.
 - `tests/test_atlas_autonomous_lane_scheduler.py` proves canonical standing
   authority, binding-aware idle and notLoaded resumption, active-task
   suppression, dependency gating, atomic reservation, exact terminal release,

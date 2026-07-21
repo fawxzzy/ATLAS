@@ -68,11 +68,22 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["reservation_id", "packet_id", "writer_scope", "status"],
+        "required": [
+          "reservation_id",
+          "packet_id",
+          "writer_scope",
+          "repository",
+          "execution_class",
+          "resource_claims",
+          "status"
+        ],
         "properties": {
           "reservation_id": { "type": "string", "pattern": "^rsrv_[0-9a-f]{64}$" },
           "packet_id": { "type": "string", "minLength": 1 },
           "writer_scope": { "type": "string", "minLength": 1 },
+          "repository": { "type": "string", "minLength": 1 },
+          "execution_class": { "enum": ["repo_worktree", "canonical_workspace", "external_mutation"] },
+          "resource_claims": { "type": "object" },
           "status": { "enum": ["active", "recovery-required"] }
         },
         "additionalProperties": true

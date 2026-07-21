@@ -159,6 +159,12 @@ def _writer_scope(job: dict[str, Any]) -> str | None:
     return None
 
 
+def _repository_identity(value: Any) -> str | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    return value.strip().casefold()
+
+
 def _normalized_claims(job: dict[str, Any]) -> OrderedDict[str, list[str]]:
     raw = job.get("resource_claims") if isinstance(job.get("resource_claims"), dict) else {}
     claims: OrderedDict[str, list[str]] = OrderedDict()
@@ -208,7 +214,7 @@ def _normalize_job(raw: Any) -> tuple[OrderedDict[str, Any] | None, list[Ordered
     candidate_id = _candidate_id(raw)
     candidate = OrderedDict(
         (("job_id", candidate_id), ("source_job_id", raw.get("job_id")), ("objective", raw.get("objective")),
-         ("project", raw.get("project")), ("component", raw.get("component")), ("repository", raw.get("repository")),
+         ("project", raw.get("project")), ("component", raw.get("component")), ("repository", _repository_identity(raw.get("repository"))),
          ("owner", raw.get("owner")), ("execution_class", execution_class),
          ("writer_scope", _writer_scope(raw)),
          ("allowed_files", _string_list(raw.get("allowed_files", []))), ("forbidden_files", _string_list(raw.get("forbidden_files", []))),
