@@ -601,7 +601,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("external_writer_claim_required", report["blocked_candidates"][0]["blocked_reason"])
 
     def test_malformed_github_pr_url_aliases_are_rejected(self) -> None:
-        for locator in ("pulls", "pr", "prs", "pull-request"):
+        for locator in ("pulls", "pr", "prs", "pull-request", "pullx"):
             with self.subTest(locator=locator):
                 program = _program_payload()
                 packet = _standing_packet(
@@ -2069,7 +2069,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual([], findings)
         self.assertEqual("active", program["active_leases"][0]["status"])
 
-    def test_exact_terminal_receipt_recovers_ambiguous_delivery(self) -> None:
+    def test_terminal_receipt_cannot_replace_delivery_recovery_evidence(self) -> None:
         program = _program_payload()
         program["standing_packets"] = [
             _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness")
@@ -2117,10 +2117,10 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         )
 
         self.assertEqual([], findings)
-        self.assertEqual([], receipt_findings)
-        self.assertEqual([], program["active_leases"])
-        self.assertEqual([], program["delivery_intents"])
-        self.assertEqual(["fitness-ready"], program["completed_packets"])
+        self.assertEqual("terminal_lease_correlation_required", receipt_findings[0]["code"])
+        self.assertEqual("recovery-required", program["active_leases"][0]["status"])
+        self.assertEqual("recovery-required", program["delivery_intents"][0]["status"])
+        self.assertEqual([], program["completed_packets"])
 
     def test_standing_dependency_requires_completed_receipt(self) -> None:
         program = _program_payload()

@@ -268,7 +268,7 @@ class CortexExecutionPlannerTests(unittest.TestCase):
         self.assertIn("invalid_resource_claim", [item["code"] for item in plan["blocked_reasons"]])
 
     def test_malformed_github_pr_url_aliases_fail_closed(self) -> None:
-        for locator in ("pulls", "pr", "prs", "pull-request"):
+        for locator in ("pulls", "pr", "prs", "pull-request", "pullx"):
             with self.subTest(locator=locator):
                 job = self._job("one", execution_class="repo_worktree")
                 job["resource_claims"] = {

@@ -754,25 +754,6 @@ def reconcile_runtime_program(
                 if str(intent.get("turn_id") or "") == turn_id
                 and str(intent.get("status") or "").lower() == "delivered"
             ]
-            recovery_intents = [
-                intent
-                for intent in correlated_intents
-                if str(intent.get("status") or "").lower() == "recovery-required"
-                and str(intent.get("turn_id") or "") in {"", turn_id}
-            ]
-            source_receipt_event_id = payload.get("source_receipt_event_id")
-            terminal_recovers_delivery = bool(
-                len(matching_intents) == 0
-                and len(recovery_intents) == 1
-                and isinstance(source_receipt_event_id, str)
-                and EVENT_ID_PATTERN.fullmatch(source_receipt_event_id)
-            )
-            if terminal_recovers_delivery:
-                recovered_intent = recovery_intents[0]
-                recovered_intent["status"] = "delivered"
-                recovered_intent["turn_id"] = turn_id
-                recovered_intent["recovered_from_terminal_receipt"] = event_id
-                matching_intents = [recovered_intent]
             read_only_match = bool(
                 packet
                 and str(packet.get("writer_scope") or "") == writer_scope
@@ -1084,7 +1065,9 @@ def _external_writer_identity(value: str) -> str:
                 repository = _repository_identity("/".join(parts[:2]))
                 if repository:
                     return f"github-pr:{repository}#{int(parts[3])}"
-            if locator in {"pr", "prs", "pulls", "pull-request", "pull-requests"}:
+            if locator in {"pr", "prs", "pulls", "pull-request", "pull-requests"} or (
+                locator.startswith("pull") and len(parts) >= 4 and parts[3].isdigit()
+            ):
                 return ""
         return raw.casefold()
     prefix, separator, remainder = raw.partition(":")
