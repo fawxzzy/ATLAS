@@ -28,6 +28,16 @@ python ops/atlas/workflow_recovery.py validate-envelope path/to/envelope.json
 
 An `answer_digest` is evidence about the operator's answer; it is not a substitute for the envelope `payload_digest`.
 
+## Automatic GitHub validation
+
+`.github/workflows/atlas-workflow-recovery.yml` is the dedicated source-validation workflow for this contract. It uses JSON form, a strict YAML subset, so the complete GitHub Actions object can be parsed and compared with the Python standard library without adding a CI-only YAML dependency. Relevant pull requests run it through an explicit recovery-surface path filter, including every schema consumed by repository validation. Every push to `main` runs it without a path filter, so each merged commit receives an exact-main result even when the merge does not change recovery files.
+
+The workflow runs the canonical validation, generated-view check, focused unit suite, envelope fixture validation, and deterministic fixture-only recovery on Python 3.12 under both `ubuntu-latest` and `windows-latest`. The expected denominator is one workflow run with two `validate` jobs. It grants only `contents: read`, has no manual-dispatch trigger, reads no secrets, uploads no artifacts, calls no provider or deployment surface, and cannot reach live Codex tasks. Its semantic policy test compares the exact event map, filters, permissions, job, matrix, ordered steps, action identities, and commands; extra authority is rejected rather than ignored.
+
+Executable actions are pinned to reviewed 40-character commit IDs, never mutable tags. The current pins are official, signature-verified `actions/checkout` v4 commit `11d5960a326750d5838078e36cf38b85af677262` and `actions/setup-python` v5 commit `a26af69be951a213d495a4c3e4e4022e16d87065`. To update either action, resolve the intended official major tag through GitHub ref metadata, verify the target commit, review the upstream change, and update the workflow and exact semantic-policy fixture together.
+
+This CI contract is source proof, not recovery authority. Its fixture apply writes only ephemeral runner-local state under `runtime/atlas/workflow-recovery-ci`; it never authorizes `--adapter live`, standing-task mutation, archival, pin inference, or production/provider work. A failed or missing `main` run is a proof blocker: preserve the last accepted state and route exact run/job evidence through the release control plane. Do not dispatch or rerun a workflow without a separately admitted action. Branch-protection or ruleset enforcement is also a separate GitHub-settings decision.
+
 ## Supported desktop activity observation
 
 The optional desktop observation is an externally produced, read-only status snapshot. Produce it through a supported Codex task/thread readback surface, then validate it before planning:
