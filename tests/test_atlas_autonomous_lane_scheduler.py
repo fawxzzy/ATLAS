@@ -260,6 +260,37 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             )
         )
 
+    def test_root_validation_does_not_suppress_same_root_read_only_packet(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "root-provenance",
+            role_id="atlas.clean-resync",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.atlas.root.provenance",
+        )
+        packet["execution_class"] = "read_only"
+        packet["resource_claims"] = {
+            "files": ["README-STACK.md", "docs/memory/profiles/zachariah_workflow_profile.md"],
+            "worktrees": ["C:/ATLAS"],
+            "ports": [],
+            "browsers": [],
+            "external_writers": [],
+        }
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("C:/ATLAS"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(error=1),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(["root-provenance"], [job["packet_id"] for job in report["selected_jobs"]])
+        self.assertEqual("read_only", report["selected_jobs"][0]["execution_class"])
+
     def test_root_validation_does_not_suppress_disjoint_owner_writer(self) -> None:
         program = _program_payload()
         packet = _standing_packet(

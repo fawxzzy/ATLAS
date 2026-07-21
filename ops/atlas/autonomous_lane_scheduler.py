@@ -1058,6 +1058,10 @@ def _candidate_conflicts_with_root_validation(
     validation_root: Path,
 ) -> list[str]:
     conflicts = _candidate_conflicts(candidate, validation_candidate)
+    # Validation cleanup is a virtual root hold, not a writer. Read-only work
+    # may inspect the held checkout; real active leases are enforced later.
+    if candidate.get("execution_class") == "read_only":
+        return []
     if not conflicts or candidate.get("execution_class") != "repo_worktree":
         return conflicts
     if _repository_identity(candidate.get("repository")) != _repository_identity(validation_candidate.get("repository")):
