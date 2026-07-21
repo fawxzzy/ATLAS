@@ -290,6 +290,122 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("web-source-fix", report["selected_jobs"][0]["packet_id"])
         self.assertEqual("repo_worktree", report["selected_jobs"][0]["execution_class"])
 
+    def test_root_validation_does_not_suppress_isolated_same_repository_worktree(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "atlas-corpus-source",
+            role_id="playbook.atlas-book",
+            repository="fawxzzy/ATLAS",
+            writer_scope="source.atlas.text-corpus-inventory.pilot.r2",
+        )
+        packet["resource_claims"] = {
+            "files": ["ops/atlas/text_corpus_inventory.py", "tests/test_atlas_text_corpus_inventory.py"],
+            "worktrees": ["C:/w/atci-r2"],
+            "ports": [],
+            "browsers": [],
+            "external_writers": ["git-branch:fawxzzy/ATLAS:codex/text-corpus-inventory-pilot-r2"],
+        }
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("C:/w/asr"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(error=1),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(["atlas-corpus-source"], [job["packet_id"] for job in report["selected_jobs"]])
+
+    def test_root_validation_suppresses_unproven_same_repository_worktree(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "atlas-unbounded-source",
+            role_id="playbook.atlas-book",
+            repository="fawxzzy/ATLAS",
+            writer_scope="source.atlas.unbounded",
+        )
+        packet["resource_claims"] = {
+            "files": [],
+            "worktrees": ["C:/w/other"],
+            "ports": [],
+            "browsers": [],
+            "external_writers": [],
+        }
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("C:/w/asr"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(error=1),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_VALIDATION_CLEANUP, report["status"])
+        self.assertEqual(["ATLAS root validation cleanup"], [job["packet_id"] for job in report["selected_jobs"]])
+
+    def test_root_validation_suppresses_same_worktree_repository_writer(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "atlas-root-source",
+            role_id="playbook.atlas-book",
+            repository="fawxzzy/ATLAS",
+            writer_scope="source.atlas.root",
+        )
+        packet["resource_claims"] = {
+            "files": ["ops/atlas/**"],
+            "worktrees": ["C:/w/asr"],
+            "ports": [],
+            "browsers": [],
+            "external_writers": [],
+        }
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("C:/w/asr"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(error=1),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_VALIDATION_CLEANUP, report["status"])
+        self.assertEqual(["ATLAS root validation cleanup"], [job["packet_id"] for job in report["selected_jobs"]])
+
+    def test_root_validation_suppresses_wildcard_worktree_claim(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "atlas-wildcard-worktree",
+            role_id="playbook.atlas-book",
+            repository="fawxzzy/ATLAS",
+            writer_scope="source.atlas.wildcard",
+        )
+        packet["resource_claims"] = {
+            "files": ["ops/atlas/text_corpus_inventory.py"],
+            "worktrees": ["C:/w/*"],
+            "ports": [],
+            "browsers": [],
+            "external_writers": [],
+        }
+        program["standing_packets"] = [packet]
+
+        report = scheduler.build_report(
+            root=Path("C:/w/asr"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(error=1),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_VALIDATION_CLEANUP, report["status"])
+        self.assertEqual(["ATLAS root validation cleanup"], [job["packet_id"] for job in report["selected_jobs"]])
+
     def test_root_validation_does_not_suppress_external_mutation(self) -> None:
         program = _program_payload()
         packet = _standing_packet(

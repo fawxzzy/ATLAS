@@ -996,6 +996,40 @@ def _candidate_conflicts(left: dict[str, Any], right: dict[str, Any]) -> list[st
     return sorted(set(conflicts))
 
 
+def _candidate_conflicts_with_root_validation(
+    candidate: dict[str, Any],
+    validation_candidate: dict[str, Any],
+    *,
+    validation_root: Path,
+) -> list[str]:
+    conflicts = _candidate_conflicts(candidate, validation_candidate)
+    if not conflicts or candidate.get("execution_class") != "repo_worktree":
+        return conflicts
+    if _repository_identity(candidate.get("repository")) != _repository_identity(validation_candidate.get("repository")):
+        return conflicts
+
+    claims = _resource_claims(candidate.get("resource_claims"))
+    files = claims["files"]
+    worktrees = claims["worktrees"]
+    if not files or not worktrees or any(path in {"*", "**"} for path in files):
+        return conflicts
+    if any(any(token in path for token in "*?[") for path in worktrees):
+        return conflicts
+
+    validation_worktree = str(validation_root.resolve()).replace("\\", "/").casefold().rstrip("/")
+    claimed_worktrees = {
+        str(Path(path).resolve()).replace("\\", "/").casefold().rstrip("/")
+        for path in worktrees
+    }
+    if validation_worktree in claimed_worktrees:
+        return conflicts
+
+    # Root validation owns the checkout being validated, not every isolated
+    # checkout of the same repository. General wave selection still enforces
+    # same-repository file/worktree isolation between actual source writers.
+    return []
+
+
 def _active_writer_scopes(program: dict[str, Any]) -> set[str]:
     leases = program.get("active_leases", [])
     if not isinstance(leases, list):
@@ -1574,12 +1608,16 @@ def build_report(
                 ("cross_marker_signal_applied", False),
             ]
         )
-        # Validation owns only atlas.root and its file surface. Keep every
-        # candidate whose declared resources are disjoint from that scope.
+        # Validation owns the checkout being validated. A same-repository
+        # worktree may continue only with complete, distinct isolation claims.
         disjoint_candidates = [
             candidate
             for candidate in sorted_candidates
-            if not _candidate_conflicts(candidate, validation_cleanup_candidate)
+            if not _candidate_conflicts_with_root_validation(
+                candidate,
+                validation_cleanup_candidate,
+                validation_root=root,
+            )
         ]
         selected_jobs, wave_blocked, deferred_candidates = _select_execution_wave(
             program=program,

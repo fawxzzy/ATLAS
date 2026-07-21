@@ -81,6 +81,13 @@ durable mutating lease as source writers, and conflicts on writer scope or an
 overlapping external writer. This lets PR lifecycle control continue beside a
 held root validation scope without weakening same-repository source isolation.
 
+A root validation hold owns only the checkout being validated. A source writer
+for the same repository may continue from another worktree only when it declares
+bounded file claims and an explicit non-wildcard worktree identity different
+from the validated checkout. Missing, catch-all, wildcard-worktree, or
+same-worktree claims fail closed; the ordinary wave conflict rule still
+serializes overlapping repository writers.
+
 ## Continuation behavior
 
 `ATLAS MAIN` consumes all newly READY packets, selects the largest deterministic
