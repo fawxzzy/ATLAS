@@ -67,6 +67,7 @@ STANDING_LOCAL_SOURCE_ROLES = {"atlas.main", "fawxzzy.questions"}
 COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 MAX_STANDING_LOCAL_SOURCE_PATHS = 32
 STANDING_LOCAL_PROTECTED_PATHS = (".env", ".git/", ".github/workflows/", "secrets/")
+RECOVERY_RECONCILIATION_BASIS = "COMPLETE_TARGET_TASK_HISTORY"
 
 SAFE_CLASSIFICATIONS = {
     planner.CLASS_IMPLEMENTATION_READY,
@@ -139,6 +140,18 @@ def _finding(code: str, message: str, **details: Any) -> OrderedDict[str, Any]:
     return payload
 
 
+def _dedupe_findings(findings: list[OrderedDict[str, Any]]) -> list[OrderedDict[str, Any]]:
+    unique: list[OrderedDict[str, Any]] = []
+    seen: set[str] = set()
+    for finding in findings:
+        identity = json.dumps(finding, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        unique.append(finding)
+    return unique
+
+
 def _git_stdout(root: Path, *args: str) -> str | None:
     completed = subprocess.run(
         ["git", "-C", str(root), *args],
@@ -188,14 +201,19 @@ def _normalize_ref(candidate: str | Path, root: Path) -> tuple[str | None, Order
     return ref, None
 
 
-def validate_program_path(root: Path, path: str) -> tuple[Path | None, OrderedDict[str, Any] | None]:
+def validate_program_path(
+    root: Path,
+    path: str,
+    *,
+    allow_missing: bool = False,
+) -> tuple[Path | None, OrderedDict[str, Any] | None]:
     ref, error = _normalize_ref(path, root)
     if error is not None or ref is None:
         return None, error
     if not ref.endswith(".json"):
         return None, _finding("program_not_json", "Program path must end with .json.", path=ref)
     resolved = (root / ref).resolve()
-    if not resolved.exists():
+    if not resolved.exists() and not allow_missing:
         return None, _finding("program_missing", "Program path does not exist.", path=ref)
     return resolved, None
 
@@ -280,6 +298,29 @@ def _canonical_payload_digest(payload: Any) -> str:
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
 
 
+def _initial_runtime_program() -> OrderedDict[str, Any]:
+    """Return the deterministic empty snapshot used to replay durable journals."""
+
+    empty_snapshot = {"bindings": [], "events": []}
+    return OrderedDict(
+        [
+            ("schema_version", PROGRAM_SCHEMA_VERSION),
+            ("revision", 1),
+            ("source_snapshot_digest", _canonical_payload_digest(empty_snapshot)),
+            ("max_parallel_writers", 4),
+            ("max_parallel_read_only", 2),
+            ("standing_packets", []),
+            ("active_leases", []),
+            ("scope_holds", []),
+            ("delivery_intents", []),
+            ("completed_packets", []),
+            ("completed_receipts", []),
+            ("released_leases", []),
+            ("processed_events", []),
+        ]
+    )
+
+
 def _load_json_object(path: Path, *, label: str) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -319,12 +360,85 @@ def apply_delivery_results(
     intents = [item for item in program.get("delivery_intents", []) if isinstance(item, dict)]
     intent_index = {str(item.get("reservation_id")): item for item in intents if item.get("reservation_id")}
     leases = [item for item in program.get("active_leases", []) if isinstance(item, dict)]
+    standing = [item for item in program.get("standing_packets", []) if isinstance(item, dict)]
+    packet_index = {str(item.get("packet_id")): item for item in standing if item.get("packet_id")}
     for result in results:
         reservation_id = str(result.get("reservation_id") or "")
         intent = intent_index.get(reservation_id)
         if intent is None:
-            findings.append(_finding("delivery_intent_not_found", "Delivery result has no prepared intent.", reservation_id=reservation_id or None))
-            continue
+            packet_id = str(result.get("packet_id") or "")
+            packet = packet_index.get(packet_id)
+            authority = packet.get("authority") if isinstance(packet, dict) and isinstance(packet.get("authority"), dict) else {}
+            runtime_thread_id = str(packet.get("runtime_thread_id") or "") if isinstance(packet, dict) else ""
+            writer_scope = str(packet.get("writer_scope") or "") if isinstance(packet, dict) else ""
+            reservation_seed = "|".join(
+                [
+                    packet_id,
+                    writer_scope,
+                    runtime_thread_id,
+                    str(authority.get("event_id") or ""),
+                ]
+            )
+            expected_reservation = "rsrv_" + hashlib.sha256(reservation_seed.encode("utf-8")).hexdigest()
+            recoverable = bool(
+                packet
+                and str(packet.get("state") or "").upper() in READY_STATES | {"ACTIVE"}
+                and reservation_id == expected_reservation
+                and str(result.get("runtime_thread_id") or "") == runtime_thread_id
+                and str(result.get("event_id") or "") == str(authority.get("event_id") or "")
+                and str(result.get("payload_digest") or "") == str(authority.get("payload_digest") or "")
+            )
+            if not recoverable:
+                findings.append(
+                    _finding(
+                        "delivery_intent_not_found",
+                        "Delivery result has no prepared intent or exact replayable reservation.",
+                        reservation_id=reservation_id or None,
+                    )
+                )
+                continue
+            packet["state"] = "ACTIVE"
+            packet["dispatch_reservation"] = OrderedDict(
+                [
+                    ("reservation_id", reservation_id),
+                    ("runtime_thread_id", runtime_thread_id),
+                    ("recovered_from_delivery_journal", True),
+                ]
+            )
+            intent = OrderedDict(
+                [
+                    ("reservation_id", reservation_id),
+                    ("packet_id", packet_id),
+                    ("logical_role_id", packet.get("logical_role_id")),
+                    ("runtime_thread_id", runtime_thread_id),
+                    ("writer_scope", writer_scope),
+                    ("event_id", authority.get("event_id")),
+                    ("payload_digest", authority.get("payload_digest")),
+                    ("status", "prepared"),
+                    ("turn_id", None),
+                    ("recovered_from_delivery_journal", True),
+                ]
+            )
+            intents.append(intent)
+            intent_index[reservation_id] = intent
+            if packet.get("execution_class") in MUTATING_EXECUTION_CLASSES:
+                leases.append(
+                    OrderedDict(
+                        [
+                            ("reservation_id", reservation_id),
+                            ("packet_id", packet_id),
+                            ("logical_role_id", packet.get("logical_role_id")),
+                            ("runtime_thread_id", runtime_thread_id),
+                            ("writer_scope", writer_scope),
+                            ("repository", packet.get("repository")),
+                            ("execution_class", packet.get("execution_class")),
+                            ("resource_claims", _resource_claims(packet.get("resource_claims"))),
+                            ("status", "active"),
+                            ("authority_event_id", authority.get("event_id")),
+                            ("recovered_from_delivery_journal", True),
+                        ]
+                    )
+                )
         exact_fields = ("packet_id", "runtime_thread_id", "event_id", "payload_digest")
         if any(str(result.get(field) or "") != str(intent.get(field) or "") for field in exact_fields):
             findings.append(_finding("delivery_result_correlation_mismatch", "Delivery result does not match its prepared intent.", reservation_id=reservation_id))
@@ -339,6 +453,23 @@ def apply_delivery_results(
             if prior_turn not in {None, turn_id}:
                 findings.append(_finding("delivery_turn_id_collision", "One reservation resolved to multiple turn IDs.", reservation_id=reservation_id))
                 continue
+            if str(intent.get("status") or "").lower() == "recovery-required":
+                recovery_exact = (
+                    result.get("history_reconciled") is True
+                    and result.get("reconciliation_basis") == RECOVERY_RECONCILIATION_BASIS
+                    and str(result.get("reconciled_event_id") or "") == str(intent.get("event_id") or "")
+                    and result.get("effects_match_intent") is True
+                )
+                legacy_recovery_exact = result.get("reconciled_from_complete_target_history") is True
+                if not (recovery_exact or legacy_recovery_exact):
+                    findings.append(
+                        _finding(
+                            "delivery_recovery_evidence_required",
+                            "A recovery-required intent needs complete-history evidence before delivery can be accepted.",
+                            reservation_id=reservation_id,
+                        )
+                    )
+                    continue
             intent["status"] = "delivered"
             intent["turn_id"] = turn_id
         elif status == "RECOVERY_REQUIRED":
@@ -350,6 +481,7 @@ def apply_delivery_results(
             findings.append(_finding("delivery_result_status_invalid", "Delivery result status must be DELIVERED or RECOVERY_REQUIRED.", reservation_id=reservation_id))
     program["delivery_intents"] = intents
     program["active_leases"] = leases
+    program["standing_packets"] = standing
     return program, findings
 
 
@@ -364,6 +496,19 @@ def _binding_index(bindings_payload: dict[str, Any]) -> dict[str, dict[str, Any]
     }
 
 
+def _deterministic_reservation_id(packet: dict[str, Any]) -> str:
+    authority = packet.get("authority") if isinstance(packet.get("authority"), dict) else {}
+    reservation_seed = "|".join(
+        [
+            str(packet.get("packet_id") or ""),
+            str(packet.get("writer_scope") or ""),
+            str(packet.get("runtime_thread_id") or ""),
+            str(authority.get("event_id") or ""),
+        ]
+    )
+    return "rsrv_" + hashlib.sha256(reservation_seed.encode("utf-8")).hexdigest()
+
+
 def _terminal_success(payload: dict[str, Any]) -> bool:
     if payload.get("terminal") is not True:
         return False
@@ -371,6 +516,13 @@ def _terminal_success(payload: dict[str, Any]) -> bool:
     tokens = set(state.split("_"))
     denied = {"BLOCKED", "FAILED", "LATENCY", "PENDING", "UNKNOWN"}
     return not tokens.intersection(denied) and bool(tokens.intersection(TERMINAL_SUCCESS_STATES | {"PASS"}))
+
+
+def _terminal_cancellation(payload: dict[str, Any]) -> bool:
+    if payload.get("terminal") is not True:
+        return False
+    state = str(payload.get("canonical_lifecycle_state") or payload.get("state") or payload.get("status") or "").upper()
+    return bool(set(state.split("_")).intersection({"CANCELLED", "SUPERSEDED"}))
 
 
 def reconcile_runtime_program(
@@ -434,6 +586,105 @@ def reconcile_runtime_program(
 
         packet_id = str(payload.get("packet_id") or "")
         writer_scope = str(payload.get("writer_scope") or "")
+        if _terminal_cancellation(payload):
+            packet = packets.get(packet_id)
+            reservation_id = str(payload.get("reservation_id") or "")
+            correlated_intents = [
+                intent
+                for intent in delivery_intents
+                if str(intent.get("packet_id") or "") == packet_id
+                and str(intent.get("writer_scope") or "") == writer_scope
+            ]
+            correlated_leases = [
+                lease
+                for lease in active_leases
+                if str(lease.get("packet_id") or "") == packet_id
+                and str(lease.get("writer_scope") or "") == writer_scope
+            ]
+            packet_state = str(packet.get("state") or "").upper() if packet else ""
+            ready_cancellation = bool(
+                packet
+                and packet_state == "READY"
+                and not correlated_intents
+                and not correlated_leases
+                and (not reservation_id or reservation_id == _deterministic_reservation_id(packet))
+            )
+            prepared_intents = [
+                intent
+                for intent in correlated_intents
+                if str(intent.get("reservation_id") or "") == reservation_id
+                and str(intent.get("status") or "").lower() == "prepared"
+                and not intent.get("turn_id")
+            ]
+            prepared_leases = [
+                lease
+                for lease in correlated_leases
+                if str(lease.get("reservation_id") or "") == reservation_id
+                and str(lease.get("status") or "").lower() == "active"
+            ]
+            prepared_cancellation = bool(
+                packet
+                and packet_state == "ACTIVE"
+                and reservation_id
+                and len(prepared_intents) == 1
+                and (
+                    (str(packet.get("execution_class") or "") == "read_only" and not correlated_leases)
+                    or len(prepared_leases) == 1
+                )
+            )
+            if (
+                envelope.get("source_role_id") != "atlas.main"
+                or not packet_id
+                or not writer_scope
+                or not packet
+                or str(packet.get("writer_scope") or "") != writer_scope
+                or not (ready_cancellation or prepared_cancellation)
+            ):
+                processed.pop(event_id, None)
+                processed_items = [item for item in processed_items if item.get("event_id") != event_id]
+                findings.append(
+                    _finding(
+                        "terminal_cancellation_correlation_required",
+                        "Cancellation must come from ATLAS MAIN and match one READY or prepared, never-delivered packet.",
+                        event_id=event_id,
+                        packet_id=packet_id or None,
+                        writer_scope=writer_scope or None,
+                    )
+                )
+                continue
+            if prepared_cancellation:
+                delivery_intents.remove(prepared_intents[0])
+                if prepared_leases:
+                    lease = prepared_leases[0]
+                    active_leases.remove(lease)
+                    released.append(
+                        OrderedDict(
+                            [
+                                ("reservation_id", lease.get("reservation_id")),
+                                ("packet_id", packet_id),
+                                ("writer_scope", writer_scope),
+                                ("status", "cancelled-before-delivery"),
+                                ("receipt_event_id", event_id),
+                            ]
+                        )
+                    )
+            completed.add(packet_id)
+            completed_receipts.append(
+                OrderedDict(
+                    [
+                        ("packet_id", packet_id),
+                        ("writer_scope", writer_scope),
+                        ("reservation_id", reservation_id or None),
+                        ("turn_id", None),
+                        ("receipt_event_id", event_id),
+                        ("receipt_payload_digest", payload_digest),
+                        ("terminal_disposition", str(payload.get("canonical_lifecycle_state") or "SUPERSEDED")),
+                        ("superseded_by_packet_id", payload.get("superseded_by_packet_id")),
+                    ]
+                )
+            )
+            packets.pop(packet_id, None)
+            continue
         if _terminal_success(payload):
             packet = packets.get(packet_id)
             matching = [
@@ -446,15 +697,38 @@ def reconcile_runtime_program(
             ]
             reservation_id = str(payload.get("reservation_id") or "")
             turn_id = str(payload.get("turn_id") or "")
-            matching_intents = [
+            correlated_intents = [
                 intent
                 for intent in delivery_intents
                 if str(intent.get("reservation_id") or "") == reservation_id
                 and str(intent.get("packet_id") or "") == packet_id
                 and str(intent.get("writer_scope") or "") == writer_scope
-                and str(intent.get("turn_id") or "") == turn_id
+            ]
+            matching_intents = [
+                intent
+                for intent in correlated_intents
+                if str(intent.get("turn_id") or "") == turn_id
                 and str(intent.get("status") or "").lower() == "delivered"
             ]
+            recovery_intents = [
+                intent
+                for intent in correlated_intents
+                if str(intent.get("status") or "").lower() == "recovery-required"
+                and str(intent.get("turn_id") or "") in {"", turn_id}
+            ]
+            source_receipt_event_id = payload.get("source_receipt_event_id")
+            terminal_recovers_delivery = bool(
+                len(matching_intents) == 0
+                and len(recovery_intents) == 1
+                and isinstance(source_receipt_event_id, str)
+                and EVENT_ID_PATTERN.fullmatch(source_receipt_event_id)
+            )
+            if terminal_recovers_delivery:
+                recovered_intent = recovery_intents[0]
+                recovered_intent["status"] = "delivered"
+                recovered_intent["turn_id"] = turn_id
+                recovered_intent["recovered_from_terminal_receipt"] = event_id
+                matching_intents = [recovered_intent]
             read_only_match = bool(
                 packet
                 and str(packet.get("writer_scope") or "") == writer_scope
@@ -755,12 +1029,16 @@ def _external_writer_identity(value: str) -> str:
     if "://" in raw:
         parsed = urlsplit(raw)
         parts = parsed.path.strip("/").split("/")
-        if parsed.hostname and parsed.hostname.casefold() == "github.com" and len(parts) >= 3 and parts[2].casefold() == "pull":
-            if len(parts) < 4 or not parts[3].isdigit():
+        if parsed.hostname and parsed.hostname.casefold() == "github.com" and len(parts) >= 3:
+            locator = parts[2].casefold()
+            if locator == "pull":
+                if len(parts) < 4 or not parts[3].isdigit():
+                    return ""
+                repository = _repository_identity("/".join(parts[:2]))
+                if repository:
+                    return f"github-pr:{repository}#{int(parts[3])}"
+            if locator in {"pr", "prs", "pulls", "pull-request", "pull-requests"}:
                 return ""
-            repository = _repository_identity("/".join(parts[:2]))
-            if repository:
-                return f"github-pr:{repository}#{int(parts[3])}"
         return raw.casefold()
     prefix, separator, remainder = raw.partition(":")
     normalized_prefix = prefix.casefold()
@@ -1604,15 +1882,7 @@ def reserve_selected_jobs(
         ):
             raise RuntimeError(f"writer scope became leased before reservation: {writer_scope}")
         authority = packet.get("authority") if isinstance(packet.get("authority"), dict) else {}
-        reservation_seed = "|".join(
-            [
-                packet_id,
-                writer_scope,
-                str(packet.get("runtime_thread_id") or ""),
-                str(authority.get("event_id") or ""),
-            ]
-        )
-        reservation_id = "rsrv_" + hashlib.sha256(reservation_seed.encode("utf-8")).hexdigest()
+        reservation_id = _deterministic_reservation_id(packet)
         packet["state"] = "ACTIVE"
         packet["dispatch_reservation"] = OrderedDict(
             [
@@ -1929,7 +2199,7 @@ def build_report(
             ("prompt_output", prompt_output_path),
             (
                 "next_recommended_command",
-                "python ops/atlas/autonomous_lane_scheduler.py --json --program tmp/atlas/autonomous-work-program.json --bindings tmp/atlas/standing-role-bindings.latest.json --envelopes tmp/atlas/autonomous-inbox-events.jsonl --max-candidates 30 --output tmp/atlas/autonomous-lane-scheduler.latest.json --prompt-output tmp/atlas/codex-autocomplete-prompt.latest.md",
+                "python ops/atlas/autonomous_lane_scheduler.py --json --program tmp/atlas/autonomous-work-program.json --bindings tmp/atlas/standing-role-bindings.latest.json --envelopes tmp/atlas/autonomous-inbox-events.jsonl --delivery-results tmp/atlas/delivery-results.latest.jsonl --max-candidates 30 --output tmp/atlas/autonomous-lane-scheduler.latest.json --prompt-output tmp/atlas/codex-autocomplete-prompt.latest.md",
             ),
         ]
     )
@@ -2002,7 +2272,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     root = atlas_root()
     try:
-        program_path, program_path_error = validate_program_path(root, args.program)
+        bridge_inputs_complete = bool(args.bindings and args.envelopes)
+        program_path, program_path_error = validate_program_path(
+            root,
+            args.program,
+            allow_missing=bridge_inputs_complete,
+        )
         output_path, output_error = validate_output_path(root, args.output, suffix=".json")
         prompt_output_path, prompt_output_error = validate_output_path(root, args.prompt_output, suffix=".md")
         bindings_path = None
@@ -2033,30 +2308,52 @@ def main(argv: list[str] | None = None) -> int:
             return 2
 
         with _exclusive_program_lock(program_path):
-            program, program_errors = load_program(root, args.program)
-            if program is None or program_errors:
-                payload = _blocked_report(args=args, blockers=program_errors, stop_reason="invalid_scheduler_inputs")
-                print(json.dumps(payload, indent=2))
-                return 2
+            program_initialized = not program_path.exists()
+            if program_initialized:
+                program = _initial_runtime_program()
+                program_errors: list[OrderedDict[str, Any]] = []
+            else:
+                program, program_errors = load_program(root, args.program)
+                if program is None or program_errors:
+                    payload = _blocked_report(args=args, blockers=program_errors, stop_reason="invalid_scheduler_inputs")
+                    print(json.dumps(payload, indent=2))
+                    return 2
             loaded_program_digest = _canonical_payload_digest(program)
-            loaded_revision = int(program.get("revision", 0) or 0)
+            loaded_revision = 0 if program_initialized else int(program.get("revision", 0) or 0)
             bridge_findings: list[OrderedDict[str, Any]] = []
+            bindings_payload: dict[str, Any] | None = None
+            envelopes: list[dict[str, Any]] = []
+            if bindings_path is not None and envelopes_path is not None:
+                bindings_payload = _load_json_object(bindings_path, label="bindings")
+                envelopes = _load_envelopes(envelopes_path)
+                nonterminal_envelopes = [
+                    envelope
+                    for envelope in envelopes
+                    if not _terminal_success(envelope.get("payload") if isinstance(envelope.get("payload"), dict) else {})
+                ]
+                program, admission_findings = reconcile_runtime_program(
+                    program=program,
+                    bindings_payload=bindings_payload,
+                    envelopes=nonterminal_envelopes,
+                )
+                bridge_findings.extend(admission_findings)
             if delivery_results_path is not None:
                 program, delivery_findings = apply_delivery_results(
                     program=program,
                     results=_load_envelopes(delivery_results_path),
                 )
                 bridge_findings.extend(delivery_findings)
-            if bindings_path is not None and envelopes_path is not None:
-                bindings_payload = _load_json_object(bindings_path, label="bindings")
-                envelopes = _load_envelopes(envelopes_path)
-                program, bridge_findings = reconcile_runtime_program(
+            if bindings_payload is not None:
+                program, terminal_findings = reconcile_runtime_program(
                     program=program,
                     bindings_payload=bindings_payload,
                     envelopes=envelopes,
                 )
+                bridge_findings.extend(terminal_findings)
             if args.allow_reselection:
                 program["allow_reselection"] = True
+            bridge_findings = _dedupe_findings(bridge_findings)
+            program["bridge_findings"] = bridge_findings
 
             report = build_report(
                 root=root,
@@ -2079,7 +2376,7 @@ def main(argv: list[str] | None = None) -> int:
                 for job in report.get("selected_jobs", [])
                 if isinstance(job, dict) and job.get("source") == "standing_task"
             ]
-            program_changed = _canonical_payload_digest(program) != loaded_program_digest
+            program_changed = program_initialized or _canonical_payload_digest(program) != loaded_program_digest
             if program_changed:
                 program["revision"] = loaded_revision + 1
                 _atomic_write_json(program_path, program)

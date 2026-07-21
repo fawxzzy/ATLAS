@@ -177,12 +177,16 @@ def _external_writer_identity(value: str) -> str:
     if "://" in raw:
         parsed = urlsplit(raw)
         parts = parsed.path.strip("/").split("/")
-        if parsed.hostname and parsed.hostname.casefold() == "github.com" and len(parts) >= 3 and parts[2].casefold() == "pull":
-            if len(parts) < 4 or not parts[3].isdigit():
+        if parsed.hostname and parsed.hostname.casefold() == "github.com" and len(parts) >= 3:
+            locator = parts[2].casefold()
+            if locator == "pull":
+                if len(parts) < 4 or not parts[3].isdigit():
+                    return ""
+                repository = _repository_identity("/".join(parts[:2]))
+                if repository:
+                    return f"github-pr:{repository}#{int(parts[3])}"
+            if locator in {"pr", "prs", "pulls", "pull-request", "pull-requests"}:
                 return ""
-            repository = _repository_identity("/".join(parts[:2]))
-            if repository:
-                return f"github-pr:{repository}#{int(parts[3])}"
         return raw.casefold()
     prefix, separator, remainder = raw.partition(":")
     normalized_prefix = prefix.casefold()

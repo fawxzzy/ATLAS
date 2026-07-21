@@ -62,6 +62,15 @@ task transcripts. `idle` and `notLoaded` bindings are resumable; `active`,
 archived, missing, and unknown bindings are lane-local blockers and are never
 steered.
 
+The work-program file under `tmp/atlas/` is a derived atomic snapshot, not the
+only durable copy of scheduler truth. If it is absent after restart, the bridge
+recreates it only when both canonical Inbox envelopes and the current binding
+snapshot are supplied. It admits nonterminal events first, reconstructs exact
+reservations from deterministic packet identity plus recorded delivery results,
+then consumes terminal receipts. A missing snapshot without those journals
+still fails closed. This makes disposable `tmp` cleanup recoverable without
+inventing packets, leases, deliveries, or completions.
+
 ## Lease behavior
 
 An active lease persists its repository, mutating execution class, and normalized
@@ -86,10 +95,21 @@ app-native send returns, MAIN settles that intent with the returned turn ID. An
 ambiguous result becomes `recovery-required`; MAIN must inspect complete thread
 history for the exact event ID and must not retry blindly. Active work without
 a correlated lease becomes a derived `scope_hold`, never an invented lease.
+Promoting a recovery-required delivery back to `delivered` requires explicit
+`COMPLETE_TARGET_TASK_HISTORY` reconciliation, the exact event identity, and a
+proof that observed effects match the admitted intent. A bare later
+`DELIVERED` status cannot clear recovery state.
 
 Every release receipt must carry `terminal=true`, a successful terminal state,
 the exact `packet_id`, `writer_scope`, reservation ID, and delivered turn ID. No
 prose classification or uncorrelated terminal receipt releases capacity.
+
+Obsolete packets are not deleted silently. `ATLAS MAIN` may emit a canonical
+`SUPERSEDED` terminal disposition only while a packet remains `READY` or while
+its exact delivery intent is `prepared` and has no returned turn. Prepared
+cancellation requires the exact packet, writer scope, and reservation. A
+delivered or recovery-required packet cannot be cancelled and still requires
+complete target-task-history reconciliation.
 
 `atlas.worker-lease.v2` now requires `writer_scope`; a lease without its
 conflict-group identity is invalid and cannot reserve global capacity by
@@ -144,6 +164,10 @@ remains app-native and uses the resolved `runtime_thread_id`. MAIN writes the
 app result to a bounded delivery-result JSON/JSONL input and reruns settlement
 under the same program lock before consuming later receipts.
 
+The normal bridge invocation always includes `--delivery-results`; omitting the
+delivery journal can recreate READY packets but cannot truthfully recover their
+in-flight or completed delivery lifecycle.
+
 ## Stop conditions
 
 The affected lane stops on missing or malformed authority, identity or scope
@@ -170,6 +194,9 @@ canonical-root mutation beyond the exact admitted packet.
   zero-capacity preservation, bounded local-preparation admission and rejection,
   protected-term-safe read-only routing,
   active-lease isolation, and deterministic multi-scope wave selection.
+  The suite also deletes the derived program snapshot and proves journal replay
+  restores two disjoint owner reservations in one wave and releases an exactly
+  delivered terminal packet without residue.
 - `tests/test_atlas_workflow_recovery.py` and the generated workflow view prove
   that the durable manifest retains per-scope collision handling and standing
   continuation rules.

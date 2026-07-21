@@ -176,6 +176,13 @@ def _planner_payload(items: list[dict[str, object]]) -> dict[str, object]:
 
 
 class AutonomousLaneSchedulerTests(unittest.TestCase):
+    def test_bridge_findings_are_deduplicated_by_complete_identity(self) -> None:
+        first = scheduler._finding("one", "same", packet_id="packet")
+        second = copy.deepcopy(first)
+        distinct = scheduler._finding("one", "same", packet_id="other")
+
+        self.assertEqual([first, distinct], scheduler._dedupe_findings([first, second, distinct]))
+
     def test_work_program_schema_freezes_delivery_and_lease_state(self) -> None:
         schema = json.loads((scheduler.ROOT / "schemas/atlas.autonomous-work-program.v2.json").read_text(encoding="utf-8"))
 
@@ -592,6 +599,34 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
 
         self.assertEqual([], report["selected_jobs"])
         self.assertEqual("external_writer_claim_required", report["blocked_candidates"][0]["blocked_reason"])
+
+    def test_malformed_github_pr_url_aliases_are_rejected(self) -> None:
+        for locator in ("pulls", "pr", "prs", "pull-request"):
+            with self.subTest(locator=locator):
+                program = _program_payload()
+                packet = _standing_packet(
+                    f"malformed-review-url-{locator}",
+                    role_id="atlas.release-control-plane",
+                    repository="fawxzzy/ATLAS",
+                    writer_scope=f"github.fawxzzy.ATLAS.pr146.review.{locator}",
+                )
+                packet["execution_class"] = "external_mutation"
+                packet["resource_claims"] = {
+                    "external_writers": [f"https://github.com/fawxzzy/ATLAS/{locator}/146"],
+                }
+                program["standing_packets"] = [packet]
+
+                report = scheduler.build_report(
+                    root=Path("atlas-root-fixture"),
+                    program=program,
+                    max_candidates=30,
+                    preflight_report=_preflight_payload(),
+                    selector_report=_selector_payload(),
+                    planner_report=_planner_payload([]),
+                )
+
+                self.assertEqual([], report["selected_jobs"])
+                self.assertEqual("external_writer_claim_required", report["blocked_candidates"][0]["blocked_reason"])
 
     def test_claimless_external_active_lease_is_incomplete(self) -> None:
         program = _program_payload()
@@ -1683,6 +1718,188 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("rsrv-other", program["active_leases"][0]["reservation_id"])
         self.assertEqual([], program["completed_packets"])
 
+    def test_supersession_cancels_ready_or_exact_prepared_packet_only(self) -> None:
+        ready = _standing_packet(
+            "ready-stale",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness.ready",
+        )
+        prepared = _standing_packet(
+            "prepared-stale",
+            role_id="owner.mazer",
+            repository="fawxzzy/mazer",
+            writer_scope="repo.mazer.prepared",
+        )
+        prepared["state"] = "ACTIVE"
+        prepared["dispatch_reservation"] = {"reservation_id": "rsrv-prepared"}
+        program = _program_payload()
+        program["standing_packets"] = [ready, prepared]
+        program["active_leases"] = [
+            {
+                "packet_id": "prepared-stale",
+                "writer_scope": "repo.mazer.prepared",
+                "status": "active",
+                "reservation_id": "rsrv-prepared",
+            }
+        ]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-prepared",
+                "packet_id": "prepared-stale",
+                "writer_scope": "repo.mazer.prepared",
+                "status": "prepared",
+            }
+        ]
+        envelopes = [
+            _envelope(
+                {
+                    "canonical_lifecycle_state": "SUPERSEDED",
+                    "terminal": True,
+                    "packet_id": "ready-stale",
+                    "writer_scope": "repo.fitness.ready",
+                    "superseded_by_packet_id": "ready-current",
+                },
+                idempotency_key="ready-stale-superseded",
+                source_role_id="atlas.main",
+            ),
+            _envelope(
+                {
+                    "canonical_lifecycle_state": "SUPERSEDED",
+                    "terminal": True,
+                    "packet_id": "prepared-stale",
+                    "writer_scope": "repo.mazer.prepared",
+                    "reservation_id": "rsrv-prepared",
+                    "superseded_by_packet_id": "prepared-current",
+                },
+                idempotency_key="prepared-stale-superseded",
+                source_role_id="atlas.main",
+            ),
+        ]
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(
+                ("owner.fitness", "fitness-thread", "idle"),
+                ("owner.mazer", "mazer-thread", "idle"),
+            ),
+            envelopes=envelopes,
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual([], program["standing_packets"])
+        self.assertEqual([], program["active_leases"])
+        self.assertEqual([], program["delivery_intents"])
+        self.assertEqual(["prepared-stale", "ready-stale"], program["completed_packets"])
+        self.assertEqual("cancelled-before-delivery", program["released_leases"][0]["status"])
+        self.assertTrue(all(item["turn_id"] is None for item in program["completed_receipts"]))
+
+    def test_supersession_cannot_cancel_delivered_or_uncorrelated_packet(self) -> None:
+        packet = _standing_packet(
+            "delivered-packet",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness",
+        )
+        packet["state"] = "ACTIVE"
+        packet["dispatch_reservation"] = {"reservation_id": "rsrv-delivered"}
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+        program["active_leases"] = [
+            {
+                "packet_id": "delivered-packet",
+                "writer_scope": "repo.fitness",
+                "status": "active",
+                "reservation_id": "rsrv-delivered",
+            }
+        ]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-delivered",
+                "packet_id": "delivered-packet",
+                "writer_scope": "repo.fitness",
+                "status": "delivered",
+                "turn_id": "turn-delivered",
+            }
+        ]
+        superseded = _envelope(
+            {
+                "canonical_lifecycle_state": "SUPERSEDED",
+                "terminal": True,
+                "packet_id": "delivered-packet",
+                "writer_scope": "repo.fitness",
+                "reservation_id": "rsrv-delivered",
+                "superseded_by_packet_id": "newer-packet",
+            },
+            idempotency_key="delivered-supersession-rejected",
+            source_role_id="atlas.main",
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[superseded],
+        )
+
+        self.assertEqual("terminal_cancellation_correlation_required", findings[0]["code"])
+        self.assertEqual("active", program["active_leases"][0]["status"])
+        self.assertEqual("delivered", program["delivery_intents"][0]["status"])
+        self.assertEqual([], program["completed_packets"])
+
+    def test_cold_start_supersession_accepts_only_the_deterministic_prior_reservation(self) -> None:
+        payload = {
+            "canonical_lifecycle_state": "READY",
+            "packet_id": "cold-stale",
+            "objective": "Obsolete exact-head review request.",
+            "logical_role_id": "atlas.release-control-plane",
+            "repository": "fawxzzy/ATLAS",
+            "writer_scope": "github.fawxzzy.ATLAS.pr146.review.stale",
+            "execution_class": "external_mutation",
+            "protected_surface_authorized": True,
+            "dependencies": [],
+            "resource_claims": {
+                "files": [],
+                "worktrees": [],
+                "ports": [],
+                "browsers": [],
+                "external_writers": ["github:fawxzzy/ATLAS#146:review:stale"],
+            },
+        }
+        ready = _envelope(payload, idempotency_key="cold-stale-ready", source_role_id="atlas.main")
+        expected_packet = {
+            "packet_id": "cold-stale",
+            "writer_scope": "github.fawxzzy.ATLAS.pr146.review.stale",
+            "runtime_thread_id": "release-thread",
+            "authority": {
+                "event_id": ready["event_id"],
+                "payload_digest": ready["payload_digest"],
+            },
+        }
+        reservation_id = scheduler._deterministic_reservation_id(expected_packet)
+        superseded = _envelope(
+            {
+                "canonical_lifecycle_state": "SUPERSEDED",
+                "terminal": True,
+                "packet_id": "cold-stale",
+                "writer_scope": "github.fawxzzy.ATLAS.pr146.review.stale",
+                "reservation_id": reservation_id,
+                "superseded_by_packet_id": "cold-current",
+            },
+            idempotency_key="cold-stale-superseded",
+            source_role_id="atlas.main",
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("atlas.release-control-plane", "release-thread", "idle")),
+            envelopes=[ready, superseded],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual([], program["standing_packets"])
+        self.assertEqual(["cold-stale"], program["completed_packets"])
+        self.assertEqual(reservation_id, program["completed_receipts"][0]["reservation_id"])
+
     def test_ambiguous_delivery_enters_recovery_without_retry(self) -> None:
         program = _program_payload()
         program["standing_packets"] = [
@@ -1725,6 +1942,46 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("recovery-required", program["active_leases"][0]["status"])
         self.assertEqual(scheduler.STATUS_HOLD, retry["status"])
 
+        program, premature = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {
+                    "reservation_id": reservations[0]["reservation_id"],
+                    "packet_id": "fitness-ready",
+                    "runtime_thread_id": intent["runtime_thread_id"],
+                    "event_id": intent["event_id"],
+                    "payload_digest": intent["payload_digest"],
+                    "status": "DELIVERED",
+                    "turn_id": "fitness-turn",
+                }
+            ],
+        )
+
+        self.assertEqual("delivery_recovery_evidence_required", premature[0]["code"])
+        self.assertEqual("recovery-required", program["delivery_intents"][0]["status"])
+
+        program, recovered = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {
+                    "reservation_id": reservations[0]["reservation_id"],
+                    "packet_id": "fitness-ready",
+                    "runtime_thread_id": intent["runtime_thread_id"],
+                    "event_id": intent["event_id"],
+                    "payload_digest": intent["payload_digest"],
+                    "status": "DELIVERED",
+                    "turn_id": "fitness-turn",
+                    "history_reconciled": True,
+                    "reconciliation_basis": scheduler.RECOVERY_RECONCILIATION_BASIS,
+                    "reconciled_event_id": intent["event_id"],
+                    "effects_match_intent": True,
+                }
+            ],
+        )
+
+        self.assertEqual([], recovered)
+        self.assertEqual("delivered", program["delivery_intents"][0]["status"])
+
     def test_nonterminal_receipt_cannot_release_a_lease(self) -> None:
         program = _program_payload()
         program["active_leases"] = [
@@ -1746,6 +2003,59 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
 
         self.assertEqual([], findings)
         self.assertEqual("active", program["active_leases"][0]["status"])
+
+    def test_exact_terminal_receipt_recovers_ambiguous_delivery(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness")
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        intent = program["delivery_intents"][0]
+        program, findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {
+                    "reservation_id": reservations[0]["reservation_id"],
+                    "packet_id": "fitness-ready",
+                    "runtime_thread_id": intent["runtime_thread_id"],
+                    "event_id": intent["event_id"],
+                    "payload_digest": intent["payload_digest"],
+                    "status": "RECOVERY_REQUIRED",
+                    "turn_id": "fitness-turn",
+                }
+            ],
+        )
+        terminal = _envelope(
+            {
+                "canonical_lifecycle_state": "COMPLETED",
+                "terminal": True,
+                "packet_id": "fitness-ready",
+                "writer_scope": "repo.fitness",
+                "reservation_id": reservations[0]["reservation_id"],
+                "turn_id": "fitness-turn",
+                "source_receipt_event_id": "onv1_" + "e" * 64,
+            },
+            idempotency_key="fitness-terminal-recovery",
+        )
+        program, receipt_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[terminal],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual([], receipt_findings)
+        self.assertEqual([], program["active_leases"])
+        self.assertEqual([], program["delivery_intents"])
+        self.assertEqual(["fitness-ready"], program["completed_packets"])
 
     def test_standing_dependency_requires_completed_receipt(self) -> None:
         program = _program_payload()
@@ -2146,3 +2456,158 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(scheduler.STATUS_HOLD, second_report["status"])
         self.assertEqual([], second_report["dispatch_plan"])
         self.assertEqual(1, second_report["program_revision"])
+
+    def test_main_rebuilds_missing_program_and_selects_disjoint_owner_wave(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            fitness = _envelope(
+                {
+                    "canonical_lifecycle_state": "READY",
+                    "packet_id": "fitness-local-preparation",
+                    "objective": "Prepare bounded Fitness source locally.",
+                    "logical_role_id": "owner.fitness",
+                    "repository": "fawxzzy/fitness",
+                    "writer_scope": "repo.fitness.local-preparation",
+                    "execution_class": "repo_worktree",
+                    "resource_claims": {"files": ["src/fitness.py"], "worktrees": ["fitness-wt"]},
+                },
+                idempotency_key="fitness-local-preparation",
+            )
+            mazer = _envelope(
+                {
+                    "canonical_lifecycle_state": "READY",
+                    "packet_id": "mazer-local-preparation",
+                    "objective": "Prepare bounded Mazer source locally.",
+                    "logical_role_id": "owner.mazer",
+                    "repository": "fawxzzy/mazer",
+                    "writer_scope": "repo.mazer.local-preparation",
+                    "execution_class": "repo_worktree",
+                    "resource_claims": {"files": ["src/mazer.py"], "worktrees": ["mazer-wt"]},
+                },
+                idempotency_key="mazer-local-preparation",
+            )
+            _write(
+                root / "tmp/atlas/bindings.json",
+                json.dumps(
+                    _bindings(
+                        ("owner.fitness", "fitness-thread", "idle"),
+                        ("owner.mazer", "mazer-thread", "notLoaded"),
+                    ),
+                    indent=2,
+                )
+                + "\n",
+            )
+            _write(root / "tmp/atlas/envelopes.jsonl", json.dumps(fitness) + "\n" + json.dumps(mazer) + "\n")
+            args = [
+                "--json",
+                "--program",
+                "tmp/atlas/program.json",
+                "--bindings",
+                "tmp/atlas/bindings.json",
+                "--envelopes",
+                "tmp/atlas/envelopes.jsonl",
+                "--output",
+                "tmp/atlas/report.json",
+                "--prompt-output",
+                "tmp/atlas/prompt.md",
+            ]
+            with patch.object(scheduler, "atlas_root", return_value=root):
+                with patch.object(scheduler, "_branch_state", return_value=("main", "abc123")):
+                    with patch.object(scheduler, "_parity_state", return_value={"status": "clean", "behind": 0, "ahead": 0}):
+                        with patch.object(scheduler, "_load_selector", return_value=_selector_payload()):
+                            with patch.object(scheduler.ai_work_session_preflight, "build_report", return_value=_preflight_payload()):
+                                with patch.object(scheduler.planner, "build_report", return_value=_planner_payload([])):
+                                    with redirect_stdout(io.StringIO()):
+                                        exit_code = scheduler.main(args)
+
+            report = json.loads((root / "tmp/atlas/report.json").read_text(encoding="utf-8"))
+            program = json.loads((root / "tmp/atlas/program.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(0, exit_code)
+        self.assertEqual(
+            ["fitness-local-preparation", "mazer-local-preparation"],
+            sorted(item["packet_id"] for item in report["dispatch_plan"]),
+        )
+        self.assertEqual(2, len(program["active_leases"]))
+        self.assertEqual(2, len(program["delivery_intents"]))
+        self.assertEqual(1, program["revision"])
+
+    def test_main_replays_ready_delivery_and_terminal_when_snapshot_is_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            ready = _envelope(
+                {
+                    "canonical_lifecycle_state": "READY",
+                    "packet_id": "fitness-ready",
+                    "objective": "Fitness bounded source correction",
+                    "logical_role_id": "owner.fitness",
+                    "repository": "fawxzzy/fitness",
+                    "writer_scope": "repo.fitness",
+                    "execution_class": "repo_worktree",
+                },
+                idempotency_key="fitness-ready-event",
+            )
+            reservation_seed = "|".join(
+                [
+                    "fitness-ready",
+                    "repo.fitness",
+                    "fitness-thread",
+                    str(ready["event_id"]),
+                ]
+            )
+            reservation_id = "rsrv_" + hashlib.sha256(reservation_seed.encode("utf-8")).hexdigest()
+            terminal = _envelope(
+                {
+                    "canonical_lifecycle_state": "COMPLETED",
+                    "terminal": True,
+                    "packet_id": "fitness-ready",
+                    "writer_scope": "repo.fitness",
+                    "reservation_id": reservation_id,
+                    "turn_id": "fitness-turn",
+                },
+                idempotency_key="fitness-terminal-event",
+            )
+            delivery = {
+                "reservation_id": reservation_id,
+                "packet_id": "fitness-ready",
+                "runtime_thread_id": "fitness-thread",
+                "event_id": ready["event_id"],
+                "payload_digest": ready["payload_digest"],
+                "status": "DELIVERED",
+                "turn_id": "fitness-turn",
+            }
+            _write(root / "tmp/atlas/bindings.json", json.dumps(_bindings(("owner.fitness", "fitness-thread", "idle")), indent=2) + "\n")
+            _write(root / "tmp/atlas/envelopes.jsonl", json.dumps(ready) + "\n" + json.dumps(terminal) + "\n")
+            _write(root / "tmp/atlas/delivery.jsonl", json.dumps(delivery) + "\n")
+            args = [
+                "--json",
+                "--program",
+                "tmp/atlas/program.json",
+                "--bindings",
+                "tmp/atlas/bindings.json",
+                "--envelopes",
+                "tmp/atlas/envelopes.jsonl",
+                "--delivery-results",
+                "tmp/atlas/delivery.jsonl",
+                "--output",
+                "tmp/atlas/report.json",
+                "--prompt-output",
+                "tmp/atlas/prompt.md",
+            ]
+            with patch.object(scheduler, "atlas_root", return_value=root):
+                with patch.object(scheduler, "_branch_state", return_value=("main", "abc123")):
+                    with patch.object(scheduler, "_parity_state", return_value={"status": "clean", "behind": 0, "ahead": 0}):
+                        with patch.object(scheduler, "_load_selector", return_value=_selector_payload()):
+                            with patch.object(scheduler.ai_work_session_preflight, "build_report", return_value=_preflight_payload()):
+                                with patch.object(scheduler.planner, "build_report", return_value=_planner_payload([])):
+                                    with redirect_stdout(io.StringIO()):
+                                        exit_code = scheduler.main(args)
+
+            program = json.loads((root / "tmp/atlas/program.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(0, exit_code)
+        self.assertEqual(["fitness-ready"], program["completed_packets"])
+        self.assertEqual([], program["standing_packets"])
+        self.assertEqual([], program["active_leases"])
+        self.assertEqual([], program["delivery_intents"])
+        self.assertEqual(reservation_id, program["released_leases"][0]["reservation_id"])

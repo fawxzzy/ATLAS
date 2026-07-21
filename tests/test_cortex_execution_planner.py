@@ -267,6 +267,20 @@ class CortexExecutionPlannerTests(unittest.TestCase):
         self.assertFalse(plan["safe_to_admit"])
         self.assertIn("invalid_resource_claim", [item["code"] for item in plan["blocked_reasons"]])
 
+    def test_malformed_github_pr_url_aliases_fail_closed(self) -> None:
+        for locator in ("pulls", "pr", "prs", "pull-request"):
+            with self.subTest(locator=locator):
+                job = self._job("one", execution_class="repo_worktree")
+                job["resource_claims"] = {
+                    "external_writers": [f"https://github.com/fawxzzy/ATLAS/{locator}/146"],
+                }
+
+                plan, status = self._plan(self._root(), [job])
+
+                self.assertEqual("blocker", status)
+                self.assertFalse(plan["safe_to_admit"])
+                self.assertIn("invalid_resource_claim", [item["code"] for item in plan["blocked_reasons"]])
+
     def test_github_pr_url_and_structured_writer_are_one_resource(self) -> None:
         first = self._job("one", execution_class="repo_worktree", writer_scope="repo.stack.one")
         second = self._job("two", execution_class="repo_worktree", writer_scope="repo.stack.two")
