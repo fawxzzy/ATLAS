@@ -1053,6 +1053,57 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(scheduler.STATUS_HOLD, report["status"])
         self.assertEqual("protected_or_platform_mutation_forbidden", report["blocked_candidates"][0]["blocked_reason"])
 
+    def test_read_only_standing_packet_can_name_protected_exclusions(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "bounded-selector",
+            role_id="fawxzzy.questions",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.atlas.selector",
+        )
+        packet["execution_class"] = "read_only"
+        packet["packet"] = "Read accepted receipts only; do not deploy production or inspect secrets."
+        program["standing_packets"] = [packet]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(error=1),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(["bounded-selector"], [job["packet_id"] for job in report["selected_jobs"]])
+        self.assertEqual("read_only", report["selected_jobs"][0]["execution_class"])
+
+    def test_read_only_planner_packet_can_name_protected_exclusions(self) -> None:
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=_program_payload(),
+            max_candidates=30,
+            preflight_report=_preflight_payload(error=1),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload(
+                [
+                    {
+                        "marker": "AI Long-Run Batch Orchestration",
+                        "classification": planner.CLASS_IMMEDIATE,
+                        "score": 70,
+                        "packet": "Read accepted receipts only; do not deploy production or inspect secrets.",
+                        "mode": "worker implementation",
+                        "logical_role_id": "fawxzzy.questions",
+                        "repository": "fawxzzy/ATLAS",
+                        "writer_scope": "read.atlas.selector",
+                        "execution_class": "read_only",
+                    }
+                ]
+            ),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual("read_only", report["selected_jobs"][0]["execution_class"])
+
     def test_protected_packet_is_blocked(self) -> None:
         report = scheduler.build_report(
             root=Path("atlas-root-fixture"),

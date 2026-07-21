@@ -782,7 +782,7 @@ def _candidate_from_planner_item(
         blocked_reason = "invalid_execution_class"
     elif writer_scope in set(program.get("forbidden_writer_scopes", [])):
         blocked_reason = "writer_scope_forbidden"
-    elif _is_protected_packet(packet):
+    elif execution_class != "read_only" and _is_protected_packet(packet):
         blocked_reason = "protected_or_platform_mutation_forbidden"
     elif requires_external_input:
         blocked_reason = "requires_external_input"
@@ -849,7 +849,11 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any]) -> Or
         blocked_reason = "writer_scope_forbidden"
     elif not _authority_is_canonical(raw.get("authority")):
         blocked_reason = "canonical_authority_required"
-    elif _is_protected_packet(packet) and raw.get("protected_surface_authorized") is not True:
+    elif (
+        execution_class != "read_only"
+        and _is_protected_packet(packet)
+        and raw.get("protected_surface_authorized") is not True
+    ):
         blocked_reason = "protected_or_platform_mutation_forbidden"
     phase = str(raw.get("phase") or PHASE_WORKER_IMPLEMENTATION)
     return OrderedDict(

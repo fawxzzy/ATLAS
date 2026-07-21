@@ -97,6 +97,11 @@ The affected lane stops on missing or malformed authority, identity or scope
 drift, unmet dependencies, active lease collision, undeclared protected
 surface access, or resource overlap. Unrelated conflict groups continue.
 
+Protected-surface wording is evaluated as a mutation guard only for mutating
+execution classes. A canonical `read_only` packet may name those surfaces as
+inspection boundaries or explicit exclusions; that wording does not expand
+the packet beyond read-only authority.
+
 No scheduler output grants GitHub workflow dispatch, provider access,
 Supabase/SQL/Auth/data mutation, deployment, production, secret access, or
 canonical-root mutation beyond the exact admitted packet.
@@ -108,8 +113,8 @@ canonical-root mutation beyond the exact admitted packet.
 - `tests/test_atlas_autonomous_lane_scheduler.py` proves canonical standing
   authority, binding-aware idle and notLoaded resumption, active-task
   suppression, dependency gating, atomic reservation, exact terminal release,
-  zero-capacity preservation, active-lease isolation, and deterministic
-  multi-scope wave selection.
+  zero-capacity preservation, protected-term-safe read-only routing,
+  active-lease isolation, and deterministic multi-scope wave selection.
 - `tests/test_atlas_workflow_recovery.py` and the generated workflow view prove
   that the durable manifest retains per-scope collision handling and standing
   continuation rules.
