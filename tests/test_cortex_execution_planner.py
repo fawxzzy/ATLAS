@@ -247,6 +247,17 @@ class CortexExecutionPlannerTests(unittest.TestCase):
         self.assertFalse(plan["safe_to_admit"])
         self.assertIn("invalid_job_shape", [item["code"] for item in plan["blocked_reasons"]])
 
+    def test_github_pr_url_and_structured_writer_are_one_resource(self) -> None:
+        first = self._job("one", execution_class="repo_worktree", writer_scope="repo.stack.one")
+        second = self._job("two", execution_class="repo_worktree", writer_scope="repo.stack.two")
+        first["resource_claims"] = {"external_writers": ["github:fawxzzy/ATLAS#146:review"]}
+        second["resource_claims"] = {"external_writers": ["https://github.com/fawxzzy/ATLAS/pull/146/files"]}
+
+        plan, _ = self._plan(self._root(), [first, second])
+
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("external_writers", plan["collision_risks"][0]["resource_kinds"])
+
     def test_explicit_distinct_scopes_share_same_repository_with_proven_isolation(self) -> None:
         first = self._job(
             "one",

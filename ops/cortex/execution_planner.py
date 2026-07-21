@@ -175,7 +175,16 @@ def _repository_identity(value: Any) -> str | None:
 
 
 def _external_writer_identity(value: str) -> str:
-    prefix, separator, remainder = value.strip().partition(":")
+    raw = value.strip()
+    if "://" in raw:
+        parsed = urlsplit(raw)
+        parts = parsed.path.strip("/").split("/")
+        if parsed.hostname and parsed.hostname.casefold() == "github.com" and len(parts) >= 4:
+            repository = _repository_identity("/".join(parts[:2]))
+            if repository and parts[2].casefold() == "pull" and parts[3].isdigit():
+                return f"github-pr:{repository}#{int(parts[3])}"
+        return raw.casefold()
+    prefix, separator, remainder = raw.partition(":")
     normalized_prefix = prefix.casefold()
     if not separator or normalized_prefix not in {"github", "github-pr", "git-branch"}:
         return value.strip()
@@ -183,10 +192,10 @@ def _external_writer_identity(value: str) -> str:
     repository, pr_separator, pr_number = repository_token.partition("#")
     normalized_repository = _repository_identity(repository)
     if not normalized_repository:
-        return value.strip().casefold()
+        return raw.casefold()
+    if pr_separator and pr_number.isdigit():
+        return f"github-pr:{normalized_repository}#{int(pr_number)}"
     normalized = f"{normalized_prefix}:{normalized_repository}"
-    if pr_separator:
-        normalized += f"#{pr_number.casefold()}"
     if suffix_separator:
         normalized += f":{suffix}"
     return normalized

@@ -87,8 +87,10 @@ the originating authority admitted that bounded surface.
 Repository identities are canonicalized before scope derivation, persistence,
 and collision checks. GitHub `owner/repo`, HTTPS, SSH, and `.git` aliases map to
 one lowercase owner/repository key; unrecognized URL identities fail closed.
-Structured `github`, `github-pr`, and `git-branch` external-writer claims apply
-the same repository normalization while preserving case-sensitive suffixes.
+Structured `github` and `github-pr` claims plus GitHub pull-request URLs map to
+one PR lifecycle writer key, so review, reply, resolution, ready, and merge
+actions for one PR cannot run concurrently under alternate spellings.
+Non-PR `github` and `git-branch` claims retain their case-sensitive suffixes.
 
 A root validation hold owns only the checkout being validated. A source writer
 for the same repository may continue from another worktree only when it declares

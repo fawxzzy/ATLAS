@@ -528,7 +528,47 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(1, len(report["selected_jobs"]))
         self.assertIn("external_writers", report["deferred_candidates"][0]["conflicts_with"][0]["resource_kinds"])
         self.assertEqual(
-            ["github:fawxzzy/atlas#146:review"],
+            ["github-pr:fawxzzy/atlas#146"],
+            report["selected_jobs"][0]["resource_claims"]["external_writers"],
+        )
+
+    def test_github_pr_url_and_structured_writer_are_one_resource(self) -> None:
+        program = _program_payload()
+        structured = _standing_packet(
+            "structured-review",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="github.fawxzzy.ATLAS.pr146.review",
+        )
+        structured["execution_class"] = "external_mutation"
+        structured["resource_claims"] = {
+            "external_writers": ["github:fawxzzy/ATLAS#146:review:head"],
+        }
+        url = _standing_packet(
+            "url-review",
+            role_id="atlas.inbox",
+            repository="fawxzzy/ATLAS",
+            writer_scope="github.fawxzzy.ATLAS.pr146.url",
+        )
+        url["execution_class"] = "external_mutation"
+        url["resource_claims"] = {
+            "external_writers": ["https://github.com/fawxzzy/ATLAS/pull/146"],
+        }
+        program["standing_packets"] = [structured, url]
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(1, len(report["selected_jobs"]))
+        self.assertIn("external_writers", report["deferred_candidates"][0]["conflicts_with"][0]["resource_kinds"])
+        self.assertEqual(
+            ["github-pr:fawxzzy/atlas#146"],
             report["selected_jobs"][0]["resource_claims"]["external_writers"],
         )
 
