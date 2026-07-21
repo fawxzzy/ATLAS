@@ -1,0 +1,98 @@
+{
+  "name": "ATLAS Workflow Recovery",
+  "on": {
+    "pull_request": {
+      "paths": [
+        ".github/workflows/atlas-workflow-recovery.yml",
+        "AGENTS.md",
+        "README-STACK.md",
+        "stack.yaml",
+        "docs/architecture/ADR-ATLAS-OPERATOR-NOTIFICATION-IDEMPOTENCY-V1.md",
+        "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+        "docs/architecture/ATLAS-EVENT-CONTRACT.md",
+        "docs/architecture/ORCHESTRATION-BOUNDARIES.md",
+        "docs/architecture/ATLAS-WORKFLOW-RECOVERY.md",
+        "docs/atlas-book/03-operating-model.md",
+        "docs/atlas-book/07-contracts-and-seams.md",
+        "docs/atlas-book/12-restart-and-handoff-guide.md",
+        "docs/memory/initiatives/initiative-fawxzzy-platform-migration.json",
+        "docs/memory/profiles/zachariah_workflow_profile.md",
+        "docs/ops/ATLAS-WORKFLOW-RECOVERY-RUNBOOK.md",
+        "docs/prompts/atlas-workflow/**",
+        "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json",
+        "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
+        "docs/registry/ATLAS-WORKFLOW-*.json",
+        "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
+        "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
+        "docs/runbooks/ATLAS-OPERATOR-NOTIFICATION-IDEMPOTENCY.md",
+        "ops/atlas/operator_notification_idempotency.py",
+        "ops/atlas/workflow_recovery.py",
+        "runtime/cortex/kernel.state-model.seed.v1.json",
+        "schemas/atlas.continuity.handoff.v1.json",
+        "schemas/atlas.workflow.*.json",
+        "tests/fixtures/atlas-workflow-recovery/**",
+        "tests/test_atlas_workflow_recovery.py"
+      ]
+    },
+    "push": {
+      "branches": [
+        "main"
+      ]
+    }
+  },
+  "permissions": {
+    "contents": "read"
+  },
+  "jobs": {
+    "validate": {
+      "name": "validate (${{ matrix.os }}, py${{ matrix.python-version }})",
+      "strategy": {
+        "fail-fast": false,
+        "matrix": {
+          "os": [
+            "ubuntu-latest",
+            "windows-latest"
+          ],
+          "python-version": [
+            "3.12"
+          ]
+        }
+      },
+      "runs-on": "${{ matrix.os }}",
+      "timeout-minutes": 10,
+      "steps": [
+        {
+          "name": "Check out",
+          "uses": "actions/checkout@11d5960a326750d5838078e36cf38b85af677262"
+        },
+        {
+          "name": "Set up Python",
+          "uses": "actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065",
+          "with": {
+            "python-version": "${{ matrix.python-version }}"
+          }
+        },
+        {
+          "name": "Validate canonical recovery contracts",
+          "run": "python ops/atlas/workflow_recovery.py validate --json"
+        },
+        {
+          "name": "Verify generated architecture",
+          "run": "python ops/atlas/workflow_recovery.py render --check"
+        },
+        {
+          "name": "Run focused recovery tests",
+          "run": "python -m unittest tests.test_atlas_workflow_recovery -v"
+        },
+        {
+          "name": "Validate canonical envelope fixture",
+          "run": "python ops/atlas/workflow_recovery.py validate-envelope tests/fixtures/atlas-workflow-recovery/valid-envelope.json"
+        },
+        {
+          "name": "Exercise deterministic fixture recovery",
+          "run": "python ops/atlas/workflow_recovery.py recover --apply --adapter fixture --fixture tests/fixtures/atlas-workflow-recovery/missing-task.json --acceptance tests/fixtures/atlas-workflow-recovery/fixture-acceptance.json --output-dir runtime/atlas/workflow-recovery-ci --deterministic"
+        }
+      ]
+    }
+  }
+}

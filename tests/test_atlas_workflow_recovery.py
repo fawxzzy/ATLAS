@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import contextlib
+import copy
 import datetime as dt
+import fnmatch
 import importlib.util
 import io
 import json
@@ -23,6 +25,138 @@ RECOVERY = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = RECOVERY
 SPEC.loader.exec_module(RECOVERY)
 FIXTURES = ROOT / "tests/fixtures/atlas-workflow-recovery"
+WORKFLOW_PATH = ROOT / ".github/workflows/atlas-workflow-recovery.yml"
+CHECKOUT_ACTION = "actions/checkout@11d5960a326750d5838078e36cf38b85af677262"
+SETUP_PYTHON_ACTION = "actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065"
+WORKFLOW_PR_PATHS = [
+    ".github/workflows/atlas-workflow-recovery.yml",
+    "AGENTS.md",
+    "README-STACK.md",
+    "stack.yaml",
+    "docs/architecture/ADR-ATLAS-OPERATOR-NOTIFICATION-IDEMPOTENCY-V1.md",
+    "docs/architecture/ATLAS-CORTEX-PLAYBOOK-CODEX.md",
+    "docs/architecture/ATLAS-EVENT-CONTRACT.md",
+    "docs/architecture/ORCHESTRATION-BOUNDARIES.md",
+    "docs/architecture/ATLAS-WORKFLOW-RECOVERY.md",
+    "docs/atlas-book/03-operating-model.md",
+    "docs/atlas-book/07-contracts-and-seams.md",
+    "docs/atlas-book/12-restart-and-handoff-guide.md",
+    "docs/memory/initiatives/initiative-fawxzzy-platform-migration.json",
+    "docs/memory/profiles/zachariah_workflow_profile.md",
+    "docs/ops/ATLAS-WORKFLOW-RECOVERY-RUNBOOK.md",
+    "docs/prompts/atlas-workflow/**",
+    "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json",
+    "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
+    "docs/registry/ATLAS-WORKFLOW-*.json",
+    "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
+    "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
+    "docs/runbooks/ATLAS-OPERATOR-NOTIFICATION-IDEMPOTENCY.md",
+    "ops/atlas/operator_notification_idempotency.py",
+    "ops/atlas/workflow_recovery.py",
+    "runtime/cortex/kernel.state-model.seed.v1.json",
+    "schemas/atlas.continuity.handoff.v1.json",
+    "schemas/atlas.workflow.*.json",
+    "tests/fixtures/atlas-workflow-recovery/**",
+    "tests/test_atlas_workflow_recovery.py",
+]
+EXPECTED_WORKFLOW = {
+    "name": "ATLAS Workflow Recovery",
+    "on": {
+        "pull_request": {"paths": WORKFLOW_PR_PATHS},
+        "push": {"branches": ["main"]},
+    },
+    "permissions": {"contents": "read"},
+    "jobs": {
+        "validate": {
+            "name": "validate (${{ matrix.os }}, py${{ matrix.python-version }})",
+            "strategy": {
+                "fail-fast": False,
+                "matrix": {
+                    "os": ["ubuntu-latest", "windows-latest"],
+                    "python-version": ["3.12"],
+                },
+            },
+            "runs-on": "${{ matrix.os }}",
+            "timeout-minutes": 10,
+            "steps": [
+                {"name": "Check out", "uses": CHECKOUT_ACTION},
+                {
+                    "name": "Set up Python",
+                    "uses": SETUP_PYTHON_ACTION,
+                    "with": {"python-version": "${{ matrix.python-version }}"},
+                },
+                {
+                    "name": "Validate canonical recovery contracts",
+                    "run": "python ops/atlas/workflow_recovery.py validate --json",
+                },
+                {
+                    "name": "Verify generated architecture",
+                    "run": "python ops/atlas/workflow_recovery.py render --check",
+                },
+                {
+                    "name": "Run focused recovery tests",
+                    "run": "python -m unittest tests.test_atlas_workflow_recovery -v",
+                },
+                {
+                    "name": "Validate canonical envelope fixture",
+                    "run": "python ops/atlas/workflow_recovery.py validate-envelope tests/fixtures/atlas-workflow-recovery/valid-envelope.json",
+                },
+                {
+                    "name": "Exercise deterministic fixture recovery",
+                    "run": "python ops/atlas/workflow_recovery.py recover --apply --adapter fixture --fixture tests/fixtures/atlas-workflow-recovery/missing-task.json --acceptance tests/fixtures/atlas-workflow-recovery/fixture-acceptance.json --output-dir runtime/atlas/workflow-recovery-ci --deterministic",
+                },
+            ],
+        }
+    },
+}
+
+
+def _reject_duplicate_json_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate workflow key: {key}")
+        result[key] = value
+    return result
+
+
+def _load_github_workflow(text: str | None = None) -> dict[str, object]:
+    # JSON is a strict YAML subset. Keeping the workflow in JSON form makes the
+    # parsed key semantics deterministic without adding a CI-only YAML package.
+    payload = json.loads(
+        WORKFLOW_PATH.read_text(encoding="utf-8") if text is None else text,
+        object_pairs_hook=_reject_duplicate_json_keys,
+    )
+    if not isinstance(payload, dict):
+        raise ValueError("workflow root must be an object")
+    return payload
+
+
+def _repository_source_truth_refs(manifest: dict[str, object]) -> list[str]:
+    references: set[str] = set()
+    for group in ("roles", "components"):
+        for item in manifest[group]:
+            source_of_truth = item["source_of_truth"]
+            if isinstance(source_of_truth, list):
+                references.update(source_of_truth)
+            else:
+                references.add(source_of_truth)
+    return sorted(
+        reference
+        for reference in references
+        if not reference.startswith("local automation: ")
+        and not reference.startswith("repos/")
+    )
+
+
+def _uncovered_source_truth_refs(
+    patterns: list[str], references: list[str]
+) -> list[str]:
+    return sorted(
+        reference
+        for reference in references
+        if not any(fnmatch.fnmatchcase(reference, pattern) for pattern in patterns)
+    )
 
 
 class WorkflowRecoveryTests(unittest.TestCase):
@@ -114,6 +248,112 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertEqual(3, result["manual_questions"])
         self.assertEqual(3, result["answered_manual_questions"])
         self.assertEqual("ARCHIVED", result["bootstrap_source_lifecycle"])
+
+    def test_github_workflow_is_read_only_cross_platform_and_main_complete(self) -> None:
+        workflow = _load_github_workflow()
+        self.assertEqual(EXPECTED_WORKFLOW, workflow)
+
+        uses = [
+            step["uses"]
+            for step in workflow["jobs"]["validate"]["steps"]
+            if "uses" in step
+        ]
+        self.assertEqual([CHECKOUT_ACTION, SETUP_PYTHON_ACTION], uses)
+        self.assertTrue(all(len(item.rsplit("@", 1)[1]) == 40 for item in uses))
+
+    def test_github_workflow_rejects_authority_expansion_counterexamples(
+        self,
+    ) -> None:
+        counterexamples: list[tuple[str, dict[str, object]]] = []
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["on"]["schedule"] = [{"cron": "0 * * * *"}]
+        counterexamples.append(("extra schedule event", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["on"]["workflow_dispatch"] = {}
+        counterexamples.append(("manual dispatch", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["on"]["push"]["branches"].append("*")
+        counterexamples.append(("widened push branches", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["on"]["pull_request"]["paths"].append("**")
+        counterexamples.append(("widened pull-request paths", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["permissions"]["issues"] = "write"
+        counterexamples.append(("write permission", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["jobs"]["network"] = {
+            "runs-on": "ubuntu-latest",
+            "steps": [{"run": "curl https://example.invalid"}],
+        }
+        counterexamples.append(("extra network job", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["jobs"]["validate"]["steps"].append({"run": "python -V"})
+        counterexamples.append(("extra step", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["jobs"]["validate"]["strategy"]["matrix"]["os"].append(
+            "macos-latest"
+        )
+        counterexamples.append(("altered matrix", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["jobs"]["validate"]["steps"][0]["uses"] = "actions/checkout@v4"
+        counterexamples.append(("mutable action ref", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["jobs"]["validate"]["steps"][2]["run"] = "python -V"
+        counterexamples.append(("changed command", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["jobs"]["validate"]["steps"].append(
+            {"uses": "actions/upload-artifact@v4"}
+        )
+        counterexamples.append(("artifact upload", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["jobs"]["validate"]["steps"].append(
+            {"run": "vercel deploy --prod"}
+        )
+        counterexamples.append(("provider deployment", candidate))
+
+        candidate = copy.deepcopy(EXPECTED_WORKFLOW)
+        candidate["jobs"]["validate"]["environment"] = "production"
+        counterexamples.append(("production environment", candidate))
+
+        for label, counterexample in counterexamples:
+            with self.subTest(label=label), self.assertRaises(AssertionError):
+                self.assertEqual(EXPECTED_WORKFLOW, counterexample)
+
+    def test_github_workflow_parser_rejects_duplicate_keys(self) -> None:
+        with self.assertRaisesRegex(ValueError, "duplicate workflow key: on"):
+            _load_github_workflow('{"on": {}, "on": {}}')
+
+    def test_github_workflow_covers_transitive_manifest_source_truth(self) -> None:
+        workflow = _load_github_workflow()
+        patterns = workflow["on"]["pull_request"]["paths"]
+        references = _repository_source_truth_refs(self.manifest)
+        self.assertEqual(22, len(references))
+        self.assertEqual([], _uncovered_source_truth_refs(patterns, references))
+
+    def test_github_workflow_detects_source_truth_filter_deletion(self) -> None:
+        workflow = _load_github_workflow()
+        patterns = [
+            pattern
+            for pattern in workflow["on"]["pull_request"]["paths"]
+            if pattern != "stack.yaml"
+        ]
+        references = _repository_source_truth_refs(self.manifest)
+        self.assertEqual(
+            ["stack.yaml"],
+            _uncovered_source_truth_refs(patterns, references),
+        )
 
     def test_answered_manual_questions_are_retained_without_execution(self) -> None:
         registry = RECOVERY._load_json(ROOT / RECOVERY.DECISION_REGISTRY_REF)
