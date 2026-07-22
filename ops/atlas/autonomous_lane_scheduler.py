@@ -1119,6 +1119,17 @@ def _safe_standing_local_path(path: str) -> bool:
     )
 
 
+def _safe_standing_local_worktree_claim(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return bool(
+        path == normalized == normalized.strip()
+        and not normalized.startswith("/")
+        and not re.match(r"^[a-zA-Z]:/", normalized)
+        and not any(token in normalized for token in "*?[")
+        and all(part not in {"", ".", ".."} for part in normalized.split("/"))
+    )
+
+
 def _standing_local_source_preparation_violation(
     payload: dict[str, Any],
     *,
@@ -1174,9 +1185,8 @@ def _standing_local_source_preparation_violation(
         return "standing_file_claims_must_match_allowlist"
     if (
         len(claims["worktrees"]) != 1
-        or not claims["worktrees"][0]
-        or claims["worktrees"][0] in {".", ".."}
-        or any(token in claims["worktrees"][0] for token in "*?[")
+        or raw_claims.get("worktrees") != claims["worktrees"]
+        or not _safe_standing_local_worktree_claim(claims["worktrees"][0])
     ):
         return "standing_isolated_worktree_required"
     if any(_string_list(raw_claims.get(kind, [])) for kind in ("ports", "browsers", "external_writers")):

@@ -1488,6 +1488,56 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 self.assertEqual([], program["standing_packets"])
                 self.assertEqual(expected_code, findings[0]["code"])
 
+    def test_bridge_rejects_noncanonical_or_escaping_standing_worktree_claims(self) -> None:
+        invalid_claims = (
+            "foo/../.",
+            "../../other-worktree",
+            "/absolute/worktree",
+            "C:/absolute/worktree",
+            "owner\\worktree",
+            "owner//worktree",
+            " owner/worktree",
+            "owner/worktree ",
+        )
+
+        for index, worktree_claim in enumerate(invalid_claims):
+            with self.subTest(worktree_claim=worktree_claim):
+                payload = _standing_local_source_payload()
+                payload["resource_claims"] = copy.deepcopy(payload["resource_claims"])
+                payload["resource_claims"]["worktrees"] = [worktree_claim]
+                program, findings = scheduler.reconcile_runtime_program(
+                    program=_program_payload(),
+                    bindings_payload=_bindings(("owner.example", "example-thread", "idle")),
+                    envelopes=[
+                        _envelope(
+                            payload,
+                            idempotency_key=f"invalid-worktree-{index}",
+                            source_role_id="atlas.main",
+                        )
+                    ],
+                )
+
+                self.assertEqual([], program["standing_packets"])
+                self.assertEqual("standing_isolated_worktree_required", findings[0]["code"])
+
+        payload = _standing_local_source_payload()
+        payload["resource_claims"] = copy.deepcopy(payload["resource_claims"])
+        payload["resource_claims"]["worktrees"] = ["owners/example-local-preparation"]
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("owner.example", "example-thread", "idle")),
+            envelopes=[
+                _envelope(
+                    payload,
+                    idempotency_key="canonical-nested-worktree",
+                    source_role_id="atlas.main",
+                )
+            ],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual(["owner-local-source-preparation"], [packet["packet_id"] for packet in program["standing_packets"]])
+
     def test_persisted_standing_local_source_preparation_revalidates_authority(self) -> None:
         packet = _standing_packet(
             "owner-local-source-preparation",
