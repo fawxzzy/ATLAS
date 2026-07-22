@@ -2314,6 +2314,80 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             program["delivery_intents"][0]["superseded_delivery_authorities"][0],
         )
 
+    def test_blocker_resume_rejects_replacement_runtime_binding(self) -> None:
+        packet = _standing_packet(
+            "fitness-source",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness.source",
+        )
+        packet["state"] = "BLOCKED"
+        packet["runtime_thread_id"] = "fitness-thread"
+        packet["dispatch_reservation"] = {
+            "reservation_id": "rsrv-fitness-source",
+            "runtime_thread_id": "fitness-thread",
+        }
+        packet["blocking_receipt"] = {
+            "event_id": "onv1_" + "c" * 64,
+            "payload_digest": "sha256:" + "c" * 64,
+            "canonical_lifecycle_state": "BLOCKED_EXACT_MISSING_EVIDENCE",
+            "turn_id": "blocked-turn",
+        }
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+        program["active_leases"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "repository": "fawxzzy/fitness",
+                "execution_class": "repo_worktree",
+                "resource_claims": {"files": ["src/feature.py"], "worktrees": ["fitness-worktree"]},
+                "status": "active",
+            }
+        ]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "runtime_thread_id": "fitness-thread",
+                "writer_scope": "repo.fitness.source",
+                "event_id": packet["authority"]["event_id"],
+                "payload_digest": packet["authority"]["payload_digest"],
+                "status": "delivered",
+                "turn_id": "blocked-turn",
+            }
+        ]
+        resume = _envelope(
+            {
+                "canonical_lifecycle_state": "BLOCKER_CLEARED_RESUME_AUTHORITY",
+                "resume_authority": True,
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "reservation_id": "rsrv-fitness-source",
+                "prior_blocking_receipt_event_id": packet["blocking_receipt"]["event_id"],
+                "prior_blocking_receipt_payload_digest": packet["blocking_receipt"]["payload_digest"],
+                "current_delivered_turn_id": "blocked-turn",
+            },
+            idempotency_key="fitness-source-replacement-runtime-resume",
+            source_role_id="atlas.main",
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "replacement-thread", "idle")),
+            envelopes=[resume],
+        )
+
+        self.assertEqual("blocker_resume_runtime_binding_drift", findings[0]["code"])
+        self.assertEqual("fitness-thread", findings[0]["details"]["expected_runtime_thread_id"])
+        self.assertEqual("replacement-thread", findings[0]["details"]["observed_runtime_thread_id"])
+        self.assertEqual("BLOCKED", program["standing_packets"][0]["state"])
+        self.assertNotIn("resume_authority", program["standing_packets"][0])
+        self.assertEqual("delivered", program["delivery_intents"][0]["status"])
+        self.assertEqual("fitness-thread", program["delivery_intents"][0]["runtime_thread_id"])
+        self.assertEqual("active", program["active_leases"][0]["status"])
+
     def test_blocker_resume_can_repeat_after_a_new_exact_blocker(self) -> None:
         packet = _standing_packet(
             "fitness-source",

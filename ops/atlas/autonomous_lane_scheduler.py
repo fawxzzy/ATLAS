@@ -764,7 +764,7 @@ def reconcile_runtime_program(
                 and str(lease.get("writer_scope") or "") == writer_scope
                 and str(lease.get("status") or "").lower() in {"active", "recovery-required"}
             ]
-            exact_resume = bool(
+            resume_correlation_exact = bool(
                 envelope.get("source_role_id") == "atlas.main"
                 and packet
                 and str(packet.get("state") or "").upper() == "BLOCKED"
@@ -776,16 +776,47 @@ def reconcile_runtime_program(
                 and len(matching_leases) == 1
                 and _authority_is_canonical(current_delivery_authority)
             )
+            logical_role_id = str(packet.get("logical_role_id") or "") if packet else ""
+            current_binding = bindings.get(logical_role_id)
+            current_runtime_thread_id = (
+                str(current_binding.get("current_runtime_id") or "")
+                if isinstance(current_binding, dict)
+                else ""
+            )
+            retained_runtime_thread_id = (
+                str(matching_intents[0].get("runtime_thread_id") or "")
+                if len(matching_intents) == 1
+                else ""
+            )
+            runtime_binding_exact = bool(
+                isinstance(current_binding, dict)
+                and current_binding.get("archived") is not True
+                and current_runtime_thread_id
+                and current_runtime_thread_id == retained_runtime_thread_id
+            )
+            exact_resume = bool(resume_correlation_exact and runtime_binding_exact)
             if not exact_resume:
                 processed.pop(event_id, None)
                 processed_items = [item for item in processed_items if item.get("event_id") != event_id]
+                finding_code = (
+                    "blocker_resume_runtime_binding_drift"
+                    if resume_correlation_exact and not runtime_binding_exact
+                    else "blocker_resume_correlation_required"
+                )
+                finding_message = (
+                    "Blocker-cleared recovery must retain the exact runtime binding from its delivered intent."
+                    if finding_code == "blocker_resume_runtime_binding_drift"
+                    else "Blocker-cleared resume authority must exactly match one blocked packet, receipt, delivered intent, and retained lease."
+                )
                 findings.append(
                     _finding(
-                        "blocker_resume_correlation_required",
-                        "Blocker-cleared resume authority must exactly match one blocked packet, receipt, delivered intent, and retained lease.",
+                        finding_code,
+                        finding_message,
                         event_id=event_id,
                         packet_id=packet_id or None,
                         writer_scope=writer_scope or None,
+                        expected_runtime_thread_id=retained_runtime_thread_id or None,
+                        observed_runtime_thread_id=current_runtime_thread_id or None,
                     )
                 )
                 continue
