@@ -56,6 +56,7 @@ PHASE_HOLD = "hold"
 
 EXECUTION_CLASSES = {"read_only", "repo_worktree", "canonical_workspace", "external_mutation"}
 READY_STATES = {"READY", "ADMITTED", "QUEUED"}
+RECOVERY_READY_STATE = "RECOVERY_READY"
 MUTATING_EXECUTION_CLASSES = {"repo_worktree", "canonical_workspace", "external_mutation"}
 REPOSITORY_MUTATING_EXECUTION_CLASSES = {"repo_worktree", "canonical_workspace"}
 EVENT_ID_PATTERN = re.compile(r"^onv1_[0-9a-f]{64}$")
@@ -658,6 +659,15 @@ def _terminal_cancellation(payload: dict[str, Any]) -> bool:
     return bool(set(state.split("_")).intersection({"CANCELLED", "SUPERSEDED"}))
 
 
+def _blocker_resume_authority(payload: dict[str, Any]) -> bool:
+    """Identify the only envelope allowed to reactivate a blocked reservation."""
+
+    return (
+        payload.get("resume_authority") is True
+        and str(payload.get("canonical_lifecycle_state") or "").upper() == "BLOCKER_CLEARED_RESUME_AUTHORITY"
+    )
+
+
 def reconcile_runtime_program(
     *,
     program: dict[str, Any],
@@ -720,6 +730,108 @@ def reconcile_runtime_program(
 
         packet_id = str(payload.get("packet_id") or "")
         writer_scope = str(payload.get("writer_scope") or "")
+        if _blocker_resume_authority(payload):
+            packet = packets.get(packet_id)
+            reservation_id = str(payload.get("reservation_id") or "")
+            prior_receipt_event_id = str(payload.get("prior_blocking_receipt_event_id") or "")
+            prior_receipt_digest = str(payload.get("prior_blocking_receipt_payload_digest") or "")
+            current_turn_id = str(payload.get("current_delivered_turn_id") or "")
+            dispatch_reservation = packet.get("dispatch_reservation") if isinstance(packet, dict) else {}
+            blocking_receipt = packet.get("blocking_receipt") if isinstance(packet, dict) else {}
+            prior_resume_authority = packet.get("resume_authority") if isinstance(packet, dict) else None
+            if prior_resume_authority is None:
+                current_delivery_authority = packet.get("authority") if isinstance(packet, dict) else {}
+            elif _authority_is_canonical(prior_resume_authority):
+                current_delivery_authority = prior_resume_authority
+            else:
+                current_delivery_authority = {}
+            matching_intents = [
+                intent
+                for intent in delivery_intents
+                if str(intent.get("reservation_id") or "") == reservation_id
+                and str(intent.get("packet_id") or "") == packet_id
+                and str(intent.get("writer_scope") or "") == writer_scope
+                and str(intent.get("turn_id") or "") == current_turn_id
+                and str(intent.get("status") or "").lower() == "delivered"
+                and str(intent.get("event_id") or "") == str(current_delivery_authority.get("event_id") or "")
+                and str(intent.get("payload_digest") or "") == str(current_delivery_authority.get("payload_digest") or "")
+            ]
+            matching_leases = [
+                lease
+                for lease in active_leases
+                if str(lease.get("reservation_id") or "") == reservation_id
+                and str(lease.get("packet_id") or "") == packet_id
+                and str(lease.get("writer_scope") or "") == writer_scope
+                and str(lease.get("status") or "").lower() in {"active", "recovery-required"}
+            ]
+            exact_resume = bool(
+                envelope.get("source_role_id") == "atlas.main"
+                and packet
+                and str(packet.get("state") or "").upper() == "BLOCKED"
+                and str(packet.get("writer_scope") or "") == writer_scope
+                and str(dispatch_reservation.get("reservation_id") or "") == reservation_id
+                and str(blocking_receipt.get("event_id") or "") == prior_receipt_event_id
+                and str(blocking_receipt.get("payload_digest") or "") == prior_receipt_digest
+                and len(matching_intents) == 1
+                and len(matching_leases) == 1
+                and _authority_is_canonical(current_delivery_authority)
+            )
+            if not exact_resume:
+                processed.pop(event_id, None)
+                processed_items = [item for item in processed_items if item.get("event_id") != event_id]
+                findings.append(
+                    _finding(
+                        "blocker_resume_correlation_required",
+                        "Blocker-cleared resume authority must exactly match one blocked packet, receipt, delivered intent, and retained lease.",
+                        event_id=event_id,
+                        packet_id=packet_id or None,
+                        writer_scope=writer_scope or None,
+                    )
+                )
+                continue
+            if _authority_is_canonical(prior_resume_authority):
+                resume_history = [
+                    item
+                    for item in packet.get("resume_authority_history", [])
+                    if isinstance(item, dict) and _authority_is_canonical(item)
+                ]
+                if not any(item.get("event_id") == prior_resume_authority.get("event_id") for item in resume_history):
+                    resume_history.append(OrderedDict(prior_resume_authority))
+                packet["resume_authority_history"] = resume_history
+            packet["state"] = RECOVERY_READY_STATE
+            packet["resume_authority"] = OrderedDict(
+                [
+                    ("event_id", event_id),
+                    ("payload_digest", payload_digest),
+                    ("reservation_id", reservation_id),
+                    ("prior_blocking_receipt_event_id", prior_receipt_event_id),
+                    ("prior_blocking_receipt_payload_digest", prior_receipt_digest),
+                    ("current_delivered_turn_id", current_turn_id),
+                ]
+            )
+            intent = matching_intents[0]
+            superseded_authorities = [
+                item
+                for item in intent.get("superseded_delivery_authorities", [])
+                if isinstance(item, dict) and _authority_is_canonical(item)
+            ]
+            if not any(item.get("event_id") == current_delivery_authority.get("event_id") for item in superseded_authorities):
+                superseded_authorities.append(
+                    OrderedDict(
+                        [
+                            ("event_id", current_delivery_authority.get("event_id")),
+                            ("payload_digest", current_delivery_authority.get("payload_digest")),
+                        ]
+                    )
+                )
+            intent["superseded_delivery_authorities"] = superseded_authorities
+            intent["event_id"] = event_id
+            intent["payload_digest"] = payload_digest
+            intent["status"] = "recovery-required"
+            intent["turn_id"] = None
+            intent["recovery_superseded_turn_id"] = current_turn_id
+            matching_leases[0]["status"] = "recovery-required"
+            continue
         if _terminal_cancellation(payload):
             packet = packets.get(packet_id)
             reservation_id = str(payload.get("reservation_id") or "")
@@ -1591,11 +1703,21 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root:
     )
     runtime_status = str(raw.get("runtime_status") or "missing").lower()
     runtime_thread_id = raw.get("runtime_thread_id")
+    dispatch_reservation = raw.get("dispatch_reservation") if isinstance(raw.get("dispatch_reservation"), dict) else {}
+    resume_authority = raw.get("resume_authority") if isinstance(raw.get("resume_authority"), dict) else {}
+    recovery_resume = bool(
+        state == RECOVERY_READY_STATE
+        and str(dispatch_reservation.get("reservation_id") or "")
+        and str(resume_authority.get("reservation_id") or "") == str(dispatch_reservation.get("reservation_id") or "")
+        and str(resume_authority.get("event_id") or "")
+        and str(resume_authority.get("payload_digest") or "")
+        and str(resume_authority.get("current_delivered_turn_id") or "")
+    )
     blocked_reason = None
     if not packet_id or not packet:
         blocked_reason = "standing_packet_identity_required"
-    elif state not in READY_STATES:
-        blocked_reason = "standing_packet_not_ready"
+    elif state not in READY_STATES and not recovery_resume:
+        blocked_reason = "resume_authority_correlation_required" if state == RECOVERY_READY_STATE else "standing_packet_not_ready"
     elif execution_class not in EXECUTION_CLASSES:
         blocked_reason = "invalid_execution_class"
     elif not repository or not logical_role_id or not writer_scope:
@@ -1654,6 +1776,11 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root:
             ("source_preparation", raw.get("source_preparation")),
             ("cross_marker_signal_applied", False),
             ("authority", raw.get("authority")),
+            ("recovery_resume", recovery_resume),
+            ("recovery_reservation_id", dispatch_reservation.get("reservation_id") if recovery_resume else None),
+            ("recovery_current_delivered_turn_id", resume_authority.get("current_delivered_turn_id") if recovery_resume else None),
+            ("recovery_event_id", resume_authority.get("event_id") if recovery_resume else None),
+            ("recovery_payload_digest", resume_authority.get("payload_digest") if recovery_resume else None),
         ]
     )
 
@@ -1814,6 +1941,47 @@ def _active_writer_scopes(program: dict[str, Any]) -> set[str]:
     return leased
 
 
+def _exact_recovery_reservation(
+    candidate: dict[str, Any],
+    *,
+    active_leases: list[dict[str, Any]],
+    delivery_intents: list[dict[str, Any]],
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Return the sole retained lease and intent a resume may reuse."""
+
+    if candidate.get("recovery_resume") is not True:
+        return None, None
+    reservation_id = str(candidate.get("recovery_reservation_id") or "")
+    packet_id = str(candidate.get("packet_id") or "")
+    writer_scope = str(candidate.get("writer_scope") or "")
+    superseded_turn_id = str(candidate.get("recovery_current_delivered_turn_id") or "")
+    recovery_event_id = str(candidate.get("recovery_event_id") or "")
+    recovery_payload_digest = str(candidate.get("recovery_payload_digest") or "")
+    matching_leases = [
+        lease
+        for lease in active_leases
+        if str(lease.get("reservation_id") or "") == reservation_id
+        and str(lease.get("packet_id") or "") == packet_id
+        and str(lease.get("writer_scope") or "") == writer_scope
+        and str(lease.get("status") or "").lower() == "recovery-required"
+    ]
+    matching_intents = [
+        intent
+        for intent in delivery_intents
+        if str(intent.get("reservation_id") or "") == reservation_id
+        and str(intent.get("packet_id") or "") == packet_id
+        and str(intent.get("writer_scope") or "") == writer_scope
+        and str(intent.get("status") or "").lower() == "recovery-required"
+        and intent.get("turn_id") in {None, ""}
+        and str(intent.get("recovery_superseded_turn_id") or "") == superseded_turn_id
+        and str(intent.get("event_id") or "") == recovery_event_id
+        and str(intent.get("payload_digest") or "") == recovery_payload_digest
+    ]
+    if len(matching_leases) != 1 or len(matching_intents) != 1:
+        return None, None
+    return matching_leases[0], matching_intents[0]
+
+
 def _active_lease_candidate(
     lease: dict[str, Any],
 ) -> OrderedDict[str, Any]:
@@ -1873,12 +2041,18 @@ def _select_execution_wave(
     blocked: list[OrderedDict[str, Any]] = []
     deferred: list[OrderedDict[str, Any]] = []
     active_scopes = _active_writer_scopes(program)
+    held_scopes = {
+        str(hold.get("writer_scope"))
+        for hold in program.get("scope_holds", [])
+        if isinstance(hold, dict) and isinstance(hold.get("writer_scope"), str) and hold["writer_scope"]
+    }
     completed = set(_string_list(program.get("completed_packets", [])))
     max_writers_value = program.get("max_parallel_writers", 4)
     max_writers = max(0, int(4 if max_writers_value is None else max_writers_value))
     max_read_only_value = program.get("max_parallel_read_only", 2)
     max_read_only = max(0, int(2 if max_read_only_value is None else max_read_only_value))
     active_leases = [item for item in program.get("active_leases", []) if isinstance(item, dict)]
+    delivery_intents = [item for item in program.get("delivery_intents", []) if isinstance(item, dict)]
     active_lease_candidates = [
         (lease, _active_lease_candidate(lease))
         for lease in active_leases
@@ -1920,8 +2094,35 @@ def _select_execution_wave(
         candidate = OrderedDict(candidate)
         dependencies = set(candidate.get("dependencies", []))
         missing_dependencies = sorted(dependencies - completed)
-        if candidate.get("writer_scope") in active_scopes:
-            candidate["blocked_reason"] = "writer_scope_leased"
+        recovery_lease, recovery_intent = _exact_recovery_reservation(
+            candidate,
+            active_leases=active_leases,
+            delivery_intents=delivery_intents,
+        )
+        recovery_resume = recovery_lease is not None and recovery_intent is not None
+        if candidate.get("writer_scope") in held_scopes:
+            candidate["blocked_reason"] = (
+                "recovery_writer_scope_hold"
+                if candidate.get("recovery_resume") is True
+                else "writer_scope_leased"
+            )
+            blocked.append(candidate)
+            continue
+        if candidate.get("writer_scope") in active_scopes and not recovery_resume:
+            candidate["blocked_reason"] = (
+                "recovery_reservation_correlation_required"
+                if candidate.get("recovery_resume") is True
+                else "writer_scope_leased"
+            )
+            blocked.append(candidate)
+            continue
+        if recovery_resume and any(
+            lease is not recovery_lease
+            and str(lease.get("writer_scope") or "") == str(candidate.get("writer_scope") or "")
+            and str(lease.get("status") or "").lower() in {"active", "recovery-required"}
+            for lease in active_leases
+        ):
+            candidate["blocked_reason"] = "recovery_peer_writer_scope_conflict"
             blocked.append(candidate)
             continue
         if missing_dependencies:
@@ -1960,6 +2161,7 @@ def _select_execution_wave(
         lease_conflicts = [
             (lease, _candidate_conflicts(candidate, leased_candidate))
             for lease, leased_candidate in active_lease_candidates
+            if lease is not recovery_lease
         ]
         lease_conflicts = [(lease, kinds) for lease, kinds in lease_conflicts if kinds]
         if lease_conflicts:
@@ -2020,6 +2222,9 @@ def _select_execution_wave(
                 continue
             read_only_count += 1
         else:
+            if recovery_resume:
+                selected.append(candidate)
+                continue
             if writer_count >= max_writers:
                 candidate["deferred_reason"] = "writer_wave_limit"
                 deferred.append(candidate)
@@ -2243,19 +2448,123 @@ def reserve_selected_jobs(
     reservations: list[OrderedDict[str, Any]] = []
     reserved_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
+    recovery_contexts: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {}
+    scope_holds = [item for item in program.get("scope_holds", []) if isinstance(item, dict)]
+    active_runtime_holds = [item for item in scope_holds if item.get("derived_from_runtime_status") is True]
+    for job in selected:
+        if job.get("recovery_resume") is not True:
+            continue
+        packet_id = str(job.get("packet_id") or "")
+        packet = packet_index.get(packet_id)
+        writer_scope = str(job.get("writer_scope") or "")
+        dispatch_reservation = packet.get("dispatch_reservation") if isinstance(packet, dict) else {}
+        if not isinstance(dispatch_reservation, dict):
+            dispatch_reservation = {}
+        recovery_lease, recovery_intent = _exact_recovery_reservation(
+            job,
+            active_leases=active_leases,
+            delivery_intents=delivery_intents,
+        )
+        resume_authority = packet.get("resume_authority") if isinstance(packet, dict) else {}
+        packet_matches_job = bool(
+            packet
+            and str(packet.get("state") or "").upper() == RECOVERY_READY_STATE
+            and str(packet.get("writer_scope") or "") == writer_scope
+            and str(packet.get("runtime_thread_id") or "") == str(job.get("runtime_thread_id") or "")
+            and str(packet.get("execution_class") or "") == str(job.get("execution_class") or "")
+            and str(dispatch_reservation.get("reservation_id") or "")
+            == str(job.get("recovery_reservation_id") or "")
+            and _authority_is_canonical(resume_authority)
+            and str(resume_authority.get("event_id") or "") == str(job.get("recovery_event_id") or "")
+            and str(resume_authority.get("payload_digest") or "") == str(job.get("recovery_payload_digest") or "")
+            and str(resume_authority.get("current_delivered_turn_id") or "")
+            == str(job.get("recovery_current_delivered_turn_id") or "")
+        )
+        if not packet_matches_job or recovery_lease is None or recovery_intent is None:
+            raise RuntimeError(f"recovery reservation lost correlation before dispatch: {packet_id}")
+        if any(str(hold.get("writer_scope") or "") == writer_scope for hold in scope_holds):
+            raise RuntimeError(f"recovery writer scope became held before dispatch: {writer_scope}")
+        peer_leases = [
+            lease
+            for lease in active_leases
+            if lease is not recovery_lease
+            and str(lease.get("status") or "").lower() in {"active", "recovery-required"}
+        ]
+        if any(
+            str(lease.get("writer_scope") or "") == writer_scope
+            or _candidate_conflicts(job, _active_lease_candidate(lease))
+            for lease in peer_leases
+        ):
+            raise RuntimeError(f"recovery peer lease conflict appeared before dispatch: {packet_id}")
+        if job.get("execution_class") in MUTATING_EXECUTION_CLASSES and any(
+            not _active_lease_identity_complete(lease) for lease in peer_leases
+        ):
+            raise RuntimeError(f"recovery lease identity became incomplete before dispatch: {packet_id}")
+        if job.get("execution_class") in MUTATING_EXECUTION_CLASSES and any(
+            not _active_runtime_hold_identity_complete(hold) for hold in active_runtime_holds
+        ):
+            raise RuntimeError(f"recovery runtime hold identity became incomplete before dispatch: {packet_id}")
+        if any(
+            _candidate_conflicts(job, _active_runtime_hold_candidate(hold))
+            for hold in active_runtime_holds
+            if _active_runtime_hold_identity_complete(hold)
+        ):
+            raise RuntimeError(f"recovery runtime hold conflict appeared before dispatch: {packet_id}")
+        recovery_contexts[packet_id] = (recovery_lease, recovery_intent)
+
     for job in selected:
         packet_id = str(job.get("packet_id") or "")
         packet = packet_index.get(packet_id)
-        if packet is None or str(packet.get("state") or "").upper() not in READY_STATES:
-            raise RuntimeError(f"selected packet is no longer READY: {packet_id}")
         writer_scope = str(job.get("writer_scope") or "")
+        recovery_lease, recovery_intent = recovery_contexts.get(packet_id, (None, None))
+        if job.get("recovery_resume") is not True:
+            recovery_lease, recovery_intent = _exact_recovery_reservation(
+                job,
+                active_leases=active_leases,
+                delivery_intents=delivery_intents,
+            )
+        recovery_resume = recovery_lease is not None and recovery_intent is not None
+        if packet is None or (
+            not recovery_resume and str(packet.get("state") or "").upper() not in READY_STATES
+        ) or (
+            job.get("recovery_resume") is True
+            and str(packet.get("state") or "").upper() != RECOVERY_READY_STATE
+        ):
+            raise RuntimeError(f"selected packet is no longer eligible: {packet_id}")
+        if job.get("recovery_resume") is True and not recovery_resume:
+            raise RuntimeError(f"recovery reservation lost correlation before dispatch: {packet_id}")
+        authority = packet.get("authority") if isinstance(packet.get("authority"), dict) else {}
+        if recovery_resume:
+            reservation_id = str(job.get("recovery_reservation_id") or "")
+            packet["state"] = "ACTIVE"
+            packet["dispatch_reservation"]["resumed_at"] = reserved_at
+            recovery_intent["status"] = "prepared"
+            recovery_intent["prepared_at"] = reserved_at
+            recovery_intent["recovery_resumed_at"] = reserved_at
+            recovery_lease["status"] = "active"
+            recovery_lease["resumed_at"] = reserved_at
+            reservation = OrderedDict(
+                [
+                    ("reservation_id", reservation_id),
+                    ("packet_id", packet_id),
+                    ("logical_role_id", job.get("logical_role_id")),
+                    ("runtime_thread_id", packet.get("runtime_thread_id")),
+                    ("writer_scope", writer_scope),
+                    ("execution_class", job.get("execution_class")),
+                    ("reserved_at", reserved_at),
+                    ("recovery_resume", True),
+                ]
+            )
+            job["reservation_id"] = reservation_id
+            job["runtime_thread_id"] = packet.get("runtime_thread_id")
+            reservations.append(reservation)
+            continue
         if any(
             str(lease.get("writer_scope") or "") == writer_scope
             and str(lease.get("status") or "").lower() in {"active", "recovery-required"}
             for lease in active_leases
         ):
             raise RuntimeError(f"writer scope became leased before reservation: {writer_scope}")
-        authority = packet.get("authority") if isinstance(packet.get("authority"), dict) else {}
         reservation_id = _deterministic_reservation_id(packet)
         packet["state"] = "ACTIVE"
         packet["dispatch_reservation"] = OrderedDict(

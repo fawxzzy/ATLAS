@@ -144,6 +144,57 @@ def _bindings(*items: tuple[str, str, str]) -> dict[str, object]:
     }
 
 
+def _recovery_ready_program() -> dict[str, object]:
+    packet = _standing_packet(
+        "fitness-source",
+        role_id="owner.fitness",
+        repository="fawxzzy/fitness",
+        writer_scope="repo.fitness.source",
+    )
+    packet["state"] = scheduler.RECOVERY_READY_STATE
+    packet["runtime_thread_id"] = "fitness-thread"
+    packet["dispatch_reservation"] = {
+        "reservation_id": "rsrv-fitness-source",
+        "runtime_thread_id": "fitness-thread",
+    }
+    packet["resume_authority"] = {
+        "event_id": "onv1_" + "d" * 64,
+        "payload_digest": "sha256:" + "d" * 64,
+        "reservation_id": "rsrv-fitness-source",
+        "current_delivered_turn_id": "blocked-turn",
+    }
+    program = _program_payload()
+    program["standing_packets"] = [packet]
+    program["active_leases"] = [
+        {
+            "reservation_id": "rsrv-fitness-source",
+            "packet_id": "fitness-source",
+            "logical_role_id": "owner.fitness",
+            "runtime_thread_id": "fitness-thread",
+            "writer_scope": "repo.fitness.source",
+            "repository": "fawxzzy/fitness",
+            "execution_class": "repo_worktree",
+            "resource_claims": {"files": ["src/feature.py"], "worktrees": ["fitness-worktree"]},
+            "status": "recovery-required",
+        }
+    ]
+    program["delivery_intents"] = [
+        {
+            "reservation_id": "rsrv-fitness-source",
+            "packet_id": "fitness-source",
+            "logical_role_id": "owner.fitness",
+            "runtime_thread_id": "fitness-thread",
+            "writer_scope": "repo.fitness.source",
+            "event_id": packet["resume_authority"]["event_id"],
+            "payload_digest": packet["resume_authority"]["payload_digest"],
+            "status": "recovery-required",
+            "turn_id": None,
+            "recovery_superseded_turn_id": "blocked-turn",
+        }
+    ]
+    return program
+
+
 def _preflight_payload(*, critical: int = 0, error: int = 0) -> dict[str, object]:
     return {
         "status": "ok" if critical == 0 and error == 0 else "blocker",
@@ -2164,6 +2215,390 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertNotIn("blocking_receipt", program["standing_packets"][0])
         self.assertEqual("active", program["active_leases"][0]["status"])
         self.assertEqual([], program["completed_packets"])
+
+    def test_blocker_resume_reuses_the_exact_reservation_lease_and_delivery_intent(self) -> None:
+        packet = _standing_packet(
+            "fitness-source",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness.source",
+        )
+        packet["state"] = "ACTIVE"
+        packet["dispatch_reservation"] = {"reservation_id": "rsrv-fitness-source", "runtime_thread_id": "fitness-thread"}
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+        program["active_leases"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "repository": "fawxzzy/fitness",
+                "execution_class": "repo_worktree",
+                "resource_claims": {"files": ["src/feature.py"], "worktrees": ["fitness-worktree"]},
+                "status": "active",
+            }
+        ]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "runtime_thread_id": "fitness-thread",
+                "writer_scope": "repo.fitness.source",
+                "event_id": packet["authority"]["event_id"],
+                "payload_digest": packet["authority"]["payload_digest"],
+                "status": "delivered",
+                "turn_id": "blocked-turn",
+            }
+        ]
+        blocker = _envelope(
+            {
+                "canonical_lifecycle_state": "BLOCKED_EXACT_MISSING_EVIDENCE",
+                "terminal": True,
+                "blocking": True,
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "reservation_id": "rsrv-fitness-source",
+                "turn_id": "blocked-turn",
+            },
+            idempotency_key="fitness-source-blocked-for-resume",
+        )
+        program, blocker_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[blocker],
+        )
+        resume = _envelope(
+            {
+                "canonical_lifecycle_state": "BLOCKER_CLEARED_RESUME_AUTHORITY",
+                "resume_authority": True,
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "reservation_id": "rsrv-fitness-source",
+                "prior_blocking_receipt_event_id": blocker["event_id"],
+                "prior_blocking_receipt_payload_digest": blocker["payload_digest"],
+                "current_delivered_turn_id": "blocked-turn",
+            },
+            idempotency_key="fitness-source-resume",
+            source_role_id="atlas.main",
+        )
+        program, resume_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[resume],
+        )
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+
+        self.assertEqual([], blocker_findings)
+        self.assertEqual([], resume_findings)
+        self.assertEqual(["fitness-source"], [job["packet_id"] for job in report["selected_jobs"]])
+        self.assertEqual("rsrv-fitness-source", reservations[0]["reservation_id"])
+        self.assertTrue(reservations[0]["recovery_resume"])
+        self.assertEqual(1, len(program["active_leases"]))
+        self.assertEqual("active", program["active_leases"][0]["status"])
+        self.assertEqual(1, len(program["delivery_intents"]))
+        self.assertEqual("prepared", program["delivery_intents"][0]["status"])
+        self.assertIsNone(program["delivery_intents"][0]["turn_id"])
+        self.assertEqual("blocked-turn", program["delivery_intents"][0]["recovery_superseded_turn_id"])
+        self.assertEqual(resume["event_id"], program["delivery_intents"][0]["event_id"])
+        self.assertEqual(resume["payload_digest"], program["delivery_intents"][0]["payload_digest"])
+        self.assertEqual(
+            packet["authority"],
+            program["delivery_intents"][0]["superseded_delivery_authorities"][0],
+        )
+
+    def test_blocker_resume_can_repeat_after_a_new_exact_blocker(self) -> None:
+        packet = _standing_packet(
+            "fitness-source",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness.source",
+        )
+        packet["state"] = "ACTIVE"
+        packet["dispatch_reservation"] = {"reservation_id": "rsrv-fitness-source", "runtime_thread_id": "fitness-thread"}
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+        program["active_leases"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "repository": "fawxzzy/fitness",
+                "execution_class": "repo_worktree",
+                "resource_claims": {"files": ["src/feature.py"], "worktrees": ["fitness-worktree"]},
+                "status": "active",
+            }
+        ]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "runtime_thread_id": "fitness-thread",
+                "writer_scope": "repo.fitness.source",
+                "event_id": packet["authority"]["event_id"],
+                "payload_digest": packet["authority"]["payload_digest"],
+                "status": "delivered",
+                "turn_id": "first-blocked-turn",
+            }
+        ]
+
+        first_blocker = _envelope(
+            {
+                "canonical_lifecycle_state": "BLOCKED_EXACT_MISSING_EVIDENCE",
+                "terminal": True,
+                "blocking": True,
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "reservation_id": "rsrv-fitness-source",
+                "turn_id": "first-blocked-turn",
+            },
+            idempotency_key="fitness-source-first-repeat-blocker",
+        )
+        program, first_blocker_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[first_blocker],
+        )
+        first_resume = _envelope(
+            {
+                "canonical_lifecycle_state": "BLOCKER_CLEARED_RESUME_AUTHORITY",
+                "resume_authority": True,
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "reservation_id": "rsrv-fitness-source",
+                "prior_blocking_receipt_event_id": first_blocker["event_id"],
+                "prior_blocking_receipt_payload_digest": first_blocker["payload_digest"],
+                "current_delivered_turn_id": "first-blocked-turn",
+            },
+            idempotency_key="fitness-source-first-repeat-resume",
+            source_role_id="atlas.main",
+        )
+        program, first_resume_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[first_resume],
+        )
+        first_report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, _ = scheduler.reserve_selected_jobs(program=program, report=first_report)
+        first_intent = program["delivery_intents"][0]
+        program, delivery_findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {
+                    "reservation_id": "rsrv-fitness-source",
+                    "packet_id": "fitness-source",
+                    "runtime_thread_id": "fitness-thread",
+                    "event_id": first_intent["event_id"],
+                    "payload_digest": first_intent["payload_digest"],
+                    "status": "DELIVERED",
+                    "turn_id": "second-blocked-turn",
+                }
+            ],
+        )
+        second_blocker = _envelope(
+            {
+                "canonical_lifecycle_state": "BLOCKED_EXACT_MISSING_EVIDENCE",
+                "terminal": True,
+                "blocking": True,
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "reservation_id": "rsrv-fitness-source",
+                "turn_id": "second-blocked-turn",
+            },
+            idempotency_key="fitness-source-second-repeat-blocker",
+        )
+        program, second_blocker_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[second_blocker],
+        )
+        second_resume = _envelope(
+            {
+                "canonical_lifecycle_state": "BLOCKER_CLEARED_RESUME_AUTHORITY",
+                "resume_authority": True,
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "reservation_id": "rsrv-fitness-source",
+                "prior_blocking_receipt_event_id": second_blocker["event_id"],
+                "prior_blocking_receipt_payload_digest": second_blocker["payload_digest"],
+                "current_delivered_turn_id": "second-blocked-turn",
+            },
+            idempotency_key="fitness-source-second-repeat-resume",
+            source_role_id="atlas.main",
+        )
+        program, second_resume_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[second_resume],
+        )
+        second_report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], first_blocker_findings)
+        self.assertEqual([], first_resume_findings)
+        self.assertEqual([], delivery_findings)
+        self.assertEqual([], second_blocker_findings)
+        self.assertEqual([], second_resume_findings)
+        self.assertEqual(["fitness-source"], [job["packet_id"] for job in second_report["selected_jobs"]])
+        self.assertEqual(second_resume["event_id"], program["delivery_intents"][0]["event_id"])
+        self.assertEqual(
+            [packet["authority"]["event_id"], first_resume["event_id"]],
+            [item["event_id"] for item in program["delivery_intents"][0]["superseded_delivery_authorities"]],
+        )
+        self.assertEqual(first_resume["event_id"], program["standing_packets"][0]["resume_authority_history"][0]["event_id"])
+
+    def test_blocker_resume_is_blocked_by_a_same_scope_hold(self) -> None:
+        program = _recovery_ready_program()
+        program["scope_holds"] = [
+            {
+                "packet_id": "held-peer",
+                "writer_scope": "repo.fitness.source",
+                "status": "operator-hold",
+            }
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual("recovery_writer_scope_hold", report["blocked_candidates"][0]["blocked_reason"])
+
+    def test_blocker_resume_revalidates_peer_lease_before_reservation(self) -> None:
+        program = _recovery_ready_program()
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program["active_leases"].append(
+            {
+                "reservation_id": "rsrv-peer",
+                "packet_id": "fitness-peer",
+                "writer_scope": "repo.fitness.source",
+                "repository": "fawxzzy/fitness",
+                "execution_class": "repo_worktree",
+                "resource_claims": {"files": ["src/peer.py"], "worktrees": ["peer-worktree"]},
+                "status": "active",
+            }
+        )
+        before = copy.deepcopy(program)
+
+        with self.assertRaisesRegex(RuntimeError, "recovery peer lease conflict appeared before dispatch"):
+            scheduler.reserve_selected_jobs(program=program, report=report)
+
+        self.assertEqual(before, program)
+        self.assertEqual(scheduler.RECOVERY_READY_STATE, program["standing_packets"][0]["state"])
+        self.assertEqual("recovery-required", program["delivery_intents"][0]["status"])
+
+    def test_blocker_resume_revalidates_scope_hold_before_reservation(self) -> None:
+        program = _recovery_ready_program()
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program["scope_holds"] = [{"writer_scope": "repo.fitness.source", "status": "operator-hold"}]
+        before = copy.deepcopy(program)
+
+        with self.assertRaisesRegex(RuntimeError, "recovery writer scope became held before dispatch"):
+            scheduler.reserve_selected_jobs(program=program, report=report)
+
+        self.assertEqual(before, program)
+        self.assertEqual(scheduler.RECOVERY_READY_STATE, program["standing_packets"][0]["state"])
+        self.assertEqual("recovery-required", program["delivery_intents"][0]["status"])
+
+    def test_blocker_resume_rejects_duplicate_peer_lease(self) -> None:
+        packet = _standing_packet(
+            "fitness-source",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness.source",
+        )
+        packet["state"] = scheduler.RECOVERY_READY_STATE
+        packet["dispatch_reservation"] = {"reservation_id": "rsrv-fitness-source"}
+        packet["resume_authority"] = {
+            "event_id": "onv1_" + "d" * 64,
+            "payload_digest": "sha256:" + "d" * 64,
+            "reservation_id": "rsrv-fitness-source",
+            "current_delivered_turn_id": "blocked-turn",
+        }
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+        program["active_leases"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "repository": "fawxzzy/fitness",
+                "execution_class": "repo_worktree",
+                "resource_claims": {"files": ["src/feature.py"], "worktrees": ["fitness-worktree"]},
+                "status": "recovery-required",
+            },
+            {
+                "reservation_id": "rsrv-peer",
+                "packet_id": "fitness-peer",
+                "writer_scope": "repo.fitness.source",
+                "repository": "fawxzzy/fitness",
+                "execution_class": "repo_worktree",
+                "resource_claims": {"files": ["src/peer.py"], "worktrees": ["peer-worktree"]},
+                "status": "active",
+            },
+        ]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "runtime_thread_id": packet["runtime_thread_id"],
+                "writer_scope": "repo.fitness.source",
+                "event_id": packet["resume_authority"]["event_id"],
+                "payload_digest": packet["resume_authority"]["payload_digest"],
+                "status": "recovery-required",
+                "turn_id": None,
+                "recovery_superseded_turn_id": "blocked-turn",
+            }
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual("recovery_peer_writer_scope_conflict", report["blocked_candidates"][0]["blocked_reason"])
 
     def test_supersession_cancels_ready_or_exact_prepared_packet_only(self) -> None:
         ready = _standing_packet(
