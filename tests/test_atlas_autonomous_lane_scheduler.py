@@ -1485,6 +1485,52 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual([], report["selected_jobs"])
         self.assertEqual("active_runtime_hold_identity_incomplete", report["blocked_candidates"][0]["blocked_reason"])
 
+    def test_active_external_runtime_hold_requires_external_writer_identity(self) -> None:
+        candidate = {
+            "canonical_lifecycle_state": "READY",
+            "packet_id": "idle-external-owner",
+            "objective": "Independent external mutation",
+            "logical_role_id": "owner.idle",
+            "repository": "fawxzzy/other",
+            "writer_scope": "github.fawxzzy.other.pr1",
+            "execution_class": "external_mutation",
+            "resource_claims": scheduler._resource_claims(
+                {"external_writers": ["github-pr:fawxzzy/other#1"]}
+            ),
+            "protected_surface_authorized": True,
+        }
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("owner.idle", "idle-thread", "idle")),
+            envelopes=[_envelope(candidate, idempotency_key="idle-external-owner")],
+        )
+        program["scope_holds"] = [
+            {
+                "packet_id": "active-external-owner",
+                "repository": "fawxzzy/example",
+                "writer_scope": "github.fawxzzy.example.pr1",
+                "execution_class": "external_mutation",
+                "resource_claims": scheduler._resource_claims({}),
+                "status": "active-without-correlated-lease",
+                "derived_from_runtime_status": True,
+            }
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual(
+            "active_runtime_hold_identity_incomplete",
+            report["blocked_candidates"][0]["blocked_reason"],
+        )
+
     def test_bridge_admits_bounded_standing_local_source_preparation(self) -> None:
         payload = _standing_local_source_payload()
         with patch.object(scheduler, "_standing_local_worktree_evidence_violation", return_value=None):

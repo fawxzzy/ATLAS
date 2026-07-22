@@ -1659,13 +1659,17 @@ def _active_runtime_hold_candidate(hold: dict[str, Any]) -> OrderedDict[str, Any
 
 
 def _active_runtime_hold_identity_complete(hold: dict[str, Any]) -> bool:
-    return bool(
+    if not (
         hold.get("derived_from_runtime_status") is True
         and hold.get("status") == "active-without-correlated-lease"
         and _repository_identity(hold.get("repository"))
         and hold.get("execution_class") in EXECUTION_CLASSES
         and isinstance(hold.get("resource_claims"), dict)
-    )
+    ):
+        return False
+    if hold.get("execution_class") == "external_mutation":
+        return bool(_resource_claims(hold.get("resource_claims"))["external_writers"])
+    return True
 
 
 def _select_execution_wave(
