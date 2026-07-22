@@ -69,6 +69,11 @@ COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 MAX_STANDING_LOCAL_SOURCE_PATHS = 32
 STANDING_LOCAL_PROTECTED_PATHS = (".env", ".git/", ".github/workflows/", "secrets/")
 RECOVERY_RECONCILIATION_BASIS = "COMPLETE_TARGET_TASK_HISTORY"
+RECOVERY_ABSENCE_EVIDENCE_SCHEMA = "atlas.scheduler.delivery-recovery-evidence.v1"
+RECOVERY_ABSENCE_EVENT_CLASS = "DELIVERY_RECOVERY_ABSENCE_PROOF"
+RECOVERY_ABSENCE_ENVELOPE_KIND = "DELIVERY_RECOVERY_PROOF"
+RECOVERY_ABSENCE_CALL_STATE = "TERMINALLY_LOST"
+RECOVERY_ABSENCE_AUTHORITIES = {"atlas.main", "atlas.workflow-architect"}
 
 SAFE_CLASSIFICATIONS = {
     planner.CLASS_IMPLEMENTATION_READY,
@@ -377,8 +382,6 @@ def apply_delivery_results(
                 for receipt in completed_receipts
                 if str(receipt.get("reservation_id") or "") == reservation_id
                 and str(receipt.get("packet_id") or "") == packet_id
-                and isinstance(receipt.get("turn_id"), str)
-                and bool(receipt.get("turn_id"))
             ]
             if len(completed_matches) == 1:
                 completed = completed_matches[0]
@@ -400,6 +403,28 @@ def apply_delivery_results(
                     )
                     continue
                 status = str(result.get("status") or "").upper()
+                if completed.get("recovery_absence_evidence_digest"):
+                    supplied_turn_id = str(result.get("turn_id") or "")
+                    if status == "RECOVERY_REQUIRED" and not supplied_turn_id:
+                        continue
+                    findings.append(
+                        _finding(
+                            "recovery_absence_contradicted_by_delivery_evidence",
+                            "A delivery result contradicted a completed proof that the original call was terminally absent.",
+                            reservation_id=reservation_id,
+                            turn_id=supplied_turn_id or None,
+                        )
+                    )
+                    continue
+                if not isinstance(completed.get("turn_id"), str) or not completed.get("turn_id"):
+                    findings.append(
+                        _finding(
+                            "delivery_result_correlation_mismatch",
+                            "Delivery result does not match its completed receipt.",
+                            reservation_id=reservation_id,
+                        )
+                    )
+                    continue
                 if status == "RECOVERY_REQUIRED":
                     continue
                 if status == "DELIVERED":
@@ -668,6 +693,128 @@ def _blocker_resume_authority(payload: dict[str, Any]) -> bool:
     )
 
 
+def _recovery_absence_evidence_violation(
+    *,
+    payload: dict[str, Any],
+    packet: dict[str, Any],
+    intent: dict[str, Any],
+    reservation_id: str,
+) -> str | None:
+    """Validate a closed, content-addressed proof that an ambiguous send had no effect."""
+
+    evidence = payload.get("delivery_recovery_evidence")
+    evidence_digest = payload.get("delivery_recovery_evidence_digest")
+    required_keys = {
+        "schema",
+        "reconciliation_basis",
+        "target_history_receipt_event_id",
+        "target_history_receipt_payload_digest",
+        "history_complete",
+        "original_call_state",
+        "reservation_id",
+        "packet_id",
+        "writer_scope",
+        "runtime_thread_id",
+        "event_id",
+        "payload_digest",
+        "matching_turn_ids",
+        "active_matching_turn_ids",
+        "effects_match_intent",
+    }
+    if not isinstance(evidence, dict) or set(evidence) != required_keys:
+        return "recovery_absence_evidence_shape_invalid"
+    if not isinstance(evidence_digest, str) or not PAYLOAD_DIGEST_PATTERN.fullmatch(evidence_digest):
+        return "recovery_absence_evidence_digest_invalid"
+    if _canonical_payload_digest(evidence) != evidence_digest:
+        return "recovery_absence_evidence_digest_mismatch"
+    history_receipt_event_id = evidence.get("target_history_receipt_event_id")
+    history_receipt_payload_digest = evidence.get("target_history_receipt_payload_digest")
+    if (
+        not isinstance(history_receipt_event_id, str)
+        or not EVENT_ID_PATTERN.fullmatch(history_receipt_event_id)
+        or not isinstance(history_receipt_payload_digest, str)
+        or not PAYLOAD_DIGEST_PATTERN.fullmatch(history_receipt_payload_digest)
+    ):
+        return "recovery_absence_history_receipt_invalid"
+    expected_identity = {
+        "reservation_id": reservation_id,
+        "packet_id": packet.get("packet_id"),
+        "writer_scope": packet.get("writer_scope"),
+        "runtime_thread_id": intent.get("runtime_thread_id"),
+        "event_id": intent.get("event_id"),
+        "payload_digest": intent.get("payload_digest"),
+    }
+    if any(str(evidence.get(field) or "") != str(value or "") for field, value in expected_identity.items()):
+        return "recovery_absence_evidence_identity_mismatch"
+    if (
+        evidence.get("schema") != RECOVERY_ABSENCE_EVIDENCE_SCHEMA
+        or evidence.get("reconciliation_basis") != RECOVERY_RECONCILIATION_BASIS
+        or evidence.get("history_complete") is not True
+        or evidence.get("original_call_state") != RECOVERY_ABSENCE_CALL_STATE
+        or evidence.get("effects_match_intent") is not False
+        or evidence.get("matching_turn_ids") != []
+        or evidence.get("active_matching_turn_ids") != []
+    ):
+        return "recovery_absence_not_proven"
+    return None
+
+
+def _recovery_successor_violation(
+    *,
+    payload: dict[str, Any],
+    packet: dict[str, Any],
+    packets: dict[str, dict[str, Any]],
+    delivery_intents: list[dict[str, Any]],
+    active_leases: list[dict[str, Any]],
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Require one already-admitted, content-addressed successor before releasing recovery."""
+
+    packet_id = str(packet.get("packet_id") or "")
+    successors = [
+        candidate
+        for candidate in packets.values()
+        if str(candidate.get("replaces_packet_id") or "") == packet_id
+    ]
+    if len(successors) != 1:
+        return None, "recovery_absence_exact_successor_required"
+    successor = successors[0]
+    successor_packet_id = str(payload.get("superseded_by_packet_id") or "")
+    successor_event_id = str(payload.get("successor_event_id") or "")
+    successor_payload_digest = str(payload.get("successor_payload_digest") or "")
+    authority = successor.get("authority") if isinstance(successor.get("authority"), dict) else {}
+    if (
+        not successor_packet_id
+        or successor_packet_id == packet_id
+        or str(successor.get("packet_id") or "") != successor_packet_id
+        or str(authority.get("event_id") or "") != successor_event_id
+        or str(authority.get("payload_digest") or "") != successor_payload_digest
+        or not EVENT_ID_PATTERN.fullmatch(successor_event_id)
+        or not PAYLOAD_DIGEST_PATTERN.fullmatch(successor_payload_digest)
+    ):
+        return None, "recovery_absence_successor_identity_mismatch"
+    invariant_fields = (
+        "logical_role_id",
+        "repository",
+        "writer_scope",
+        "execution_class",
+        "runtime_thread_id",
+        "protected_surface_authorized",
+    )
+    if any(successor.get(field) != packet.get(field) for field in invariant_fields):
+        return None, "recovery_absence_successor_scope_mismatch"
+    if (
+        _resource_claims(successor.get("resource_claims")) != _resource_claims(packet.get("resource_claims"))
+        or _string_list(successor.get("dependencies")) != _string_list(packet.get("dependencies"))
+        or str(successor.get("state") or "").upper() not in READY_STATES
+    ):
+        return None, "recovery_absence_successor_scope_mismatch"
+    if any(str(intent.get("packet_id") or "") == successor_packet_id for intent in delivery_intents) or any(
+        str(lease.get("packet_id") or "") == successor_packet_id for lease in active_leases
+    ):
+        return None, "recovery_absence_successor_already_dispatched"
+    return successor, None
+
+
 def reconcile_runtime_program(
     *,
     program: dict[str, Any],
@@ -909,13 +1056,90 @@ def reconcile_runtime_program(
                     or len(prepared_leases) == 1
                 )
             )
+            recovery_attempted = bool(
+                payload.get("event_class") == RECOVERY_ABSENCE_EVENT_CLASS
+                or payload.get("delivery_recovery_evidence") is not None
+                or payload.get("delivery_recovery_evidence_digest") is not None
+            )
+            recovery_absence_cancellation = False
+            recovery_absence_violation: str | None = None
+            recovery_intents = [
+                intent
+                for intent in correlated_intents
+                if str(intent.get("reservation_id") or "") == reservation_id
+                and str(intent.get("status") or "").lower() == "recovery-required"
+                and intent.get("turn_id") is None
+                and not intent.get("recovery_superseded_turn_id")
+            ]
+            recovery_leases = [
+                lease
+                for lease in correlated_leases
+                if str(lease.get("reservation_id") or "") == reservation_id
+                and str(lease.get("status") or "").lower() == "recovery-required"
+            ]
+            recovery_successor: dict[str, Any] | None = None
+            if recovery_attempted:
+                mutating_recovery = bool(
+                    packet and str(packet.get("execution_class") or "") in MUTATING_EXECUTION_CLASSES
+                )
+                recovery_correlation_exact = bool(
+                    envelope.get("kind") == RECOVERY_ABSENCE_ENVELOPE_KIND
+                    and envelope.get("source_role_id") in RECOVERY_ABSENCE_AUTHORITIES
+                    and packet
+                    and packet_state == "ACTIVE"
+                    and reservation_id
+                    and isinstance(packet.get("dispatch_reservation"), dict)
+                    and str(packet["dispatch_reservation"].get("reservation_id") or "") == reservation_id
+                    and len(correlated_intents) == 1
+                    and len(recovery_intents) == 1
+                    and ((mutating_recovery and len(recovery_leases) == 1) or (not mutating_recovery and not correlated_leases))
+                    and not payload.get("turn_id")
+                )
+                if not recovery_correlation_exact:
+                    recovery_absence_violation = "recovery_absence_correlation_required"
+                else:
+                    recovery_absence_violation = _recovery_absence_evidence_violation(
+                        payload=payload,
+                        packet=packet,
+                        intent=recovery_intents[0],
+                        reservation_id=reservation_id,
+                    )
+                if recovery_absence_violation is None:
+                    recovery_successor, recovery_absence_violation = _recovery_successor_violation(
+                        payload=payload,
+                        packet=packet,
+                        packets=packets,
+                        delivery_intents=delivery_intents,
+                        active_leases=active_leases,
+                    )
+                recovery_absence_cancellation = recovery_absence_violation is None
+            if recovery_attempted and not recovery_absence_cancellation:
+                processed.pop(event_id, None)
+                processed_items = [item for item in processed_items if item.get("event_id") != event_id]
+                findings.append(
+                    _finding(
+                        recovery_absence_violation or "recovery_absence_correlation_required",
+                        "Recovery absence may retire only one exact orphaned reservation with closed history proof and one admitted successor.",
+                        event_id=event_id,
+                        packet_id=packet_id or None,
+                        writer_scope=writer_scope or None,
+                        reservation_id=reservation_id or None,
+                    )
+                )
+                continue
             if (
-                envelope.get("source_role_id") != "atlas.main"
+                (
+                    (not recovery_absence_cancellation and envelope.get("source_role_id") != "atlas.main")
+                    or (
+                        recovery_absence_cancellation
+                        and envelope.get("source_role_id") not in RECOVERY_ABSENCE_AUTHORITIES
+                    )
+                )
                 or not packet_id
                 or not writer_scope
                 or not packet
                 or str(packet.get("writer_scope") or "") != writer_scope
-                or not (ready_cancellation or prepared_cancellation)
+                or not (ready_cancellation or prepared_cancellation or recovery_absence_cancellation)
             ):
                 processed.pop(event_id, None)
                 processed_items = [item for item in processed_items if item.get("event_id") != event_id]
@@ -929,7 +1153,25 @@ def reconcile_runtime_program(
                     )
                 )
                 continue
-            if prepared_cancellation:
+            if recovery_absence_cancellation:
+                recovery_intent = recovery_intents[0]
+                delivery_intents.remove(recovery_intent)
+                if recovery_leases:
+                    lease = recovery_leases[0]
+                    active_leases.remove(lease)
+                    released.append(
+                        OrderedDict(
+                            [
+                                ("reservation_id", lease.get("reservation_id")),
+                                ("packet_id", packet_id),
+                                ("writer_scope", writer_scope),
+                                ("status", "recovery-absence-proven"),
+                                ("receipt_event_id", event_id),
+                                ("successor_packet_id", recovery_successor.get("packet_id") if recovery_successor else None),
+                            ]
+                        )
+                    )
+            elif prepared_cancellation:
                 delivery_intents.remove(prepared_intents[0])
                 if prepared_leases:
                     lease = prepared_leases[0]
@@ -946,20 +1188,33 @@ def reconcile_runtime_program(
                         )
                     )
             completed.add(packet_id)
-            completed_receipts.append(
-                OrderedDict(
-                    [
-                        ("packet_id", packet_id),
-                        ("writer_scope", writer_scope),
-                        ("reservation_id", reservation_id or None),
-                        ("turn_id", None),
-                        ("receipt_event_id", event_id),
-                        ("receipt_payload_digest", payload_digest),
-                        ("terminal_disposition", str(payload.get("canonical_lifecycle_state") or "SUPERSEDED")),
-                        ("superseded_by_packet_id", payload.get("superseded_by_packet_id")),
-                    ]
-                )
+            completion = OrderedDict(
+                [
+                    ("packet_id", packet_id),
+                    ("writer_scope", writer_scope),
+                    ("reservation_id", reservation_id or None),
+                    ("turn_id", None),
+                    ("receipt_event_id", event_id),
+                    ("receipt_payload_digest", payload_digest),
+                    ("terminal_disposition", str(payload.get("canonical_lifecycle_state") or "SUPERSEDED")),
+                    ("superseded_by_packet_id", payload.get("superseded_by_packet_id")),
+                ]
             )
+            if recovery_absence_cancellation:
+                recovery_intent = recovery_intents[0]
+                completion.update(
+                    OrderedDict(
+                        [
+                            ("runtime_thread_id", recovery_intent.get("runtime_thread_id")),
+                            ("event_id", recovery_intent.get("event_id")),
+                            ("payload_digest", recovery_intent.get("payload_digest")),
+                            ("recovery_absence_evidence_digest", payload.get("delivery_recovery_evidence_digest")),
+                            ("successor_event_id", payload.get("successor_event_id")),
+                            ("successor_payload_digest", payload.get("successor_payload_digest")),
+                        ]
+                    )
+                )
+            completed_receipts.append(completion)
             packets.pop(packet_id, None)
             continue
         if payload.get("terminal") is True and not _terminal_success(payload):
@@ -1216,6 +1471,8 @@ def reconcile_runtime_program(
                 ("idempotency_key", envelope.get("idempotency_key")),
             ]
         )
+        if isinstance(payload.get("replaces_packet_id"), str) and payload.get("replaces_packet_id"):
+            candidate["replaces_packet_id"] = payload.get("replaces_packet_id")
         prior = packets.get(packet_id)
         if prior is not None and prior.get("authority") != candidate.get("authority"):
             findings.append(_finding("packet_identity_collision", "One packet_id carried multiple immutable authorities.", packet_id=packet_id))

@@ -195,6 +195,125 @@ def _recovery_ready_program() -> dict[str, object]:
     return program
 
 
+def _web_release_packet_payload(packet_id: str, *, replaces_packet_id: str | None = None) -> dict[str, object]:
+    payload: dict[str, object] = {
+        "canonical_lifecycle_state": "READY",
+        "packet_id": packet_id,
+        "objective": "Review and guard the exact FawxzzyWeb PR source merge.",
+        "logical_role_id": "atlas.release-control-plane",
+        "repository": "fawxzzy/FawxzzyWeb",
+        "writer_scope": "github.fawxzzy.fawxzzyweb.pr30.guarded-source-merge",
+        "execution_class": "external_mutation",
+        "protected_surface_authorized": True,
+        "dependencies": [],
+        "resource_claims": {
+            "files": [],
+            "worktrees": [],
+            "ports": [],
+            "browsers": [],
+            "external_writers": ["github:fawxzzy/FawxzzyWeb#30:merge"],
+        },
+    }
+    if replaces_packet_id is not None:
+        payload["replaces_packet_id"] = replaces_packet_id
+    return payload
+
+
+def _orphaned_web_delivery_program() -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
+    ready = _envelope(
+        _web_release_packet_payload("fawxzzyweb-pr30-guarded-source-merge"),
+        idempotency_key="fawxzzyweb-pr30-original",
+        source_role_id="owner.fawxzzyweb",
+    )
+    bindings = _bindings(("atlas.release-control-plane", "release-control-thread", "idle"))
+    program, findings = scheduler.reconcile_runtime_program(
+        program=_program_payload(),
+        bindings_payload=bindings,
+        envelopes=[ready],
+    )
+    if findings:
+        raise AssertionError(findings)
+    report = scheduler.build_report(
+        root=Path("atlas-root-fixture"),
+        program=program,
+        max_candidates=30,
+        preflight_report=_preflight_payload(),
+        selector_report=_selector_payload(),
+        planner_report=_planner_payload([]),
+    )
+    program, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+    intent = program["delivery_intents"][0]
+    program, findings = scheduler.apply_delivery_results(
+        program=program,
+        results=[
+            {
+                "reservation_id": reservations[0]["reservation_id"],
+                "packet_id": intent["packet_id"],
+                "runtime_thread_id": intent["runtime_thread_id"],
+                "event_id": intent["event_id"],
+                "payload_digest": intent["payload_digest"],
+                "status": "RECOVERY_REQUIRED",
+            }
+        ],
+    )
+    if findings:
+        raise AssertionError(findings)
+    return program, bindings, ready
+
+
+def _web_recovery_absence_envelope(
+    *,
+    program: dict[str, object],
+    successor: dict[str, object],
+    evidence_updates: dict[str, object] | None = None,
+    payload_updates: dict[str, object] | None = None,
+) -> dict[str, object]:
+    packet = program["standing_packets"][0]
+    intent = program["delivery_intents"][0]
+    evidence: dict[str, object] = {
+        "schema": scheduler.RECOVERY_ABSENCE_EVIDENCE_SCHEMA,
+        "reconciliation_basis": scheduler.RECOVERY_RECONCILIATION_BASIS,
+        "target_history_receipt_event_id": "onv1_" + "7" * 64,
+        "target_history_receipt_payload_digest": "sha256:" + "6" * 64,
+        "history_complete": True,
+        "original_call_state": scheduler.RECOVERY_ABSENCE_CALL_STATE,
+        "reservation_id": intent["reservation_id"],
+        "packet_id": intent["packet_id"],
+        "writer_scope": intent["writer_scope"],
+        "runtime_thread_id": intent["runtime_thread_id"],
+        "event_id": intent["event_id"],
+        "payload_digest": intent["payload_digest"],
+        "matching_turn_ids": [],
+        "active_matching_turn_ids": [],
+        "effects_match_intent": False,
+    }
+    if evidence_updates:
+        evidence.update(evidence_updates)
+    successor_payload = successor["payload"]
+    payload: dict[str, object] = {
+        "event_class": scheduler.RECOVERY_ABSENCE_EVENT_CLASS,
+        "canonical_lifecycle_state": "SUPERSEDED_RECOVERY_ABSENCE_PROVEN",
+        "terminal": True,
+        "packet_id": packet["packet_id"],
+        "writer_scope": packet["writer_scope"],
+        "reservation_id": intent["reservation_id"],
+        "superseded_by_packet_id": successor_payload["packet_id"],
+        "successor_event_id": successor["event_id"],
+        "successor_payload_digest": successor["payload_digest"],
+        "delivery_recovery_evidence": evidence,
+        "delivery_recovery_evidence_digest": scheduler._canonical_payload_digest(evidence),
+    }
+    if payload_updates:
+        payload.update(payload_updates)
+    envelope = _envelope(
+        payload,
+        idempotency_key="fawxzzyweb-pr30-recovery-absence",
+        source_role_id="atlas.workflow-architect",
+    )
+    envelope["kind"] = scheduler.RECOVERY_ABSENCE_ENVELOPE_KIND
+    return envelope
+
+
 def _preflight_payload(*, critical: int = 0, error: int = 0) -> dict[str, object]:
     return {
         "status": "ok" if critical == 0 and error == 0 else "blocker",
@@ -2801,6 +2920,400 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("active", program["active_leases"][0]["status"])
         self.assertEqual("delivered", program["delivery_intents"][0]["status"])
         self.assertEqual([], program["completed_packets"])
+
+    def test_recovery_absence_proof_releases_only_the_orphaned_reservation_for_one_successor(self) -> None:
+        program, bindings, _ = _orphaned_web_delivery_program()
+        original_reservation = program["delivery_intents"][0]["reservation_id"]
+        unrelated_lease = {
+            "reservation_id": "rsrv_" + "9" * 64,
+            "packet_id": "unrelated-platform-source",
+            "logical_role_id": "platform.supabase-migration",
+            "runtime_thread_id": "platform-thread",
+            "writer_scope": "repo.fawxzzy-platform.unrelated",
+            "repository": "fawxzzy/fawxzzy-platform",
+            "execution_class": "repo_worktree",
+            "resource_claims": {
+                "files": ["bootstrap/manifests/namespace-plan.v1.json"],
+                "worktrees": ["platform-unrelated"],
+                "ports": [],
+                "browsers": [],
+                "external_writers": [],
+            },
+            "status": "active",
+        }
+        preserved_receipt = {"packet_id": "already-complete", "receipt_event_id": "onv1_" + "8" * 64}
+        program["active_leases"].append(unrelated_lease)
+        program["completed_receipts"].append(preserved_receipt)
+        successor = _envelope(
+            _web_release_packet_payload(
+                "fawxzzyweb-pr30-guarded-source-merge-retry-1",
+                replaces_packet_id="fawxzzyweb-pr30-guarded-source-merge",
+            ),
+            idempotency_key="fawxzzyweb-pr30-successor",
+            source_role_id="owner.fawxzzyweb",
+        )
+        recovery = _web_recovery_absence_envelope(program=program, successor=successor)
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=bindings,
+            envelopes=[successor, recovery],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual(["fawxzzyweb-pr30-guarded-source-merge"], program["completed_packets"])
+        self.assertEqual("fawxzzyweb-pr30-guarded-source-merge-retry-1", program["standing_packets"][0]["packet_id"])
+        self.assertEqual([unrelated_lease], program["active_leases"])
+        self.assertEqual([], program["delivery_intents"])
+        self.assertEqual("recovery-absence-proven", program["released_leases"][0]["status"])
+        self.assertEqual(preserved_receipt, program["completed_receipts"][0])
+        recovery_receipt = next(
+            item
+            for item in program["completed_receipts"]
+            if item.get("packet_id") == "fawxzzyweb-pr30-guarded-source-merge"
+        )
+        self.assertEqual(
+            recovery["payload"]["delivery_recovery_evidence_digest"],
+            recovery_receipt["recovery_absence_evidence_digest"],
+        )
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        self.assertEqual(["fawxzzyweb-pr30-guarded-source-merge-retry-1"], [item["packet_id"] for item in report["selected_jobs"]])
+        program, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+
+        self.assertEqual(1, len(reservations))
+        self.assertNotEqual(original_reservation, reservations[0]["reservation_id"])
+        self.assertEqual("prepared", program["delivery_intents"][0]["status"])
+        duplicate = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        self.assertEqual([], duplicate["selected_jobs"])
+
+    def test_recovery_existing_turn_is_bound_and_cannot_be_released_as_absent(self) -> None:
+        program, bindings, _ = _orphaned_web_delivery_program()
+        intent = program["delivery_intents"][0]
+        program, findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {
+                    "reservation_id": intent["reservation_id"],
+                    "packet_id": intent["packet_id"],
+                    "runtime_thread_id": intent["runtime_thread_id"],
+                    "event_id": intent["event_id"],
+                    "payload_digest": intent["payload_digest"],
+                    "status": "DELIVERED",
+                    "turn_id": "release-control-turn",
+                    "history_reconciled": True,
+                    "reconciliation_basis": scheduler.RECOVERY_RECONCILIATION_BASIS,
+                    "reconciled_event_id": intent["event_id"],
+                    "effects_match_intent": True,
+                }
+            ],
+        )
+        self.assertEqual([], findings)
+        successor = _envelope(
+            _web_release_packet_payload(
+                "fawxzzyweb-pr30-guarded-source-merge-retry-1",
+                replaces_packet_id="fawxzzyweb-pr30-guarded-source-merge",
+            ),
+            idempotency_key="fawxzzyweb-pr30-successor-existing-turn",
+            source_role_id="owner.fawxzzyweb",
+        )
+        recovery = _web_recovery_absence_envelope(program=program, successor=successor)
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=bindings,
+            envelopes=[successor, recovery],
+        )
+
+        self.assertEqual("recovery_absence_correlation_required", findings[0]["code"])
+        self.assertEqual("delivered", program["delivery_intents"][0]["status"])
+        self.assertEqual("release-control-turn", program["delivery_intents"][0]["turn_id"])
+        self.assertEqual("active", program["active_leases"][0]["status"])
+
+    def test_recovery_absence_remains_held_when_complete_history_is_ambiguous(self) -> None:
+        program, bindings, _ = _orphaned_web_delivery_program()
+        successor = _envelope(
+            _web_release_packet_payload(
+                "fawxzzyweb-pr30-guarded-source-merge-retry-1",
+                replaces_packet_id="fawxzzyweb-pr30-guarded-source-merge",
+            ),
+            idempotency_key="fawxzzyweb-pr30-successor-ambiguous",
+            source_role_id="owner.fawxzzyweb",
+        )
+        recovery = _web_recovery_absence_envelope(
+            program=program,
+            successor=successor,
+            evidence_updates={"history_complete": False, "original_call_state": "UNKNOWN"},
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=bindings,
+            envelopes=[successor, recovery],
+        )
+
+        self.assertEqual("recovery_absence_not_proven", findings[0]["code"])
+        self.assertEqual("recovery-required", program["delivery_intents"][0]["status"])
+        self.assertEqual("recovery-required", program["active_leases"][0]["status"])
+        self.assertEqual([], program["completed_packets"])
+
+    def test_recovery_absence_rejects_stale_or_mismatched_identity(self) -> None:
+        cases = [
+            ("stale reservation", {}, {"reservation_id": "rsrv_" + "0" * 64}, "recovery_absence_correlation_required"),
+            ("wrong packet", {}, {"packet_id": "different-packet"}, "recovery_absence_correlation_required"),
+            ("wrong scope", {}, {"writer_scope": "github.fawxzzy.other.pr30"}, "recovery_absence_correlation_required"),
+            ("wrong event", {"event_id": "onv1_" + "1" * 64}, {}, "recovery_absence_evidence_identity_mismatch"),
+            ("wrong digest", {"payload_digest": "sha256:" + "2" * 64}, {}, "recovery_absence_evidence_identity_mismatch"),
+            ("semantic extra", {"unexpected": True}, {}, "recovery_absence_evidence_shape_invalid"),
+            (
+                "malformed target history receipt",
+                {"target_history_receipt_event_id": "not-an-event-id"},
+                {},
+                "recovery_absence_history_receipt_invalid",
+            ),
+            (
+                "unbound evidence digest",
+                {},
+                {"delivery_recovery_evidence_digest": "sha256:" + "3" * 64},
+                "recovery_absence_evidence_digest_mismatch",
+            ),
+        ]
+        for label, evidence_updates, payload_updates, expected_code in cases:
+            with self.subTest(label=label):
+                program, bindings, _ = _orphaned_web_delivery_program()
+                successor = _envelope(
+                    _web_release_packet_payload(
+                        "fawxzzyweb-pr30-guarded-source-merge-retry-1",
+                        replaces_packet_id="fawxzzyweb-pr30-guarded-source-merge",
+                    ),
+                    idempotency_key=f"fawxzzyweb-pr30-successor-{label}",
+                    source_role_id="owner.fawxzzyweb",
+                )
+                recovery = _web_recovery_absence_envelope(
+                    program=program,
+                    successor=successor,
+                    evidence_updates=evidence_updates,
+                    payload_updates=payload_updates,
+                )
+
+                program, findings = scheduler.reconcile_runtime_program(
+                    program=program,
+                    bindings_payload=bindings,
+                    envelopes=[successor, recovery],
+                )
+
+                self.assertEqual(expected_code, findings[0]["code"])
+                self.assertEqual("recovery-required", program["delivery_intents"][0]["status"])
+                self.assertEqual("recovery-required", program["active_leases"][0]["status"])
+
+    def test_recovery_absence_rejects_duplicate_successors(self) -> None:
+        program, bindings, _ = _orphaned_web_delivery_program()
+        first = _envelope(
+            _web_release_packet_payload(
+                "fawxzzyweb-pr30-guarded-source-merge-retry-1",
+                replaces_packet_id="fawxzzyweb-pr30-guarded-source-merge",
+            ),
+            idempotency_key="fawxzzyweb-pr30-successor-first",
+            source_role_id="owner.fawxzzyweb",
+        )
+        second = _envelope(
+            _web_release_packet_payload(
+                "fawxzzyweb-pr30-guarded-source-merge-retry-2",
+                replaces_packet_id="fawxzzyweb-pr30-guarded-source-merge",
+            ),
+            idempotency_key="fawxzzyweb-pr30-successor-second",
+            source_role_id="owner.fawxzzyweb",
+        )
+        recovery = _web_recovery_absence_envelope(program=program, successor=first)
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=bindings,
+            envelopes=[first, second, recovery],
+        )
+
+        self.assertEqual("recovery_absence_exact_successor_required", findings[0]["code"])
+        self.assertEqual("recovery-required", program["delivery_intents"][0]["status"])
+        self.assertEqual("recovery-required", program["active_leases"][0]["status"])
+
+    def test_recovery_absence_replay_is_idempotent(self) -> None:
+        program, bindings, _ = _orphaned_web_delivery_program()
+        successor = _envelope(
+            _web_release_packet_payload(
+                "fawxzzyweb-pr30-guarded-source-merge-retry-1",
+                replaces_packet_id="fawxzzyweb-pr30-guarded-source-merge",
+            ),
+            idempotency_key="fawxzzyweb-pr30-successor-replay",
+            source_role_id="owner.fawxzzyweb",
+        )
+        recovery = _web_recovery_absence_envelope(program=program, successor=successor)
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=bindings,
+            envelopes=[successor, recovery],
+        )
+        self.assertEqual([], findings)
+        frozen = copy.deepcopy(program)
+
+        program, replay_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=bindings,
+            envelopes=[successor, recovery],
+        )
+
+        self.assertEqual([], replay_findings)
+        self.assertEqual(frozen, program)
+
+    def test_crash_after_successor_reservation_cannot_replay_the_absent_delivery(self) -> None:
+        program, bindings, _ = _orphaned_web_delivery_program()
+        original_intent = copy.deepcopy(program["delivery_intents"][0])
+        successor = _envelope(
+            _web_release_packet_payload(
+                "fawxzzyweb-pr30-guarded-source-merge-retry-1",
+                replaces_packet_id="fawxzzyweb-pr30-guarded-source-merge",
+            ),
+            idempotency_key="fawxzzyweb-pr30-successor-crash",
+            source_role_id="owner.fawxzzyweb",
+        )
+        recovery = _web_recovery_absence_envelope(program=program, successor=successor)
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=bindings,
+            envelopes=[successor, recovery],
+        )
+        self.assertEqual([], findings)
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        successor_reservation = reservations[0]["reservation_id"]
+
+        program, replay_findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {
+                    "reservation_id": original_intent["reservation_id"],
+                    "packet_id": original_intent["packet_id"],
+                    "runtime_thread_id": original_intent["runtime_thread_id"],
+                    "event_id": original_intent["event_id"],
+                    "payload_digest": original_intent["payload_digest"],
+                    "status": "RECOVERY_REQUIRED",
+                }
+            ],
+        )
+        program, envelope_replay_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=bindings,
+            envelopes=[successor, recovery],
+        )
+        retry = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], replay_findings)
+        self.assertEqual([], envelope_replay_findings)
+        self.assertEqual([], retry["selected_jobs"])
+        self.assertEqual(1, len(program["delivery_intents"]))
+        self.assertEqual(successor_reservation, program["delivery_intents"][0]["reservation_id"])
+        self.assertEqual("prepared", program["delivery_intents"][0]["status"])
+
+    def test_main_cold_start_retires_proven_absent_delivery_and_dispatches_successor_once(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            program, bindings, _ = _orphaned_web_delivery_program()
+            original_intent = copy.deepcopy(program["delivery_intents"][0])
+            successor = _envelope(
+                _web_release_packet_payload(
+                    "fawxzzyweb-pr30-guarded-source-merge-retry-1",
+                    replaces_packet_id="fawxzzyweb-pr30-guarded-source-merge",
+                ),
+                idempotency_key="fawxzzyweb-pr30-successor-main-cold-start",
+                source_role_id="owner.fawxzzyweb",
+            )
+            recovery = _web_recovery_absence_envelope(program=program, successor=successor)
+            delivery_replay = {
+                "reservation_id": original_intent["reservation_id"],
+                "packet_id": original_intent["packet_id"],
+                "runtime_thread_id": original_intent["runtime_thread_id"],
+                "event_id": original_intent["event_id"],
+                "payload_digest": original_intent["payload_digest"],
+                "status": "RECOVERY_REQUIRED",
+            }
+            _write(root / "tmp/atlas/program.json", json.dumps(program, indent=2) + "\n")
+            _write(root / "tmp/atlas/bindings.json", json.dumps(bindings, indent=2) + "\n")
+            _write(
+                root / "tmp/atlas/envelopes.jsonl",
+                json.dumps(successor) + "\n" + json.dumps(recovery) + "\n",
+            )
+            _write(root / "tmp/atlas/delivery.jsonl", json.dumps(delivery_replay) + "\n")
+            args = [
+                "--json",
+                "--program",
+                "tmp/atlas/program.json",
+                "--bindings",
+                "tmp/atlas/bindings.json",
+                "--envelopes",
+                "tmp/atlas/envelopes.jsonl",
+                "--delivery-results",
+                "tmp/atlas/delivery.jsonl",
+                "--output",
+                "tmp/atlas/report.json",
+                "--prompt-output",
+                "tmp/atlas/prompt.md",
+            ]
+            with patch.object(scheduler, "atlas_root", return_value=root):
+                with patch.object(scheduler, "_branch_state", return_value=("main", "abc123")):
+                    with patch.object(scheduler, "_parity_state", return_value={"status": "clean", "behind": 0, "ahead": 0}):
+                        with patch.object(scheduler, "_load_selector", return_value=_selector_payload()):
+                            with patch.object(scheduler.ai_work_session_preflight, "build_report", return_value=_preflight_payload()):
+                                with patch.object(scheduler.planner, "build_report", return_value=_planner_payload([])):
+                                    with redirect_stdout(io.StringIO()):
+                                        first_exit = scheduler.main(args)
+                                    first_report = json.loads((root / "tmp/atlas/report.json").read_text(encoding="utf-8"))
+                                    first_program = json.loads((root / "tmp/atlas/program.json").read_text(encoding="utf-8"))
+                                    with redirect_stdout(io.StringIO()):
+                                        second_exit = scheduler.main(args)
+                                    second_report = json.loads((root / "tmp/atlas/report.json").read_text(encoding="utf-8"))
+                                    second_program = json.loads((root / "tmp/atlas/program.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(0, first_exit)
+        self.assertEqual([], first_report["bridge_findings"])
+        self.assertEqual(
+            ["fawxzzyweb-pr30-guarded-source-merge-retry-1"],
+            [item["packet_id"] for item in first_report["dispatch_plan"]],
+        )
+        self.assertEqual(["fawxzzyweb-pr30-guarded-source-merge"], first_program["completed_packets"])
+        self.assertEqual(1, len(first_program["delivery_intents"]))
+        self.assertEqual("prepared", first_program["delivery_intents"][0]["status"])
+        self.assertNotEqual(original_intent["reservation_id"], first_program["delivery_intents"][0]["reservation_id"])
+        self.assertEqual(0, second_exit)
+        self.assertEqual([], second_report["bridge_findings"])
+        self.assertEqual([], second_report["dispatch_plan"])
+        self.assertEqual(first_program, second_program)
 
     def test_cold_start_supersession_accepts_only_the_deterministic_prior_reservation(self) -> None:
         payload = {
