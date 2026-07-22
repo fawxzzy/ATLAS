@@ -96,8 +96,9 @@ the `ACTIVE` state, so it cannot expose the same packet twice.
 The same transaction records a `prepared` delivery intent containing the exact
 event, digest, packet, role, thread, and writer-scope identities. After the
 app-native send returns, MAIN settles that intent with the returned turn ID. An
-ambiguous result becomes `recovery-required`; MAIN must inspect complete thread
-history for the exact event ID and must not retry blindly. Active work without
+ambiguous result becomes `recovery-required`; the admitted recovery owner must
+inspect complete target history for the exact event ID and must not retry
+blindly. Active work without
 a correlated lease becomes a derived `scope_hold`, never an invented lease.
 Promoting a recovery-required delivery back to `delivered` requires explicit
 `COMPLETE_TARGET_TASK_HISTORY` reconciliation, the exact event identity, and a
@@ -110,6 +111,31 @@ delivery journal is idempotent while identity drift still fails closed.
 When delivery and cancellation evidence arrive together, delivery settlement
 runs first; a delivered intent cannot then be erased by cancellation.
 
+Complete-history recovery has exactly two outcomes. If the target history
+contains the matching turn, the bridge binds that returned turn and preserves
+the existing reservation. If complete history contains no matching or active
+turn and the original app call is independently proven terminally lost, a
+`DELIVERY_RECOVERY_PROOF` may retire only that orphaned reservation. The proof
+is a closed, canonically hashed `atlas.scheduler.delivery-recovery-evidence.v1`
+projection containing the exact packet, writer scope, runtime, event, digest,
+and reservation identities plus the canonical event ID and payload digest of
+the supported target-history read receipt; `history_complete=true`; empty
+matching and active turn sets; `original_call_state=TERMINALLY_LOST`; and
+`effects_match_intent=false`. Missing, partial, extra, mismatched, or ambiguous
+evidence leaves the intent and lease in `recovery-required`.
+
+The absence transition also requires exactly one already-admitted successor
+authority. That successor must name the retired packet in `replaces_packet_id`,
+carry a distinct canonical event and packet identity, and preserve the logical
+role, runtime binding, repository, writer scope, execution class, dependencies,
+protected-surface authority, and complete resource claims. The scheduler
+removes only the orphaned intent and correlated lease, records both proof and
+successor identities in the completion receipt, then exposes the successor to
+normal atomic reservation. Program locking and the distinct successor identity
+permit exactly one fresh delivery. Replaying the old `RECOVERY_REQUIRED`
+journal entry is silent; any later delivered-turn evidence contradicting the
+absence proof fails closed.
+
 Every release receipt must carry `terminal=true`, a successful terminal state,
 the exact `packet_id`, `writer_scope`, reservation ID, and delivered turn ID. No
 prose classification or uncorrelated terminal receipt releases capacity.
@@ -118,8 +144,10 @@ Obsolete packets are not deleted silently. `ATLAS MAIN` may emit a canonical
 `SUPERSEDED` terminal disposition only while a packet remains `READY` or while
 its exact delivery intent is `prepared` and has no returned turn. Prepared
 cancellation requires the exact packet, writer scope, and reservation. A
-delivered or recovery-required packet cannot be cancelled and still requires
-complete target-task-history reconciliation.
+delivered packet cannot be cancelled. A recovery-required packet can be
+superseded only through the closed absence-proof transition above, issued by
+the Workflow Architect recovery owner or MAIN under exact recovery authority;
+ordinary owner/review/manual routing does not require MAIN as a relay.
 
 `atlas.worker-lease.v2` now requires `writer_scope`; a lease without its
 conflict-group identity is invalid and cannot reserve global capacity by
