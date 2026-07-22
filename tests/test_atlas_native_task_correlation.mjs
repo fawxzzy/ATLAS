@@ -104,6 +104,7 @@ function validWorkerLease() {
     lease_id: "lease-native-correlation-001",
     job_id: "job-native-correlation-001",
     component_id: "atlas-root",
+    writer_scope: "atlas.root",
     status: "released",
     acquired_at: "2026-07-14T04:50:00Z",
     expires_at: "2026-07-14T05:50:00Z",

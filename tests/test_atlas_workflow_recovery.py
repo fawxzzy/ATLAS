@@ -55,6 +55,7 @@ WORKFLOW_PR_PATHS = [
     "ops/atlas/workflow_recovery.py",
     "runtime/cortex/kernel.state-model.seed.v1.json",
     "schemas/atlas.continuity.handoff.v1.json",
+    "schemas/atlas.autonomous-work-program.v2.json",
     "schemas/atlas.workflow.*.json",
     "tests/fixtures/atlas-workflow-recovery/**",
     "tests/test_atlas_workflow_recovery.py",
@@ -248,6 +249,17 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertEqual(3, result["manual_questions"])
         self.assertEqual(3, result["answered_manual_questions"])
         self.assertEqual("ARCHIVED", result["bootstrap_source_lifecycle"])
+
+    def test_scheduler_continuation_is_conflict_group_scoped(self) -> None:
+        recovery_policy = self.manifest["recovery_policy"]
+        single_writer = self.manifest["single_writer"]
+        main_role = next(item for item in self.manifest["roles"] if item["role_id"] == "atlas.main")
+
+        self.assertIn("largest conflict-free writer-scope wave", recovery_policy["standing_continuation_rule"])
+        self.assertIn("releases only its exact writer_scope lease", recovery_policy["receipt_continuation_rule"])
+        self.assertIn("do not replace foreground", recovery_policy["heartbeat_rule"].lower())
+        self.assertIn("Distinct writer_scope values may execute concurrently", single_writer["parallel_rule"])
+        self.assertIn("new canonically authorized READY standing packet", main_role["wake_conditions"])
 
     def test_github_workflow_is_read_only_cross_platform_and_main_complete(self) -> None:
         workflow = _load_github_workflow()

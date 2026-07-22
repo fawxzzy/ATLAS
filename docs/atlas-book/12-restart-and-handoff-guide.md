@@ -623,12 +623,17 @@ Treat these as serialized shared root spines:
 Default operating split:
 
 - one root writer
-- one owner-repo writer
-- one read-only scout
+- one writer per owner repository or declared external-resource conflict group
+- read-only scouts only while their resource claims remain disjoint
 
 Rules:
 
 - do not let two active root-writing passes touch the same shared spine at once
+- do not globally serialize unrelated owner repositories; acquire and release leases by `writer_scope`
+- resume an `IDLE` or `notLoaded` standing role by stable logical role ID when a canonical READY packet exists; do not require a dedicated heartbeat per owner
+- if no READY packet exists, one bounded selector may return exact `standing_local_source_preparation` work for an idle `owner.*` role, but only with an immutable parent, exact relative file claims, one isolated worktree, `LOCAL_ONLY_UNSTAGED` mode, and `HELD` publication
+- treat that standing class as preparation only; staging, commit, push, PR or review creation, merge, workflow, runner, provider, Supabase, deployment, production, secrets, and canonical-root writes remain separately gated
+- after a terminal receipt, release only its exact lease and immediately dispatch the next dependency-satisfied conflict-free wave
 - if a receipt can land without an immediate shared-spine rewrite, prefer batching that rewrite with the next related ratchet or hygiene pass
 - do not let a read-only scout quietly become a writer without reclassifying the lane
 

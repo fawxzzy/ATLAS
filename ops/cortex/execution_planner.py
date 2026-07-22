@@ -15,6 +15,7 @@ import sys
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 SCHEMA_VERSION = "atlas.cortex.execution_plan.v1"
 SYNTHESIS_SCHEMA_VERSION = "atlas.cortex.chat_style_synthesis_packet.v1"
@@ -23,6 +24,7 @@ CONTRACT_VERSION = "atlas.cortex.execution_planner_contract_registry.v1"
 NO_EXECUTION_AUTHORITY = "no_execution_authority"
 
 EXECUTION_CLASSES = ("read_only", "repo_worktree", "canonical_workspace")
+MUTATING_EXECUTION_CLASSES = {"repo_worktree", "canonical_workspace"}
 TOP_LEVEL_FIELDS = (
     "schema_version", "plan_id", "source_packet", "source_digests", "source_trust_classes",
     "selected_lane", "selected_marker", "selected_packet", "objective", "plan_status",
@@ -49,7 +51,7 @@ AUTHORITY_DENIALS = (
 )
 RESOURCE_KINDS = (
     "files", "generated_artifacts", "schemas", "canonical_root", "worktrees", "ports",
-    "browsers", "external_writers",
+    "browsers", "external_writers", "writer_scopes",
 )
 PROTECTED_PARTS = {"repos", "secrets", "runtime", ".vercel", ".codex", "archive", "archives"}
 FORBIDDEN_PATH_TERMS = ("transcript", "conversation", "private-reasoning", "browser-profile", "account", "health", "payment", "live-platform", "network")
@@ -145,6 +147,81 @@ def _string_list(value: Any) -> list[str]:
     return sorted({str(item).replace("\\", "/") for item in value if isinstance(item, (str, int, float))})
 
 
+def _repository_identity(value: Any) -> str | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    raw = value.strip().replace("\\", "/")
+    lowered = raw.casefold()
+    if lowered.startswith("git@github.com:"):
+        path = raw.split(":", 1)[1]
+    elif "://" in raw:
+        parsed = urlsplit(raw)
+        if parsed.hostname is None or parsed.hostname.casefold() != "github.com" or parsed.query or parsed.fragment:
+            return None
+        path = parsed.path
+    elif lowered.startswith("github.com/"):
+        path = raw[len("github.com/") :]
+    else:
+        path = raw
+    path = path.strip("/")
+    if path.casefold().endswith(".git"):
+        path = path[:-4]
+    parts = path.split("/")
+    if len(parts) != 2 or not all(parts):
+        return None
+    return "/".join(part.casefold() for part in parts)
+
+
+def _external_writer_identity(value: str) -> str:
+    raw = value.strip()
+    if "://" in raw:
+        parsed = urlsplit(raw)
+        parts = parsed.path.strip("/").split("/")
+        if parsed.hostname and parsed.hostname.casefold() == "github.com" and len(parts) >= 3:
+            locator = parts[2].casefold()
+            if locator == "pull":
+                if len(parts) < 4 or not parts[3].isdigit():
+                    return ""
+                repository = _repository_identity("/".join(parts[:2]))
+                if repository:
+                    return f"github-pr:{repository}#{int(parts[3])}"
+            if locator in {"pr", "prs"} or locator.startswith("pull"):
+                return ""
+        return raw.casefold()
+    prefix, separator, remainder = raw.partition(":")
+    normalized_prefix = prefix.casefold()
+    if not separator or normalized_prefix not in {"github", "github-pr", "git-branch"}:
+        return value.strip()
+    repository_token, suffix_separator, suffix = remainder.partition(":")
+    repository, pr_separator, pr_number = repository_token.partition("#")
+    normalized_repository = _repository_identity(repository)
+    if not normalized_repository:
+        return ""
+    if pr_separator:
+        if not pr_number.isdigit():
+            return ""
+        return f"github-pr:{normalized_repository}#{int(pr_number)}"
+    if normalized_prefix == "github-pr":
+        return ""
+    normalized = f"{normalized_prefix}:{normalized_repository}"
+    if suffix_separator:
+        normalized += f":{suffix}"
+    return normalized
+
+
+def _writer_scope(job: dict[str, Any]) -> str | None:
+    declared = job.get("writer_scope")
+    if isinstance(declared, str) and declared.strip():
+        return declared.strip()
+    execution_class = job.get("execution_class")
+    if execution_class == "canonical_workspace":
+        return "atlas.root"
+    repository = _repository_identity(job.get("repository"))
+    if execution_class == "repo_worktree" and repository:
+        return f"repo.{repository}"
+    return None
+
+
 def _normalized_claims(job: dict[str, Any]) -> OrderedDict[str, list[str]]:
     raw = job.get("resource_claims") if isinstance(job.get("resource_claims"), dict) else {}
     claims: OrderedDict[str, list[str]] = OrderedDict()
@@ -156,7 +233,21 @@ def _normalized_claims(job: dict[str, Any]) -> OrderedDict[str, list[str]]:
                 value += job.get("allowed_files", []) if isinstance(job.get("allowed_files"), list) else []
         if value is True and kind == "canonical_root":
             value = ["canonical_root"]
+        if kind == "canonical_root" and job.get("execution_class") == "canonical_workspace":
+            value = list(value) if isinstance(value, list) else []
+            value.append("atlas")
+        if kind == "writer_scopes":
+            value = list(value) if isinstance(value, list) else []
+            writer_scope = _writer_scope(job)
+            if writer_scope:
+                value.append(writer_scope)
         claims[kind] = _string_list(value)
+        if kind == "external_writers":
+            claims[kind] = sorted(
+                identity
+                for identity in {_external_writer_identity(item) for item in claims[kind]}
+                if identity
+            )
     return claims
 
 
@@ -181,11 +272,36 @@ def _normalize_job(raw: Any) -> tuple[OrderedDict[str, Any] | None, list[Ordered
             blockers.append(_finding("invalid_job_shape", "Job collection field must be an array.", field=field))
     if "resource_claims" in raw and not isinstance(raw["resource_claims"], dict):
         blockers.append(_finding("invalid_job_shape", "resource_claims must be an object."))
+    raw_claims = raw.get("resource_claims") if isinstance(raw.get("resource_claims"), dict) else {}
+    external_writers = raw_claims.get("external_writers", [])
+    if not isinstance(external_writers, list) or any(
+        not isinstance(item, str) or not item.strip() or not _external_writer_identity(item)
+        for item in external_writers
+    ):
+        blockers.append(
+            _finding(
+                "invalid_resource_claim",
+                "External writer claims must use a recognized, complete resource identity.",
+                field="resource_claims.external_writers",
+            )
+        )
+    if "writer_scope" in raw and (not isinstance(raw["writer_scope"], str) or not raw["writer_scope"].strip()):
+        blockers.append(_finding("invalid_job_shape", "writer_scope must be a non-empty string when supplied."))
+    repository = _repository_identity(raw.get("repository"))
+    if repository is None:
+        blockers.append(
+            _finding(
+                "invalid_job_shape",
+                "Repository identity must be an owner/repo value or recognized GitHub alias.",
+                field="repository",
+            )
+        )
     candidate_id = _candidate_id(raw)
     candidate = OrderedDict(
         (("job_id", candidate_id), ("source_job_id", raw.get("job_id")), ("objective", raw.get("objective")),
-         ("project", raw.get("project")), ("component", raw.get("component")), ("repository", raw.get("repository")),
+         ("project", raw.get("project")), ("component", raw.get("component")), ("repository", repository),
          ("owner", raw.get("owner")), ("execution_class", execution_class),
+         ("writer_scope", _writer_scope(raw)),
          ("allowed_files", _string_list(raw.get("allowed_files", []))), ("forbidden_files", _string_list(raw.get("forbidden_files", []))),
          ("dependencies", _string_list(raw.get("dependencies", []))), ("resource_claims", _normalized_claims(raw)),
          ("runtime", _canonical(raw.get("runtime", {})) if isinstance(raw.get("runtime", {}), dict) else OrderedDict()),
@@ -213,10 +329,36 @@ def _collision_kinds(left: OrderedDict[str, Any], right: OrderedDict[str, Any]) 
     for kind in RESOURCE_KINDS:
         values_left, values_right = left_claims[kind], right_claims[kind]
         if kind == "files":
-            if any(_patterns_overlap(a, b) for a in values_left for b in values_right):
+            if left.get("repository") == right.get("repository") and any(
+                _patterns_overlap(a, b) for a in values_left for b in values_right
+            ):
                 kinds.append(kind)
         elif set(values_left).intersection(values_right):
             kinds.append(kind)
+    same_repository_mutation = (
+        left.get("execution_class") in MUTATING_EXECUTION_CLASSES
+        and right.get("execution_class") in MUTATING_EXECUTION_CLASSES
+        and bool(left.get("repository"))
+        and left.get("repository") == right.get("repository")
+    )
+    if same_repository_mutation:
+        if "canonical_workspace" in {left.get("execution_class"), right.get("execution_class")}:
+            kinds.append("canonical_root")
+        else:
+            complete_isolation_claims = all(
+                claims.get(kind)
+                for claims in (left_claims, right_claims)
+                for kind in ("worktrees", "files")
+            )
+            worktrees_overlap = any(
+                _patterns_overlap(a, b)
+                for a in left_claims["worktrees"]
+                for b in right_claims["worktrees"]
+            )
+            if not complete_isolation_claims:
+                kinds.append("repository")
+            elif worktrees_overlap:
+                kinds.append("worktrees")
     return sorted(kinds)
 
 
@@ -378,12 +520,12 @@ def build_plan(*, root: Path, synthesis_path: str | None, bridge_path: str | Non
          ("selected_packet", contract.get("selected_packet")), ("objective", contract.get("objective")),
          ("plan_status", plan_status), ("dependency_graph", edges), ("execution_waves", waves),
          ("job_candidates", candidates),
-         ("project_component_ownership", [OrderedDict((("job_id", c["job_id"]), ("project", c["project"]), ("component", c["component"]), ("repository", c["repository"]), ("owner", c["owner"]))) for c in candidates]),
+         ("project_component_ownership", [OrderedDict((("job_id", c["job_id"]), ("project", c["project"]), ("component", c["component"]), ("repository", c["repository"]), ("owner", c["owner"]), ("writer_scope", c["writer_scope"]))) for c in candidates]),
          ("runtime_recommendation", runtime),
          ("permission_posture", OrderedDict((("full_local_access_is_capability_only", True), ("requested_capability", contract.get("local_capability", "unresolved")), ("planner_cannot_apply_permissions", True)))),
          ("external_action_authority", OrderedDict((("planner_authority", NO_EXECUTION_AUTHORITY), ("requested_authority", authority), ("requested_actions", external_actions), ("denials", list(AUTHORITY_DENIALS))))),
          ("scope_lock", [OrderedDict((("job_id", c["job_id"]), ("allowed_files", c["allowed_files"]), ("forbidden_files", c["forbidden_files"]))) for c in candidates]),
-         ("resource_leases", [OrderedDict((("job_id", c["job_id"]), ("claims", c["resource_claims"]), ("advisory_only", True))) for c in candidates]),
+         ("resource_leases", [OrderedDict((("job_id", c["job_id"]), ("writer_scope", c["writer_scope"]), ("claims", c["resource_claims"]), ("advisory_only", True))) for c in candidates]),
          ("verification_requirements", [OrderedDict((("job_id", c["job_id"]), ("requirements", c["verification_requirements"]))) for c in candidates]),
          ("proof_requirements", [OrderedDict((("job_id", c["job_id"]), ("requirements", c["proof_requirements"]))) for c in candidates]),
          ("commit_requirements", [OrderedDict((("job_id", c["job_id"]), ("requirements", c["commit_requirements"]))) for c in candidates]),
@@ -439,8 +581,7 @@ def _assign_waves(candidates: list[OrderedDict[str, Any]]) -> tuple[list[Ordered
                 occupants = [by_id[item] for item in waves.get(wave, [])]
                 collisions = [(occupant, _collision_kinds(candidate, occupant)) for occupant in occupants]
                 collisions = [(occupant, kinds) for occupant, kinds in collisions if kinds]
-                only_read_only = candidate["execution_class"] == "read_only" and all(item["execution_class"] == "read_only" for item in occupants)
-                if not collisions and (not occupants or only_read_only):
+                if not collisions:
                     break
                 for occupant, kinds in collisions:
                     risks.append(OrderedDict((("jobs", sorted([job_id, occupant["job_id"]])), ("resource_kinds", kinds), ("serialized", True))))

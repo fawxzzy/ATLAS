@@ -42,7 +42,7 @@ class CortexExecutionPlannerTests(unittest.TestCase):
             "objective": "Prove one bounded advisory outcome.",
             "project": "atlas",
             "component": "cortex",
-            "repository": "stack",
+            "repository": "fawxzzy/ATLAS",
             "owner": "stack",
             "execution_class": "read_only",
             "allowed_files": [f"ops/cortex/{job_id}.py"],
@@ -158,9 +158,195 @@ class CortexExecutionPlannerTests(unittest.TestCase):
         self.assertEqual(1, len(plan["execution_waves"]))
         self.assertEqual(2, len(plan["execution_waves"][0]["job_ids"]))
 
-    def test_writers_are_serialized_even_without_resource_overlap(self) -> None:
+    def test_same_repository_writers_are_serialized_by_implicit_scope(self) -> None:
         plan, _ = self._plan(self._root(), [self._job("one", execution_class="repo_worktree"), self._job("two", execution_class="repo_worktree")])
         self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("writer_scopes", plan["collision_risks"][0]["resource_kinds"])
+
+    def test_distinct_repository_writers_share_a_wave(self) -> None:
+        first = self._job("one", execution_class="repo_worktree")
+        second = self._job("two", execution_class="repo_worktree")
+        second["repository"] = "fawxzzy/other"
+        second["allowed_files"] = first["allowed_files"]
+        plan, _ = self._plan(self._root(), [first, second])
+        self.assertEqual(1, len(plan["execution_waves"]))
+        self.assertEqual(2, len(plan["execution_waves"][0]["job_ids"]))
+
+    def test_explicit_writer_scope_serializes_cross_repository_jobs(self) -> None:
+        first = self._job("one", execution_class="repo_worktree", writer_scope="external.shared")
+        second = self._job("two", execution_class="repo_worktree", writer_scope="external.shared")
+        second["repository"] = "fawxzzy/other"
+        plan, _ = self._plan(self._root(), [first, second])
+        self.assertEqual(2, len(plan["execution_waves"]))
+
+    def test_explicit_distinct_scopes_do_not_bypass_same_repository_serialization(self) -> None:
+        first = self._job(
+            "one",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.one",
+            allowed_files=[],
+        )
+        second = self._job(
+            "two",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.two",
+            allowed_files=[],
+        )
+        plan, _ = self._plan(self._root(), [first, second])
+
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("repository", plan["collision_risks"][0]["resource_kinds"])
+
+    def test_repository_case_variants_cannot_bypass_serialization(self) -> None:
+        first = self._job(
+            "one",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.one",
+            allowed_files=[],
+        )
+        second = self._job(
+            "two",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.two",
+            allowed_files=[],
+        )
+        first["repository"] = "Fawxzzy/ATLAS"
+        second["repository"] = "fawxzzy/atlas"
+
+        plan, _ = self._plan(self._root(), [first, second])
+
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("repository", plan["collision_risks"][0]["resource_kinds"])
+        self.assertEqual(
+            {"fawxzzy/atlas"},
+            {item["repository"] for item in plan["project_component_ownership"]},
+        )
+
+    def test_repository_url_alias_cannot_bypass_serialization(self) -> None:
+        first = self._job("one", execution_class="repo_worktree", writer_scope="repo.stack.one", allowed_files=[])
+        second = self._job("two", execution_class="repo_worktree", writer_scope="repo.stack.two", allowed_files=[])
+        first["repository"] = "fawxzzy/ATLAS"
+        second["repository"] = "https://github.com/fawxzzy/ATLAS.git"
+
+        plan, _ = self._plan(self._root(), [first, second])
+
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("repository", plan["collision_risks"][0]["resource_kinds"])
+        self.assertEqual(
+            {"fawxzzy/atlas"},
+            {item["repository"] for item in plan["project_component_ownership"]},
+        )
+
+    def test_unrecognized_repository_url_fails_closed(self) -> None:
+        job = self._job("one", execution_class="repo_worktree")
+        job["repository"] = "https://example.com/fawxzzy/ATLAS.git"
+
+        plan, status = self._plan(self._root(), [job])
+
+        self.assertEqual("blocker", status)
+        self.assertFalse(plan["safe_to_admit"])
+        self.assertIn("invalid_job_shape", [item["code"] for item in plan["blocked_reasons"]])
+
+    def test_bare_repository_identity_fails_closed(self) -> None:
+        job = self._job("one", execution_class="repo_worktree")
+        job["repository"] = "ATLAS"
+
+        plan, status = self._plan(self._root(), [job])
+
+        self.assertEqual("blocker", status)
+        self.assertFalse(plan["safe_to_admit"])
+        self.assertIn("invalid_job_shape", [item["code"] for item in plan["blocked_reasons"]])
+
+    def test_malformed_github_pr_writer_alias_fails_closed(self) -> None:
+        job = self._job("one", execution_class="repo_worktree")
+        job["resource_claims"] = {"external_writers": ["github-pr:fawxzzy/ATLAS#not-a-number"]}
+
+        plan, status = self._plan(self._root(), [job])
+
+        self.assertEqual("blocker", status)
+        self.assertFalse(plan["safe_to_admit"])
+        self.assertIn("invalid_resource_claim", [item["code"] for item in plan["blocked_reasons"]])
+
+    def test_malformed_github_pr_url_aliases_fail_closed(self) -> None:
+        for locator, number in (
+            ("pulls", "146"),
+            ("pr", "146"),
+            ("prs", "146"),
+            ("pull-request", "146"),
+            ("pullx", "146"),
+            ("pullx", "not-a-number"),
+        ):
+            with self.subTest(locator=locator, number=number):
+                job = self._job("one", execution_class="repo_worktree")
+                job["resource_claims"] = {
+                    "external_writers": [f"https://github.com/fawxzzy/ATLAS/{locator}/{number}"],
+                }
+
+                plan, status = self._plan(self._root(), [job])
+
+                self.assertEqual("blocker", status)
+                self.assertFalse(plan["safe_to_admit"])
+                self.assertIn("invalid_resource_claim", [item["code"] for item in plan["blocked_reasons"]])
+
+    def test_github_pr_url_and_structured_writer_are_one_resource(self) -> None:
+        first = self._job("one", execution_class="repo_worktree", writer_scope="repo.stack.one")
+        second = self._job("two", execution_class="repo_worktree", writer_scope="repo.stack.two")
+        first["resource_claims"] = {"external_writers": ["github:fawxzzy/ATLAS#146:review"]}
+        second["resource_claims"] = {"external_writers": ["https://github.com/fawxzzy/ATLAS/pull/146/files"]}
+
+        plan, _ = self._plan(self._root(), [first, second])
+
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("external_writers", plan["collision_risks"][0]["resource_kinds"])
+
+    def test_explicit_distinct_scopes_share_same_repository_with_proven_isolation(self) -> None:
+        first = self._job(
+            "one",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.one",
+            allowed_files=["ops/cortex/one/**"],
+            resource_claims={"worktrees": ["worktrees/one"]},
+        )
+        second = self._job(
+            "two",
+            execution_class="repo_worktree",
+            writer_scope="repo.stack.two",
+            allowed_files=["tests/cortex/two/**"],
+            resource_claims={"worktrees": ["worktrees/two"]},
+        )
+        plan, _ = self._plan(self._root(), [first, second])
+
+        self.assertEqual(1, len(plan["execution_waves"]))
+        self.assertEqual(2, len(plan["execution_waves"][0]["job_ids"]))
+
+    def test_canonical_workspace_claim_is_implicit_and_exclusive(self) -> None:
+        plan, _ = self._plan(
+            self._root(),
+            [self._job("one", execution_class="canonical_workspace"), self._job("two", execution_class="canonical_workspace")],
+        )
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("canonical_root", plan["collision_risks"][0]["resource_kinds"])
+
+    def test_canonical_workspace_never_shares_same_repository_worktree_wave(self) -> None:
+        canonical = self._job(
+            "canonical",
+            execution_class="canonical_workspace",
+            writer_scope="atlas.root",
+            allowed_files=["docs/root/**"],
+            resource_claims={"worktrees": ["C:/ATLAS"]},
+        )
+        isolated = self._job(
+            "isolated",
+            execution_class="repo_worktree",
+            writer_scope="repo.atlas.isolated",
+            allowed_files=["ops/isolated/**"],
+            resource_claims={"worktrees": ["C:/w/isolated"]},
+        )
+
+        plan, _ = self._plan(self._root(), [canonical, isolated])
+
+        self.assertEqual(2, len(plan["execution_waves"]))
+        self.assertIn("canonical_root", plan["collision_risks"][0]["resource_kinds"])
 
     def test_missing_owner_blocks_admission(self) -> None:
         job = self._job(); job.pop("owner")

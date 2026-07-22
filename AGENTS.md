@@ -18,8 +18,9 @@ Persistent context
 Routing
 - Single-repo implementation work should be routed into the target repo root.
 - Cross-repo work may touch only the named repos plus stack-level files under the ATLAS root.
-- ATLAS-root sessions are root-governance sessions by default. Fitness, Mazer, and other owner repos are excluded fallback lanes unless the operator explicitly selects an owner-lane packet by name.
-- If the selector, planner, or marker board reports no immediate root packet, stop and report the held root state. Do not switch into Fitness, Mazer, Stripe/Vercel launch work, game work, or owner-repo cleanup as a fallback.
+- ATLAS-root sessions are root-governance sessions by default. Fitness, Mazer, and other owner repos are excluded arbitrary fallback lanes. An owner lane may run only from an explicitly selected packet or a scheduler-admitted `standing_local_source_preparation` packet that satisfies the bounded contract below.
+- If the selector, planner, or marker board reports no immediate root packet and no valid standing local source-preparation packet, stop and report the held root state. Do not invent Fitness, Mazer, Stripe/Vercel launch work, game work, or owner-repo cleanup as a fallback.
+- Standing local source preparation is limited to unstaged edits, tests, documentation, and deterministic generation in one isolated owner worktree at an immutable parent and exact path allowlist. It never authorizes staging, commit, push, branch or PR creation, review requests, merge, workflow or runner actions, provider access, Supabase mutation, deployment, production, or canonical-root mutation.
 - Fitness and Mazer may appear in root outputs only as read-only advisory owner-lane inventory status unless explicitly selected.
 - Stack-level files are:
   - `stack.yaml`
@@ -89,15 +90,15 @@ Live Data Safety
 - Do not treat exploratory product mutations as disposable if they can affect user-visible ordering, naming, history, or active-state truth.
 
 Parallelism
-- Use one agent per repo or one non-overlapping stack file slice.
-- Do not let multiple agents edit the same repo root without a clear ownership split.
+- Use one mutating agent per declared writer scope. Independent repository or explicitly non-overlapping stack conflict groups may run in parallel.
+- Do not let multiple agents edit the same writer scope without a durable ownership split and distinct resource claims.
 
 Execution Cadence
 - Treat root as governance, projection, and receipts only. Do not let root keep narrating a blocker once the bottleneck has moved into owner-repo work.
 - Two-strike blocker rule: if a lane already has one blocked execution receipt and one blocked proof or blocker-recheck receipt for the same blocker class, root is done. After that, only owner-side blocker conversion work is allowed until the blocker class materially changes.
 - No duplicate package rule: before opening a new pass, check whether the exact receipt already exists durably. If it does, do not rerun it unless state changed or scope changed.
 - Cluster execution rule: for execution-ready lanes, run execution, then proof or reconciliation, then ratchet as one serial cluster. Do not interleave unrelated root lanes between those steps unless execution becomes blocked.
-- One root writer only: at most one root writer, one owner-repo writer, and one optional read-only scout should be active at a time.
+- Conflict-group writer leases: at most one root writer and at most one mutating writer per owner repository or declared external-resource group may be active. Distinct owner scopes may run concurrently; read-only scouts may run when their resource claims do not collide.
 - Marker ratchet threshold: a marker moves only when executed state changed, proof-backed adoption widened, manifest-backed restart got broader and stayed refreshed, or one real blocker was cleared. Cleaner wording alone is not enough.
 - If one lane blocks and another execution-ready lane remains open, switch lanes and keep the batch moving instead of narrating the same blocker repeatedly.
 - Batch routing:
@@ -108,6 +109,9 @@ Execution Cadence
 Operator Continuity
 - Do not stop foreground coordination solely because background tasks are active. Continue monitoring terminal receipts, archiving completed bounded tasks, and dispatching the next non-conflicting admitted lane.
 - Treat heartbeat automations as interruption recovery only, not as a substitute for active execution.
+- On every material wake, consume all canonically authorized READY standing packets in dependency order, dispatch the largest conflict-free wave, and continue after each terminal receipt until no admitted packet remains. `IDLE` and `notLoaded` standing tasks are resumable role bindings, not dead lanes.
+- When no READY packet exists, one bounded read-only selector may derive exact `standing_local_source_preparation` packets from immutable repository evidence. Each packet must name an `owner.*` role, a full parent commit, one isolated worktree, a nonempty exact relative path allowlist mirrored by file claims, `LOCAL_ONLY_UNSTAGED` mode, and `HELD` publication. Generic continuation language is not this authority.
+- Release only the lease named by a terminal receipt. A blocked or latency-bound lease suppresses that conflict group only; it must not stop unrelated READY scopes.
 - When a lane blocks, persist the blocker and advance another ready lane. Use `FAWXZZY MESSAGES` for concise non-blocking operator updates when useful.
 - All root-launched local tasks inherit full local access, network access, live web search, and no approval prompts. Read-only scope is job authority, not a permission downgrade.
 - Require every bounded task to close with verification, a structured receipt, board reconciliation when applicable, and post-work review before archival.

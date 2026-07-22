@@ -72,6 +72,36 @@ Observation can replace activity provenance only for a runtime already returned 
 7. Recover ATLAS MAIN first. Do not initialize queues or owners until the root role is unique, readable, unarchived, pinned, and accepted.
 8. Initialize ATLAS INBOX, MANUAL MESSAGES, FAWXZZY QUESTIONS, AI QUESTIONS, and FAWXZZY MESSAGES in parallel only after unique title/role bindings are proven.
 9. Initialize the control plane, domain coordinator, and owners in parallel only across distinct writer scopes. A standing role being active is a hold, not an invitation to steer it.
+
+### Scheduler and standing-task continuation
+
+`ATLAS MAIN` schedules by durable `writer_scope`, dependency, and resource claims. The safety invariant is one mutating lease per conflict group, not one owner writer across the entire stack. A canonical-root writer remains exclusive to the root scope; independent owner repositories and external-resource groups may run concurrently when their declared claims do not overlap.
+
+Every material wake consumes all canonically authorized `READY` standing packets in dependency order and dispatches the largest conflict-free wave. A standing role in `IDLE` or `notLoaded` state is resumed through its stable logical role binding; it does not need a dedicated heartbeat automation. An `ACTIVE` role is never steered or duplicated.
+
+Before dispatch, snapshot changed canonical Inbox envelopes to `tmp/atlas/autonomous-inbox-events.jsonl` and current app-native role bindings to `tmp/atlas/standing-role-bindings.latest.json`. Run the autonomous scheduler with both inputs. Send only jobs in its persisted `dispatch_plan`; the scheduler has already transitioned them to `ACTIVE` and atomically acquired their exact mutating writer-scope leases. Never hand-build a replacement standing-packet list.
+
+`tmp/atlas/autonomous-work-program.json` is a derived snapshot. On a cold start,
+invoke the scheduler with the canonical envelopes, bindings, and delivery
+journal; it deterministically rebuilds packet, reservation, lease, intent, and
+terminal state before selecting new work. Do not hand-create the missing file.
+The bridge still fails closed when any required journal is absent or an exact
+reservation cannot be reproduced.
+
+For each app-native send, persist a delivery result containing the reservation, packet, runtime thread, event, digest, status, and returned turn ID, then rerun the scheduler with `--delivery-results`. If the send outcome is ambiguous, record `RECOVERY_REQUIRED`, inspect complete thread history for the exact event ID, and do not retry until the original delivery is proven absent. Active work without a valid correlated lease becomes a scope hold.
+
+A recovered delivery may be promoted only with explicit complete-target-history
+evidence, the reconciled event ID, and proof that observed effects match the
+admitted intent. Merely changing the status from `RECOVERY_REQUIRED` to
+`DELIVERED` is rejected.
+
+Each terminal receipt releases only the exact correlated lease and immediately triggers selection of the next admitted wave. `BLOCKED`, `REVIEW_LATENCY`, `UNKNOWN`, or an active lease suppresses only that conflict group. Heartbeats remain interruption recovery and must not become the foreground scheduler.
+
+Fail closed when a standing packet lacks a canonical `onv1_` event ID and `sha256:` payload digest, a stable logical role, repository, writer scope, execution class, dependency proof, or a collision-free lease. These checks never widen GitHub, provider, deployment, production, Supabase, or data authority.
+
+A terminal receipt releases capacity only when it explicitly carries `terminal=true` and exactly matches the active `packet_id`, `writer_scope`, reservation ID, and delivered turn ID. `BLOCKED`, `REVIEW_LATENCY`, `UNKNOWN`, malformed, or uncorrelated receipts retain the lease for that scope while unrelated scopes continue.
+
+Retire stale or duplicate READY work through an auditable `SUPERSEDED` envelope. The bridge accepts that disposition only before delivery: a READY packet has no reservation, while a prepared packet must match its exact reservation and have no returned turn. Never use supersession to erase a delivered or ambiguous send.
 10. Initialize the workflow architect and read embedded-service health last. DiscordOS, Foundation, Lifeline, Playbook Observer, Cortex, the service bus, ledgers, and heartbeats are components, not automatically required conversations.
 11. Re-run dry-run. A healthy second run creates no role, sends no bootstrap message, and changes no registry binding.
 
