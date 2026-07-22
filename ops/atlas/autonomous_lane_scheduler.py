@@ -573,6 +573,7 @@ def reconcile_runtime_program(
     program: dict[str, Any],
     bindings_payload: dict[str, Any],
     envelopes: list[dict[str, Any]],
+    root: Path | None = None,
 ) -> tuple[dict[str, Any], list[OrderedDict[str, Any]]]:
     """Build scheduler v2 state from immutable envelopes and standing bindings."""
 
@@ -832,6 +833,7 @@ def reconcile_runtime_program(
         standing_violation = _standing_local_source_preparation_violation(
             payload,
             source_role_id=envelope.get("source_role_id"),
+            root=root,
         )
         if standing_violation:
             findings.append(
@@ -1130,10 +1132,69 @@ def _safe_standing_local_worktree_claim(path: str) -> bool:
     )
 
 
+def _path_identity(path: Path) -> str:
+    return os.path.normcase(os.path.abspath(path))
+
+
+def _standing_local_worktree_evidence_violation(
+    *,
+    root: Path | None,
+    worktree_claim: str,
+    repository: str,
+    parent_commit: str,
+) -> str | None:
+    if root is None:
+        return "standing_worktree_evidence_required"
+    try:
+        root_resolved = root.resolve(strict=True)
+        claimed_path = root / Path(worktree_claim)
+        claimed_absolute = Path(os.path.abspath(claimed_path))
+        worktree = claimed_absolute.resolve(strict=True)
+    except (OSError, RuntimeError):
+        return "standing_worktree_evidence_unavailable"
+    if _path_identity(worktree) != _path_identity(claimed_absolute):
+        return "standing_worktree_indirection_forbidden"
+    if _path_identity(worktree) == _path_identity(root_resolved) or not worktree.is_dir():
+        return "standing_isolated_worktree_required"
+    if not (worktree / ".git").is_file():
+        return "standing_registered_worktree_required"
+
+    top_level = _git_stdout(worktree, "rev-parse", "--show-toplevel")
+    head = _git_stdout(worktree, "rev-parse", "HEAD")
+    origin = _git_stdout(worktree, "remote", "get-url", "origin")
+    registered = _git_stdout(worktree, "worktree", "list", "--porcelain")
+    if None in {top_level, head, origin, registered}:
+        return "standing_worktree_evidence_unavailable"
+    try:
+        top_level_path = Path(str(top_level)).resolve(strict=True)
+    except (OSError, RuntimeError):
+        return "standing_worktree_evidence_unavailable"
+    if _path_identity(top_level_path) != _path_identity(worktree):
+        return "standing_worktree_top_level_mismatch"
+
+    registered_paths: set[str] = set()
+    for line in str(registered).splitlines():
+        if not line.startswith("worktree "):
+            continue
+        try:
+            registered_path = Path(line.removeprefix("worktree ")).resolve(strict=True)
+        except (OSError, RuntimeError):
+            continue
+        registered_paths.add(_path_identity(registered_path))
+    if _path_identity(worktree) not in registered_paths:
+        return "standing_registered_worktree_required"
+    if _repository_identity(origin) != _repository_identity(repository):
+        return "standing_worktree_repository_mismatch"
+    if head != parent_commit:
+        return "standing_worktree_parent_mismatch"
+    return None
+
+
 def _standing_local_source_preparation_violation(
     payload: dict[str, Any],
     *,
     source_role_id: Any,
+    root: Path | None = None,
 ) -> str | None:
     authority_class = payload.get("authority_class")
     if authority_class is None:
@@ -1191,6 +1252,13 @@ def _standing_local_source_preparation_violation(
         return "standing_isolated_worktree_required"
     if any(_string_list(raw_claims.get(kind, [])) for kind in ("ports", "browsers", "external_writers")):
         return "standing_external_resource_claim_forbidden"
+    if violation := _standing_local_worktree_evidence_violation(
+        root=root,
+        worktree_claim=claims["worktrees"][0],
+        repository=str(payload.get("repository") or ""),
+        parent_commit=preparation["parent_commit"],
+    ):
+        return violation
     return None
 
 
@@ -1315,7 +1383,7 @@ def _candidate_from_planner_item(
     )
 
 
-def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any]) -> OrderedDict[str, Any]:
+def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root: Path) -> OrderedDict[str, Any]:
     raw = item if isinstance(item, dict) else {}
     packet = str(raw.get("packet") or raw.get("packet_id") or "")
     packet_id = str(raw.get("packet_id") or packet)
@@ -1347,6 +1415,7 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any]) -> Or
     elif standing_violation := _standing_local_source_preparation_violation(
         raw,
         source_role_id=raw.get("source_role_id"),
+        root=root,
     ):
         blocked_reason = standing_violation
     elif execution_class == "external_mutation" and not _resource_claims(raw.get("resource_claims")).get("external_writers"):
@@ -2031,7 +2100,7 @@ def build_report(
     standing_packets = program.get("standing_packets", [])
     if isinstance(standing_packets, list):
         for item in standing_packets:
-            candidate = _candidate_from_standing_packet(item=item, program=program)
+            candidate = _candidate_from_standing_packet(item=item, program=program, root=root)
             if candidate["safe"]:
                 candidates.append(candidate)
             else:
@@ -2375,6 +2444,7 @@ def main(argv: list[str] | None = None) -> int:
                     program=program,
                     bindings_payload=bindings_payload,
                     envelopes=nonterminal_envelopes,
+                    root=root,
                 )
                 bridge_findings.extend(admission_findings)
             if delivery_results_path is not None:
@@ -2388,6 +2458,7 @@ def main(argv: list[str] | None = None) -> int:
                     program=program,
                     bindings_payload=bindings_payload,
                     envelopes=envelopes,
+                    root=root,
                 )
                 bridge_findings.extend(terminal_findings)
             if args.allow_reselection:

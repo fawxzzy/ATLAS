@@ -42,7 +42,11 @@ carry all of the following:
 - one immutable lowercase 40-character parent commit;
 - one to 32 exact repository-relative paths, mirrored exactly by `files`
   resource claims;
-- exactly one explicit non-wildcard isolated-worktree claim;
+- exactly one explicit non-wildcard isolated-worktree claim, resolved relative
+  to the scheduler root without symlink or junction indirection;
+- live Git proof that the resolved path is the exact top level of a registered
+  linked worktree whose normalized `origin` matches the declared repository and
+  whose `HEAD` equals the packet's immutable parent commit;
 - no protected workflow, secret, environment, port, browser, or external-writer
   claim.
 

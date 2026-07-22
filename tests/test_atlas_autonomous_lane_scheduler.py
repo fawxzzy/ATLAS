@@ -1400,25 +1400,27 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
 
     def test_bridge_admits_bounded_standing_local_source_preparation(self) -> None:
         payload = _standing_local_source_payload()
-        program, findings = scheduler.reconcile_runtime_program(
-            program=_program_payload(),
-            bindings_payload=_bindings(("owner.example", "example-thread", "notLoaded")),
-            envelopes=[
-                _envelope(
-                    payload,
-                    idempotency_key="owner-local-source-preparation",
-                    source_role_id="atlas.main",
-                )
-            ],
-        )
-        report = scheduler.build_report(
-            root=Path("atlas-root-fixture"),
-            program=program,
-            max_candidates=30,
-            preflight_report=_preflight_payload(),
-            selector_report=_selector_payload(),
-            planner_report=_planner_payload([]),
-        )
+        with patch.object(scheduler, "_standing_local_worktree_evidence_violation", return_value=None):
+            program, findings = scheduler.reconcile_runtime_program(
+                program=_program_payload(),
+                bindings_payload=_bindings(("owner.example", "example-thread", "notLoaded")),
+                envelopes=[
+                    _envelope(
+                        payload,
+                        idempotency_key="owner-local-source-preparation",
+                        source_role_id="atlas.main",
+                    )
+                ],
+            )
+        with patch.object(scheduler, "_standing_local_worktree_evidence_violation", return_value=None):
+            report = scheduler.build_report(
+                root=Path("atlas-root-fixture"),
+                program=program,
+                max_candidates=30,
+                preflight_report=_preflight_payload(),
+                selector_report=_selector_payload(),
+                planner_report=_planner_payload([]),
+            )
 
         self.assertEqual([], findings)
         self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
@@ -1523,20 +1525,107 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         payload = _standing_local_source_payload()
         payload["resource_claims"] = copy.deepcopy(payload["resource_claims"])
         payload["resource_claims"]["worktrees"] = ["owners/example-local-preparation"]
-        program, findings = scheduler.reconcile_runtime_program(
-            program=_program_payload(),
-            bindings_payload=_bindings(("owner.example", "example-thread", "idle")),
-            envelopes=[
-                _envelope(
-                    payload,
-                    idempotency_key="canonical-nested-worktree",
-                    source_role_id="atlas.main",
-                )
-            ],
-        )
+        with patch.object(scheduler, "_standing_local_worktree_evidence_violation", return_value=None):
+            program, findings = scheduler.reconcile_runtime_program(
+                program=_program_payload(),
+                bindings_payload=_bindings(("owner.example", "example-thread", "idle")),
+                envelopes=[
+                    _envelope(
+                        payload,
+                        idempotency_key="canonical-nested-worktree",
+                        source_role_id="atlas.main",
+                    )
+                ],
+            )
 
         self.assertEqual([], findings)
         self.assertEqual(["owner-local-source-preparation"], [packet["packet_id"] for packet in program["standing_packets"]])
+
+    def test_bridge_requires_registered_matching_worktree_at_parent(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            primary = root / "primary"
+            primary.mkdir()
+            subprocess.run(["git", "init", str(primary)], check=True, capture_output=True)
+            subprocess.run(["git", "-C", str(primary), "config", "user.name", "ATLAS Test"], check=True)
+            subprocess.run(["git", "-C", str(primary), "config", "user.email", "atlas-test@example.invalid"], check=True)
+            subprocess.run(
+                ["git", "-C", str(primary), "remote", "add", "origin", "https://github.com/fawxzzy/example.git"],
+                check=True,
+            )
+            _write(primary / "README.md", "fixture\n")
+            subprocess.run(["git", "-C", str(primary), "add", "README.md"], check=True)
+            subprocess.run(["git", "-C", str(primary), "commit", "-m", "fixture"], check=True, capture_output=True)
+            parent = subprocess.check_output(["git", "-C", str(primary), "rev-parse", "HEAD"], text=True).strip()
+            worktree = root / "example-local-preparation"
+            subprocess.run(
+                ["git", "-C", str(primary), "worktree", "add", "--detach", str(worktree), parent],
+                check=True,
+                capture_output=True,
+            )
+
+            def violation(payload: dict[str, object]) -> str | None:
+                program, findings = scheduler.reconcile_runtime_program(
+                    program=_program_payload(),
+                    bindings_payload=_bindings(("owner.example", "example-thread", "idle")),
+                    envelopes=[
+                        _envelope(
+                            payload,
+                            idempotency_key="registered-worktree-proof",
+                            source_role_id="atlas.main",
+                        )
+                    ],
+                    root=root,
+                )
+                if findings:
+                    self.assertEqual([], program["standing_packets"])
+                else:
+                    self.assertEqual(
+                        ["owner-local-source-preparation"],
+                        [packet["packet_id"] for packet in program["standing_packets"]],
+                    )
+                return findings[0]["code"] if findings else None
+
+            valid = _standing_local_source_payload()
+            valid["source_preparation"] = copy.deepcopy(valid["source_preparation"])
+            valid["source_preparation"]["parent_commit"] = parent
+            self.assertIsNone(violation(valid))
+
+            nonexistent = copy.deepcopy(valid)
+            nonexistent["resource_claims"]["worktrees"] = ["missing-worktree"]
+            self.assertEqual("standing_worktree_evidence_unavailable", violation(nonexistent))
+
+            foreign = copy.deepcopy(valid)
+            foreign["repository"] = "fawxzzy/foreign"
+            self.assertEqual("standing_worktree_repository_mismatch", violation(foreign))
+
+            wrong_parent = copy.deepcopy(valid)
+            wrong_parent["source_preparation"]["parent_commit"] = "f" * 40
+            self.assertEqual("standing_worktree_parent_mismatch", violation(wrong_parent))
+
+            clone = root / "unregistered-clone"
+            subprocess.run(["git", "clone", "--shared", str(primary), str(clone)], check=True, capture_output=True)
+            subprocess.run(
+                ["git", "-C", str(clone), "remote", "set-url", "origin", "https://github.com/fawxzzy/example.git"],
+                check=True,
+            )
+            unregistered = copy.deepcopy(valid)
+            unregistered["resource_claims"]["worktrees"] = ["unregistered-clone"]
+            self.assertEqual("standing_registered_worktree_required", violation(unregistered))
+
+            indirection = copy.deepcopy(valid)
+            indirection["resource_claims"]["worktrees"] = ["linked-worktree"]
+            linked = root / "linked-worktree"
+            try:
+                linked.symlink_to(worktree, target_is_directory=True)
+            except OSError:
+                if os.name != "nt":
+                    raise
+                subprocess.run(["cmd", "/c", "mklink", "/J", str(linked), str(worktree)], check=True, capture_output=True)
+            try:
+                self.assertEqual("standing_worktree_indirection_forbidden", violation(indirection))
+            finally:
+                linked.rmdir() if os.name == "nt" and not linked.is_symlink() else linked.unlink()
 
     def test_persisted_standing_local_source_preparation_revalidates_authority(self) -> None:
         packet = _standing_packet(
