@@ -1998,6 +1998,173 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("rsrv-other", program["active_leases"][0]["reservation_id"])
         self.assertEqual([], program["completed_packets"])
 
+    def test_terminal_read_only_finding_completes_only_the_exact_delivered_packet(self) -> None:
+        packet = _standing_packet(
+            "scheduler-review",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.github.fawxzzy.atlas.scheduler-review",
+        )
+        packet["execution_class"] = "read_only"
+        packet["state"] = "ACTIVE"
+        packet["dispatch_reservation"] = {"reservation_id": "rsrv-review"}
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-review",
+                "packet_id": "scheduler-review",
+                "runtime_thread_id": "release-thread",
+                "writer_scope": "read.github.fawxzzy.atlas.scheduler-review",
+                "event_id": "onv1_" + "c" * 64,
+                "payload_digest": "sha256:" + "c" * 64,
+                "status": "delivered",
+                "turn_id": "review-turn",
+            }
+        ]
+        finding = _envelope(
+            {
+                "canonical_lifecycle_state": "REVIEW_FINDINGS_PENDING",
+                "terminal": True,
+                "packet_id": "scheduler-review",
+                "writer_scope": "read.github.fawxzzy.atlas.scheduler-review",
+                "reservation_id": "rsrv-review",
+                "turn_id": "review-turn",
+            },
+            idempotency_key="scheduler-review-finding",
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("atlas.release-control-plane", "release-thread", "idle")),
+            envelopes=[finding],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual(["scheduler-review"], program["completed_packets"])
+        self.assertEqual([], program["standing_packets"])
+        self.assertEqual([], program["delivery_intents"])
+        self.assertEqual("REVIEW_FINDINGS_PENDING", program["completed_receipts"][0]["terminal_disposition"])
+
+    def test_terminal_mutating_blocker_holds_exact_packet_and_lease_for_resume(self) -> None:
+        packet = _standing_packet(
+            "fitness-source",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness.source",
+        )
+        packet["state"] = "ACTIVE"
+        packet["dispatch_reservation"] = {"reservation_id": "rsrv-fitness-source"}
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+        program["active_leases"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "status": "active",
+            }
+        ]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "runtime_thread_id": "fitness-thread",
+                "writer_scope": "repo.fitness.source",
+                "event_id": "onv1_" + "c" * 64,
+                "payload_digest": "sha256:" + "c" * 64,
+                "status": "delivered",
+                "turn_id": "fitness-turn",
+            }
+        ]
+        blocker = _envelope(
+            {
+                "canonical_lifecycle_state": "BLOCKED_EXACT_MISSING_EVIDENCE",
+                "terminal": True,
+                "blocking": True,
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "reservation_id": "rsrv-fitness-source",
+                "turn_id": "fitness-turn",
+            },
+            idempotency_key="fitness-source-blocked",
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[blocker],
+        )
+        program, replay_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[blocker],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual([], replay_findings)
+        self.assertEqual("BLOCKED", program["standing_packets"][0]["state"])
+        self.assertEqual(blocker["event_id"], program["standing_packets"][0]["blocking_receipt"]["event_id"])
+        self.assertEqual("active", program["active_leases"][0]["status"])
+        self.assertEqual("delivered", program["delivery_intents"][0]["status"])
+        self.assertEqual([], program["completed_packets"])
+
+    def test_terminal_mutating_blocker_rejects_packet_reservation_mismatch(self) -> None:
+        packet = _standing_packet(
+            "fitness-source",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness.source",
+        )
+        packet["state"] = "ACTIVE"
+        packet["dispatch_reservation"] = {"reservation_id": "rsrv-other"}
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+        program["active_leases"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "status": "active",
+            }
+        ]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-fitness-source",
+                "packet_id": "fitness-source",
+                "runtime_thread_id": "fitness-thread",
+                "writer_scope": "repo.fitness.source",
+                "event_id": "onv1_" + "c" * 64,
+                "payload_digest": "sha256:" + "c" * 64,
+                "status": "delivered",
+                "turn_id": "fitness-turn",
+            }
+        ]
+        blocker = _envelope(
+            {
+                "canonical_lifecycle_state": "BLOCKED_EXACT_MISSING_EVIDENCE",
+                "terminal": True,
+                "blocking": True,
+                "packet_id": "fitness-source",
+                "writer_scope": "repo.fitness.source",
+                "reservation_id": "rsrv-fitness-source",
+                "turn_id": "fitness-turn",
+            },
+            idempotency_key="fitness-source-blocked-mismatch",
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[blocker],
+        )
+
+        self.assertEqual("terminal_mutating_blocker_correlation_required", findings[0]["code"])
+        self.assertEqual("ACTIVE", program["standing_packets"][0]["state"])
+        self.assertNotIn("blocking_receipt", program["standing_packets"][0])
+        self.assertEqual("active", program["active_leases"][0]["status"])
+        self.assertEqual([], program["completed_packets"])
+
     def test_supersession_cancels_ready_or_exact_prepared_packet_only(self) -> None:
         ready = _standing_packet(
             "ready-stale",
@@ -2282,6 +2449,206 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("delivered", program["delivery_intents"][0]["status"])
         self.assertEqual("active", program["active_leases"][0]["status"])
 
+    def test_append_only_recovery_correction_clears_superseded_evidence_finding(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness")
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        intent = program["delivery_intents"][0]
+        correlation = {
+            "reservation_id": reservations[0]["reservation_id"],
+            "packet_id": "fitness-ready",
+            "runtime_thread_id": intent["runtime_thread_id"],
+            "event_id": intent["event_id"],
+            "payload_digest": intent["payload_digest"],
+        }
+
+        program, findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {**correlation, "status": "RECOVERY_REQUIRED"},
+                {**correlation, "status": "DELIVERED", "turn_id": "fitness-turn"},
+                {
+                    **correlation,
+                    "status": "DELIVERED",
+                    "turn_id": "fitness-turn",
+                    "history_reconciled": True,
+                    "reconciliation_basis": scheduler.RECOVERY_RECONCILIATION_BASIS,
+                    "reconciled_event_id": intent["event_id"],
+                    "effects_match_intent": True,
+                },
+            ],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual("delivered", program["delivery_intents"][0]["status"])
+        self.assertEqual("fitness-turn", program["delivery_intents"][0]["turn_id"])
+        self.assertEqual("active", program["active_leases"][0]["status"])
+
+    def test_recovery_can_supersede_an_interrupted_delivery_turn_with_exact_history_proof(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness")
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        intent = program["delivery_intents"][0]
+        correlation = {
+            "reservation_id": reservations[0]["reservation_id"],
+            "packet_id": "fitness-ready",
+            "runtime_thread_id": intent["runtime_thread_id"],
+            "event_id": intent["event_id"],
+            "payload_digest": intent["payload_digest"],
+        }
+        program, initial = scheduler.apply_delivery_results(
+            program=program,
+            results=[{**correlation, "status": "DELIVERED", "turn_id": "interrupted-turn"}],
+        )
+        self.assertEqual([], initial)
+
+        program, recovered = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {**correlation, "status": "RECOVERY_REQUIRED", "superseded_turn_id": "interrupted-turn"},
+                {
+                    **correlation,
+                    "status": "DELIVERED",
+                    "turn_id": "resumed-turn",
+                    "supersedes_turn_id": "interrupted-turn",
+                    "history_reconciled": True,
+                    "reconciliation_basis": scheduler.RECOVERY_RECONCILIATION_BASIS,
+                    "reconciled_event_id": intent["event_id"],
+                    "effects_match_intent": True,
+                },
+            ],
+        )
+
+        self.assertEqual([], recovered)
+        self.assertEqual("delivered", program["delivery_intents"][0]["status"])
+        self.assertEqual("resumed-turn", program["delivery_intents"][0]["turn_id"])
+        self.assertNotIn("recovery_superseded_turn_id", program["delivery_intents"][0])
+        self.assertEqual(["interrupted-turn"], program["delivery_intents"][0]["superseded_turn_ids"])
+        self.assertEqual("active", program["active_leases"][0]["status"])
+
+    def test_append_only_exact_supersession_clears_prior_turn_collision(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness")
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        intent = program["delivery_intents"][0]
+        correlation = {
+            "reservation_id": reservations[0]["reservation_id"],
+            "packet_id": "fitness-ready",
+            "runtime_thread_id": intent["runtime_thread_id"],
+            "event_id": intent["event_id"],
+            "payload_digest": intent["payload_digest"],
+        }
+
+        program, findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {**correlation, "status": "DELIVERED", "turn_id": "interrupted-turn"},
+                {**correlation, "status": "RECOVERY_REQUIRED"},
+                {**correlation, "status": "DELIVERED", "turn_id": "resumed-turn"},
+                {
+                    **correlation,
+                    "status": "RECOVERY_REQUIRED",
+                    "superseded_turn_id": "interrupted-turn",
+                    "history_reconciled": True,
+                    "reconciliation_basis": scheduler.RECOVERY_RECONCILIATION_BASIS,
+                },
+                {
+                    **correlation,
+                    "status": "DELIVERED",
+                    "turn_id": "resumed-turn",
+                    "supersedes_turn_id": "interrupted-turn",
+                    "history_reconciled": True,
+                    "reconciliation_basis": scheduler.RECOVERY_RECONCILIATION_BASIS,
+                    "reconciled_event_id": intent["event_id"],
+                    "effects_match_intent": True,
+                },
+            ],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual("delivered", program["delivery_intents"][0]["status"])
+        self.assertEqual("resumed-turn", program["delivery_intents"][0]["turn_id"])
+        self.assertEqual(["interrupted-turn"], program["delivery_intents"][0]["superseded_turn_ids"])
+        self.assertEqual("active", program["active_leases"][0]["status"])
+
+    def test_full_delivery_journal_replay_is_idempotent_after_turn_supersession(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet("fitness-ready", role_id="owner.fitness", repository="fawxzzy/fitness", writer_scope="repo.fitness")
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+        program, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        intent = program["delivery_intents"][0]
+        correlation = {
+            "reservation_id": reservations[0]["reservation_id"],
+            "packet_id": "fitness-ready",
+            "runtime_thread_id": intent["runtime_thread_id"],
+            "event_id": intent["event_id"],
+            "payload_digest": intent["payload_digest"],
+        }
+        journal = [
+            {**correlation, "status": "DELIVERED", "turn_id": "interrupted-turn"},
+            {**correlation, "status": "RECOVERY_REQUIRED"},
+            {**correlation, "status": "DELIVERED", "turn_id": "resumed-turn"},
+            {**correlation, "status": "RECOVERY_REQUIRED", "superseded_turn_id": "interrupted-turn"},
+            {
+                **correlation,
+                "status": "DELIVERED",
+                "turn_id": "resumed-turn",
+                "supersedes_turn_id": "interrupted-turn",
+                "history_reconciled": True,
+                "reconciliation_basis": scheduler.RECOVERY_RECONCILIATION_BASIS,
+                "reconciled_event_id": intent["event_id"],
+                "effects_match_intent": True,
+            },
+        ]
+        program, initial_findings = scheduler.apply_delivery_results(program=program, results=journal)
+        self.assertEqual([], initial_findings)
+
+        program, replay_findings = scheduler.apply_delivery_results(program=program, results=journal)
+
+        self.assertEqual([], replay_findings)
+        self.assertEqual("delivered", program["delivery_intents"][0]["status"])
+        self.assertEqual("resumed-turn", program["delivery_intents"][0]["turn_id"])
+        self.assertEqual(["interrupted-turn"], program["delivery_intents"][0]["superseded_turn_ids"])
+
     def test_completed_delivery_journal_replay_is_idempotent(self) -> None:
         program = _program_payload()
         program["completed_receipts"] = [
@@ -2314,6 +2681,120 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual([], findings)
         self.assertEqual([], program["delivery_intents"])
         self.assertEqual([], program["active_leases"])
+
+    def test_completed_delivery_journal_replay_accepts_exact_legacy_supersession_history(self) -> None:
+        program = _program_payload()
+        program["completed_receipts"] = [
+            {
+                "packet_id": "fitness-complete",
+                "writer_scope": "repo.fitness",
+                "reservation_id": "rsrv_" + "a" * 64,
+                "turn_id": "resumed-turn",
+                "runtime_thread_id": "fitness-thread",
+                "event_id": "onv1_" + "b" * 64,
+                "payload_digest": "sha256:" + "b" * 64,
+            }
+        ]
+        historical = {
+            "reservation_id": "rsrv_" + "a" * 64,
+            "packet_id": "fitness-complete",
+            "runtime_thread_id": "fitness-thread",
+            "event_id": "onv1_" + "b" * 64,
+            "payload_digest": "sha256:" + "b" * 64,
+        }
+
+        program, findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {**historical, "status": "DELIVERED", "turn_id": "interrupted-turn"},
+                {**historical, "status": "RECOVERY_REQUIRED", "superseded_turn_id": "interrupted-turn"},
+                {
+                    **historical,
+                    "status": "DELIVERED",
+                    "turn_id": "resumed-turn",
+                    "supersedes_turn_id": "interrupted-turn",
+                    "history_reconciled": True,
+                    "reconciliation_basis": scheduler.RECOVERY_RECONCILIATION_BASIS,
+                    "reconciled_event_id": historical["event_id"],
+                    "effects_match_intent": True,
+                },
+            ],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual(["interrupted-turn"], program["completed_receipts"][0]["superseded_turn_ids"])
+
+    def test_completed_delivery_journal_replay_rejects_unproved_old_turn(self) -> None:
+        program = _program_payload()
+        program["completed_receipts"] = [
+            {
+                "packet_id": "fitness-complete",
+                "writer_scope": "repo.fitness",
+                "reservation_id": "rsrv_" + "a" * 64,
+                "turn_id": "resumed-turn",
+                "runtime_thread_id": "fitness-thread",
+                "event_id": "onv1_" + "b" * 64,
+                "payload_digest": "sha256:" + "b" * 64,
+            }
+        ]
+        historical = {
+            "reservation_id": "rsrv_" + "a" * 64,
+            "packet_id": "fitness-complete",
+            "runtime_thread_id": "fitness-thread",
+            "event_id": "onv1_" + "b" * 64,
+            "payload_digest": "sha256:" + "b" * 64,
+        }
+
+        _, findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {**historical, "status": "DELIVERED", "turn_id": "interrupted-turn"},
+                {**historical, "status": "DELIVERED", "turn_id": "resumed-turn"},
+            ],
+        )
+
+        self.assertEqual("delivery_result_correlation_mismatch", findings[0]["code"])
+        self.assertEqual("interrupted-turn", findings[0]["details"]["turn_id"])
+
+    def test_completed_delivery_journal_replay_rejects_self_supersession(self) -> None:
+        program = _program_payload()
+        program["completed_receipts"] = [
+            {
+                "packet_id": "fitness-complete",
+                "writer_scope": "repo.fitness",
+                "reservation_id": "rsrv_" + "a" * 64,
+                "turn_id": "resumed-turn",
+                "runtime_thread_id": "fitness-thread",
+                "event_id": "onv1_" + "b" * 64,
+                "payload_digest": "sha256:" + "b" * 64,
+            }
+        ]
+        historical = {
+            "reservation_id": "rsrv_" + "a" * 64,
+            "packet_id": "fitness-complete",
+            "runtime_thread_id": "fitness-thread",
+            "event_id": "onv1_" + "b" * 64,
+            "payload_digest": "sha256:" + "b" * 64,
+        }
+
+        program, findings = scheduler.apply_delivery_results(
+            program=program,
+            results=[
+                {
+                    **historical,
+                    "status": "DELIVERED",
+                    "turn_id": "resumed-turn",
+                    "supersedes_turn_id": "resumed-turn",
+                    "history_reconciled": True,
+                    "reconciliation_basis": scheduler.RECOVERY_RECONCILIATION_BASIS,
+                    "reconciled_event_id": historical["event_id"],
+                    "effects_match_intent": True,
+                }
+            ],
+        )
+
+        self.assertEqual("completed_receipt_self_supersession_forbidden", findings[0]["code"])
+        self.assertNotIn("superseded_turn_ids", program["completed_receipts"][0])
 
     def test_completed_delivery_journal_replay_rejects_identity_drift(self) -> None:
         program = _program_payload()

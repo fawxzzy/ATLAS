@@ -357,6 +357,9 @@ def apply_delivery_results(
     """Settle app-native delivery using exact prepared-intent correlations."""
 
     findings: list[OrderedDict[str, Any]] = []
+    unresolved_recovery_findings: OrderedDict[str, OrderedDict[str, Any]] = OrderedDict()
+    unresolved_turn_collision_findings: OrderedDict[str, OrderedDict[str, Any]] = OrderedDict()
+    unresolved_completed_turn_findings: OrderedDict[tuple[str, str], OrderedDict[str, Any]] = OrderedDict()
     intents = [item for item in program.get("delivery_intents", []) if isinstance(item, dict)]
     intent_index = {str(item.get("reservation_id")): item for item in intents if item.get("reservation_id")}
     leases = [item for item in program.get("active_leases", []) if isinstance(item, dict)]
@@ -398,7 +401,56 @@ def apply_delivery_results(
                 status = str(result.get("status") or "").upper()
                 if status == "RECOVERY_REQUIRED":
                     continue
-                if status == "DELIVERED" and str(result.get("turn_id") or "") == str(completed.get("turn_id") or ""):
+                if status == "DELIVERED":
+                    completed_turn_id = str(completed.get("turn_id") or "")
+                    result_turn_id = str(result.get("turn_id") or "")
+                    superseded_turn_ids = set(_string_list(completed.get("superseded_turn_ids")))
+                    if completed_turn_id in superseded_turn_ids:
+                        findings.append(
+                            _finding(
+                                "completed_receipt_self_supersession_forbidden",
+                                "A completed receipt cannot supersede its own current turn.",
+                                reservation_id=reservation_id,
+                                turn_id=completed_turn_id,
+                            )
+                        )
+                        continue
+                    if result_turn_id in superseded_turn_ids:
+                        continue
+                    if result_turn_id == completed_turn_id:
+                        supplied_supersedes_turn_id = str(result.get("supersedes_turn_id") or "")
+                        if supplied_supersedes_turn_id == completed_turn_id:
+                            findings.append(
+                                _finding(
+                                    "completed_receipt_self_supersession_forbidden",
+                                    "A completed receipt cannot supersede its own current turn.",
+                                    reservation_id=reservation_id,
+                                    turn_id=completed_turn_id,
+                                )
+                            )
+                            continue
+                        exact_recovery = bool(
+                            supplied_supersedes_turn_id
+                            and result.get("history_reconciled") is True
+                            and result.get("reconciliation_basis") == RECOVERY_RECONCILIATION_BASIS
+                            and str(result.get("reconciled_event_id") or "") == str(completed.get("event_id") or "")
+                            and result.get("effects_match_intent") is True
+                        )
+                        if exact_recovery:
+                            unresolved_completed_turn_findings.pop(
+                                (reservation_id, supplied_supersedes_turn_id),
+                                None,
+                            )
+                            completed["superseded_turn_ids"] = sorted(
+                                superseded_turn_ids | {supplied_supersedes_turn_id}
+                            )
+                        continue
+                    unresolved_completed_turn_findings[(reservation_id, result_turn_id)] = _finding(
+                        "delivery_result_correlation_mismatch",
+                        "Delivery result does not match its completed receipt.",
+                        reservation_id=reservation_id,
+                        turn_id=result_turn_id or None,
+                    )
                     continue
                 findings.append(
                     _finding(
@@ -491,37 +543,75 @@ def apply_delivery_results(
                 findings.append(_finding("delivery_turn_id_required", "Delivered result must include the returned turn_id.", reservation_id=reservation_id))
                 continue
             prior_turn = intent.get("turn_id")
+            pending_superseded_turn_id = intent.get("recovery_superseded_turn_id")
+            superseded_turn_ids = set(_string_list(intent.get("superseded_turn_ids")))
+            if turn_id in superseded_turn_ids or turn_id == pending_superseded_turn_id:
+                continue
             if prior_turn not in {None, turn_id}:
-                findings.append(_finding("delivery_turn_id_collision", "One reservation resolved to multiple turn IDs.", reservation_id=reservation_id))
+                unresolved_turn_collision_findings[reservation_id] = _finding(
+                    "delivery_turn_id_collision",
+                    "One reservation resolved to multiple turn IDs.",
+                    reservation_id=reservation_id,
+                )
                 continue
             if str(intent.get("status") or "").lower() == "recovery-required":
+                superseded_turn_id = pending_superseded_turn_id
                 recovery_exact = (
                     result.get("history_reconciled") is True
                     and result.get("reconciliation_basis") == RECOVERY_RECONCILIATION_BASIS
                     and str(result.get("reconciled_event_id") or "") == str(intent.get("event_id") or "")
                     and result.get("effects_match_intent") is True
+                    and (
+                        superseded_turn_id in {None, ""}
+                        or str(result.get("supersedes_turn_id") or "") == str(superseded_turn_id)
+                    )
                 )
                 if not recovery_exact:
-                    findings.append(
-                        _finding(
-                            "delivery_recovery_evidence_required",
-                            "A recovery-required intent needs complete-history evidence before delivery can be accepted.",
-                            reservation_id=reservation_id,
-                        )
+                    unresolved_recovery_findings[reservation_id] = _finding(
+                        "delivery_recovery_evidence_required",
+                        "A recovery-required intent needs complete-history evidence before delivery can be accepted.",
+                        reservation_id=reservation_id,
                     )
                     continue
+                unresolved_recovery_findings.pop(reservation_id, None)
+                intent.pop("recovery_superseded_turn_id", None)
+                if superseded_turn_id not in {None, ""}:
+                    intent["superseded_turn_ids"] = sorted(superseded_turn_ids | {str(superseded_turn_id)})
             intent["status"] = "delivered"
             intent["turn_id"] = turn_id
             for lease in leases:
                 if lease.get("reservation_id") == reservation_id:
                     lease["status"] = "active"
         elif status == "RECOVERY_REQUIRED":
+            prior_turn = intent.get("turn_id")
+            superseded_turn_id = intent.get("recovery_superseded_turn_id") or prior_turn
+            supplied_superseded_turn_id = result.get("superseded_turn_id")
+            already_superseded_turn_ids = set(_string_list(intent.get("superseded_turn_ids")))
+            if supplied_superseded_turn_id in already_superseded_turn_ids:
+                unresolved_recovery_findings.pop(reservation_id, None)
+                unresolved_turn_collision_findings.pop(reservation_id, None)
+                continue
+            if superseded_turn_id not in {None, ""} and str(supplied_superseded_turn_id or "") != str(superseded_turn_id):
+                unresolved_recovery_findings[reservation_id] = _finding(
+                    "delivery_recovery_supersession_required",
+                    "Recovery must name the interrupted turn it supersedes before a new turn can be accepted.",
+                    reservation_id=reservation_id,
+                )
+                continue
+            unresolved_recovery_findings.pop(reservation_id, None)
+            unresolved_turn_collision_findings.pop(reservation_id, None)
             intent["status"] = "recovery-required"
+            intent["turn_id"] = None
+            if superseded_turn_id not in {None, ""}:
+                intent["recovery_superseded_turn_id"] = superseded_turn_id
             for lease in leases:
                 if lease.get("reservation_id") == reservation_id:
                     lease["status"] = "recovery-required"
         else:
             findings.append(_finding("delivery_result_status_invalid", "Delivery result status must be DELIVERED or RECOVERY_REQUIRED.", reservation_id=reservation_id))
+    findings.extend(unresolved_turn_collision_findings.values())
+    findings.extend(unresolved_recovery_findings.values())
+    findings.extend(unresolved_completed_turn_findings.values())
     program["delivery_intents"] = intents
     program["active_leases"] = leases
     program["standing_packets"] = standing
@@ -729,6 +819,107 @@ def reconcile_runtime_program(
             )
             packets.pop(packet_id, None)
             continue
+        if payload.get("terminal") is True and not _terminal_success(payload):
+            packet = packets.get(packet_id)
+            reservation_id = str(payload.get("reservation_id") or "")
+            turn_id = str(payload.get("turn_id") or "")
+            matching_intents = [
+                intent
+                for intent in delivery_intents
+                if str(intent.get("reservation_id") or "") == reservation_id
+                and str(intent.get("packet_id") or "") == packet_id
+                and str(intent.get("writer_scope") or "") == writer_scope
+                and str(intent.get("turn_id") or "") == turn_id
+                and str(intent.get("status") or "").lower() == "delivered"
+            ]
+            matching_blocked_leases = [
+                lease
+                for lease in active_leases
+                if str(lease.get("reservation_id") or "") == reservation_id
+                and str(lease.get("packet_id") or "") == packet_id
+                and str(lease.get("writer_scope") or "") == writer_scope
+                and str(lease.get("status") or "").lower() in {"active", "recovery-required"}
+            ]
+            mutating_blocked_receipt = bool(
+                packet
+                and payload.get("blocking") is True
+                and str(packet.get("writer_scope") or "") == writer_scope
+                and str(packet.get("execution_class") or "") in MUTATING_EXECUTION_CLASSES
+            )
+            mutating_blocked_terminal = bool(
+                mutating_blocked_receipt
+                and str(packet.get("state") or "").upper() == "ACTIVE"
+                and isinstance(packet.get("dispatch_reservation"), dict)
+                and str(packet["dispatch_reservation"].get("reservation_id") or "") == reservation_id
+                and len(matching_intents) == 1
+                and len(matching_blocked_leases) == 1
+            )
+            if mutating_blocked_terminal:
+                packet["state"] = "BLOCKED"
+                packet["blocking_receipt"] = OrderedDict(
+                    [
+                        ("event_id", event_id),
+                        ("payload_digest", payload_digest),
+                        ("canonical_lifecycle_state", payload.get("canonical_lifecycle_state")),
+                        ("turn_id", turn_id),
+                    ]
+                )
+                continue
+            if mutating_blocked_receipt:
+                processed.pop(event_id, None)
+                processed_items = [item for item in processed_items if item.get("event_id") != event_id]
+                findings.append(
+                    _finding(
+                        "terminal_mutating_blocker_correlation_required",
+                        "A mutating blocking receipt must match one active packet reservation, delivered intent, and lease.",
+                        event_id=event_id,
+                        packet_id=packet_id or None,
+                        writer_scope=writer_scope or None,
+                    )
+                )
+                continue
+            read_only_terminal = bool(
+                packet
+                and str(packet.get("writer_scope") or "") == writer_scope
+                and str(packet.get("execution_class") or "") == "read_only"
+                and str(packet.get("state") or "").upper() == "ACTIVE"
+                and isinstance(packet.get("dispatch_reservation"), dict)
+                and not any(str(lease.get("reservation_id") or "") == reservation_id for lease in active_leases)
+            )
+            if not packet_id or not writer_scope or not reservation_id or not turn_id or len(matching_intents) != 1 or not read_only_terminal:
+                processed.pop(event_id, None)
+                processed_items = [item for item in processed_items if item.get("event_id") != event_id]
+                findings.append(
+                    _finding(
+                        "terminal_read_only_correlation_required",
+                        "Terminal read-only evidence must correlate exactly one delivered read-only packet.",
+                        event_id=event_id,
+                        packet_id=packet_id or None,
+                        writer_scope=writer_scope or None,
+                    )
+                )
+                continue
+            completed.add(packet_id)
+            completed_receipts.append(
+                OrderedDict(
+                    [
+                        ("packet_id", packet_id),
+                        ("writer_scope", writer_scope),
+                        ("reservation_id", reservation_id),
+                        ("turn_id", turn_id),
+                        ("runtime_thread_id", matching_intents[0].get("runtime_thread_id")),
+                        ("event_id", matching_intents[0].get("event_id")),
+                        ("payload_digest", matching_intents[0].get("payload_digest")),
+                        ("superseded_turn_ids", _string_list(matching_intents[0].get("superseded_turn_ids"))),
+                        ("receipt_event_id", event_id),
+                        ("receipt_payload_digest", payload_digest),
+                        ("terminal_disposition", str(payload.get("canonical_lifecycle_state") or "TERMINAL")),
+                    ]
+                )
+            )
+            packets.pop(packet_id, None)
+            delivery_intents.remove(matching_intents[0])
+            continue
         if _terminal_success(payload):
             packet = packets.get(packet_id)
             matching = [
@@ -806,6 +997,7 @@ def reconcile_runtime_program(
                         ("runtime_thread_id", matching_intents[0].get("runtime_thread_id")),
                         ("event_id", matching_intents[0].get("event_id")),
                         ("payload_digest", matching_intents[0].get("payload_digest")),
+                        ("superseded_turn_ids", _string_list(matching_intents[0].get("superseded_turn_ids"))),
                         ("receipt_event_id", event_id),
                         ("receipt_payload_digest", payload_digest),
                     ]
