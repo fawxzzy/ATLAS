@@ -906,9 +906,13 @@ def reconcile_runtime_program(
     derived_holds = [
         OrderedDict(
             [
+                ("packet_id", packet.get("packet_id")),
                 ("writer_scope", packet.get("writer_scope")),
                 ("logical_role_id", packet.get("logical_role_id")),
                 ("runtime_thread_id", packet.get("runtime_thread_id")),
+                ("repository", packet.get("repository")),
+                ("execution_class", packet.get("execution_class")),
+                ("resource_claims", _resource_claims(packet.get("resource_claims"))),
                 ("status", "active-without-correlated-lease"),
                 ("derived_from_runtime_status", True),
             ]
@@ -1110,7 +1114,7 @@ def _safe_standing_local_path(path: str) -> bool:
     if (
         not normalized
         or normalized.startswith("/")
-        or re.match(r"^[a-zA-Z]:/", normalized)
+        or re.match(r"^[a-zA-Z]:", normalized)
         or any(token in normalized for token in "*?[")
         or any(part in {"", ".", ".."} for part in normalized.split("/"))
     ):
@@ -1126,7 +1130,7 @@ def _safe_standing_local_worktree_claim(path: str) -> bool:
     return bool(
         path == normalized == normalized.strip()
         and not normalized.startswith("/")
-        and not re.match(r"^[a-zA-Z]:/", normalized)
+        and not re.match(r"^[a-zA-Z]:", normalized)
         and not any(token in normalized for token in "*?[")
         and all(part not in {"", ".", ".."} for part in normalized.split("/"))
     )
@@ -1642,6 +1646,28 @@ def _active_lease_identity_complete(lease: dict[str, Any]) -> bool:
     return True
 
 
+def _active_runtime_hold_candidate(hold: dict[str, Any]) -> OrderedDict[str, Any]:
+    return OrderedDict(
+        [
+            ("packet_id", hold.get("packet_id")),
+            ("repository", hold.get("repository")),
+            ("writer_scope", hold.get("writer_scope")),
+            ("execution_class", hold.get("execution_class")),
+            ("resource_claims", _resource_claims(hold.get("resource_claims"))),
+        ]
+    )
+
+
+def _active_runtime_hold_identity_complete(hold: dict[str, Any]) -> bool:
+    return bool(
+        hold.get("derived_from_runtime_status") is True
+        and hold.get("status") == "active-without-correlated-lease"
+        and _repository_identity(hold.get("repository"))
+        and hold.get("execution_class") in EXECUTION_CLASSES
+        and isinstance(hold.get("resource_claims"), dict)
+    )
+
+
 def _select_execution_wave(
     *,
     program: dict[str, Any],
@@ -1667,6 +1693,19 @@ def _select_execution_wave(
         for lease in active_leases
         if str(lease.get("status") or "").lower() in {"active", "recovery-required"}
         and not _active_lease_identity_complete(lease)
+    ]
+    active_runtime_holds = [
+        hold
+        for hold in program.get("scope_holds", [])
+        if isinstance(hold, dict) and hold.get("derived_from_runtime_status") is True
+    ]
+    active_runtime_hold_candidates = [
+        (hold, _active_runtime_hold_candidate(hold))
+        for hold in active_runtime_holds
+        if _active_runtime_hold_identity_complete(hold)
+    ]
+    incomplete_active_runtime_holds = [
+        hold for hold in active_runtime_holds if not _active_runtime_hold_identity_complete(hold)
     ]
     writer_count = sum(
         1
@@ -1708,6 +1747,20 @@ def _select_execution_wave(
             ]
             blocked.append(candidate)
             continue
+        if candidate.get("execution_class") in MUTATING_EXECUTION_CLASSES and incomplete_active_runtime_holds:
+            candidate["blocked_reason"] = "active_runtime_hold_identity_incomplete"
+            candidate["conflicts_with"] = [
+                OrderedDict(
+                    [
+                        ("packet_id", hold.get("packet_id")),
+                        ("writer_scope", hold.get("writer_scope")),
+                        ("resource_kinds", ["unknown_active_runtime_scope"]),
+                    ]
+                )
+                for hold in incomplete_active_runtime_holds
+            ]
+            blocked.append(candidate)
+            continue
         lease_conflicts = [
             (lease, _candidate_conflicts(candidate, leased_candidate))
             for lease, leased_candidate in active_lease_candidates
@@ -1724,6 +1777,25 @@ def _select_execution_wave(
                     ]
                 )
                 for lease, kinds in lease_conflicts
+            ]
+            blocked.append(candidate)
+            continue
+        runtime_hold_conflicts = [
+            (hold, _candidate_conflicts(candidate, held_candidate))
+            for hold, held_candidate in active_runtime_hold_candidates
+        ]
+        runtime_hold_conflicts = [(hold, kinds) for hold, kinds in runtime_hold_conflicts if kinds]
+        if runtime_hold_conflicts:
+            candidate["blocked_reason"] = "active_runtime_resource_conflict"
+            candidate["conflicts_with"] = [
+                OrderedDict(
+                    [
+                        ("packet_id", hold.get("packet_id")),
+                        ("writer_scope", hold.get("writer_scope")),
+                        ("resource_kinds", kinds),
+                    ]
+                )
+                for hold, kinds in runtime_hold_conflicts
             ]
             blocked.append(candidate)
             continue

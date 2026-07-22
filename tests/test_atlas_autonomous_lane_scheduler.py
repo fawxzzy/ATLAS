@@ -1396,7 +1396,94 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(["fitness-ready", "mazer-ready"], sorted(job["packet_id"] for job in report["selected_jobs"]))
         self.assertIn("standing_role_active", [item["blocked_reason"] for item in report["blocked_candidates"]])
         self.assertEqual("repo.socials-os", program["scope_holds"][0]["writer_scope"])
+        self.assertEqual("fawxzzy/socials-os", program["scope_holds"][0]["repository"])
+        self.assertEqual("repo_worktree", program["scope_holds"][0]["execution_class"])
+        self.assertEqual(scheduler._resource_claims({}), program["scope_holds"][0]["resource_claims"])
         self.assertNotIn("forbidden_owner_lanes", program)
+
+    def test_active_runtime_hold_blocks_same_repository_mutation_under_another_scope(self) -> None:
+        active = {
+            "canonical_lifecycle_state": "READY",
+            "packet_id": "active-owner",
+            "objective": "Existing active repository mutation",
+            "logical_role_id": "owner.active",
+            "repository": "fawxzzy/example",
+            "writer_scope": "repo.example.active",
+            "execution_class": "repo_worktree",
+            "resource_claims": scheduler._resource_claims({}),
+        }
+        candidate = {
+            "canonical_lifecycle_state": "READY",
+            "packet_id": "idle-owner",
+            "objective": "Competing repository mutation",
+            "logical_role_id": "owner.idle",
+            "repository": "fawxzzy/example",
+            "writer_scope": "repo.example.other",
+            "execution_class": "repo_worktree",
+            "resource_claims": scheduler._resource_claims({}),
+        }
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(
+                ("owner.active", "active-thread", "active"),
+                ("owner.idle", "idle-thread", "idle"),
+            ),
+            envelopes=[
+                _envelope(active, idempotency_key="active-owner"),
+                _envelope(candidate, idempotency_key="idle-owner"),
+            ],
+        )
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual([], report["selected_jobs"])
+        blocked = {item["packet_id"]: item for item in report["blocked_candidates"]}
+        self.assertEqual("standing_role_active", blocked["active-owner"]["blocked_reason"])
+        self.assertEqual("active_runtime_resource_conflict", blocked["idle-owner"]["blocked_reason"])
+        self.assertEqual(["repository"], blocked["idle-owner"]["conflicts_with"][0]["resource_kinds"])
+
+    def test_incomplete_active_runtime_hold_blocks_mutating_dispatch(self) -> None:
+        candidate = {
+            "canonical_lifecycle_state": "READY",
+            "packet_id": "idle-owner",
+            "objective": "Candidate repository mutation",
+            "logical_role_id": "owner.idle",
+            "repository": "fawxzzy/example",
+            "writer_scope": "repo.example.other",
+            "execution_class": "repo_worktree",
+            "resource_claims": scheduler._resource_claims({}),
+        }
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("owner.idle", "idle-thread", "idle")),
+            envelopes=[_envelope(candidate, idempotency_key="idle-owner")],
+        )
+        program["scope_holds"] = [
+            {
+                "writer_scope": "repo.legacy.active",
+                "status": "active-without-correlated-lease",
+                "derived_from_runtime_status": True,
+            }
+        ]
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=program,
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual("active_runtime_hold_identity_incomplete", report["blocked_candidates"][0]["blocked_reason"])
 
     def test_bridge_admits_bounded_standing_local_source_preparation(self) -> None:
         payload = _standing_local_source_payload()
@@ -1496,6 +1583,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             "../../other-worktree",
             "/absolute/worktree",
             "C:/absolute/worktree",
+            "C:outside-worktree",
             "owner\\worktree",
             "owner//worktree",
             " owner/worktree",
