@@ -3,10 +3,54 @@
   "$id": "atlas.autonomous-work-program.v2",
   "title": "ATLAS Autonomous Work Program v2",
   "type": "object",
+  "$defs": {
+    "owner_return": {
+      "type": "object",
+      "required": ["logical_role_id", "thread_id", "host_id"],
+      "additionalProperties": false,
+      "properties": {
+        "logical_role_id": { "type": "string", "minLength": 1 },
+        "thread_id": { "type": "string", "minLength": 1 },
+        "host_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "execution_target": {
+      "type": "object",
+      "required": ["logical_role_id", "thread_id", "host_id"],
+      "additionalProperties": false,
+      "properties": {
+        "logical_role_id": { "type": "string", "minLength": 1 },
+        "thread_id": { "type": "string", "minLength": 1 },
+        "host_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "resource_claims": {
+      "type": "object",
+      "required": ["files", "worktrees", "ports", "browsers", "external_writers"],
+      "additionalProperties": false,
+      "properties": {
+        "files": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "worktrees": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "ports": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "browsers": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "external_writers": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "terminal_successor": {
+      "enum": [
+        "NEXT_AUTONOMOUS_PACKET",
+        "MANUAL_REQUIRED",
+        "EXTERNAL_WAIT",
+        "TERMINAL_DOMAIN",
+        "ERROR_RECOVERY"
+      ]
+    }
+  },
   "required": [
     "schema_version",
     "revision",
     "source_snapshot_digest",
+    "scheduler_authority",
     "standing_packets",
     "active_leases",
     "scope_holds",
@@ -20,6 +64,15 @@
     "schema_version": { "const": "atlas.autonomous-work-program.v2" },
     "revision": { "type": "integer", "minimum": 1 },
     "source_snapshot_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "scheduler_authority": {
+      "const": {
+        "logical_role_id": "atlas.main",
+        "mode": "SELECTOR_SUPERVISOR",
+        "control_loop": "ops/atlas/autonomous_lane_scheduler.py",
+        "release_role": "atlas.release-control-plane",
+        "architecture_role": "atlas.workflow-architect"
+      }
+    },
     "max_parallel_writers": { "type": "integer", "minimum": 0 },
     "max_parallel_read_only": { "type": "integer", "minimum": 0 },
     "standing_packets": {
@@ -41,7 +94,7 @@
         "properties": {
           "packet_id": { "type": "string", "minLength": 1 },
           "packet": { "type": "string", "minLength": 1 },
-          "state": { "enum": ["READY", "ADMITTED", "QUEUED", "ACTIVE", "SUPERSEDED"] },
+          "state": { "enum": ["READY", "ADMITTED", "QUEUED", "ACTIVE", "BLOCKED", "RECOVERY_READY", "HOST_UNAVAILABLE", "SUPERSEDED"] },
           "logical_role_id": { "type": "string", "minLength": 1 },
           "repository": { "type": "string", "minLength": 1 },
           "writer_scope": { "type": "string", "minLength": 1 },
@@ -49,7 +102,24 @@
           "runtime_thread_id": { "type": ["string", "null"] },
           "runtime_status": { "type": "string", "minLength": 1 },
           "dependencies": { "type": "array", "items": { "type": "string" } },
-          "resource_claims": { "type": "object" },
+          "resource_claims": { "$ref": "#/$defs/resource_claims" },
+          "policy_id": { "type": ["string", "null"] },
+          "policy_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "target_role_id": { "type": ["string", "null"] },
+          "host_id": { "type": ["string", "null"] },
+          "execution_target": { "anyOf": [{ "$ref": "#/$defs/execution_target" }, { "type": "null" }] },
+          "execution_target_state": { "enum": ["PENDING", "DELIVERED", "HOST_UNAVAILABLE", "UNKNOWN"] },
+          "owner_return": { "anyOf": [{ "$ref": "#/$defs/owner_return" }, { "type": "null" }] },
+          "owner_return_state": {
+            "enum": ["LEGACY_UNPROVEN", "PENDING", "PENDING_REDELIVERY", "DELIVERED", "OWNER_RETURN_BLOCKED", "UNKNOWN"]
+          },
+          "owner_return_turn_id": { "type": ["string", "null"] },
+          "owner_return_proof": { "type": ["object", "null"] },
+          "current_tracker_role_id": { "type": ["string", "null"] },
           "protected_surface_authorized": { "type": "boolean" },
           "authority_class": { "enum": ["standing_local_source_preparation"] },
           "source_role_id": { "type": "string", "minLength": 1 },
@@ -75,7 +145,8 @@
             "required": ["event_id", "payload_digest"],
             "properties": {
               "event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
-              "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+              "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+              "transport_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
             },
             "additionalProperties": false
           },
@@ -91,6 +162,29 @@
             },
             "then": {
               "required": ["source_role_id", "source_preparation"]
+            }
+          },
+          {
+            "if": {
+              "anyOf": [
+                {
+                  "required": ["policy_id"],
+                  "properties": {
+                    "policy_id": { "const": "ATLAS-WORKFLOW-STANDARDIZATION-20260721-001" }
+                  }
+                },
+                {
+                  "required": ["policy_ids"],
+                  "properties": {
+                    "policy_ids": {
+                      "contains": { "const": "ATLAS-WORKFLOW-STANDARDIZATION-20260721-001" }
+                    }
+                  }
+                }
+              ]
+            },
+            "then": {
+              "required": ["target_role_id", "execution_target", "owner_return", "owner_return_state"]
             }
           }
         ],
@@ -116,7 +210,7 @@
           "writer_scope": { "type": "string", "minLength": 1 },
           "repository": { "type": "string", "minLength": 1 },
           "execution_class": { "enum": ["repo_worktree", "canonical_workspace", "external_mutation"] },
-          "resource_claims": { "type": "object" },
+          "resource_claims": { "$ref": "#/$defs/resource_claims" },
           "status": { "enum": ["active", "recovery-required"] }
         },
         "additionalProperties": true
@@ -139,14 +233,32 @@
         ],
         "properties": {
           "reservation_id": { "type": "string", "pattern": "^rsrv_[0-9a-f]{64}$" },
-          "status": { "enum": ["prepared", "delivered", "recovery-required"] },
-          "turn_id": { "type": ["string", "null"] }
+          "status": { "enum": ["prepared", "delivered", "host-unavailable", "recovery-required"] },
+          "turn_id": { "type": ["string", "null"] },
+          "transport_digest": { "type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$" },
+          "execution_target": { "anyOf": [{ "$ref": "#/$defs/execution_target" }, { "type": "null" }] },
+          "execution_target_state": { "enum": ["PENDING", "DELIVERED", "HOST_UNAVAILABLE", "UNKNOWN"] },
+          "owner_return": { "anyOf": [{ "$ref": "#/$defs/owner_return" }, { "type": "null" }] },
+          "owner_return_state": {
+            "enum": ["LEGACY_UNPROVEN", "PENDING", "PENDING_REDELIVERY", "DELIVERED", "OWNER_RETURN_BLOCKED", "UNKNOWN"]
+          },
+          "owner_return_turn_id": { "type": ["string", "null"] },
+          "owner_return_proof": { "type": ["object", "null"] }
         },
         "additionalProperties": true
       }
     },
     "completed_packets": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
-    "completed_receipts": { "type": "array", "items": { "type": "object" } },
+    "completed_receipts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "terminal_successor": { "$ref": "#/$defs/terminal_successor" }
+        },
+        "additionalProperties": true
+      }
+    },
     "released_leases": { "type": "array", "items": { "type": "object" } },
     "processed_events": {
       "type": "array",
@@ -156,7 +268,11 @@
         "additionalProperties": false,
         "properties": {
           "event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
-          "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+          "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+          "transport_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+          "target_role_id": { "type": ["string", "null"] },
+          "execution_target": { "anyOf": [{ "$ref": "#/$defs/execution_target" }, { "type": "null" }] },
+          "owner_return": { "anyOf": [{ "$ref": "#/$defs/owner_return" }, { "type": "null" }] }
         }
       }
     }
