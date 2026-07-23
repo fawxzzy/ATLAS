@@ -62,7 +62,6 @@ REPOSITORY_MUTATING_EXECUTION_CLASSES = {"repo_worktree", "canonical_workspace"}
 EVENT_ID_PATTERN = re.compile(r"^onv1_[0-9a-f]{64}$")
 PAYLOAD_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 RESUMABLE_RUNTIME_STATES = {"idle", "notloaded"}
-TERMINAL_SUCCESS_STATES = {"ACCEPTED", "COMPLETE", "COMPLETED", "MERGED", "SUCCESS"}
 STANDING_LOCAL_SOURCE_PREPARATION = "standing_local_source_preparation"
 STANDING_LOCAL_SOURCE_ROLES = {"atlas.main", "fawxzzy.questions"}
 COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
@@ -89,6 +88,11 @@ TERMINAL_SUCCESSORS = {
     "MANUAL_REQUIRED",
     "EXTERNAL_WAIT",
     "TERMINAL_DOMAIN",
+    "ERROR_RECOVERY",
+}
+NONCOMPLETION_TERMINAL_SUCCESSORS = {
+    "MANUAL_REQUIRED",
+    "EXTERNAL_WAIT",
     "ERROR_RECOVERY",
 }
 LEGACY_MANUAL_SUCCESSOR_STATES = {"MANUAL_REQUIRED", "WAITING_ON_ZAC"}
@@ -991,12 +995,10 @@ def _deterministic_reservation_id(packet: dict[str, Any]) -> str:
 
 
 def _terminal_success(payload: dict[str, Any]) -> bool:
-    if payload.get("terminal") is not True:
+    if payload.get("terminal") is not True or payload.get("blocking") is True:
         return False
-    state = str(payload.get("canonical_lifecycle_state") or payload.get("state") or payload.get("status") or "").upper()
-    tokens = set(state.split("_"))
-    denied = {"BLOCKED", "FAILED", "LATENCY", "PENDING", "UNKNOWN"}
-    return not tokens.intersection(denied) and bool(tokens.intersection(TERMINAL_SUCCESS_STATES | {"PASS"}))
+    successor, error = _resolve_terminal_successor(payload)
+    return error is None and successor in {"NEXT_AUTONOMOUS_PACKET", "TERMINAL_DOMAIN"}
 
 
 def _terminal_cancellation(payload: dict[str, Any]) -> bool:
@@ -1045,6 +1047,29 @@ def _resolve_terminal_successor(payload: dict[str, Any]) -> tuple[str | None, Or
     if closed_states.intersection(LEGACY_ERROR_SUCCESSOR_STATES):
         return "ERROR_RECOVERY", None
     return "TERMINAL_DOMAIN", None
+
+
+def _terminal_wait_wake_condition(
+    payload: dict[str, Any],
+    *,
+    event_id: str,
+    terminal_successor: str,
+) -> str:
+    explicit = payload.get("wake_condition")
+    if isinstance(explicit, str) and explicit.strip():
+        return explicit.strip()
+    if terminal_successor == "MANUAL_REQUIRED":
+        identity = payload.get("question_id") or payload.get("stable_id") or event_id
+        return f"OPERATOR_DECISION_ANSWERED:{identity}"
+    if terminal_successor == "EXTERNAL_WAIT":
+        identity = (
+            payload.get("wake_event_id")
+            or payload.get("expected_event_id")
+            or payload.get("external_wait_id")
+            or event_id
+        )
+        return f"EXTERNAL_EVIDENCE_CHANGED:{identity}"
+    return f"EXACT_RECOVERY_AUTHORITY:{event_id}"
 
 
 def _owner_return_completion_error(
@@ -1823,6 +1848,26 @@ def reconcile_runtime_program(
                 processed_items = [item for item in processed_items if item.get("event_id") != event_id]
                 findings.append(owner_return_completion_error)
                 continue
+            if terminal_successor in NONCOMPLETION_TERMINAL_SUCCESSORS:
+                packet["state"] = "BLOCKED"
+                packet["blocking_receipt"] = OrderedDict(
+                    [
+                        ("event_id", event_id),
+                        ("payload_digest", payload_digest),
+                        ("canonical_lifecycle_state", payload.get("canonical_lifecycle_state")),
+                        ("terminal_successor", terminal_successor),
+                        ("turn_id", turn_id),
+                        (
+                            "wake_condition",
+                            _terminal_wait_wake_condition(
+                                payload,
+                                event_id=event_id,
+                                terminal_successor=terminal_successor,
+                            ),
+                        ),
+                    ]
+                )
+                continue
             completed.add(packet_id)
             completed_receipts.append(
                 OrderedDict(
@@ -1942,6 +1987,7 @@ def reconcile_runtime_program(
                         ("superseded_turn_ids", _string_list(matching_intents[0].get("superseded_turn_ids"))),
                         ("receipt_event_id", event_id),
                         ("receipt_payload_digest", payload_digest),
+                        ("terminal_disposition", str(payload.get("canonical_lifecycle_state") or "TERMINAL")),
                          ("terminal_successor", terminal_successor),
                          ("owner_return_turn_id", packet.get("owner_return_turn_id") if isinstance(packet, dict) else None),
                          ("owner_return_proof", packet.get("owner_return_proof") if isinstance(packet, dict) else None),
@@ -2540,6 +2586,38 @@ def _owner_return_delivery_proof(
             "Delivery proof must name the app-native tool receipt.",
             reservation_id=intent.get("reservation_id"),
         )
+    if delivered and delivery_phase == "OWNER_RETURN":
+        execution_turn_id = intent.get("turn_id")
+        if not isinstance(execution_turn_id, str) or not execution_turn_id:
+            return None, _finding(
+                "owner_return_execution_delivery_required",
+                "Owner return cannot settle without the distinct execution-target turn.",
+                reservation_id=intent.get("reservation_id"),
+            )
+        if result.get("turn_id") == execution_turn_id:
+            return None, _finding(
+                "owner_return_execution_turn_reuse",
+                "Cross-role owner return must use a turn distinct from the execution-target turn.",
+                reservation_id=intent.get("reservation_id"),
+            )
+        execution_proof = intent.get("execution_delivery_proof")
+        execution_tool_receipt_id = (
+            execution_proof.get("tool_receipt_id")
+            if isinstance(execution_proof, dict)
+            else None
+        )
+        if not isinstance(execution_tool_receipt_id, str) or not execution_tool_receipt_id:
+            return None, _finding(
+                "owner_return_execution_delivery_required",
+                "Owner return cannot settle without the execution-target native receipt.",
+                reservation_id=intent.get("reservation_id"),
+            )
+        if tool_receipt_id == execution_tool_receipt_id:
+            return None, _finding(
+                "owner_return_execution_receipt_reuse",
+                "Cross-role owner return must use a native receipt distinct from execution delivery.",
+                reservation_id=intent.get("reservation_id"),
+            )
     if delivered:
         dedupe_result = proof.get("dedupe_result")
         if proof.get("turn_id") != result.get("turn_id") or dedupe_result not in OWNER_RETURN_DELIVERY_RESULTS:
@@ -3587,9 +3665,15 @@ def _liveness_watchdogs(
                 wake_condition = "SCHEDULER_RESELECTION_OR_SCOPE_CORRECTION"
         elif state in {"BLOCKED", RECOVERY_READY_STATE}:
             code = "BLOCKED_QUEUE"
-            successor = packet.get("blocking_receipt", {}).get("terminal_successor") if isinstance(packet.get("blocking_receipt"), dict) else None
+            blocking_receipt = packet.get("blocking_receipt") if isinstance(packet.get("blocking_receipt"), dict) else {}
+            successor = blocking_receipt.get("terminal_successor")
             terminal_successor = successor if successor in TERMINAL_SUCCESSORS else "ERROR_RECOVERY"
-            wake_condition = "NAMED_BLOCKER_OR_RECOVERY_EVENT"
+            exact_wake_condition = blocking_receipt.get("wake_condition")
+            wake_condition = (
+                exact_wake_condition
+                if isinstance(exact_wake_condition, str) and exact_wake_condition
+                else "NAMED_BLOCKER_OR_RECOVERY_EVENT"
+            )
         elif state == "ACTIVE" and packet.get("execution_class") in MUTATING_EXECUTION_CLASSES and not packet_leases:
             code = "ACTIVE_WITHOUT_LEASE"
             wake_condition = "EXACT_LEASE_RECONCILIATION"
@@ -3618,12 +3702,23 @@ def _portfolio_row(
     runtime_status = str(packet.get("runtime_status") or "missing").lower()
     packet_leases = [item for item in leases if str(item.get("packet_id") or "") == packet_id]
     blocking_receipt = packet.get("blocking_receipt") if isinstance(packet.get("blocking_receipt"), dict) else None
+    blocking_successor = blocking_receipt.get("terminal_successor") if blocking_receipt else None
+    blocking_wake_condition = blocking_receipt.get("wake_condition") if blocking_receipt else None
     if packet_id in selected_ids:
         next_action = "DISPATCH_DURABLE_OUTBOX"
         wake_condition = "PERSISTED_RESERVATION_READBACK"
     elif state == "ACTIVE":
         next_action = "WAIT_FOR_TERMINAL_RECEIPT"
         wake_condition = "CORRELATED_TERMINAL_OR_HEARTBEAT"
+    elif blocking_successor == "MANUAL_REQUIRED":
+        next_action = "WAIT_FOR_OPERATOR_DECISION"
+        wake_condition = blocking_wake_condition or "EXACT_OPERATOR_DECISION_ANSWER"
+    elif blocking_successor == "EXTERNAL_WAIT":
+        next_action = "WAIT_FOR_NAMED_EXTERNAL_EVENT"
+        wake_condition = blocking_wake_condition or "EXACT_EXTERNAL_EVIDENCE_CHANGE"
+    elif blocking_successor == "ERROR_RECOVERY":
+        next_action = "EMIT_CONTENT_ADDRESSED_RECOVERY_PACKET"
+        wake_condition = blocking_wake_condition or "EXACT_RECOVERY_AUTHORITY"
     elif runtime_status == "active":
         next_action = "QUEUE_UNTIL_OWNER_SAFE_BOUNDARY"
         wake_condition = "OWNER_SAFE_BOUNDARY"
@@ -3742,6 +3837,11 @@ def _attach_operational_projection(
     report["recovery_packets"] = watchdogs
     watchdog_codes = sorted({str(item.get("code") or "") for item in watchdogs if item.get("code")})
     blocking_watchdog_codes = sorted(set(watchdog_codes).intersection(BLOCKING_WATCHDOG_CODES))
+    blocking_watchdogs = [
+        item
+        for item in watchdogs
+        if str(item.get("code") or "") in BLOCKING_WATCHDOG_CODES
+    ]
     scheduler_health = "BLOCKED" if blocking_watchdog_codes else "DEGRADED" if watchdog_codes else "HEALTHY"
     report["portfolio_status"] = OrderedDict(
         [
@@ -3762,7 +3862,8 @@ def _attach_operational_projection(
                         ("watchdog_recovery_packets", len(watchdogs)),
                         ("watchdog_codes", watchdog_codes),
                         ("blocking_watchdog_codes", blocking_watchdog_codes),
-                        ("blocking_watchdog_count", len(blocking_watchdog_codes)),
+                        ("blocking_watchdog_code_count", len(blocking_watchdog_codes)),
+                        ("blocking_watchdog_count", len(blocking_watchdogs)),
                         ("idle_cliff_count", sum(1 for item in watchdogs if item.get("code") == "READY_IDLE")),
                     ]
                 ),

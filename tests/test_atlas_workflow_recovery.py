@@ -1776,6 +1776,18 @@ os._exit(97)
         envelope = RECOVERY._load_json(FIXTURES / "valid-envelope.json")
         result = RECOVERY.validate_envelope(envelope)
         self.assertEqual("PASS", result["status"])
+        self.assertEqual(
+            {
+                "logical_role_id": "atlas.workflow-architect",
+                "thread_id": "019f7df6-8521-7292-a012-297208fce120",
+                "host_id": "local",
+            },
+            envelope["owner_return"],
+        )
+        self.assertIn(
+            "ATLAS-WORKFLOW-STANDARDIZATION-20260721-001",
+            envelope["payload"]["policy_ids"],
+        )
 
         missing_runtime = json.loads(json.dumps(envelope))
         del missing_runtime["source_runtime"]
@@ -1786,6 +1798,27 @@ os._exit(97)
         invalid["payload_digest"] = "sha256:" + "a" * 64
         with self.assertRaises(RECOVERY.ValidationFailure):
             RECOVERY.validate_envelope(invalid)
+
+        missing_owner_return = json.loads(json.dumps(envelope))
+        del missing_owner_return["owner_return"]
+        invalid_owner_returns = [missing_owner_return]
+        for field in ("logical_role_id", "thread_id", "host_id"):
+            missing = json.loads(json.dumps(envelope))
+            del missing["owner_return"][field]
+            invalid_owner_returns.append(missing)
+
+            empty = json.loads(json.dumps(envelope))
+            empty["owner_return"][field] = ""
+            invalid_owner_returns.append(empty)
+
+        extra = json.loads(json.dumps(envelope))
+        extra["owner_return"]["unexpected"] = "rejected"
+        invalid_owner_returns.append(extra)
+
+        for invalid_owner_return in invalid_owner_returns:
+            with self.subTest(owner_return=invalid_owner_return.get("owner_return")):
+                with self.assertRaises(RECOVERY.ValidationFailure):
+                    RECOVERY.validate_envelope(invalid_owner_return)
 
     def test_fixture_apply_creates_exactly_one_missing_role(self) -> None:
         plan, adapter = self.plan("missing-task.json", mode="apply")

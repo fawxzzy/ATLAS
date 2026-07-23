@@ -13,6 +13,7 @@
     "source_role_id",
     "source_runtime",
     "target_role_id",
+    "owner_return",
     "correlation",
     "freshness",
     "acknowledgement",
@@ -47,6 +48,16 @@
       }
     },
     "target_role_id": { "type": "string", "minLength": 1 },
+    "owner_return": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logical_role_id", "thread_id", "host_id"],
+      "properties": {
+        "logical_role_id": { "type": "string", "minLength": 1 },
+        "thread_id": { "type": "string", "minLength": 1 },
+        "host_id": { "type": "string", "minLength": 1 }
+      }
+    },
     "correlation": {
       "type": "object",
       "additionalProperties": false,

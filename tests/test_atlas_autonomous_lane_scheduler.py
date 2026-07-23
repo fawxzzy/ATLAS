@@ -739,6 +739,41 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 "dedupe_result": "FIRST_DELIVERY",
             },
         }
+        callback_reuse_cases = (
+            (
+                "owner_return_execution_turn_reuse",
+                {
+                    **callback_result,
+                    "turn_id": "release-turn",
+                    "delivery_proof": {
+                        "turn_id": "release-turn",
+                        "tool_receipt_id": "tool-owner-distinct",
+                        "dedupe_result": "FIRST_DELIVERY",
+                    },
+                },
+            ),
+            (
+                "owner_return_execution_receipt_reuse",
+                {
+                    **callback_result,
+                    "delivery_proof": {
+                        "turn_id": "architect-owner-turn",
+                        "tool_receipt_id": "tool-release-turn",
+                        "dedupe_result": "FIRST_DELIVERY",
+                    },
+                },
+            ),
+        )
+        for expected_code, invalid_callback in callback_reuse_cases:
+            with self.subTest(expected_code=expected_code):
+                rejected, rejected_findings = scheduler.apply_delivery_results(
+                    program=copy.deepcopy(premature),
+                    results=[invalid_callback],
+                )
+                self.assertIn(expected_code, [finding["code"] for finding in rejected_findings])
+                self.assertEqual("UNKNOWN", rejected["standing_packets"][0]["owner_return_state"])
+                self.assertNotIn("owner_return_turn_id", rejected["delivery_intents"][0])
+
         returned, return_findings = scheduler.apply_delivery_results(
             program=premature,
             results=[callback_result],
@@ -1341,7 +1376,32 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 self.assertEqual("BLOCKED", health["scheduler"])
                 self.assertIn(expected_code, health["watchdog_codes"])
                 self.assertIn(expected_code, health["blocking_watchdog_codes"])
+                self.assertEqual(1, health["blocking_watchdog_code_count"])
                 self.assertEqual(1, health["blocking_watchdog_count"])
+
+        duplicate_code_program = _program_payload()
+        duplicate_code_program["standing_packets"] = [
+            copy.deepcopy(owner_unknown),
+            {
+                **copy.deepcopy(owner_unknown),
+                "packet_id": "owner-unknown-second",
+                "writer_scope": "repo.socials-os.second-source",
+            },
+        ]
+        duplicate_code_program["active_leases"] = []
+        duplicate_code_program["delivery_intents"] = []
+        duplicate_code_report: dict[str, object] = {
+            "selected_jobs": [],
+            "observed_at": "2026-07-22T12:00:00Z",
+        }
+        scheduler._attach_operational_projection(
+            report=duplicate_code_report,
+            program=duplicate_code_program,
+        )
+        duplicate_code_health = duplicate_code_report["portfolio_status"]["HEALTH"]
+        self.assertEqual(["OWNER_RETURN_UNKNOWN"], duplicate_code_health["blocking_watchdog_codes"])
+        self.assertEqual(1, duplicate_code_health["blocking_watchdog_code_count"])
+        self.assertEqual(2, duplicate_code_health["blocking_watchdog_count"])
 
         degraded_program = _program_payload()
         degraded_program["standing_packets"] = [
@@ -3219,6 +3279,262 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual([], program["delivery_intents"])
         self.assertEqual("REVIEW_FINDINGS_PENDING", program["completed_receipts"][0]["terminal_disposition"])
 
+    def test_closed_nonblocking_successor_settles_exact_mutating_packet_after_owner_return(self) -> None:
+        owner_return = {
+            "logical_role_id": "atlas.workflow-architect",
+            "thread_id": "architect-thread",
+            "host_id": "local",
+        }
+        owner_return_proof = {
+            "turn_id": "architect-owner-turn",
+            "tool_receipt_id": "tool-architect-owner-turn",
+            "dedupe_result": "FIRST_DELIVERY",
+        }
+        packet = _standing_packet(
+            "atlas-source-complete",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="repo.atlas.source-complete",
+        )
+        packet.update(
+            {
+                "state": "ACTIVE",
+                "runtime_thread_id": "release-thread",
+                "policy_ids": [
+                    scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID,
+                    "ATLAS-UNIFIED-BLOCKER-MANUAL-ROUTING-20260722-001",
+                ],
+                "owner_return": owner_return,
+                "owner_return_state": "DELIVERED",
+                "owner_return_turn_id": "architect-owner-turn",
+                "owner_return_proof": owner_return_proof,
+                "dispatch_reservation": {"reservation_id": "rsrv-atlas-source-complete"},
+            }
+        )
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+        program["active_leases"] = [
+            {
+                "reservation_id": "rsrv-atlas-source-complete",
+                "packet_id": "atlas-source-complete",
+                "writer_scope": "repo.atlas.source-complete",
+                "status": "active",
+            }
+        ]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-atlas-source-complete",
+                "packet_id": "atlas-source-complete",
+                "logical_role_id": "atlas.release-control-plane",
+                "runtime_thread_id": "release-thread",
+                "writer_scope": "repo.atlas.source-complete",
+                "event_id": "onv1_" + "c" * 64,
+                "payload_digest": "sha256:" + "c" * 64,
+                "status": "delivered",
+                "turn_id": "release-turn",
+                "execution_delivery_proof": {
+                    "turn_id": "release-turn",
+                    "tool_receipt_id": "tool-release-turn",
+                    "dedupe_result": "FIRST_DELIVERY",
+                },
+                "owner_return": owner_return,
+                "owner_return_state": "DELIVERED",
+                "owner_return_turn_id": "architect-owner-turn",
+                "owner_return_proof": owner_return_proof,
+            }
+        ]
+        terminal = _envelope(
+            {
+                "canonical_lifecycle_state": "TERMINAL",
+                "terminal": True,
+                "blocking": False,
+                "terminal_successor": "TERMINAL_DOMAIN",
+                "policy_ids": [
+                    scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID,
+                    "ATLAS-UNIFIED-BLOCKER-MANUAL-ROUTING-20260722-001",
+                ],
+                "logical_role_id": "atlas.release-control-plane",
+                "packet_id": "atlas-source-complete",
+                "writer_scope": "repo.atlas.source-complete",
+                "reservation_id": "rsrv-atlas-source-complete",
+                "turn_id": "release-turn",
+            },
+            idempotency_key="atlas-source-complete-terminal",
+            source_role_id="atlas.release-control-plane",
+        )
+        terminal["target_role_id"] = "atlas.release-control-plane"
+        terminal["owner_return"] = owner_return
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(
+                ("atlas.release-control-plane", "release-thread", "idle"),
+                ("atlas.workflow-architect", "architect-thread", "idle"),
+            ),
+            envelopes=[terminal],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual(["atlas-source-complete"], program["completed_packets"])
+        self.assertEqual([], program["standing_packets"])
+        self.assertEqual([], program["delivery_intents"])
+        self.assertEqual([], program["active_leases"])
+        self.assertEqual("TERMINAL_DOMAIN", program["completed_receipts"][0]["terminal_successor"])
+        self.assertEqual("architect-owner-turn", program["completed_receipts"][0]["owner_return_turn_id"])
+
+    def test_read_only_noncompletion_successors_remain_standing_and_projected(self) -> None:
+        owner_return = {
+            "logical_role_id": "atlas.workflow-architect",
+            "thread_id": "architect-thread",
+            "host_id": "local",
+        }
+        owner_return_proof = {
+            "turn_id": "architect-owner-turn",
+            "tool_receipt_id": "tool-architect-owner-turn",
+            "dedupe_result": "FIRST_DELIVERY",
+        }
+        packet = _standing_packet(
+            "atlas-read-only-wait",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.atlas.review.wait",
+        )
+        packet.update(
+            {
+                "state": "ACTIVE",
+                "execution_class": "read_only",
+                "runtime_thread_id": "release-thread",
+                "policy_ids": [
+                    scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID,
+                    "ATLAS-UNIFIED-BLOCKER-MANUAL-ROUTING-20260722-001",
+                ],
+                "owner_return": owner_return,
+                "owner_return_state": "DELIVERED",
+                "owner_return_turn_id": "architect-owner-turn",
+                "owner_return_proof": owner_return_proof,
+                "current_tracker_role_id": "atlas.workflow-architect",
+                "dispatch_reservation": {"reservation_id": "rsrv-atlas-read-only-wait"},
+            }
+        )
+        base_program = _program_payload()
+        base_program["standing_packets"] = [packet]
+        base_program["active_leases"] = []
+        base_program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-atlas-read-only-wait",
+                "packet_id": "atlas-read-only-wait",
+                "logical_role_id": "atlas.release-control-plane",
+                "runtime_thread_id": "release-thread",
+                "writer_scope": "read.atlas.review.wait",
+                "event_id": "onv1_" + "c" * 64,
+                "payload_digest": "sha256:" + "c" * 64,
+                "status": "delivered",
+                "turn_id": "release-turn",
+                "execution_delivery_proof": {
+                    "turn_id": "release-turn",
+                    "tool_receipt_id": "tool-release-turn",
+                    "dedupe_result": "FIRST_DELIVERY",
+                },
+                "owner_return": owner_return,
+                "owner_return_state": "DELIVERED",
+                "owner_return_turn_id": "architect-owner-turn",
+                "owner_return_proof": owner_return_proof,
+            }
+        ]
+        cases = (
+            (
+                "MANUAL_REQUIRED",
+                {"question_id": "ATLAS-MAN-WAIT"},
+                "WAITING_ON_ZAC",
+                "WAIT_FOR_OPERATOR_DECISION",
+                "OPERATOR_DECISION_ANSWERED:ATLAS-MAN-WAIT",
+            ),
+            (
+                "EXTERNAL_WAIT",
+                {"wake_condition": "EXACT_HEAD_REVIEW_RESULT:review-head"},
+                "WAITING_EXTERNAL",
+                "WAIT_FOR_NAMED_EXTERNAL_EVENT",
+                "EXACT_HEAD_REVIEW_RESULT:review-head",
+            ),
+            (
+                "ERROR_RECOVERY",
+                {},
+                "BLOCKED_ERROR",
+                "EMIT_CONTENT_ADDRESSED_RECOVERY_PACKET",
+                None,
+            ),
+        )
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("atlas.workflow-architect", "architect-thread", "idle"),
+        )
+
+        for successor, evidence, section, next_action, expected_wake in cases:
+            with self.subTest(successor=successor):
+                terminal_payload = {
+                    "canonical_lifecycle_state": successor,
+                    "terminal": True,
+                    "blocking": False,
+                    "terminal_successor": successor,
+                    "policy_ids": [
+                        scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID,
+                        "ATLAS-UNIFIED-BLOCKER-MANUAL-ROUTING-20260722-001",
+                    ],
+                    "logical_role_id": "atlas.release-control-plane",
+                    "packet_id": "atlas-read-only-wait",
+                    "writer_scope": "read.atlas.review.wait",
+                    "reservation_id": "rsrv-atlas-read-only-wait",
+                    "turn_id": "release-turn",
+                    **evidence,
+                }
+                terminal = _envelope(
+                    terminal_payload,
+                    idempotency_key=f"atlas-read-only-{successor.lower()}",
+                    source_role_id="atlas.release-control-plane",
+                )
+                terminal["target_role_id"] = "atlas.release-control-plane"
+                terminal["owner_return"] = owner_return
+                wake_condition = expected_wake or f"EXACT_RECOVERY_AUTHORITY:{terminal['event_id']}"
+
+                retained, findings = scheduler.reconcile_runtime_program(
+                    program=copy.deepcopy(base_program),
+                    bindings_payload=bindings,
+                    envelopes=[terminal],
+                )
+                replayed, replay_findings = scheduler.reconcile_runtime_program(
+                    program=retained,
+                    bindings_payload=bindings,
+                    envelopes=[terminal],
+                )
+
+                self.assertEqual([], findings)
+                self.assertEqual([], replay_findings)
+                self.assertEqual([], replayed["completed_packets"])
+                self.assertEqual([], replayed["completed_receipts"])
+                self.assertEqual([], replayed["active_leases"])
+                self.assertEqual(1, len(replayed["standing_packets"]))
+                self.assertEqual(1, len(replayed["delivery_intents"]))
+                retained_packet = replayed["standing_packets"][0]
+                self.assertEqual("BLOCKED", retained_packet["state"])
+                self.assertEqual(successor, retained_packet["blocking_receipt"]["terminal_successor"])
+                self.assertEqual(terminal["event_id"], retained_packet["blocking_receipt"]["event_id"])
+                self.assertEqual(wake_condition, retained_packet["blocking_receipt"]["wake_condition"])
+
+                report: dict[str, object] = {
+                    "selected_jobs": [],
+                    "observed_at": "2026-07-23T00:00:00Z",
+                }
+                scheduler._attach_operational_projection(report=report, program=replayed)
+                portfolio = report["portfolio_status"]
+                self.assertEqual([], portfolio["DONE_RECENTLY"])
+                self.assertEqual(1, len(portfolio[section]))
+                self.assertEqual("atlas-read-only-wait", portfolio[section][0]["packet"])
+                self.assertEqual(next_action, portfolio[section][0]["next_executable_action"])
+                self.assertEqual(wake_condition, portfolio[section][0]["wake_condition"])
+                self.assertEqual(1, len(report["recovery_packets"]))
+                self.assertEqual(successor, report["recovery_packets"][0]["terminal_successor"])
+                self.assertEqual(wake_condition, report["recovery_packets"][0]["wake_condition"])
+
     def test_terminal_mutating_blocker_holds_exact_packet_and_lease_for_resume(self) -> None:
         packet = _standing_packet(
             "fitness-source",
@@ -3255,6 +3571,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 "canonical_lifecycle_state": "BLOCKED_EXACT_MISSING_EVIDENCE",
                 "terminal": True,
                 "blocking": True,
+                "terminal_successor": "ERROR_RECOVERY",
                 "packet_id": "fitness-source",
                 "writer_scope": "repo.fitness.source",
                 "reservation_id": "rsrv-fitness-source",
