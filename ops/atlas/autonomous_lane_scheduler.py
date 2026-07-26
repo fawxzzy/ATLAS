@@ -1823,6 +1823,7 @@ def reconcile_runtime_program(
                 and str(packet.get("execution_class") or "") == "read_only"
                 and str(packet.get("state") or "").upper() == "ACTIVE"
                 and isinstance(packet.get("dispatch_reservation"), dict)
+                and str(packet["dispatch_reservation"].get("reservation_id") or "") == reservation_id
                 and not any(str(lease.get("reservation_id") or "") == reservation_id for lease in active_leases)
             )
             if not packet_id or not writer_scope or not reservation_id or not turn_id or len(matching_intents) != 1 or not read_only_terminal:
@@ -1927,6 +1928,7 @@ def reconcile_runtime_program(
                 and str(packet.get("execution_class") or "") == "read_only"
                 and str(packet.get("state") or "").upper() == "ACTIVE"
                 and isinstance(packet.get("dispatch_reservation"), dict)
+                and str(packet["dispatch_reservation"].get("reservation_id") or "") == reservation_id
             )
             if (
                 not packet_id

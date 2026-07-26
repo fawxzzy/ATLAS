@@ -3279,6 +3279,70 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual([], program["delivery_intents"])
         self.assertEqual("REVIEW_FINDINGS_PENDING", program["completed_receipts"][0]["terminal_disposition"])
 
+    def test_read_only_terminal_rejects_stale_reservation_without_blocking_or_completion(self) -> None:
+        packet = _standing_packet(
+            "scheduler-review",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.github.fawxzzy.atlas.scheduler-review",
+        )
+        packet["execution_class"] = "read_only"
+        packet["state"] = "ACTIVE"
+        packet["dispatch_reservation"] = {"reservation_id": "rsrv-current"}
+        base_program = _program_payload()
+        base_program["standing_packets"] = [packet]
+        base_program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-stale",
+                "packet_id": "scheduler-review",
+                "runtime_thread_id": "release-thread",
+                "writer_scope": "read.github.fawxzzy.atlas.scheduler-review",
+                "event_id": "onv1_" + "c" * 64,
+                "payload_digest": "sha256:" + "c" * 64,
+                "status": "delivered",
+                "turn_id": "review-turn",
+            }
+        ]
+        cases = (
+            ("ERROR_RECOVERY", "terminal_read_only_correlation_required"),
+            ("TERMINAL_DOMAIN", "terminal_lease_correlation_required"),
+        )
+
+        for successor, expected_finding in cases:
+            with self.subTest(successor=successor):
+                terminal = _envelope(
+                    {
+                        "canonical_lifecycle_state": successor,
+                        "terminal": True,
+                        "blocking": False,
+                        "terminal_successor": successor,
+                        "packet_id": "scheduler-review",
+                        "writer_scope": "read.github.fawxzzy.atlas.scheduler-review",
+                        "reservation_id": "rsrv-stale",
+                        "turn_id": "review-turn",
+                    },
+                    idempotency_key=f"scheduler-review-stale-{successor.lower()}",
+                )
+
+                reconciled, findings = scheduler.reconcile_runtime_program(
+                    program=copy.deepcopy(base_program),
+                    bindings_payload=_bindings(("atlas.release-control-plane", "release-thread", "idle")),
+                    envelopes=[terminal],
+                )
+
+                self.assertEqual([expected_finding], [item["code"] for item in findings])
+                self.assertEqual([], reconciled["processed_events"])
+                self.assertEqual([], reconciled["completed_packets"])
+                self.assertEqual([], reconciled["completed_receipts"])
+                self.assertEqual([], reconciled["active_leases"])
+                self.assertEqual(1, len(reconciled["standing_packets"]))
+                self.assertEqual("ACTIVE", reconciled["standing_packets"][0]["state"])
+                self.assertEqual(
+                    "rsrv-current",
+                    reconciled["standing_packets"][0]["dispatch_reservation"]["reservation_id"],
+                )
+                self.assertEqual(["rsrv-stale"], [item["reservation_id"] for item in reconciled["delivery_intents"]])
+
     def test_closed_nonblocking_successor_settles_exact_mutating_packet_after_owner_return(self) -> None:
         owner_return = {
             "logical_role_id": "atlas.workflow-architect",
