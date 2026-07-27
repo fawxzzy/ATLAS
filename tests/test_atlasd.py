@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -38,6 +40,19 @@ class AtlasdTests(unittest.TestCase):
             health = json.loads(output.getvalue())
             self.assertEqual(health["paused_runtime_tasks"], ["running"])
             self.assertEqual(health["tasks_by_state"], {"PAUSED_RUNTIME": 1})
+
+    def test_documented_direct_script_command_runs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            database = Path(tmp) / "atlasd.db"
+            root = Path(__file__).resolve().parents[1]
+            result = subprocess.run(
+                [sys.executable, "ops/atlas/atlasd.py", "--database", str(database), "init"],
+                cwd=root,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(json.loads(result.stdout)["running_worker_count"], 0)
 
 
 if __name__ == "__main__":

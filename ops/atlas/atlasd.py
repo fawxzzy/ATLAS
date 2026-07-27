@@ -10,8 +10,14 @@ from __future__ import annotations
 import argparse
 import json
 import sqlite3
+import sys
 import time
 from pathlib import Path
+
+# Direct script execution (the documented operator command) does not place the
+# repository root on sys.path. Keep module imports working in both modes.
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from ops.atlas.atlas_runtime import AtlasRuntime
 
