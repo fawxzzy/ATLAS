@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas.runtime.v1",
+  "title": "ATLAS durable runtime state",
+  "type": "object",
+  "required": ["task_id", "state", "lane", "scope"],
+  "properties": {
+    "task_id": {"type": "string", "minLength": 1},
+    "lane": {"type": "string", "minLength": 1},
+    "scope": {"type": "string", "minLength": 1},
+    "state": {"enum": ["QUEUED", "CLAIMED", "RUNNING", "WAITING_EXTERNAL", "WAITING_MANUAL", "PAUSED_USAGE", "PAUSED_RUNTIME", "BLOCKED_DEPENDENCY", "SUCCEEDED", "FAILED", "CANCELLED", "SUPERSEDED", "UNKNOWN"]},
+    "worker_id": {"type": "string"},
+    "run_id": {"type": "string"},
+    "heartbeat_at": {"type": "number"},
+    "lease_expires_at": {"type": "number"}
+  },
+  "additionalProperties": true
+}
