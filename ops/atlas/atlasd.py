@@ -25,7 +25,9 @@ from ops.atlas.atlas_runtime import AtlasRuntime
 def _health(runtime: AtlasRuntime) -> dict[str, object]:
     rows = runtime.db.execute("SELECT state, COUNT(*) AS n FROM tasks GROUP BY state").fetchall()
     states = {row["state"]: row["n"] for row in rows}
-    lease_count = runtime.db.execute("SELECT COUNT(*) AS n FROM leases").fetchone()["n"]
+    lease_count = runtime.db.execute(
+        "SELECT COUNT(*) AS n FROM leases WHERE expires_at>?", (time.time(),)
+    ).fetchone()["n"]
     return {
         "schema": "atlasd.health.v1",
         "generated_at": time.time(),

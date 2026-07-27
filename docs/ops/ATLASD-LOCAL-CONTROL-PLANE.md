@@ -8,9 +8,9 @@ supervision is enabled.
 ## Local-only commands
 
 ```powershell
-python ops/atlas/atlasd.py --database runtime/atlasd/atlasd.sqlite init
-python ops/atlas/atlasd.py --database runtime/atlasd/atlasd.sqlite health
-python ops/atlas/atlasd.py --database runtime/atlasd/atlasd.sqlite reconcile
+python ops/atlas/atlasd.py --database runtime/atlas/atlasd.sqlite init
+python ops/atlas/atlasd.py --database runtime/atlas/atlasd.sqlite health
+python ops/atlas/atlasd.py --database runtime/atlas/atlasd.sqlite reconcile
 ```
 
 The SQLite database is runtime state and is intentionally excluded from source

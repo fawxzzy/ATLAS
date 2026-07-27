@@ -279,12 +279,18 @@ class AtlasRuntime:
                     dependencies = tuple(json.loads(successor_row["depends_on"]))
                     if task_id not in dependencies:
                         raise ValueError(f"successor {successor} does not declare dependency on {task_id}")
-                    unresolved = self.db.execute(
-                        "SELECT COUNT(*) AS n FROM tasks WHERE task_id IN ({}) AND state!='SUCCEEDED'".format(
+                    dependency_status = self.db.execute(
+                        "SELECT COUNT(*) AS total, "
+                        "SUM(CASE WHEN state='SUCCEEDED' THEN 1 ELSE 0 END) AS succeeded "
+                        "FROM tasks WHERE task_id IN ({})".format(
                             ",".join("?" for _ in dependencies)
                         ), dependencies
-                    ).fetchone()["n"]
-                    if unresolved == 0:
+                    ).fetchone()
+                    # An absent dependency is unresolved, not implicitly
+                    # successful. It may be registered later, but it cannot
+                    # release this successor until it has itself succeeded.
+                    if (dependency_status["total"] == len(dependencies)
+                            and dependency_status["succeeded"] == len(dependencies)):
                         self.db.execute(
                             "UPDATE tasks SET state='QUEUED', updated_at=? WHERE task_id=? AND state='BLOCKED_DEPENDENCY'",
                             (now, successor),

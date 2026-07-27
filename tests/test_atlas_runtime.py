@@ -88,6 +88,13 @@ class AtlasRuntimeTests(unittest.TestCase):
         self.runtime.complete(task_id="first", worker_id="w", run_id="r", state="WAITING_MANUAL")
         self.assertEqual(self.runtime.get("next").state, "BLOCKED_DEPENDENCY")
 
+    def test_absent_dependency_does_not_release_successor(self):
+        self.runtime.enqueue("next", lane="lane", scope="repo:x", depends_on=["first", "missing"])
+        self.runtime.enqueue("first", lane="lane", scope="repo:y", successor_ids=["next"])
+        lease = self.runtime.claim(worker_id="w", run_id="r")
+        self.runtime.complete(task_id="first", worker_id="w", run_id="r")
+        self.assertEqual(self.runtime.get("next").state, "BLOCKED_DEPENDENCY")
+
     def test_expired_worker_cannot_heartbeat_or_complete(self):
         self.runtime.enqueue("a", lane="lane", scope="repo:x")
         lease = self.runtime.claim(worker_id="w", run_id="r", lease_seconds=0.001)

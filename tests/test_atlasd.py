@@ -41,6 +41,20 @@ class AtlasdTests(unittest.TestCase):
             self.assertEqual(health["paused_runtime_tasks"], ["running"])
             self.assertEqual(health["tasks_by_state"], {"PAUSED_RUNTIME": 1})
 
+    def test_health_excludes_expired_lease(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            database = Path(tmp) / "atlasd.db"
+            runtime = AtlasRuntime(database)
+            runtime.enqueue("running", lane="atlas", scope="atlas-root:runtime")
+            runtime.claim(worker_id="worker", run_id="run", lease_seconds=0.001)
+            runtime.close()
+            import time
+            time.sleep(0.01)
+            output = StringIO()
+            with redirect_stdout(output):
+                self.assertEqual(main(["--database", str(database), "health"]), 0)
+            self.assertEqual(json.loads(output.getvalue())["running_worker_count"], 0)
+
     def test_documented_direct_script_command_runs(self):
         with tempfile.TemporaryDirectory() as tmp:
             database = Path(tmp) / "atlasd.db"
