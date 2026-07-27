@@ -319,10 +319,19 @@ def schema_errors(
             errors.append(f"{at}: fewer than minimum items")
         if "maxItems" in schema and len(value) > schema["maxItems"]:
             errors.append(f"{at}: more than maximum items")
-        if schema.get("uniqueItems") and len(
-            {canonical_bytes(item) for item in value}
-        ) != len(value):
-            errors.append(f"{at}: array items are not unique")
+        if schema.get("uniqueItems"):
+            canonical_items: list[bytes] = []
+            canonical_items_valid = True
+            for index, item in enumerate(value):
+                try:
+                    canonical_items.append(canonical_bytes(item))
+                except (OverflowError, TypeError, ValueError):
+                    canonical_items_valid = False
+                    errors.append(
+                        f"{at}[{index}]: value is not canonical JSON"
+                    )
+            if canonical_items_valid and len(set(canonical_items)) != len(value):
+                errors.append(f"{at}: array items are not unique")
         child = schema.get("items")
         if isinstance(child, Mapping):
             for index, item in enumerate(value):
@@ -971,17 +980,6 @@ def _build_observation(
         copy.deepcopy(dict(requested)) if isinstance(requested, Mapping) else {}
     )
     normalized_usage = copy.deepcopy(dict(usage_value))
-    identity_payload = {
-        "admitted_execution_binding": admitted_binding_value,
-        "effective": effective_value,
-        "logical_role_id": logical_role_id,
-        "packet_id": packet_id,
-        "requested": requested_value,
-        "usage": normalized_usage,
-    }
-    observation_id = "onv1_" + hashlib.sha256(
-        canonical_bytes(identity_payload)
-    ).hexdigest()
     observation = {
         "admitted_execution_binding": admitted_binding_value,
         "contract_version": "atlas.execution-observation.v1",
@@ -992,7 +990,7 @@ def _build_observation(
         },
         "effective": effective_value,
         "logical_role_id": logical_role_id,
-        "observation_id": observation_id,
+        "observation_id": "onv1_" + ("0" * 64),
         "packet_id": packet_id,
         "requested": requested_value,
         "usage": normalized_usage,
@@ -1011,6 +1009,12 @@ def _build_observation(
             "findings": normalized_findings,
             "state": "BLOCKED",
         }
+    identity_payload = {
+        key: value for key, value in observation.items() if key != "observation_id"
+    }
+    observation["observation_id"] = "onv1_" + hashlib.sha256(
+        canonical_bytes(identity_payload)
+    ).hexdigest()
     return observation
 
 
@@ -1026,9 +1030,23 @@ def resolve_execution(
 ) -> dict[str, Any]:
     """Return a closed deterministic observation without dispatching work."""
 
-    findings = validate_registry(registry)
-    if findings and all(
-        finding.startswith("registry_schema_invalid:") for finding in findings
+    registry_findings = validate_registry(registry)
+    findings = list(registry_findings)
+    if not isinstance(requested, Mapping):
+        findings.append("requested_root_invalid")
+        requested = {}
+    if not isinstance(effective, Mapping):
+        findings.append("effective_root_invalid")
+        effective = {}
+    if not isinstance(admitted_execution_binding, Mapping):
+        findings.append("admitted_execution_binding_root_invalid")
+        admitted_execution_binding = {}
+    if usage is not None and not isinstance(usage, Mapping):
+        findings.append("usage_root_invalid")
+        usage = None
+    if registry_findings and all(
+        finding.startswith("registry_schema_invalid:")
+        for finding in registry_findings
     ):
         usage_value = copy.deepcopy(
             dict(usage) if isinstance(usage, Mapping) else _default_usage()
@@ -1240,11 +1258,16 @@ def resolve_execution(
 def validate_canary_result(
     registry: Mapping[str, Any], result: Mapping[str, Any]
 ) -> list[str]:
-    findings = validate_registry(registry)
-    if findings and all(
-        finding.startswith("registry_schema_invalid:") for finding in findings
+    registry_findings = validate_registry(registry)
+    findings = list(registry_findings)
+    if not isinstance(result, Mapping):
+        findings.append("canary_result_root_invalid")
+        result = {}
+    if registry_findings and all(
+        finding.startswith("registry_schema_invalid:")
+        for finding in registry_findings
     ):
-        return findings
+        return sorted(set(findings))
     registry_view: Mapping[str, Any] = (
         registry if isinstance(registry, Mapping) else {}
     )
@@ -1354,11 +1377,9 @@ def validate_canary_result(
             baseline_value = record.get("baseline")
             candidate_value = record.get("candidate")
             numeric = (
-                isinstance(baseline_value, (int, float))
-                and not isinstance(baseline_value, bool)
+                _is_finite_number(baseline_value)
                 and baseline_value >= 0
-                and isinstance(candidate_value, (int, float))
-                and not isinstance(candidate_value, bool)
+                and _is_finite_number(candidate_value)
                 and candidate_value >= 0
             )
             _append(
@@ -1401,8 +1422,7 @@ def validate_canary_result(
         computed_reduction = (baseline - repeated) * 100 / baseline
         _append(
             findings,
-            not isinstance(reported_reduction, (int, float))
-            or isinstance(reported_reduction, bool)
+            not _is_finite_number(reported_reduction)
             or not math.isclose(
                 reported_reduction,
                 computed_reduction,

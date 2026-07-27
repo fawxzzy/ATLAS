@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import io
 import importlib.util
 import json
@@ -1032,6 +1033,136 @@ class AtlasModelGovernanceContractTests(unittest.TestCase):
                 self.assertEqual("ADMITTED", result["decision"]["state"])
                 self.assertEqual(value, result["usage"]["provider_cost"])
 
+    def test_observation_id_addresses_final_decision_and_findings(self) -> None:
+        requested = self.requested("DEEP", "xhigh", "ARCHITECTURE")
+        admitted = self.resolve("atlas.workflow-architect", requested)
+        drifted_registry = copy.deepcopy(self.registry)
+        drifted_registry["profiles"]["DEEP"]["reasoning_default"] = "xhigh"
+        blocked = self.resolve(
+            "atlas.workflow-architect",
+            requested,
+            registry=drifted_registry,
+        )
+
+        self.assertEqual("ADMITTED", admitted["decision"]["state"])
+        self.assertEqual("BLOCKED", blocked["decision"]["state"])
+        self.assertNotEqual(admitted["observation_id"], blocked["observation_id"])
+        for observation in (admitted, blocked):
+            identity_payload = {
+                key: value
+                for key, value in observation.items()
+                if key != "observation_id"
+            }
+            expected = (
+                "onv1_"
+                + hashlib.sha256(
+                    RESOLVER.canonical_bytes(identity_payload)
+                ).hexdigest()
+            )
+            self.assertEqual(expected, observation["observation_id"])
+
+    def test_canary_comparison_rejects_nonfinite_values(self) -> None:
+        definition = self.registry["canaries"]["classes"][0]
+        for value in (float("nan"), float("inf"), float("-inf")):
+            for field in ("baseline", "candidate"):
+                with self.subTest(value=repr(value), field=field):
+                    result = self.canary_result(definition)
+                    result["comparison"]["QUALITY"][field] = value
+                    self.assertIn(
+                        "canary_comparison_values_invalid:QUALITY",
+                        RESOLVER.validate_canary_result(self.registry, result),
+                    )
+
+    def test_nonfinite_unique_items_fail_closed_in_schema_and_cli(self) -> None:
+        for value in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(value=repr(value)):
+                candidate = copy.deepcopy(self.registry)
+                candidate["policy_ids"] = [value]
+                findings = RESOLVER.validate_registry(candidate)
+                self.assertTrue(findings)
+                self.assertTrue(
+                    all(
+                        item.startswith("registry_schema_invalid:")
+                        for item in findings
+                    )
+                )
+
+                with tempfile.TemporaryDirectory() as temporary:
+                    path = Path(temporary) / "nonfinite-registry.json"
+                    path.write_text(
+                        json.dumps(
+                            candidate,
+                            allow_nan=True,
+                            ensure_ascii=False,
+                            sort_keys=True,
+                        )
+                        + "\n",
+                        encoding="utf-8",
+                    )
+                    completed = subprocess.run(
+                        [
+                            sys.executable,
+                            str(MODULE_PATH),
+                            "--registry",
+                            str(path),
+                            "--json",
+                        ],
+                        cwd=ROOT,
+                        check=False,
+                        capture_output=True,
+                        text=True,
+                    )
+                self.assertEqual(1, completed.returncode)
+                self.assertNotIn("Traceback", completed.stdout)
+                self.assertNotIn("Traceback", completed.stderr)
+                cli_result = json.loads(completed.stdout)
+                self.assertEqual("BLOCKED", cli_result["status"])
+
+    def test_public_boundaries_block_malformed_roots_without_traceback(
+        self,
+    ) -> None:
+        requested = self.requested("DEEP", "xhigh", "ARCHITECTURE")
+        admitted_binding = copy.deepcopy(requested["execution_binding"])
+        admitted_binding["turn_id"] = "turn-001"
+        effective = self.effective(
+            requested["model"],
+            requested["reasoning_effort"],
+            requested["execution_binding"],
+        )
+        for root_name, malformed in (
+            ("requested", None),
+            ("requested", []),
+            ("requested", "invalid"),
+            ("effective", None),
+            ("effective", []),
+            ("effective", "invalid"),
+        ):
+            with self.subTest(root=root_name, value=repr(malformed)):
+                kwargs = {
+                    "registry": self.registry,
+                    "packet_id": "packet-001",
+                    "logical_role_id": "atlas.workflow-architect",
+                    "admitted_execution_binding": admitted_binding,
+                    "requested": requested,
+                    "effective": effective,
+                    "usage": self.usage(),
+                }
+                kwargs[root_name] = malformed
+                observation = RESOLVER.resolve_execution(**kwargs)
+                self.assertEqual("BLOCKED", observation["decision"]["state"])
+                self.assertIn(
+                    f"{root_name}_root_invalid",
+                    observation["decision"]["findings"],
+                )
+                json.dumps(observation, allow_nan=False, sort_keys=True)
+
+        for malformed in (None, [], "invalid"):
+            with self.subTest(root="canary", value=repr(malformed)):
+                findings = RESOLVER.validate_canary_result(
+                    self.registry, malformed
+                )
+                self.assertIn("canary_result_root_invalid", findings)
+
     def test_five_canaries_bind_baseline_and_acceptance(self) -> None:
         canaries = self.registry["canaries"]
         self.assertEqual(5, len(canaries["classes"]))
@@ -1180,6 +1311,7 @@ class AtlasModelGovernanceContractTests(unittest.TestCase):
         for path in (REGISTRY_PATH, FIXTURE_PATH):
             data = path.read_bytes()
             self.assertTrue(data.endswith(b"\n"))
+            self.assertFalse(data.endswith(b"\n\n"))
             self.assertNotIn(b"\r\n", data)
 
         docs = DOC_PATH.read_text(encoding="utf-8")
