@@ -149,7 +149,16 @@ class AtlasRuntime:
         dependencies = tuple(depends_on)
         event_id = event_id or f"task:{task_id}"
         event_payload = dict(payload or {})
-        event_payload.update({"task_id": task_id, "lane": lane, "scope": scope})
+        # This is the canonical enqueue identity. Do not allow an idempotency
+        # key to conceal priority, dependency, or successor-topology drift.
+        event_payload.update({
+            "task_id": task_id,
+            "lane": lane,
+            "scope": scope,
+            "priority": priority,
+            "depends_on": dependencies,
+            "successor_ids": successors,
+        })
         digest = self.digest(event_payload)
         self.db.execute("BEGIN IMMEDIATE")
         try:

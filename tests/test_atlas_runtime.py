@@ -63,6 +63,15 @@ class AtlasRuntimeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.runtime.complete(task_id=other.task_id, worker_id="w2", run_id="r2", receipt={"event_id": "same", "different": True})
 
+    def test_conflicting_enqueue_event_fails_closed_on_topology_drift(self):
+        self.runtime.enqueue(
+            "a", lane="lane", scope="repo:x", priority=1, successor_ids=["s1"], event_id="enqueue-a"
+        )
+        with self.assertRaises(ValueError):
+            self.runtime.enqueue(
+                "a", lane="lane", scope="repo:x", priority=999, successor_ids=["s2"], event_id="enqueue-a"
+            )
+
     def test_scope_conflict_does_not_starve_independent_task(self):
         self.runtime.enqueue("high1", lane="lane", scope="repo:x", priority=10)
         first = self.runtime.claim(worker_id="w1", run_id="r1")

@@ -12,8 +12,9 @@ review, provider, and production authority boundaries.
   provider, deployment, or protected path set. Path-overlap conflict predicates
   are a later scoped-lock wave.
 - Terminal receipt plus successor enqueue is one transaction.
-- Duplicate task and exact receipt events are idempotent; reusing an event ID
-  with a different digest fails closed.
+- Duplicate task and exact receipt events are idempotent; the canonical enqueue
+  digest includes priority, dependencies, and successors, so reusing an event
+  ID with different behavior fails closed.
 - A successor remains blocked until every declared predecessor succeeds.
 - Restart reconciliation converts expired/orphaned work to `PAUSED_RUNTIME`.
 - Reconciliation exposes `READY_NOT_DISPATCHED` and
