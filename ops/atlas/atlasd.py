@@ -47,7 +47,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "reconcile":
             paused = runtime.reconcile(heartbeat_timeout=args.heartbeat_timeout)
-            output = _health(runtime) | {"paused_runtime_tasks": paused}
+            output = _health(runtime) | {
+                "paused_runtime_tasks": paused,
+                "recovery_dispositions": [item.__dict__ for item in runtime.recovery_dispositions()],
+            }
         else:
             output = _health(runtime)
         print(json.dumps(output, sort_keys=True))
