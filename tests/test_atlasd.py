@@ -68,6 +68,19 @@ class AtlasdTests(unittest.TestCase):
             )
             self.assertEqual(json.loads(result.stdout)["running_worker_count"], 0)
 
+    def test_watchdog_command_observes_without_launching_a_worker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            database = Path(tmp) / "atlasd.db"
+            runtime = AtlasRuntime(database)
+            runtime.enqueue("ready", lane="atlas", scope="repo:atlas")
+            runtime.close()
+            output = StringIO()
+            with redirect_stdout(output):
+                self.assertEqual(main(["--database", str(database), "watchdog", "--event"]), 0)
+            result = json.loads(output.getvalue())
+            self.assertFalse(result["worker_launch_enabled"])
+            self.assertEqual(result["watchdog"]["decisions"][0]["action"], "WAKE_NEEDED")
+
 
 if __name__ == "__main__":
     unittest.main()

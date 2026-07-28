@@ -11,11 +11,14 @@ supervision is enabled.
 python ops/atlas/atlasd.py --database runtime/atlas/atlasd.sqlite init
 python ops/atlas/atlasd.py --database runtime/atlas/atlasd.sqlite health
 python ops/atlas/atlasd.py --database runtime/atlas/atlasd.sqlite reconcile
+python ops/atlas/atlasd.py --database runtime/atlas/atlasd.sqlite watchdog --event
 ```
 
 The SQLite database is runtime state and is intentionally excluded from source
-snapshots. A future adapter wave will add a supervised worker process and only
-then may report a task as `RUNNING`.
+snapshots. `watchdog` records a durable, idempotent wake-or-hold receipt and
+uses a 30-minute fallback when no event is observed. It never launches a
+worker or steers a chat. A future adapter wave will add a supervised worker
+process and only then may report a task as `RUNNING`.
 
 ## Current cutover status
 

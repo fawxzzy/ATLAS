@@ -106,6 +106,10 @@ class AtlasRuntime:
             );
             CREATE INDEX IF NOT EXISTS tasks_runnable ON tasks(state, priority DESC);
             CREATE INDEX IF NOT EXISTS leases_expiry ON leases(expires_at);
+            CREATE TABLE IF NOT EXISTS watchdog_state (
+              name TEXT PRIMARY KEY,
+              last_checked_at REAL NOT NULL
+            );
             """
         )
         columns = {row["name"] for row in self.db.execute("PRAGMA table_info(tasks)")}
@@ -336,6 +340,91 @@ class AtlasRuntime:
             )
             for row in rows
         )
+
+    def reserve_watchdog_tick(
+        self,
+        *,
+        name: str,
+        now: float,
+        fallback_seconds: float,
+        event_observed: bool,
+    ) -> bool:
+        """Atomically reserve one event-driven or fallback watchdog check.
+
+        A second process cannot turn the same fallback window into another
+        durable wake request.  Event observations may re-check immediately,
+        but receipt identities still deduplicate their resulting decisions.
+        """
+        if not name.strip():
+            raise ValueError("watchdog name must be non-empty")
+        if fallback_seconds <= 0:
+            raise ValueError("fallback_seconds must be positive")
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT last_checked_at FROM watchdog_state WHERE name=?", (name,)
+            ).fetchone()
+            due = event_observed or row is None or now - row["last_checked_at"] >= fallback_seconds
+            if due:
+                self.db.execute(
+                    "INSERT INTO watchdog_state(name,last_checked_at) VALUES(?,?) "
+                    "ON CONFLICT(name) DO UPDATE SET last_checked_at=excluded.last_checked_at",
+                    (name, now),
+                )
+            self.db.execute("COMMIT")
+            return due
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def watchdog_tasks(self, *, now: float) -> tuple[tuple[Task, bool], ...]:
+        """Return durable liveness candidates and whether each has a valid lease."""
+        rows = self.db.execute(
+            "SELECT t.*, EXISTS("
+            "SELECT 1 FROM leases l WHERE l.expires_at>? "
+            "AND (l.task_id=t.task_id OR l.scope=t.scope)"
+            ") AS has_valid_lease "
+            "FROM tasks t "
+            "WHERE t.state IN ('QUEUED','BLOCKED_DEPENDENCY','WAITING_MANUAL',"
+            "'WAITING_EXTERNAL','PAUSED_RUNTIME','UNKNOWN') "
+            "ORDER BY t.priority DESC, t.created_at",
+            (now,),
+        ).fetchall()
+        return tuple(
+            (
+                Task(
+                    row["task_id"], row["lane"], row["state"], row["priority"], row["scope"],
+                    tuple(json.loads(row["depends_on"])), tuple(json.loads(row["successor_ids"])),
+                ),
+                bool(row["has_valid_lease"]),
+            )
+            for row in rows
+        )
+
+    def record_watchdog_receipt(self, *, task_id: str, payload: Mapping[str, object], now: float) -> bool:
+        """Persist one canonical wake-or-hold receipt; repeated identity is a no-op."""
+        event_payload = dict(payload)
+        event_payload["task_id"] = task_id
+        digest = self.digest(event_payload)
+        event_id = "watchdog:" + digest.removeprefix("sha256:")
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            existing = self.db.execute(
+                "SELECT payload_digest FROM events WHERE event_id=?", (event_id,)
+            ).fetchone()
+            self._record_event(
+                event_id=event_id,
+                digest=digest,
+                task_id=task_id,
+                kind="WATCHDOG",
+                payload=event_payload,
+                now=now,
+            )
+            self.db.execute("COMMIT")
+            return existing is None
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
 
     def get(self, task_id: str) -> Task | None:
         row = self.db.execute("SELECT * FROM tasks WHERE task_id=?", (task_id,)).fetchone()
