@@ -1820,6 +1820,86 @@ os._exit(97)
                 with self.assertRaises(RECOVERY.ValidationFailure):
                     RECOVERY.validate_envelope(invalid_owner_return)
 
+    def test_envelope_owner_return_requirement_preserves_legacy_v1_compatibility(
+        self,
+    ) -> None:
+        marker = "ATLAS-WORKFLOW-STANDARDIZATION-20260721-001"
+        envelope = RECOVERY._load_json(FIXTURES / "valid-envelope.json")
+
+        standardized_singular = json.loads(json.dumps(envelope))
+        standardized_singular.pop("owner_return")
+        standardized_singular["payload"].pop("policy_ids")
+        standardized_singular["payload"]["policy_id"] = marker
+        standardized_singular["payload_digest"] = RECOVERY._sha256_bytes(
+            RECOVERY._canonical_bytes(standardized_singular["payload"])
+        )
+        with self.assertRaises(RECOVERY.ValidationFailure):
+            RECOVERY.validate_envelope(standardized_singular)
+
+        standardized_plural = json.loads(json.dumps(envelope))
+        standardized_plural.pop("owner_return")
+        with self.assertRaises(RECOVERY.ValidationFailure):
+            RECOVERY.validate_envelope(standardized_plural)
+
+        wrong_field = json.loads(json.dumps(envelope))
+        wrong_field.pop("owner_return")
+        wrong_field["payload"].pop("policy_ids")
+        wrong_field["target_role_id"] = marker
+        wrong_field["payload_digest"] = RECOVERY._sha256_bytes(
+            RECOVERY._canonical_bytes(wrong_field["payload"])
+        )
+        self.assertEqual("PASS", RECOVERY.validate_envelope(wrong_field)["status"])
+
+        wrong_singular_marker = json.loads(json.dumps(envelope))
+        wrong_singular_marker.pop("owner_return")
+        wrong_singular_marker["payload"].pop("policy_ids")
+        wrong_singular_marker["payload"]["policy_id"] = "OTHER-POLICY"
+        wrong_singular_marker["payload_digest"] = RECOVERY._sha256_bytes(
+            RECOVERY._canonical_bytes(wrong_singular_marker["payload"])
+        )
+        self.assertEqual(
+            "PASS",
+            RECOVERY.validate_envelope(wrong_singular_marker)["status"],
+        )
+
+        contains_false = json.loads(json.dumps(envelope))
+        contains_false.pop("owner_return")
+        contains_false["payload"]["policy_ids"] = ["OTHER-POLICY"]
+        contains_false["payload_digest"] = RECOVERY._sha256_bytes(
+            RECOVERY._canonical_bytes(contains_false["payload"])
+        )
+        self.assertEqual("PASS", RECOVERY.validate_envelope(contains_false)["status"])
+
+        malformed_policy_ids = json.loads(json.dumps(envelope))
+        malformed_policy_ids.pop("owner_return")
+        malformed_policy_ids["payload"]["policy_ids"] = marker
+        malformed_policy_ids["payload_digest"] = RECOVERY._sha256_bytes(
+            RECOVERY._canonical_bytes(malformed_policy_ids["payload"])
+        )
+        with self.assertRaises(RECOVERY.ValidationFailure):
+            RECOVERY.validate_envelope(malformed_policy_ids)
+
+        malformed_policy_ids_item = json.loads(json.dumps(envelope))
+        malformed_policy_ids_item.pop("owner_return")
+        malformed_policy_ids_item["payload"]["policy_ids"] = [marker, 7]
+        malformed_policy_ids_item["payload_digest"] = RECOVERY._sha256_bytes(
+            RECOVERY._canonical_bytes(malformed_policy_ids_item["payload"])
+        )
+        with self.assertRaises(RECOVERY.ValidationFailure):
+            RECOVERY.validate_envelope(malformed_policy_ids_item)
+
+        legacy = json.loads(json.dumps(envelope))
+        legacy.pop("owner_return")
+        legacy["payload"].pop("policy_ids")
+        legacy["payload_digest"] = RECOVERY._sha256_bytes(
+            RECOVERY._canonical_bytes(legacy["payload"])
+        )
+        self.assertEqual(
+            "sha256:66194964b3d60e51042d7d600f615c4847f05f05c200d8c4f57124add7b55416",
+            legacy["payload_digest"],
+        )
+        self.assertEqual("PASS", RECOVERY.validate_envelope(legacy)["status"])
+
     def test_fixture_apply_creates_exactly_one_missing_role(self) -> None:
         plan, adapter = self.plan("missing-task.json", mode="apply")
         accepted_digest = plan["plan_digest"]

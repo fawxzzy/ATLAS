@@ -13,7 +13,6 @@
     "source_role_id",
     "source_runtime",
     "target_role_id",
-    "owner_return",
     "correlation",
     "freshness",
     "acknowledgement",
@@ -101,7 +100,45 @@
     },
     "payload": {
       "type": "object",
-      "additionalProperties": true
+      "additionalProperties": true,
+      "properties": {
+        "policy_id": { "type": "string" },
+        "policy_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
     }
+  },
+  "if": {
+    "required": ["payload"],
+    "properties": {
+      "payload": {
+        "anyOf": [
+          {
+            "required": ["policy_id"],
+            "properties": {
+              "policy_id": {
+                "const": "ATLAS-WORKFLOW-STANDARDIZATION-20260721-001"
+              }
+            }
+          },
+          {
+            "required": ["policy_ids"],
+            "properties": {
+              "policy_ids": {
+                "type": "array",
+                "contains": {
+                  "const": "ATLAS-WORKFLOW-STANDARDIZATION-20260721-001"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "then": {
+    "required": ["owner_return"]
   }
 }

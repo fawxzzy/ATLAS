@@ -154,6 +154,21 @@ def _schema_errors(
             errors.append(f"{at}: expected type {' | '.join(allowed)}")
             return errors
 
+    any_of = schema.get("anyOf")
+    if isinstance(any_of, list):
+        if not any(
+            isinstance(candidate, dict)
+            and not _schema_errors(value, candidate, root_schema, at)
+            for candidate in any_of
+        ):
+            errors.append(f"{at}: value does not match any schema in anyOf")
+
+    condition = schema.get("if")
+    if isinstance(condition, dict) and not _schema_errors(value, condition, root_schema, at):
+        consequent = schema.get("then")
+        if isinstance(consequent, dict):
+            errors.extend(_schema_errors(value, consequent, root_schema, at))
+
     if isinstance(value, str):
         if len(value) < schema.get("minLength", 0):
             errors.append(f"{at}: string shorter than {schema['minLength']}")
@@ -167,6 +182,12 @@ def _schema_errors(
     if isinstance(value, list):
         if len(value) < schema.get("minItems", 0):
             errors.append(f"{at}: fewer than {schema['minItems']} items")
+        contains = schema.get("contains")
+        if isinstance(contains, dict) and not any(
+            not _schema_errors(item, contains, root_schema, f"{at}[{index}]")
+            for index, item in enumerate(value)
+        ):
+            errors.append(f"{at}: array does not contain a matching item")
         child = schema.get("items")
         if isinstance(child, dict):
             for index, item in enumerate(value):
