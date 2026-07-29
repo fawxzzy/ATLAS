@@ -173,6 +173,47 @@ def _standardized_envelope(
     return envelope
 
 
+def _continuation_envelope(
+    payload: dict[str, object],
+    *,
+    idempotency_key: str,
+    lifecycle_state: str,
+    wake_condition: str = "EXACT_CONTINUATION_WAKE",
+    source_role_id: str = "atlas.release-control-plane",
+    source_thread_id: str = "release-thread",
+    target_role_id: str = "owner.socials-os",
+    target_thread_id: str = "socials-thread",
+    owner_return_role_id: str = "owner.socials-os",
+    owner_return_thread_id: str = "socials-thread",
+    correlation_id: str = "continuation-correlation",
+    kind: str = "WORKFLOW_RECEIPT",
+) -> dict[str, object]:
+    payload = copy.deepcopy(payload)
+    payload["logical_role_id"] = target_role_id
+    payload["correlation_id"] = correlation_id
+    payload["lifecycle_state"] = lifecycle_state
+    payload["wake_condition"] = wake_condition
+    envelope = _envelope(
+        payload,
+        idempotency_key=idempotency_key,
+        source_role_id=source_role_id,
+    )
+    envelope.update(
+        {
+            "kind": kind,
+            "source_thread_id": source_thread_id,
+            "target_role_id": target_role_id,
+            "target_thread_id": target_thread_id,
+            "owner_return_role_id": owner_return_role_id,
+            "owner_return_thread_id": owner_return_thread_id,
+            "correlation_id": correlation_id,
+            "lifecycle_state": lifecycle_state,
+            "wake_condition": wake_condition,
+        }
+    )
+    return envelope
+
+
 def _standardized_ready_payload(
     packet_id: str,
     *,
@@ -5925,3 +5966,333 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("active", program["active_leases"][0]["status"])
         self.assertEqual([], program["completed_packets"])
         self.assertIn("terminal_cancellation_correlation_required", [item["code"] for item in program["bridge_findings"]])
+
+    def test_clean_review_receipt_routes_one_manual_ready_decision_and_never_stops(self) -> None:
+        receipt = _continuation_envelope(
+            {
+                "receipt_class": "REVIEW",
+                "review_result": "PASS_NO_FINDINGS",
+                "action_required": False,
+            },
+            idempotency_key="review-pass",
+            lifecycle_state="REVIEW_PASS",
+        )
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("owner.socials-os", "socials-thread", "idle"),
+            ("manual.messages", "manual-thread", "idle"),
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings,
+            envelopes=[receipt, receipt],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual(1, len(program["continuation_audits"]))
+        audit = program["continuation_audits"][0]["payload"]
+        self.assertEqual("ROUTE_MANUAL", audit["chosen_outcome"])
+        self.assertEqual("REQUEST_SEPARATELY_GATED_READY_DECISION", audit["next_action"])
+        self.assertTrue(audit["action_required_advisory_ignored"])
+        self.assertFalse(audit["stop_permitted"])
+        successor = audit["successor_envelope"]
+        self.assertEqual("manual.messages", successor["target_role_id"])
+        self.assertEqual("manual-thread", successor["target_thread_id"])
+        self.assertEqual("owner.socials-os", successor["owner_return_role_id"])
+        self.assertEqual("socials-thread", successor["owner_return_thread_id"])
+        self.assertNotIn(successor["target_role_id"], {"atlas.main", "atlas.inbox"})
+
+    def test_ready_merge_and_source_authority_receipts_continue_exact_bounded_actions(self) -> None:
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("owner.socials-os", "socials-thread", "idle"),
+            ("manual.messages", "manual-thread", "idle"),
+        )
+        cases = (
+            (
+                {
+                    "receipt_class": "OPERATOR_DECISION",
+                    "decision": "APPROVE",
+                    "decision_scope": "READY",
+                },
+                "READY_APPROVED",
+                "GUARDED_READY_TRANSITION_THEN_ROUTE_MERGE_DECISION",
+            ),
+            (
+                {
+                    "receipt_class": "OPERATOR_DECISION",
+                    "decision": "APPROVE",
+                    "decision_scope": "MERGE",
+                },
+                "MERGE_APPROVED",
+                "GUARDED_MERGE_THEN_POST_MERGE_VERIFICATION",
+            ),
+            (
+                {
+                    "receipt_class": "SOURCE",
+                    "authority_class": "SOURCE_CORRECTION_AUTHORITY",
+                    "authority_current": True,
+                    "expected_head": "1" * 40,
+                    "actual_head": "1" * 40,
+                },
+                "SOURCE_AUTHORITY_GRANTED",
+                "EXECUTE_BOUNDED_CURRENT_SOURCE_AUTHORITY",
+            ),
+        )
+
+        canonical_kinds = (
+            "OPERATOR_DECISION_ANSWERED",
+            "OPERATOR_DECISION_ANSWER",
+            "OPERATOR_DECISION_ANSWERED",
+        )
+        for index, (payload, lifecycle, next_action) in enumerate(cases):
+            with self.subTest(lifecycle=lifecycle):
+                receipt = _continuation_envelope(
+                    payload,
+                    idempotency_key=f"continue-{index}",
+                    lifecycle_state=lifecycle,
+                    kind=canonical_kinds[index],
+                )
+                program, findings = scheduler.reconcile_runtime_program(
+                    program=_program_payload(),
+                    bindings_payload=bindings,
+                    envelopes=[receipt],
+                )
+
+                self.assertEqual([], findings)
+                audit = program["continuation_audits"][0]["payload"]
+                self.assertEqual("CONTINUE_AUTHORIZED", audit["chosen_outcome"])
+                self.assertEqual(next_action, audit["next_action"])
+                self.assertIsNone(audit["successor_envelope"])
+                self.assertFalse(audit["stop_permitted"])
+
+    def test_unknown_operator_answer_kind_cannot_bypass_continuation_audit(self) -> None:
+        unknown = _continuation_envelope(
+            {
+                "receipt_class": "OPERATOR_DECISION",
+                "decision": "APPROVE",
+                "decision_scope": "READY",
+            },
+            idempotency_key="unknown-answer-kind",
+            lifecycle_state="READY_APPROVED",
+            kind="OPERATOR_RANDOM_ANSWERED",
+        )
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("owner.socials-os", "socials-thread", "idle"),
+            ("manual.messages", "manual-thread", "idle"),
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings,
+            envelopes=[unknown],
+        )
+
+        self.assertEqual(
+            ["continuation_answer_kind_unknown"],
+            [item["code"] for item in findings],
+        )
+        self.assertEqual([], program["continuation_audits"])
+        self.assertEqual([], program["processed_events"])
+
+    def test_verified_source_routes_exact_release_and_returns_to_owner(self) -> None:
+        receipt = _continuation_envelope(
+            {"receipt_class": "SOURCE"},
+            idempotency_key="source-verified",
+            lifecycle_state="SOURCE_VERIFIED",
+        )
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("owner.socials-os", "socials-thread", "idle"),
+            ("manual.messages", "manual-thread", "idle"),
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings,
+            envelopes=[receipt],
+        )
+
+        self.assertEqual([], findings)
+        audit = program["continuation_audits"][0]["payload"]
+        self.assertEqual("ROUTE_REVIEW", audit["chosen_outcome"])
+        successor = audit["successor_envelope"]
+        self.assertEqual("atlas.release-control-plane", successor["target_role_id"])
+        self.assertEqual("release-thread", successor["target_thread_id"])
+        self.assertEqual("owner.socials-os", successor["owner_return_role_id"])
+        self.assertEqual("socials-thread", successor["owner_return_thread_id"])
+
+    def test_delivery_tool_success_without_acceptance_is_delivery_unknown(self) -> None:
+        receipt = _continuation_envelope(
+            {
+                "receipt_class": "DELIVERY",
+                "delivery_tool_status": "SUCCESS",
+                "target_acceptance_readback": "UNKNOWN",
+            },
+            idempotency_key="delivery-unknown",
+            lifecycle_state="DELIVERY_ATTEMPTED",
+        )
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("owner.socials-os", "socials-thread", "idle"),
+        )
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings,
+            envelopes=[receipt],
+        )
+
+        self.assertEqual([], findings)
+        audit = program["continuation_audits"][0]["payload"]
+        self.assertEqual("WAIT_EXTERNAL", audit["chosen_outcome"])
+        self.assertEqual("DELIVERY_UNKNOWN", audit["verification_result"])
+        self.assertFalse(audit["stop_permitted"])
+
+    def test_continuation_receipts_fail_closed_on_missing_wake_wrong_owner_stale_head_and_bad_digest(self) -> None:
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("owner.socials-os", "socials-thread", "idle"),
+            ("owner.fitness", "fitness-thread", "idle"),
+            ("manual.messages", "manual-thread", "idle"),
+        )
+        missing_wake = _continuation_envelope(
+            {"review_result": "PASS_NO_FINDINGS"},
+            idempotency_key="missing-wake",
+            lifecycle_state="REVIEW_PASS",
+            wake_condition="",
+        )
+        wrong_owner = _continuation_envelope(
+            {"review_result": "PASS_NO_FINDINGS"},
+            idempotency_key="wrong-owner",
+            lifecycle_state="REVIEW_PASS",
+            owner_return_role_id="owner.fitness",
+            owner_return_thread_id="fitness-thread",
+        )
+        stale_head = _continuation_envelope(
+            {
+                "authority_class": "SOURCE_AUTHORITY",
+                "authority_current": True,
+                "expected_head": "1" * 40,
+                "actual_head": "2" * 40,
+            },
+            idempotency_key="stale-head",
+            lifecycle_state="SOURCE_AUTHORITY_GRANTED",
+        )
+        missing_source_freshness = _continuation_envelope(
+            {
+                "authority_class": "SOURCE_AUTHORITY",
+                "authority_current": True,
+            },
+            idempotency_key="missing-source-freshness",
+            lifecycle_state="SOURCE_AUTHORITY_GRANTED",
+        )
+        bad_digest = _continuation_envelope(
+            {"review_result": "PASS_NO_FINDINGS"},
+            idempotency_key="bad-digest",
+            lifecycle_state="REVIEW_PASS",
+        )
+        bad_digest["payload"]["review_result"] = "FAILED"
+        cases = (
+            (missing_wake, "continuation_envelope_field_required"),
+            (wrong_owner, "continuation_wrong_owner_return"),
+            (stale_head, "continuation_stale_head"),
+            (missing_source_freshness, "continuation_source_freshness_required"),
+            (bad_digest, "envelope_digest_mismatch"),
+        )
+
+        for envelope, expected in cases:
+            with self.subTest(expected=expected):
+                program, findings = scheduler.reconcile_runtime_program(
+                    program=_program_payload(),
+                    bindings_payload=bindings,
+                    envelopes=[envelope],
+                )
+
+                self.assertEqual([expected], [item["code"] for item in findings])
+                self.assertEqual([], program["continuation_audits"])
+                self.assertEqual([], program["processed_events"])
+
+    def test_continuation_idempotency_rejects_changed_receipt_and_preserves_first_audit(self) -> None:
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("owner.socials-os", "socials-thread", "idle"),
+            ("manual.messages", "manual-thread", "idle"),
+        )
+        first = _continuation_envelope(
+            {"review_result": "PASS_NO_FINDINGS"},
+            idempotency_key="same-continuation",
+            lifecycle_state="REVIEW_PASS",
+        )
+        changed = _continuation_envelope(
+            {"review_result": "FAILED"},
+            idempotency_key="same-continuation",
+            lifecycle_state="ERROR",
+        )
+        program, first_findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings,
+            envelopes=[first],
+        )
+        replayed, replay_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=bindings,
+            envelopes=[first, changed],
+        )
+
+        self.assertEqual([], first_findings)
+        self.assertEqual(
+            ["continuation_idempotency_collision"],
+            [item["code"] for item in replay_findings],
+        )
+        self.assertEqual(1, len(replayed["continuation_audits"]))
+        consumed = replayed["continuation_audits"][0]["payload"]["consumed_receipt"]
+        self.assertEqual(first["event_id"], consumed["event_id"])
+
+    def test_only_complete_terminal_hold_proof_permits_stop(self) -> None:
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("owner.socials-os", "socials-thread", "idle"),
+        )
+        incomplete = _continuation_envelope(
+            {
+                "receipt_class": "TERMINAL_HOLD",
+                "terminal_hold_proof": {
+                    "no_admitted_lane_local_successor": True,
+                },
+            },
+            idempotency_key="incomplete-hold",
+            lifecycle_state="VERIFIED_TERMINAL_HOLD",
+        )
+        proof = {field: True for field in scheduler.CONTINUATION_TERMINAL_HOLD_PROOF_FIELDS}
+        complete = _continuation_envelope(
+            {
+                "receipt_class": "TERMINAL_HOLD",
+                "terminal_hold_proof": proof,
+            },
+            idempotency_key="complete-hold",
+            lifecycle_state="VERIFIED_TERMINAL_HOLD",
+        )
+
+        rejected, rejected_findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings,
+            envelopes=[incomplete],
+        )
+        accepted, accepted_findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings,
+            envelopes=[complete],
+        )
+
+        self.assertEqual(
+            ["continuation_terminal_hold_proof_incomplete"],
+            [item["code"] for item in rejected_findings],
+        )
+        self.assertEqual([], rejected["continuation_audits"])
+        self.assertEqual([], accepted_findings)
+        audit = accepted["continuation_audits"][0]["payload"]
+        self.assertEqual("VERIFIED_TERMINAL_HOLD", audit["chosen_outcome"])
+        self.assertTrue(audit["stop_permitted"])
