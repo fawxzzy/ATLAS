@@ -95,6 +95,74 @@ NONCOMPLETION_TERMINAL_SUCCESSORS = {
     "EXTERNAL_WAIT",
     "ERROR_RECOVERY",
 }
+CONTINUATION_OUTCOMES = {
+    "CONTINUE_AUTHORIZED",
+    "ROUTE_REVIEW",
+    "ROUTE_MANUAL",
+    "WAIT_EXTERNAL",
+    "ERROR_RECOVERY",
+    "VERIFIED_TERMINAL_HOLD",
+}
+CONTINUATION_RECEIPT_KINDS = {
+    "OPERATOR_ANSWER",
+    "OPERATOR_DECISION_ANSWER",
+    "OPERATOR_DECISION_ANSWERED",
+    "REVIEW_RECEIPT",
+    "WORKFLOW_RECEIPT",
+    "WORKFLOW_SETTLEMENT_RECEIPT",
+    "WORKFLOW_TERMINAL_RECEIPT",
+}
+CONTINUATION_REVIEW_PASS_RESULTS = {
+    "APPROVED",
+    "CLEAN_NO_MAJOR_ISSUES",
+    "PASS",
+    "PASS_NO_FINDINGS",
+}
+CONTINUATION_EXTERNAL_STATES = {
+    "DELIVERY_UNKNOWN",
+    "EXTERNAL_WAIT",
+    "HOST_UNAVAILABLE",
+    "REVIEW_LATENCY",
+    "WAITING_EXTERNAL",
+}
+CONTINUATION_ERROR_STATES = {
+    "BLOCKED_ERROR",
+    "ERROR",
+    "ERROR_RECOVERY",
+    "FAILED",
+    "RECOVERY_REQUIRED",
+    "UNKNOWN",
+}
+CONTINUATION_SOURCE_AUTHORITY_CLASSES = {
+    "POST_MERGE_SOURCE_AUTHORITY",
+    "SOURCE_AUTHORITY",
+    "SOURCE_CORRECTION_AUTHORITY",
+    "SOURCE_REPAIR_AUTHORITY",
+}
+CONTINUATION_SOURCE_REVIEW_STATES = {
+    "CORRECTION_VERIFIED",
+    "SOURCE_READY_FOR_REVIEW",
+    "SOURCE_VERIFIED",
+}
+CONTINUATION_REQUIRED_FIELDS = (
+    "idempotency_key",
+    "source_role_id",
+    "source_thread_id",
+    "target_role_id",
+    "target_thread_id",
+    "owner_return_role_id",
+    "owner_return_thread_id",
+    "correlation_id",
+    "lifecycle_state",
+    "wake_condition",
+)
+CONTINUATION_TERMINAL_HOLD_PROOF_FIELDS = (
+    "no_admitted_lane_local_successor",
+    "no_unanswered_manual_decision",
+    "no_pending_owner_return",
+    "no_in_flight_external_review",
+    "no_collision_free_ready_packet",
+)
 LEGACY_MANUAL_SUCCESSOR_STATES = {"MANUAL_REQUIRED", "WAITING_ON_ZAC"}
 LEGACY_EXTERNAL_SUCCESSOR_STATES = {
     "EXTERNAL_WAIT",
@@ -980,6 +1048,355 @@ def _binding_index(bindings_payload: dict[str, Any]) -> dict[str, dict[str, Any]
     }
 
 
+def _requires_continuation_audit(envelope: dict[str, Any]) -> bool:
+    payload = envelope.get("payload")
+    kind = str(envelope.get("kind") or "").upper()
+    return bool(
+        kind in CONTINUATION_RECEIPT_KINDS
+        or kind.endswith("_RECEIPT")
+        or (isinstance(payload, dict) and payload.get("continuation_audit_required") is True)
+    )
+
+
+def _unknown_continuation_answer_kind(envelope: dict[str, Any]) -> bool:
+    kind = str(envelope.get("kind") or "").upper()
+    answer_shaped = kind.endswith("_ANSWER") or kind.endswith("_ANSWERED")
+    return bool(answer_shaped and kind not in CONTINUATION_RECEIPT_KINDS)
+
+
+def _continuation_binding_error(
+    *,
+    bindings: dict[str, dict[str, Any]],
+    role_id: str,
+    thread_id: str,
+    identity: str,
+) -> OrderedDict[str, Any] | None:
+    binding = bindings.get(role_id)
+    expected_thread_id = str(binding.get("current_runtime_id") or "") if isinstance(binding, dict) else ""
+    if (
+        not isinstance(binding, dict)
+        or binding.get("archived") is True
+        or thread_id != expected_thread_id
+    ):
+        return _finding(
+            f"continuation_{identity}_binding_mismatch",
+            f"Incoming continuation {identity} must match one current unarchived role binding.",
+            role_id=role_id or None,
+            thread_id=thread_id or None,
+            expected_thread_id=expected_thread_id or None,
+        )
+    return None
+
+
+def _continuation_successor_envelope(
+    *,
+    consumed_envelope: dict[str, Any],
+    bindings: dict[str, dict[str, Any]],
+    outcome: str,
+    next_action: str,
+) -> tuple[OrderedDict[str, Any] | None, OrderedDict[str, Any] | None]:
+    if outcome not in {"ROUTE_REVIEW", "ROUTE_MANUAL"}:
+        return None, None
+    target_role_id = "atlas.release-control-plane" if outcome == "ROUTE_REVIEW" else "manual.messages"
+    binding = bindings.get(target_role_id)
+    target_thread_id = str(binding.get("current_runtime_id") or "") if isinstance(binding, dict) else ""
+    target_host_id = str(binding.get("host_id") or "") if isinstance(binding, dict) else ""
+    if (
+        not isinstance(binding, dict)
+        or binding.get("archived") is True
+        or not target_thread_id
+        or not target_host_id
+    ):
+        return None, _finding(
+            "continuation_successor_binding_missing",
+            "A routed continuation requires the exact current target role binding.",
+            target_role_id=target_role_id,
+        )
+
+    owner_role_id = str(consumed_envelope["target_role_id"])
+    owner_thread_id = str(consumed_envelope["target_thread_id"])
+    correlation_id = str(consumed_envelope["correlation_id"])
+    source_event_id = str(consumed_envelope["event_id"])
+    route = "REVIEW" if outcome == "ROUTE_REVIEW" else "MANUAL_DECISION"
+    successor_payload = OrderedDict(
+        [
+            ("canonical_lifecycle_state", f"{route}_REQUESTED"),
+            ("continuation_audit_required", False),
+            ("correlation_id", correlation_id),
+            ("source_receipt_event_id", source_event_id),
+            ("source_receipt_payload_digest", consumed_envelope["payload_digest"]),
+            ("logical_role_id", target_role_id),
+            ("next_action", next_action),
+            ("terminal", False),
+            ("blocking", outcome == "ROUTE_MANUAL"),
+        ]
+    )
+    successor_digest = _canonical_payload_digest(successor_payload)
+    wake_condition = (
+        f"EXACT_HEAD_RELEASE_REVIEW_RECEIPT:{correlation_id}"
+        if outcome == "ROUTE_REVIEW"
+        else f"EXACT_OPERATOR_DECISION_ANSWER:{correlation_id}"
+    )
+    successor = OrderedDict(
+        [
+            ("schema", "atlas.workflow.envelope.v1"),
+            ("kind", f"WORKFLOW_{route}_REQUEST"),
+            ("event_id", "onv1_" + successor_digest.removeprefix("sha256:")),
+            ("payload_digest", successor_digest),
+            (
+                "idempotency_key",
+                f"{consumed_envelope['idempotency_key']}:{route}",
+            ),
+            ("source_role_id", owner_role_id),
+            ("source_thread_id", owner_thread_id),
+            ("target_role_id", target_role_id),
+            ("target_thread_id", target_thread_id),
+            ("owner_return_role_id", owner_role_id),
+            ("owner_return_thread_id", owner_thread_id),
+            ("correlation_id", correlation_id),
+            ("lifecycle_state", f"{route}_REQUESTED"),
+            ("wake_condition", wake_condition),
+            (
+                "owner_return",
+                OrderedDict(
+                    [
+                        ("logical_role_id", owner_role_id),
+                        ("thread_id", owner_thread_id),
+                        ("host_id", str(bindings[owner_role_id].get("host_id") or "local")),
+                    ]
+                ),
+            ),
+            ("payload", successor_payload),
+        ]
+    )
+    return successor, None
+
+
+def _continuation_outcome(
+    *,
+    envelope: dict[str, Any],
+) -> tuple[str | None, str | None, str | None, OrderedDict[str, Any] | None]:
+    payload = envelope["payload"]
+    lifecycle_state = str(envelope["lifecycle_state"]).upper()
+    receipt_class = str(payload.get("receipt_class") or "").upper()
+    decision = str(payload.get("decision") or "").upper()
+    decision_scope = str(payload.get("decision_scope") or "").upper()
+    review_result = str(payload.get("review_result") or "").upper()
+    authority_class = str(payload.get("authority_class") or "").upper()
+    delivery_tool_status = str(payload.get("delivery_tool_status") or "").upper()
+    target_acceptance = str(payload.get("target_acceptance_readback") or "").upper()
+
+    if delivery_tool_status == "SUCCESS" and target_acceptance != "ACCEPTED":
+        return (
+            "WAIT_EXTERNAL",
+            "WAIT_FOR_EXACT_DESTINATION_ACCEPTANCE_READBACK",
+            "DELIVERY_UNKNOWN",
+            None,
+        )
+
+    if receipt_class == "TERMINAL_HOLD" or lifecycle_state == "VERIFIED_TERMINAL_HOLD":
+        proof = payload.get("terminal_hold_proof")
+        if not isinstance(proof, dict) or any(
+            proof.get(field) is not True
+            for field in CONTINUATION_TERMINAL_HOLD_PROOF_FIELDS
+        ):
+            return None, None, None, _finding(
+                "continuation_terminal_hold_proof_incomplete",
+                "A terminal hold requires explicit negative proof for every admitted continuation source.",
+            )
+        return (
+            "VERIFIED_TERMINAL_HOLD",
+            "STOP_ONLY_AT_VERIFIED_TERMINAL_BOUNDARY",
+            "VERIFIED",
+            None,
+        )
+
+    if decision == "APPROVE" and decision_scope == "READY":
+        return (
+            "CONTINUE_AUTHORIZED",
+            "GUARDED_READY_TRANSITION_THEN_ROUTE_MERGE_DECISION",
+            "VERIFIED",
+            None,
+        )
+    if decision == "APPROVE" and decision_scope == "MERGE":
+        return (
+            "CONTINUE_AUTHORIZED",
+            "GUARDED_MERGE_THEN_POST_MERGE_VERIFICATION",
+            "VERIFIED",
+            None,
+        )
+    if (
+        authority_class in CONTINUATION_SOURCE_AUTHORITY_CLASSES
+        and payload.get("authority_current") is True
+    ):
+        if (
+            not isinstance(payload.get("expected_head"), str)
+            or not COMMIT_SHA_PATTERN.fullmatch(str(payload["expected_head"]))
+            or payload.get("actual_head") != payload.get("expected_head")
+        ):
+            return None, None, None, _finding(
+                "continuation_source_freshness_required",
+                "Source continuation requires exact current-head authority and readback.",
+            )
+        return (
+            "CONTINUE_AUTHORIZED",
+            "EXECUTE_BOUNDED_CURRENT_SOURCE_AUTHORITY",
+            "VERIFIED",
+            None,
+        )
+    if receipt_class == "SOURCE" and lifecycle_state in CONTINUATION_SOURCE_REVIEW_STATES:
+        return "ROUTE_REVIEW", "REQUEST_EXACT_HEAD_INDEPENDENT_REVIEW", "VERIFIED", None
+    if review_result in CONTINUATION_REVIEW_PASS_RESULTS:
+        return "ROUTE_MANUAL", "REQUEST_SEPARATELY_GATED_READY_DECISION", "VERIFIED", None
+    if lifecycle_state in CONTINUATION_EXTERNAL_STATES:
+        return "WAIT_EXTERNAL", "WAIT_FOR_NAMED_EXTERNAL_WAKE", "VERIFIED", None
+    if lifecycle_state in CONTINUATION_ERROR_STATES:
+        return "ERROR_RECOVERY", "EMIT_CONTENT_ADDRESSED_RECOVERY_PACKET", "VERIFIED", None
+    return "ERROR_RECOVERY", "EMIT_UNCLASSIFIED_RECEIPT_RECOVERY_PACKET", "VERIFIED", None
+
+
+def _build_continuation_audit(
+    *,
+    envelope: dict[str, Any],
+    bindings: dict[str, dict[str, Any]],
+) -> tuple[OrderedDict[str, Any] | None, OrderedDict[str, Any] | None]:
+    missing = [
+        field
+        for field in CONTINUATION_REQUIRED_FIELDS
+        if not isinstance(envelope.get(field), str) or not str(envelope[field]).strip()
+    ]
+    if missing:
+        return None, _finding(
+            "continuation_envelope_field_required",
+            "Incoming receipts and operator answers require every explicit continuation identity.",
+            missing_fields=missing,
+        )
+    payload = envelope.get("payload")
+    if not isinstance(payload, dict):
+        return None, _finding(
+            "continuation_payload_required",
+            "Incoming continuation payload must be a canonical object.",
+        )
+
+    correlation_id = str(envelope["correlation_id"])
+    lifecycle_state = str(envelope["lifecycle_state"])
+    wake_condition = str(envelope["wake_condition"])
+    for payload_field, expected in (
+        ("correlation_id", correlation_id),
+        ("lifecycle_state", lifecycle_state),
+        ("wake_condition", wake_condition),
+    ):
+        supplied = payload.get(payload_field)
+        if supplied is not None and supplied != expected:
+            return None, _finding(
+                f"continuation_{payload_field}_mismatch",
+                f"Incoming continuation {payload_field} must be stable across envelope and payload.",
+                expected=expected,
+                actual=supplied,
+            )
+
+    source_role_id = str(envelope["source_role_id"])
+    source_thread_id = str(envelope["source_thread_id"])
+    target_role_id = str(envelope["target_role_id"])
+    target_thread_id = str(envelope["target_thread_id"])
+    owner_role_id = str(envelope["owner_return_role_id"])
+    owner_thread_id = str(envelope["owner_return_thread_id"])
+    if target_role_id != owner_role_id or target_thread_id != owner_thread_id:
+        return None, _finding(
+            "continuation_wrong_owner_return",
+            "A received owner-first continuation must target and return to the same exact owner task.",
+            target_role_id=target_role_id,
+            target_thread_id=target_thread_id,
+            owner_return_role_id=owner_role_id,
+            owner_return_thread_id=owner_thread_id,
+        )
+    for identity, role_id, thread_id in (
+        ("source", source_role_id, source_thread_id),
+        ("target", target_role_id, target_thread_id),
+        ("owner_return", owner_role_id, owner_thread_id),
+    ):
+        if binding_error := _continuation_binding_error(
+            bindings=bindings,
+            role_id=role_id,
+            thread_id=thread_id,
+            identity=identity,
+        ):
+            return None, binding_error
+
+    expected_head = payload.get("expected_head")
+    actual_head = payload.get("actual_head")
+    if expected_head is not None and (
+        not isinstance(expected_head, str)
+        or not COMMIT_SHA_PATTERN.fullmatch(expected_head)
+        or actual_head != expected_head
+    ):
+        return None, _finding(
+            "continuation_stale_head",
+            "Head-bound continuation authority requires an exact current head readback.",
+            expected_head=expected_head,
+            actual_head=actual_head,
+        )
+
+    outcome, next_action, verification_result, outcome_error = _continuation_outcome(envelope=envelope)
+    if outcome_error is not None:
+        return None, outcome_error
+    if outcome not in CONTINUATION_OUTCOMES or next_action is None or verification_result is None:
+        return None, _finding(
+            "continuation_outcome_unclosed",
+            "Every consumed continuation must resolve to one closed audited outcome.",
+        )
+    successor, successor_error = _continuation_successor_envelope(
+        consumed_envelope=envelope,
+        bindings=bindings,
+        outcome=outcome,
+        next_action=next_action,
+    )
+    if successor_error is not None:
+        return None, successor_error
+
+    audit_payload = OrderedDict(
+        [
+            (
+                "consumed_receipt",
+                OrderedDict(
+                    [
+                        ("event_id", envelope["event_id"]),
+                        ("payload_digest", envelope["payload_digest"]),
+                        ("idempotency_key", envelope["idempotency_key"]),
+                        ("source_role_id", source_role_id),
+                        ("source_thread_id", source_thread_id),
+                        ("target_role_id", target_role_id),
+                        ("target_thread_id", target_thread_id),
+                        ("owner_return_role_id", owner_role_id),
+                        ("owner_return_thread_id", owner_thread_id),
+                        ("correlation_id", correlation_id),
+                        ("lifecycle_state", lifecycle_state),
+                        ("wake_condition", wake_condition),
+                    ]
+                ),
+            ),
+            ("chosen_outcome", outcome),
+            ("next_action", next_action),
+            ("successor_envelope", successor),
+            ("verification_result", verification_result),
+            ("action_required_advisory_ignored", payload.get("action_required") is False),
+            ("stop_permitted", outcome == "VERIFIED_TERMINAL_HOLD"),
+        ]
+    )
+    audit_digest = _canonical_payload_digest(audit_payload)
+    return (
+        OrderedDict(
+            [
+                ("schema", "atlas.workflow.continuation-audit.v1"),
+                ("event_id", "onv1_" + audit_digest.removeprefix("sha256:")),
+                ("payload_digest", audit_digest),
+                ("payload", audit_payload),
+            ]
+        ),
+        None,
+    )
+
+
 def _deterministic_reservation_id(packet: dict[str, Any]) -> str:
     authority = packet.get("authority") if isinstance(packet.get("authority"), dict) else {}
     reservation_parts = [
@@ -1273,6 +1690,23 @@ def reconcile_runtime_program(
         for item in processed_items
         if isinstance(item.get("event_id"), str) and isinstance(item.get("payload_digest"), str)
     }
+    continuation_audits = [
+        item
+        for item in reconciled.get("continuation_audits", [])
+        if isinstance(item, dict)
+    ]
+    continuation_by_event = {
+        str(item.get("payload", {}).get("consumed_receipt", {}).get("event_id") or ""): item
+        for item in continuation_audits
+        if isinstance(item.get("payload"), dict)
+        and isinstance(item["payload"].get("consumed_receipt"), dict)
+    }
+    continuation_by_idempotency = {
+        str(item.get("payload", {}).get("consumed_receipt", {}).get("idempotency_key") or ""): item
+        for item in continuation_audits
+        if isinstance(item.get("payload"), dict)
+        and isinstance(item["payload"].get("consumed_receipt"), dict)
+    }
     packets = {str(item.get("packet_id")): item for item in standing if item.get("packet_id")}
 
     for envelope in envelopes:
@@ -1299,6 +1733,53 @@ def reconcile_runtime_program(
                 )
             )
             continue
+        if _unknown_continuation_answer_kind(envelope):
+            findings.append(
+                _finding(
+                    "continuation_answer_kind_unknown",
+                    "Unknown operator-answer kinds cannot bypass the continuation audit.",
+                    event_id=event_id,
+                    kind=envelope.get("kind"),
+                )
+            )
+            continue
+        if _requires_continuation_audit(envelope):
+            continuation_audit, continuation_error = _build_continuation_audit(
+                envelope=envelope,
+                bindings=bindings,
+            )
+            if continuation_error is not None:
+                continuation_error.setdefault("details", {})
+                continuation_error["details"]["event_id"] = event_id
+                findings.append(continuation_error)
+                continue
+            consumed = continuation_audit["payload"]["consumed_receipt"]
+            prior_audit = continuation_by_event.get(event_id)
+            prior_idempotency = continuation_by_idempotency.get(str(envelope["idempotency_key"]))
+            if prior_audit is not None:
+                if prior_audit != continuation_audit:
+                    findings.append(
+                        _finding(
+                            "continuation_event_collision",
+                            "One consumed continuation event cannot produce multiple audits.",
+                            event_id=event_id,
+                        )
+                    )
+                    continue
+            elif prior_idempotency is not None:
+                findings.append(
+                    _finding(
+                        "continuation_idempotency_collision",
+                        "One continuation idempotency key cannot identify multiple receipt events.",
+                        event_id=event_id,
+                        idempotency_key=envelope["idempotency_key"],
+                    )
+                )
+                continue
+            else:
+                continuation_audits.append(continuation_audit)
+                continuation_by_event[event_id] = continuation_audit
+                continuation_by_idempotency[str(consumed["idempotency_key"])] = continuation_audit
         policy_ids, policy_error = _normalized_policy_ids(payload)
         if policy_error is not None:
             policy_error.setdefault("details", {})
@@ -2226,6 +2707,7 @@ def reconcile_runtime_program(
     reconciled["completed_packets"] = sorted(completed)
     reconciled["completed_receipts"] = completed_receipts
     reconciled["processed_events"] = processed_items
+    reconciled["continuation_audits"] = continuation_audits
     reconciled["bridge_findings"] = findings
     reconciled["source_snapshot_digest"] = _canonical_payload_digest(
         {
