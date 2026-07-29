@@ -315,6 +315,53 @@ class AtlasRuntimeTests(unittest.TestCase):
         finally:
             migrated.close()
 
+    def test_migrated_watchdog_runs_require_expiry_for_future_active_writes(self):
+        legacy_database = Path(self.tmp.name) / "legacy-write-guard.db"
+        legacy = sqlite3.connect(legacy_database)
+        legacy.executescript(
+            """
+            CREATE TABLE watchdog_runs (
+              reservation_id TEXT PRIMARY KEY,
+              name TEXT NOT NULL,
+              state TEXT NOT NULL,
+              reserved_at REAL NOT NULL,
+              terminal_at REAL
+            );
+            INSERT INTO watchdog_runs(
+              reservation_id,name,state,reserved_at,terminal_at
+            ) VALUES('terminal','watchdog','ABANDONED',100,101);
+            """
+        )
+        legacy.commit()
+        legacy.close()
+        migrated = AtlasRuntime(legacy_database)
+        try:
+            with self.assertRaises(sqlite3.IntegrityError):
+                migrated.db.execute(
+                    "INSERT INTO watchdog_runs("
+                    "reservation_id,name,state,reserved_at,expires_at,terminal_at"
+                    ") VALUES('missing-expiry','other','IN_PROGRESS',100,NULL,NULL)"
+                )
+            with self.assertRaises(sqlite3.IntegrityError):
+                migrated.db.execute(
+                    "UPDATE watchdog_runs SET state='IN_PROGRESS',expires_at=NULL "
+                    "WHERE reservation_id='terminal'"
+                )
+            migrated.db.execute(
+                "INSERT INTO watchdog_runs("
+                "reservation_id,name,state,reserved_at,expires_at,terminal_at"
+                ") VALUES('issued','other','IN_PROGRESS',100,105,NULL)"
+            )
+            self.assertEqual(
+                migrated.db.execute(
+                    "SELECT state,expires_at FROM watchdog_runs "
+                    "WHERE reservation_id='issued'"
+                ).fetchone()["expires_at"],
+                105,
+            )
+        finally:
+            migrated.close()
+
     def test_abandoned_watchdog_run_retries_immediately(self):
         reservation = self.runtime.reserve_watchdog_tick(
             name="watchdog",
@@ -394,6 +441,94 @@ class AtlasRuntimeTests(unittest.TestCase):
                 (reservation.reservation_id,),
             ).fetchone()["state"],
             "IN_PROGRESS",
+        )
+        self.assertIsNone(
+            self.runtime.db.execute(
+                "SELECT * FROM watchdog_state WHERE name='watchdog'"
+            ).fetchone()
+        )
+        self.assertFalse(self.runtime.db.in_transaction)
+
+    def test_watchdog_completion_rejects_forged_issued_fields(self):
+        reservation = self.runtime.reserve_watchdog_tick(
+            name="watchdog",
+            now=100,
+            fallback_seconds=60,
+            reservation_seconds=5,
+            event_observed=False,
+        )
+        for forged in (
+            WatchdogReservation(
+                name="other",
+                reservation_id=reservation.reservation_id,
+                reserved_at=reservation.reserved_at,
+                expires_at=reservation.expires_at,
+            ),
+            WatchdogReservation(
+                name=reservation.name,
+                reservation_id=reservation.reservation_id,
+                reserved_at=999,
+                expires_at=reservation.expires_at,
+            ),
+            WatchdogReservation(
+                name=reservation.name,
+                reservation_id=reservation.reservation_id,
+                reserved_at=reservation.reserved_at,
+                expires_at=999,
+            ),
+        ):
+            with self.subTest(forged=forged), self.assertRaises(KeyError):
+                self.runtime.complete_watchdog_tick(reservation=forged, now=101)
+        row = self.runtime.db.execute(
+            "SELECT state,reserved_at,expires_at FROM watchdog_runs "
+            "WHERE reservation_id=?",
+            (reservation.reservation_id,),
+        ).fetchone()
+        self.assertEqual(tuple(row), ("IN_PROGRESS", 100, 105))
+        self.assertIsNone(
+            self.runtime.db.execute(
+                "SELECT * FROM watchdog_state WHERE name='watchdog'"
+            ).fetchone()
+        )
+        self.assertFalse(self.runtime.db.in_transaction)
+
+    def test_expired_watchdog_completion_rejects_without_cooldown_then_recovers(self):
+        expired = self.runtime.reserve_watchdog_tick(
+            name="watchdog",
+            now=100,
+            fallback_seconds=60,
+            reservation_seconds=5,
+            event_observed=False,
+        )
+        with self.assertRaises(KeyError):
+            self.runtime.complete_watchdog_tick(reservation=expired, now=105)
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT state FROM watchdog_runs WHERE reservation_id=?",
+                (expired.reservation_id,),
+            ).fetchone()["state"],
+            "IN_PROGRESS",
+        )
+        self.assertIsNone(
+            self.runtime.db.execute(
+                "SELECT * FROM watchdog_state WHERE name='watchdog'"
+            ).fetchone()
+        )
+        replacement = self.runtime.reserve_watchdog_tick(
+            name="watchdog",
+            now=105,
+            fallback_seconds=60,
+            reservation_seconds=5,
+            event_observed=False,
+        )
+        self.assertIsNotNone(replacement)
+        self.assertNotEqual(replacement.reservation_id, expired.reservation_id)
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT state FROM watchdog_runs WHERE reservation_id=?",
+                (expired.reservation_id,),
+            ).fetchone()["state"],
+            "ABANDONED",
         )
         self.assertIsNone(
             self.runtime.db.execute(

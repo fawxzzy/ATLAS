@@ -147,6 +147,22 @@ class AtlasRuntime:
             # A pre-migration in-progress run has no trustworthy issued expiry.
             # Leave it fail-closed until its owner explicitly abandons it.
             self.db.execute("ALTER TABLE watchdog_runs ADD COLUMN expires_at REAL")
+        self.db.executescript(
+            """
+            CREATE TRIGGER IF NOT EXISTS watchdog_in_progress_requires_expiry_insert
+              BEFORE INSERT ON watchdog_runs
+              WHEN NEW.state='IN_PROGRESS' AND NEW.expires_at IS NULL
+            BEGIN
+              SELECT RAISE(ABORT, 'in-progress watchdog run requires expires_at');
+            END;
+            CREATE TRIGGER IF NOT EXISTS watchdog_in_progress_requires_expiry_update
+              BEFORE UPDATE ON watchdog_runs
+              WHEN NEW.state='IN_PROGRESS' AND NEW.expires_at IS NULL
+            BEGIN
+              SELECT RAISE(ABORT, 'in-progress watchdog run requires expires_at');
+            END;
+            """
+        )
 
     def _record_event(self, *, event_id: str, digest: str, task_id: str, kind: str,
                       payload: Mapping[str, object], now: float) -> None:
@@ -446,15 +462,28 @@ class AtlasRuntime:
         now: float,
     ) -> None:
         """Mark a watchdog run successful and begin its fallback cooldown."""
+        if not math.isfinite(now):
+            raise ValueError("now must be finite")
         self.db.execute("BEGIN IMMEDIATE")
         try:
             cur = self.db.execute(
                 "UPDATE watchdog_runs SET state='SUCCEEDED', terminal_at=? "
-                "WHERE reservation_id=? AND name=? AND state='IN_PROGRESS'",
-                (now, reservation.reservation_id, reservation.name),
+                "WHERE reservation_id=? AND name=? AND state='IN_PROGRESS' "
+                "AND reserved_at=? AND expires_at=? AND expires_at>?",
+                (
+                    now,
+                    reservation.reservation_id,
+                    reservation.name,
+                    reservation.reserved_at,
+                    reservation.expires_at,
+                    now,
+                ),
             )
             if cur.rowcount != 1:
-                raise KeyError("watchdog reservation is absent or no longer in progress")
+                raise KeyError(
+                    "watchdog reservation is absent, expired, mismatched, "
+                    "or no longer in progress"
+                )
             self.db.execute(
                 "INSERT INTO watchdog_state(name,last_checked_at) VALUES(?,?) "
                 "ON CONFLICT(name) DO UPDATE SET last_checked_at=excluded.last_checked_at",

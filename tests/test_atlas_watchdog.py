@@ -97,7 +97,7 @@ class AtlasWatchdogTests(unittest.TestCase):
             self.runtime,
             clock=clock,
             fallback_seconds=20,
-            reservation_seconds=5,
+            reservation_seconds=60,
         )
         original = self.runtime.watchdog_tasks
 
