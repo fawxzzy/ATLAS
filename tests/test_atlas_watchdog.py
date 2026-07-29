@@ -143,10 +143,10 @@ class AtlasWatchdogTests(unittest.TestCase):
         self.assertTrue(retry.checked)
         self.assertEqual(retry.decisions[0].action, "WAKE_NEEDED")
 
-    def test_receipt_failure_abandons_and_retry_deduplicates_completed_work(self):
+    def test_receipt_batch_failure_abandons_and_retry_commits_complete_set(self):
         self.runtime.enqueue("first", lane="atlas", scope="repo:first", priority=10)
         self.runtime.enqueue("second", lane="atlas", scope="repo:second")
-        original = self.runtime.record_watchdog_receipt
+        original = self.runtime._record_event
         calls = 0
 
         def fail_after_one_receipt(**kwargs):
@@ -158,7 +158,7 @@ class AtlasWatchdogTests(unittest.TestCase):
 
         with patch.object(
             self.runtime,
-            "record_watchdog_receipt",
+            "_record_event",
             side_effect=fail_after_one_receipt,
         ):
             with self.assertRaisesRegex(RuntimeError, "receipt failure"):
@@ -169,16 +169,42 @@ class AtlasWatchdogTests(unittest.TestCase):
             ).fetchone()["state"],
             "ABANDONED",
         )
-        with patch.object(
-            self.runtime,
-            "record_watchdog_receipt",
-            wraps=original,
-        ) as recorder:
-            retry = self.tick(event=False)
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT COUNT(*) FROM events WHERE kind='WATCHDOG'"
+            ).fetchone()[0],
+            0,
+        )
+        retry = self.tick(event=False)
         self.assertTrue(retry.checked)
-        self.assertEqual(recorder.call_count, 2)
-        self.assertFalse(retry.decisions[0].receipt_recorded)
+        self.assertTrue(retry.decisions[0].receipt_recorded)
         self.assertTrue(retry.decisions[1].receipt_recorded)
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT COUNT(*) FROM events WHERE kind='WATCHDOG'"
+            ).fetchone()[0],
+            2,
+        )
+
+    def test_cleanup_failure_does_not_mask_finalization_failure(self):
+        self.runtime.enqueue("ready", lane="atlas", scope="repo:atlas")
+        with (
+            patch.object(
+                self.runtime,
+                "finalize_watchdog_tick",
+                side_effect=RuntimeError("primary finalization failure"),
+            ),
+            patch.object(
+                self.runtime,
+                "abandon_watchdog_tick",
+                side_effect=RuntimeError("cleanup failure"),
+            ),
+        ):
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "primary finalization failure",
+            ):
+                self.tick(event=False)
 
     def test_two_watchdogs_share_one_successful_fallback_window(self):
         database = Path(self.tmp.name) / "concurrent.sqlite"
@@ -265,6 +291,13 @@ class AtlasWatchdogTests(unittest.TestCase):
 
     def test_stale_observation_records_only_and_cannot_mutate_or_release(self):
         self.runtime.enqueue("stale", lane="atlas", scope="repo:stale")
+        reservation = self.runtime.reserve_watchdog_tick(
+            name=self.watchdog.name,
+            now=self.clock.now,
+            fallback_seconds=self.watchdog.fallback_seconds,
+            reservation_seconds=self.watchdog.reservation_seconds,
+            event_observed=True,
+        )
         stale_task, has_valid_lease = self.runtime.watchdog_tasks(now=self.clock.now)[0]
         self.assertFalse(has_valid_lease)
         lease = self.runtime.claim(worker_id="worker", run_id="run", lease_seconds=600)
@@ -272,10 +305,15 @@ class AtlasWatchdogTests(unittest.TestCase):
             "SELECT worker_id,run_id,expires_at FROM leases WHERE task_id='stale'"
         ).fetchone()
 
-        decision = self.watchdog._record_decision(
+        decision, payload = self.watchdog._plan_decision(
             stale_task,
             has_valid_lease,
             self.clock.now,
+        )
+        recorded = self.runtime.finalize_watchdog_tick(
+            reservation=reservation,
+            receipts=((decision.task_id, payload),),
+            now=self.clock.now,
         )
 
         after = self.runtime.db.execute(
@@ -285,6 +323,7 @@ class AtlasWatchdogTests(unittest.TestCase):
             "SELECT payload FROM events WHERE kind='WATCHDOG'"
         ).fetchone()
         self.assertEqual(decision.reason, "STRANDED_READY_NO_VALID_LEASE")
+        self.assertEqual(recorded, (True,))
         self.assertEqual(self.runtime.get("stale").state, "RUNNING")
         self.assertEqual(tuple(before), tuple(after))
         self.assertEqual(after["run_id"], lease.run_id)

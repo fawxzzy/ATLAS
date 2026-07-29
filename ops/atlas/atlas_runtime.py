@@ -135,6 +135,12 @@ class AtlasRuntime:
               ON watchdog_runs(name) WHERE state='IN_PROGRESS';
             CREATE INDEX IF NOT EXISTS watchdog_runs_name_state
               ON watchdog_runs(name, state, reserved_at);
+            CREATE TABLE IF NOT EXISTS watchdog_receipt_sets (
+              reservation_id TEXT PRIMARY KEY
+                REFERENCES watchdog_runs(reservation_id) ON DELETE CASCADE,
+              receipt_count INTEGER NOT NULL CHECK(receipt_count >= 0),
+              receipt_set_digest TEXT NOT NULL
+            );
             """
         )
         columns = {row["name"] for row in self.db.execute("PRAGMA table_info(tasks)")}
@@ -354,7 +360,13 @@ class AtlasRuntime:
             raise
 
     def reconcile(self, *, now: float | None = None, heartbeat_timeout: float = 120) -> list[str]:
-        """Convert orphaned/stale RUNNING tasks to truthful PAUSED_RUNTIME."""
+        """Convert orphaned/stale RUNNING tasks to truthful PAUSED_RUNTIME.
+
+        This transaction is independent of watchdog finalization by design. Its
+        conditional RUNNING-to-PAUSED_RUNTIME transition and lease deletion are
+        idempotent, so overlapping reconcilers cannot repeat or undo durable
+        work.
+        """
         now = time.time() if now is None else now
         paused: list[str] = []
         self.db.execute("BEGIN IMMEDIATE")
@@ -461,11 +473,125 @@ class AtlasRuntime:
         reservation: WatchdogReservation,
         now: float,
     ) -> None:
-        """Mark a watchdog run successful and begin its fallback cooldown."""
+        """Finalize a receipt-free watchdog run and begin its fallback cooldown."""
+        self.finalize_watchdog_tick(reservation=reservation, receipts=(), now=now)
+
+    def finalize_watchdog_tick(
+        self,
+        *,
+        reservation: WatchdogReservation,
+        receipts: Iterable[tuple[str, Mapping[str, object]]],
+        now: float,
+    ) -> tuple[bool, ...]:
+        """Atomically persist a complete receipt set and settle its reservation.
+
+        The hard deadline is checked while holding the same SQLite write
+        transaction that records every receipt, marks the run successful, and
+        advances the fallback cooldown. An exact replay of an already committed
+        reservation is a read-only no-op; a partial or different replay fails
+        closed.
+        """
         if not math.isfinite(now):
             raise ValueError("now must be finite")
+
+        prepared: list[tuple[str, str, str, Mapping[str, object]]] = []
+        seen_event_ids: set[str] = set()
+        for task_id, payload in receipts:
+            if not isinstance(task_id, str) or not task_id.strip():
+                raise ValueError("watchdog receipt task_id must be non-empty")
+            event_payload = dict(payload)
+            event_payload["task_id"] = task_id
+            digest = self.digest(event_payload)
+            event_id = "watchdog:" + digest.removeprefix("sha256:")
+            if event_id in seen_event_ids:
+                raise ValueError("watchdog receipt batch contains duplicate identity")
+            seen_event_ids.add(event_id)
+            prepared.append((event_id, digest, task_id, event_payload))
+
+        receipt_set_body = json.dumps(
+            sorted((event_id, digest) for event_id, digest, _, _ in prepared),
+            separators=(",", ":"),
+        ).encode()
+        receipt_set_digest = "sha256:" + hashlib.sha256(receipt_set_body).hexdigest()
+
         self.db.execute("BEGIN IMMEDIATE")
         try:
+            row = self.db.execute(
+                "SELECT state,terminal_at FROM watchdog_runs "
+                "WHERE reservation_id=? AND name=? AND reserved_at=? AND expires_at=?",
+                (
+                    reservation.reservation_id,
+                    reservation.name,
+                    reservation.reserved_at,
+                    reservation.expires_at,
+                ),
+            ).fetchone()
+            if row and row["state"] == "SUCCEEDED":
+                receipt_set = self.db.execute(
+                    "SELECT receipt_count,receipt_set_digest "
+                    "FROM watchdog_receipt_sets WHERE reservation_id=?",
+                    (reservation.reservation_id,),
+                ).fetchone()
+                if (
+                    receipt_set is None
+                    or receipt_set["receipt_count"] != len(prepared)
+                    or receipt_set["receipt_set_digest"] != receipt_set_digest
+                ):
+                    raise KeyError(
+                        "watchdog reservation is already settled with a different receipt set"
+                    )
+                for event_id, digest, _, _ in prepared:
+                    event = self.db.execute(
+                        "SELECT payload_digest FROM events WHERE event_id=?",
+                        (event_id,),
+                    ).fetchone()
+                    if event is None or event["payload_digest"] != digest:
+                        raise KeyError(
+                            "watchdog reservation receipt set is incomplete or mismatched"
+                        )
+                cooldown = self.db.execute(
+                    "SELECT last_checked_at FROM watchdog_state WHERE name=?",
+                    (reservation.name,),
+                ).fetchone()
+                if (
+                    cooldown is None
+                    or cooldown["last_checked_at"] < row["terminal_at"]
+                ):
+                    raise KeyError("watchdog reservation cooldown does not match completion")
+                self.db.execute("COMMIT")
+                return tuple(False for _ in prepared)
+
+            if (
+                row is None
+                or row["state"] != "IN_PROGRESS"
+                or not (reservation.reserved_at <= now < reservation.expires_at)
+            ):
+                raise KeyError(
+                    "watchdog reservation is absent, expired, mismatched, "
+                    "or no longer in progress"
+                )
+
+            inserted: list[bool] = []
+            self.db.execute(
+                "INSERT INTO watchdog_receipt_sets("
+                "reservation_id,receipt_count,receipt_set_digest"
+                ") VALUES(?,?,?)",
+                (reservation.reservation_id, len(prepared), receipt_set_digest),
+            )
+            for event_id, digest, task_id, event_payload in prepared:
+                existing = self.db.execute(
+                    "SELECT payload_digest FROM events WHERE event_id=?", (event_id,)
+                ).fetchone()
+                self._record_event(
+                    event_id=event_id,
+                    digest=digest,
+                    task_id=task_id,
+                    kind="WATCHDOG",
+                    payload=event_payload,
+                    now=now,
+                )
+                inserted.append(existing is None)
+
             cur = self.db.execute(
                 "UPDATE watchdog_runs SET state='SUCCEEDED', terminal_at=? "
                 "WHERE reservation_id=? AND name=? AND state='IN_PROGRESS' "
@@ -492,6 +618,7 @@ class AtlasRuntime:
                 (reservation.name, now),
             )
             self.db.execute("COMMIT")
+            return tuple(inserted)
         except Exception:
             self.db.execute("ROLLBACK")
             raise
@@ -551,31 +678,6 @@ class AtlasRuntime:
             )
             for row in rows
         )
-
-    def record_watchdog_receipt(self, *, task_id: str, payload: Mapping[str, object], now: float) -> bool:
-        """Persist one canonical wake-or-hold receipt; repeated identity is a no-op."""
-        event_payload = dict(payload)
-        event_payload["task_id"] = task_id
-        digest = self.digest(event_payload)
-        event_id = "watchdog:" + digest.removeprefix("sha256:")
-        self.db.execute("BEGIN IMMEDIATE")
-        try:
-            existing = self.db.execute(
-                "SELECT payload_digest FROM events WHERE event_id=?", (event_id,)
-            ).fetchone()
-            self._record_event(
-                event_id=event_id,
-                digest=digest,
-                task_id=task_id,
-                kind="WATCHDOG",
-                payload=event_payload,
-                now=now,
-            )
-            self.db.execute("COMMIT")
-            return existing is None
-        except Exception:
-            self.db.execute("ROLLBACK")
-            raise
 
     def get(self, task_id: str) -> Task | None:
         row = self.db.execute("SELECT * FROM tasks WHERE task_id=?", (task_id,)).fetchone()
