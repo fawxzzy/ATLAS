@@ -537,6 +537,43 @@ class AtlasRuntimeTests(unittest.TestCase):
         )
         self.assertFalse(self.runtime.db.in_transaction)
 
+    def test_pre_issuance_watchdog_completion_rejects_without_immediate_fallback(self):
+        reservation = self.runtime.reserve_watchdog_tick(
+            name="watchdog",
+            now=100,
+            fallback_seconds=60,
+            reservation_seconds=5,
+            event_observed=False,
+        )
+        before = self.runtime.db.execute(
+            "SELECT state,reserved_at,expires_at,terminal_at FROM watchdog_runs "
+            "WHERE reservation_id=?",
+            (reservation.reservation_id,),
+        ).fetchone()
+        with self.assertRaises(KeyError):
+            self.runtime.complete_watchdog_tick(reservation=reservation, now=0)
+        after = self.runtime.db.execute(
+            "SELECT state,reserved_at,expires_at,terminal_at FROM watchdog_runs "
+            "WHERE reservation_id=?",
+            (reservation.reservation_id,),
+        ).fetchone()
+        self.assertEqual(tuple(after), tuple(before))
+        self.assertIsNone(
+            self.runtime.db.execute(
+                "SELECT * FROM watchdog_state WHERE name='watchdog'"
+            ).fetchone()
+        )
+        self.assertIsNone(
+            self.runtime.reserve_watchdog_tick(
+                name="watchdog",
+                now=100.1,
+                fallback_seconds=60,
+                reservation_seconds=5,
+                event_observed=False,
+            )
+        )
+        self.assertFalse(self.runtime.db.in_transaction)
+
     def test_watchdog_receipt_rolls_back_and_deduplicates_after_restart(self):
         payload = {
             "schema": "atlas.watchdog.receipt.v1",

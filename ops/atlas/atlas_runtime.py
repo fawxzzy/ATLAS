@@ -469,13 +469,15 @@ class AtlasRuntime:
             cur = self.db.execute(
                 "UPDATE watchdog_runs SET state='SUCCEEDED', terminal_at=? "
                 "WHERE reservation_id=? AND name=? AND state='IN_PROGRESS' "
-                "AND reserved_at=? AND expires_at=? AND expires_at>?",
+                "AND reserved_at=? AND expires_at=? "
+                "AND reserved_at<=? AND expires_at>?",
                 (
                     now,
                     reservation.reservation_id,
                     reservation.name,
                     reservation.reserved_at,
                     reservation.expires_at,
+                    now,
                     now,
                 ),
             )
