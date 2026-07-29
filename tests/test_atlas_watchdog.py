@@ -1,6 +1,10 @@
+import json
 import tempfile
+import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from unittest.mock import patch
 
 from ops.atlas.atlas_runtime import AtlasRuntime
 from ops.atlas.atlas_watchdog import AtlasWatchdog
@@ -94,6 +98,168 @@ class AtlasWatchdogTests(unittest.TestCase):
         decision = self.tick(event=True).decisions[0]
         self.assertEqual(decision.task_id, "queued")
         self.assertEqual(decision.reason, "VALID_ACTIVE_LEASE")
+
+    def test_reconcile_failure_abandons_reservation_for_immediate_retry(self):
+        self.runtime.enqueue("ready", lane="atlas", scope="repo:atlas")
+        with patch.object(self.runtime, "reconcile", side_effect=RuntimeError("host loss")):
+            with self.assertRaisesRegex(RuntimeError, "host loss"):
+                self.tick(event=False)
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT state FROM watchdog_runs ORDER BY reserved_at"
+            ).fetchone()["state"],
+            "ABANDONED",
+        )
+        retry = self.tick(event=False)
+        self.assertTrue(retry.checked)
+        self.assertEqual(retry.decisions[0].action, "WAKE_NEEDED")
+
+    def test_receipt_failure_abandons_and_retry_deduplicates_completed_work(self):
+        self.runtime.enqueue("first", lane="atlas", scope="repo:first", priority=10)
+        self.runtime.enqueue("second", lane="atlas", scope="repo:second")
+        original = self.runtime.record_watchdog_receipt
+        calls = 0
+
+        def fail_after_one_receipt(**kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise RuntimeError("receipt failure")
+            return original(**kwargs)
+
+        with patch.object(
+            self.runtime,
+            "record_watchdog_receipt",
+            side_effect=fail_after_one_receipt,
+        ):
+            with self.assertRaisesRegex(RuntimeError, "receipt failure"):
+                self.tick(event=False)
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT state FROM watchdog_runs ORDER BY reserved_at"
+            ).fetchone()["state"],
+            "ABANDONED",
+        )
+        with patch.object(
+            self.runtime,
+            "record_watchdog_receipt",
+            wraps=original,
+        ) as recorder:
+            retry = self.tick(event=False)
+        self.assertTrue(retry.checked)
+        self.assertEqual(recorder.call_count, 2)
+        self.assertFalse(retry.decisions[0].receipt_recorded)
+        self.assertTrue(retry.decisions[1].receipt_recorded)
+
+    def test_two_watchdogs_share_one_successful_fallback_window(self):
+        database = Path(self.tmp.name) / "concurrent.sqlite"
+        AtlasRuntime(database).close()
+        barrier = threading.Barrier(2)
+
+        def tick():
+            runtime = AtlasRuntime(database)
+            try:
+                barrier.wait()
+                return AtlasWatchdog(
+                    runtime,
+                    clock=FakeClock(),
+                    fallback_seconds=1_800,
+                ).tick(event_observed=False)
+            finally:
+                runtime.close()
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            ticks = list(pool.map(lambda _: tick(), range(2)))
+        self.assertEqual(sum(item.checked for item in ticks), 1)
+        readback = AtlasRuntime(database)
+        try:
+            self.assertEqual(
+                readback.db.execute(
+                    "SELECT COUNT(*) FROM watchdog_runs WHERE state='SUCCEEDED'"
+                ).fetchone()[0],
+                1,
+            )
+        finally:
+            readback.close()
+
+    def test_non_default_heartbeat_timeout_changes_reconciliation(self):
+        self.runtime.enqueue("running", lane="atlas", scope="repo:atlas")
+        self.runtime.claim(worker_id="worker", run_id="run", lease_seconds=600)
+        self.runtime.db.execute(
+            "UPDATE leases SET heartbeat_at=?, expires_at=? WHERE task_id='running'",
+            (self.clock.now - 11, self.clock.now + 100),
+        )
+        tick = AtlasWatchdog(
+            self.runtime,
+            clock=self.clock,
+            heartbeat_timeout=10,
+        ).tick(event_observed=True)
+        self.assertEqual(tick.paused_runtime_tasks, ("running",))
+        self.assertEqual(self.runtime.get("running").state, "PAUSED_RUNTIME")
+
+    def test_default_heartbeat_timeout_remains_stable(self):
+        self.runtime.enqueue("running", lane="atlas", scope="repo:atlas")
+        self.runtime.claim(worker_id="worker", run_id="run", lease_seconds=600)
+        self.runtime.db.execute(
+            "UPDATE leases SET heartbeat_at=?, expires_at=? WHERE task_id='running'",
+            (self.clock.now - 60, self.clock.now + 100),
+        )
+        tick = self.tick(event=True)
+        self.assertEqual(tick.paused_runtime_tasks, ())
+        self.assertEqual(self.runtime.get("running").state, "RUNNING")
+
+    def test_paused_usage_is_observe_only_with_or_without_lease(self):
+        self.runtime.enqueue("fresh", lane="atlas", scope="repo:fresh")
+        self.runtime.enqueue("stale", lane="atlas", scope="repo:stale")
+        self.runtime.enqueue(
+            "leased", lane="atlas", scope="repo:leased", priority=10
+        )
+        self.runtime.claim(worker_id="worker", run_id="lease", lease_seconds=600)
+        self.runtime.db.execute(
+            "UPDATE tasks SET state='PAUSED_USAGE', updated_at=? "
+            "WHERE task_id IN ('fresh','leased')",
+            (self.clock.now,),
+        )
+        self.runtime.db.execute(
+            "UPDATE tasks SET state='PAUSED_USAGE', updated_at=? WHERE task_id='stale'",
+            (self.clock.now - 86_400,),
+        )
+        decisions = {item.task_id: item for item in self.tick(event=True).decisions}
+        self.assertEqual(decisions["fresh"].reason, "PAUSED_USAGE_OBSERVE_ONLY")
+        self.assertEqual(decisions["stale"].reason, "PAUSED_USAGE_OBSERVE_ONLY")
+        self.assertEqual(decisions["leased"].reason, "VALID_ACTIVE_LEASE")
+        self.assertTrue(all(item.action == "HOLD" for item in decisions.values()))
+        self.assertEqual(
+            {task_id: self.runtime.get(task_id).state for task_id in decisions},
+            {task_id: "PAUSED_USAGE" for task_id in decisions},
+        )
+
+    def test_stale_observation_records_only_and_cannot_mutate_or_release(self):
+        self.runtime.enqueue("stale", lane="atlas", scope="repo:stale")
+        stale_task, has_valid_lease = self.runtime.watchdog_tasks(now=self.clock.now)[0]
+        self.assertFalse(has_valid_lease)
+        lease = self.runtime.claim(worker_id="worker", run_id="run", lease_seconds=600)
+        before = self.runtime.db.execute(
+            "SELECT worker_id,run_id,expires_at FROM leases WHERE task_id='stale'"
+        ).fetchone()
+
+        decision = self.watchdog._record_decision(
+            stale_task,
+            has_valid_lease,
+            self.clock.now,
+        )
+
+        after = self.runtime.db.execute(
+            "SELECT worker_id,run_id,expires_at FROM leases WHERE task_id='stale'"
+        ).fetchone()
+        event = self.runtime.db.execute(
+            "SELECT payload FROM events WHERE kind='WATCHDOG'"
+        ).fetchone()
+        self.assertEqual(decision.reason, "STRANDED_READY_NO_VALID_LEASE")
+        self.assertEqual(self.runtime.get("stale").state, "RUNNING")
+        self.assertEqual(tuple(before), tuple(after))
+        self.assertEqual(after["run_id"], lease.run_id)
+        self.assertEqual(json.loads(event["payload"])["execution"], "NOT_STARTED")
 
 
 if __name__ == "__main__":

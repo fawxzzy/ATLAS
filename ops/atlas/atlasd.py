@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sqlite3
 import sys
 import time
@@ -21,6 +22,13 @@ if __package__ in {None, ""}:
 
 from ops.atlas.atlas_runtime import AtlasRuntime
 from ops.atlas.atlas_watchdog import AtlasWatchdog, DEFAULT_FALLBACK_SECONDS
+
+
+def _positive_float(value: str) -> float:
+    parsed = float(value)
+    if not math.isfinite(parsed) or parsed <= 0:
+        raise argparse.ArgumentTypeError("must be finite and positive")
+    return parsed
 
 
 def _health(runtime: AtlasRuntime) -> dict[str, object]:
@@ -44,9 +52,19 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="ATLAS Workflow V4 runtime control plane")
     parser.add_argument("--database", required=True, help="local SQLite database path")
     parser.add_argument("command", choices=("init", "health", "reconcile", "watchdog"))
-    parser.add_argument("--heartbeat-timeout", type=float, default=120)
+    parser.add_argument(
+        "--heartbeat-timeout",
+        type=_positive_float,
+        default=120,
+        help="seconds before a missing worker heartbeat is stale",
+    )
     parser.add_argument("--event", action="store_true", help="record an observed local runtime event")
-    parser.add_argument("--fallback-seconds", type=float, default=DEFAULT_FALLBACK_SECONDS)
+    parser.add_argument(
+        "--fallback-seconds",
+        type=_positive_float,
+        default=DEFAULT_FALLBACK_SECONDS,
+        help="seconds between successful fallback watchdog checks",
+    )
     args = parser.parse_args(argv)
     runtime = AtlasRuntime(Path(args.database))
     try:
@@ -57,7 +75,11 @@ def main(argv: list[str] | None = None) -> int:
                 "recovery_dispositions": [item.__dict__ for item in runtime.recovery_dispositions()],
             }
         elif args.command == "watchdog":
-            tick = AtlasWatchdog(runtime, fallback_seconds=args.fallback_seconds).tick(event_observed=args.event)
+            tick = AtlasWatchdog(
+                runtime,
+                fallback_seconds=args.fallback_seconds,
+                heartbeat_timeout=args.heartbeat_timeout,
+            ).tick(event_observed=args.event)
             output = _health(runtime) | {"watchdog": tick.as_dict()}
         else:
             output = _health(runtime)

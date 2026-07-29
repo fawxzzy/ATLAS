@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import sqlite3
 import time
 import uuid
@@ -52,6 +53,16 @@ class RecoveryDisposition:
     task_id: str
     state: str
     disposition: str
+
+
+@dataclass(frozen=True)
+class WatchdogReservation:
+    """One durable watchdog run reservation."""
+
+    name: str
+    reservation_id: str
+    reserved_at: float
+    expires_at: float
 
 
 class AtlasRuntime:
@@ -110,6 +121,18 @@ class AtlasRuntime:
               name TEXT PRIMARY KEY,
               last_checked_at REAL NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS watchdog_runs (
+              reservation_id TEXT PRIMARY KEY,
+              name TEXT NOT NULL,
+              state TEXT NOT NULL CHECK(state IN (
+                'IN_PROGRESS','SUCCEEDED','ABANDONED')),
+              reserved_at REAL NOT NULL,
+              terminal_at REAL
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS watchdog_one_in_progress
+              ON watchdog_runs(name) WHERE state='IN_PROGRESS';
+            CREATE INDEX IF NOT EXISTS watchdog_runs_name_state
+              ON watchdog_runs(name, state, reserved_at);
             """
         )
         columns = {row["name"] for row in self.db.execute("PRAGMA table_info(tasks)")}
@@ -348,31 +371,118 @@ class AtlasRuntime:
         now: float,
         fallback_seconds: float,
         event_observed: bool,
-    ) -> bool:
-        """Atomically reserve one event-driven or fallback watchdog check.
+        reservation_seconds: float | None = None,
+    ) -> WatchdogReservation | None:
+        """Atomically reserve one event-driven or fallback watchdog run.
 
-        A second process cannot turn the same fallback window into another
-        durable wake request.  Event observations may re-check immediately,
-        but receipt identities still deduplicate their resulting decisions.
+        Only a terminally successful run starts the fallback cooldown. A
+        failed run can be abandoned immediately, while an unclosed run becomes
+        recoverable after ``reservation_seconds``.
         """
         if not name.strip():
             raise ValueError("watchdog name must be non-empty")
-        if fallback_seconds <= 0:
+        if not math.isfinite(now):
+            raise ValueError("now must be finite")
+        if not math.isfinite(fallback_seconds) or fallback_seconds <= 0:
             raise ValueError("fallback_seconds must be positive")
+        if reservation_seconds is None:
+            reservation_seconds = min(60, fallback_seconds / 10)
+        if not math.isfinite(reservation_seconds) or reservation_seconds <= 0:
+            raise ValueError("reservation_seconds must be positive")
         self.db.execute("BEGIN IMMEDIATE")
         try:
+            self.db.execute(
+                "UPDATE watchdog_runs SET state='ABANDONED', terminal_at=? "
+                "WHERE name=? AND state='IN_PROGRESS' AND reserved_at<=?",
+                (now, name, now - reservation_seconds),
+            )
+            active = self.db.execute(
+                "SELECT reservation_id FROM watchdog_runs "
+                "WHERE name=? AND state='IN_PROGRESS'",
+                (name,),
+            ).fetchone()
+            if active:
+                self.db.execute("COMMIT")
+                return None
             row = self.db.execute(
                 "SELECT last_checked_at FROM watchdog_state WHERE name=?", (name,)
             ).fetchone()
             due = event_observed or row is None or now - row["last_checked_at"] >= fallback_seconds
-            if due:
-                self.db.execute(
-                    "INSERT INTO watchdog_state(name,last_checked_at) VALUES(?,?) "
-                    "ON CONFLICT(name) DO UPDATE SET last_checked_at=excluded.last_checked_at",
-                    (name, now),
-                )
+            if not due:
+                self.db.execute("COMMIT")
+                return None
+            reservation_id = uuid.uuid4().hex
+            self.db.execute(
+                "INSERT INTO watchdog_runs("
+                "reservation_id,name,state,reserved_at,terminal_at"
+                ") VALUES(?,?,'IN_PROGRESS',?,NULL)",
+                (reservation_id, name, now),
+            )
             self.db.execute("COMMIT")
-            return due
+            return WatchdogReservation(
+                name=name,
+                reservation_id=reservation_id,
+                reserved_at=now,
+                expires_at=now + reservation_seconds,
+            )
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def complete_watchdog_tick(
+        self,
+        *,
+        reservation: WatchdogReservation,
+        now: float,
+    ) -> None:
+        """Mark a watchdog run successful and begin its fallback cooldown."""
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            cur = self.db.execute(
+                "UPDATE watchdog_runs SET state='SUCCEEDED', terminal_at=? "
+                "WHERE reservation_id=? AND name=? AND state='IN_PROGRESS'",
+                (now, reservation.reservation_id, reservation.name),
+            )
+            if cur.rowcount != 1:
+                raise KeyError("watchdog reservation is absent or no longer in progress")
+            self.db.execute(
+                "INSERT INTO watchdog_state(name,last_checked_at) VALUES(?,?) "
+                "ON CONFLICT(name) DO UPDATE SET last_checked_at=excluded.last_checked_at",
+                (reservation.name, now),
+            )
+            self.db.execute("COMMIT")
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def abandon_watchdog_tick(
+        self,
+        *,
+        reservation: WatchdogReservation,
+        now: float,
+    ) -> bool:
+        """Make a failed watchdog run immediately recoverable."""
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT state FROM watchdog_runs "
+                "WHERE reservation_id=? AND name=?",
+                (reservation.reservation_id, reservation.name),
+            ).fetchone()
+            if not row:
+                raise KeyError("watchdog reservation is absent")
+            if row["state"] == "ABANDONED":
+                self.db.execute("COMMIT")
+                return False
+            if row["state"] != "IN_PROGRESS":
+                raise KeyError("watchdog reservation is no longer in progress")
+            self.db.execute(
+                "UPDATE watchdog_runs SET state='ABANDONED', terminal_at=? "
+                "WHERE reservation_id=?",
+                (now, reservation.reservation_id),
+            )
+            self.db.execute("COMMIT")
+            return True
         except Exception:
             self.db.execute("ROLLBACK")
             raise
@@ -386,7 +496,7 @@ class AtlasRuntime:
             ") AS has_valid_lease "
             "FROM tasks t "
             "WHERE t.state IN ('QUEUED','BLOCKED_DEPENDENCY','WAITING_MANUAL',"
-            "'WAITING_EXTERNAL','PAUSED_RUNTIME','UNKNOWN') "
+            "'WAITING_EXTERNAL','PAUSED_USAGE','PAUSED_RUNTIME','UNKNOWN') "
             "ORDER BY t.priority DESC, t.created_at",
             (now,),
         ).fetchall()
