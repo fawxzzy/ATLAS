@@ -91,6 +91,35 @@ class AtlasWatchdogTests(unittest.TestCase):
         self.assertTrue(fallback.decisions[0].receipt_recorded)
         self.assertEqual(first.decisions[0].reason, fallback.decisions[0].reason)
 
+    def test_successful_cooldown_starts_when_delayed_tick_finishes(self):
+        clock = FakeClock(now=100)
+        watchdog = AtlasWatchdog(
+            self.runtime,
+            clock=clock,
+            fallback_seconds=20,
+            reservation_seconds=5,
+        )
+        original = self.runtime.watchdog_tasks
+
+        def delayed_tasks(*, now):
+            clock.now = 130
+            return original(now=now)
+
+        with patch.object(self.runtime, "watchdog_tasks", side_effect=delayed_tasks):
+            self.assertTrue(watchdog.tick(event_observed=False).checked)
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT last_checked_at FROM watchdog_state WHERE name=?",
+                (watchdog.name,),
+            ).fetchone()["last_checked_at"],
+            130,
+        )
+        self.assertFalse(watchdog.tick(event_observed=False).checked)
+        clock.now = 149
+        self.assertFalse(watchdog.tick(event_observed=False).checked)
+        clock.now = 150
+        self.assertTrue(watchdog.tick(event_observed=False).checked)
+
     def test_valid_active_scope_lease_prevents_wake(self):
         self.runtime.enqueue("running", lane="atlas", scope="repo:atlas")
         self.runtime.claim(worker_id="worker", run_id="active", lease_seconds=60)

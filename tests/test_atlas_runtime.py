@@ -161,6 +161,43 @@ class AtlasRuntimeTests(unittest.TestCase):
             1,
         )
 
+    def test_competitor_cannot_shorten_issued_reservation_expiry(self):
+        issued = self.runtime.reserve_watchdog_tick(
+            name="watchdog",
+            now=100,
+            fallback_seconds=1_800,
+            reservation_seconds=60,
+            event_observed=False,
+        )
+        competitor = AtlasRuntime(self.database)
+        try:
+            self.assertIsNone(
+                competitor.reserve_watchdog_tick(
+                    name="watchdog",
+                    now=102,
+                    fallback_seconds=1_800,
+                    reservation_seconds=1,
+                    event_observed=False,
+                )
+            )
+        finally:
+            competitor.close()
+        row = self.runtime.db.execute(
+            "SELECT state,expires_at FROM watchdog_runs WHERE reservation_id=?",
+            (issued.reservation_id,),
+        ).fetchone()
+        self.assertEqual(row["state"], "IN_PROGRESS")
+        self.assertEqual(row["expires_at"], issued.expires_at)
+        self.assertEqual(row["expires_at"], 160)
+
+    def test_new_in_progress_watchdog_run_requires_issued_expiry(self):
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.runtime.db.execute(
+                "INSERT INTO watchdog_runs("
+                "reservation_id,name,state,reserved_at,expires_at,terminal_at"
+                ") VALUES('missing-expiry','watchdog','IN_PROGRESS',100,NULL,NULL)"
+            )
+
     def test_watchdog_success_starts_cooldown_and_survives_restart(self):
         reservation = self.runtime.reserve_watchdog_tick(
             name="watchdog",
@@ -236,6 +273,45 @@ class AtlasRuntimeTests(unittest.TestCase):
                     event_observed=False,
                 )
             )
+        finally:
+            migrated.close()
+
+    def test_legacy_in_progress_run_without_expiry_fails_closed(self):
+        legacy_database = Path(self.tmp.name) / "legacy-run.db"
+        legacy = sqlite3.connect(legacy_database)
+        legacy.executescript(
+            """
+            CREATE TABLE watchdog_runs (
+              reservation_id TEXT PRIMARY KEY,
+              name TEXT NOT NULL,
+              state TEXT NOT NULL,
+              reserved_at REAL NOT NULL,
+              terminal_at REAL
+            );
+            INSERT INTO watchdog_runs(
+              reservation_id,name,state,reserved_at,terminal_at
+            ) VALUES('legacy','watchdog','IN_PROGRESS',100,NULL);
+            """
+        )
+        legacy.commit()
+        legacy.close()
+        migrated = AtlasRuntime(legacy_database)
+        try:
+            self.assertIsNone(
+                migrated.reserve_watchdog_tick(
+                    name="watchdog",
+                    now=10_000,
+                    fallback_seconds=1_800,
+                    reservation_seconds=1,
+                    event_observed=False,
+                )
+            )
+            row = migrated.db.execute(
+                "SELECT state,expires_at FROM watchdog_runs "
+                "WHERE reservation_id='legacy'"
+            ).fetchone()
+            self.assertEqual(row["state"], "IN_PROGRESS")
+            self.assertIsNone(row["expires_at"])
         finally:
             migrated.close()
 

@@ -94,10 +94,17 @@ class AtlasWatchdog:
                 self._record_decision(task, has_valid_lease, now)
                 for task, has_valid_lease in self.runtime.watchdog_tasks(now=now)
             )
-            self.runtime.complete_watchdog_tick(reservation=reservation, now=now)
+            completed_at = self.clock()
+            self.runtime.complete_watchdog_tick(
+                reservation=reservation,
+                now=completed_at,
+            )
             return WatchdogTick(True, paused, decisions)
         except Exception:
-            self.runtime.abandon_watchdog_tick(reservation=reservation, now=now)
+            self.runtime.abandon_watchdog_tick(
+                reservation=reservation,
+                now=self.clock(),
+            )
             raise
 
     def _record_decision(self, task: Task, has_valid_lease: bool, now: float) -> WatchdogDecision:

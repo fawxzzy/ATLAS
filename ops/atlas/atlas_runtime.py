@@ -127,7 +127,9 @@ class AtlasRuntime:
               state TEXT NOT NULL CHECK(state IN (
                 'IN_PROGRESS','SUCCEEDED','ABANDONED')),
               reserved_at REAL NOT NULL,
-              terminal_at REAL
+              expires_at REAL,
+              terminal_at REAL,
+              CHECK(state!='IN_PROGRESS' OR expires_at IS NOT NULL)
             );
             CREATE UNIQUE INDEX IF NOT EXISTS watchdog_one_in_progress
               ON watchdog_runs(name) WHERE state='IN_PROGRESS';
@@ -138,6 +140,13 @@ class AtlasRuntime:
         columns = {row["name"] for row in self.db.execute("PRAGMA table_info(tasks)")}
         if "depends_on" not in columns:
             self.db.execute("ALTER TABLE tasks ADD COLUMN depends_on TEXT NOT NULL DEFAULT '[]'")
+        watchdog_columns = {
+            row["name"] for row in self.db.execute("PRAGMA table_info(watchdog_runs)")
+        }
+        if "expires_at" not in watchdog_columns:
+            # A pre-migration in-progress run has no trustworthy issued expiry.
+            # Leave it fail-closed until its owner explicitly abandons it.
+            self.db.execute("ALTER TABLE watchdog_runs ADD COLUMN expires_at REAL")
 
     def _record_event(self, *, event_id: str, digest: str, task_id: str, kind: str,
                       payload: Mapping[str, object], now: float) -> None:
@@ -393,8 +402,9 @@ class AtlasRuntime:
         try:
             self.db.execute(
                 "UPDATE watchdog_runs SET state='ABANDONED', terminal_at=? "
-                "WHERE name=? AND state='IN_PROGRESS' AND reserved_at<=?",
-                (now, name, now - reservation_seconds),
+                "WHERE name=? AND state='IN_PROGRESS' "
+                "AND expires_at IS NOT NULL AND expires_at<=?",
+                (now, name, now),
             )
             active = self.db.execute(
                 "SELECT reservation_id FROM watchdog_runs "
@@ -414,9 +424,9 @@ class AtlasRuntime:
             reservation_id = uuid.uuid4().hex
             self.db.execute(
                 "INSERT INTO watchdog_runs("
-                "reservation_id,name,state,reserved_at,terminal_at"
-                ") VALUES(?,?,'IN_PROGRESS',?,NULL)",
-                (reservation_id, name, now),
+                "reservation_id,name,state,reserved_at,expires_at,terminal_at"
+                ") VALUES(?,?,'IN_PROGRESS',?,?,NULL)",
+                (reservation_id, name, now, now + reservation_seconds),
             )
             self.db.execute("COMMIT")
             return WatchdogReservation(
