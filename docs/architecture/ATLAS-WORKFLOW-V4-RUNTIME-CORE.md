@@ -20,13 +20,30 @@ review, provider, and production authority boundaries.
 - Reconciliation exposes `READY_NOT_DISPATCHED` and
   `PAUSED_RUNTIME_REQUIRES_RESUME` dispositions; it never silently restarts a
   worker.
+- The watchdog is event-driven with a durable 30-minute fallback. It records
+  one idempotent `WAKE_NEEDED` or `HOLD` receipt per task/cooldown window, but
+  never starts a chat or worker. A short durable run reservation records
+  `IN_PROGRESS`, `SUCCEEDED`, or `ABANDONED`; only `SUCCEEDED` begins the
+  fallback cooldown. Exceptions abandon immediately, and a crashed reservation
+  expires for recovery without holding a transaction across reconciliation.
+- Valid leases, manual/external/provider/production gates, unresolved
+  dependencies, `PAUSED_USAGE`, paused runtime work, and unknown state remain
+  explicit holds. `PAUSED_USAGE` is observe-only and is never automatically
+  resumed or dispatched.
+- Watchdog heartbeat staleness is configurable and is applied to the
+  reconciliation pass. Invalid non-positive timeout and fallback values fail
+  before runtime work begins.
+- Watchdog candidate reads and receipt writes are intentionally separate
+  transactions. A concurrent task transition can make a receipt observation
+  stale, but receipt persistence cannot launch work, mutate task state, or
+  release a lease; every receipt records `execution: NOT_STARTED`.
 
 ## Not included in this slice
 
 This core does not start Codex workers, call providers, merge code, deploy, or
 replace the legacy scheduler. The worker adapter supplies a fail-closed receipt
-contract only; watchdog supervision, shadow replay, controlled worker launch,
-and cutover remain subsequent bounded waves.
+contract only. The watchdog is observe-only; controlled worker launch and
+cutover remain subsequent bounded waves.
 
 ## Verification
 

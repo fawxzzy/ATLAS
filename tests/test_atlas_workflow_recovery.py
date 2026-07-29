@@ -51,6 +51,9 @@ WORKFLOW_PR_PATHS = [
     "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
     "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
     "docs/runbooks/ATLAS-OPERATOR-NOTIFICATION-IDEMPOTENCY.md",
+    "ops/atlas/atlas_runtime.py",
+    "ops/atlas/atlas_watchdog.py",
+    "ops/atlas/atlasd.py",
     "ops/atlas/operator_notification_idempotency.py",
     "ops/atlas/workflow_recovery.py",
     "runtime/cortex/kernel.state-model.seed.v1.json",
@@ -58,6 +61,9 @@ WORKFLOW_PR_PATHS = [
     "schemas/atlas.autonomous-work-program.v2.json",
     "schemas/atlas.workflow.*.json",
     "tests/fixtures/atlas-workflow-recovery/**",
+    "tests/test_atlas_runtime.py",
+    "tests/test_atlas_watchdog.py",
+    "tests/test_atlasd.py",
     "tests/test_atlas_workflow_recovery.py",
 ]
 EXPECTED_WORKFLOW = {
@@ -95,8 +101,8 @@ EXPECTED_WORKFLOW = {
                     "run": "python ops/atlas/workflow_recovery.py render --check",
                 },
                 {
-                    "name": "Run focused recovery tests",
-                    "run": "python -m unittest tests.test_atlas_workflow_recovery -v",
+                    "name": "Run changed runtime, watchdog, atlasd, and recovery tests",
+                    "run": "python -m unittest tests.test_atlas_runtime tests.test_atlas_watchdog tests.test_atlasd tests.test_atlas_workflow_recovery -v",
                 },
                 {
                     "name": "Validate canonical envelope fixture",
