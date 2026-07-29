@@ -137,11 +137,85 @@ def _bindings(*items: tuple[str, str, str]) -> dict[str, object]:
                 "role_id": role_id,
                 "current_runtime_id": runtime_id,
                 "runtime_status": status,
+                "host_id": "local",
                 "archived": False,
             }
             for role_id, runtime_id, status in items
         ]
     }
+
+
+def _standardized_envelope(
+    payload: dict[str, object],
+    *,
+    role_id: str,
+    runtime_thread_id: str,
+    idempotency_key: str,
+    source_role_id: str = "atlas.release-control-plane",
+    host_id: str = "local",
+    owner_role_id: str | None = None,
+    owner_runtime_thread_id: str | None = None,
+) -> dict[str, object]:
+    payload = copy.deepcopy(payload)
+    payload["policy_id"] = scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID
+    payload["logical_role_id"] = role_id
+    envelope = _envelope(
+        payload,
+        idempotency_key=idempotency_key,
+        source_role_id=source_role_id,
+    )
+    envelope["target_role_id"] = role_id
+    envelope["owner_return"] = {
+        "logical_role_id": owner_role_id or role_id,
+        "thread_id": owner_runtime_thread_id or runtime_thread_id,
+        "host_id": host_id,
+    }
+    return envelope
+
+
+def _standardized_ready_payload(
+    packet_id: str,
+    *,
+    role_id: str,
+    repository: str,
+    writer_scope: str,
+    worktree: str,
+    files: list[str] | None = None,
+) -> dict[str, object]:
+    return {
+        "canonical_lifecycle_state": "READY",
+        "packet_id": packet_id,
+        "objective": f"Execute {packet_id} through the canonical scheduler.",
+        "logical_role_id": role_id,
+        "repository": repository,
+        "writer_scope": writer_scope,
+        "execution_class": "repo_worktree",
+        "worktree": worktree,
+        "resource_claims": {
+            "files": files or ["ops/atlas/**"],
+            "worktrees": [worktree],
+            "ports": [],
+            "browsers": [],
+            "external_writers": [],
+        },
+    }
+
+
+def _scheduler_report(
+    program: dict[str, object],
+    *,
+    preflight_report: dict[str, object] | None = None,
+) -> dict[str, object]:
+    with patch.object(scheduler, "_branch_state", return_value=("main", "a" * 40)):
+        with patch.object(scheduler, "_parity_state", return_value={"status": "clean", "behind": 0, "ahead": 0}):
+            return scheduler.build_report(
+                root=Path("C:/ATLAS"),
+                program=program,
+                max_candidates=30,
+                preflight_report=preflight_report or _preflight_payload(),
+                selector_report=_selector_payload(),
+                planner_report=_planner_payload([]),
+            )
 
 
 def _recovery_ready_program() -> dict[str, object]:
@@ -362,6 +436,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 "schema_version",
                 "revision",
                 "source_snapshot_digest",
+                "scheduler_authority",
                 "standing_packets",
                 "active_leases",
                 "scope_holds",
@@ -374,15 +449,31 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             set(schema["required"]),
         )
         self.assertEqual(
-            ["prepared", "delivered", "recovery-required"],
+            ["prepared", "delivered", "host-unavailable", "recovery-required"],
             schema["properties"]["delivery_intents"]["items"]["properties"]["status"]["enum"],
         )
+        self.assertEqual(scheduler.CANONICAL_SCHEDULER_AUTHORITY, schema["properties"]["scheduler_authority"]["const"])
         self.assertIn(
             "external_mutation",
             schema["properties"]["standing_packets"]["items"]["properties"]["execution_class"]["enum"],
         )
         standing = schema["properties"]["standing_packets"]["items"]
         self.assertIn("SUPERSEDED", standing["properties"]["state"]["enum"])
+        self.assertIn("HOST_UNAVAILABLE", standing["properties"]["state"]["enum"])
+        self.assertEqual(
+            sorted(scheduler.TERMINAL_SUCCESSORS),
+            sorted(schema["$defs"]["terminal_successor"]["enum"]),
+        )
+        self.assertFalse(schema["$defs"]["owner_return"]["additionalProperties"])
+        self.assertFalse(schema["$defs"]["execution_target"]["additionalProperties"])
+        self.assertEqual("string", schema["$defs"]["execution_target"]["properties"]["host_id"]["type"])
+        self.assertEqual(1, schema["$defs"]["execution_target"]["properties"]["host_id"]["minLength"])
+        self.assertIn("transport_digest", schema["properties"]["processed_events"]["items"]["properties"])
+        self.assertIn("transport_digest", standing["properties"]["authority"]["properties"])
+        self.assertEqual(
+            ["target_role_id", "execution_target", "owner_return", "owner_return_state"],
+            standing["allOf"][1]["then"]["required"],
+        )
         self.assertEqual(
             [scheduler.STANDING_LOCAL_SOURCE_PREPARATION],
             standing["properties"]["authority_class"]["enum"],
@@ -404,6 +495,976 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             },
             set(schema["properties"]["active_leases"]["items"]["required"]),
         )
+
+    def test_standardized_ready_packet_normalizes_exact_worktree_and_wakes_once(self) -> None:
+        worktree = "worktrees/atlas-discordos-runtime-binding-001"
+        payload = _standardized_ready_payload(
+            "discordos-wave-c-publication",
+            role_id="atlas.workflow-architect",
+            repository="fawxzzy/ATLAS",
+            writer_scope="repo.fawxzzy.ATLAS.discordos-wave-c",
+            worktree=worktree,
+            files=["docs/registry/ATLAS-WORKFLOW-LIVE-MAPPING.v1.json"],
+        )
+        payload["resource_claims"]["worktrees"] = worktree
+        payload["reservation_id"] = "rsrv_" + "f" * 64
+        envelope = _standardized_envelope(
+            payload,
+            role_id="atlas.workflow-architect",
+            runtime_thread_id="architect-thread",
+            idempotency_key="discordos-wave-c-publication",
+            source_role_id="atlas.main",
+        )
+        envelope["consumers"] = ["atlas.inbox", "atlas.main"]
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("atlas.workflow-architect", "architect-thread", "idle")),
+            envelopes=[envelope],
+            root=Path("C:/ATLAS"),
+        )
+        packet = program["standing_packets"][0]
+        self.assertEqual([], findings)
+        self.assertEqual([worktree], packet["resource_claims"]["worktrees"])
+        self.assertEqual("TOP_LEVEL_WORKTREE_BOUND_LEGACY_SCALAR", packet["resource_claim_normalization"])
+        self.assertEqual("SUPERSEDED_BEFORE_RESERVE_BY_CANONICAL_SCHEDULER", packet["reservation_reconciliation"])
+        self.assertEqual(
+            {"logical_role_id": "atlas.workflow-architect", "thread_id": "architect-thread", "host_id": "local"},
+            packet["execution_target"],
+        )
+        self.assertEqual("PENDING", packet["owner_return_state"])
+        self.assertRegex(packet["authority"]["transport_digest"], r"^sha256:[0-9a-f]{64}$")
+        self.assertEqual(packet["authority"]["transport_digest"], program["processed_events"][0]["transport_digest"])
+
+        replayed, replay_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(("atlas.workflow-architect", "architect-thread", "idle")),
+            envelopes=[envelope],
+            root=Path("C:/ATLAS"),
+        )
+        self.assertEqual([], replay_findings)
+        self.assertEqual(1, len(replayed["standing_packets"]))
+        self.assertEqual(1, len(replayed["processed_events"]))
+
+        report = _scheduler_report(replayed, preflight_report=_preflight_payload(error=1))
+        self.assertEqual(["discordos-wave-c-publication"], [job["packet_id"] for job in report["selected_jobs"]])
+        reserved, reservations = scheduler.reserve_selected_jobs(program=replayed, report=report)
+        expected_reservation = scheduler._deterministic_reservation_id(reserved["standing_packets"][0])
+        self.assertEqual(expected_reservation, reservations[0]["reservation_id"])
+        self.assertNotEqual(payload["reservation_id"], reservations[0]["reservation_id"])
+
+        second = _scheduler_report(reserved)
+        self.assertEqual([], [job for job in second["selected_jobs"] if job.get("source") == "standing_task"])
+        self.assertEqual(1, len(reserved["delivery_intents"]))
+        self.assertEqual(1, len(reserved["active_leases"]))
+
+    def test_program_loader_rejects_a_second_scheduler_authority(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            relative = "tmp/atlas/program.json"
+            valid = scheduler._initial_runtime_program()
+            _write(root / relative, json.dumps(valid, indent=2) + "\n")
+            loaded, errors = scheduler.load_program(root, relative)
+            self.assertIsNotNone(loaded)
+            self.assertEqual([], errors)
+
+            invalid = copy.deepcopy(valid)
+            invalid["scheduler_authority"]["logical_role_id"] = "atlas.release-control-plane"
+            _write(root / relative, json.dumps(invalid, indent=2) + "\n")
+            _, invalid_errors = scheduler.load_program(root, relative)
+            self.assertEqual("scheduler_authority_mismatch", invalid_errors[0]["code"])
+
+    def test_cross_role_execution_targets_preserve_exact_owner_callback(self) -> None:
+        routes = [
+            ("atlas.release-control-plane", "release-thread"),
+            ("manual.messages", "manual-thread"),
+            ("component.discordos", "discordos-thread"),
+        ]
+        for target_role, target_thread in routes:
+            with self.subTest(target_role=target_role):
+                packet_id = "route-" + target_role.replace(".", "-")
+                payload = _standardized_ready_payload(
+                    packet_id,
+                    role_id=target_role,
+                    repository="fawxzzy/ATLAS",
+                    writer_scope=f"read.route.{target_role}",
+                    worktree=f"isolated-{packet_id}",
+                )
+                payload["execution_class"] = "read_only"
+                envelope = _standardized_envelope(
+                    payload,
+                    role_id=target_role,
+                    runtime_thread_id=target_thread,
+                    owner_role_id="atlas.workflow-architect",
+                    owner_runtime_thread_id="architect-thread",
+                    idempotency_key=packet_id,
+                    source_role_id="atlas.workflow-architect",
+                )
+                program, findings = scheduler.reconcile_runtime_program(
+                    program=_program_payload(),
+                    bindings_payload=_bindings(
+                        (target_role, target_thread, "idle"),
+                        ("atlas.workflow-architect", "architect-thread", "idle"),
+                    ),
+                    envelopes=[envelope],
+                )
+                self.assertEqual([], findings)
+                packet = program["standing_packets"][0]
+                self.assertEqual(target_role, packet["execution_target"]["logical_role_id"])
+                self.assertEqual(target_thread, packet["execution_target"]["thread_id"])
+                self.assertEqual("atlas.workflow-architect", packet["owner_return"]["logical_role_id"])
+                self.assertEqual("architect-thread", packet["owner_return"]["thread_id"])
+
+                report = _scheduler_report(program)
+                self.assertEqual([packet_id], [job["packet_id"] for job in report["selected_jobs"]])
+                reserved, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+                intent = reserved["delivery_intents"][0]
+                self.assertEqual(target_thread, reservations[0]["runtime_thread_id"])
+                self.assertEqual(packet["execution_target"], intent["execution_target"])
+                self.assertEqual(packet["owner_return"], intent["owner_return"])
+
+                result = {
+                    "reservation_id": intent["reservation_id"],
+                    "packet_id": packet_id,
+                    "runtime_thread_id": target_thread,
+                    "writer_scope": packet["writer_scope"],
+                    "event_id": envelope["event_id"],
+                    "payload_digest": envelope["payload_digest"],
+                    "transport_digest": packet["authority"]["transport_digest"],
+                    "status": "DELIVERED",
+                    "turn_id": f"turn-{packet_id}",
+                    "owner_return": envelope["owner_return"],
+                    "delivery_proof": {
+                        "turn_id": f"turn-{packet_id}",
+                        "tool_receipt_id": f"tool-{packet_id}",
+                        "dedupe_result": "FIRST_DELIVERY",
+                    },
+                }
+                settled, result_findings = scheduler.apply_delivery_results(program=reserved, results=[result])
+                self.assertEqual([], result_findings)
+                self.assertEqual("DELIVERED", settled["standing_packets"][0]["execution_target_state"])
+                self.assertEqual("PENDING", settled["standing_packets"][0]["owner_return_state"])
+                self.assertEqual(target_role, settled["standing_packets"][0]["current_tracker_role_id"])
+
+    def test_cross_role_owner_return_must_settle_before_terminal_completion(self) -> None:
+        packet_id = "route-release-owner-return"
+        payload = _standardized_ready_payload(
+            packet_id,
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.atlas.release.owner-return",
+            worktree="isolated-route-release-owner-return",
+        )
+        payload["execution_class"] = "read_only"
+        envelope = _standardized_envelope(
+            payload,
+            role_id="atlas.release-control-plane",
+            runtime_thread_id="release-thread",
+            owner_role_id="atlas.workflow-architect",
+            owner_runtime_thread_id="architect-thread",
+            idempotency_key=packet_id,
+            source_role_id="atlas.workflow-architect",
+        )
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("atlas.workflow-architect", "architect-thread", "idle"),
+        )
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings,
+            envelopes=[envelope],
+        )
+        self.assertEqual([], findings)
+        report = _scheduler_report(program)
+        reserved, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        reservation_id = reservations[0]["reservation_id"]
+        intent = reserved["delivery_intents"][0]
+        execution_result = {
+            "reservation_id": reservation_id,
+            "packet_id": packet_id,
+            "runtime_thread_id": "release-thread",
+            "writer_scope": payload["writer_scope"],
+            "event_id": envelope["event_id"],
+            "payload_digest": envelope["payload_digest"],
+            "transport_digest": intent["transport_digest"],
+            "status": "DELIVERED",
+            "turn_id": "release-turn",
+            "owner_return": envelope["owner_return"],
+            "delivery_proof": {
+                "turn_id": "release-turn",
+                "tool_receipt_id": "tool-release-turn",
+                "dedupe_result": "FIRST_DELIVERY",
+            },
+        }
+        delivered, delivery_findings = scheduler.apply_delivery_results(
+            program=reserved,
+            results=[execution_result],
+        )
+        self.assertEqual([], delivery_findings)
+        self.assertEqual("PENDING", delivered["standing_packets"][0]["owner_return_state"])
+
+        terminal = _envelope(
+            {
+                "terminal": True,
+                "terminal_successor": "TERMINAL_DOMAIN",
+                "canonical_lifecycle_state": "COMPLETED",
+                "packet_id": packet_id,
+                "writer_scope": payload["writer_scope"],
+                "reservation_id": reservation_id,
+                "turn_id": "release-turn",
+            },
+            idempotency_key="route-release-terminal",
+            source_role_id="atlas.release-control-plane",
+        )
+        premature, premature_findings = scheduler.reconcile_runtime_program(
+            program=copy.deepcopy(delivered),
+            bindings_payload=bindings,
+            envelopes=[terminal],
+        )
+        self.assertIn(
+            "terminal_owner_return_delivery_required",
+            [finding["code"] for finding in premature_findings],
+        )
+        self.assertEqual(1, len(premature["standing_packets"]))
+        self.assertEqual(0, len(premature["completed_receipts"]))
+
+        callback_result = {
+            **execution_result,
+            "delivery_phase": "OWNER_RETURN",
+            "runtime_thread_id": "architect-thread",
+            "turn_id": "architect-owner-turn",
+            "delivery_proof": {
+                "turn_id": "architect-owner-turn",
+                "tool_receipt_id": "tool-architect-owner-turn",
+                "dedupe_result": "FIRST_DELIVERY",
+            },
+        }
+        callback_reuse_cases = (
+            (
+                "owner_return_execution_turn_reuse",
+                {
+                    **callback_result,
+                    "turn_id": "release-turn",
+                    "delivery_proof": {
+                        "turn_id": "release-turn",
+                        "tool_receipt_id": "tool-owner-distinct",
+                        "dedupe_result": "FIRST_DELIVERY",
+                    },
+                },
+            ),
+            (
+                "owner_return_execution_receipt_reuse",
+                {
+                    **callback_result,
+                    "delivery_proof": {
+                        "turn_id": "architect-owner-turn",
+                        "tool_receipt_id": "tool-release-turn",
+                        "dedupe_result": "FIRST_DELIVERY",
+                    },
+                },
+            ),
+        )
+        for expected_code, invalid_callback in callback_reuse_cases:
+            with self.subTest(expected_code=expected_code):
+                rejected, rejected_findings = scheduler.apply_delivery_results(
+                    program=copy.deepcopy(premature),
+                    results=[invalid_callback],
+                )
+                self.assertIn(expected_code, [finding["code"] for finding in rejected_findings])
+                self.assertEqual("UNKNOWN", rejected["standing_packets"][0]["owner_return_state"])
+                self.assertNotIn("owner_return_turn_id", rejected["delivery_intents"][0])
+
+        returned, return_findings = scheduler.apply_delivery_results(
+            program=premature,
+            results=[callback_result],
+        )
+        self.assertEqual([], return_findings)
+        self.assertEqual("DELIVERED", returned["standing_packets"][0]["owner_return_state"])
+        self.assertEqual("architect-owner-turn", returned["standing_packets"][0]["owner_return_turn_id"])
+        self.assertEqual("atlas.workflow-architect", returned["standing_packets"][0]["current_tracker_role_id"])
+
+        duplicate_callback = copy.deepcopy(callback_result)
+        duplicate_callback["delivery_proof"]["dedupe_result"] = "DUPLICATE_SUPPRESSED"
+        returned, duplicate_findings = scheduler.apply_delivery_results(
+            program=returned,
+            results=[duplicate_callback],
+        )
+        self.assertEqual([], duplicate_findings)
+        self.assertEqual(
+            "FIRST_DELIVERY",
+            returned["standing_packets"][0]["owner_return_proof"]["dedupe_result"],
+        )
+
+        completed, completion_findings = scheduler.reconcile_runtime_program(
+            program=returned,
+            bindings_payload=bindings,
+            envelopes=[terminal],
+        )
+        self.assertEqual([], completion_findings)
+        self.assertEqual([], completed["standing_packets"])
+        self.assertEqual("architect-owner-turn", completed["completed_receipts"][0]["owner_return_turn_id"])
+        self.assertEqual(
+            "tool-architect-owner-turn",
+            completed["completed_receipts"][0]["owner_return_proof"]["tool_receipt_id"],
+        )
+
+    def test_plural_policy_ids_enforce_standardized_successor_and_epoch_binding(self) -> None:
+        payload = _standardized_ready_payload(
+            "plural-policy",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.atlas.release.plural-policy",
+            worktree="isolated-plural-policy",
+        )
+        payload["execution_class"] = "read_only"
+        payload["policy_ids"] = [
+            scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID,
+            "ATLAS-UNIFIED-BLOCKER-MANUAL-ROUTING-20260722-001",
+        ]
+        envelope = _envelope(
+            payload,
+            idempotency_key="plural-policy",
+            source_role_id="atlas.workflow-architect",
+        )
+        envelope["target_role_id"] = "atlas.release-control-plane"
+        envelope["owner_return"] = {
+            "logical_role_id": "atlas.workflow-architect",
+            "thread_id": "architect-v1",
+            "host_id": "local",
+        }
+        bindings_v1 = _bindings(
+            ("atlas.release-control-plane", "release-v1", "idle"),
+            ("atlas.workflow-architect", "architect-v1", "idle"),
+        )
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings_v1,
+            envelopes=[envelope],
+        )
+        self.assertEqual([], findings)
+        self.assertEqual(sorted(payload["policy_ids"]), program["standing_packets"][0]["policy_ids"])
+
+        terminal_successor, terminal_error = scheduler._resolve_terminal_successor(
+            {
+                "terminal": True,
+                "canonical_lifecycle_state": "COMPLETED",
+                "policy_ids": payload["policy_ids"],
+            }
+        )
+        self.assertIsNone(terminal_successor)
+        self.assertEqual("terminal_successor_required", terminal_error["code"])
+
+        drifted, drift_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(
+                ("atlas.release-control-plane", "release-v2", "idle"),
+                ("atlas.workflow-architect", "architect-v2", "idle"),
+            ),
+            envelopes=[],
+        )
+        self.assertEqual([], drift_findings)
+        self.assertEqual("binding_drift", drifted["standing_packets"][0]["runtime_status"])
+        self.assertEqual("UNKNOWN", drifted["standing_packets"][0]["owner_return_state"])
+        report = _scheduler_report(drifted)
+        self.assertEqual([], report["selected_jobs"])
+
+    def test_standardized_execution_target_requires_current_host_identity(self) -> None:
+        payload = _standardized_ready_payload(
+            "missing-target-host",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.atlas.release.missing-host",
+            worktree="isolated-missing-target-host",
+        )
+        payload["execution_class"] = "read_only"
+        envelope = _standardized_envelope(
+            payload,
+            role_id="atlas.release-control-plane",
+            runtime_thread_id="release-thread",
+            idempotency_key="missing-target-host",
+        )
+        bindings = _bindings(("atlas.release-control-plane", "release-thread", "idle"))
+        del bindings["bindings"][0]["host_id"]
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings,
+            envelopes=[envelope],
+        )
+        self.assertIn("execution_target_binding_mismatch", [finding["code"] for finding in findings])
+        self.assertIsNone(program["standing_packets"][0]["execution_target"])
+        report = _scheduler_report(program)
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual("execution_target_unknown", report["blocked_candidates"][0]["blocked_reason"])
+
+    def test_persisted_callback_binding_host_loss_fails_closed(self) -> None:
+        packet_id = "callback-host-loss"
+        payload = _standardized_ready_payload(
+            packet_id,
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.atlas.release.callback-host-loss",
+            worktree="isolated-callback-host-loss",
+        )
+        payload["execution_class"] = "read_only"
+        envelope = _standardized_envelope(
+            payload,
+            role_id="atlas.release-control-plane",
+            runtime_thread_id="release-thread",
+            owner_role_id="atlas.workflow-architect",
+            owner_runtime_thread_id="architect-thread",
+            idempotency_key=packet_id,
+            source_role_id="atlas.workflow-architect",
+        )
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("atlas.workflow-architect", "architect-thread", "idle"),
+        )
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings,
+            envelopes=[envelope],
+        )
+        self.assertEqual([], findings)
+
+        bindings_without_owner_host = copy.deepcopy(bindings)
+        owner_binding = next(
+            binding
+            for binding in bindings_without_owner_host["bindings"]
+            if binding["role_id"] == "atlas.workflow-architect"
+        )
+        del owner_binding["host_id"]
+        reconciled, reconcile_findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=bindings_without_owner_host,
+            envelopes=[],
+        )
+
+        self.assertEqual([], reconcile_findings)
+        self.assertEqual("UNKNOWN", reconciled["standing_packets"][0]["owner_return_state"])
+        report = _scheduler_report(reconciled)
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual("owner_return_unknown", report["blocked_candidates"][0]["blocked_reason"])
+
+    def test_same_event_replay_cannot_retarget_execution_or_owner_transport(self) -> None:
+        payload = _standardized_ready_payload(
+            "immutable-transport",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.atlas.release.immutable-transport",
+            worktree="isolated-immutable-transport",
+        )
+        payload["execution_class"] = "read_only"
+        envelope = _standardized_envelope(
+            payload,
+            role_id="atlas.release-control-plane",
+            runtime_thread_id="release-epoch-1",
+            owner_role_id="atlas.workflow-architect",
+            owner_runtime_thread_id="architect-epoch-1",
+            idempotency_key="immutable-transport",
+            source_role_id="atlas.workflow-architect",
+        )
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-epoch-1", "idle"),
+            ("atlas.workflow-architect", "architect-epoch-1", "idle"),
+        )
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=bindings,
+            envelopes=[envelope],
+        )
+        self.assertEqual([], findings)
+        original_transport = program["standing_packets"][0]["authority"]["transport_digest"]
+
+        cases = []
+        owner_epoch = copy.deepcopy(envelope)
+        owner_epoch["owner_return"]["thread_id"] = "architect-epoch-2"
+        cases.append(
+            (
+                owner_epoch,
+                _bindings(
+                    ("atlas.release-control-plane", "release-epoch-1", "idle"),
+                    ("atlas.workflow-architect", "architect-epoch-2", "idle"),
+                ),
+            )
+        )
+        owner_host = copy.deepcopy(envelope)
+        owner_host["owner_return"]["host_id"] = "remote"
+        owner_host_bindings = _bindings(
+            ("atlas.release-control-plane", "release-epoch-1", "idle"),
+            ("atlas.workflow-architect", "architect-epoch-1", "idle"),
+        )
+        owner_host_bindings["bindings"][1]["host_id"] = "remote"
+        cases.append((owner_host, owner_host_bindings))
+        cases.append(
+            (
+                copy.deepcopy(envelope),
+                _bindings(
+                    ("atlas.release-control-plane", "release-epoch-2", "idle"),
+                    ("atlas.workflow-architect", "architect-epoch-1", "idle"),
+                ),
+            )
+        )
+
+        for replay, replay_bindings in cases:
+            with self.subTest(replay_owner=replay["owner_return"], replay_bindings=replay_bindings):
+                replayed, replay_findings = scheduler.reconcile_runtime_program(
+                    program=copy.deepcopy(program),
+                    bindings_payload=replay_bindings,
+                    envelopes=[replay],
+                )
+                self.assertIn("event_transport_identity_collision", [item["code"] for item in replay_findings])
+                self.assertEqual(original_transport, replayed["standing_packets"][0]["authority"]["transport_digest"])
+
+    def test_tracking_text_cannot_replace_standardized_owner_return(self) -> None:
+        payload = _standardized_ready_payload(
+            "owner-return-missing",
+            role_id="owner.socials-os",
+            repository="fawxzzy/socials-os",
+            writer_scope="repo.socials-os.source",
+            worktree="C:/worktrees/socials-os",
+        )
+        payload["next_tracking_thread"] = "03 Socials OS — SELF"
+        envelope = _standardized_envelope(
+            payload,
+            role_id="owner.socials-os",
+            runtime_thread_id="socials-thread",
+            idempotency_key="owner-return-missing",
+        )
+        envelope.pop("owner_return")
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("owner.socials-os", "socials-thread", "idle")),
+            envelopes=[envelope],
+        )
+        report = _scheduler_report(program)
+
+        self.assertIn("owner_return_identity_required", [finding["code"] for finding in findings])
+        self.assertEqual("UNKNOWN", program["standing_packets"][0]["owner_return_state"])
+        self.assertEqual("owner_return_unknown", report["blocked_candidates"][0]["blocked_reason"])
+        self.assertIn("OWNER_RETURN_UNKNOWN", [item["code"] for item in report["liveness_watchdogs"]])
+        terminal_successor, error = scheduler._resolve_terminal_successor(
+            {
+                "terminal": True,
+                "canonical_lifecycle_state": "COMPLETED",
+                "next_tracking_thread": "03 Socials OS — SELF",
+            }
+        )
+        self.assertIsNone(error)
+        self.assertEqual("TERMINAL_DOMAIN", terminal_successor)
+
+    def test_standardized_delivery_requires_exact_owner_return_proof_and_dedupes(self) -> None:
+        payload = _standardized_ready_payload(
+            "owner-return-delivery",
+            role_id="owner.fawxzzyweb",
+            repository="fawxzzy/fawxzzyweb",
+            writer_scope="repo.fawxzzyweb.source",
+            worktree="C:/worktrees/fawxzzyweb",
+        )
+        envelope = _standardized_envelope(
+            payload,
+            role_id="owner.fawxzzyweb",
+            runtime_thread_id="web-thread",
+            idempotency_key="owner-return-delivery",
+        )
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("owner.fawxzzyweb", "web-thread", "idle")),
+            envelopes=[envelope],
+        )
+        self.assertEqual([], findings)
+        report = _scheduler_report(program)
+        reserved, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        reservation_id = reservations[0]["reservation_id"]
+        intent = reserved["delivery_intents"][0]
+        base_result = {
+            "reservation_id": reservation_id,
+            "packet_id": "owner-return-delivery",
+            "runtime_thread_id": "web-thread",
+            "writer_scope": "repo.fawxzzyweb.source",
+            "event_id": envelope["event_id"],
+            "payload_digest": envelope["payload_digest"],
+            "transport_digest": intent["transport_digest"],
+            "status": "DELIVERED",
+            "turn_id": "web-turn",
+            "owner_return": envelope["owner_return"],
+        }
+
+        rejected, rejected_findings = scheduler.apply_delivery_results(
+            program=copy.deepcopy(reserved),
+            results=[base_result],
+        )
+        self.assertIn("owner_return_proof_required", [finding["code"] for finding in rejected_findings])
+        self.assertEqual("UNKNOWN", rejected["standing_packets"][0]["owner_return_state"])
+
+        suppressed_first = copy.deepcopy(base_result)
+        suppressed_first["delivery_proof"] = {
+            "turn_id": "web-turn",
+            "tool_receipt_id": "tool-web-turn",
+            "dedupe_result": "DUPLICATE_SUPPRESSED",
+        }
+        _, suppressed_findings = scheduler.apply_delivery_results(
+            program=copy.deepcopy(reserved),
+            results=[suppressed_first],
+        )
+        self.assertIn("owner_return_first_delivery_required", [finding["code"] for finding in suppressed_findings])
+
+        delivered_result = copy.deepcopy(base_result)
+        delivered_result["delivery_proof"] = {
+            "turn_id": "web-turn",
+            "tool_receipt_id": "tool-web-turn",
+            "dedupe_result": "FIRST_DELIVERY",
+        }
+        settled, settled_findings = scheduler.apply_delivery_results(
+            program=copy.deepcopy(reserved),
+            results=[delivered_result, delivered_result],
+        )
+        self.assertEqual([], settled_findings)
+        self.assertEqual("delivered", settled["delivery_intents"][0]["status"])
+        self.assertEqual("DELIVERED", settled["standing_packets"][0]["owner_return_state"])
+        self.assertEqual("owner.fawxzzyweb", settled["standing_packets"][0]["current_tracker_role_id"])
+        self.assertEqual(intent["owner_return"], settled["delivery_intents"][0]["owner_return"])
+        self.assertEqual("owner.fawxzzyweb", settled["delivery_intents"][0]["tracker_role_id"])
+
+        duplicate = copy.deepcopy(delivered_result)
+        duplicate["delivery_proof"]["dedupe_result"] = "DUPLICATE_SUPPRESSED"
+        deduped, dedupe_findings = scheduler.apply_delivery_results(program=settled, results=[duplicate])
+        self.assertEqual([], dedupe_findings)
+        self.assertEqual("web-turn", deduped["delivery_intents"][0]["turn_id"])
+
+    def test_host_loss_retains_outbox_and_reuses_exact_reservation_after_reconnect(self) -> None:
+        payload = _standardized_ready_payload(
+            "host-reconnect",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness.source",
+            worktree="C:/worktrees/fitness",
+        )
+        envelope = _standardized_envelope(
+            payload,
+            role_id="owner.fitness",
+            runtime_thread_id="fitness-thread",
+            idempotency_key="host-reconnect",
+        )
+        program, _ = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[envelope],
+        )
+        report = _scheduler_report(program)
+        reserved, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        reservation_id = reservations[0]["reservation_id"]
+        host_result = {
+            "reservation_id": reservation_id,
+            "packet_id": "host-reconnect",
+            "runtime_thread_id": "fitness-thread",
+            "writer_scope": "repo.fitness.source",
+            "event_id": envelope["event_id"],
+            "payload_digest": envelope["payload_digest"],
+            "transport_digest": reserved["delivery_intents"][0]["transport_digest"],
+            "status": "HOST_UNAVAILABLE",
+            "turn_id": None,
+            "owner_return": envelope["owner_return"],
+            "delivery_proof": {
+                "tool_receipt_id": "tool-host-unavailable",
+                "failure_class": "HOST_UNAVAILABLE",
+            },
+        }
+        unavailable, unavailable_findings = scheduler.apply_delivery_results(
+            program=reserved,
+            results=[host_result],
+        )
+        self.assertEqual([], unavailable_findings)
+        self.assertEqual("HOST_UNAVAILABLE", unavailable["standing_packets"][0]["state"])
+        self.assertEqual("host-unavailable", unavailable["delivery_intents"][0]["status"])
+        self.assertEqual("recovery-required", unavailable["active_leases"][0]["status"])
+
+        reconnected, reconnect_findings = scheduler.reconcile_runtime_program(
+            program=copy.deepcopy(unavailable),
+            bindings_payload=_bindings(("owner.fitness", "fitness-thread", "idle")),
+            envelopes=[envelope],
+        )
+        self.assertEqual([], reconnect_findings)
+        self.assertEqual(scheduler.RECOVERY_READY_STATE, reconnected["standing_packets"][0]["state"])
+        reconnect_report = _scheduler_report(reconnected)
+        self.assertEqual("HOST_RECONNECT", reconnect_report["selected_jobs"][0]["recovery_mode"])
+        resumed, resumed_reservations = scheduler.reserve_selected_jobs(program=reconnected, report=reconnect_report)
+        self.assertEqual(reservation_id, resumed_reservations[0]["reservation_id"])
+        self.assertEqual(1, len(resumed["delivery_intents"]))
+        self.assertEqual(1, len(resumed["active_leases"]))
+
+        drifted, _ = scheduler.reconcile_runtime_program(
+            program=copy.deepcopy(unavailable),
+            bindings_payload=_bindings(("owner.fitness", "replacement-fitness-thread", "idle")),
+            envelopes=[envelope],
+        )
+        drift_report = _scheduler_report(drifted)
+        self.assertEqual([], [job for job in drift_report["selected_jobs"] if job.get("source") == "standing_task"])
+        self.assertEqual("UNKNOWN", drifted["standing_packets"][0]["owner_return_state"])
+
+    def test_terminal_successor_is_closed_and_free_form_text_has_no_authority(self) -> None:
+        cases = [
+            ({"terminal": True, "next_packet_id": "next"}, "NEXT_AUTONOMOUS_PACKET"),
+            ({"terminal": True, "question_id": "ATLAS-MAN-1"}, "MANUAL_REQUIRED"),
+            ({"terminal": True, "external_wait": True}, "EXTERNAL_WAIT"),
+            ({"terminal": True, "canonical_lifecycle_state": "COMPLETED"}, "TERMINAL_DOMAIN"),
+            ({"terminal": True, "canonical_lifecycle_state": "BLOCKED_ERROR"}, "ERROR_RECOVERY"),
+        ]
+        for payload, expected in cases:
+            with self.subTest(expected=expected):
+                successor, finding = scheduler._resolve_terminal_successor(payload)
+                self.assertIsNone(finding)
+                self.assertEqual(expected, successor)
+        successor, finding = scheduler._resolve_terminal_successor(
+            {"terminal": True, "terminal_successor": "KEEP_GOING"}
+        )
+        self.assertIsNone(successor)
+        self.assertEqual("terminal_successor_invalid", finding["code"])
+
+        successor, finding = scheduler._resolve_terminal_successor(
+            {
+                "terminal": True,
+                "policy_id": scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID,
+                "canonical_lifecycle_state": "COMPLETED",
+            }
+        )
+        self.assertIsNone(successor)
+        self.assertEqual("terminal_successor_required", finding["code"])
+
+        for clean_state in ("MANUALLY_VERIFIED_PASS", "SUCCESS_NO_ERRORS", "UNKNOWN_ITEMS_ZERO"):
+            with self.subTest(clean_state=clean_state):
+                successor, finding = scheduler._resolve_terminal_successor(
+                    {"terminal": True, "canonical_lifecycle_state": clean_state}
+                )
+                self.assertIsNone(finding)
+                self.assertEqual("TERMINAL_DOMAIN", successor)
+
+    def test_portfolio_projection_exposes_named_sections_and_recovery_packets(self) -> None:
+        ready = _standing_packet(
+            "ready-idle",
+            role_id="owner.socials-os",
+            repository="fawxzzy/socials-os",
+            writer_scope="repo.socials-os.source",
+        )
+        active = _standing_packet(
+            "active-stale",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness.source",
+        )
+        active["state"] = "ACTIVE"
+        manual = _standing_packet(
+            "manual-wait",
+            role_id="owner.mazer",
+            repository="fawxzzy/mazer",
+            writer_scope="repo.mazer.source",
+        )
+        manual["state"] = "BLOCKED"
+        manual["blocking_receipt"] = {"terminal_successor": "MANUAL_REQUIRED"}
+        external = _standing_packet(
+            "host-wait",
+            role_id="owner.fawxzzyweb",
+            repository="fawxzzy/fawxzzyweb",
+            writer_scope="repo.fawxzzyweb.source",
+        )
+        external["state"] = "HOST_UNAVAILABLE"
+        external["runtime_status"] = "host_unavailable"
+        program = _program_payload()
+        program["standing_packets"] = [ready, active, manual, external]
+        program["active_leases"] = [
+            {
+                "reservation_id": "rsrv_" + "1" * 64,
+                "packet_id": "active-stale",
+                "logical_role_id": "owner.fitness",
+                "runtime_thread_id": active["runtime_thread_id"],
+                "writer_scope": active["writer_scope"],
+                "repository": active["repository"],
+                "execution_class": "repo_worktree",
+                "resource_claims": {"files": [], "worktrees": [], "ports": [], "browsers": [], "external_writers": []},
+                "status": "active",
+                "heartbeat_at": "2020-01-01T00:00:00Z",
+            }
+        ]
+        program["delivery_intents"] = []
+        program["completed_receipts"] = [
+            {
+                "logical_role_id": "owner.completed",
+                "packet_id": "completed",
+                "terminal_successor": "TERMINAL_DOMAIN",
+            }
+        ]
+        report: dict[str, object] = {"selected_jobs": [], "observed_at": "2026-07-22T12:00:00Z"}
+
+        scheduler._attach_operational_projection(report=report, program=program)
+        portfolio = report["portfolio_status"]
+        self.assertEqual(
+            [
+                "DONE_RECENTLY",
+                "ACTIVE_NOW",
+                "READY_TO_START",
+                "WAITING_ON_ZAC",
+                "WAITING_EXTERNAL",
+                "BLOCKED_ERROR",
+                "NEXT_DISPATCHES",
+                "HEALTH",
+            ],
+            list(portfolio),
+        )
+        for section in ("DONE_RECENTLY", "ACTIVE_NOW", "READY_TO_START", "WAITING_ON_ZAC", "WAITING_EXTERNAL"):
+            self.assertTrue(portfolio[section])
+            self.assertEqual(
+                {
+                    "role",
+                    "packet",
+                    "resource_claim",
+                    "state",
+                    "last_receipt",
+                    "next_executable_action",
+                    "wake_condition",
+                    "owner_return_proof",
+                    "staleness",
+                },
+                set(portfolio[section][0]),
+            )
+        watchdog_codes = {item["code"] for item in report["liveness_watchdogs"]}
+        self.assertTrue({"READY_IDLE", "STALE_ACTIVE_LEASE", "BLOCKED_QUEUE", "HOST_UNAVAILABLE"}.issubset(watchdog_codes))
+        self.assertEqual("BLOCKED", portfolio["HEALTH"]["scheduler"])
+        self.assertIn("STALE_ACTIVE_LEASE", portfolio["HEALTH"]["blocking_watchdog_codes"])
+        self.assertGreater(portfolio["HEALTH"]["blocking_watchdog_count"], 0)
+
+    def test_portfolio_health_reflects_each_blocking_watchdog(self) -> None:
+        owner_unknown = _standing_packet(
+            "owner-unknown",
+            role_id="owner.socials-os",
+            repository="fawxzzy/socials-os",
+            writer_scope="repo.socials-os.source",
+        )
+        owner_unknown["policy_id"] = scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID
+        owner_unknown["owner_return_state"] = "UNKNOWN"
+
+        missing_runtime = _standing_packet(
+            "missing-runtime",
+            role_id="owner.fitness",
+            repository="fawxzzy/fitness",
+            writer_scope="repo.fitness.source",
+        )
+        missing_runtime["runtime_thread_id"] = None
+        missing_runtime["runtime_status"] = "missing"
+
+        active_without_lease = _standing_packet(
+            "active-without-lease",
+            role_id="owner.mazer",
+            repository="fawxzzy/mazer",
+            writer_scope="repo.mazer.source",
+        )
+        active_without_lease["state"] = "ACTIVE"
+
+        for packet, expected_code in (
+            (owner_unknown, "OWNER_RETURN_UNKNOWN"),
+            (missing_runtime, "MISSING_RUNTIME"),
+            (active_without_lease, "ACTIVE_WITHOUT_LEASE"),
+        ):
+            with self.subTest(expected_code=expected_code):
+                program = _program_payload()
+                program["standing_packets"] = [packet]
+                program["active_leases"] = []
+                program["delivery_intents"] = []
+                report: dict[str, object] = {"selected_jobs": [], "observed_at": "2026-07-22T12:00:00Z"}
+                scheduler._attach_operational_projection(report=report, program=program)
+                health = report["portfolio_status"]["HEALTH"]
+                self.assertEqual("BLOCKED", health["scheduler"])
+                self.assertIn(expected_code, health["watchdog_codes"])
+                self.assertIn(expected_code, health["blocking_watchdog_codes"])
+                self.assertEqual(1, health["blocking_watchdog_code_count"])
+                self.assertEqual(1, health["blocking_watchdog_count"])
+
+        duplicate_code_program = _program_payload()
+        duplicate_code_program["standing_packets"] = [
+            copy.deepcopy(owner_unknown),
+            {
+                **copy.deepcopy(owner_unknown),
+                "packet_id": "owner-unknown-second",
+                "writer_scope": "repo.socials-os.second-source",
+            },
+        ]
+        duplicate_code_program["active_leases"] = []
+        duplicate_code_program["delivery_intents"] = []
+        duplicate_code_report: dict[str, object] = {
+            "selected_jobs": [],
+            "observed_at": "2026-07-22T12:00:00Z",
+        }
+        scheduler._attach_operational_projection(
+            report=duplicate_code_report,
+            program=duplicate_code_program,
+        )
+        duplicate_code_health = duplicate_code_report["portfolio_status"]["HEALTH"]
+        self.assertEqual(["OWNER_RETURN_UNKNOWN"], duplicate_code_health["blocking_watchdog_codes"])
+        self.assertEqual(1, duplicate_code_health["blocking_watchdog_code_count"])
+        self.assertEqual(2, duplicate_code_health["blocking_watchdog_count"])
+
+        degraded_program = _program_payload()
+        degraded_program["standing_packets"] = [
+            _standing_packet(
+                "ready-idle-health",
+                role_id="owner.fawxzzyweb",
+                repository="fawxzzy/fawxzzyweb",
+                writer_scope="repo.fawxzzyweb.source",
+            )
+        ]
+        degraded_report: dict[str, object] = {"selected_jobs": [], "observed_at": "2026-07-22T12:00:00Z"}
+        scheduler._attach_operational_projection(report=degraded_report, program=degraded_program)
+        self.assertEqual("DEGRADED", degraded_report["portfolio_status"]["HEALTH"]["scheduler"])
+
+        healthy_report: dict[str, object] = {"selected_jobs": [], "observed_at": "2026-07-22T12:00:00Z"}
+        scheduler._attach_operational_projection(report=healthy_report, program=_program_payload())
+        self.assertEqual("HEALTHY", healthy_report["portfolio_status"]["HEALTH"]["scheduler"])
+
+    def test_disjoint_owner_repositories_advance_while_colliding_platform_writers_serialize(self) -> None:
+        program = _program_payload()
+        program["max_parallel_writers"] = 6
+        packets = []
+        identities = [
+            ("web", "owner.fawxzzyweb", "fawxzzy/fawxzzyweb"),
+            ("socials", "owner.socials-os", "fawxzzy/socials-os"),
+            ("recovery", "owner.recovery-automation", "fawxzzy/recovery-automation"),
+            ("hosted-replay", "owner.hosted-replay", "fawxzzy/hosted-replay"),
+            ("platform-a", "owner.fawxzzy-platform", "fawxzzy/fawxzzy-platform"),
+            ("platform-b", "owner.fawxzzy-platform.secondary", "fawxzzy/fawxzzy-platform"),
+        ]
+        for packet_id, role_id, repository in identities:
+            packet = _standing_packet(
+                packet_id,
+                role_id=role_id,
+                repository=repository,
+                writer_scope=f"repo.{packet_id}.source",
+            )
+            worktree = "worktrees/platform" if packet_id.startswith("platform") else f"worktrees/{packet_id}"
+            packet["resource_claims"] = {
+                "files": ["src/platform/**"] if packet_id.startswith("platform") else [f"src/{packet_id}/**"],
+                "worktrees": [worktree],
+                "ports": [],
+                "browsers": [],
+                "external_writers": [],
+            }
+            packets.append(packet)
+        program["standing_packets"] = packets
+
+        report = _scheduler_report(program)
+        selected = {job["packet_id"] for job in report["selected_jobs"]}
+        self.assertTrue({"web", "socials", "recovery", "hosted-replay"}.issubset(selected))
+        self.assertEqual(1, len(selected.intersection({"platform-a", "platform-b"})))
+        deferred_platform = [
+            item for item in report["deferred_candidates"] if item["packet_id"] in {"platform-a", "platform-b"}
+        ]
+        self.assertEqual(1, len(deferred_platform))
+        self.assertEqual("resource_conflict", deferred_platform[0]["deferred_reason"])
+        deferred_id = deferred_platform[0]["packet_id"]
+        deferred_watchdog = next(
+            item for item in report["liveness_watchdogs"] if item["packet_id"] == deferred_id
+        )
+        self.assertEqual("BLOCKED_QUEUE", deferred_watchdog["code"])
+        self.assertEqual("CONFLICTING_RESOURCE_RELEASE_OR_CAPACITY", deferred_watchdog["wake_condition"])
 
     def test_program_lock_excludes_concurrent_scheduler_invocation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1513,6 +2574,8 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
 
         self.assertEqual(scheduler.STATUS_HOLD, report["status"])
         self.assertEqual("standing_role_active", report["blocked_candidates"][0]["blocked_reason"])
+        self.assertEqual("QUEUE_UNTIL_OWNER_SAFE_BOUNDARY", report["portfolio_status"]["READY_TO_START"][0]["next_executable_action"])
+        self.assertIn("BLOCKED_QUEUE", [item["code"] for item in report["liveness_watchdogs"]])
 
     def test_bridge_maps_idle_and_notloaded_bindings_but_preserves_active(self) -> None:
         ready_payloads = [
@@ -2216,6 +3279,326 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual([], program["delivery_intents"])
         self.assertEqual("REVIEW_FINDINGS_PENDING", program["completed_receipts"][0]["terminal_disposition"])
 
+    def test_read_only_terminal_rejects_stale_reservation_without_blocking_or_completion(self) -> None:
+        packet = _standing_packet(
+            "scheduler-review",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.github.fawxzzy.atlas.scheduler-review",
+        )
+        packet["execution_class"] = "read_only"
+        packet["state"] = "ACTIVE"
+        packet["dispatch_reservation"] = {"reservation_id": "rsrv-current"}
+        base_program = _program_payload()
+        base_program["standing_packets"] = [packet]
+        base_program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-stale",
+                "packet_id": "scheduler-review",
+                "runtime_thread_id": "release-thread",
+                "writer_scope": "read.github.fawxzzy.atlas.scheduler-review",
+                "event_id": "onv1_" + "c" * 64,
+                "payload_digest": "sha256:" + "c" * 64,
+                "status": "delivered",
+                "turn_id": "review-turn",
+            }
+        ]
+        cases = (
+            ("ERROR_RECOVERY", "terminal_read_only_correlation_required"),
+            ("TERMINAL_DOMAIN", "terminal_lease_correlation_required"),
+        )
+
+        for successor, expected_finding in cases:
+            with self.subTest(successor=successor):
+                terminal = _envelope(
+                    {
+                        "canonical_lifecycle_state": successor,
+                        "terminal": True,
+                        "blocking": False,
+                        "terminal_successor": successor,
+                        "packet_id": "scheduler-review",
+                        "writer_scope": "read.github.fawxzzy.atlas.scheduler-review",
+                        "reservation_id": "rsrv-stale",
+                        "turn_id": "review-turn",
+                    },
+                    idempotency_key=f"scheduler-review-stale-{successor.lower()}",
+                )
+
+                reconciled, findings = scheduler.reconcile_runtime_program(
+                    program=copy.deepcopy(base_program),
+                    bindings_payload=_bindings(("atlas.release-control-plane", "release-thread", "idle")),
+                    envelopes=[terminal],
+                )
+
+                self.assertEqual([expected_finding], [item["code"] for item in findings])
+                self.assertEqual([], reconciled["processed_events"])
+                self.assertEqual([], reconciled["completed_packets"])
+                self.assertEqual([], reconciled["completed_receipts"])
+                self.assertEqual([], reconciled["active_leases"])
+                self.assertEqual(1, len(reconciled["standing_packets"]))
+                self.assertEqual("ACTIVE", reconciled["standing_packets"][0]["state"])
+                self.assertEqual(
+                    "rsrv-current",
+                    reconciled["standing_packets"][0]["dispatch_reservation"]["reservation_id"],
+                )
+                self.assertEqual(["rsrv-stale"], [item["reservation_id"] for item in reconciled["delivery_intents"]])
+
+    def test_closed_nonblocking_successor_settles_exact_mutating_packet_after_owner_return(self) -> None:
+        owner_return = {
+            "logical_role_id": "atlas.workflow-architect",
+            "thread_id": "architect-thread",
+            "host_id": "local",
+        }
+        owner_return_proof = {
+            "turn_id": "architect-owner-turn",
+            "tool_receipt_id": "tool-architect-owner-turn",
+            "dedupe_result": "FIRST_DELIVERY",
+        }
+        packet = _standing_packet(
+            "atlas-source-complete",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="repo.atlas.source-complete",
+        )
+        packet.update(
+            {
+                "state": "ACTIVE",
+                "runtime_thread_id": "release-thread",
+                "policy_ids": [
+                    scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID,
+                    "ATLAS-UNIFIED-BLOCKER-MANUAL-ROUTING-20260722-001",
+                ],
+                "owner_return": owner_return,
+                "owner_return_state": "DELIVERED",
+                "owner_return_turn_id": "architect-owner-turn",
+                "owner_return_proof": owner_return_proof,
+                "dispatch_reservation": {"reservation_id": "rsrv-atlas-source-complete"},
+            }
+        )
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+        program["active_leases"] = [
+            {
+                "reservation_id": "rsrv-atlas-source-complete",
+                "packet_id": "atlas-source-complete",
+                "writer_scope": "repo.atlas.source-complete",
+                "status": "active",
+            }
+        ]
+        program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-atlas-source-complete",
+                "packet_id": "atlas-source-complete",
+                "logical_role_id": "atlas.release-control-plane",
+                "runtime_thread_id": "release-thread",
+                "writer_scope": "repo.atlas.source-complete",
+                "event_id": "onv1_" + "c" * 64,
+                "payload_digest": "sha256:" + "c" * 64,
+                "status": "delivered",
+                "turn_id": "release-turn",
+                "execution_delivery_proof": {
+                    "turn_id": "release-turn",
+                    "tool_receipt_id": "tool-release-turn",
+                    "dedupe_result": "FIRST_DELIVERY",
+                },
+                "owner_return": owner_return,
+                "owner_return_state": "DELIVERED",
+                "owner_return_turn_id": "architect-owner-turn",
+                "owner_return_proof": owner_return_proof,
+            }
+        ]
+        terminal = _envelope(
+            {
+                "canonical_lifecycle_state": "TERMINAL",
+                "terminal": True,
+                "blocking": False,
+                "terminal_successor": "TERMINAL_DOMAIN",
+                "policy_ids": [
+                    scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID,
+                    "ATLAS-UNIFIED-BLOCKER-MANUAL-ROUTING-20260722-001",
+                ],
+                "logical_role_id": "atlas.release-control-plane",
+                "packet_id": "atlas-source-complete",
+                "writer_scope": "repo.atlas.source-complete",
+                "reservation_id": "rsrv-atlas-source-complete",
+                "turn_id": "release-turn",
+            },
+            idempotency_key="atlas-source-complete-terminal",
+            source_role_id="atlas.release-control-plane",
+        )
+        terminal["target_role_id"] = "atlas.release-control-plane"
+        terminal["owner_return"] = owner_return
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=program,
+            bindings_payload=_bindings(
+                ("atlas.release-control-plane", "release-thread", "idle"),
+                ("atlas.workflow-architect", "architect-thread", "idle"),
+            ),
+            envelopes=[terminal],
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual(["atlas-source-complete"], program["completed_packets"])
+        self.assertEqual([], program["standing_packets"])
+        self.assertEqual([], program["delivery_intents"])
+        self.assertEqual([], program["active_leases"])
+        self.assertEqual("TERMINAL_DOMAIN", program["completed_receipts"][0]["terminal_successor"])
+        self.assertEqual("architect-owner-turn", program["completed_receipts"][0]["owner_return_turn_id"])
+
+    def test_read_only_noncompletion_successors_remain_standing_and_projected(self) -> None:
+        owner_return = {
+            "logical_role_id": "atlas.workflow-architect",
+            "thread_id": "architect-thread",
+            "host_id": "local",
+        }
+        owner_return_proof = {
+            "turn_id": "architect-owner-turn",
+            "tool_receipt_id": "tool-architect-owner-turn",
+            "dedupe_result": "FIRST_DELIVERY",
+        }
+        packet = _standing_packet(
+            "atlas-read-only-wait",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.atlas.review.wait",
+        )
+        packet.update(
+            {
+                "state": "ACTIVE",
+                "execution_class": "read_only",
+                "runtime_thread_id": "release-thread",
+                "policy_ids": [
+                    scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID,
+                    "ATLAS-UNIFIED-BLOCKER-MANUAL-ROUTING-20260722-001",
+                ],
+                "owner_return": owner_return,
+                "owner_return_state": "DELIVERED",
+                "owner_return_turn_id": "architect-owner-turn",
+                "owner_return_proof": owner_return_proof,
+                "current_tracker_role_id": "atlas.workflow-architect",
+                "dispatch_reservation": {"reservation_id": "rsrv-atlas-read-only-wait"},
+            }
+        )
+        base_program = _program_payload()
+        base_program["standing_packets"] = [packet]
+        base_program["active_leases"] = []
+        base_program["delivery_intents"] = [
+            {
+                "reservation_id": "rsrv-atlas-read-only-wait",
+                "packet_id": "atlas-read-only-wait",
+                "logical_role_id": "atlas.release-control-plane",
+                "runtime_thread_id": "release-thread",
+                "writer_scope": "read.atlas.review.wait",
+                "event_id": "onv1_" + "c" * 64,
+                "payload_digest": "sha256:" + "c" * 64,
+                "status": "delivered",
+                "turn_id": "release-turn",
+                "execution_delivery_proof": {
+                    "turn_id": "release-turn",
+                    "tool_receipt_id": "tool-release-turn",
+                    "dedupe_result": "FIRST_DELIVERY",
+                },
+                "owner_return": owner_return,
+                "owner_return_state": "DELIVERED",
+                "owner_return_turn_id": "architect-owner-turn",
+                "owner_return_proof": owner_return_proof,
+            }
+        ]
+        cases = (
+            (
+                "MANUAL_REQUIRED",
+                {"question_id": "ATLAS-MAN-WAIT"},
+                "WAITING_ON_ZAC",
+                "WAIT_FOR_OPERATOR_DECISION",
+                "OPERATOR_DECISION_ANSWERED:ATLAS-MAN-WAIT",
+            ),
+            (
+                "EXTERNAL_WAIT",
+                {"wake_condition": "EXACT_HEAD_REVIEW_RESULT:review-head"},
+                "WAITING_EXTERNAL",
+                "WAIT_FOR_NAMED_EXTERNAL_EVENT",
+                "EXACT_HEAD_REVIEW_RESULT:review-head",
+            ),
+            (
+                "ERROR_RECOVERY",
+                {},
+                "BLOCKED_ERROR",
+                "EMIT_CONTENT_ADDRESSED_RECOVERY_PACKET",
+                None,
+            ),
+        )
+        bindings = _bindings(
+            ("atlas.release-control-plane", "release-thread", "idle"),
+            ("atlas.workflow-architect", "architect-thread", "idle"),
+        )
+
+        for successor, evidence, section, next_action, expected_wake in cases:
+            with self.subTest(successor=successor):
+                terminal_payload = {
+                    "canonical_lifecycle_state": successor,
+                    "terminal": True,
+                    "blocking": False,
+                    "terminal_successor": successor,
+                    "policy_ids": [
+                        scheduler.WORKFLOW_STANDARDIZATION_POLICY_ID,
+                        "ATLAS-UNIFIED-BLOCKER-MANUAL-ROUTING-20260722-001",
+                    ],
+                    "logical_role_id": "atlas.release-control-plane",
+                    "packet_id": "atlas-read-only-wait",
+                    "writer_scope": "read.atlas.review.wait",
+                    "reservation_id": "rsrv-atlas-read-only-wait",
+                    "turn_id": "release-turn",
+                    **evidence,
+                }
+                terminal = _envelope(
+                    terminal_payload,
+                    idempotency_key=f"atlas-read-only-{successor.lower()}",
+                    source_role_id="atlas.release-control-plane",
+                )
+                terminal["target_role_id"] = "atlas.release-control-plane"
+                terminal["owner_return"] = owner_return
+                wake_condition = expected_wake or f"EXACT_RECOVERY_AUTHORITY:{terminal['event_id']}"
+
+                retained, findings = scheduler.reconcile_runtime_program(
+                    program=copy.deepcopy(base_program),
+                    bindings_payload=bindings,
+                    envelopes=[terminal],
+                )
+                replayed, replay_findings = scheduler.reconcile_runtime_program(
+                    program=retained,
+                    bindings_payload=bindings,
+                    envelopes=[terminal],
+                )
+
+                self.assertEqual([], findings)
+                self.assertEqual([], replay_findings)
+                self.assertEqual([], replayed["completed_packets"])
+                self.assertEqual([], replayed["completed_receipts"])
+                self.assertEqual([], replayed["active_leases"])
+                self.assertEqual(1, len(replayed["standing_packets"]))
+                self.assertEqual(1, len(replayed["delivery_intents"]))
+                retained_packet = replayed["standing_packets"][0]
+                self.assertEqual("BLOCKED", retained_packet["state"])
+                self.assertEqual(successor, retained_packet["blocking_receipt"]["terminal_successor"])
+                self.assertEqual(terminal["event_id"], retained_packet["blocking_receipt"]["event_id"])
+                self.assertEqual(wake_condition, retained_packet["blocking_receipt"]["wake_condition"])
+
+                report: dict[str, object] = {
+                    "selected_jobs": [],
+                    "observed_at": "2026-07-23T00:00:00Z",
+                }
+                scheduler._attach_operational_projection(report=report, program=replayed)
+                portfolio = report["portfolio_status"]
+                self.assertEqual([], portfolio["DONE_RECENTLY"])
+                self.assertEqual(1, len(portfolio[section]))
+                self.assertEqual("atlas-read-only-wait", portfolio[section][0]["packet"])
+                self.assertEqual(next_action, portfolio[section][0]["next_executable_action"])
+                self.assertEqual(wake_condition, portfolio[section][0]["wake_condition"])
+                self.assertEqual(1, len(report["recovery_packets"]))
+                self.assertEqual(successor, report["recovery_packets"][0]["terminal_successor"])
+                self.assertEqual(wake_condition, report["recovery_packets"][0]["wake_condition"])
+
     def test_terminal_mutating_blocker_holds_exact_packet_and_lease_for_resume(self) -> None:
         packet = _standing_packet(
             "fitness-source",
@@ -2252,6 +3635,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 "canonical_lifecycle_state": "BLOCKED_EXACT_MISSING_EVIDENCE",
                 "terminal": True,
                 "blocking": True,
+                "terminal_successor": "ERROR_RECOVERY",
                 "packet_id": "fitness-source",
                 "writer_scope": "repo.fitness.source",
                 "reservation_id": "rsrv-fitness-source",

@@ -47,6 +47,16 @@
       }
     },
     "target_role_id": { "type": "string", "minLength": 1 },
+    "owner_return": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logical_role_id", "thread_id", "host_id"],
+      "properties": {
+        "logical_role_id": { "type": "string", "minLength": 1 },
+        "thread_id": { "type": "string", "minLength": 1 },
+        "host_id": { "type": "string", "minLength": 1 }
+      }
+    },
     "correlation": {
       "type": "object",
       "additionalProperties": false,
@@ -90,7 +100,45 @@
     },
     "payload": {
       "type": "object",
-      "additionalProperties": true
+      "additionalProperties": true,
+      "properties": {
+        "policy_id": { "type": "string" },
+        "policy_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
     }
+  },
+  "if": {
+    "required": ["payload"],
+    "properties": {
+      "payload": {
+        "anyOf": [
+          {
+            "required": ["policy_id"],
+            "properties": {
+              "policy_id": {
+                "const": "ATLAS-WORKFLOW-STANDARDIZATION-20260721-001"
+              }
+            }
+          },
+          {
+            "required": ["policy_ids"],
+            "properties": {
+              "policy_ids": {
+                "type": "array",
+                "contains": {
+                  "const": "ATLAS-WORKFLOW-STANDARDIZATION-20260721-001"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "then": {
+    "required": ["owner_return"]
   }
 }
