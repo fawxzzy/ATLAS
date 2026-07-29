@@ -59,6 +59,29 @@ class AtlasRuntimeTests(unittest.TestCase):
         self.assertEqual(paused, ["a"])
         self.assertEqual(self.runtime.get("a").state, "PAUSED_RUNTIME")
 
+    def test_reconcile_is_idempotent_across_two_connections(self):
+        self.runtime.enqueue("a", lane="lane", scope="repo:x")
+        lease = self.runtime.claim(worker_id="w", run_id="r", lease_seconds=1)
+        competitor = AtlasRuntime(self.database)
+        try:
+            self.assertEqual(
+                competitor.reconcile(now=lease.expires_at + 1),
+                ["a"],
+            )
+            self.assertEqual(
+                self.runtime.reconcile(now=lease.expires_at + 1),
+                [],
+            )
+            self.assertEqual(self.runtime.get("a").state, "PAUSED_RUNTIME")
+            self.assertEqual(
+                self.runtime.db.execute(
+                    "SELECT COUNT(*) FROM leases WHERE task_id='a'"
+                ).fetchone()[0],
+                0,
+            )
+        finally:
+            competitor.close()
+
     def test_conflicting_receipt_event_fails_closed(self):
         self.runtime.enqueue("a", lane="lane", scope="repo:x")
         lease = self.runtime.claim(worker_id="w", run_id="r")
@@ -574,16 +597,106 @@ class AtlasRuntimeTests(unittest.TestCase):
         )
         self.assertFalse(self.runtime.db.in_transaction)
 
-    def test_watchdog_receipt_rolls_back_and_deduplicates_after_restart(self):
-        payload = {
-            "schema": "atlas.watchdog.receipt.v1",
-            "action": "HOLD",
-            "reason": "TEST",
-        }
-        with patch.object(self.runtime, "_record_event", side_effect=RuntimeError("disk")):
-            with self.assertRaises(RuntimeError):
-                self.runtime.record_watchdog_receipt(
-                    task_id="task", payload=payload, now=100
+    def test_stale_watchdog_owner_cannot_finalize_receipt_after_replacement(self):
+        stale = self.runtime.reserve_watchdog_tick(
+            name="watchdog",
+            now=100,
+            fallback_seconds=60,
+            reservation_seconds=5,
+            event_observed=False,
+        )
+        competitor = AtlasRuntime(self.database)
+        try:
+            replacement = competitor.reserve_watchdog_tick(
+                name="watchdog",
+                now=105,
+                fallback_seconds=60,
+                reservation_seconds=5,
+                event_observed=True,
+            )
+            replacement_before = competitor.db.execute(
+                "SELECT state,reserved_at,expires_at,terminal_at "
+                "FROM watchdog_runs WHERE reservation_id=?",
+                (replacement.reservation_id,),
+            ).fetchone()
+            with self.assertRaises(KeyError):
+                self.runtime.finalize_watchdog_tick(
+                    reservation=stale,
+                    receipts=(
+                        (
+                            "unique-stale-owner",
+                            {
+                                "schema": "atlas.watchdog.receipt.v1",
+                                "action": "HOLD",
+                                "reason": "STALE_OWNER_UNIQUE",
+                            },
+                        ),
+                    ),
+                    now=105.1,
+                )
+            self.assertEqual(
+                self.runtime.db.execute(
+                    "SELECT COUNT(*) FROM events WHERE kind='WATCHDOG'"
+                ).fetchone()[0],
+                0,
+            )
+            self.assertEqual(
+                self.runtime.db.execute(
+                    "SELECT state FROM watchdog_runs WHERE reservation_id=?",
+                    (stale.reservation_id,),
+                ).fetchone()["state"],
+                "ABANDONED",
+            )
+            replacement_after = self.runtime.db.execute(
+                "SELECT state,reserved_at,expires_at,terminal_at "
+                "FROM watchdog_runs WHERE reservation_id=?",
+                (replacement.reservation_id,),
+            ).fetchone()
+            self.assertEqual(tuple(replacement_after), tuple(replacement_before))
+            self.assertEqual(replacement_after["state"], "IN_PROGRESS")
+            self.assertIsNone(
+                self.runtime.db.execute(
+                    "SELECT * FROM watchdog_state WHERE name='watchdog'"
+                ).fetchone()
+            )
+        finally:
+            competitor.close()
+
+    def test_watchdog_finalization_rolls_back_complete_receipt_batch(self):
+        reservation = self.runtime.reserve_watchdog_tick(
+            name="watchdog",
+            now=100,
+            fallback_seconds=60,
+            reservation_seconds=5,
+            event_observed=False,
+        )
+        receipts = (
+            ("first", {"schema": "atlas.watchdog.receipt.v1", "reason": "FIRST"}),
+            ("second", {"schema": "atlas.watchdog.receipt.v1", "reason": "SECOND"}),
+        )
+        original = self.runtime._record_event
+        calls = 0
+
+        def fail_on_second_receipt(**kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise RuntimeError("injected receipt persistence failure")
+            return original(**kwargs)
+
+        with patch.object(
+            self.runtime,
+            "_record_event",
+            side_effect=fail_on_second_receipt,
+        ):
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "injected receipt persistence failure",
+            ):
+                self.runtime.finalize_watchdog_tick(
+                    reservation=reservation,
+                    receipts=receipts,
+                    now=101,
                 )
         self.assertEqual(
             self.runtime.db.execute(
@@ -591,26 +704,196 @@ class AtlasRuntimeTests(unittest.TestCase):
             ).fetchone()[0],
             0,
         )
-        self.assertFalse(self.runtime.db.in_transaction)
-        self.assertTrue(
-            self.runtime.record_watchdog_receipt(
-                task_id="task", payload=payload, now=100
-            )
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT COUNT(*) FROM watchdog_receipt_sets"
+            ).fetchone()[0],
+            0,
         )
-        event = self.runtime.db.execute(
-            "SELECT event_id,payload_digest FROM events WHERE kind='WATCHDOG'"
-        ).fetchone()
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT state FROM watchdog_runs WHERE reservation_id=?",
+                (reservation.reservation_id,),
+            ).fetchone()["state"],
+            "IN_PROGRESS",
+        )
+        self.assertIsNone(
+            self.runtime.db.execute(
+                "SELECT * FROM watchdog_state WHERE name='watchdog'"
+            ).fetchone()
+        )
+        self.assertFalse(self.runtime.db.in_transaction)
+
+    def test_two_connections_finalize_same_watchdog_batch_exactly_once(self):
+        reservation = self.runtime.reserve_watchdog_tick(
+            name="watchdog",
+            now=100,
+            fallback_seconds=60,
+            reservation_seconds=5,
+            event_observed=False,
+        )
+        receipts = (
+            ("task", {"schema": "atlas.watchdog.receipt.v1", "reason": "EXACT"}),
+        )
+        barrier = threading.Barrier(2)
+
+        def finalize():
+            runtime = AtlasRuntime(self.database)
+            try:
+                barrier.wait()
+                return runtime.finalize_watchdog_tick(
+                    reservation=reservation,
+                    receipts=receipts,
+                    now=101,
+                )
+            finally:
+                runtime.close()
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(lambda _: finalize(), range(2)))
+        self.assertEqual(sorted(results), [(False,), (True,)])
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT COUNT(*) FROM events WHERE kind='WATCHDOG'"
+            ).fetchone()[0],
+            1,
+        )
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT COUNT(*) FROM watchdog_receipt_sets "
+                "WHERE reservation_id=?",
+                (reservation.reservation_id,),
+            ).fetchone()[0],
+            1,
+        )
+        self.assertEqual(
+            tuple(
+                self.runtime.db.execute(
+                    "SELECT state,terminal_at FROM watchdog_runs "
+                    "WHERE reservation_id=?",
+                    (reservation.reservation_id,),
+                ).fetchone()
+            ),
+            ("SUCCEEDED", 101),
+        )
+
+    def test_watchdog_finalization_commits_and_replays_exact_batch_after_restart(self):
+        reservation = self.runtime.reserve_watchdog_tick(
+            name="watchdog",
+            now=100,
+            fallback_seconds=60,
+            reservation_seconds=5,
+            event_observed=False,
+        )
+        receipts = (
+            ("first", {"schema": "atlas.watchdog.receipt.v1", "reason": "FIRST"}),
+            ("second", {"schema": "atlas.watchdog.receipt.v1", "reason": "SECOND"}),
+        )
+        self.assertEqual(
+            self.runtime.finalize_watchdog_tick(
+                reservation=reservation,
+                receipts=receipts,
+                now=101,
+            ),
+            (True, True),
+        )
+        event_identity = [
+            tuple(row)
+            for row in self.runtime.db.execute(
+                "SELECT event_id,payload_digest FROM events "
+                "WHERE kind='WATCHDOG' ORDER BY event_id"
+            )
+        ]
+        self.assertEqual(len(event_identity), 2)
+        self.assertEqual(
+            tuple(
+                self.runtime.db.execute(
+                    "SELECT state,terminal_at FROM watchdog_runs "
+                    "WHERE reservation_id=?",
+                    (reservation.reservation_id,),
+                ).fetchone()
+            ),
+            ("SUCCEEDED", 101),
+        )
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT receipt_count FROM watchdog_receipt_sets "
+                "WHERE reservation_id=?",
+                (reservation.reservation_id,),
+            ).fetchone()["receipt_count"],
+            2,
+        )
         self.runtime.close()
         self.runtime = AtlasRuntime(self.database)
-        self.assertFalse(
-            self.runtime.record_watchdog_receipt(
-                task_id="task", payload=payload, now=101
-            )
+        later = self.runtime.reserve_watchdog_tick(
+            name="watchdog",
+            now=102,
+            fallback_seconds=60,
+            reservation_seconds=5,
+            event_observed=True,
         )
-        reread = self.runtime.db.execute(
-            "SELECT event_id,payload_digest FROM events WHERE kind='WATCHDOG'"
-        ).fetchone()
-        self.assertEqual(tuple(event), tuple(reread))
+        self.runtime.complete_watchdog_tick(reservation=later, now=102)
+        self.assertEqual(
+            self.runtime.finalize_watchdog_tick(
+                reservation=reservation,
+                receipts=receipts,
+                now=999,
+            ),
+            (False, False),
+        )
+        reread = [
+            tuple(row)
+            for row in self.runtime.db.execute(
+                "SELECT event_id,payload_digest FROM events "
+                "WHERE kind='WATCHDOG' ORDER BY event_id"
+            )
+        ]
+        self.assertEqual(reread, event_identity)
+        with self.assertRaises(KeyError):
+            self.runtime.finalize_watchdog_tick(
+                reservation=reservation,
+                receipts=receipts[:1],
+                now=999,
+            )
+        self.assertFalse(self.runtime.db.in_transaction)
+
+    def test_invalid_watchdog_receipt_prevents_the_complete_batch(self):
+        reservation = self.runtime.reserve_watchdog_tick(
+            name="watchdog",
+            now=100,
+            fallback_seconds=60,
+            reservation_seconds=5,
+            event_observed=False,
+        )
+        with self.assertRaises(TypeError):
+            self.runtime.finalize_watchdog_tick(
+                reservation=reservation,
+                receipts=(
+                    ("valid", {"schema": "atlas.watchdog.receipt.v1"}),
+                    ("invalid", {"value": object()}),
+                ),
+                now=101,
+            )
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT COUNT(*) FROM events WHERE kind='WATCHDOG'"
+            ).fetchone()[0],
+            0,
+        )
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT COUNT(*) FROM watchdog_receipt_sets"
+            ).fetchone()[0],
+            0,
+        )
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT state FROM watchdog_runs WHERE reservation_id=?",
+                (reservation.reservation_id,),
+            ).fetchone()["state"],
+            "IN_PROGRESS",
+        )
+        self.assertFalse(self.runtime.db.in_transaction)
 
     def test_watchdog_tasks_observe_paused_usage_without_mutation(self):
         self.runtime.enqueue("paused", lane="lane", scope="repo:paused")

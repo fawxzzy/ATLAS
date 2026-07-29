@@ -90,24 +90,47 @@ class AtlasWatchdog:
                     heartbeat_timeout=self.heartbeat_timeout,
                 )
             )
-            decisions = tuple(
-                self._record_decision(task, has_valid_lease, now)
+            planned = tuple(
+                self._plan_decision(task, has_valid_lease, now)
                 for task, has_valid_lease in self.runtime.watchdog_tasks(now=now)
             )
             completed_at = self.clock()
-            self.runtime.complete_watchdog_tick(
+            recorded = self.runtime.finalize_watchdog_tick(
                 reservation=reservation,
+                receipts=(
+                    (decision.task_id, payload)
+                    for decision, payload in planned
+                ),
                 now=completed_at,
+            )
+            decisions = tuple(
+                WatchdogDecision(
+                    decision.task_id,
+                    decision.action,
+                    decision.reason,
+                    was_recorded,
+                )
+                for (decision, _), was_recorded in zip(planned, recorded, strict=True)
             )
             return WatchdogTick(True, paused, decisions)
         except Exception:
-            self.runtime.abandon_watchdog_tick(
-                reservation=reservation,
-                now=self.clock(),
-            )
+            try:
+                self.runtime.abandon_watchdog_tick(
+                    reservation=reservation,
+                    now=self.clock(),
+                )
+            except Exception:
+                # Finalization/reconciliation is the primary failure. Cleanup
+                # is best effort and must never replace its evidence.
+                pass
             raise
 
-    def _record_decision(self, task: Task, has_valid_lease: bool, now: float) -> WatchdogDecision:
+    def _plan_decision(
+        self,
+        task: Task,
+        has_valid_lease: bool,
+        now: float,
+    ) -> tuple[WatchdogDecision, dict[str, object]]:
         action, reason = self._classify(task, has_valid_lease)
         payload = {
             "schema": WATCHDOG_SCHEMA,
@@ -119,8 +142,7 @@ class AtlasWatchdog:
             "cooldown_window": int(now // self.fallback_seconds),
             "execution": "NOT_STARTED",
         }
-        recorded = self.runtime.record_watchdog_receipt(task_id=task.task_id, payload=payload, now=now)
-        return WatchdogDecision(task.task_id, action, reason, recorded)
+        return WatchdogDecision(task.task_id, action, reason, False), payload
 
     @staticmethod
     def _classify(task: Task, has_valid_lease: bool) -> tuple[str, str]:

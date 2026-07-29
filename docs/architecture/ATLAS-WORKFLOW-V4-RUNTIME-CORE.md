@@ -24,8 +24,13 @@ review, provider, and production authority boundaries.
   one idempotent `WAKE_NEEDED` or `HOLD` receipt per task/cooldown window, but
   never starts a chat or worker. A short durable run reservation records
   `IN_PROGRESS`, `SUCCEEDED`, or `ABANDONED`; only `SUCCEEDED` begins the
-  fallback cooldown. Exceptions abandon immediately, and a crashed reservation
-  expires for recovery without holding a transaction across reconciliation.
+  fallback cooldown. Reservation expiry is a hard deadline. The complete
+  deterministic receipt set, exact unexpired reservation transition, and
+  cooldown advance commit in one SQLite write transaction; stale, expired, or
+  replaced owners leave none of those effects. Exact committed replays are
+  read-only no-ops, while partial or different replays fail closed. Exceptions
+  abandon immediately, and a crashed reservation expires for recovery without
+  holding a transaction across reconciliation.
 - Valid leases, manual/external/provider/production gates, unresolved
   dependencies, `PAUSED_USAGE`, paused runtime work, and unknown state remain
   explicit holds. `PAUSED_USAGE` is observe-only and is never automatically
@@ -33,10 +38,12 @@ review, provider, and production authority boundaries.
 - Watchdog heartbeat staleness is configurable and is applied to the
   reconciliation pass. Invalid non-positive timeout and fallback values fail
   before runtime work begins.
-- Watchdog candidate reads and receipt writes are intentionally separate
-  transactions. A concurrent task transition can make a receipt observation
-  stale, but receipt persistence cannot launch work, mutate task state, or
-  release a lease; every receipt records `execution: NOT_STARTED`.
+- Watchdog candidate reads remain separate from finalization. A concurrent task
+  transition can make a receipt observation stale, but every receipt records
+  `execution: NOT_STARTED` and cannot launch work, mutate task state, or release
+  a lease. Reconciliation uses its own bounded transaction: its conditional
+  `RUNNING` to `PAUSED_RUNTIME` transition plus lease deletion is idempotent,
+  so overlapping reconcilers cannot repeat or undo durable work.
 
 ## Not included in this slice
 
