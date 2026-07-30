@@ -66,6 +66,7 @@ STANDING_LOCAL_SOURCE_PREPARATION = "standing_local_source_preparation"
 OPERATIONS_ROLE_ID = "atlas.workflow-operations"
 LEGACY_MAIN_ROLE_ID = "atlas.main"
 LEGACY_MAIN_CANDIDATE_BLOCK_REASON = "legacy_main_candidate_retired"
+LEGACY_MAIN_SOURCE_BLOCK_REASON = "legacy_main_source_retired"
 STANDING_LOCAL_SOURCE_ROLES = {"fawxzzy.questions"}
 COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 MAX_STANDING_LOCAL_SOURCE_PATHS = 32
@@ -1732,6 +1733,15 @@ def reconcile_runtime_program(
                 _finding(
                     "envelope_digest_mismatch",
                     "Envelope event_id and payload_digest must match canonical payload bytes.",
+                    event_id=event_id,
+                )
+            )
+            continue
+        if envelope.get("source_role_id") == LEGACY_MAIN_ROLE_ID:
+            findings.append(
+                _finding(
+                    LEGACY_MAIN_SOURCE_BLOCK_REASON,
+                    "atlas.main is immutable history only and cannot originate new scheduler authority.",
                     event_id=event_id,
                 )
             )
@@ -3499,6 +3509,8 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root:
         blocked_reason = "standing_packet_identity_required"
     elif state not in READY_STATES and not recovery_resume:
         blocked_reason = "resume_authority_correlation_required" if state == RECOVERY_READY_STATE else "standing_packet_not_ready"
+    elif raw.get("source_role_id") == LEGACY_MAIN_ROLE_ID:
+        blocked_reason = LEGACY_MAIN_SOURCE_BLOCK_REASON
     elif logical_role_id == LEGACY_MAIN_ROLE_ID:
         blocked_reason = LEGACY_MAIN_CANDIDATE_BLOCK_REASON
     elif execution_class not in EXECUTION_CLASSES:

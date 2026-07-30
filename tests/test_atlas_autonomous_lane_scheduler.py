@@ -747,6 +747,99 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             self.assertFalse(report["blocked_candidates"][0]["safe"])
         self.assertEqual(first["blocked_candidates"], second["blocked_candidates"])
 
+    def test_legacy_main_source_authority_is_rejected_before_program_mutation(self) -> None:
+        standardized_payload = _standardized_ready_payload(
+            "legacy-main-standardized-source",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.legacy-main-standardized-source",
+            worktree="legacy-main-standardized-source",
+        )
+        standardized_payload["execution_class"] = "read_only"
+        standardized = _standardized_envelope(
+            standardized_payload,
+            role_id="atlas.release-control-plane",
+            runtime_thread_id="release-thread",
+            owner_role_id="atlas.workflow-architect",
+            owner_runtime_thread_id="architect-thread",
+            idempotency_key="legacy-main-standardized-source",
+            source_role_id=scheduler.LEGACY_MAIN_ROLE_ID,
+        )
+
+        unstandardized_payload = _standardized_ready_payload(
+            "legacy-main-unstandardized-source",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.legacy-main-unstandardized-source",
+            worktree="legacy-main-unstandardized-source",
+        )
+        unstandardized_payload["execution_class"] = "read_only"
+        unstandardized = _envelope(
+            unstandardized_payload,
+            idempotency_key="legacy-main-unstandardized-source",
+            source_role_id=scheduler.LEGACY_MAIN_ROLE_ID,
+        )
+
+        continuation = _continuation_envelope(
+            {
+                "canonical_lifecycle_state": "TERMINAL",
+                "terminal": True,
+            },
+            idempotency_key="legacy-main-continuation-source",
+            lifecycle_state="TERMINAL",
+            source_role_id=scheduler.LEGACY_MAIN_ROLE_ID,
+        )
+
+        for envelope in (standardized, unstandardized, continuation):
+            with self.subTest(idempotency_key=envelope["idempotency_key"]):
+                program, findings = scheduler.reconcile_runtime_program(
+                    program=_program_payload(),
+                    bindings_payload=_bindings(
+                        ("atlas.release-control-plane", "release-thread", "idle"),
+                        ("atlas.workflow-architect", "architect-thread", "idle"),
+                        ("owner.socials-os", "socials-thread", "idle"),
+                    ),
+                    envelopes=[envelope],
+                )
+                self.assertEqual(
+                    [scheduler.LEGACY_MAIN_SOURCE_BLOCK_REASON],
+                    [finding["code"] for finding in findings],
+                )
+                self.assertEqual([], program["processed_events"])
+                self.assertEqual([], program["standing_packets"])
+
+                report = _scheduler_report(program)
+                self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+                self.assertEqual([], report["selected_jobs"])
+                reserved, reservations = scheduler.reserve_selected_jobs(
+                    program=program,
+                    report=report,
+                )
+                self.assertEqual([], reservations)
+                self.assertEqual([], reserved["active_leases"])
+                self.assertEqual([], reserved["delivery_intents"])
+
+    def test_persisted_legacy_main_source_packet_is_held(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "legacy-main-source-persisted",
+            role_id="atlas.release-control-plane",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.legacy-main-source-persisted",
+        )
+        packet["source_role_id"] = scheduler.LEGACY_MAIN_ROLE_ID
+        packet["execution_class"] = "read_only"
+        program["standing_packets"] = [packet]
+
+        report = _scheduler_report(program)
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual(
+            scheduler.LEGACY_MAIN_SOURCE_BLOCK_REASON,
+            report["blocked_candidates"][0]["blocked_reason"],
+        )
+        self.assertFalse(report["blocked_candidates"][0]["safe"])
+
     def test_planner_cannot_select_retired_legacy_main_role(self) -> None:
         planner_report = _planner_payload(
             [
