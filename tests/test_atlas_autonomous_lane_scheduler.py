@@ -741,11 +741,48 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             self.assertEqual(scheduler.STATUS_HOLD, report["status"])
             self.assertEqual([], report["selected_jobs"])
             self.assertEqual(
-                "legacy_main_standing_packet_retired",
+                scheduler.LEGACY_MAIN_CANDIDATE_BLOCK_REASON,
                 report["blocked_candidates"][0]["blocked_reason"],
             )
             self.assertFalse(report["blocked_candidates"][0]["safe"])
         self.assertEqual(first["blocked_candidates"], second["blocked_candidates"])
+
+    def test_planner_cannot_select_retired_legacy_main_role(self) -> None:
+        planner_report = _planner_payload(
+            [
+                {
+                    "marker": "Cortex Dual-Mode Replacement Readiness",
+                    "classification": planner.CLASS_IMMEDIATE,
+                    "score": 90,
+                    "packet": "Cortex Dual-Mode Replacement Readiness exact implementation packet",
+                    "mode": "implementation-ready exact root packet",
+                    "logical_role_id": scheduler.LEGACY_MAIN_ROLE_ID,
+                    "repository": "fawxzzy/ATLAS",
+                    "writer_scope": "repo.atlas.legacy-main-planner",
+                    "execution_class": "repo_worktree",
+                }
+            ]
+        )
+        reports = [
+            scheduler.build_report(
+                root=Path("atlas-root-fixture"),
+                program=_program_payload(),
+                max_candidates=30,
+                preflight_report=_preflight_payload(),
+                selector_report=_selector_payload(),
+                planner_report=copy.deepcopy(planner_report),
+            )
+            for _ in range(2)
+        ]
+        for report in reports:
+            self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+            self.assertEqual([], report["selected_jobs"])
+            self.assertEqual(
+                scheduler.LEGACY_MAIN_CANDIDATE_BLOCK_REASON,
+                report["blocked_candidates"][0]["blocked_reason"],
+            )
+            self.assertFalse(report["blocked_candidates"][0]["safe"])
+        self.assertEqual(reports[0]["blocked_candidates"], reports[1]["blocked_candidates"])
 
     def test_generic_root_planner_packet_requires_an_explicit_owner(self) -> None:
         planner_report = _planner_payload(

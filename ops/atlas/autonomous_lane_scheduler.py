@@ -65,6 +65,7 @@ RESUMABLE_RUNTIME_STATES = {"idle", "notloaded"}
 STANDING_LOCAL_SOURCE_PREPARATION = "standing_local_source_preparation"
 OPERATIONS_ROLE_ID = "atlas.workflow-operations"
 LEGACY_MAIN_ROLE_ID = "atlas.main"
+LEGACY_MAIN_CANDIDATE_BLOCK_REASON = "legacy_main_candidate_retired"
 STANDING_LOCAL_SOURCE_ROLES = {"fawxzzy.questions"}
 COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 MAX_STANDING_LOCAL_SOURCE_PATHS = 32
@@ -3411,6 +3412,8 @@ def _candidate_from_planner_item(
         blocked_reason = "owner_lane_metadata_required"
     elif root_metadata_required:
         blocked_reason = "root_lane_metadata_required"
+    elif logical_role_id == LEGACY_MAIN_ROLE_ID:
+        blocked_reason = LEGACY_MAIN_CANDIDATE_BLOCK_REASON
     elif execution_class not in EXECUTION_CLASSES:
         blocked_reason = "invalid_execution_class"
     elif writer_scope in set(program.get("forbidden_writer_scopes", [])):
@@ -3497,7 +3500,7 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root:
     elif state not in READY_STATES and not recovery_resume:
         blocked_reason = "resume_authority_correlation_required" if state == RECOVERY_READY_STATE else "standing_packet_not_ready"
     elif logical_role_id == LEGACY_MAIN_ROLE_ID:
-        blocked_reason = "legacy_main_standing_packet_retired"
+        blocked_reason = LEGACY_MAIN_CANDIDATE_BLOCK_REASON
     elif execution_class not in EXECUTION_CLASSES:
         blocked_reason = "invalid_execution_class"
     elif not repository or not logical_role_id or not writer_scope:
