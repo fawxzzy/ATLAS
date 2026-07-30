@@ -2,15 +2,41 @@ from __future__ import annotations
 
 import hashlib
 import json
+import multiprocessing
 import tempfile
+import time
 import unittest
 from pathlib import Path
+from queue import Empty
+from unittest.mock import patch
 
 from ops.atlas.persist_thread_context import (
     ThreadContextError,
     build_checkpoint,
     persist_checkpoint,
 )
+
+
+def _persist_checkpoint_worker(checkpoint, root, start_event, result_queue) -> None:
+    import ops.atlas.persist_thread_context as context_module
+
+    original_load_index = context_module._load_index
+
+    def slow_load_index(path):
+        index = original_load_index(path)
+        time.sleep(0.2)
+        return index
+
+    context_module._load_index = slow_load_index
+    if not start_event.wait(timeout=10):
+        result_queue.put("start timeout")
+        return
+    try:
+        context_module.persist_checkpoint(checkpoint, output_root=Path(root))
+    except Exception as error:  # pragma: no cover - returned to the parent process
+        result_queue.put(f"{type(error).__name__}: {error}")
+    else:
+        result_queue.put(None)
 
 
 class AtlasThreadContextTests(unittest.TestCase):
@@ -71,6 +97,66 @@ class AtlasThreadContextTests(unittest.TestCase):
             self.assertEqual(2, len(immutable))
             latest = json.loads((root / "thread-123" / "latest.json").read_text())
             self.assertEqual("WAITING", latest["payload"]["state"])
+
+    def test_older_exact_retry_does_not_regress_latest_or_index(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            older = self.checkpoint()
+            newer = self.checkpoint(
+                state="TERMINAL",
+                summary="The bounded packet is terminal.",
+                recorded_at="2026-07-29T12:02:00Z",
+            )
+            persist_checkpoint(older, output_root=root)
+            persist_checkpoint(newer, output_root=root)
+
+            with patch("ops.atlas.persist_thread_context._atomic_write_json") as writer:
+                result = persist_checkpoint(older, output_root=root)
+
+            writer.assert_not_called()
+            self.assertTrue(result["deduplicated"])
+            latest = json.loads((root / "thread-123" / "latest.json").read_text())
+            index = json.loads((root / "index.json").read_text())
+            self.assertEqual(newer["checkpoint_id"], latest["checkpoint_id"])
+            self.assertEqual(newer["checkpoint_id"], index["threads"][0]["checkpoint_id"])
+
+    def test_concurrent_writers_preserve_both_shared_index_records(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            process_context = multiprocessing.get_context("spawn")
+            start_event = process_context.Event()
+            result_queue = process_context.Queue()
+            checkpoints = [
+                self.checkpoint(thread_id="thread-a", summary="First concurrent writer."),
+                self.checkpoint(thread_id="thread-b", summary="Second concurrent writer."),
+            ]
+            processes = [
+                process_context.Process(
+                    target=_persist_checkpoint_worker,
+                    args=(checkpoint, str(root), start_event, result_queue),
+                )
+                for checkpoint in checkpoints
+            ]
+            for process in processes:
+                process.start()
+            start_event.set()
+            for process in processes:
+                process.join(timeout=15)
+                self.assertFalse(process.is_alive())
+                self.assertEqual(0, process.exitcode)
+
+            results = []
+            for _ in processes:
+                try:
+                    results.append(result_queue.get(timeout=5))
+                except Empty:
+                    self.fail("Concurrent context writer did not return a result")
+            self.assertEqual([None, None], sorted(results, key=lambda value: value or ""))
+            index = json.loads((root / "index.json").read_text())
+            self.assertEqual(
+                ["thread-a", "thread-b"],
+                [record["thread_id"] for record in index["threads"]],
+            )
 
     def test_rejects_secret_like_context(self) -> None:
         with self.assertRaisesRegex(ThreadContextError, "prohibited sensitive material"):

@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import re
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -259,6 +260,44 @@ def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     os.replace(temporary, path)
 
 
+@contextmanager
+def _exclusive_file_lock(path: Path):
+    try:
+        handle = path.open("a+b")
+        handle.seek(0, os.SEEK_END)
+        if handle.tell() == 0:
+            handle.write(b"\0")
+            handle.flush()
+        handle.seek(0)
+        if os.name == "nt":
+            import msvcrt
+
+            msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
+        else:
+            import fcntl
+
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+    except OSError as error:
+        if "handle" in locals():
+            handle.close()
+        raise ThreadContextError("Unable to lock thread context index") from error
+    try:
+        yield
+    finally:
+        try:
+            handle.seek(0)
+            if os.name == "nt":
+                import msvcrt
+
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        finally:
+            handle.close()
+
+
 def _load_index(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {"schema": "atlas.thread-context-index.v1", "threads": []}
@@ -295,48 +334,68 @@ def persist_checkpoint(
     immutable_path = _resolved_beneath(root, thread_dir / f"{expected_checkpoint_id}.json")
     latest_path = _resolved_beneath(root, thread_dir / "latest.json")
     index_path = _resolved_beneath(root, root / "index.json")
+    lock_path = _resolved_beneath(root, root / ".thread-context.lock")
     try:
-        thread_dir.mkdir(parents=True, exist_ok=True)
-        if not thread_dir.is_dir():
+        root.mkdir(parents=True, exist_ok=True)
+        if not root.is_dir():
             raise OSError("thread context path is not a directory")
-        existed_before = immutable_path.exists()
     except OSError as error:
         raise ThreadContextError("Unable to prepare thread context path") from error
-    if existed_before:
-        existing = json.loads(immutable_path.read_text(encoding="utf-8"))
-        if existing != checkpoint:
-            raise ThreadContextError("Checkpoint identity collision")
-    else:
-        _atomic_write_json(immutable_path, checkpoint)
-    _atomic_write_json(latest_path, checkpoint)
+    with _exclusive_file_lock(lock_path):
+        try:
+            thread_dir.mkdir(parents=True, exist_ok=True)
+            if not thread_dir.is_dir():
+                raise OSError("thread context path is not a directory")
+            existed_before = immutable_path.exists()
+        except OSError as error:
+            raise ThreadContextError("Unable to prepare thread context path") from error
+        if existed_before:
+            existing = json.loads(immutable_path.read_text(encoding="utf-8"))
+            if existing != checkpoint:
+                raise ThreadContextError("Checkpoint identity collision")
+            if latest_path.exists():
+                current_latest = json.loads(latest_path.read_text(encoding="utf-8"))
+                if current_latest != checkpoint:
+                    return {
+                        "checkpoint_ref": str(immutable_path),
+                        "latest_ref": str(latest_path),
+                        "index_ref": str(index_path),
+                        "checkpoint_id": checkpoint["checkpoint_id"],
+                        "payload_digest": checkpoint["payload_digest"],
+                        "deduplicated": True,
+                    }
+        else:
+            _atomic_write_json(immutable_path, checkpoint)
+        if not latest_path.exists() or json.loads(latest_path.read_text(encoding="utf-8")) != checkpoint:
+            _atomic_write_json(latest_path, checkpoint)
 
-    index = _load_index(index_path)
-    records = {
-        str(item.get("thread_id")): item
-        for item in index["threads"]
-        if isinstance(item, dict) and item.get("thread_id")
-    }
-    records[thread_id] = {
-        "thread_id": thread_id,
-        "logical_role_id": payload["logical_role_id"],
-        "visible_title": payload["visible_title"],
-        "state": payload["state"],
-        "recorded_at": payload["recorded_at"],
-        "checkpoint_id": checkpoint["checkpoint_id"],
-        "payload_digest": checkpoint["payload_digest"],
-        "latest_ref": f"runtime/atlas/thread-context/{thread_id}/latest.json",
-    }
-    index["threads"] = [records[name] for name in sorted(records)]
-    index["index_digest"] = _digest({"schema": index["schema"], "threads": index["threads"]})
-    _atomic_write_json(index_path, index)
-    return {
-        "checkpoint_ref": str(immutable_path),
-        "latest_ref": str(latest_path),
-        "index_ref": str(index_path),
-        "checkpoint_id": checkpoint["checkpoint_id"],
-        "payload_digest": checkpoint["payload_digest"],
-        "deduplicated": existed_before,
-    }
+        index = _load_index(index_path)
+        records = {
+            str(item.get("thread_id")): item
+            for item in index["threads"]
+            if isinstance(item, dict) and item.get("thread_id")
+        }
+        records[thread_id] = {
+            "thread_id": thread_id,
+            "logical_role_id": payload["logical_role_id"],
+            "visible_title": payload["visible_title"],
+            "state": payload["state"],
+            "recorded_at": payload["recorded_at"],
+            "checkpoint_id": checkpoint["checkpoint_id"],
+            "payload_digest": checkpoint["payload_digest"],
+            "latest_ref": f"runtime/atlas/thread-context/{thread_id}/latest.json",
+        }
+        index["threads"] = [records[name] for name in sorted(records)]
+        index["index_digest"] = _digest({"schema": index["schema"], "threads": index["threads"]})
+        _atomic_write_json(index_path, index)
+        return {
+            "checkpoint_ref": str(immutable_path),
+            "latest_ref": str(latest_path),
+            "index_ref": str(index_path),
+            "checkpoint_id": checkpoint["checkpoint_id"],
+            "payload_digest": checkpoint["payload_digest"],
+            "deduplicated": existed_before,
+        }
 
 
 def main(argv: list[str] | None = None) -> int:

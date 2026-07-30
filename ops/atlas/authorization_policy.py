@@ -62,6 +62,7 @@ def empty_registry() -> dict[str, Any]:
         "schema": SCHEMA,
         "registry_version": 1,
         "applied_event_ids": [],
+        "applied_event_digests": {},
         "entries": [],
     }
 
@@ -74,6 +75,20 @@ def load_registry(path: Path | None = None) -> dict[str, Any]:
     if registry.get("schema") != SCHEMA:
         raise AuthorizationPolicyError("Unsupported learned authorization registry schema")
     if not isinstance(registry.get("entries"), list) or not isinstance(registry.get("applied_event_ids"), list):
+        raise AuthorizationPolicyError("Malformed learned authorization registry")
+    applied_event_digests = registry.get("applied_event_digests")
+    if applied_event_digests is None:
+        registry["applied_event_digests"] = {}
+    elif (
+        not isinstance(applied_event_digests, dict)
+        or any(
+            not isinstance(event_id, str)
+            or not isinstance(digest, str)
+            or not digest.startswith("sha256:")
+            for event_id, digest in applied_event_digests.items()
+        )
+        or any(event_id not in registry["applied_event_ids"] for event_id in applied_event_digests)
+    ):
         raise AuthorizationPolicyError("Malformed learned authorization registry")
     return registry
 
@@ -113,8 +128,19 @@ def record_operator_decision(
 ) -> dict[str, Any]:
     updated = deepcopy(registry)
     event_id = _require_token(decision, "event_id")
+    decision_digest = _digest(decision)
+    applied_event_digests = updated.setdefault("applied_event_digests", {})
+    if not isinstance(applied_event_digests, dict):
+        raise AuthorizationPolicyError("Malformed learned authorization registry")
     if event_id in updated["applied_event_ids"]:
-        return updated
+        recorded_digest = applied_event_digests.get(event_id)
+        if recorded_digest == decision_digest:
+            return updated
+        if recorded_digest is None:
+            raise AuthorizationPolicyError(
+                "Decision event identity cannot be verified for a legacy applied event"
+            )
+        raise AuthorizationPolicyError("Decision event ID was reused with different content")
 
     action_class = _require_token(decision, "action_class")
     scope_key = _require_token(decision, "scope_key")
@@ -183,11 +209,16 @@ def record_operator_decision(
     entries[key] = entry
     updated["entries"] = [entries[name] for name in sorted(entries)]
     updated["applied_event_ids"] = sorted({*updated["applied_event_ids"], event_id})
+    applied_event_digests[event_id] = decision_digest
+    updated["applied_event_digests"] = {
+        name: applied_event_digests[name] for name in sorted(applied_event_digests)
+    }
     updated["registry_digest"] = _digest(
         {
             "schema": updated["schema"],
             "registry_version": updated["registry_version"],
             "applied_event_ids": updated["applied_event_ids"],
+            "applied_event_digests": updated["applied_event_digests"],
             "entries": updated["entries"],
         }
     )

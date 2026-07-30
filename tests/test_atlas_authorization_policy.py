@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from ops.atlas.authorization_policy import (
+    AuthorizationPolicyError,
     empty_registry,
     evaluate_authorization,
     load_policy,
@@ -70,6 +71,41 @@ class AtlasAuthorizationPolicyTests(unittest.TestCase):
         first = record_operator_decision(empty_registry(), self.decision("event-1"), self.policy)
         second = record_operator_decision(first, self.decision("event-1"), self.policy)
         self.assertEqual(first, second)
+        self.assertEqual(
+            first["applied_event_digests"]["event-1"],
+            second["applied_event_digests"]["event-1"],
+        )
+
+    def test_reused_event_id_with_changed_content_fails_before_mutation(self) -> None:
+        registry = record_operator_decision(empty_registry(), self.decision("event-1"), self.policy)
+        registry = record_operator_decision(registry, self.decision("event-2"), self.policy)
+        original = registry.copy()
+        changed = self.decision(
+            "event-1",
+            "DENY",
+            constraints={"review": "clean", "deployment": "preview"},
+        )
+
+        with self.assertRaisesRegex(
+            AuthorizationPolicyError,
+            "reused with different content",
+        ):
+            record_operator_decision(registry, changed, self.policy)
+
+        self.assertEqual(original, registry)
+        self.assertEqual(
+            "AUTO_AUTHORIZED",
+            evaluate_authorization(self.request(), registry, self.policy)["decision"],
+        )
+
+    def test_legacy_applied_event_without_digest_fails_closed(self) -> None:
+        registry = empty_registry()
+        registry["applied_event_ids"] = ["event-1"]
+        with self.assertRaisesRegex(
+            AuthorizationPolicyError,
+            "cannot be verified",
+        ):
+            record_operator_decision(registry, self.decision("event-1"), self.policy)
 
     def test_constraint_drift_does_not_reuse_authority(self) -> None:
         registry = record_operator_decision(empty_registry(), self.decision("event-1"), self.policy)
