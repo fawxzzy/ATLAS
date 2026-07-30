@@ -15,10 +15,31 @@ DEFAULT_OUTPUT_ROOT = ROOT / "runtime" / "atlas" / "thread-context"
 SCHEMA = "atlas.thread-context-checkpoint.v1"
 STATES = {"ACTIVE", "WAITING", "BLOCKED", "TERMINAL", "IDLE"}
 SAFE_ID = re.compile(r"^[A-Za-z0-9._:-]+$")
-SECRET_PATTERNS = (
+SENSITIVE_TEXT_PATTERNS = (
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----", re.IGNORECASE),
-    re.compile(r"\b(?:sk|sbp|ghp)_[A-Za-z0-9_-]{16,}\b"),
+    re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}\b"),
+    re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}\b"),
+    re.compile(r"\b(?:sk[-_]|sbp_)[A-Za-z0-9_-]{16,}\b"),
+    re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{10,}\b"),
     re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
+    re.compile(r"\bBearer\s+[A-Za-z0-9._~+/-]{8,}=*\b", re.IGNORECASE),
+    re.compile(r"\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b"),
+    re.compile(
+        r"\b(?:postgres(?:ql)?|mysql|mariadb|mongodb(?:\+srv)?|redis|amqps?|https?)"
+        r"://[^/\s:@]+:[^@\s/]+@",
+        re.IGNORECASE,
+    ),
+    re.compile(r"\b(?:cookie|set-cookie|authorization)\s*[:=]\s*\S+", re.IGNORECASE),
+    re.compile(
+        r"\b(?:password|passwd|pwd|secret|token|api[_-]?key|client[_-]?secret|"
+        r"access[_-]?key|private[_-]?key|session[_-]?key)\s*[:=]\s*['\"]?[^\s,'\";]{6,}",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b[A-Z][A-Z0-9_]*(?:TOKEN|SECRET|PASSWORD|PASSWD|API_KEY|PRIVATE_KEY|"
+        r"COOKIE|CREDENTIAL)[A-Z0-9_]*\s*=\s*\S+"
+    ),
+    re.compile(r"\b(?:sessionid|connect\.sid|__Host-|__Secure-)[A-Za-z0-9_.-]*\s*=\s*\S+", re.IGNORECASE),
 )
 
 
@@ -45,8 +66,8 @@ def _clean_text(value: str, field: str) -> str:
     normalized = " ".join(value.split())
     if not normalized:
         raise ThreadContextError(f"{field} must not be empty")
-    if any(pattern.search(normalized) for pattern in SECRET_PATTERNS):
-        raise ThreadContextError(f"{field} contains secret-like material")
+    if any(pattern.search(normalized) for pattern in SENSITIVE_TEXT_PATTERNS):
+        raise ThreadContextError("context contains prohibited sensitive material")
     return normalized
 
 
@@ -95,7 +116,8 @@ def build_checkpoint(
         "blockers": _clean_list(blockers, "blockers"),
         "receipts": _clean_list(receipts, "receipts"),
         "source_refs": _clean_list(source_refs, "source_refs"),
-        "raw_transcript_included": False,
+        "content_class": "COMPACT_OPERATIONAL_CONTEXT",
+        "sensitive_material_policy": "REJECT_BEFORE_PERSISTENCE",
     }
     payload_digest = _digest(payload)
     return {

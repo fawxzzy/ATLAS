@@ -87,6 +87,42 @@ class AtlasAuthorizationPolicyTests(unittest.TestCase):
             evaluate_authorization(self.request(), registry, self.policy)["decision"],
         )
 
+    def test_changed_constraint_modify_revokes_prior_active_lineage(self) -> None:
+        registry = record_operator_decision(empty_registry(), self.decision("event-1"), self.policy)
+        registry = record_operator_decision(registry, self.decision("event-2"), self.policy)
+        modified = self.decision(
+            "event-3",
+            "MODIFY",
+            constraints={"review": "clean", "deployment": "preview"},
+        )
+        registry = record_operator_decision(registry, modified, self.policy)
+        original = next(
+            entry
+            for entry in registry["entries"]
+            if entry.get("last_decision") == "SUPERSEDED_BY_MODIFY"
+        )
+        self.assertEqual("REVOKED", original["state"])
+        self.assertEqual("event-3", original["revoked_by_event_id"])
+        self.assertEqual(
+            "AUTHORIZATION_REQUIRED",
+            evaluate_authorization(self.request(), registry, self.policy)["decision"],
+        )
+
+    def test_changed_constraint_deny_revokes_prior_active_lineage(self) -> None:
+        registry = record_operator_decision(empty_registry(), self.decision("event-1"), self.policy)
+        registry = record_operator_decision(registry, self.decision("event-2"), self.policy)
+        denied = self.decision(
+            "event-3",
+            "DENY",
+            constraints={"review": "clean", "deployment": "preview"},
+        )
+        registry = record_operator_decision(registry, denied, self.policy)
+        self.assertTrue(all(entry["state"] == "REVOKED" for entry in registry["entries"]))
+        self.assertEqual(
+            "AUTHORIZATION_REQUIRED",
+            evaluate_authorization(self.request(), registry, self.policy)["decision"],
+        )
+
     def test_production_never_becomes_learned_authority(self) -> None:
         risky = {"production": True}
         registry = record_operator_decision(

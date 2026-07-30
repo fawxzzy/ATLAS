@@ -145,10 +145,26 @@ def record_operator_decision(
     threshold = int(policy["learning"]["minimum_matching_approvals"])
 
     if outcome in {"DENY", "MODIFY"}:
+        decision_time = decision.get("decided_at") or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        for existing_entry in entries.values():
+            if (
+                existing_entry.get("action_class") == action_class
+                and existing_entry.get("scope_key") == scope_key
+                and existing_entry.get("state") in {"ACTIVE", "CANDIDATE"}
+            ):
+                existing_entry["state"] = "REVOKED"
+                existing_entry["matching_approval_count"] = 0
+                existing_entry["approval_event_ids"] = []
+                existing_entry["last_decision"] = f"SUPERSEDED_BY_{outcome}"
+                existing_entry["revoked_by_event_id"] = event_id
+                existing_entry["revoked_at"] = decision_time
+                existing_entry["updated_at"] = decision_time
         entry["state"] = "REVOKED"
         entry["matching_approval_count"] = 0
         entry["approval_event_ids"] = []
         entry["last_decision"] = outcome
+        entry["revoked_by_event_id"] = event_id
+        entry["revoked_at"] = decision_time
     elif not allowlisted or risky:
         entry["state"] = "INELIGIBLE"
         entry["last_decision"] = "APPROVE"

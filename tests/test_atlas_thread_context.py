@@ -43,7 +43,8 @@ class AtlasThreadContextTests(unittest.TestCase):
             index = json.loads((root / "index.json").read_text())
             self.assertEqual("atlas.thread-context-index.v1", index["schema"])
             self.assertEqual("thread-123", index["threads"][0]["thread_id"])
-            self.assertFalse(checkpoint["payload"]["raw_transcript_included"])
+            self.assertNotIn("raw_transcript_included", checkpoint["payload"])
+            self.assertEqual("COMPACT_OPERATIONAL_CONTEXT", checkpoint["payload"]["content_class"])
 
     def test_exact_retry_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -71,8 +72,24 @@ class AtlasThreadContextTests(unittest.TestCase):
             self.assertEqual("WAITING", latest["payload"]["state"])
 
     def test_rejects_secret_like_context(self) -> None:
-        with self.assertRaisesRegex(ThreadContextError, "secret-like"):
+        with self.assertRaisesRegex(ThreadContextError, "prohibited sensitive material"):
             self.checkpoint(summary="Use key sk_SYNTHETIC0123456789 for the test.")
+
+    def test_rejects_extended_sensitive_classes_without_echoing(self) -> None:
+        sensitive_values = [
+            "OAuth gho_0123456789abcdefghij must never persist.",
+            "Database postgresql://atlas:synthetic-password@example.invalid/db",
+            "Authorization: Bearer eyJheader12345.eyJpayload12345.signature12345",
+            "Cookie: sessionid=synthetic-cookie-value",
+            "DATABASE_PASSWORD=synthetic-password-value",
+        ]
+        for value in sensitive_values:
+            with self.subTest(value=value.split()[0]):
+                with self.assertRaises(ThreadContextError) as raised:
+                    self.checkpoint(summary=value)
+                message = str(raised.exception)
+                self.assertEqual("context contains prohibited sensitive material", message)
+                self.assertNotIn("synthetic", message)
 
     def test_rejects_unknown_state(self) -> None:
         with self.assertRaisesRegex(ThreadContextError, "state must be one of"):
