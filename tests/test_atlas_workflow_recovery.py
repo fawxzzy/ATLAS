@@ -288,6 +288,52 @@ class WorkflowRecoveryTests(unittest.TestCase):
         )
         self.assertEqual("00 Authorization", policy["operator_surface"]["visible_title"])
 
+    def test_operator_title_aliases_claim_roles_but_repair_to_numbered_canonical_titles(self) -> None:
+        adapter = self.adapter("healthy.json")
+        roles = {item["role_id"]: item for item in self.manifest["roles"]}
+        legacy_titles = {
+            "fawxzzy.questions": "Questions",
+            "manual.messages": "Authorization",
+        }
+        for record in adapter.threads:
+            if record.role_marker in legacy_titles:
+                record.title = legacy_titles[record.role_marker]
+                alias_only_record = copy.copy(record)
+                alias_only_record.role_marker = None
+                self.assertTrue(
+                    RECOVERY._role_claims(roles[record.role_marker], alias_only_record)
+                )
+
+        plan, _, _ = RECOVERY.build_recovery_plan(
+            self.manifest,
+            self.registry,
+            adapter,
+            mode="apply",
+            deterministic=True,
+        )
+        for role_id in legacy_titles:
+            role_plan = self.role(plan, role_id)
+            self.assertEqual("REUSE_AND_REPAIR_AFTER_ACCEPTANCE", role_plan["decision"])
+            self.assertEqual(
+                ["SET_TITLE", "POST_REPAIR_READBACK", "REFRESH_REGISTRY"],
+                role_plan["actions"],
+            )
+            self.assertNotIn("CREATE", role_plan["actions"])
+
+        RECOVERY.apply_plan(plan, self.manifest, self.registry, adapter)
+        repaired_titles = {
+            record.role_marker: record.title
+            for record in adapter.threads
+            if record.role_marker in legacy_titles
+        }
+        self.assertEqual(
+            {
+                "fawxzzy.questions": "00 Questions",
+                "manual.messages": "00 Authorization",
+            },
+            repaired_titles,
+        )
+
     def test_scheduler_continuation_is_conflict_group_scoped(self) -> None:
         recovery_policy = self.manifest["recovery_policy"]
         single_writer = self.manifest["single_writer"]

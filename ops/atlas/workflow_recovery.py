@@ -1923,13 +1923,13 @@ def _role_claims(role: dict[str, Any], thread: ThreadRecord) -> bool:
 def _actions_for_record(role: dict[str, Any], record: ThreadRecord, *, stale_binding: bool) -> tuple[list[str], list[str]]:
     actions: list[str] = []
     reasons: list[str] = []
-    aliases = {_normalize_title(item) for item in role["title_aliases"]}
+    canonical_title = _normalize_title(role["human_title"])
     if stale_binding:
         actions.append("UPDATE_BINDING")
         reasons.append("durable runtime ID is stale; one unique role candidate was discovered")
-    if record.title is None or _normalize_title(record.title) not in aliases:
+    if record.title is None or _normalize_title(record.title) != canonical_title:
         actions.append("SET_TITLE")
-        reasons.append("runtime title does not match a canonical alias")
+        reasons.append("runtime title does not match the canonical title")
     if record.cwd is None:
         actions.append("SET_RUNTIME_POLICY")
         reasons.append("runtime cwd/project policy is missing")
