@@ -2,25 +2,27 @@
 # ATLAS workflow architecture and recovery
 
 Canonical manifest: `docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json`
-Manifest digest: `sha256:1745d482c445bd2d7c8a481992a0c4f14b1b05a2353a4412900c0ecae0d567c2`
+Manifest digest: `sha256:96f12d9b4e4f15a5fcbf7a0ed0b6f0197e59544ca638c2eb3e1ed7c259d0a6e6`
 Runtime seed: `docs/registry/ATLAS-WORKFLOW-LIVE-MAPPING.v1.json`
 
 This view is generated from the versioned manifest. Stable logical role IDs are the contract; Codex thread IDs are replaceable runtime epochs refreshed in the live registry.
 
 ## Authority and safety
 
-- Authority sink: `atlas.main`.
+- Mechanical reconciliation owner: `atlas.workflow-operations`.
+- Human authority owner: `manual.messages`.
 - Recovery owner: `atlas.workflow-architect`.
 - Default recovery is dry-run and no-archive.
-- A live apply needs an independent ATLAS MAIN acceptance bound to both manifest and plan digests.
+- A live apply needs an exact accepted authority packet plus 01 Ops reconciliation bound to both manifest and plan digests.
+- `atlas.main` is immutable historical compatibility only: recovery never creates, binds, activates, schedules, or targets it.
 - Active tasks are never steered or interrupted; duplicate writers, unknown identity, and incomplete pin/readback proof fail closed.
 
 ## Standing role catalog
 
 | Logical role | Human title | Purpose | Writer scope | Creation | Runtime floor | Current epoch | Health seed |
 |---|---|---|---|---|---|---|---|
-| `atlas.main` | 00 Main | Sole master orchestrator, authority sink, dependency-aware conflict-group scheduler, and acceptance owner for the ATLAS operating system. | `atlas.authority` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f52d9-7667-72a3-a5f7-9c0613aedd8f` | `DEGRADED` |
-| `atlas.inbox` | Inbox | Primary inbound aggregation queue for material receipts and coordination events destined for ATLAS MAIN. | `atlas.inbound-ledger` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f7de0-3e1d-7433-a760-a9b724174ab6` | `DEGRADED` |
+| `atlas.workflow-operations` | 01 Ops | Mechanical exact-state workflow reconciler for scheduling, leases, collision enforcement, bindings, durable pending delivery, settlement, and restart recovery under already-existing authority. | `atlas.workflow-operations` | `reuse_only` | `gpt-5.6-sol/medium` | `019fa7a7-dcf4-7860-9326-dc7a2c92c198` | `DEGRADED` |
+| `atlas.inbox` | Inbox | Retired compatibility ledger for already-existing legacy deliveries; normal workflow traffic is direct and owner-returning. | `atlas.inbound-ledger` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f7de0-3e1d-7433-a760-a9b724174ab6` | `DEGRADED` |
 | `atlas.workflow-architect` | 01 Architect | Own the canonical workflow/recovery specification, bounded architecture audit, and reconstruction proof without becoming an operational root. | `atlas.workflow-contracts` | `create_if_missing` | `gpt-5.6-sol/high` | `019f7df6-8521-7292-a012-297208fce120` | `DEGRADED` |
 | `atlas.release-control-plane` | 01 Release | Stack-wide PR, CI, review, guarded-merge, deployment/readback, and lifecycle surveillance surface. | `external.release-control` | `create_if_missing` | `gpt-5.6-sol/high` | `019f79ac-bd85-7952-8935-58dfbb77aa20` | `DEGRADED` |
 | `fawxzzy.questions` | 00 Questions | Zac's general-purpose conversation for status, timelines, dependencies, architecture, planning, and explicitly requested bounded work. | `atlas.questions-explicit-bounded` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f75ca-d9c7-7941-b73f-fb06ff2a0459` | `DEGRADED` |
@@ -39,6 +41,7 @@ These live or historical runtimes used standing-task prose but lack a current du
 
 | Runtime | Title | Disposition | Canonical target | Health | Recovery action |
 |---|---|---|---|---|---|
+| `019f52d9-7667-72a3-a5f7-9c0613aedd8f` | ATLAS MAIN | `HISTORICAL_PROGRAM_SURFACE` | `UNBOUND` | `HELD` | `HOLD_NO_CREATE` |
 | `019f6d9d-a192-7a51-8d2d-463494c87d3a` | DiscordOS | `EMBEDDED_COORDINATION_RUNTIME` | `component.discordos` | `HELD` | `IGNORE_FOR_ROLE_CREATION` |
 | `019f6dad-8e00-7563-ba96-8b7ceae8fdf9` | GitHub Control Plane | `RELATED_PREDECESSOR_CLAIM` | `atlas.release-control-plane` | `HELD` | `HOLD_NO_CREATE` |
 | `019f6dac-afc1-7551-a47b-37e2dda95f35` | Atlas Control | `HISTORICAL_PROGRAM_SURFACE` | `UNBOUND` | `HELD` | `HOLD_NO_CREATE` |
@@ -60,17 +63,17 @@ Answered questions are suppressed from repetition. Transport acceptance does not
 
 ## Boot order
 
-0. **SERIAL** — `manifest-and-schema-validation`, `git-and-writer-preflight`, `live-discovery`. Gate: manifest valid, unique root authority, discovery complete or UNKNOWN preserved
-1. **SERIAL** — `atlas.main`. Gate: ATLAS MAIN unique, readable, unarchived, and accepted as authority sink
-2. **PARALLEL** — `atlas.inbox`, `manual.messages`, `fawxzzy.questions`, `ai.questions`, `fawxzzy.messages`. Gate: queue contracts read back and routes resolve by logical role
-3. **PARALLEL** — `atlas.release-control-plane`, `owner.fitness`, `owner.mazer`, `owner.socials-os`, `owner.fawxzzyweb`, `platform.supabase-migration`. Gate: each unique binding is idle or safely queued; writer scopes do not collide
-4. **SERIAL** — `atlas.workflow-architect`, `embedded-service-readback`, `topology-health-report`. Gate: recovery owner and embedded services are mapped without becoming operational writers
+0. **SERIAL** — `manifest-and-schema-validation`, `git-and-writer-preflight`, `live-discovery`. Gate: manifest valid, exact authority ownership preserved, discovery complete or UNKNOWN preserved
+1. **SERIAL** — `atlas.workflow-operations`. Gate: 01 Ops unique, readable, and constrained to mechanical reconciliation under existing authority
+2. **PARALLEL** — `manual.messages`, `fawxzzy.questions`, `ai.questions`, `fawxzzy.messages`. Gate: decision, question, research, and notification contracts resolve directly by logical role
+3. **PARALLEL** — `atlas.release-control-plane`, `atlas.workflow-architect`, `owner.fitness`, `owner.mazer`, `owner.socials-os`, `owner.fawxzzyweb`, `platform.supabase-migration`. Gate: each unique binding is idle or safely queued; writer scopes do not collide
+4. **SERIAL** — `atlas.inbox`, `historical-main-readback`, `embedded-service-readback`, `topology-health-report`. Gate: compatibility history and embedded services are readable without creating, binding, activating, scheduling, or targeting atlas.main
 
 Serialization rules:
 
 - Phase 0 must finish before any runtime mutation.
-- ATLAS MAIN must be recovered and accepted before any downstream bootstrap message.
-- Queue surfaces may initialize in parallel only after their titles and stable role IDs are unique.
+- 01 Ops must be uniquely reconciled under exact existing authority before any dispatch; atlas.main is never recovered or recreated.
+- Decision and owner-return surfaces may initialize in parallel only after their titles and stable role IDs are unique.
 - Owner surfaces may initialize in parallel only across distinct writer scopes.
 - Bootstrap messages serialize per target and use a stable event_id; never send to an active target.
 - Pin and post-create readback must finish before a created runtime is placed in the live registry.
@@ -93,7 +96,7 @@ States: `DECLARED` -> `DISCOVERED` -> `QUEUED` -> `IDLE` -> `ACTIVE` -> `BLOCKED
 | `RECONCILING` | `ACCEPTED` | authority-sink acceptance |
 | `ACCEPTED` | `IDLE` | standing role retains continuity |
 | `IDLE` | `SUPERSEDED` | content-addressed successor continuity proof |
-| `SUPERSEDED` | `ARCHIVE_ELIGIBLE` | ATLAS MAIN acceptance and zero pending routes |
+| `SUPERSEDED` | `ARCHIVE_ELIGIBLE` | exact owner or 00 Authorization lifecycle authority and zero pending routes |
 | `ARCHIVE_ELIGIBLE` | `ARCHIVED` | separate explicit lifecycle authority |
 | `ARCHIVED` | `RECOVERING` | accepted recovery plan |
 | `RECOVERING` | `IDLE` | post-create or unarchive readback and route bootstrap proof |
@@ -122,30 +125,34 @@ Every edge below is a logical contract. The sender resolves the current runtime 
 
 | Type | From | To | Contract |
 |---|---|---|---|
-| `control` | `atlas.main` | `atlas.inbox` | ATLAS MAIN owns admission and consumption policy; Inbox retains deliveries. |
-| `data_event` | `atlas.inbox` | `atlas.main` | Only material, deduped, correlated envelopes wake Main at a safe boundary. |
+| `control` | `atlas.workflow-operations` | `atlas.inbox` | 01 Ops may reconcile an already-existing compatibility delivery but never creates routine Inbox fanout. |
 | `decision` | `atlas.workflow-architect` | `manual.messages` | MANUAL_REQUIRED changes become stable questions; silence is not approval. |
-| `decision` | `manual.messages` | `atlas.inbox` | Answered decisions route back once with source correlation and digest. |
-| `notification` | `atlas.main` | `fawxzzy.messages` | Material notification only; no decision ownership. |
-| `proof` | `atlas.release-control-plane` | `atlas.inbox` | Exact-head review, CI, merge, and release receipts route to Inbox. |
-| `owner` | `atlas.main` | `owner.fitness` | Exact admitted Fitness packets only. |
-| `owner` | `atlas.main` | `owner.mazer` | Exact admitted Mazer packets only. |
-| `owner` | `atlas.main` | `owner.socials-os` | Exact admitted Socials OS packets only. |
-| `owner` | `atlas.main` | `owner.fawxzzyweb` | Exact admitted FawxzzyWeb packets only. |
-| `control` | `atlas.main` | `platform.supabase-migration` | Platform coordinator receives dependency-bounded program packets and no implicit provider authority. |
+| `decision` | `manual.messages` | `atlas.workflow-architect` | Answered architecture decisions return once to their exact source owner. |
+| `notification` | `atlas.workflow-operations` | `fawxzzy.messages` | Material mechanical blocker or recovery notification only; no decision ownership. |
+| `owner` | `atlas.workflow-operations` | `owner.fitness` | Only an exact already-authorized Fitness packet may be scheduled. |
+| `owner` | `atlas.workflow-operations` | `owner.mazer` | Only an exact already-authorized Mazer packet may be scheduled. |
+| `owner` | `atlas.workflow-operations` | `owner.socials-os` | Only an exact already-authorized Socials OS packet may be scheduled. |
+| `owner` | `atlas.workflow-operations` | `owner.fawxzzyweb` | Only an exact already-authorized FawxzzyWeb packet may be scheduled. |
+| `control` | `atlas.workflow-operations` | `platform.supabase-migration` | Only an exact already-authorized dependency-bounded platform packet may be scheduled; no provider authority is inferred. |
 | `proof` | `owner.fitness` | `atlas.release-control-plane` | Published Fitness work hands lifecycle monitoring to the control plane. |
 | `proof` | `owner.mazer` | `atlas.release-control-plane` | Published Mazer work hands lifecycle monitoring to the control plane. |
 | `proof` | `owner.socials-os` | `atlas.release-control-plane` | Published Socials work hands lifecycle monitoring to the control plane. |
 | `proof` | `owner.fawxzzyweb` | `atlas.release-control-plane` | Published FawxzzyWeb work hands lifecycle monitoring to the control plane. |
+| `proof` | `atlas.workflow-architect` | `atlas.release-control-plane` | Published workflow source receives one independent exact-head review. |
+| `proof` | `atlas.release-control-plane` | `owner.fitness` | Fitness review and CI results return owner-first. |
+| `proof` | `atlas.release-control-plane` | `owner.mazer` | Mazer review and CI results return owner-first. |
+| `proof` | `atlas.release-control-plane` | `owner.socials-os` | Socials OS review and CI results return owner-first. |
+| `proof` | `atlas.release-control-plane` | `owner.fawxzzyweb` | FawxzzyWeb review and CI results return owner-first. |
+| `proof` | `atlas.release-control-plane` | `atlas.workflow-architect` | Workflow-source review and CI results return owner-first. |
 | `data_event` | `fawxzzy.questions` | `ai.questions` | Unresolved omissions become bounded research envelopes. |
-| `proof` | `ai.questions` | `atlas.inbox` | Only material research findings route to Inbox. |
-| `recovery` | `atlas.workflow-architect` | `atlas.main` | Architect returns manifest, plan, health, and proof through Inbox; Main accepts recovery. |
+| `proof` | `ai.questions` | `fawxzzy.questions` | Material research findings return to the requesting Questions owner. |
+| `recovery` | `atlas.workflow-architect` | `atlas.workflow-operations` | Architect supplies a source-proven recovery contract; 01 Ops may reconcile it only under exact existing authority. |
 | `data_event` | `owner.socials-os` | `component.discordos` | Owners emit exact owner exports or BoardEvents; DiscordOS is sole live board writer. |
-| `recovery` | `component.heartbeat-main` | `atlas.main` | Interruption-recovery wake only; unchanged runs are silent. |
+| `recovery` | `component.heartbeat-operations` | `atlas.workflow-operations` | Interruption-recovery wake only after separately authorized runtime rebind; unchanged runs are silent. |
 | `recovery` | `component.heartbeat-release` | `atlas.release-control-plane` | Read-only bounded watch; unchanged runs are silent. |
-| `data_event` | `component.service-bus` | `atlas.inbox` | Durable transport resolves the current Inbox runtime by role ID. |
+| `data_event` | `component.service-bus` | `atlas.workflow-operations` | Durable transport exposes exact pending-delivery state for mechanical reconciliation without routine relay. |
 | `proof` | `component.notification-ledger` | `fawxzzy.messages` | Delivery proceeds only after digest-based suppression and ledger admission. |
-| `proof` | `component.foundation` | `atlas.main` | Foundation projects accepted state and preserves UNKNOWN. |
+| `proof` | `component.foundation` | `fawxzzy.questions` | Foundation projects accepted state for read-only status and preserves UNKNOWN. |
 | `recovery` | `component.lifeline` | `atlas.workflow-architect` | Lifeline may request a bounded recovery audit but cannot create or archive tasks itself. |
 
 ## Embedded and non-standing components
@@ -160,7 +167,7 @@ Every edge below is a logical contract. The sender resolves the current runtime 
 | `component.cortex` | `future-control-subsystem` | `false` | Rehydrate only from accepted event and seed contracts; keep activation separately governed. |
 | `component.service-bus` | `embedded-event-transport` | `false` | Replay only unacknowledged stable event IDs and suppress digest-identical retries. |
 | `component.notification-ledger` | `embedded-ledger` | `false` | Rebuild the ledger from durable receipts before sending any replayed notification. |
-| `component.heartbeat-main` | `automation` | `false` | Rebind target by logical role and verify one active automation before enabling. |
+| `component.heartbeat-operations` | `automation` | `false` | Do not rebind or enable during source cutover. A separate runtime action must prove the old target disabled, the Ops target exact, and no duplicate schedule. |
 | `component.heartbeat-release` | `automation` | `false` | Rebind target by logical role, prove no duplicate schedule, and preserve read-only default. |
 
 ## One-command recovery
@@ -177,7 +184,7 @@ A role whose manifest locator is not `ATLAS_ROOT` can be created or bootstrapped
 
 Optional `--desktop-observation <receipt.json> --desktop-observation-current <head.json>` inputs supply a complete, fresh, content-addressed activity snapshot plus the trusted current immutable head produced by a supported external task/thread readback ledger on the v1 `local` host. Each newer head cumulatively names prior receipt IDs in `supersedes_observation_ids`, so an older candidate is rejected without mutating its identity. Observation is dry-run only and can replace only `active`, `idle`, `notLoaded`, or `UNKNOWN` activity provenance on a runtime already returned by primary discovery. Pin state remains exactly `UNKNOWN` with capability `UNSUPPORTED`; private desktop storage, SQLite coupling, UI scraping, and pin inference are prohibited. Receipt/head identity, host, and timestamps are reported but excluded from plan identity; their validated activity effects remain digest-bound.
 
-A live apply additionally requires `--apply --acceptance <receipt.json>`. The receipt must bind the exact manifest and plan digests and name `atlas.main` as accepter. The current Codex app-server protocol does not expose pin readback or pin mutation, so any role needing pin proof fails closed before creation or repair. `ATLAS-WORKFLOW-MAN-001` rejected a manual fallback: the observation bridge can prove supported activity evidence, but live recovery remains blocked until deterministic pin readback and mutation exist.
+A live apply additionally requires `--apply --acceptance <receipt.json>`. The receipt must bind the exact manifest and plan digests and name `atlas.workflow-operations` as the mechanical accepter under an already-existing exact authority packet. The current Codex app-server protocol does not expose pin readback or pin mutation, so any role needing pin proof fails closed before creation or repair. `ATLAS-WORKFLOW-MAN-001` rejected a manual fallback: the observation bridge can prove supported activity evidence, but live recovery remains blocked until deterministic pin readback and mutation exist.
 
 Creation binds its accepted runtime policy through `thread/start`; the supported app-server contract exposes no mutation for repairing a missing policy on an existing runtime, so that case fails preflight. Live apply must use the canonical runtime output directory. Every `CREATE` transaction first acquires a bounded native exclusive lock on the stable persistent `creation-journal.json.create.lock` path. While holding it, recovery reloads retained state under the separate journal transition lock, performs complete discovery, rebuilds the exact logical-role decision, and durably commits a content-addressed `CREATE_INTENT` before issuing the remote create. The intent binds the accepted plan, logical role, prior runtime, adapter, and whether that provider supports the deterministic operation key. The key is supplied to the provider only where the supported adapter contract exposes such idempotency; the current live app-server thread protocol does not. The create lock remains held through the remote create and durable journal commitment of the returned runtime ID. A process death after the remote call therefore leaves either the binding or the earlier intent. An unresolved intent blocks every later `CREATE`; exactly one discovered runtime carrying the same provider operation key may be committed after a new accepted plan, while no match, multiple matches, claimant drift, or an adapter without supported key readback remains fail-closed. Any timeout, claimant, lease, decision, intent, create, journal, or release failure stops without a second create or cleanup. Lock order is always create lock then journal lock, and journal transitions never recursively acquire the create lock. Every journal intent, record, reconciliation, or readback-confirmation transition acquires the stable persistent `creation-journal.json.lock`, reloads and fully validates the latest committed envelope under that lock, merges role-bound entries, rejects role/runtime/operation collisions, performs the durable replacement while still locked, and refreshes caller state from the committed envelope before release. Both shared lock files are never unlinked, preventing split-inode or split-handle races. The temporary journal file is fsynced before replacement; POSIX then fsyncs the modified parent directory, while Windows uses `MoveFileExW` with replace-existing and write-through flags. Unsupported locking or replacement primitives and lock acquisition, lock I/O, reload, merge, durability, release, or metadata-flush failures stop later actions. A successful apply keeps the accepted plan immutable and carries the read-back runtime ID through a separate post-apply binding map into a content-addressed post-apply plan and the live registry. The terminal receipt binds the accepted plan, post-apply plan, and journal event/digest. Terminal health comes from the post-apply plan. If the bound runtime is absent from complete readback, registry generation fails closed.
 
@@ -190,9 +197,9 @@ python ops/atlas/workflow_recovery.py recover --apply --adapter fixture --fixtur
 ## Cold start and rollover summary
 
 1. Restore ATLAS and `_stack`; validate Git identity, manifest, schemas, prompts, leases, and live discovery.
-2. Recover/reuse ATLAS MAIN first. Do not create downstream roles until Main is unique and accepted.
+2. Reconcile/reuse `atlas.workflow-operations` first under exact existing authority. Never create, bind, reactivate, schedule, or target `atlas.main`.
 3. Recover queue surfaces in parallel, then owner/control surfaces by non-overlapping writer scope.
-4. For a rollover, persist a related epoch, bootstrap the successor with a stable event ID, prove routes/readback, obtain ATLAS MAIN acceptance, then and only then make the predecessor archive-eligible.
+4. For a rollover, persist a related epoch, bootstrap the successor with a stable event ID, prove routes/readback, obtain exact owner or `00 Authorization` authority plus 01 Ops reconciliation, then and only then make the predecessor archive-eligible.
 5. Before remote create, atomically journal the content-addressed `CREATE_INTENT`. After create, atomically replace it with the returned runtime binding before the next action. A fresh process must load either state: reuse the bound ID, reconcile one exact supported provider-key match, or block. Never delete the journal as rollback and never create a replacement while identity or outcome is unresolved.
 6. On crash, re-run dry-run. Idempotence derives from role IDs, event IDs, payload digests, retained operation intent, supported provider idempotency, and retained runtime IDs—not from chat recollection.
 

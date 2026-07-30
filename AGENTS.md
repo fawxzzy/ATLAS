@@ -43,9 +43,9 @@ Routing
   - `tmp/**`
 - Do not make opportunistic code edits across unrelated repos from the root session.
 - Canonical visible standing titles assume the Atlas stack context: `00 Questions`,
-  `00 Authorization`, `00 Main`, `01 Release`, `01 Architect`, `01 Ops`, and
-  `Inbox`. Stable logical role IDs do not change, and legacy title aliases remain
-  read-only recovery inputs.
+  `00 Authorization`, `01 Release`, `01 Architect`, and `01 Ops`. `00 Main` and
+  `Inbox` are compatibility history only. Stable active logical role IDs remain
+  canonical, while legacy title aliases remain read-only recovery inputs.
 - `00 Questions` is the general-purpose operator conversation. It is read-only by
   default for status and analysis, but may execute an explicitly requested
   bounded task without silently absorbing Main, Release, `00 Authorization`, owner,

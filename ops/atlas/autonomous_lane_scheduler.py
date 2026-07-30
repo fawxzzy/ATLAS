@@ -63,7 +63,11 @@ EVENT_ID_PATTERN = re.compile(r"^onv1_[0-9a-f]{64}$")
 PAYLOAD_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 RESUMABLE_RUNTIME_STATES = {"idle", "notloaded"}
 STANDING_LOCAL_SOURCE_PREPARATION = "standing_local_source_preparation"
-STANDING_LOCAL_SOURCE_ROLES = {"atlas.main", "fawxzzy.questions"}
+OPERATIONS_ROLE_ID = "atlas.workflow-operations"
+LEGACY_MAIN_ROLE_ID = "atlas.main"
+LEGACY_MAIN_CANDIDATE_BLOCK_REASON = "legacy_main_candidate_retired"
+LEGACY_MAIN_SOURCE_BLOCK_REASON = "legacy_main_source_retired"
+STANDING_LOCAL_SOURCE_ROLES = {"fawxzzy.questions"}
 COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 MAX_STANDING_LOCAL_SOURCE_PATHS = 32
 STANDING_LOCAL_PROTECTED_PATHS = (".env", ".git/", ".github/workflows/", "secrets/")
@@ -72,11 +76,11 @@ RECOVERY_ABSENCE_EVIDENCE_SCHEMA = "atlas.scheduler.delivery-recovery-evidence.v
 RECOVERY_ABSENCE_EVENT_CLASS = "DELIVERY_RECOVERY_ABSENCE_PROOF"
 RECOVERY_ABSENCE_ENVELOPE_KIND = "DELIVERY_RECOVERY_PROOF"
 RECOVERY_ABSENCE_CALL_STATE = "TERMINALLY_LOST"
-RECOVERY_ABSENCE_AUTHORITIES = {"atlas.main", "atlas.workflow-architect"}
+RECOVERY_ABSENCE_AUTHORITIES = {OPERATIONS_ROLE_ID, "atlas.workflow-architect"}
 WORKFLOW_STANDARDIZATION_POLICY_ID = "ATLAS-WORKFLOW-STANDARDIZATION-20260721-001"
 CANONICAL_SCHEDULER_AUTHORITY = OrderedDict(
     [
-        ("logical_role_id", "atlas.main"),
+        ("logical_role_id", OPERATIONS_ROLE_ID),
         ("mode", "SELECTOR_SUPERVISOR"),
         ("control_loop", "ops/atlas/autonomous_lane_scheduler.py"),
         ("release_role", "atlas.release-control-plane"),
@@ -1733,6 +1737,40 @@ def reconcile_runtime_program(
                 )
             )
             continue
+        if envelope.get("source_role_id") == LEGACY_MAIN_ROLE_ID:
+            findings.append(
+                _finding(
+                    LEGACY_MAIN_SOURCE_BLOCK_REASON,
+                    "atlas.main is immutable history only and cannot originate new scheduler authority.",
+                    event_id=event_id,
+                )
+            )
+            continue
+        legacy_targets = {
+            str(envelope.get("target_role_id") or ""),
+            str(envelope.get("owner_return_role_id") or ""),
+            str((envelope.get("owner_return") or {}).get("logical_role_id") or "")
+            if isinstance(envelope.get("owner_return"), dict)
+            else "",
+            str(payload.get("target_role_id") or ""),
+            str(payload.get("owner_return_role_id") or ""),
+            str(payload.get("logical_role_id") or ""),
+            str((payload.get("execution_target") or {}).get("logical_role_id") or "")
+            if isinstance(payload.get("execution_target"), dict)
+            else "",
+            str((payload.get("owner_return") or {}).get("logical_role_id") or "")
+            if isinstance(payload.get("owner_return"), dict)
+            else "",
+        }
+        if LEGACY_MAIN_ROLE_ID in legacy_targets:
+            findings.append(
+                _finding(
+                    "legacy_main_target_retired",
+                    "atlas.main is immutable history only and cannot be an execution target or owner-return route.",
+                    event_id=event_id,
+                )
+            )
+            continue
         if _unknown_continuation_answer_kind(envelope):
             findings.append(
                 _finding(
@@ -1927,7 +1965,7 @@ def reconcile_runtime_program(
                 and str(lease.get("status") or "").lower() in {"active", "recovery-required"}
             ]
             resume_correlation_exact = bool(
-                envelope.get("source_role_id") == "atlas.main"
+                envelope.get("source_role_id") == OPERATIONS_ROLE_ID
                 and packet
                 and str(packet.get("state") or "").upper() == "BLOCKED"
                 and str(packet.get("writer_scope") or "") == writer_scope
@@ -2147,7 +2185,7 @@ def reconcile_runtime_program(
                 continue
             if (
                 (
-                    (not recovery_absence_cancellation and envelope.get("source_role_id") != "atlas.main")
+                    (not recovery_absence_cancellation and envelope.get("source_role_id") != OPERATIONS_ROLE_ID)
                     or (
                         recovery_absence_cancellation
                         and envelope.get("source_role_id") not in RECOVERY_ABSENCE_AUTHORITIES
@@ -2164,7 +2202,7 @@ def reconcile_runtime_program(
                 findings.append(
                     _finding(
                         "terminal_cancellation_correlation_required",
-                        "Cancellation must come from ATLAS MAIN and match one READY or prepared, never-delivered packet.",
+                        "Cancellation must come from 01 Ops and match one READY or prepared, never-delivered packet.",
                         event_id=event_id,
                         packet_id=packet_id or None,
                         writer_scope=writer_scope or None,
@@ -3320,7 +3358,7 @@ def _candidate_identity(
     execution_class = str(item.get("execution_class") or ("canonical_workspace" if default_root else ""))
     repository = _repository_identity(item.get("repository") or ("fawxzzy/ATLAS" if default_root else "")) or None
     writer_scope = str(item.get("writer_scope") or ("atlas.root" if default_root else "")) or None
-    logical_role_id = str(item.get("logical_role_id") or ("atlas.main" if default_root else "")) or None
+    logical_role_id = str(item.get("logical_role_id") or "") or None
     if execution_class == "read_only":
         writer_scope = writer_scope or "read-only"
     return execution_class or None, repository, writer_scope, logical_role_id
@@ -3367,6 +3405,10 @@ def _candidate_from_planner_item(
         isinstance(item.get(field), str) and str(item[field]).strip()
         for field in ("repository", "writer_scope", "logical_role_id", "execution_class")
     )
+    root_metadata_required = not _is_owner_lane(packet) and not all(
+        isinstance(item.get(field), str) and str(item[field]).strip()
+        for field in ("repository", "writer_scope", "logical_role_id", "execution_class")
+    )
     execution_class, repository, writer_scope, logical_role_id = _candidate_identity(
         packet=packet,
         item=item,
@@ -3378,6 +3420,10 @@ def _candidate_from_planner_item(
         blocked_reason = "marker_excluded_by_program"
     elif owner_metadata_required:
         blocked_reason = "owner_lane_metadata_required"
+    elif root_metadata_required:
+        blocked_reason = "root_lane_metadata_required"
+    elif logical_role_id == LEGACY_MAIN_ROLE_ID:
+        blocked_reason = LEGACY_MAIN_CANDIDATE_BLOCK_REASON
     elif execution_class not in EXECUTION_CLASSES:
         blocked_reason = "invalid_execution_class"
     elif writer_scope in set(program.get("forbidden_writer_scopes", [])):
@@ -3463,6 +3509,10 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root:
         blocked_reason = "standing_packet_identity_required"
     elif state not in READY_STATES and not recovery_resume:
         blocked_reason = "resume_authority_correlation_required" if state == RECOVERY_READY_STATE else "standing_packet_not_ready"
+    elif raw.get("source_role_id") == LEGACY_MAIN_ROLE_ID:
+        blocked_reason = LEGACY_MAIN_SOURCE_BLOCK_REASON
+    elif logical_role_id == LEGACY_MAIN_ROLE_ID:
+        blocked_reason = LEGACY_MAIN_CANDIDATE_BLOCK_REASON
     elif execution_class not in EXECUTION_CLASSES:
         blocked_reason = "invalid_execution_class"
     elif not repository or not logical_role_id or not writer_scope:
@@ -4396,15 +4446,6 @@ def render_prompt(report: dict[str, Any]) -> str:
             ]
         ) + "\n"
     selected_jobs = report.get("selected_jobs", [])
-    if not selected_jobs and report.get("selected_packet"):
-        selected_jobs = [
-            {
-                "packet_id": report.get("selected_packet"),
-                "logical_role_id": "atlas.main",
-                "writer_scope": "atlas.root",
-                "execution_class": "canonical_workspace",
-            }
-        ]
     lines = [
         "Run the selected ATLAS execution wave.",
         "",
@@ -4852,7 +4893,7 @@ def build_report(
             str(selector_report.get("selected_current_packet_mode") or ""),
             planner.CLASS_IMMEDIATE,
         )
-        candidates.append(
+        blocked_candidates.append(
             OrderedDict(
                 [
                     ("marker", exact_marker),
@@ -4863,14 +4904,14 @@ def build_report(
                     ("score", 1_000_000),
                     ("source", "selector_current_packet"),
                     ("proof_delta", "implementation_backed"),
-                    ("blocked_reason", None),
+                    ("blocked_reason", "root_owner_admission_required"),
                     ("stale_reason", None),
                     ("file_overlap_risk", _file_overlap_risk(exact_phase)),
                     ("requires_external_input", False),
                     ("requires_reselection", False),
-                    ("safe", True),
+                    ("safe", False),
                     ("classification", planner.CLASS_IMMEDIATE),
-                    ("logical_role_id", "atlas.main"),
+                    ("logical_role_id", None),
                     ("repository", "fawxzzy/ATLAS"),
                     ("writer_scope", "atlas.root"),
                     ("execution_class", "canonical_workspace"),
@@ -4917,7 +4958,7 @@ def build_report(
                 ("requires_reselection", False),
                 ("safe", False),
                 ("classification", "validation_cleanup"),
-                ("logical_role_id", "atlas.main"),
+                ("logical_role_id", None),
                 ("repository", "fawxzzy/ATLAS"),
                 ("writer_scope", "atlas.root"),
                 ("execution_class", "canonical_workspace"),
@@ -4942,34 +4983,12 @@ def build_report(
             candidates=disjoint_candidates,
         )
         blocked_candidates.extend(wave_blocked)
-        if selected_jobs:
-            blocked_candidates.append(validation_cleanup_candidate)
-        else:
-            status = STATUS_VALIDATION_CLEANUP
-            decision = DECISION_VALIDATION_CLEANUP
-            routing_mode = DECISION_VALIDATION_CLEANUP
-            selected_marker = "ATLAS root"
-            selected_packet = "ATLAS root validation cleanup"
-            packet_phase = PHASE_SELECTOR
-            selected_packet_source = "validation"
-            stop_reason = "critical_or_error_validation"
-            safe_to_execute = True
-            selected_jobs = [
-                OrderedDict(
-                    [
-                        ("marker", "ATLAS root"),
-                        ("lane", "ATLAS root"),
-                        ("packet_id", selected_packet),
-                        ("packet", selected_packet),
-                        ("phase", packet_phase),
-                        ("source", selected_packet_source),
-                        ("logical_role_id", "atlas.main"),
-                        ("repository", "fawxzzy/ATLAS"),
-                        ("writer_scope", "atlas.root"),
-                        ("execution_class", "canonical_workspace"),
-                    ]
-                )
-            ]
+        blocked_candidates.append(validation_cleanup_candidate)
+        if not selected_jobs:
+            status = STATUS_HOLD
+            decision = DECISION_HOLD
+            routing_mode = DECISION_HOLD
+            stop_reason = "root_owner_admission_required"
     else:
         selected_jobs, wave_blocked, deferred_candidates = _select_execution_wave(
             program=program,

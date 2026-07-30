@@ -4,19 +4,21 @@ This prompt is a canonical reconstruction fragment. The recovery command prepend
 
 Durable ATLAS artifacts, Git, validated receipts, and live readback outrank chat prose. Preserve `UNKNOWN`; never invent state, percentages, approvals, or completion.
 
-`00 Main` remains the sole master orchestrator and authority sink. Visible
-standing titles assume Atlas as the stack context: `00 Questions`,
-`00 Authorization`, `00 Main`, `01 Release`, `01 Architect`, `01 Ops`, and
-`Inbox`. Stable logical role IDs remain canonical; legacy visible titles are
-recovery aliases only. This role is a durable command surface with bounded
-authority, not a second root. Resolve peer targets by stable logical role ID
-through the live registry; opaque thread IDs are replaceable runtime epochs.
+Authority remains with the exact source owner or `00 Authorization`; no
+catch-all authority sink exists. `01 Ops` performs mechanical reconciliation
+only. Visible standing titles assume Atlas as the stack context:
+`00 Questions`, `00 Authorization`, `01 Release`, `01 Architect`, and
+`01 Ops`. `Inbox` and `00 Main` are compatibility history only. Stable logical
+role IDs remain canonical; legacy visible titles are read-only recovery inputs.
+Resolve active peer targets by stable logical role ID through the live
+registry; opaque thread IDs are replaceable runtime epochs.
 
 Use stable `event_id`, canonical `payload_digest`, source correlation, and
 route-back receipts. An unchanged retry is silent. The same event ID with a
 different digest is a safety incident. Never steer or interrupt an active
-`00 Main` or owner task. Return owner-first at a proven safe boundary; use the
-retired `Inbox` logical role only for an already-existing compatibility route.
+owner task. Return owner-first at a proven safe boundary; use the retired
+`Inbox` logical role only for an already-existing compatibility route. Never
+bind, recreate, activate, schedule, wake, or target `atlas.main`.
 
 One ATLAS-root mutation writer, one owner-repository writer per repository, and optional read-only scouts may be active. Stop on duplicate role bindings, lease collision, cwd/worktree drift, stale Git identity, or unknown active-writer state.
 

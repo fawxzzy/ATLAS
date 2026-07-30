@@ -1,8 +1,8 @@
 {
   "schema": "atlas.workflow.desktop-observation.v1",
   "kind": "THREAD_STATUS_SNAPSHOT",
-  "observation_id": "onv1_1635a7b85714119e8d066547da923271b54f861107d383fc6e3e150b1020382b",
-  "payload_digest": "sha256:1635a7b85714119e8d066547da923271b54f861107d383fc6e3e150b1020382b",
+  "observation_id": "onv1_4b947ea234e573ab2b668c28031acd5274b87f44e27e0e3e2f46f6cb8a805a6a",
+  "payload_digest": "sha256:4b947ea234e573ab2b668c28031acd5274b87f44e27e0e3e2f46f6cb8a805a6a",
   "payload": {
     "producer_interface": "SUPPORTED_TASK_THREAD_READBACK",
     "source_host_id": "local",
@@ -13,10 +13,10 @@
     "required_role_count": 13,
     "entries": [
       {
-        "role_id": "atlas.main",
-        "runtime_thread_id": "019f52d9-7667-72a3-a5f7-9c0613aedd8f",
+        "role_id": "atlas.workflow-operations",
+        "runtime_thread_id": "019fa7a7-dcf4-7860-9326-dc7a2c92c198",
         "source_host_id": "local",
-        "source_title": "ATLAS MAIN",
+        "source_title": "01 Ops",
         "observed_at": "2026-07-20T16:50:00Z",
         "activity": "idle",
         "activity_evidence": "SUPPORTED_TASK_THREAD_STATUS",

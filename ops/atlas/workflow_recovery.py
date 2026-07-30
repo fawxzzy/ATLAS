@@ -36,6 +36,9 @@ CREATION_JOURNAL_SCHEMA_REF = "schemas/atlas.workflow.creation-journal.v1.json"
 GENERATED_VIEW_REF = "docs/architecture/ATLAS-WORKFLOW-RECOVERY.md"
 DEFAULT_RUNTIME_REF = "runtime/atlas/workflow-recovery"
 DESKTOP_OBSERVATION_FIXTURE_REF = "tests/fixtures/atlas-workflow-recovery/valid-desktop-observation.json"
+OPERATIONS_ROLE_ID = "atlas.workflow-operations"
+LEGACY_MAIN_ROLE_ID = "atlas.main"
+LEGACY_MAIN_RUNTIME_ID = "019f52d9-7667-72a3-a5f7-9c0613aedd8f"
 
 DESKTOP_OBSERVATION_MAX_AGE_SECONDS = 300
 DESKTOP_OBSERVATION_FUTURE_SKEW_SECONDS = 30
@@ -1188,6 +1191,10 @@ def validate_repository(
         errors.append("manifest component IDs are not unique")
     if manifest["logical_root_role_id"] not in set(role_ids):
         errors.append("logical_root_role_id is not present in roles")
+    if manifest["logical_root_role_id"] != OPERATIONS_ROLE_ID:
+        errors.append(f"logical_root_role_id must be {OPERATIONS_ROLE_ID}")
+    if LEGACY_MAIN_ROLE_ID in set(role_ids):
+        errors.append("atlas.main is immutable legacy history and cannot remain a recoverable role")
 
     for role in roles:
         prompt_text = ""
@@ -1201,6 +1208,14 @@ def validate_repository(
                 errors.append(f"{role['role_id']}: prompt marker missing: {marker}")
         for reference in role["source_of_truth"]:
             errors.extend(_validate_relative_ref(reference, f"{role['role_id']} source_of_truth"))
+        operational_routes = [
+            *role["dependencies"],
+            *role["upstream_routes"],
+            *role["downstream_routes"],
+            role["owner"],
+        ]
+        if LEGACY_MAIN_ROLE_ID in operational_routes:
+            errors.append(f"{role['role_id']}: atlas.main cannot remain an operational dependency, route, or owner")
 
     for component in manifest["components"]:
         for reference in component["source_of_truth"]:
@@ -1242,6 +1257,16 @@ def validate_repository(
             errors.append(f"{claim['runtime_id']}: unknown canonical target {target}")
         if claim["admission_state"] == "DURABLY_ADMITTED":
             errors.append(f"{claim['runtime_id']}: durably admitted runtime must be bound to a role")
+    historical_main_claims = [
+        claim
+        for claim in unbound_claims
+        if claim.get("runtime_id") == LEGACY_MAIN_RUNTIME_ID
+        and claim.get("canonical_target_id") is None
+        and claim.get("disposition") == "HISTORICAL_PROGRAM_SURFACE"
+        and claim.get("lifecycle_action_authorized") is False
+    ]
+    if not historical_main_claims:
+        errors.append("registry must preserve atlas.main as an unbound immutable historical claim")
     question_ids = [item["question_id"] for item in decisions["questions"]]
     if len(question_ids) != len(set(question_ids)):
         errors.append("decision registry question IDs are not unique")
@@ -2461,7 +2486,7 @@ def _load_acceptance(
     if allow_fixture_template and value.get("fixture_only") is True:
         required_fixture = {
             "schema": "atlas.workflow.recovery-acceptance.v1",
-            "accepted_by_role_id": "atlas.main",
+            "accepted_by_role_id": OPERATIONS_ROLE_ID,
             "no_archive": True,
         }
         errors = [
@@ -2481,8 +2506,8 @@ def _load_acceptance(
     errors = [f"{key} must equal {expected!r}" for key, expected in required.items() if value.get(key) != expected]
     if not isinstance(value.get("event_id"), str) or not value["event_id"]:
         errors.append("event_id is required")
-    if value.get("accepted_by_role_id") != "atlas.main":
-        errors.append("accepted_by_role_id must be atlas.main")
+    if value.get("accepted_by_role_id") != OPERATIONS_ROLE_ID:
+        errors.append(f"accepted_by_role_id must be {OPERATIONS_ROLE_ID}")
     if errors:
         raise ValidationFailure("invalid live recovery acceptance:\n- " + "\n- ".join(errors))
     return value
@@ -2923,10 +2948,12 @@ def render_markdown(
         "",
         "## Authority and safety",
         "",
-        f"- Authority sink: `{manifest['authority']['authority_sink']}`.",
+        f"- Mechanical reconciliation owner: `{manifest['authority']['execution_reconciliation_owner']}`.",
+        f"- Human authority owner: `{manifest['authority']['human_authority_owner']}`.",
         f"- Recovery owner: `{manifest['authority']['architecture_owner']}`.",
         "- Default recovery is dry-run and no-archive.",
-        "- A live apply needs an independent ATLAS MAIN acceptance bound to both manifest and plan digests.",
+        "- A live apply needs an exact accepted authority packet plus 01 Ops reconciliation bound to both manifest and plan digests.",
+        "- `atlas.main` is immutable historical compatibility only: recovery never creates, binds, activates, schedules, or targets it.",
         "- Active tasks are never steered or interrupted; duplicate writers, unknown identity, and incomplete pin/readback proof fail closed.",
         "",
         "## Standing role catalog",
@@ -3043,7 +3070,7 @@ def render_markdown(
         "",
         "Optional `--desktop-observation <receipt.json> --desktop-observation-current <head.json>` inputs supply a complete, fresh, content-addressed activity snapshot plus the trusted current immutable head produced by a supported external task/thread readback ledger on the v1 `local` host. Each newer head cumulatively names prior receipt IDs in `supersedes_observation_ids`, so an older candidate is rejected without mutating its identity. Observation is dry-run only and can replace only `active`, `idle`, `notLoaded`, or `UNKNOWN` activity provenance on a runtime already returned by primary discovery. Pin state remains exactly `UNKNOWN` with capability `UNSUPPORTED`; private desktop storage, SQLite coupling, UI scraping, and pin inference are prohibited. Receipt/head identity, host, and timestamps are reported but excluded from plan identity; their validated activity effects remain digest-bound.",
         "",
-        "A live apply additionally requires `--apply --acceptance <receipt.json>`. The receipt must bind the exact manifest and plan digests and name `atlas.main` as accepter. The current Codex app-server protocol does not expose pin readback or pin mutation, so any role needing pin proof fails closed before creation or repair. `ATLAS-WORKFLOW-MAN-001` rejected a manual fallback: the observation bridge can prove supported activity evidence, but live recovery remains blocked until deterministic pin readback and mutation exist.",
+        "A live apply additionally requires `--apply --acceptance <receipt.json>`. The receipt must bind the exact manifest and plan digests and name `atlas.workflow-operations` as the mechanical accepter under an already-existing exact authority packet. The current Codex app-server protocol does not expose pin readback or pin mutation, so any role needing pin proof fails closed before creation or repair. `ATLAS-WORKFLOW-MAN-001` rejected a manual fallback: the observation bridge can prove supported activity evidence, but live recovery remains blocked until deterministic pin readback and mutation exist.",
         "",
         "Creation binds its accepted runtime policy through `thread/start`; the supported app-server contract exposes no mutation for repairing a missing policy on an existing runtime, so that case fails preflight. Live apply must use the canonical runtime output directory. Every `CREATE` transaction first acquires a bounded native exclusive lock on the stable persistent `creation-journal.json.create.lock` path. While holding it, recovery reloads retained state under the separate journal transition lock, performs complete discovery, rebuilds the exact logical-role decision, and durably commits a content-addressed `CREATE_INTENT` before issuing the remote create. The intent binds the accepted plan, logical role, prior runtime, adapter, and whether that provider supports the deterministic operation key. The key is supplied to the provider only where the supported adapter contract exposes such idempotency; the current live app-server thread protocol does not. The create lock remains held through the remote create and durable journal commitment of the returned runtime ID. A process death after the remote call therefore leaves either the binding or the earlier intent. An unresolved intent blocks every later `CREATE`; exactly one discovered runtime carrying the same provider operation key may be committed after a new accepted plan, while no match, multiple matches, claimant drift, or an adapter without supported key readback remains fail-closed. Any timeout, claimant, lease, decision, intent, create, journal, or release failure stops without a second create or cleanup. Lock order is always create lock then journal lock, and journal transitions never recursively acquire the create lock. Every journal intent, record, reconciliation, or readback-confirmation transition acquires the stable persistent `creation-journal.json.lock`, reloads and fully validates the latest committed envelope under that lock, merges role-bound entries, rejects role/runtime/operation collisions, performs the durable replacement while still locked, and refreshes caller state from the committed envelope before release. Both shared lock files are never unlinked, preventing split-inode or split-handle races. The temporary journal file is fsynced before replacement; POSIX then fsyncs the modified parent directory, while Windows uses `MoveFileExW` with replace-existing and write-through flags. Unsupported locking or replacement primitives and lock acquisition, lock I/O, reload, merge, durability, release, or metadata-flush failures stop later actions. A successful apply keeps the accepted plan immutable and carries the read-back runtime ID through a separate post-apply binding map into a content-addressed post-apply plan and the live registry. The terminal receipt binds the accepted plan, post-apply plan, and journal event/digest. Terminal health comes from the post-apply plan. If the bound runtime is absent from complete readback, registry generation fails closed.",
         "",
@@ -3056,9 +3083,9 @@ def render_markdown(
         "## Cold start and rollover summary",
         "",
         "1. Restore ATLAS and `_stack`; validate Git identity, manifest, schemas, prompts, leases, and live discovery.",
-        "2. Recover/reuse ATLAS MAIN first. Do not create downstream roles until Main is unique and accepted.",
+        "2. Reconcile/reuse `atlas.workflow-operations` first under exact existing authority. Never create, bind, reactivate, schedule, or target `atlas.main`.",
         "3. Recover queue surfaces in parallel, then owner/control surfaces by non-overlapping writer scope.",
-        "4. For a rollover, persist a related epoch, bootstrap the successor with a stable event ID, prove routes/readback, obtain ATLAS MAIN acceptance, then and only then make the predecessor archive-eligible.",
+        "4. For a rollover, persist a related epoch, bootstrap the successor with a stable event ID, prove routes/readback, obtain exact owner or `00 Authorization` authority plus 01 Ops reconciliation, then and only then make the predecessor archive-eligible.",
         "5. Before remote create, atomically journal the content-addressed `CREATE_INTENT`. After create, atomically replace it with the returned runtime binding before the next action. A fresh process must load either state: reuse the bound ID, reconcile one exact supported provider-key match, or block. Never delete the journal as rollback and never create a replacement while identity or outcome is unresolved.",
         "6. On crash, re-run dry-run. Idempotence derives from role IDs, event IDs, payload digests, retained operation intent, supported provider idempotency, and retained runtime IDs—not from chat recollection.",
         "",

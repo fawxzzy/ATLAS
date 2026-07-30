@@ -9,7 +9,7 @@ word `ATLAS`.
 | --- | --- | --- |
 | `fawxzzy.questions` | `00 Questions` | `Questions`, `00 FAWXZZY QUESTIONS`, `FAWXZZY QUESTIONS` |
 | `manual.messages` | `00 Authorization` | `Authorization`, `00 MANUAL MESSAGES`, `MANUAL MESSAGES` |
-| `atlas.main` | `00 Main` | `ATLAS MAIN` |
+| `atlas.main` | historical compatibility only | `00 Main`, `ATLAS MAIN` |
 | `atlas.release-control-plane` | `01 Release` | `ATLAS PR, CI & Release Control Plane`, `01 ATLAS RELEASE` |
 | `atlas.workflow-architect` | `01 Architect` | `ATLAS WORKFLOW ARCHITECT`, `01 ATLAS ARCHITECT` |
 | `atlas.workflow-operations` | `01 Ops` | `01 ATLAS OPS` |

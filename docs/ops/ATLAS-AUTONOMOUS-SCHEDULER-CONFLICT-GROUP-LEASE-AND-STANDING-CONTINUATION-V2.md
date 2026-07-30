@@ -33,8 +33,8 @@ license to mutate that repository.
 
 The operator may keep idle owner tasks productive through the exact authority
 class `standing_local_source_preparation`. This is not generic owner-repository
-authority. A valid packet must originate from `atlas.main` or
-`fawxzzy.questions`, target an `owner.*` logical role, use `repo_worktree`, and
+authority. A valid packet must originate from `fawxzzy.questions` under an
+explicit current operator request, target an `owner.*` logical role, use `repo_worktree`, and
 carry all of the following:
 
 - `source_preparation.mode` equal to `LOCAL_ONLY_UNSTAGED`;
@@ -140,7 +140,7 @@ Every release receipt must carry `terminal=true`, a successful terminal state,
 the exact `packet_id`, `writer_scope`, reservation ID, and delivered turn ID. No
 prose classification or uncorrelated terminal receipt releases capacity.
 
-Obsolete packets are not deleted silently. `ATLAS MAIN` may emit a canonical
+Obsolete packets are not deleted silently. `01 Ops` may consume a canonical
 `SUPERSEDED` terminal disposition only while a packet remains `READY` or while
 its exact delivery intent is `prepared` and has no returned turn. Prepared
 cancellation requires the exact packet, writer scope, and reservation. A
@@ -184,10 +184,15 @@ serializes overlapping repository writers.
 
 ## Continuation behavior
 
-`ATLAS MAIN` consumes all newly READY packets, selects the largest deterministic
+`01 Ops` consumes only already-authorized READY packets, selects the largest deterministic
 conflict-free wave within configured writer and read-only limits, and routes
 each packet to its existing standing logical role. `IDLE` and `notLoaded` are
 resumable binding states, not terminal states.
+
+Root and cross-lane candidates must name an exact logical owner, repository,
+writer scope, and execution class. Legacy selector or validation output without
+that owner metadata is held as `root_owner_admission_required`; 01 Ops never
+becomes a catch-all source or semantic authority.
 
 When a receipt arrives, MAIN persists it, releases the correlated lease, and
 immediately selects the next eligible wave. It does not wait for the next
