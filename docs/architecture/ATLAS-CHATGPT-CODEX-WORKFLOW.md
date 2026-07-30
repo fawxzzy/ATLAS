@@ -54,7 +54,9 @@ Plugins, apps, and skills are what remove the manual glue. They give you the rig
 
 | Surface | What it is for |
 | --- | --- |
-| **ATLAS MAIN** | pinned anchor for cross-project architecture, governance, marker truth, receipts, routing policy |
+| **Questions** | pinned general-purpose conversation for status, planning, architecture, and explicitly requested bounded work |
+| **Authorization** | genuine operator authority and external-evidence decisions; learned low-risk approvals suppress repeated questions |
+| **00 Main** | pinned anchor for cross-project architecture, governance, marker truth, receipts, routing policy |
 | **Mazer chat** | product planning and bounded game/app tasks for Mazer |
 | **Fitness chat** | product, launch, business, and bounded owner-lane tasks for Fitness |
 | **Codex task** | actual code changes, tests, terminal work, subagents, diffs, commits |
@@ -65,12 +67,14 @@ That final row matters because DiscordOS should stay a single logical writer rat
 
 ### Standing Work conversations and launch trigger
 
-The standing operator-facing command conversations are `ATLAS MAIN`, `Fitness`,
-and `Mazer`. `ATLAS MAIN` is the pinned operational-preparation and stack
-strategy anchor. `Fitness` is created with that exact display name after its
-resume gates pass. The existing `Mazer` conversation is retained and receives
-a current context-and-resume packet after its resume gates pass; it is not
-replaced by a newly created conversation.
+The standing operator-facing command conversations include `Questions`,
+`Authorization`, `00 Main`, `Fitness`, `Mazer`, and the admitted owner
+surfaces. Atlas is assumed, so visible infrastructure titles do not repeat the
+word `ATLAS`. `Questions` is the general-purpose operator surface; `00 Main` is
+the operational-preparation and stack-strategy anchor; `Authorization` handles
+only genuine authority or external-evidence gates. Existing owner conversations
+are retained and receive current context-and-resume packets rather than being
+replaced.
 
 DiscordOS does not receive a standing Work conversation. It participates in
 every governed workflow as the embedded board, card, publication, and readback
@@ -100,9 +104,9 @@ separate DiscordOS chat handoff. Routine local commits and intermediate steps
 remain durable execution events without automatically becoming public Update
 posts.
 
-The three standing conversations are persistent command surfaces. A bounded
+Standing conversations are persistent command surfaces. A bounded
 Codex task is archived after its terminal result is accepted and its receipt is
-durable. Active owner conversations are not archived. `ATLAS MAIN` may pause an
+durable. Active owner conversations are not archived. `00 Main` may pause an
 owner conversation for a serialized root-write window only through an explicit
 checkpoint-and-resume contract that preserves all active work.
 
@@ -116,7 +120,12 @@ Then Codex executes inside that task. Programmatic thread control is already ava
 
 While the task runs, you can inspect it in the desktop app. The integrated terminal is task-scoped, and ChatGPT can read terminal output. If the work is decomposable, Codex and ChatGPT Work can run subagents in parallel and collect results into the main task. That is especially helpful for read-heavy exploration, test analysis, and review. Parallel write-heavy workflows still need non-overlapping ownership to avoid conflicts.
 
-At the end, the outcome should not be "the last chat message." It should be a **receipt** that Atlas can trust: what task ran, what thread handled it, what files changed, what tests ran, what commit or PR exists, and what board or marker consequences follow.
+At the end, the outcome should not be "the last chat message." It should be a
+**receipt** that Atlas can trust: what task ran, what thread handled it, what
+files changed, what tests ran, what commit or PR exists, and what board or marker
+consequences follow. Every substantive turn also writes a compact source-linked
+thread checkpoint under `runtime/atlas/thread-context/`, so restart continuity
+does not depend on one chat provider.
 
 ## What is native now and what Atlas still has to own
 
@@ -184,7 +193,12 @@ create endless self-referential drift.
 
 On a normal day, your workflow should feel much simpler than it does now.
 
-You start in the right project chat. If you are making a cross-project decision, changing Atlas infrastructure, or defining contracts, you start in `ATLAS MAIN`. If you are building Mazer, you start in the existing Mazer conversation. If you are working on Fitness, you start in Fitness. The chat's job is to capture intent, break the work into one bounded outcome, and point at the right repo context.
+You start in `Questions` for general requests, status, planning, and
+architecture. Work with an established owner goes to that owner conversation;
+cross-project orchestration and Atlas infrastructure lifecycle go to `00 Main`;
+genuine operator authority goes to `Authorization`. The conversation captures
+intent, breaks work into one bounded outcome, and points at the right repository
+context.
 
 If the task needs reusable workflow logic, ChatGPT should invoke an Atlas skill or plugin rather than expecting you to handcraft a giant prompt every time. That is the right home for something like an **Atlas Control** capability that can prepare jobs, invoke Codex, and coordinate app-backed systems.
 
@@ -193,8 +207,8 @@ Then Codex handles the actual implementation task. It runs in its own task/threa
 When the task finishes, you do not treat the last assistant paragraph as the deliverable. You review the outcome, accept or reject it, and Atlas records the governed result. If the work affects cards or project state, a single logical board writer applies the update. If the work teaches Atlas something reusable, that rule or pattern is promoted into Playbook, Contracts, or checked-in instructions.
 
 When the receipt is durable and the result is accepted, archive the bounded
-task. Keep `ATLAS MAIN`, `Fitness`, and the existing `Mazer` conversation as the
-long-lived operator surfaces.
+task. Keep `Questions`, `Authorization`, `00 Main`, and the standing owner
+conversations as long-lived operator surfaces.
 
 So the practical answer is this:
 

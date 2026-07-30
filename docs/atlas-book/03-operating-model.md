@@ -71,10 +71,15 @@ Canonical flow:
 
 ## Standing Project Command Surfaces
 
-The intended operator-facing command surfaces are three long-lived ChatGPT
-Work conversations:
+The intended operator-facing command surfaces are long-lived governed
+conversations:
 
-- `ATLAS MAIN` is the pinned anchor conversation. It is active during
+- `Questions` is the pinned general-purpose conversation for questions, status,
+  planning, architecture, and explicitly requested bounded work.
+- `Authorization` handles genuine operator authority and external-evidence
+  decisions. Repeated eligible low-risk approvals are learned under the
+  canonical authorization policy.
+- `00 Main` is the pinned anchor conversation. It is active during
   operational preparation and owns stack-wide
   architecture, governance, routing, receipts, and readiness decisions.
 - `Fitness` is created when the operational-preparation closeout proves the
@@ -107,16 +112,21 @@ the existing `Mazer` conversation a current context-and-resume packet. Each
 conversation owns project intent and review; each bounded outcome still
 receives a separate Codex task through `_stack`.
 
-`ATLAS MAIN`, `Fitness`, and `Mazer` are durable command surfaces. Bounded
+`Questions`, `Authorization`, `00 Main`, `Fitness`, and `Mazer` are durable command surfaces. Bounded
 execution tasks are disposable work surfaces: after a terminal result is
 accepted and its receipt is durable, archive the task to keep the workstation
 clean. Never archive an active or intentionally persistent owner conversation.
 
 When canonical Atlas truth requires a stable workspace-registration window,
-`ATLAS MAIN` may explicitly pause an owner conversation at its nearest safe
+`00 Main` may explicitly pause an owner conversation at its nearest safe
 checkpoint. The pause receipt must preserve branches, worktrees, uncommitted
 files, servers, board state, and the exact resume action. Resume requires an
-explicit message from `ATLAS MAIN` after the serialized root window closes.
+explicit message from `00 Main` after the serialized root window closes.
+
+Every substantive conversation turn persists a compact secret-free checkpoint
+under `runtime/atlas/thread-context/`. Every cross-thread message explicitly
+labels whether it is a handoff, whether a response is expected, its return
+target, and its wake condition.
 
 At the start and closeout of every governed owner-lane task, the workflow must
 inspect the relevant DiscordOS project board and then create, update, move,

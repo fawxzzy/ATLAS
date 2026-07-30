@@ -1225,6 +1225,8 @@ def render_codex_context_markdown(payload: dict[str, Any]) -> str:
         "- Raw evidence stays where it lives; promoted truth is tracked deliberately.",
         "- Runtime and query artifacts are rebuildable and should not become second truth sources.",
         "- Open target repo docs or code only after the root bootstrap contract is complete.",
+        "- Persist a compact source-linked thread checkpoint after every substantive turn and before handoff, blocker closeout, terminal receipt, or archival.",
+        "- Use `ops/atlas/persist_thread_context.py`; never copy raw transcripts or secret material into Atlas context checkpoints.",
         "",
     ]
     return "\n".join(lines).rstrip() + "\n"
@@ -1299,6 +1301,10 @@ def render_codex_prompt(payload: dict[str, Any]) -> str:
         "- Federate, don't duplicate.",
         "- Do not vendor child repos into ATLAS root.",
         "- Use ATLAS resources by task intent instead of dumping the whole stack into the task.",
+        "- Persist Done, Now, Next, decisions, blockers, receipts, authority qualifiers, and source refs with `python -m ops.atlas.persist_thread_context` before every substantive handoff or terminal response.",
+        "- If checkpoint persistence fails, report `CONTEXT_PERSISTENCE_BLOCKED`; do not claim handoff completion or archive safety.",
+        "- Do not persist raw transcripts, secrets, tokens, cookies, private keys, or environment values in a thread-context checkpoint.",
+        "- End every inter-thread message with `HANDOFF`, `RESPONSE_EXPECTED`, `RETURN_TO`, and `WAKE_CONDITION` labels.",
         f"- Context digest: {payload['context_digest']}",
     ]
     return "\n".join(lines).rstrip() + "\n"

@@ -14,6 +14,15 @@ Persistent context
 - Before planning Playbook, Cortex, Atlas, Codex-prompt, repo-architecture, or other stack-governance work, read the canonical Zachariah Workflow Profile:
   - `docs/memory/profiles/zachariah_workflow_profile.md`
 - Treat that profile as the durable source of truth for assistant behavior and long-term operator/project context.
+- Every governed substantive thread turn must persist a compact, secret-free,
+  source-linked checkpoint through `ops/atlas/persist_thread_context.py` before
+  handoff, blocker closeout, terminal receipt, or archival. An exact retry is
+  idempotent; a changed checkpoint is append-only.
+- If context persistence fails, report `CONTEXT_PERSISTENCE_BLOCKED` and do not
+  claim the turn is handoff-complete or archive-safe.
+- Raw transcripts remain provider evidence. Atlas stores the durable Done, Now,
+  Next, decisions, blockers, receipts, authority qualifiers, and source refs
+  required for deterministic continuation.
 
 Routing
 - Single-repo implementation work should be routed into the target repo root.
@@ -33,6 +42,22 @@ Routing
   - `packages/**`
   - `tmp/**`
 - Do not make opportunistic code edits across unrelated repos from the root session.
+- Canonical visible standing titles assume the Atlas stack context: `Questions`,
+  `Authorization`, `00 Main`, `01 Release`, `01 Architect`, `01 Ops`, and
+  `Inbox`. Stable logical role IDs do not change, and legacy title aliases remain
+  read-only recovery inputs.
+- `Questions` is the general-purpose operator conversation. It is read-only by
+  default for status and analysis, but may execute an explicitly requested
+  bounded task without silently absorbing Main, Release, Authorization, owner,
+  provider, or production authority.
+- `Authorization` is the genuine operator-authority surface. Repeated low-risk
+  decisions are evaluated against
+  `docs/registry/ATLAS-AUTHORIZATION-POLICY.v1.json`; eligible matching approvals
+  become exact learned authority instead of repeated questions.
+- Every inter-thread message must end with explicit transport labels:
+  `HANDOFF`, `RESPONSE_EXPECTED`, `RETURN_TO`, and `WAKE_CONDITION`. A status
+  copy uses `HANDOFF: NO` and `RESPONSE_EXPECTED: NO`; an owner-first work return
+  names the exact logical role and stable thread ID.
 
 Path Discipline
 - Keep committed paths relative to the ATLAS root whenever possible.
@@ -69,6 +94,26 @@ Runtime Permissions
 - Do not downgrade permissions for ATLAS-root threads, owner-lane service threads, scheduler workers, service-bus workers, or future Cortex adapters unless the operator explicitly requests it in the current thread.
 - Treat single-writer routing, queue ordering, idempotency, leases, sync/readback, and correlated receipts as coordination controls, not as permission restrictions.
 - Managed product or workspace requirements may still constrain allowed permission profiles or approval policies even when the ATLAS operator default is full access.
+
+Learned Authorization
+- Learned authorization is allowed only for an allowlisted action class with
+  two distinct matching explicit approvals, the same scope and constraints,
+  fresh evidence, exact identity, bounded reversible scope, no writer collision,
+  and no material `UNKNOWN`.
+- Every learned reuse emits one exact owner-first `AUTO_AUTHORIZED` decision
+  receipt and still requires fresh action-time preflight and post-action proof.
+- Two exact operator-granted profiles are active immediately: a fully proven
+  clean draft-to-ready transition, and retirement of one exact accidental
+  statusless GitHub deployment metadata record with zero execution evidence.
+  The first excludes merge; the second excludes provider/deployment/production
+  execution and every unrelated record.
+- A denial, modified answer, scope drift, identity drift, policy drift, failed
+  check, unresolved review thread, deployment drift, or writer drift revokes or
+  invalidates reuse.
+- Never learn or infer reusable authority for production, provider mutation,
+  Supabase apply, Auth or live-data mutation, secrets or credentials, DNS,
+  billing or purchases, destructive or irreversible work, security bypass,
+  source retirement or deletion, or ownership or retention changes.
 
 Vercel Production Deploy Guard
 - Treat every Vercel production deployment, promotion, or production-alias cutover as approval-gated.

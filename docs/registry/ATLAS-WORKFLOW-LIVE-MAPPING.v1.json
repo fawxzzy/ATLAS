@@ -1,7 +1,7 @@
 {
   "schema": "atlas.workflow.runtime-registry.v1",
   "manifest_ref": "docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json",
-  "manifest_digest": "sha256:37bee7fc27fbee46fdcc61d608904e7494286e333b884564cf43a58179b9fc56",
+  "manifest_digest": "sha256:a01b7b47e9e32181ba2acd979ddd5c776d34801540d739f03c0a424341b40326",
   "observed_at": "2026-07-20",
   "observation_precision": "day",
   "discovery": {

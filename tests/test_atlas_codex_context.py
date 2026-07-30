@@ -125,6 +125,9 @@ class AtlasCodexContextTests(unittest.TestCase):
         self.assertIn("stack.yaml", prompt)
         self.assertIn("docs/registry/STACK-REPO-INVENTORY.json", prompt)
         self.assertIn("docs/memory/profiles/zachariah_workflow_profile.md", prompt)
+        self.assertIn("python -m ops.atlas.persist_thread_context", prompt)
+        self.assertIn("CONTEXT_PERSISTENCE_BLOCKED", prompt)
+        self.assertIn("RESPONSE_EXPECTED", prompt)
 
     def test_bootstrap_includes_canonical_zachariah_profile(self) -> None:
         refs = {item["ref"] for item in self.mazer_payload["bootstrap_contract"]["ordered_reads"]}

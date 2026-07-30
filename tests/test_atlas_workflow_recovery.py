@@ -43,8 +43,10 @@ WORKFLOW_PR_PATHS = [
     "docs/atlas-book/12-restart-and-handoff-guide.md",
     "docs/memory/initiatives/initiative-fawxzzy-platform-migration.json",
     "docs/memory/profiles/zachariah_workflow_profile.md",
+    "docs/ops/ATLAS-THREAD-NAMING-AUTHORIZATION-AND-CONTEXT-STANDARD.md",
     "docs/ops/ATLAS-WORKFLOW-RECOVERY-RUNBOOK.md",
     "docs/prompts/atlas-workflow/**",
+    "docs/registry/ATLAS-AUTHORIZATION-POLICY.v1.json",
     "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json",
     "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
     "docs/registry/ATLAS-WORKFLOW-*.json",
@@ -54,7 +56,10 @@ WORKFLOW_PR_PATHS = [
     "ops/atlas/atlas_runtime.py",
     "ops/atlas/atlas_watchdog.py",
     "ops/atlas/atlasd.py",
+    "ops/atlas/authorization_policy.py",
+    "ops/atlas/build_codex_context.py",
     "ops/atlas/operator_notification_idempotency.py",
+    "ops/atlas/persist_thread_context.py",
     "ops/atlas/workflow_recovery.py",
     "runtime/cortex/kernel.state-model.seed.v1.json",
     "schemas/atlas.continuity.handoff.v1.json",
@@ -62,6 +67,9 @@ WORKFLOW_PR_PATHS = [
     "schemas/atlas.workflow.*.json",
     "tests/fixtures/atlas-workflow-recovery/**",
     "tests/test_atlas_runtime.py",
+    "tests/test_atlas_authorization_policy.py",
+    "tests/test_atlas_codex_context.py",
+    "tests/test_atlas_thread_context.py",
     "tests/test_atlas_watchdog.py",
     "tests/test_atlasd.py",
     "tests/test_atlas_workflow_recovery.py",
@@ -101,8 +109,8 @@ EXPECTED_WORKFLOW = {
                     "run": "python ops/atlas/workflow_recovery.py render --check",
                 },
                 {
-                    "name": "Run changed runtime, watchdog, atlasd, and recovery tests",
-                    "run": "python -m unittest tests.test_atlas_runtime tests.test_atlas_watchdog tests.test_atlasd tests.test_atlas_workflow_recovery -v",
+                    "name": "Run workflow, authorization, and context tests",
+                    "run": "python -m unittest tests.test_atlas_runtime tests.test_atlas_watchdog tests.test_atlasd tests.test_atlas_workflow_recovery tests.test_atlas_authorization_policy tests.test_atlas_thread_context -v",
                 },
                 {
                     "name": "Validate canonical envelope fixture",
@@ -357,7 +365,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
         workflow = _load_github_workflow()
         patterns = workflow["on"]["pull_request"]["paths"]
         references = _repository_source_truth_refs(self.manifest)
-        self.assertEqual(22, len(references))
+        self.assertEqual(24, len(references))
         self.assertEqual([], _uncovered_source_truth_refs(patterns, references))
 
     def test_github_workflow_detects_source_truth_filter_deletion(self) -> None:

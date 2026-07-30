@@ -2,7 +2,7 @@
 # ATLAS workflow architecture and recovery
 
 Canonical manifest: `docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json`
-Manifest digest: `sha256:37bee7fc27fbee46fdcc61d608904e7494286e333b884564cf43a58179b9fc56`
+Manifest digest: `sha256:a01b7b47e9e32181ba2acd979ddd5c776d34801540d739f03c0a424341b40326`
 Runtime seed: `docs/registry/ATLAS-WORKFLOW-LIVE-MAPPING.v1.json`
 
 This view is generated from the versioned manifest. Stable logical role IDs are the contract; Codex thread IDs are replaceable runtime epochs refreshed in the live registry.
@@ -19,12 +19,12 @@ This view is generated from the versioned manifest. Stable logical role IDs are 
 
 | Logical role | Human title | Purpose | Writer scope | Creation | Runtime floor | Current epoch | Health seed |
 |---|---|---|---|---|---|---|---|
-| `atlas.main` | ATLAS MAIN | Sole master orchestrator, authority sink, dependency-aware conflict-group scheduler, and acceptance owner for the ATLAS operating system. | `atlas.authority` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f52d9-7667-72a3-a5f7-9c0613aedd8f` | `DEGRADED` |
-| `atlas.inbox` | ATLAS INBOX | Primary inbound aggregation queue for material receipts and coordination events destined for ATLAS MAIN. | `atlas.inbound-ledger` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f7de0-3e1d-7433-a760-a9b724174ab6` | `DEGRADED` |
-| `atlas.workflow-architect` | ATLAS WORKFLOW ARCHITECT | Own the canonical workflow/recovery specification, bounded architecture audit, and reconstruction proof without becoming an operational root. | `atlas.workflow-contracts` | `create_if_missing` | `gpt-5.6-sol/high` | `019f7df6-8521-7292-a012-297208fce120` | `DEGRADED` |
-| `atlas.release-control-plane` | ATLAS PR, CI & Release Control Plane | Stack-wide PR, CI, review, guarded-merge, deployment/readback, and lifecycle surveillance surface. | `external.release-control` | `create_if_missing` | `gpt-5.6-sol/high` | `019f79ac-bd85-7952-8935-58dfbb77aa20` | `DEGRADED` |
-| `fawxzzy.questions` | FAWXZZY QUESTIONS | Zac's cross-stack read/analysis surface for status, timelines, dependencies, and architecture questions. | `read-only` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f75ca-d9c7-7941-b73f-fb06ff2a0459` | `DEGRADED` |
-| `manual.messages` | MANUAL MESSAGES | Non-blocking human decision queue with stable questions, answer suppression, expiry, and route-back receipts. | `atlas.manual-question-ledger` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f70b7-fad4-74d2-90e3-e5f34c6fab06` | `DEGRADED` |
+| `atlas.main` | 00 Main | Sole master orchestrator, authority sink, dependency-aware conflict-group scheduler, and acceptance owner for the ATLAS operating system. | `atlas.authority` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f52d9-7667-72a3-a5f7-9c0613aedd8f` | `DEGRADED` |
+| `atlas.inbox` | Inbox | Primary inbound aggregation queue for material receipts and coordination events destined for ATLAS MAIN. | `atlas.inbound-ledger` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f7de0-3e1d-7433-a760-a9b724174ab6` | `DEGRADED` |
+| `atlas.workflow-architect` | 01 Architect | Own the canonical workflow/recovery specification, bounded architecture audit, and reconstruction proof without becoming an operational root. | `atlas.workflow-contracts` | `create_if_missing` | `gpt-5.6-sol/high` | `019f7df6-8521-7292-a012-297208fce120` | `DEGRADED` |
+| `atlas.release-control-plane` | 01 Release | Stack-wide PR, CI, review, guarded-merge, deployment/readback, and lifecycle surveillance surface. | `external.release-control` | `create_if_missing` | `gpt-5.6-sol/high` | `019f79ac-bd85-7952-8935-58dfbb77aa20` | `DEGRADED` |
+| `fawxzzy.questions` | Questions | Zac's general-purpose conversation for status, timelines, dependencies, architecture, planning, and explicitly requested bounded work. | `atlas.questions-explicit-bounded` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f75ca-d9c7-7941-b73f-fb06ff2a0459` | `DEGRADED` |
+| `manual.messages` | Authorization | Non-blocking operator authority queue with stable requests, learned low-risk authorization, answer suppression, expiry, and owner-first route-back receipts. | `atlas.authorization-ledger` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f70b7-fad4-74d2-90e3-e5f34c6fab06` | `DEGRADED` |
 | `ai.questions` | AI QUESTIONS | Agent-generated research, omission, and deep-investigation intake that converts findings into bounded Atlas packets. | `read-only` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f79de-76cd-7062-9d8b-1b9f5fd6a8ba` | `DEGRADED` |
 | `fawxzzy.messages` | FAWXZZY MESSAGES | Notification-only operator surface for concise material progress, blocker, usage, and attention updates. | `atlas.notification-ledger` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f58c4-6d0b-7dc0-a4e3-9f6335f381e1` | `DEGRADED` |
 | `owner.fitness` | Fitness | Standing owner command surface for the Fitness repository, board projection, and governed product continuity. | `repo.fitness` | `manual_gate` | `gpt-5.6-sol/high` | `019f58c4-4a9e-7af3-bb3e-06e199884027` | `DEGRADED` |
