@@ -1,8 +1,8 @@
 {
   "schema": "atlas.workflow.runtime-registry.v1",
   "manifest_ref": "docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json",
-  "manifest_digest": "sha256:1745d482c445bd2d7c8a481992a0c4f14b1b05a2353a4412900c0ecae0d567c2",
-  "observed_at": "2026-07-20",
+  "manifest_digest": "sha256:96f12d9b4e4f15a5fcbf7a0ed0b6f0197e59544ca638c2eb3e1ed7c259d0a6e6",
+  "observed_at": "2026-07-30",
   "observation_precision": "day",
   "discovery": {
     "sources": [
@@ -16,18 +16,15 @@
   },
   "bindings": [
     {
-      "role_id": "atlas.main",
-      "current_runtime_id": "019f52d9-7667-72a3-a5f7-9c0613aedd8f",
-      "runtime_status": "active",
+      "role_id": "atlas.workflow-operations",
+      "current_runtime_id": "019fa7a7-dcf4-7860-9326-dc7a2c92c198",
+      "runtime_status": "idle",
       "health": "DEGRADED",
       "archived": false,
-      "title": "ATLAS MAIN",
+      "title": "01 Ops",
       "cwd": "ATLAS_ROOT",
-      "evidence": ["task-tool live readback", "codex-session://2026/07/11/019f52d9-7667-72a3-a5f7-9c0613aedd8f", "pin state unavailable through app-server discovery"],
-      "related_epochs": [
-        {"runtime_id": "019f6d99-1954-7b71-b860-dcc69fc2fd14", "relationship": "historical-work-mode-mirror-not-accepted-role-epoch", "status": "notLoaded-interrupted"},
-        {"runtime_id": "019f6d99-8e97-7920-b141-55ef1a6c32e3", "relationship": "historical-work-mode-mirror-not-accepted-role-epoch", "status": "notLoaded-interrupted"}
-      ]
+      "evidence": ["canonical 01 Ops owner-return and settlement task identity", "source-only role cutover contract", "runtime activation and scheduler cutover remain separately gated", "pin state unavailable through app-server discovery"],
+      "related_epochs": []
     },
     {
       "role_id": "atlas.inbox",
@@ -175,6 +172,20 @@
   ],
   "unbound_runtime_claims": [
     {
+      "runtime_id": "019f52d9-7667-72a3-a5f7-9c0613aedd8f",
+      "title": "ATLAS MAIN",
+      "observed_status": "historical",
+      "standing_contract_claim": false,
+      "admission_state": "NOT_DURABLY_ADMITTED",
+      "disposition": "HISTORICAL_PROGRAM_SURFACE",
+      "canonical_target_id": null,
+      "health": "HELD",
+      "recovery_action": "HOLD_NO_CREATE",
+      "lifecycle_action_authorized": false,
+      "evidence": ["prior accepted runtime mapping", "source-only Main-role retirement contract", "immutable historical compatibility requirement"],
+      "rationale": "atlas.main remains readable historical compatibility only. It is not a current binding and must never be recreated, activated, scheduled, selected, woken, or targeted. Rename/archive remains separately gated."
+    },
+    {
       "runtime_id": "019f6d9d-a192-7a51-8d2d-463494c87d3a",
       "title": "DiscordOS",
       "observed_status": "notLoaded",
@@ -214,7 +225,7 @@
       "recovery_action": "HOLD_NO_CREATE",
       "lifecycle_action_authorized": false,
       "evidence": ["task-tool live readback", "codex-session://2026/07/16/019f6dac-afc1-7551-a47b-37e2dda95f35", "no stable logical role admission in current durable governance"],
-      "rationale": "Its umbrella read-model and task-supervision scope is now represented by durable components and ATLAS MAIN contracts, but no accepted supersession or lifecycle receipt exists."
+      "rationale": "Its umbrella read-model and task-supervision scope is now represented by durable components and exact-owner contracts, but no accepted supersession or lifecycle receipt exists."
     },
     {
       "runtime_id": "019f6dac-9488-7923-b596-e7f6bd66dc22",
@@ -270,7 +281,7 @@
       "recovery_action": "HOLD_NO_CREATE",
       "lifecycle_action_authorized": false,
       "evidence": ["task-tool live readback", "codex-session://2026/07/16/019f6dae-99bc-7850-a79e-c1d03e83fc80", "development-gate program evidence exists but no current stable logical-role admission exists"],
-      "rationale": "This future development coordinator remains preserved historical evidence; it is not recreated until ATLAS MAIN admits a stable logical role."
+      "rationale": "This future development coordinator remains preserved historical evidence; it is not recreated without an exact source-owner admission and 01 Ops collision reconciliation."
     },
     {
       "runtime_id": "019f6dad-f4ac-7c42-b0cf-bd5a58750ee6",

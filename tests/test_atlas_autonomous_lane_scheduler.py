@@ -450,6 +450,15 @@ def _selector_payload(*, active_lane_is_held: bool = True, action: str = "hold_c
 
 
 def _planner_payload(items: list[dict[str, object]]) -> dict[str, object]:
+    items = copy.deepcopy(items)
+    for item in items:
+        packet = str(item.get("packet") or "")
+        if scheduler._is_owner_lane(packet):
+            continue
+        item.setdefault("logical_role_id", "atlas.workflow-architect")
+        item.setdefault("repository", "fawxzzy/ATLAS")
+        item.setdefault("writer_scope", "atlas.workflow-contracts")
+        item.setdefault("execution_class", "repo_worktree")
     return {
         "schema_version": planner.SCHEMA_VERSION,
         "status": "ok",
@@ -554,9 +563,9 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             role_id="atlas.workflow-architect",
             runtime_thread_id="architect-thread",
             idempotency_key="discordos-wave-c-publication",
-            source_role_id="atlas.main",
+            source_role_id="atlas.workflow-architect",
         )
-        envelope["consumers"] = ["atlas.inbox", "atlas.main"]
+        envelope["consumers"] = ["atlas.workflow-architect"]
 
         program, findings = scheduler.reconcile_runtime_program(
             program=_program_payload(),
@@ -600,6 +609,14 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(1, len(reserved["active_leases"]))
 
     def test_program_loader_rejects_a_second_scheduler_authority(self) -> None:
+        self.assertEqual(
+            scheduler.OPERATIONS_ROLE_ID,
+            scheduler.CANONICAL_SCHEDULER_AUTHORITY["logical_role_id"],
+        )
+        self.assertEqual(
+            "ops/atlas/autonomous_lane_scheduler.py",
+            scheduler.CANONICAL_SCHEDULER_AUTHORITY["control_loop"],
+        )
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             relative = "tmp/atlas/program.json"
@@ -614,6 +631,116 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             _write(root / relative, json.dumps(invalid, indent=2) + "\n")
             _, invalid_errors = scheduler.load_program(root, relative)
             self.assertEqual("scheduler_authority_mismatch", invalid_errors[0]["code"])
+
+    def test_legacy_main_execution_and_owner_return_routes_are_rejected(self) -> None:
+        cases = (
+            (scheduler.LEGACY_MAIN_ROLE_ID, "owner.socials-os"),
+            ("atlas.release-control-plane", scheduler.LEGACY_MAIN_ROLE_ID),
+        )
+        for target_role, owner_role in cases:
+            with self.subTest(target_role=target_role, owner_role=owner_role):
+                payload = _standardized_ready_payload(
+                    "legacy-main-route",
+                    role_id=target_role,
+                    repository="fawxzzy/ATLAS",
+                    writer_scope="read.legacy-main-route",
+                    worktree="legacy-main-route",
+                )
+                payload["execution_class"] = "read_only"
+                envelope = _standardized_envelope(
+                    payload,
+                    role_id=target_role,
+                    runtime_thread_id="target-thread",
+                    owner_role_id=owner_role,
+                    owner_runtime_thread_id="owner-thread",
+                    idempotency_key=f"legacy-main-route-{target_role}-{owner_role}",
+                    source_role_id="atlas.workflow-architect",
+                )
+                program, findings = scheduler.reconcile_runtime_program(
+                    program=_program_payload(),
+                    bindings_payload=_bindings(
+                        (target_role, "target-thread", "idle"),
+                        (owner_role, "owner-thread", "idle"),
+                    ),
+                    envelopes=[envelope],
+                )
+                self.assertEqual([], program["standing_packets"])
+                self.assertEqual(
+                    ["legacy_main_target_retired"],
+                    [finding["code"] for finding in findings],
+                )
+                self.assertEqual([], program["processed_events"])
+
+        continuation = _continuation_envelope(
+            {
+                "canonical_lifecycle_state": "TERMINAL",
+                "terminal": True,
+            },
+            idempotency_key="legacy-main-flat-owner-return",
+            lifecycle_state="TERMINAL",
+            owner_return_role_id=scheduler.LEGACY_MAIN_ROLE_ID,
+            owner_return_thread_id="legacy-main-thread",
+        )
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(
+                ("owner.socials-os", "socials-thread", "idle"),
+                (scheduler.LEGACY_MAIN_ROLE_ID, "legacy-main-thread", "idle"),
+            ),
+            envelopes=[continuation],
+        )
+        self.assertEqual([], program["standing_packets"])
+        self.assertEqual(
+            ["legacy_main_target_retired"],
+            [finding["code"] for finding in findings],
+        )
+        self.assertEqual([], program["processed_events"])
+
+    def test_generic_root_planner_packet_requires_an_explicit_owner(self) -> None:
+        planner_report = _planner_payload(
+            [
+                {
+                    "marker": "Cortex Dual-Mode Replacement Readiness",
+                    "classification": planner.CLASS_DOCS_ONLY,
+                    "score": 70,
+                    "packet": "Cortex Dual-Mode Replacement Readiness synthesis-to-execution bridge schema contract freeze",
+                    "mode": "docs-only root-bounded synthesis-to-execution bridge-schema contract freeze",
+                }
+            ]
+        )
+        candidate = planner_report["candidate_scores"][0]
+        for field in ("logical_role_id", "repository", "writer_scope", "execution_class"):
+            candidate.pop(field, None)
+
+        report = scheduler.build_report(
+            root=Path("atlas-root-fixture"),
+            program=_program_payload(),
+            max_candidates=30,
+            preflight_report=_preflight_payload(),
+            selector_report=_selector_payload(),
+            planner_report=planner_report,
+        )
+
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual(
+            "root_lane_metadata_required",
+            report["blocked_candidates"][0]["blocked_reason"],
+        )
+        self.assertIsNone(report["blocked_candidates"][0]["logical_role_id"])
+
+    def test_prompt_renderer_never_invents_an_operations_owner(self) -> None:
+        prompt = scheduler.render_prompt(
+            {
+                "status": scheduler.STATUS_EXECUTE,
+                "selected_packet": "legacy-unowned-root-packet",
+                "selected_jobs": [],
+                "routing_mode": "legacy",
+                "git_state": {},
+            }
+        )
+        self.assertIn("Selected jobs: `0`", prompt)
+        self.assertNotIn(scheduler.OPERATIONS_ROLE_ID, prompt)
 
     def test_cross_role_execution_targets_preserve_exact_owner_callback(self) -> None:
         routes = [
@@ -1552,9 +1679,17 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             planner_report=_planner_payload([]),
         )
 
-        self.assertEqual(scheduler.STATUS_VALIDATION_CLEANUP, report["status"])
-        self.assertEqual(scheduler.DECISION_VALIDATION_CLEANUP, report["decision"])
-        self.assertTrue(report["safe_to_execute"])
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual(scheduler.DECISION_HOLD, report["decision"])
+        self.assertEqual([], report["selected_jobs"])
+        self.assertFalse(report["safe_to_execute"])
+        self.assertEqual("root_owner_admission_required", report["stop_reason"])
+        self.assertTrue(
+            any(
+                candidate.get("blocked_reason") == "root_validation_scope_held"
+                for candidate in report["blocked_candidates"]
+            )
+        )
 
     def test_root_validation_does_not_suppress_disjoint_read_only_packet(self) -> None:
         program = _program_payload()
@@ -1702,8 +1837,15 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             planner_report=_planner_payload([]),
         )
 
-        self.assertEqual(scheduler.STATUS_VALIDATION_CLEANUP, report["status"])
-        self.assertEqual(["ATLAS root validation cleanup"], [job["packet_id"] for job in report["selected_jobs"]])
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual("root_owner_admission_required", report["stop_reason"])
+        self.assertTrue(
+            any(
+                candidate.get("blocked_reason") == "root_validation_scope_held"
+                for candidate in report["blocked_candidates"]
+            )
+        )
 
     def test_root_validation_suppresses_same_worktree_repository_writer(self) -> None:
         program = _program_payload()
@@ -1731,8 +1873,15 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             planner_report=_planner_payload([]),
         )
 
-        self.assertEqual(scheduler.STATUS_VALIDATION_CLEANUP, report["status"])
-        self.assertEqual(["ATLAS root validation cleanup"], [job["packet_id"] for job in report["selected_jobs"]])
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual("root_owner_admission_required", report["stop_reason"])
+        self.assertTrue(
+            any(
+                candidate.get("blocked_reason") == "root_validation_scope_held"
+                for candidate in report["blocked_candidates"]
+            )
+        )
 
     def test_root_validation_suppresses_wildcard_worktree_claim(self) -> None:
         program = _program_payload()
@@ -1760,8 +1909,15 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             planner_report=_planner_payload([]),
         )
 
-        self.assertEqual(scheduler.STATUS_VALIDATION_CLEANUP, report["status"])
-        self.assertEqual(["ATLAS root validation cleanup"], [job["packet_id"] for job in report["selected_jobs"]])
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual("root_owner_admission_required", report["stop_reason"])
+        self.assertTrue(
+            any(
+                candidate.get("blocked_reason") == "root_validation_scope_held"
+                for candidate in report["blocked_candidates"]
+            )
+        )
 
     def test_root_validation_does_not_suppress_external_mutation(self) -> None:
         program = _program_payload()
@@ -1821,7 +1977,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         program = _program_payload()
         malformed = _standing_packet(
             "bare-repository",
-            role_id="atlas.main",
+            role_id=scheduler.OPERATIONS_ROLE_ID,
             repository="ATLAS",
             writer_scope="repo.atlas.bare",
         )
@@ -2120,8 +2276,13 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             planner_report=_planner_payload([]),
         )
 
-        self.assertEqual(scheduler.DECISION_EXACT_MANIFEST_PACKET, report["decision"])
-        self.assertEqual("Exact routed root packet", report["selected_packet"])
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual(scheduler.DECISION_HOLD, report["decision"])
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual(
+            "root_owner_admission_required",
+            report["blocked_candidates"][0]["blocked_reason"],
+        )
 
     def test_operator_program_switch_requires_reselection_receipt(self) -> None:
         report = scheduler.build_report(
@@ -2210,7 +2371,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
     def test_same_repository_mutations_require_complete_isolation_claims(self) -> None:
         program = _program_payload()
         program["standing_packets"] = [
-            _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
+            _standing_packet("atlas-a", role_id=scheduler.OPERATIONS_ROLE_ID, repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
             _standing_packet("atlas-b", role_id="atlas.workflow-architect", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.b"),
         ]
         report = scheduler.build_report(
@@ -2228,7 +2389,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
 
     def test_same_repository_mutations_can_share_wave_with_proven_isolation(self) -> None:
         program = _program_payload()
-        left = _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a")
+        left = _standing_packet("atlas-a", role_id=scheduler.OPERATIONS_ROLE_ID, repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a")
         left["resource_claims"] = {"worktrees": ["worktrees/atlas-a"], "files": ["ops/atlas/a/**"]}
         right = _standing_packet(
             "atlas-b",
@@ -2254,7 +2415,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         program = _program_payload()
         canonical = _standing_packet(
             "atlas-root",
-            role_id="atlas.main",
+            role_id=scheduler.OPERATIONS_ROLE_ID,
             repository="fawxzzy/ATLAS",
             writer_scope="atlas.root",
         )
@@ -2341,7 +2502,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
     def test_active_lease_serializes_unproved_same_repository_scope(self) -> None:
         program = _program_payload()
         program["standing_packets"] = [
-            _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
+            _standing_packet("atlas-a", role_id=scheduler.OPERATIONS_ROLE_ID, repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
             _standing_packet("atlas-b", role_id="atlas.workflow-architect", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.b"),
         ]
         program["max_parallel_writers"] = 1
@@ -2380,7 +2541,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         )
         read_only["execution_class"] = "read_only"
         program["standing_packets"] = [
-            _standing_packet("atlas-new", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.new"),
+            _standing_packet("atlas-new", role_id=scheduler.OPERATIONS_ROLE_ID, repository="fawxzzy/ATLAS", writer_scope="repo.atlas.new"),
             read_only,
         ]
         program["active_leases"] = [
@@ -2408,7 +2569,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
     def test_repository_identity_is_case_insensitive(self) -> None:
         program = _program_payload()
         program["standing_packets"] = [
-            _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
+            _standing_packet("atlas-a", role_id=scheduler.OPERATIONS_ROLE_ID, repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
             _standing_packet("atlas-b", role_id="atlas.workflow-architect", repository="FAWXZZY/atlas", writer_scope="repo.atlas.b"),
         ]
 
@@ -2428,7 +2589,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
     def test_repository_url_alias_cannot_bypass_serialization(self) -> None:
         program = _program_payload()
         program["standing_packets"] = [
-            _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
+            _standing_packet("atlas-a", role_id=scheduler.OPERATIONS_ROLE_ID, repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
             _standing_packet(
                 "atlas-b",
                 role_id="atlas.workflow-architect",
@@ -2453,7 +2614,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
     def test_recovery_lease_serializes_unproved_same_repository_scope(self) -> None:
         program = _program_payload()
         program["standing_packets"] = [
-            _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
+            _standing_packet("atlas-a", role_id=scheduler.OPERATIONS_ROLE_ID, repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a"),
             _standing_packet("atlas-b", role_id="atlas.workflow-architect", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.b"),
         ]
         program["max_parallel_writers"] = 1
@@ -2483,7 +2644,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
 
     def test_active_lease_allows_proven_same_repository_isolation(self) -> None:
         program = _program_payload()
-        left = _standing_packet("atlas-a", role_id="atlas.main", repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a")
+        left = _standing_packet("atlas-a", role_id=scheduler.OPERATIONS_ROLE_ID, repository="fawxzzy/ATLAS", writer_scope="repo.atlas.a")
         left["resource_claims"] = {"worktrees": ["worktrees/atlas-a"], "files": ["ops/atlas/a/**"]}
         right = _standing_packet(
             "atlas-b",
@@ -2815,7 +2976,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                     _envelope(
                         payload,
                         idempotency_key="owner-local-source-preparation",
-                        source_role_id="atlas.main",
+                        source_role_id="fawxzzy.questions",
                     )
                 ],
             )
@@ -2834,7 +2995,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(["owner-local-source-preparation"], [job["packet_id"] for job in report["selected_jobs"]])
         persisted = program["standing_packets"][0]
         self.assertEqual(scheduler.STANDING_LOCAL_SOURCE_PREPARATION, persisted["authority_class"])
-        self.assertEqual("atlas.main", persisted["source_role_id"])
+        self.assertEqual("fawxzzy.questions", persisted["source_role_id"])
         self.assertEqual("HELD", persisted["source_preparation"]["publication"])
         prompt = scheduler.render_prompt(report)
         self.assertIn("keep every change unstaged and publication held", prompt)
@@ -2844,39 +3005,39 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         cases: list[tuple[str, dict[str, object], str]] = []
 
         wrong_role = _standing_local_source_payload()
-        wrong_role["logical_role_id"] = "atlas.main"
-        cases.append(("standing_owner_role_required", wrong_role, "atlas.main"))
+        wrong_role["logical_role_id"] = scheduler.OPERATIONS_ROLE_ID
+        cases.append(("standing_owner_role_required", wrong_role, "fawxzzy.questions"))
 
         wrong_execution = _standing_local_source_payload()
         wrong_execution["execution_class"] = "read_only"
-        cases.append(("standing_repo_worktree_required", wrong_execution, "atlas.main"))
+        cases.append(("standing_repo_worktree_required", wrong_execution, "fawxzzy.questions"))
 
         unsafe_path = _standing_local_source_payload()
         unsafe_path["source_preparation"] = copy.deepcopy(unsafe_path["source_preparation"])
         unsafe_path["source_preparation"]["path_allowlist"] = [".github/workflows/release.yml"]
         unsafe_path["resource_claims"] = copy.deepcopy(unsafe_path["resource_claims"])
         unsafe_path["resource_claims"]["files"] = [".github/workflows/release.yml"]
-        cases.append(("standing_path_allowlist_unsafe", unsafe_path, "atlas.main"))
+        cases.append(("standing_path_allowlist_unsafe", unsafe_path, "fawxzzy.questions"))
 
         mismatched_files = _standing_local_source_payload()
         mismatched_files["resource_claims"] = copy.deepcopy(mismatched_files["resource_claims"])
         mismatched_files["resource_claims"]["files"] = ["src/feature.py"]
-        cases.append(("standing_file_claims_must_match_allowlist", mismatched_files, "atlas.main"))
+        cases.append(("standing_file_claims_must_match_allowlist", mismatched_files, "fawxzzy.questions"))
 
         duplicate_path = _standing_local_source_payload()
         duplicate_path["source_preparation"] = copy.deepcopy(duplicate_path["source_preparation"])
         duplicate_path["source_preparation"]["path_allowlist"] = ["src/feature.py", "src/feature.py"]
-        cases.append(("standing_path_allowlist_not_canonical", duplicate_path, "atlas.main"))
+        cases.append(("standing_path_allowlist_not_canonical", duplicate_path, "fawxzzy.questions"))
 
         external_claim = _standing_local_source_payload()
         external_claim["resource_claims"] = copy.deepcopy(external_claim["resource_claims"])
         external_claim["resource_claims"]["external_writers"] = ["malformed-external-writer"]
-        cases.append(("standing_external_resource_claim_forbidden", external_claim, "atlas.main"))
+        cases.append(("standing_external_resource_claim_forbidden", external_claim, "fawxzzy.questions"))
 
         unknown_claim = _standing_local_source_payload()
         unknown_claim["resource_claims"] = copy.deepcopy(unknown_claim["resource_claims"])
         unknown_claim["resource_claims"]["gpu"] = ["shared"]
-        cases.append(("standing_resource_claims_invalid", unknown_claim, "atlas.main"))
+        cases.append(("standing_resource_claims_invalid", unknown_claim, "fawxzzy.questions"))
 
         cases.append(("standing_source_role_forbidden", _standing_local_source_payload(), "manual.messages"))
 
@@ -2922,7 +3083,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                         _envelope(
                             payload,
                             idempotency_key=f"invalid-worktree-{index}",
-                            source_role_id="atlas.main",
+                            source_role_id="fawxzzy.questions",
                         )
                     ],
                 )
@@ -2941,7 +3102,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                     _envelope(
                         payload,
                         idempotency_key="canonical-nested-worktree",
-                        source_role_id="atlas.main",
+                        source_role_id="fawxzzy.questions",
                     )
                 ],
             )
@@ -2980,7 +3141,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                         _envelope(
                             payload,
                             idempotency_key="registered-worktree-proof",
-                            source_role_id="atlas.main",
+                            source_role_id="fawxzzy.questions",
                         )
                     ],
                     root=root,
@@ -3823,7 +3984,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 "current_delivered_turn_id": "blocked-turn",
             },
             idempotency_key="fitness-source-resume",
-            source_role_id="atlas.main",
+            source_role_id=scheduler.OPERATIONS_ROLE_ID,
         )
         program, resume_findings = scheduler.reconcile_runtime_program(
             program=program,
@@ -3914,7 +4075,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 "current_delivered_turn_id": "blocked-turn",
             },
             idempotency_key="fitness-source-replacement-runtime-resume",
-            source_role_id="atlas.main",
+            source_role_id=scheduler.OPERATIONS_ROLE_ID,
         )
 
         program, findings = scheduler.reconcile_runtime_program(
@@ -3996,7 +4157,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 "current_delivered_turn_id": "first-blocked-turn",
             },
             idempotency_key="fitness-source-first-repeat-resume",
-            source_role_id="atlas.main",
+            source_role_id=scheduler.OPERATIONS_ROLE_ID,
         )
         program, first_resume_findings = scheduler.reconcile_runtime_program(
             program=program,
@@ -4056,7 +4217,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 "current_delivered_turn_id": "second-blocked-turn",
             },
             idempotency_key="fitness-source-second-repeat-resume",
-            source_role_id="atlas.main",
+            source_role_id=scheduler.OPERATIONS_ROLE_ID,
         )
         program, second_resume_findings = scheduler.reconcile_runtime_program(
             program=program,
@@ -4261,7 +4422,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                     "superseded_by_packet_id": "ready-current",
                 },
                 idempotency_key="ready-stale-superseded",
-                source_role_id="atlas.main",
+                source_role_id=scheduler.OPERATIONS_ROLE_ID,
             ),
             _envelope(
                 {
@@ -4273,7 +4434,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                     "superseded_by_packet_id": "prepared-current",
                 },
                 idempotency_key="prepared-stale-superseded",
-                source_role_id="atlas.main",
+                source_role_id=scheduler.OPERATIONS_ROLE_ID,
             ),
         ]
 
@@ -4332,7 +4493,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 "superseded_by_packet_id": "newer-packet",
             },
             idempotency_key="delivered-supersession-rejected",
-            source_role_id="atlas.main",
+            source_role_id=scheduler.OPERATIONS_ROLE_ID,
         )
 
         program, findings = scheduler.reconcile_runtime_program(
@@ -4759,7 +4920,11 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 "external_writers": ["github:fawxzzy/ATLAS#146:review:stale"],
             },
         }
-        ready = _envelope(payload, idempotency_key="cold-stale-ready", source_role_id="atlas.main")
+        ready = _envelope(
+            payload,
+            idempotency_key="cold-stale-ready",
+            source_role_id=scheduler.OPERATIONS_ROLE_ID,
+        )
         expected_packet = {
             "packet_id": "cold-stale",
             "writer_scope": "github.fawxzzy.ATLAS.pr146.review.stale",
@@ -4780,7 +4945,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 "superseded_by_packet_id": "cold-current",
             },
             idempotency_key="cold-stale-superseded",
-            source_role_id="atlas.main",
+            source_role_id=scheduler.OPERATIONS_ROLE_ID,
         )
 
         program, findings = scheduler.reconcile_runtime_program(
@@ -5932,7 +6097,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                     "superseded_by_packet_id": "fitness-next",
                 },
                 idempotency_key="fitness-cancel-event",
-                source_role_id="atlas.main",
+                source_role_id=scheduler.OPERATIONS_ROLE_ID,
             )
             delivery = {
                 "reservation_id": reservation_id,
@@ -6001,7 +6166,10 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual("manual-thread", successor["target_thread_id"])
         self.assertEqual("owner.socials-os", successor["owner_return_role_id"])
         self.assertEqual("socials-thread", successor["owner_return_thread_id"])
-        self.assertNotIn(successor["target_role_id"], {"atlas.main", "atlas.inbox"})
+        self.assertNotIn(
+            successor["target_role_id"],
+            {scheduler.LEGACY_MAIN_ROLE_ID, "atlas.inbox"},
+        )
 
     def test_ready_merge_and_source_authority_receipts_continue_exact_bounded_actions(self) -> None:
         bindings = _bindings(

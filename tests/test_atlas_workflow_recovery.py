@@ -259,7 +259,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
             set(item["role_id"] for item in self.manifest["roles"]),
             set(item["role_id"] for item in self.registry["bindings"]),
         )
-        self.assertEqual(8, result["unbound_runtime_claims"])
+        self.assertEqual(9, result["unbound_runtime_claims"])
         self.assertEqual(3, result["manual_questions"])
         self.assertEqual(3, result["answered_manual_questions"])
         self.assertEqual("ARCHIVED", result["bootstrap_source_lifecycle"])
@@ -337,13 +337,20 @@ class WorkflowRecoveryTests(unittest.TestCase):
     def test_scheduler_continuation_is_conflict_group_scoped(self) -> None:
         recovery_policy = self.manifest["recovery_policy"]
         single_writer = self.manifest["single_writer"]
-        main_role = next(item for item in self.manifest["roles"] if item["role_id"] == "atlas.main")
+        operations_role = next(
+            item
+            for item in self.manifest["roles"]
+            if item["role_id"] == "atlas.workflow-operations"
+        )
 
         self.assertIn("largest conflict-free writer-scope wave", recovery_policy["standing_continuation_rule"])
-        self.assertIn("releases only its exact writer_scope lease", recovery_policy["receipt_continuation_rule"])
+        self.assertIn(
+            "releases only the exact writer_scope lease",
+            recovery_policy["receipt_continuation_rule"],
+        )
         self.assertIn("do not replace foreground", recovery_policy["heartbeat_rule"].lower())
         self.assertIn("Distinct writer_scope values may execute concurrently", single_writer["parallel_rule"])
-        self.assertIn("new canonically authorized READY standing packet", main_role["wake_conditions"])
+        self.assertIn("new exact authorized packet", operations_role["wake_conditions"])
 
     def test_github_workflow_is_read_only_cross_platform_and_main_complete(self) -> None:
         workflow = _load_github_workflow()
@@ -467,6 +474,59 @@ class WorkflowRecoveryTests(unittest.TestCase):
         plan, _ = self.plan("healthy.json")
         planned_runtime_ids = {item["runtime_id"] for item in plan["roles"]}
         self.assertTrue(planned_runtime_ids.isdisjoint(item["runtime_id"] for item in claims))
+
+    def test_restart_cannot_recreate_or_rebind_legacy_main(self) -> None:
+        role_ids = {item["role_id"] for item in self.manifest["roles"]}
+        self.assertNotIn("atlas.main", role_ids)
+        historical_claims = [
+            item
+            for item in self.registry["unbound_runtime_claims"]
+            if item["runtime_id"] == RECOVERY.LEGACY_MAIN_RUNTIME_ID
+        ]
+        self.assertEqual(1, len(historical_claims))
+        self.assertEqual("HISTORICAL_PROGRAM_SURFACE", historical_claims[0]["disposition"])
+        self.assertFalse(historical_claims[0]["lifecycle_action_authorized"])
+
+        adapter = self.adapter("healthy.json")
+        adapter.threads = [
+            item
+            for item in adapter.threads
+            if item.role_marker != "atlas.workflow-operations"
+        ]
+        plan, _, _ = RECOVERY.build_recovery_plan(
+            self.manifest,
+            self.registry,
+            adapter,
+            mode="apply",
+            deterministic=True,
+        )
+        operations = self.role(plan, "atlas.workflow-operations")
+        self.assertEqual("BLOCKED_REUSE_ONLY", operations["decision"])
+        self.assertEqual([], operations["actions"])
+        self.assertEqual(0, plan["summary"]["create_count"])
+        self.assertFalse(any(item["role_id"] == "atlas.main" for item in plan["roles"]))
+
+        self.assertEqual(
+            [],
+            RECOVERY.apply_plan(
+                plan,
+                self.manifest,
+                self.registry,
+                adapter,
+            ),
+        )
+        self.assertEqual(0, adapter.mutations)
+        self.assertFalse(any(item.role_marker == "atlas.main" for item in adapter.threads))
+
+    def test_active_workflow_graph_has_no_main_or_inbox_fanout(self) -> None:
+        active_role_ids = {item["role_id"] for item in self.manifest["roles"]}
+        self.assertNotIn("atlas.main", active_role_ids)
+        for edge in self.manifest["edges"]:
+            self.assertNotEqual("atlas.main", edge["from"])
+            self.assertNotEqual("atlas.main", edge["to"])
+            if edge["to"] == "atlas.inbox":
+                self.assertIn("compatibility", edge["contract"].lower())
+                self.assertIn("never creates routine Inbox fanout", edge["contract"])
 
     def test_healthy_fixture_is_deterministic_and_idempotent(self) -> None:
         first, _ = self.plan("healthy.json")
@@ -2339,9 +2399,11 @@ os._exit(97)
 
     def test_observed_active_writer_and_discovery_mismatch_fail_closed(self) -> None:
         active = self.observation()
-        next(item for item in active["payload"]["entries"] if item["role_id"] == "atlas.main")[
-            "activity"
-        ] = "active"
+        next(
+            item
+            for item in active["payload"]["entries"]
+            if item["role_id"] == "atlas.workflow-operations"
+        )["activity"] = "active"
         self.resign_observation(active)
         adapter = self.adapter("healthy.json")
         active_plan, _, _ = RECOVERY.build_recovery_plan(
@@ -2354,10 +2416,10 @@ os._exit(97)
             desktop_observation_current=active,
             observation_now=self.observation_now(),
         )
-        main = self.role(active_plan, "atlas.main")
-        self.assertEqual("BLOCKED", main["health"])
-        self.assertEqual("FAIL_CLOSED_OBSERVED_ACTIVE_WRITER", main["decision"])
-        self.assertEqual([], main["actions"])
+        operations = self.role(active_plan, "atlas.workflow-operations")
+        self.assertEqual("BLOCKED", operations["health"])
+        self.assertEqual("FAIL_CLOSED_OBSERVED_ACTIVE_WRITER", operations["decision"])
+        self.assertEqual([], operations["actions"])
         with self.assertRaises(RECOVERY.WorkflowRecoveryError):
             RECOVERY._preflight_apply(active_plan, adapter)
 

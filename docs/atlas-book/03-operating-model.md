@@ -2,7 +2,7 @@
 
 ## 2026-07-15 current capability override
 
-Atlas root owns governance, markers, v1 contracts, and accepted receipts; `_stack` owns governed action routing, operator flows, and event normalization; Playbook owns doctrine and repo verification; root-owned Cortex surfaces provide advisory context/routing/synthesis; owner repos own product/code truth; DiscordOS is the one logical board/publication/readback writer; GitHub is remote/CI/review/release/security truth; Vercel is delivery/observability; Supabase is auth/persistence; Codex supplies bounded execution tasks; ATLAS MAIN routes standing command surfaces.
+Atlas root owns governance, markers, v1 contracts, and accepted receipts; `_stack` owns governed action routing, operator flows, and event normalization; Playbook owns doctrine and repo verification; root-owned Cortex surfaces provide advisory context/routing/synthesis; owner repos own product/code truth; DiscordOS is the one logical board/publication/readback writer; GitHub is remote/CI/review/release/security truth; Vercel is delivery/observability; Supabase is auth/persistence; Codex supplies bounded execution tasks; 01 Ops mechanically reconciles exact already-authorized standing work without becoming a catch-all authority sink.
 
 Runtime placement is explicit: Foundation is the hosted read-only portfolio,
 DiscordOS is the hosted API/writer, Playbook Observer is the private loopback
@@ -10,7 +10,7 @@ cockpit, Lifeline is its intended local supervisor, `_stack` may later run one
 bounded serialized scheduled sweep, and Cortex refreshes read models only on
 accepted state or digest changes. See [Runtime Placement](16-runtime-placement.md).
 
-Native desktop handoff creates a separate Codex transcript and receipts are the durable reverse handoff. Current manual evidence proves local/worktree/cloud tasks, deep links, follow-up steer/queue behavior, subagent threads, and task-scoped IDE context, but not the full Atlas callback loop. Atlas Control and its backend-neutral ledger, persistent workspace/browser leases, delivery event plane, historical task intelligence, and systematic cross-project promotion remain partial or **PROPOSED**. SQLite is a frozen proposal, not deployed truth. Current standing surfaces are ATLAS MAIN, existing Mazer, future Fitness after gates, with DiscordOS embedded.
+Native desktop handoff creates a separate Codex transcript and receipts are the durable reverse handoff. Current manual evidence proves local/worktree/cloud tasks, deep links, follow-up steer/queue behavior, subagent threads, and task-scoped IDE context, but not the full Atlas callback loop. Atlas Control and its backend-neutral ledger, persistent workspace/browser leases, delivery event plane, historical task intelligence, and systematic cross-project promotion remain partial or **PROPOSED**. SQLite is a frozen proposal, not deployed truth. Current standing surfaces include 00 Questions, 00 Authorization, 01 Ops, existing Mazer, and future Fitness after gates, with DiscordOS embedded. Main is historical compatibility only.
 
 ## Canonical Owner Split
 
@@ -79,9 +79,10 @@ conversations:
 - `00 Authorization` handles genuine operator authority and external-evidence
   decisions. Repeated eligible low-risk approvals are learned under the
   canonical authorization policy.
-- `00 Main` is the pinned anchor conversation. It is active during
-  operational preparation and owns stack-wide
-  architecture, governance, routing, receipts, and readiness decisions.
+- `01 Ops` is the mechanical reconciliation conversation. It schedules only
+  exact already-authorized work, enforces collisions and leases, and settles
+  owner-returning receipts without owning architecture, product, lifecycle, or
+  exceptional-priority decisions.
 - `Fitness` is created when the operational-preparation closeout proves the
   Fitness resume gates below.
 - The existing `Mazer` conversation is retained. When its resume gates pass,
@@ -112,16 +113,16 @@ the existing `Mazer` conversation a current context-and-resume packet. Each
 conversation owns project intent and review; each bounded outcome still
 receives a separate Codex task through `_stack`.
 
-`00 Questions`, `00 Authorization`, `00 Main`, `Fitness`, and `Mazer` are durable command surfaces. Bounded
+`00 Questions`, `00 Authorization`, `01 Ops`, `Fitness`, and `Mazer` are durable command surfaces. Bounded
 execution tasks are disposable work surfaces: after a terminal result is
 accepted and its receipt is durable, archive the task to keep the workstation
 clean. Never archive an active or intentionally persistent owner conversation.
 
 When canonical Atlas truth requires a stable workspace-registration window,
-`00 Main` may explicitly pause an owner conversation at its nearest safe
+`01 Ops` may enforce an exactly authorized pause at an owner's nearest safe
 checkpoint. The pause receipt must preserve branches, worktrees, uncommitted
 files, servers, board state, and the exact resume action. Resume requires an
-explicit message from `00 Main` after the serialized root window closes.
+exact owner or authority packet after the serialized root window closes.
 
 Every substantive conversation turn persists a compact secret-free checkpoint
 under `runtime/atlas/thread-context/`. Every cross-thread message explicitly

@@ -7,4 +7,5 @@ This is a notification-only surface. Show concise material progress, blocker, us
 Do not ask questions, own decisions, orchestrate work, or interpret
 notifications as acceptance. `00 Authorization` owns genuine operator decisions;
 owner-first return owns normal receipts; `Inbox` is retired compatibility
-history; `00 Main` owns orchestration.
+history; `01 Ops` owns only mechanical reconciliation under existing authority.
+Historical Main has no active orchestration authority.

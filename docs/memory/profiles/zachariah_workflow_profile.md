@@ -95,22 +95,26 @@ When working on Playbook or repository development and speed matters, default to
 ## Atlas command-surface preferences
 
 - Visible standing titles assume Atlas as the stack context. Use `00 Questions`,
-  `00 Authorization`, `00 Main`, `01 Release`, `01 Architect`, `01 Ops`, and
-  `Inbox`; do not repeat `ATLAS` in those thread titles. Preserve stable logical
-  role IDs and accept legacy titles only as recovery aliases.
+  `00 Authorization`, `01 Release`, `01 Architect`, and `01 Ops`; do not repeat
+  `ATLAS` in those thread titles. `00 Main` and `Inbox` are compatibility
+  history only. Preserve stable active logical role IDs and accept legacy titles
+  only as read-only recovery inputs.
 - `00 Questions` is Zac's pinned general-purpose conversation for questions,
   status, architecture, planning, and explicitly requested bounded work. Status
-  turns remain read-only by default; `00 Questions` does not silently become Main,
+  turns remain read-only by default; `00 Questions` does not silently become Ops,
   Release, `00 Authorization`, an owner, or a provider/production executor.
-- `00 Main` is the pinned anchor conversation for operational preparation,
-  Atlas governance, architecture, markers, routing, and cross-project review.
+- `01 Ops` is the standing mechanical reconciliation surface for exact
+  scheduling, leases, bindings, delivery recovery, and settlement under
+  already-existing authority. It is not a catch-all replacement for historical
+  `00 Main`.
 - Create `Fitness` only after its operational-preparation resume gates pass.
 - Reuse the existing `Mazer` conversation. Refresh its context and resume its
   preserved checkpoint instead of creating a replacement conversation.
 - Keep `Socials OS` as a standing non-root-blocking owner conversation for the
-  private `repos/socials-os` analytics-data system. `00 Main` tracks its
-  lifecycle, receipts, GitHub parity, and cross-stack dependencies while
-  account collection, planning, and implementation remain in that owner lane.
+  private `repos/socials-os` analytics-data system. Its owner tracks product
+  truth and returns lifecycle receipts owner-first; `01 Ops` reconciles only
+  admitted scheduling and settlement while account collection, planning, and
+  implementation remain in that owner lane.
 - DiscordOS is an embedded governed service and single logical writer, not a
   required standing conversation.
 - Archive bounded Codex tasks after their accepted terminal receipt is durable.
@@ -175,9 +179,11 @@ When working on Playbook or repository development and speed matters, default to
   qualifiers, and source refs; do not copy raw transcripts or secret material.
 - If checkpoint persistence fails, report `CONTEXT_PERSISTENCE_BLOCKED` and do
   not claim handoff completion or archive safety.
-- Never archive the standing `00 Questions`, `00 Authorization`, `00 Main`, `Mazer`, `Fitness`, or
-  `FAWXZZY MESSAGES` conversations. Keep the task roster clean by archiving
-  completed bounded implementation, research, and recovery tasks.
+- Never archive standing `00 Questions`, `00 Authorization`, `01 Ops`, `Mazer`,
+  `Fitness`, or `FAWXZZY MESSAGES` conversations without separate lifecycle
+  authority. Historical Main rename/archive remains separately gated. Keep the
+  task roster clean by archiving completed bounded implementation, research,
+  and recovery tasks.
 - `FAWXZZY MESSAGES` is the non-blocking operator update surface, not the source
   of truth. Git, validated receipts, Atlas registries, and external readback
   remain authoritative.

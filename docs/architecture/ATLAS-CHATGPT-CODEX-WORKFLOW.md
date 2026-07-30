@@ -56,7 +56,7 @@ Plugins, apps, and skills are what remove the manual glue. They give you the rig
 | --- | --- |
 | **00 Questions** | pinned general-purpose conversation for status, planning, architecture, and explicitly requested bounded work |
 | **00 Authorization** | genuine operator authority and external-evidence decisions; learned low-risk approvals suppress repeated questions |
-| **00 Main** | pinned anchor for cross-project architecture, governance, marker truth, receipts, routing policy |
+| **01 Ops** | mechanical exact-state reconciliation, scheduling, leases, delivery recovery, and settlement under existing authority |
 | **Mazer chat** | product planning and bounded game/app tasks for Mazer |
 | **Fitness chat** | product, launch, business, and bounded owner-lane tasks for Fitness |
 | **Codex task** | actual code changes, tests, terminal work, subagents, diffs, commits |
@@ -68,11 +68,12 @@ That final row matters because DiscordOS should stay a single logical writer rat
 ### Standing Work conversations and launch trigger
 
 The standing operator-facing command conversations include `00 Questions`,
-`00 Authorization`, `00 Main`, `Fitness`, `Mazer`, and the admitted owner
+`00 Authorization`, `01 Ops`, `Fitness`, `Mazer`, and the admitted owner
 surfaces. Atlas is assumed, so visible infrastructure titles do not repeat the
-word `ATLAS`. `00 Questions` is the general-purpose operator surface; `00 Main` is
-the operational-preparation and stack-strategy anchor; `00 Authorization` handles
-only genuine authority or external-evidence gates. Existing owner conversations
+word `ATLAS`. `00 Questions` is the general-purpose operator surface; `01 Ops`
+mechanically reconciles exact already-authorized work; `00 Authorization` handles
+only genuine authority or external-evidence gates. Historical `00 Main` is not
+an active routing surface. Existing owner conversations
 are retained and receive current context-and-resume packets rather than being
 replaced.
 
@@ -106,9 +107,9 @@ posts.
 
 Standing conversations are persistent command surfaces. A bounded
 Codex task is archived after its terminal result is accepted and its receipt is
-durable. Active owner conversations are not archived. `00 Main` may pause an
-owner conversation for a serialized root-write window only through an explicit
-checkpoint-and-resume contract that preserves all active work.
+durable. Active owner conversations are not archived. `01 Ops` may enforce a
+serialized root-write window only from an exact existing authority packet and
+an explicit checkpoint-and-resume contract that preserves all active work.
 
 ## What one real task now looks like
 
@@ -195,8 +196,9 @@ On a normal day, your workflow should feel much simpler than it does now.
 
 You start in `00 Questions` for general requests, status, planning, and
 architecture. Work with an established owner goes to that owner conversation;
-cross-project orchestration and Atlas infrastructure lifecycle go to `00 Main`;
-genuine operator authority goes to `00 Authorization`. The conversation captures
+mechanical scheduling and settlement go to `01 Ops`; source architecture goes
+to `01 Architect`; review goes to `01 Release`; genuine operator authority goes
+to `00 Authorization`. The conversation captures
 intent, breaks work into one bounded outcome, and points at the right repository
 context.
 
@@ -207,8 +209,9 @@ Then Codex handles the actual implementation task. It runs in its own task/threa
 When the task finishes, you do not treat the last assistant paragraph as the deliverable. You review the outcome, accept or reject it, and Atlas records the governed result. If the work affects cards or project state, a single logical board writer applies the update. If the work teaches Atlas something reusable, that rule or pattern is promoted into Playbook, Contracts, or checked-in instructions.
 
 When the receipt is durable and the result is accepted, archive the bounded
-task. Keep `00 Questions`, `00 Authorization`, `00 Main`, and the standing owner
-conversations as long-lived operator surfaces.
+task. Keep `00 Questions`, `00 Authorization`, `01 Ops`, and the standing owner
+conversations as long-lived operator surfaces. Historical Main lifecycle remains
+separately gated.
 
 So the practical answer is this:
 

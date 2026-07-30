@@ -4,7 +4,7 @@ This runbook operates the contract in `docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.
 
 ## Safety invariant
 
-Recovery is not archival authority. The default is dry-run and no-archive. A recovery run must never delete a partial runtime, archive a predecessor, steer an active task, or silently select between duplicates. ATLAS MAIN is the sole authority sink; the workflow architect owns specification and recovery proof only.
+Recovery is not archival authority. The default is dry-run and no-archive. A recovery run must never delete a partial runtime, archive a predecessor, steer an active task, or silently select between duplicates. Authority remains with the exact source owner or `00 Authorization`; 01 Ops performs mechanical reconciliation only, and the workflow architect owns specification and recovery proof only.
 
 Before every filesystem or Git mutation, prove the exact checkout/worktree, branch, HEAD, status, upstream relation, applicable instructions, and writer lease. Stop on tracked or scratch drift, competing root writer, same-branch worktree collision, stale base, or inability to bind the workdir explicitly.
 
@@ -69,15 +69,15 @@ Observation can replace activity provenance only for a runtime already returned 
 4. Inspect `runtime/atlas/workflow-recovery/plan.json`, optional `post-apply-plan.json`, `creation-journal.json`, persistent `creation-journal.json.create.lock` and `creation-journal.json.lock`, `live-registry.json`, and `RECEIPT.json`. Live apply must use this canonical runtime directory; an alternate output directory or `--no-write-runtime` fails before discovery or mutation. `plan.json` remains the immutable accepted pre-mutation plan. Every `CREATE` transaction first acquires the bounded native create lock. While holding it, recovery reloads retained state under the separate journal transition lock, performs complete discovery, rebuilds that logical role's accepted decision, and durably commits a content-addressed `CREATE_INTENT` before the remote call. The intent binds the accepted plan, role, prior runtime, adapter, and provider-operation-key support. Recovery passes the deterministic operation key only where the supported adapter contract exposes it, keeps the create lock through remote creation, then durably replaces the intent with the returned runtime ID. A process death after the remote call therefore leaves either the runtime binding or the earlier intent. An unresolved intent never schedules another create. Exactly one discovered runtime carrying the same supported provider key can be proposed for separately accepted reconciliation; zero matches, multiple matches, claimant drift, or an adapter without supported key readback stays blocked. A timeout, new claimant, lease collision, decision drift, intent failure, create failure, or journal failure stops without a second create or automatic cleanup. Lock order is always create lock then journal lock; journal transitions never recursively acquire the create lock. Every journal intent, record, reconciliation, or confirmation update acquires the journal transition lock, reloads and validates the latest committed envelope, merges role-bound entries, rejects role/runtime/operation collisions, keeps the lock through durable replacement and committed readback, then releases it. Neither shared lock file is deleted. The temporary journal file is fsynced before replacement. POSIX systems then fsync the modified parent directory; Windows uses `MoveFileExW` with replace-existing and write-through flags. Unsupported primitives and lock acquisition, I/O, reload, merge, replacement, directory synchronization, or release failures stop later actions. After apply, `post-apply-plan.json` records the separate content-addressed readback plan used for terminal health and registry output. `RECEIPT.json` binds the accepted plan, post-apply plan, and journal event/digest. Runtime output is intentionally ignored by Git. Plan digests always exclude `generated_at`; when an observation is present they also exclude volatile receipt identity, source host, and timestamps. The validated activity effects, recovery decisions, cwd locator, and any resolved creation/bootstrap cwd remain digest-bound.
 5. Reconcile every role as `HEALTHY`, `DEGRADED`, `MISSING`, `DUPLICATE`, `BLOCKED`, `HELD`, or `UNKNOWN`. Also inspect `unbound_runtime_claims`; they are preserved inventory and must never trigger create or lifecycle actions. Do not translate `notLoaded` into missing and do not translate an archived rollout file into an accepted supersession.
 6. Read `docs/registry/ATLAS-WORKFLOW-DECISIONS.v1.json`. Repeat only `OPEN` questions; suppress `ANSWERED`, `EXPIRED`, and `SUPERSEDED` questions. Transport retention is not execution completion.
-7. Recover ATLAS MAIN first. Do not initialize queues or owners until the root role is unique, readable, unarchived, pinned, and accepted.
-8. Initialize ATLAS INBOX, MANUAL MESSAGES, FAWXZZY QUESTIONS, AI QUESTIONS, and FAWXZZY MESSAGES in parallel only after unique title/role bindings are proven.
+7. Reconcile 01 Ops first under exact existing authority. Never create, bind, reactivate, schedule, wake, or target `atlas.main`.
+8. Initialize 00 Authorization, 00 Questions, AI QUESTIONS, and FAWXZZY MESSAGES in parallel only after unique title/role bindings are proven. Inbox is compatibility history and is not recreated.
 9. Initialize the control plane, domain coordinator, and owners in parallel only across distinct writer scopes. A standing role being active is a hold, not an invitation to steer it.
 
 ### Scheduler and standing-task continuation
 
-`ops/atlas/autonomous_lane_scheduler.py` is the one canonical control loop. Its persisted program identifies `atlas.main` as selector/supervisor, `atlas.release-control-plane` as a GitHub-lifecycle consumer, and `atlas.workflow-architect` as the design owner. Main admits new cross-lane scope, arbitrates collisions, and consumes the generated portfolio view; it is not the normal relay for owner, review, manual-decision, or DiscordOS traffic.
+`ops/atlas/autonomous_lane_scheduler.py` is the one canonical control loop. Its persisted program identifies `atlas.workflow-operations` as the mechanical selector/supervisor, `atlas.release-control-plane` as the GitHub-lifecycle consumer, and `atlas.workflow-architect` as the design owner. 01 Ops reconciles already-authorized exact scope and arbitrates declared collisions; it does not admit semantic scope or relay ordinary owner, review, manual-decision, or DiscordOS traffic.
 
-Normal routes are direct and owner-returning: owner -> Release -> owner, owner -> Manual -> owner, and owner -> DiscordOS -> owner. `atlas.inbox` receives an aggregation copy only. A failed or idle Inbox turn never blocks owner progress. Main receives material status and cross-lane decision copies, not every hop.
+Normal routes are direct and owner-returning: owner -> Release -> owner, owner -> Manual -> owner, and owner -> DiscordOS -> owner. `atlas.inbox` receives no routine aggregation copy. An already-existing compatibility delivery remains readable, but failed or idle Inbox state never blocks owner progress.
 
 The scheduler selects by durable `writer_scope`, dependency, and closed resource claims. The safety invariant is one mutating lease per overlapping resource group, not one global owner writer. The canonical-root writer remains exclusive to its checkout. Disjoint owner repositories, isolated same-repository worktrees with non-overlapping file claims, and read-only scopes may advance concurrently within bounded global caps. Provider, production, secret, and manual-decision mutation surfaces remain singleton resources. Missing, scalar, stale, wildcard, or ambiguous claims fail closed; one legacy scalar worktree is normalized only when an exact top-level worktree field binds the same checkout.
 
@@ -121,13 +121,13 @@ Retire stale or duplicate READY work through an auditable `SUPERSEDED` envelope.
 
 ## Accepted live apply
 
-Live reconstruction is held until ATLAS MAIN or the operator independently accepts the exact plan. The acceptance file must contain:
+Live reconstruction is held until an exact owner or operator authority packet exists and 01 Ops independently reconciles the exact plan. The acceptance file must contain:
 
 ```json
 {
   "schema": "atlas.workflow.recovery-acceptance.v1",
   "event_id": "STABLE-ACCEPTANCE-EVENT-ID",
-  "accepted_by_role_id": "atlas.main",
+  "accepted_by_role_id": "atlas.workflow-operations",
   "manifest_digest": "sha256:<exact manifest digest>",
   "plan_digest": "sha256:<exact plan digest>",
   "no_archive": true
@@ -165,7 +165,7 @@ The test lane covers healthy, missing, stale-ID, duplicate, active-writer, parti
 - Leave active roles untouched and queue bootstrap/repair events through ATLAS INBOX.
 - A missing `create_if_missing` role may be planned for creation after acceptance.
 - A missing `manual_gate` role stops for an exact decision.
-- A missing `reuse_only` role stops until ATLAS MAIN resolves the accepted predecessor epoch.
+- A missing `reuse_only` role stops until exact lifecycle authority resolves the accepted predecessor epoch.
 - A stale runtime ID may be rebound only when complete discovery yields exactly one candidate and no unaccepted claimant.
 
 ## Task rollover
@@ -173,7 +173,7 @@ The test lane covers healthy, missing, stale-ID, duplicate, active-writer, parti
 1. Persist the predecessor runtime ID, outstanding events/questions, writer scope, cwd/project, Git identity, prompt/manifest digest, and recovery checkpoint.
 2. Create or resume one successor under an exact accepted packet. Bootstrap with a stable event ID and generated logical bindings.
 3. Prove title, runtime policy, pin, prompt markers, routes, receipt delivery, and continuity reconstruction.
-4. Record the predecessor as a related epoch and obtain ATLAS MAIN acceptance.
+4. Record the predecessor as a related epoch and obtain exact owner or `00 Authorization` lifecycle authority plus 01 Ops reconciliation.
 5. Mark the predecessor `ARCHIVE_ELIGIBLE` only after zero pending routes and successor readback. Archival itself is a separate lifecycle action and is never performed by the default recovery command.
 
 ## Crash or interruption recovery
