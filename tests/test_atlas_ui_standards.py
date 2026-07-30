@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -21,6 +22,7 @@ from ops.atlas.ui_standards.validate import (
     validate_candidate_cards,
     validate_finding_remediation_link,
     validate_foundation,
+    validate_json_schema,
     validate_registry,
     validate_remediation_card,
 )
@@ -184,6 +186,48 @@ class AtlasUiStandardsTests(unittest.TestCase):
             }
             errors = validate_ascii_policy(registry, root=root)
         self.assertTrue(any("ASCII policy" in error for error in errors), errors)
+
+    def test_fallback_const_and_enum_use_json_typed_equality(self) -> None:
+        cases = [
+            ("const boolean exact", False, {"const": False}, True),
+            ("const boolean integer mismatch", 0, {"const": False}, False),
+            ("const boolean float mismatch", 1.0, {"const": True}, False),
+            ("const integer float match", 1.0, {"const": 1}, True),
+            ("const null exact", None, {"const": None}, True),
+            ("const string number mismatch", "1", {"const": 1}, False),
+            (
+                "const nested match",
+                [1, {"enabled": False, "weight": 2.0}],
+                {"const": [1.0, {"weight": 2, "enabled": False}]},
+                True,
+            ),
+            (
+                "const nested boolean number mismatch",
+                {"items": [{"enabled": 0}]},
+                {"const": {"items": [{"enabled": False}]}},
+                False,
+            ),
+            ("enum boolean integer mismatch", 0, {"enum": [False]}, False),
+            ("enum boolean float mismatch", 1.0, {"enum": [True]}, False),
+            ("enum integer float match", 1.0, {"enum": [1]}, True),
+            ("enum null exact", None, {"enum": [None]}, True),
+            ("enum string exact", "ready", {"enum": ["held", "ready"]}, True),
+            ("enum array numeric match", [1.0, 2], {"enum": [[1, 2.0]]}, True),
+            (
+                "enum nested boolean number mismatch",
+                {"enabled": 0},
+                {"enum": [{"enabled": False}]},
+                False,
+            ),
+        ]
+        with (
+            mock.patch("ops.atlas.ui_standards.validate.Draft202012Validator", None),
+            mock.patch("ops.atlas.ui_standards.validate.FormatChecker", None),
+        ):
+            for name, value, schema, should_accept in cases:
+                with self.subTest(name=name):
+                    errors = validate_json_schema(value, schema)
+                    self.assertEqual(not errors, should_accept, errors)
 
     def test_cli_returns_success_and_machine_readable_result(self) -> None:
         completed = subprocess.run(
