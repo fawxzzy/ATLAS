@@ -1,0 +1,148 @@
+{
+  "schema": "atlas.authorization-policy.v1",
+  "policy_version": 1,
+  "operator_surface": {
+    "logical_role_id": "manual.messages",
+    "visible_title": "00 Authorization",
+    "purpose": "Resolve genuine operator authority and external-evidence gates without interrupting work for repeatedly approved low-risk actions."
+  },
+  "learning": {
+    "minimum_matching_approvals": 2,
+    "matching_key_fields": [
+      "action_class",
+      "scope_key",
+      "constraints_digest"
+    ],
+    "activation_state": "ACTIVE",
+    "denial_state": "REVOKED",
+    "rule": "Two distinct, explicit, materially identical approvals with no later denial or modification may activate a learned authorization only for an allowlisted action class."
+  },
+  "common_required_gates": [
+    "bounded_scope",
+    "exact_identity",
+    "fresh_evidence",
+    "no_unknown_material_state",
+    "no_writer_collision"
+  ],
+  "allowlisted_action_classes": {
+    "READ_ONLY_RECONCILIATION": [
+      "reversible"
+    ],
+    "LOCAL_STAGE_COMMIT_NO_PUSH": [
+      "reversible",
+      "clean_index_preimage",
+      "exact_diff"
+    ],
+    "SOURCE_CORRECTION": [
+      "reversible",
+      "exact_path_ceiling",
+      "tests_defined"
+    ],
+    "DRAFT_PR_PUBLICATION": [
+      "reversible",
+      "clean_worktree",
+      "exact_diff",
+      "local_checks_passed"
+    ],
+    "CI_OR_REVIEW_RERUN": [
+      "reversible",
+      "exact_head",
+      "no_external_execution"
+    ],
+    "EXACT_METADATA_REMEDIATION": [
+      "exact_record",
+      "no_external_execution"
+    ],
+    "READY_TRANSITION": [
+      "reversible",
+      "clean_worktree",
+      "exact_head",
+      "head_parity",
+      "checks_passed",
+      "independent_review_clean",
+      "zero_unresolved_threads",
+      "zero_deployments"
+    ],
+    "CLEAN_GUARDED_MERGE": [
+      "reversible",
+      "clean_worktree",
+      "exact_head",
+      "head_parity",
+      "checks_passed",
+      "independent_review_clean",
+      "zero_unresolved_threads",
+      "zero_deployments",
+      "merge_policy_allows"
+    ]
+  },
+  "operator_granted_rules": [
+    {
+      "rule_id": "AUTH-GITHUB-EXACT-STATUSLESS-DEPLOYMENT-RECORD-RETIREMENT-V1",
+      "authority_profile": "exact-statusless-github-deployment-record-retirement-v1",
+      "action_class": "EXACT_METADATA_REMEDIATION",
+      "source": "Explicit operator directive recorded 2026-07-29.",
+      "required_gates": [
+        "statusless",
+        "reviewed_head_binding",
+        "zero_workflow_execution",
+        "zero_provider_execution",
+        "zero_vercel_execution",
+        "zero_production_execution",
+        "single_inactive_status_only",
+        "delete_exact_record_only",
+        "absence_readback"
+      ],
+      "exclusions": [
+        "provider execution",
+        "Vercel mutation",
+        "production deployment",
+        "source mutation",
+        "unrelated deployment record"
+      ]
+    },
+    {
+      "rule_id": "AUTH-GITHUB-CLEAN-DRAFT-TO-READY-V1",
+      "authority_profile": "clean-draft-to-ready-transition-v1",
+      "action_class": "READY_TRANSITION",
+      "source": "Explicit operator directive recorded 2026-07-29.",
+      "required_gates": [
+        "open_draft_clean_mergeable_unmerged",
+        "exact_base_head_tree",
+        "repository_policy_allows"
+      ],
+      "exclusions": [
+        "merge",
+        "deployment",
+        "provider mutation",
+        "production"
+      ]
+    }
+  ],
+  "never_learn_risk_flags": [
+    "production",
+    "provider_mutation",
+    "supabase_apply",
+    "auth_mutation",
+    "live_data_mutation",
+    "secret_or_credential_access",
+    "dns",
+    "billing_or_purchase",
+    "destructive_or_irreversible",
+    "security_policy_bypass",
+    "source_retirement_or_deletion",
+    "ownership_or_retention_change"
+  ],
+  "decision_states": [
+    "AUTO_AUTHORIZED",
+    "AUTHORIZATION_REQUIRED",
+    "HOLD"
+  ],
+  "safety_rules": [
+    "Learned authorization is an exact reusable authority contract, not general autonomy.",
+    "Any identity, scope, constraint, exclusion, policy, review, deployment, or writer drift invalidates reuse.",
+    "A missing gate or material UNKNOWN produces HOLD, never approval.",
+    "The evaluator emits authority only; the owning lane still performs fresh action-time preflight and exact post-action proof.",
+    "Production and other never-learn risk classes remain current-action operator decisions even after repeated prior approvals.",
+    "Operator-granted rules are exact reusable exceptions identified by authority_profile; they do not satisfy any excluded later lifecycle action."
+  ]
+}

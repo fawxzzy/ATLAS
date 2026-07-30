@@ -43,8 +43,10 @@ WORKFLOW_PR_PATHS = [
     "docs/atlas-book/12-restart-and-handoff-guide.md",
     "docs/memory/initiatives/initiative-fawxzzy-platform-migration.json",
     "docs/memory/profiles/zachariah_workflow_profile.md",
+    "docs/ops/ATLAS-THREAD-NAMING-AUTHORIZATION-AND-CONTEXT-STANDARD.md",
     "docs/ops/ATLAS-WORKFLOW-RECOVERY-RUNBOOK.md",
     "docs/prompts/atlas-workflow/**",
+    "docs/registry/ATLAS-AUTHORIZATION-POLICY.v1.json",
     "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json",
     "docs/registry/ATLAS-RUNTIME-PLACEMENT-REGISTRY.v1.json",
     "docs/registry/ATLAS-WORKFLOW-*.json",
@@ -54,7 +56,10 @@ WORKFLOW_PR_PATHS = [
     "ops/atlas/atlas_runtime.py",
     "ops/atlas/atlas_watchdog.py",
     "ops/atlas/atlasd.py",
+    "ops/atlas/authorization_policy.py",
+    "ops/atlas/build_codex_context.py",
     "ops/atlas/operator_notification_idempotency.py",
+    "ops/atlas/persist_thread_context.py",
     "ops/atlas/workflow_recovery.py",
     "runtime/cortex/kernel.state-model.seed.v1.json",
     "schemas/atlas.continuity.handoff.v1.json",
@@ -62,6 +67,9 @@ WORKFLOW_PR_PATHS = [
     "schemas/atlas.workflow.*.json",
     "tests/fixtures/atlas-workflow-recovery/**",
     "tests/test_atlas_runtime.py",
+    "tests/test_atlas_authorization_policy.py",
+    "tests/test_atlas_codex_context.py",
+    "tests/test_atlas_thread_context.py",
     "tests/test_atlas_watchdog.py",
     "tests/test_atlasd.py",
     "tests/test_atlas_workflow_recovery.py",
@@ -101,8 +109,8 @@ EXPECTED_WORKFLOW = {
                     "run": "python ops/atlas/workflow_recovery.py render --check",
                 },
                 {
-                    "name": "Run changed runtime, watchdog, atlasd, and recovery tests",
-                    "run": "python -m unittest tests.test_atlas_runtime tests.test_atlas_watchdog tests.test_atlasd tests.test_atlas_workflow_recovery -v",
+                    "name": "Run workflow, authorization, and context tests",
+                    "run": "python -m unittest tests.test_atlas_runtime tests.test_atlas_watchdog tests.test_atlasd tests.test_atlas_workflow_recovery tests.test_atlas_authorization_policy tests.test_atlas_thread_context -v",
                 },
                 {
                     "name": "Validate canonical envelope fixture",
@@ -256,6 +264,76 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertEqual(3, result["answered_manual_questions"])
         self.assertEqual("ARCHIVED", result["bootstrap_source_lifecycle"])
 
+    def test_operator_titles_preserve_numbered_zero_tier(self) -> None:
+        roles = {item["role_id"]: item for item in self.manifest["roles"]}
+        questions = roles["fawxzzy.questions"]
+        authorization = roles["manual.messages"]
+
+        self.assertEqual("00 Questions", questions["human_title"])
+        self.assertEqual("00 Authorization", authorization["human_title"])
+        self.assertIn("Questions", questions["title_aliases"])
+        self.assertIn("Authorization", authorization["title_aliases"])
+        self.assertTrue(
+            (ROOT / "docs/prompts/atlas-workflow/fawxzzy.questions.md")
+            .read_text(encoding="utf-8")
+            .startswith("# 00 Questions\n")
+        )
+        self.assertTrue(
+            (ROOT / "docs/prompts/atlas-workflow/manual.messages.md")
+            .read_text(encoding="utf-8")
+            .startswith("# 00 Authorization\n")
+        )
+        policy = json.loads(
+            (ROOT / "docs/registry/ATLAS-AUTHORIZATION-POLICY.v1.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual("00 Authorization", policy["operator_surface"]["visible_title"])
+
+    def test_operator_title_aliases_claim_roles_but_repair_to_numbered_canonical_titles(self) -> None:
+        adapter = self.adapter("healthy.json")
+        roles = {item["role_id"]: item for item in self.manifest["roles"]}
+        legacy_titles = {
+            "fawxzzy.questions": "Questions",
+            "manual.messages": "Authorization",
+        }
+        for record in adapter.threads:
+            if record.role_marker in legacy_titles:
+                record.title = legacy_titles[record.role_marker]
+                alias_only_record = copy.copy(record)
+                alias_only_record.role_marker = None
+                self.assertTrue(
+                    RECOVERY._role_claims(roles[record.role_marker], alias_only_record)
+                )
+
+        plan, _, _ = RECOVERY.build_recovery_plan(
+            self.manifest,
+            self.registry,
+            adapter,
+            mode="apply",
+            deterministic=True,
+        )
+        for role_id in legacy_titles:
+            role_plan = self.role(plan, role_id)
+            self.assertEqual("REUSE_AND_REPAIR_AFTER_ACCEPTANCE", role_plan["decision"])
+            self.assertEqual(
+                ["SET_TITLE", "POST_REPAIR_READBACK", "REFRESH_REGISTRY"],
+                role_plan["actions"],
+            )
+            self.assertNotIn("CREATE", role_plan["actions"])
+
+        RECOVERY.apply_plan(plan, self.manifest, self.registry, adapter)
+        repaired_titles = {
+            record.role_marker: record.title
+            for record in adapter.threads
+            if record.role_marker in legacy_titles
+        }
+        self.assertEqual(
+            {
+                "fawxzzy.questions": "00 Questions",
+                "manual.messages": "00 Authorization",
+            },
+            repaired_titles,
+        )
+
     def test_scheduler_continuation_is_conflict_group_scoped(self) -> None:
         recovery_policy = self.manifest["recovery_policy"]
         single_writer = self.manifest["single_writer"]
@@ -357,7 +435,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
         workflow = _load_github_workflow()
         patterns = workflow["on"]["pull_request"]["paths"]
         references = _repository_source_truth_refs(self.manifest)
-        self.assertEqual(22, len(references))
+        self.assertEqual(24, len(references))
         self.assertEqual([], _uncovered_source_truth_refs(patterns, references))
 
     def test_github_workflow_detects_source_truth_filter_deletion(self) -> None:

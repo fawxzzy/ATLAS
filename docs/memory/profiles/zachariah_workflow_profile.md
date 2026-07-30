@@ -94,13 +94,21 @@ When working on Playbook or repository development and speed matters, default to
 
 ## Atlas command-surface preferences
 
-- `ATLAS MAIN` is the pinned anchor conversation for operational preparation,
+- Visible standing titles assume Atlas as the stack context. Use `00 Questions`,
+  `00 Authorization`, `00 Main`, `01 Release`, `01 Architect`, `01 Ops`, and
+  `Inbox`; do not repeat `ATLAS` in those thread titles. Preserve stable logical
+  role IDs and accept legacy titles only as recovery aliases.
+- `00 Questions` is Zac's pinned general-purpose conversation for questions,
+  status, architecture, planning, and explicitly requested bounded work. Status
+  turns remain read-only by default; `00 Questions` does not silently become Main,
+  Release, `00 Authorization`, an owner, or a provider/production executor.
+- `00 Main` is the pinned anchor conversation for operational preparation,
   Atlas governance, architecture, markers, routing, and cross-project review.
 - Create `Fitness` only after its operational-preparation resume gates pass.
 - Reuse the existing `Mazer` conversation. Refresh its context and resume its
   preserved checkpoint instead of creating a replacement conversation.
 - Keep `Socials OS` as a standing non-root-blocking owner conversation for the
-  private `repos/socials-os` analytics-data system. ATLAS MAIN tracks its
+  private `repos/socials-os` analytics-data system. `00 Main` tracks its
   lifecycle, receipts, GitHub parity, and cross-stack dependencies while
   account collection, planning, and implementation remain in that owner lane.
 - DiscordOS is an embedded governed service and single logical writer, not a
@@ -110,6 +118,33 @@ When working on Playbook or repository development and speed matters, default to
 - Atlas may pause Mazer or another owner lane at a safe checkpoint when a
   serialized canonical root window requires stable workspace registration,
   then explicitly resume it from the recorded checkpoint.
+
+## Authorization preferences
+
+- `00 Authorization` replaces the visible `MANUAL MESSAGES` title and owns genuine
+  operator authority or external-evidence decisions.
+- Do not repeatedly ask Zac for materially identical low-risk decisions. After
+  two distinct matching explicit approvals, an allowlisted, exact, bounded,
+  reversible, collision-free action may become learned reusable authority.
+- Learned reuse must preserve the same action class, scope, constraints, and
+  exclusions; use fresh evidence and exact action-time preflight; emit one
+  owner-first `AUTO_AUTHORIZED` receipt; and never execute from Authorization
+  itself.
+- Two exact operator-granted profiles are active now: fully proven clean
+  draft-to-ready transitions, and exact retirement of one accidental statusless
+  GitHub deployment metadata record with zero workflow/provider/Vercel/
+  production execution. Ready does not include merge; metadata retirement does
+  not include provider execution, deployment, production, source mutation, or
+  any unrelated record.
+- Production, provider mutation, Supabase apply, Auth/live-data mutation,
+  secrets, credentials, DNS, billing, purchases, destructive work, security
+  bypass, source retirement, deletion, ownership, and retention changes always
+  require current exact authority and never become learned automatic approval.
+- A denial, modification, drift, failed check, unresolved finding, or material
+  `UNKNOWN` invalidates learned reuse.
+- Every cross-thread message ends with `HANDOFF`, `RESPONSE_EXPECTED`,
+  `RETURN_TO`, and `WAKE_CONDITION` labels. Routine status copies do not imply
+  work or a reply; true handoffs name the exact owner-return role and thread.
 
 ## Autonomous execution continuity
 
@@ -134,7 +169,13 @@ When working on Playbook or repository development and speed matters, default to
   update the card body and work journal as evidence changes, verify, return a
   structured post-work receipt, reconcile the board, and archive the bounded
   task only after its durable result is accepted.
-- Never archive the standing `ATLAS MAIN`, `Mazer`, `Fitness`, or
+- Persist a compact source-linked Atlas thread-context checkpoint after every
+  substantive turn and before handoff, blocker closeout, terminal receipt, or
+  archival. Save Done, Now, Next, decisions, blockers, receipts, authority
+  qualifiers, and source refs; do not copy raw transcripts or secret material.
+- If checkpoint persistence fails, report `CONTEXT_PERSISTENCE_BLOCKED` and do
+  not claim handoff completion or archive safety.
+- Never archive the standing `00 Questions`, `00 Authorization`, `00 Main`, `Mazer`, `Fitness`, or
   `FAWXZZY MESSAGES` conversations. Keep the task roster clean by archiving
   completed bounded implementation, research, and recovery tasks.
 - `FAWXZZY MESSAGES` is the non-blocking operator update surface, not the source
@@ -329,7 +370,11 @@ Rule:
 Canonical user/project context belongs in versioned Atlas memory slots, not only in external assistant memory.
 
 Pattern:
-Use a small `AGENTS.md` pointer plus a full durable memory slot. Keep `AGENTS.md` lightweight and keep the full profile in the canonical slot.
+Use a small `AGENTS.md` pointer plus a full durable memory slot. Keep `AGENTS.md`
+lightweight and keep the full profile in the canonical slot. Each governed
+thread also maintains compact append-only checkpoints under
+`runtime/atlas/thread-context/`; promote reusable rules and durable decisions
+from those checkpoints into versioned memory slots.
 
 Failure Mode:
 If profile context only lives in ChatGPT saved memory, it can be lost, compressed, omitted, or become unavailable across tools. Avoid relying on it as the sole source of truth.
