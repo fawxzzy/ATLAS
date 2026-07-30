@@ -15,6 +15,44 @@ DEFAULT_OUTPUT_ROOT = ROOT / "runtime" / "atlas" / "thread-context"
 SCHEMA = "atlas.thread-context-checkpoint.v1"
 STATES = {"ACTIVE", "WAITING", "BLOCKED", "TERMINAL", "IDLE"}
 SAFE_ID = re.compile(r"^[A-Za-z0-9._:-]+$")
+PAYLOAD_DIGEST = re.compile(r"^sha256:([0-9a-f]{64})$")
+CHECKPOINT_KEYS = {"schema", "checkpoint_id", "payload_digest", "payload"}
+PAYLOAD_KEYS = {
+    "thread_id",
+    "logical_role_id",
+    "visible_title",
+    "state",
+    "recorded_at",
+    "summary",
+    "done",
+    "now",
+    "next",
+    "decisions",
+    "blockers",
+    "receipts",
+    "source_refs",
+    "content_class",
+    "sensitive_material_policy",
+}
+PAYLOAD_TEXT_FIELDS = {
+    "thread_id",
+    "logical_role_id",
+    "visible_title",
+    "state",
+    "recorded_at",
+    "summary",
+    "content_class",
+    "sensitive_material_policy",
+}
+PAYLOAD_LIST_FIELDS = {
+    "done",
+    "now",
+    "next",
+    "decisions",
+    "blockers",
+    "receipts",
+    "source_refs",
+}
 SENSITIVE_TEXT_PATTERNS = (
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----", re.IGNORECASE),
     re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}\b"),
@@ -77,12 +115,72 @@ def _assert_no_sensitive_material(value: Any) -> None:
             raise ThreadContextError("context contains prohibited sensitive material")
         return
     if isinstance(value, dict):
-        for nested in value.values():
+        for key, nested in value.items():
+            if not isinstance(key, str):
+                raise ThreadContextError("Malformed thread context checkpoint")
+            _assert_no_sensitive_material(key)
             _assert_no_sensitive_material(nested)
         return
-    if isinstance(value, list):
+    if isinstance(value, (list, tuple)):
         for nested in value:
             _assert_no_sensitive_material(nested)
+        return
+    if value is None or isinstance(value, (bool, int, float)):
+        return
+    raise ThreadContextError("Malformed thread context checkpoint")
+
+
+def _validate_checkpoint_shape(checkpoint: Any) -> dict[str, Any]:
+    if not isinstance(checkpoint, dict) or set(checkpoint) != CHECKPOINT_KEYS:
+        raise ThreadContextError("Malformed thread context checkpoint")
+    payload = checkpoint.get("payload")
+    if checkpoint.get("schema") != SCHEMA or not isinstance(payload, dict):
+        raise ThreadContextError("Malformed thread context checkpoint")
+    if set(payload) != PAYLOAD_KEYS:
+        raise ThreadContextError("Malformed thread context checkpoint")
+    if any(not isinstance(payload.get(field), str) for field in PAYLOAD_TEXT_FIELDS):
+        raise ThreadContextError("Malformed thread context checkpoint")
+    for field in PAYLOAD_LIST_FIELDS:
+        values = payload.get(field)
+        if not isinstance(values, list) or any(not isinstance(value, str) for value in values):
+            raise ThreadContextError("Malformed thread context checkpoint")
+    if payload["state"] not in STATES:
+        raise ThreadContextError("Malformed thread context checkpoint")
+    if payload["content_class"] != "COMPACT_OPERATIONAL_CONTEXT":
+        raise ThreadContextError("Malformed thread context checkpoint")
+    if payload["sensitive_material_policy"] != "REJECT_BEFORE_PERSISTENCE":
+        raise ThreadContextError("Malformed thread context checkpoint")
+    if payload["thread_id"] != _stable_id(payload["thread_id"], "thread_id"):
+        raise ThreadContextError("Malformed thread context checkpoint")
+    if payload["logical_role_id"] != _stable_id(payload["logical_role_id"], "logical_role_id"):
+        raise ThreadContextError("Malformed thread context checkpoint")
+    for field in {"visible_title", "recorded_at", "summary"}:
+        if payload[field] != _clean_text(payload[field], field):
+            raise ThreadContextError("Malformed thread context checkpoint")
+    for field in PAYLOAD_LIST_FIELDS:
+        if payload[field] != _clean_list(payload[field], field):
+            raise ThreadContextError("Malformed thread context checkpoint")
+    return payload
+
+
+def _safe_path_component(value: str, field: str) -> str:
+    if (
+        not SAFE_ID.fullmatch(value)
+        or value in {".", ".."}
+        or Path(value).name != value
+        or Path(value).is_absolute()
+    ):
+        raise ThreadContextError(f"{field} must be one safe path component")
+    return value
+
+
+def _resolved_beneath(root: Path, candidate: Path) -> Path:
+    resolved = candidate.resolve()
+    try:
+        resolved.relative_to(root)
+    except ValueError as error:
+        raise ThreadContextError("Thread context path escapes output root") from error
+    return resolved
 
 
 def _clean_list(values: list[str] | None, field: str) -> list[str]:
@@ -167,16 +265,24 @@ def persist_checkpoint(
     output_root: Path | None = None,
 ) -> dict[str, Any]:
     root = (output_root or DEFAULT_OUTPUT_ROOT).resolve()
-    payload = checkpoint.get("payload")
-    if checkpoint.get("schema") != SCHEMA or not isinstance(payload, dict):
-        raise ThreadContextError("Malformed thread context checkpoint")
-    _assert_no_sensitive_material(payload)
-    if checkpoint.get("payload_digest") != _digest(payload):
+    _assert_no_sensitive_material(checkpoint)
+    payload = _validate_checkpoint_shape(checkpoint)
+    expected_digest = _digest(payload)
+    if checkpoint.get("payload_digest") != expected_digest:
         raise ThreadContextError("Thread context payload digest mismatch")
+    digest_match = PAYLOAD_DIGEST.fullmatch(expected_digest)
+    if digest_match is None:
+        raise ThreadContextError("Malformed thread context checkpoint")
+    expected_checkpoint_id = f"threadctx_{digest_match.group(1)}"
+    if checkpoint.get("checkpoint_id") != expected_checkpoint_id:
+        raise ThreadContextError("Thread context checkpoint identity mismatch")
+    _safe_path_component(expected_checkpoint_id, "checkpoint_id")
 
-    thread_id = _stable_id(str(payload.get("thread_id") or ""), "thread_id")
-    thread_dir = root / thread_id
-    immutable_path = thread_dir / f"{checkpoint['checkpoint_id']}.json"
+    thread_id = _safe_path_component(payload["thread_id"], "thread_id")
+    thread_dir = _resolved_beneath(root, root / thread_id)
+    immutable_path = _resolved_beneath(root, thread_dir / f"{expected_checkpoint_id}.json")
+    latest_path = _resolved_beneath(root, thread_dir / "latest.json")
+    index_path = _resolved_beneath(root, root / "index.json")
     existed_before = immutable_path.exists()
     if existed_before:
         existing = json.loads(immutable_path.read_text(encoding="utf-8"))
@@ -184,9 +290,8 @@ def persist_checkpoint(
             raise ThreadContextError("Checkpoint identity collision")
     else:
         _atomic_write_json(immutable_path, checkpoint)
-    _atomic_write_json(thread_dir / "latest.json", checkpoint)
+    _atomic_write_json(latest_path, checkpoint)
 
-    index_path = root / "index.json"
     index = _load_index(index_path)
     records = {
         str(item.get("thread_id")): item
@@ -208,7 +313,7 @@ def persist_checkpoint(
     _atomic_write_json(index_path, index)
     return {
         "checkpoint_ref": str(immutable_path),
-        "latest_ref": str(thread_dir / "latest.json"),
+        "latest_ref": str(latest_path),
         "index_ref": str(index_path),
         "checkpoint_id": checkpoint["checkpoint_id"],
         "payload_digest": checkpoint["payload_digest"],

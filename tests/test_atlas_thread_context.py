@@ -121,6 +121,69 @@ class AtlasThreadContextTests(unittest.TestCase):
                 )
                 self.assertNotIn("sb_", str(raised.exception))
 
+    def test_persistence_scan_covers_mapping_keys_and_tuple_values(self) -> None:
+        sensitive_value = "sb_secret_0123456789abcdefghij"
+        mutations = (
+            lambda checkpoint: checkpoint["payload"].update({sensitive_value: "value"}),
+            lambda checkpoint: checkpoint["payload"].update({"done": (sensitive_value,)}),
+        )
+        for mutate in mutations:
+            with self.subTest(mutation=mutate):
+                checkpoint = self.checkpoint()
+                mutate(checkpoint)
+                with tempfile.TemporaryDirectory() as temporary_directory:
+                    root = Path(temporary_directory)
+                    with self.assertRaises(ThreadContextError) as raised:
+                        persist_checkpoint(checkpoint, output_root=root)
+                    self.assertFalse(list(root.rglob("*.json")))
+                self.assertEqual(
+                    "context contains prohibited sensitive material",
+                    str(raised.exception),
+                )
+
+    def test_persistence_rejects_noncanonical_shape_and_unsupported_values(self) -> None:
+        checkpoints = []
+        extra_field = self.checkpoint()
+        extra_field["payload"]["unexpected"] = "value"
+        checkpoints.append(extra_field)
+        unsupported_value = self.checkpoint()
+        unsupported_value["payload"]["done"] = {"not", "json"}
+        checkpoints.append(unsupported_value)
+        tuple_value = self.checkpoint()
+        tuple_value["payload"]["done"] = ("not canonical",)
+        checkpoints.append(tuple_value)
+        for checkpoint in checkpoints:
+            with self.subTest(value=checkpoint["payload"]["done"]):
+                with tempfile.TemporaryDirectory() as temporary_directory:
+                    root = Path(temporary_directory)
+                    with self.assertRaisesRegex(
+                        ThreadContextError,
+                        "Malformed thread context checkpoint",
+                    ):
+                        persist_checkpoint(checkpoint, output_root=root)
+                    self.assertFalse(list(root.rglob("*.json")))
+
+    def test_checkpoint_id_is_digest_bound_and_cannot_escape_output_root(self) -> None:
+        checkpoint = self.checkpoint()
+        checkpoint["checkpoint_id"] = "..\\..\\escaped"
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory) / "context"
+            with self.assertRaisesRegex(
+                ThreadContextError,
+                "checkpoint identity mismatch",
+            ):
+                persist_checkpoint(checkpoint, output_root=root)
+            self.assertFalse((Path(temporary_directory) / "escaped.json").exists())
+            self.assertFalse(root.exists())
+
+    def test_thread_directory_must_remain_under_output_root(self) -> None:
+        checkpoint = self.checkpoint(thread_id="..")
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory) / "context"
+            with self.assertRaisesRegex(ThreadContextError, "safe path component"):
+                persist_checkpoint(checkpoint, output_root=root)
+            self.assertFalse(root.exists())
+
     def test_rejects_unknown_state(self) -> None:
         with self.assertRaisesRegex(ThreadContextError, "state must be one of"):
             self.checkpoint(state="MAYBE")
