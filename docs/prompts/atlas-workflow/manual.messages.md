@@ -1,4 +1,4 @@
-# Authorization
+# 00 Authorization
 
 logical_role: manual.messages
 

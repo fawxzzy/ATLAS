@@ -74,9 +74,9 @@ Canonical flow:
 The intended operator-facing command surfaces are long-lived governed
 conversations:
 
-- `Questions` is the pinned general-purpose conversation for questions, status,
+- `00 Questions` is the pinned general-purpose conversation for questions, status,
   planning, architecture, and explicitly requested bounded work.
-- `Authorization` handles genuine operator authority and external-evidence
+- `00 Authorization` handles genuine operator authority and external-evidence
   decisions. Repeated eligible low-risk approvals are learned under the
   canonical authorization policy.
 - `00 Main` is the pinned anchor conversation. It is active during
@@ -112,7 +112,7 @@ the existing `Mazer` conversation a current context-and-resume packet. Each
 conversation owns project intent and review; each bounded outcome still
 receives a separate Codex task through `_stack`.
 
-`Questions`, `Authorization`, `00 Main`, `Fitness`, and `Mazer` are durable command surfaces. Bounded
+`00 Questions`, `00 Authorization`, `00 Main`, `Fitness`, and `Mazer` are durable command surfaces. Bounded
 execution tasks are disposable work surfaces: after a terminal result is
 accepted and its receipt is durable, archive the task to keep the workstation
 clean. Never archive an active or intentionally persistent owner conversation.

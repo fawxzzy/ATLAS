@@ -42,15 +42,15 @@ Routing
   - `packages/**`
   - `tmp/**`
 - Do not make opportunistic code edits across unrelated repos from the root session.
-- Canonical visible standing titles assume the Atlas stack context: `Questions`,
-  `Authorization`, `00 Main`, `01 Release`, `01 Architect`, `01 Ops`, and
+- Canonical visible standing titles assume the Atlas stack context: `00 Questions`,
+  `00 Authorization`, `00 Main`, `01 Release`, `01 Architect`, `01 Ops`, and
   `Inbox`. Stable logical role IDs do not change, and legacy title aliases remain
   read-only recovery inputs.
-- `Questions` is the general-purpose operator conversation. It is read-only by
+- `00 Questions` is the general-purpose operator conversation. It is read-only by
   default for status and analysis, but may execute an explicitly requested
-  bounded task without silently absorbing Main, Release, Authorization, owner,
+  bounded task without silently absorbing Main, Release, `00 Authorization`, owner,
   provider, or production authority.
-- `Authorization` is the genuine operator-authority surface. Repeated low-risk
+- `00 Authorization` is the genuine operator-authority surface. Repeated low-risk
   decisions are evaluated against
   `docs/registry/ATLAS-AUTHORIZATION-POLICY.v1.json`; eligible matching approvals
   become exact learned authority instead of repeated questions.

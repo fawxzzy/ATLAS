@@ -7,8 +7,8 @@ word `ATLAS`.
 
 | Logical role | Canonical visible title | Compatibility aliases |
 | --- | --- | --- |
-| `fawxzzy.questions` | `Questions` | `FAWXZZY QUESTIONS` |
-| `manual.messages` | `Authorization` | `MANUAL MESSAGES` |
+| `fawxzzy.questions` | `00 Questions` | `Questions`, `00 FAWXZZY QUESTIONS`, `FAWXZZY QUESTIONS` |
+| `manual.messages` | `00 Authorization` | `Authorization`, `00 MANUAL MESSAGES`, `MANUAL MESSAGES` |
 | `atlas.main` | `00 Main` | `ATLAS MAIN` |
 | `atlas.release-control-plane` | `01 Release` | `ATLAS PR, CI & Release Control Plane`, `01 ATLAS RELEASE` |
 | `atlas.workflow-architect` | `01 Architect` | `ATLAS WORKFLOW ARCHITECT`, `01 ATLAS ARCHITECT` |
@@ -19,9 +19,9 @@ Logical role IDs and historical receipts do not change. Old titles remain
 read-only aliases so recovery can recognize prior epochs without recreating
 them.
 
-`Questions` is the general-purpose operator conversation. Status and question
+`00 Questions` is the general-purpose operator conversation. Status and question
 turns are read-only by default. An explicit bounded user request may authorize
-work, but Questions does not silently absorb Main, Release, Authorization,
+work, but `00 Questions` does not silently absorb Main, Release, `00 Authorization`,
 owner, provider, or production authority.
 
 ## Inter-thread transport labels
@@ -42,7 +42,7 @@ authority.
 
 ## Authorization learning
 
-`Authorization` is the human authority surface. It should not repeatedly ask
+`00 Authorization` is the human authority surface. It should not repeatedly ask
 Zac for materially identical low-risk decisions.
 
 The canonical policy is

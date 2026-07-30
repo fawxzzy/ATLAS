@@ -264,6 +264,30 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertEqual(3, result["answered_manual_questions"])
         self.assertEqual("ARCHIVED", result["bootstrap_source_lifecycle"])
 
+    def test_operator_titles_preserve_numbered_zero_tier(self) -> None:
+        roles = {item["role_id"]: item for item in self.manifest["roles"]}
+        questions = roles["fawxzzy.questions"]
+        authorization = roles["manual.messages"]
+
+        self.assertEqual("00 Questions", questions["human_title"])
+        self.assertEqual("00 Authorization", authorization["human_title"])
+        self.assertIn("Questions", questions["title_aliases"])
+        self.assertIn("Authorization", authorization["title_aliases"])
+        self.assertTrue(
+            (ROOT / "docs/prompts/atlas-workflow/fawxzzy.questions.md")
+            .read_text(encoding="utf-8")
+            .startswith("# 00 Questions\n")
+        )
+        self.assertTrue(
+            (ROOT / "docs/prompts/atlas-workflow/manual.messages.md")
+            .read_text(encoding="utf-8")
+            .startswith("# 00 Authorization\n")
+        )
+        policy = json.loads(
+            (ROOT / "docs/registry/ATLAS-AUTHORIZATION-POLICY.v1.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual("00 Authorization", policy["operator_surface"]["visible_title"])
+
     def test_scheduler_continuation_is_conflict_group_scoped(self) -> None:
         recovery_policy = self.manifest["recovery_policy"]
         single_writer = self.manifest["single_writer"]

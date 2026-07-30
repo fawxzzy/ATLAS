@@ -272,7 +272,7 @@
     },
     {
       "role_id": "fawxzzy.questions",
-      "human_title": "Questions",
+      "human_title": "00 Questions",
       "purpose": "Zac's general-purpose conversation for status, timelines, dependencies, architecture, planning, and explicitly requested bounded work.",
       "lifecycle_class": "standing",
       "authority": ["perform bounded cross-stack synthesis", "execute an explicitly requested bounded task within current exact authority", "queue discovered omissions", "explain uncertainty and dependencies"],
@@ -291,12 +291,12 @@
       "terminal_conditions": ["idle after answer or bounded result, context checkpoint, and any deduped omission route"],
       "writer_scope": "atlas.questions-explicit-bounded",
       "creation_policy": "create_if_missing",
-      "title_aliases": ["Questions", "00 FAWXZZY QUESTIONS", "FAWXZZY QUESTIONS"],
+      "title_aliases": ["00 Questions", "Questions", "00 FAWXZZY QUESTIONS", "FAWXZZY QUESTIONS"],
       "prompt_template": {"fragments": ["docs/prompts/atlas-workflow/STANDING-BASELINE.md", "docs/prompts/atlas-workflow/fawxzzy.questions.md"], "required_markers": ["logical_role: fawxzzy.questions", "general-purpose conversation"]}
     },
     {
       "role_id": "manual.messages",
-      "human_title": "Authorization",
+      "human_title": "00 Authorization",
       "purpose": "Non-blocking operator authority queue with stable requests, learned low-risk authorization, answer suppression, expiry, and owner-first route-back receipts.",
       "lifecycle_class": "standing",
       "authority": ["present decision-ready authorization requests", "record explicit answers", "learn exact repeated low-risk approvals", "emit exact AUTO_AUTHORIZED decisions", "forward decisions to source roles"],
@@ -315,7 +315,7 @@
       "terminal_conditions": ["idle with all current decisions routed or requests retained OPEN"],
       "writer_scope": "atlas.authorization-ledger",
       "creation_policy": "create_if_missing",
-      "title_aliases": ["Authorization", "00 MANUAL MESSAGES", "MANUAL MESSAGES"],
+      "title_aliases": ["00 Authorization", "Authorization", "00 MANUAL MESSAGES", "MANUAL MESSAGES"],
       "prompt_template": {"fragments": ["docs/prompts/atlas-workflow/STANDING-BASELINE.md", "docs/prompts/atlas-workflow/manual.messages.md"], "required_markers": ["logical_role: manual.messages", "Silence is never approval"]}
     },
     {

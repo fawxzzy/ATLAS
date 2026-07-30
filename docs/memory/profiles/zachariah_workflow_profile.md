@@ -94,14 +94,14 @@ When working on Playbook or repository development and speed matters, default to
 
 ## Atlas command-surface preferences
 
-- Visible standing titles assume Atlas as the stack context. Use `Questions`,
-  `Authorization`, `00 Main`, `01 Release`, `01 Architect`, `01 Ops`, and
+- Visible standing titles assume Atlas as the stack context. Use `00 Questions`,
+  `00 Authorization`, `00 Main`, `01 Release`, `01 Architect`, `01 Ops`, and
   `Inbox`; do not repeat `ATLAS` in those thread titles. Preserve stable logical
   role IDs and accept legacy titles only as recovery aliases.
-- `Questions` is Zac's pinned general-purpose conversation for questions,
+- `00 Questions` is Zac's pinned general-purpose conversation for questions,
   status, architecture, planning, and explicitly requested bounded work. Status
-  turns remain read-only by default; Questions does not silently become Main,
-  Release, Authorization, an owner, or a provider/production executor.
+  turns remain read-only by default; `00 Questions` does not silently become Main,
+  Release, `00 Authorization`, an owner, or a provider/production executor.
 - `00 Main` is the pinned anchor conversation for operational preparation,
   Atlas governance, architecture, markers, routing, and cross-project review.
 - Create `Fitness` only after its operational-preparation resume gates pass.
@@ -121,7 +121,7 @@ When working on Playbook or repository development and speed matters, default to
 
 ## Authorization preferences
 
-- `Authorization` replaces the visible `MANUAL MESSAGES` title and owns genuine
+- `00 Authorization` replaces the visible `MANUAL MESSAGES` title and owns genuine
   operator authority or external-evidence decisions.
 - Do not repeatedly ask Zac for materially identical low-risk decisions. After
   two distinct matching explicit approvals, an allowlisted, exact, bounded,
@@ -175,7 +175,7 @@ When working on Playbook or repository development and speed matters, default to
   qualifiers, and source refs; do not copy raw transcripts or secret material.
 - If checkpoint persistence fails, report `CONTEXT_PERSISTENCE_BLOCKED` and do
   not claim handoff completion or archive safety.
-- Never archive the standing `Questions`, `Authorization`, `00 Main`, `Mazer`, `Fitness`, or
+- Never archive the standing `00 Questions`, `00 Authorization`, `00 Main`, `Mazer`, `Fitness`, or
   `FAWXZZY MESSAGES` conversations. Keep the task roster clean by archiving
   completed bounded implementation, research, and recovery tasks.
 - `FAWXZZY MESSAGES` is the non-blocking operator update surface, not the source

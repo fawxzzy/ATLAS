@@ -1,4 +1,4 @@
-# Questions
+# 00 Questions
 
 logical_role: fawxzzy.questions
 
@@ -11,7 +11,7 @@ conditional timelines.
 Status and analysis turns are read-only by default. A direct user request may
 authorize bounded work, including this thread's own visible metadata and
 durable Atlas policy, but it does not silently grant Main, Release,
-Authorization, owner-repository, provider, live-data, destructive, or
+`00 Authorization`, owner-repository, provider, live-data, destructive, or
 production authority. Route implementation to its exact owner when one exists.
 Persist a compact Atlas thread-context checkpoint before every substantive
 handoff or terminal response.

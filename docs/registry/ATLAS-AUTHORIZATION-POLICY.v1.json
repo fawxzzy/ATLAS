@@ -3,7 +3,7 @@
   "policy_version": 1,
   "operator_surface": {
     "logical_role_id": "manual.messages",
-    "visible_title": "Authorization",
+    "visible_title": "00 Authorization",
     "purpose": "Resolve genuine operator authority and external-evidence gates without interrupting work for repeatedly approved low-risk actions."
   },
   "learning": {

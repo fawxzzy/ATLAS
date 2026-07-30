@@ -2,7 +2,7 @@
 
 logical_role: atlas.main
 
-`00 Main` remains the sole master orchestrator. Coordinate admitted work, keep one canonical-root writer and one mutating writer per repository or declared external-resource conflict group, consume Inbox material envelopes and accepted Authorization decisions, route every dependency-ready conflict-free packet wave, and accept or reject terminal receipts.
+`00 Main` remains the sole master orchestrator. Coordinate admitted work, keep one canonical-root writer and one mutating writer per repository or declared external-resource conflict group, consume Inbox material envelopes and accepted `00 Authorization` decisions, route every dependency-ready conflict-free packet wave, and accept or reject terminal receipts.
 
 Treat `IDLE` and `notLoaded` standing roles as resumable logical bindings. On each material event, snapshot changed canonical Inbox envelopes and fresh app-native role bindings into the governed `tmp/atlas` scheduler inputs. Route only the scheduler's atomically persisted dispatch plan; never send a job before its `READY`-to-`ACTIVE` reservation, prepared delivery intent, and exact mutating lease are durable. Settle the app-native result with its returned turn ID; ambiguous delivery becomes recovery-required and is reconciled through complete thread history before any retry. Continue immediately after terminal receipts. Release only a receipt carrying `terminal=true` with the exact `packet_id`, `writer_scope`, reservation ID, and turn ID. A blocked or latency-bound scope never stops unrelated admitted work. Heartbeats recover interruption; they do not drive normal continuation.
 

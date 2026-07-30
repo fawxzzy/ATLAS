@@ -54,8 +54,8 @@ Plugins, apps, and skills are what remove the manual glue. They give you the rig
 
 | Surface | What it is for |
 | --- | --- |
-| **Questions** | pinned general-purpose conversation for status, planning, architecture, and explicitly requested bounded work |
-| **Authorization** | genuine operator authority and external-evidence decisions; learned low-risk approvals suppress repeated questions |
+| **00 Questions** | pinned general-purpose conversation for status, planning, architecture, and explicitly requested bounded work |
+| **00 Authorization** | genuine operator authority and external-evidence decisions; learned low-risk approvals suppress repeated questions |
 | **00 Main** | pinned anchor for cross-project architecture, governance, marker truth, receipts, routing policy |
 | **Mazer chat** | product planning and bounded game/app tasks for Mazer |
 | **Fitness chat** | product, launch, business, and bounded owner-lane tasks for Fitness |
@@ -67,11 +67,11 @@ That final row matters because DiscordOS should stay a single logical writer rat
 
 ### Standing Work conversations and launch trigger
 
-The standing operator-facing command conversations include `Questions`,
-`Authorization`, `00 Main`, `Fitness`, `Mazer`, and the admitted owner
+The standing operator-facing command conversations include `00 Questions`,
+`00 Authorization`, `00 Main`, `Fitness`, `Mazer`, and the admitted owner
 surfaces. Atlas is assumed, so visible infrastructure titles do not repeat the
-word `ATLAS`. `Questions` is the general-purpose operator surface; `00 Main` is
-the operational-preparation and stack-strategy anchor; `Authorization` handles
+word `ATLAS`. `00 Questions` is the general-purpose operator surface; `00 Main` is
+the operational-preparation and stack-strategy anchor; `00 Authorization` handles
 only genuine authority or external-evidence gates. Existing owner conversations
 are retained and receive current context-and-resume packets rather than being
 replaced.
@@ -193,10 +193,10 @@ create endless self-referential drift.
 
 On a normal day, your workflow should feel much simpler than it does now.
 
-You start in `Questions` for general requests, status, planning, and
+You start in `00 Questions` for general requests, status, planning, and
 architecture. Work with an established owner goes to that owner conversation;
 cross-project orchestration and Atlas infrastructure lifecycle go to `00 Main`;
-genuine operator authority goes to `Authorization`. The conversation captures
+genuine operator authority goes to `00 Authorization`. The conversation captures
 intent, breaks work into one bounded outcome, and points at the right repository
 context.
 
@@ -207,7 +207,7 @@ Then Codex handles the actual implementation task. It runs in its own task/threa
 When the task finishes, you do not treat the last assistant paragraph as the deliverable. You review the outcome, accept or reject it, and Atlas records the governed result. If the work affects cards or project state, a single logical board writer applies the update. If the work teaches Atlas something reusable, that rule or pattern is promoted into Playbook, Contracts, or checked-in instructions.
 
 When the receipt is durable and the result is accepted, archive the bounded
-task. Keep `Questions`, `Authorization`, `00 Main`, and the standing owner
+task. Keep `00 Questions`, `00 Authorization`, `00 Main`, and the standing owner
 conversations as long-lived operator surfaces.
 
 So the practical answer is this:
