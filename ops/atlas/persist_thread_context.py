@@ -20,6 +20,7 @@ SENSITIVE_TEXT_PATTERNS = (
     re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}\b"),
     re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}\b"),
     re.compile(r"\b(?:sk[-_]|sbp_)[A-Za-z0-9_-]{16,}\b"),
+    re.compile(r"\bsb_(?:secret|publishable)_[A-Za-z0-9_-]{16,}\b"),
     re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{10,}\b"),
     re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
     re.compile(r"\bBearer\s+[A-Za-z0-9._~+/-]{8,}=*\b", re.IGNORECASE),
@@ -66,9 +67,22 @@ def _clean_text(value: str, field: str) -> str:
     normalized = " ".join(value.split())
     if not normalized:
         raise ThreadContextError(f"{field} must not be empty")
-    if any(pattern.search(normalized) for pattern in SENSITIVE_TEXT_PATTERNS):
-        raise ThreadContextError("context contains prohibited sensitive material")
+    _assert_no_sensitive_material(normalized)
     return normalized
+
+
+def _assert_no_sensitive_material(value: Any) -> None:
+    if isinstance(value, str):
+        if any(pattern.search(value) for pattern in SENSITIVE_TEXT_PATTERNS):
+            raise ThreadContextError("context contains prohibited sensitive material")
+        return
+    if isinstance(value, dict):
+        for nested in value.values():
+            _assert_no_sensitive_material(nested)
+        return
+    if isinstance(value, list):
+        for nested in value:
+            _assert_no_sensitive_material(nested)
 
 
 def _clean_list(values: list[str] | None, field: str) -> list[str]:
@@ -156,6 +170,7 @@ def persist_checkpoint(
     payload = checkpoint.get("payload")
     if checkpoint.get("schema") != SCHEMA or not isinstance(payload, dict):
         raise ThreadContextError("Malformed thread context checkpoint")
+    _assert_no_sensitive_material(payload)
     if checkpoint.get("payload_digest") != _digest(payload):
         raise ThreadContextError("Thread context payload digest mismatch")
 
