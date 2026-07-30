@@ -15,6 +15,15 @@ DEFAULT_OUTPUT_ROOT = ROOT / "runtime" / "atlas" / "thread-context"
 SCHEMA = "atlas.thread-context-checkpoint.v1"
 STATES = {"ACTIVE", "WAITING", "BLOCKED", "TERMINAL", "IDLE"}
 SAFE_ID = re.compile(r"^[A-Za-z0-9._:-]+$")
+SAFE_PATH_COMPONENT = re.compile(r"^[A-Za-z0-9._-]+$")
+WINDOWS_RESERVED_PATH_NAMES = {
+    "CON",
+    "PRN",
+    "AUX",
+    "NUL",
+    *(f"COM{number}" for number in range(1, 10)),
+    *(f"LPT{number}" for number in range(1, 10)),
+}
 PAYLOAD_DIGEST = re.compile(r"^sha256:([0-9a-f]{64})$")
 CHECKPOINT_KEYS = {"schema", "checkpoint_id", "payload_digest", "payload"}
 PAYLOAD_KEYS = {
@@ -164,9 +173,12 @@ def _validate_checkpoint_shape(checkpoint: Any) -> dict[str, Any]:
 
 
 def _safe_path_component(value: str, field: str) -> str:
+    windows_stem = value.split(".", 1)[0].upper()
     if (
-        not SAFE_ID.fullmatch(value)
+        not SAFE_PATH_COMPONENT.fullmatch(value)
         or value in {".", ".."}
+        or value.endswith((".", " "))
+        or windows_stem in WINDOWS_RESERVED_PATH_NAMES
         or Path(value).name != value
         or Path(value).is_absolute()
     ):
@@ -283,7 +295,13 @@ def persist_checkpoint(
     immutable_path = _resolved_beneath(root, thread_dir / f"{expected_checkpoint_id}.json")
     latest_path = _resolved_beneath(root, thread_dir / "latest.json")
     index_path = _resolved_beneath(root, root / "index.json")
-    existed_before = immutable_path.exists()
+    try:
+        thread_dir.mkdir(parents=True, exist_ok=True)
+        if not thread_dir.is_dir():
+            raise OSError("thread context path is not a directory")
+        existed_before = immutable_path.exists()
+    except OSError as error:
+        raise ThreadContextError("Unable to prepare thread context path") from error
     if existed_before:
         existing = json.loads(immutable_path.read_text(encoding="utf-8"))
         if existing != checkpoint:

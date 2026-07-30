@@ -184,6 +184,27 @@ class AtlasThreadContextTests(unittest.TestCase):
                 persist_checkpoint(checkpoint, output_root=root)
             self.assertFalse(root.exists())
 
+    def test_thread_directory_uses_cross_platform_safe_components(self) -> None:
+        unsafe_ids = ["thread:123", "thread.", "CON", "con.txt", "COM1", "LPT9.log"]
+        for thread_id in unsafe_ids:
+            with self.subTest(thread_id=thread_id):
+                checkpoint = self.checkpoint(thread_id=thread_id)
+                with tempfile.TemporaryDirectory() as temporary_directory:
+                    root = Path(temporary_directory) / "context"
+                    with self.assertRaisesRegex(ThreadContextError, "safe path component"):
+                        persist_checkpoint(checkpoint, output_root=root)
+                    self.assertFalse(root.exists())
+
+    def test_filesystem_path_failure_is_wrapped_before_json_write(self) -> None:
+        checkpoint = self.checkpoint()
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory) / "context"
+            root.write_text("not a directory", encoding="utf-8")
+            with self.assertRaisesRegex(ThreadContextError, "Unable to prepare"):
+                persist_checkpoint(checkpoint, output_root=root)
+            self.assertEqual("not a directory", root.read_text(encoding="utf-8"))
+            self.assertFalse(list(Path(temporary_directory).rglob("*.json")))
+
     def test_rejects_unknown_state(self) -> None:
         with self.assertRaisesRegex(ThreadContextError, "state must be one of"):
             self.checkpoint(state="MAYBE")
