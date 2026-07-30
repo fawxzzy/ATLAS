@@ -696,6 +696,57 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         )
         self.assertEqual([], program["processed_events"])
 
+        unstandardized_payload = _standardized_ready_payload(
+            "legacy-main-unstandardized",
+            role_id=scheduler.LEGACY_MAIN_ROLE_ID,
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.legacy-main-unstandardized",
+            worktree="legacy-main-unstandardized",
+        )
+        unstandardized_payload["execution_class"] = "read_only"
+        unstandardized = _envelope(
+            unstandardized_payload,
+            idempotency_key="legacy-main-unstandardized",
+            source_role_id="atlas.workflow-architect",
+        )
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(
+                (scheduler.LEGACY_MAIN_ROLE_ID, "legacy-main-thread", "idle"),
+            ),
+            envelopes=[unstandardized],
+        )
+        self.assertEqual([], program["standing_packets"])
+        self.assertEqual([], program["processed_events"])
+        self.assertEqual(
+            ["legacy_main_target_retired"],
+            [finding["code"] for finding in findings],
+        )
+
+    def test_persisted_legacy_main_standing_packet_is_held(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [
+            _standing_packet(
+                "legacy-main-persisted",
+                role_id=scheduler.LEGACY_MAIN_ROLE_ID,
+                repository="fawxzzy/ATLAS",
+                writer_scope="read.legacy-main-persisted",
+            )
+        ]
+        program["standing_packets"][0]["execution_class"] = "read_only"
+
+        first = _scheduler_report(program)
+        second = _scheduler_report(copy.deepcopy(program))
+        for report in (first, second):
+            self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+            self.assertEqual([], report["selected_jobs"])
+            self.assertEqual(
+                "legacy_main_standing_packet_retired",
+                report["blocked_candidates"][0]["blocked_reason"],
+            )
+            self.assertFalse(report["blocked_candidates"][0]["safe"])
+        self.assertEqual(first["blocked_candidates"], second["blocked_candidates"])
+
     def test_generic_root_planner_packet_requires_an_explicit_owner(self) -> None:
         planner_report = _planner_payload(
             [

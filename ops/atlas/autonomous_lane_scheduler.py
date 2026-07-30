@@ -1743,6 +1743,7 @@ def reconcile_runtime_program(
             else "",
             str(payload.get("target_role_id") or ""),
             str(payload.get("owner_return_role_id") or ""),
+            str(payload.get("logical_role_id") or ""),
             str((payload.get("execution_target") or {}).get("logical_role_id") or "")
             if isinstance(payload.get("execution_target"), dict)
             else "",
@@ -3495,6 +3496,8 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root:
         blocked_reason = "standing_packet_identity_required"
     elif state not in READY_STATES and not recovery_resume:
         blocked_reason = "resume_authority_correlation_required" if state == RECOVERY_READY_STATE else "standing_packet_not_ready"
+    elif logical_role_id == LEGACY_MAIN_ROLE_ID:
+        blocked_reason = "legacy_main_standing_packet_retired"
     elif execution_class not in EXECUTION_CLASSES:
         blocked_reason = "invalid_execution_class"
     elif not repository or not logical_role_id or not writer_scope:
