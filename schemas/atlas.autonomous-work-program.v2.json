@@ -14,6 +14,28 @@
         "host_id": { "type": "string", "minLength": 1 }
       }
     },
+    "legacy_owner_return": {
+      "type": "object",
+      "required": ["logical_role_id", "thread_id", "delivery_order"],
+      "additionalProperties": false,
+      "properties": {
+        "logical_role_id": { "type": "string", "minLength": 1 },
+        "thread_id": { "type": "string", "minLength": 1 },
+        "host_id": { "type": "string", "minLength": 1 },
+        "delivery_order": {
+          "enum": [
+            "OWNER_FIRST",
+            "OWNER_FIRST_ALREADY_COMPLETED",
+            "OWNER_FIRST_DIRECT",
+            "OWNER_FIRST_THEN_00_MAIN",
+            "OWNER_FIRST_THEN_ATLAS_MAIN",
+            "OWNER_FIRST_THEN_MAIN_SETTLEMENT",
+            "PRIMARY_ONLY",
+            "PRIMARY_ONLY_AFTER_OWNER_TERMINAL_RECEIPT"
+          ]
+        }
+      }
+    },
     "execution_target": {
       "type": "object",
       "required": ["logical_role_id", "thread_id", "host_id"],
@@ -125,6 +147,29 @@
         "consumed_at": { "type": "string", "minLength": 1 }
       }
     },
+    "source_preparation": {
+      "type": "object",
+      "required": ["mode", "publication", "parent_commit", "path_allowlist"],
+      "properties": {
+        "mode": { "const": "LOCAL_ONLY_UNSTAGED" },
+        "publication": { "const": "HELD" },
+        "parent_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "path_allowlist": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "legacy_event_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160,
+      "pattern": "^[A-Z0-9][A-Z0-9_-]*:ANSWER$"
+    },
     "terminal_successor": {
       "enum": [
         "NEXT_AUTONOMOUS_PACKET",
@@ -211,24 +256,13 @@
           "owner_return_proof": { "type": ["object", "null"] },
           "current_tracker_role_id": { "type": ["string", "null"] },
           "protected_surface_authorized": { "type": "boolean" },
-          "authority_class": { "enum": ["standing_local_source_preparation"] },
+          "authority_class": { "enum": [null, "standing_local_source_preparation"] },
           "source_role_id": { "type": "string", "minLength": 1 },
           "source_preparation": {
-            "type": "object",
-            "required": ["mode", "publication", "parent_commit", "path_allowlist"],
-            "properties": {
-              "mode": { "const": "LOCAL_ONLY_UNSTAGED" },
-              "publication": { "const": "HELD" },
-              "parent_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
-              "path_allowlist": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 32,
-                "uniqueItems": true,
-                "items": { "type": "string", "minLength": 1 }
-              }
-            },
-            "additionalProperties": false
+            "anyOf": [
+              { "$ref": "#/$defs/source_preparation" },
+              { "type": "null" }
+            ]
           },
           "authority": {
             "type": "object",
@@ -261,7 +295,10 @@
               }
             },
             "then": {
-              "required": ["source_role_id", "source_preparation"]
+              "required": ["source_role_id", "source_preparation"],
+              "properties": {
+                "source_preparation": { "$ref": "#/$defs/source_preparation" }
+              }
             }
           },
           {
@@ -360,8 +397,34 @@
       "items": {
         "type": "object",
         "properties": {
-          "terminal_successor": { "$ref": "#/$defs/terminal_successor" }
+          "terminal_successor": { "type": "string" },
+          "receipt_path": { "type": "string", "minLength": 1 },
+          "receipt_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
         },
+        "oneOf": [
+          {
+            "not": {
+              "anyOf": [
+                { "required": ["receipt_path"] },
+                { "required": ["receipt_sha256"] }
+              ]
+            },
+            "properties": {
+              "terminal_successor": { "$ref": "#/$defs/terminal_successor" }
+            }
+          },
+          {
+            "required": ["receipt_path", "receipt_sha256"],
+            "properties": {
+              "terminal_successor": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160,
+                "pattern": "^[A-Z0-9][A-Z0-9_-]*$"
+              }
+            }
+          }
+        ],
         "additionalProperties": true
       }
     },
@@ -369,22 +432,50 @@
     "processed_events": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": ["event_id", "payload_digest"],
-        "additionalProperties": false,
-        "properties": {
-          "event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
-          "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-          "transport_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-          "source_role_id": { "type": ["string", "null"] },
-          "kind": { "type": ["string", "null"] },
-          "external_attempt_authority": {
-            "anyOf": [{ "$ref": "#/$defs/external_attempt_authority" }, { "type": "null" }]
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["event_id", "payload_digest"],
+            "additionalProperties": false,
+            "properties": {
+              "event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
+              "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+              "transport_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+              "source_role_id": { "type": ["string", "null"] },
+              "kind": { "type": ["string", "null"] },
+              "external_attempt_authority": {
+                "anyOf": [{ "$ref": "#/$defs/external_attempt_authority" }, { "type": "null" }]
+              },
+              "target_role_id": { "type": ["string", "null"] },
+              "execution_target": { "anyOf": [{ "$ref": "#/$defs/execution_target" }, { "type": "null" }] },
+              "owner_return": { "anyOf": [{ "$ref": "#/$defs/owner_return" }, { "type": "null" }] }
+            }
           },
-          "target_role_id": { "type": ["string", "null"] },
-          "execution_target": { "anyOf": [{ "$ref": "#/$defs/execution_target" }, { "type": "null" }] },
-          "owner_return": { "anyOf": [{ "$ref": "#/$defs/owner_return" }, { "type": "null" }] }
-        }
+          {
+            "type": "object",
+            "required": ["event_id", "payload_digest", "target_role_id", "disposition"],
+            "additionalProperties": false,
+            "properties": {
+              "event_id": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
+                  { "$ref": "#/$defs/legacy_event_id" }
+                ]
+              },
+              "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+              "target_role_id": { "type": "string", "minLength": 1 },
+              "execution_target": { "$ref": "#/$defs/execution_target" },
+              "owner_return": { "$ref": "#/$defs/legacy_owner_return" },
+              "disposition": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200,
+                "pattern": "^[A-Z0-9][A-Z0-9_-]*$"
+              },
+              "source_event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" }
+            }
+          }
+        ]
       }
     }
   },

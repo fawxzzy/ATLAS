@@ -653,17 +653,24 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertFalse(schema["$defs"]["execution_target"]["additionalProperties"])
         self.assertEqual("string", schema["$defs"]["execution_target"]["properties"]["host_id"]["type"])
         self.assertEqual(1, schema["$defs"]["execution_target"]["properties"]["host_id"]["minLength"])
-        self.assertIn("transport_digest", schema["properties"]["processed_events"]["items"]["properties"])
+        current_processed_event = schema["properties"]["processed_events"]["items"]["oneOf"][0]
+        historical_processed_event = schema["properties"]["processed_events"]["items"]["oneOf"][1]
+        self.assertIn("transport_digest", current_processed_event["properties"])
+        self.assertEqual(
+            ["event_id", "payload_digest", "target_role_id", "disposition"],
+            historical_processed_event["required"],
+        )
+        self.assertFalse(historical_processed_event["additionalProperties"])
         self.assertIn("transport_digest", standing["properties"]["authority"]["properties"])
         self.assertEqual(
             ["target_role_id", "execution_target", "owner_return", "owner_return_state"],
             standing["allOf"][2]["then"]["required"],
         )
         self.assertEqual(
-            [scheduler.STANDING_LOCAL_SOURCE_PREPARATION],
+            [None, scheduler.STANDING_LOCAL_SOURCE_PREPARATION],
             standing["properties"]["authority_class"]["enum"],
         )
-        self.assertEqual(32, standing["properties"]["source_preparation"]["properties"]["path_allowlist"]["maxItems"])
+        self.assertEqual(32, schema["$defs"]["source_preparation"]["properties"]["path_allowlist"]["maxItems"])
         self.assertEqual(
             ["source_role_id", "source_preparation"],
             standing["allOf"][1]["then"]["required"],
@@ -685,7 +692,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         )
         self.assertIn(
             "external_attempt_authority",
-            schema["properties"]["processed_events"]["items"]["properties"],
+            current_processed_event["properties"],
         )
         self.assertEqual(
             "external_mutation",
@@ -707,6 +714,126 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             },
             set(schema["properties"]["active_leases"]["items"]["required"]),
         )
+
+    def test_work_program_schema_closes_current_and_historical_compatibility(self) -> None:
+        try:
+            from jsonschema import Draft202012Validator
+        except ImportError as exc:  # pragma: no cover - exercised in the pinned validation lane
+            self.skipTest(f"Draft 2020-12 validator unavailable: {exc}")
+
+        schema = json.loads((scheduler.ROOT / "schemas/atlas.autonomous-work-program.v2.json").read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(schema)
+        validator = Draft202012Validator(schema)
+
+        def errors(program: dict[str, object]) -> list[object]:
+            round_tripped = json.loads(json.dumps(program, sort_keys=True, separators=(",", ":")))
+            return list(validator.iter_errors(round_tripped))
+
+        def program_with(*, packet: dict[str, object] | None = None) -> dict[str, object]:
+            program = scheduler._initial_runtime_program()
+            if packet is not None:
+                program["standing_packets"] = [packet]
+            return program
+
+        ordinary = _standing_packet(
+            "ordinary-ready",
+            role_id="atlas.workflow-operations",
+            repository="fawxzzy/ATLAS",
+            writer_scope="github.fawxzzy.atlas.publication",
+        )
+        ordinary["execution_class"] = "external_mutation"
+        ordinary["authority_class"] = None
+        ordinary["source_preparation"] = None
+        self.assertEqual([], errors(program_with(packet=ordinary)))
+
+        standing = _standing_packet(
+            "standing-local-source",
+            role_id="owner.example",
+            repository="fawxzzy/example",
+            writer_scope="repo.example.local-source",
+        )
+        standing["authority_class"] = scheduler.STANDING_LOCAL_SOURCE_PREPARATION
+        standing["source_role_id"] = "fawxzzy.questions"
+        standing["source_preparation"] = {
+            "mode": "LOCAL_ONLY_UNSTAGED",
+            "publication": "HELD",
+            "parent_commit": "1" * 40,
+            "path_allowlist": ["src/example.py"],
+        }
+        self.assertEqual([], errors(program_with(packet=standing)))
+
+        current_receipt = scheduler._initial_runtime_program()
+        current_receipt["completed_receipts"] = [{"terminal_successor": "TERMINAL_DOMAIN"}]
+        self.assertEqual([], errors(current_receipt))
+
+        historical_receipt = scheduler._initial_runtime_program()
+        historical_receipt["completed_receipts"] = [
+            {
+                "terminal_successor": "SETTLED_ONCE_LEGACY_PACKET",
+                "receipt_path": "runtime/atlas/continuity/legacy.json",
+                "receipt_sha256": "2" * 64,
+            },
+            {
+                "receipt_path": "runtime/atlas/continuity/legacy-without-successor.json",
+                "receipt_sha256": "3" * 64,
+            },
+        ]
+        self.assertEqual([], errors(historical_receipt))
+
+        current_event = scheduler._initial_runtime_program()
+        current_event["processed_events"] = [
+            {"event_id": "onv1_" + "4" * 64, "payload_digest": "sha256:" + "5" * 64}
+        ]
+        self.assertEqual([], errors(current_event))
+
+        historical_event = scheduler._initial_runtime_program()
+        historical_event["processed_events"] = [
+            {
+                "event_id": "ATLAS-LEGACY-DECISION-001:ANSWER",
+                "payload_digest": "sha256:" + "6" * 64,
+                "target_role_id": "owner.example",
+                "owner_return": {
+                    "logical_role_id": "owner.example",
+                    "thread_id": "owner-thread",
+                    "delivery_order": "PRIMARY_ONLY",
+                },
+                "disposition": "CONSUMED_ONCE_LEGACY_DECISION",
+            }
+        ]
+        self.assertEqual([], errors(historical_event))
+
+        invalid_programs: list[tuple[str, dict[str, object]]] = []
+        unknown_authority = copy.deepcopy(ordinary)
+        unknown_authority["authority_class"] = "unbounded_authority"
+        invalid_programs.append(("unknown authority", program_with(packet=unknown_authority)))
+
+        standing_without_source = copy.deepcopy(standing)
+        standing_without_source["source_preparation"] = None
+        invalid_programs.append(("standing null source preparation", program_with(packet=standing_without_source)))
+
+        arbitrary_current_successor = scheduler._initial_runtime_program()
+        arbitrary_current_successor["completed_receipts"] = [{"terminal_successor": "UNBOUNDED_SUCCESSOR"}]
+        invalid_programs.append(("arbitrary current successor", arbitrary_current_successor))
+
+        malformed_disposition = copy.deepcopy(historical_event)
+        malformed_disposition["processed_events"][0]["disposition"] = "lowercase-disposition"
+        invalid_programs.append(("malformed disposition", malformed_disposition))
+
+        unknown_delivery = copy.deepcopy(historical_event)
+        unknown_delivery["processed_events"][0]["owner_return"]["delivery_order"] = "SEND_EVERYWHERE"
+        invalid_programs.append(("unknown delivery order", unknown_delivery))
+
+        legacy_without_history = copy.deepcopy(historical_event)
+        legacy_without_history["processed_events"][0].pop("disposition")
+        invalid_programs.append(("legacy id without historical discriminator", legacy_without_history))
+
+        historical_extra = copy.deepcopy(historical_event)
+        historical_extra["processed_events"][0]["unexpected"] = True
+        invalid_programs.append(("historical extra property", historical_extra))
+
+        for label, invalid in invalid_programs:
+            with self.subTest(label=label):
+                self.assertTrue(errors(invalid), label)
 
     def test_standardized_ready_packet_normalizes_exact_worktree_and_wakes_once(self) -> None:
         worktree = "worktrees/atlas-discordos-runtime-binding-001"

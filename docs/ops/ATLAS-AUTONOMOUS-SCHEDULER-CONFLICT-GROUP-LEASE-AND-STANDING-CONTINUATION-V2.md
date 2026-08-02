@@ -75,6 +75,33 @@ then consumes terminal receipts. A missing snapshot without those journals
 still fails closed. This makes disposable `tmp` cleanup recoverable without
 inventing packets, leases, deliveries, or completions.
 
+### Canonical-program schema compatibility
+
+The v2 schema distinguishes current scheduler writes from immutable historical
+records without migrating or rewriting the canonical program:
+
+- an ordinary standing packet may persist `authority_class: null` and
+  `source_preparation: null`; selecting
+  `standing_local_source_preparation` still requires the existing closed
+  source-preparation object;
+- a current completion receipt remains limited to the five closed terminal
+  successors; only a receipt carrying both `receipt_path` and
+  `receipt_sha256` may use the bounded uppercase historical successor form;
+- a current processed event retains the strict current routing and authority
+  shape; only a record carrying `disposition` may use the strict historical
+  shape, the audited legacy owner-return delivery orders, an optional
+  `source_event_id`, or a bounded uppercase legacy decision ID ending in
+  `:ANSWER`.
+
+These discriminators are compatibility boundaries, not new writer authority.
+Current scheduler writers do not emit `receipt_path`, `receipt_sha256`, or
+`disposition`, so they cannot produce a historical variant accidentally.
+Unknown authority classes, standing authority with null source preparation,
+free-form current successors, unknown delivery orders, malformed dispositions,
+legacy IDs without a historical discriminator, and extra historical fields all
+remain invalid. Restart and replay preserve historical bytes; no compatibility
+path rewrites the program or widens execution authority.
+
 ## Lease behavior
 
 An active lease persists its repository, mutating execution class, and normalized
