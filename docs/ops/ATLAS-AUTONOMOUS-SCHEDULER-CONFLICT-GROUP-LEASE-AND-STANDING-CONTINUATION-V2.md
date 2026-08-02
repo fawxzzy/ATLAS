@@ -158,11 +158,12 @@ The default scope for a `repo_worktree` job is derived from its repository. A
 conflict groups remain responsible for complete, non-overlapping file,
 worktree, port, browser, and external-writer claims.
 
-An `external_mutation` job does not claim repository files or worktrees. It
-must declare at least one exact `external_writers` resource, receives the same
-durable mutating lease as source writers, and conflicts on writer scope or an
-overlapping external writer. This lets PR lifecycle control continue beside a
-held root validation scope without weakening same-repository source isolation.
+An `external_mutation` job must declare at least one exact `external_writers`
+resource, receives the same durable mutating lease as source writers, and
+conflicts on writer scope or an overlapping external writer. It normally has no
+repository file or worktree claim. A protected branch or pull-request writer
+may retain exact source-file and isolated-worktree provenance; those additional
+claims participate in the ordinary file and worktree conflict checks.
 Canonical envelope ingestion persists `protected_surface_authorized` exactly;
 otherwise protected lifecycle wording remains blocked after handoff even when
 the originating authority admitted that bounded surface.
@@ -231,6 +232,17 @@ bounded file claims and an explicit non-wildcard worktree identity different
 from the validated checkout. Missing, catch-all, wildcard-worktree, or
 same-worktree claims fail closed; the ordinary wave conflict rule still
 serializes overlapping repository writers.
+
+A same-repository `external_mutation` may also continue beside the virtual root
+validation hold, but only when its initial conflict set is exactly `files`, it
+has explicit protected-surface authority, and it declares nonempty concrete
+file, isolated-worktree, and external-writer claims. Every claimed worktree must
+differ from the validation root. A missing or wildcard claim, a different
+repository, the validation worktree itself, or any additional writer-scope,
+worktree, external-writer, canonical-root, repository, port, or browser conflict
+keeps the packet blocked. This exception removes only the validation candidate's
+synthetic `**` file collision; normal execution-wave and active-lease collision
+checks remain unchanged.
 
 ## Continuation behavior
 

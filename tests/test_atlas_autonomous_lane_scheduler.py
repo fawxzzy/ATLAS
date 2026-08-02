@@ -82,6 +82,35 @@ def _standing_packet(
     }
 
 
+def _isolated_external_mutation_packet(
+    packet_id: str = "atlas-draft-publication",
+    *,
+    repository: str = "fawxzzy/ATLAS",
+    writer_scope: str = "github.fawxzzy.atlas.draft-publication",
+    protected_surface_authorized: bool = True,
+) -> dict[str, object]:
+    packet = _standing_packet(
+        packet_id,
+        role_id="atlas.release-control-plane",
+        repository=repository,
+        writer_scope=writer_scope,
+    )
+    packet.update(
+        {
+            "execution_class": "external_mutation",
+            "protected_surface_authorized": protected_surface_authorized,
+            "resource_claims": {
+                "files": ["ops/atlas/autonomous_lane_scheduler.py"],
+                "worktrees": ["C:/w/atlas-publication"],
+                "ports": [],
+                "browsers": [],
+                "external_writers": ["git-branch:fawxzzy/ATLAS:codex/atlas-publication"],
+            },
+        }
+    )
+    return packet
+
+
 def _external_attempt_packet(
     packet_id: str = "data-api-containment",
     *,
@@ -2597,6 +2626,81 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
         self.assertEqual(["pr-review-request"], [job["packet_id"] for job in report["selected_jobs"]])
         self.assertEqual("external_mutation", report["selected_jobs"][0]["execution_class"])
+
+    def test_root_validation_does_not_suppress_protected_isolated_same_repository_external_mutation(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [_isolated_external_mutation_packet()]
+
+        report = _scheduler_report(program, preflight_report=_preflight_payload(error=1))
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(["atlas-draft-publication"], [job["packet_id"] for job in report["selected_jobs"]])
+        self.assertEqual("external_mutation", report["selected_jobs"][0]["execution_class"])
+
+    def test_root_validation_requires_closed_external_mutation_isolation_claims(self) -> None:
+        cases: dict[str, object] = {}
+
+        unprotected = _isolated_external_mutation_packet(protected_surface_authorized=False)
+        cases["unprotected"] = unprotected
+
+        missing_external_writer = _isolated_external_mutation_packet()
+        missing_external_writer["resource_claims"]["external_writers"] = []
+        cases["missing_external_writer"] = missing_external_writer
+
+        missing_files = _isolated_external_mutation_packet()
+        missing_files["resource_claims"]["files"] = []
+        cases["missing_files"] = missing_files
+
+        missing_worktree = _isolated_external_mutation_packet()
+        missing_worktree["resource_claims"]["worktrees"] = []
+        cases["missing_worktree"] = missing_worktree
+
+        wildcard_files = _isolated_external_mutation_packet()
+        wildcard_files["resource_claims"]["files"] = ["ops/atlas/**"]
+        cases["wildcard_files"] = wildcard_files
+
+        wildcard_worktree = _isolated_external_mutation_packet()
+        wildcard_worktree["resource_claims"]["worktrees"] = ["C:/w/*"]
+        cases["wildcard_worktree"] = wildcard_worktree
+
+        same_root = _isolated_external_mutation_packet()
+        same_root["resource_claims"]["worktrees"] = ["C:/ATLAS"]
+        cases["same_root"] = same_root
+
+        different_repository = _isolated_external_mutation_packet(repository="fawxzzy/other")
+        different_repository["resource_claims"]["external_writers"] = [
+            "git-branch:fawxzzy/other:codex/atlas-publication"
+        ]
+        cases["different_repository"] = different_repository
+
+        extra_conflict = _isolated_external_mutation_packet(writer_scope="atlas.root")
+        cases["extra_conflict"] = extra_conflict
+
+        for label, packet in cases.items():
+            with self.subTest(label=label):
+                program = _program_payload()
+                program["standing_packets"] = [packet]
+                report = _scheduler_report(program, preflight_report=_preflight_payload(error=1))
+                self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+                self.assertEqual([], report["selected_jobs"])
+
+    def test_root_validation_waiver_does_not_allow_overlapping_external_writers(self) -> None:
+        first = _isolated_external_mutation_packet("atlas-publication-one")
+        second = _isolated_external_mutation_packet(
+            "atlas-publication-two",
+            writer_scope="github.fawxzzy.atlas.draft-publication.peer",
+        )
+        program = _program_payload()
+        program["standing_packets"] = [first, second]
+
+        report = _scheduler_report(program, preflight_report=_preflight_payload(error=1))
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(1, len(report["selected_jobs"]))
+        self.assertEqual(1, len(report["deferred_candidates"]))
+        self.assertEqual("resource_conflict", report["deferred_candidates"][0]["deferred_reason"])
+        conflict_kinds = report["deferred_candidates"][0]["conflicts_with"][0]["resource_kinds"]
+        self.assertEqual(["external_writers", "files", "worktrees"], conflict_kinds)
 
     def test_external_mutation_requires_exact_writer_claim(self) -> None:
         program = _program_payload()

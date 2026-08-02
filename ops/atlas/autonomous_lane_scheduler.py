@@ -4153,16 +4153,57 @@ def _candidate_conflicts_with_root_validation(
     conflicts = _candidate_conflicts(candidate, validation_candidate)
     # Validation cleanup is a virtual root hold, not a writer. Read-only work
     # may inspect the held checkout; real active leases are enforced later.
-    if candidate.get("execution_class") == "read_only":
+    execution_class = candidate.get("execution_class")
+    if execution_class == "read_only":
         return []
-    if not conflicts or candidate.get("execution_class") != "repo_worktree":
-        return conflicts
-    if _repository_identity(candidate.get("repository")) != _repository_identity(validation_candidate.get("repository")):
-        return conflicts
 
     claims = _resource_claims(candidate.get("resource_claims"))
     files = claims["files"]
     worktrees = claims["worktrees"]
+    external_writers = claims["external_writers"]
+
+    if execution_class == "external_mutation" and (files or worktrees):
+        candidate_repository = _repository_identity(candidate.get("repository"))
+        validation_repository = _repository_identity(validation_candidate.get("repository"))
+        same_repository = candidate_repository == validation_repository
+        exact_virtual_files_conflict = conflicts == ["files"]
+        concrete_files = bool(files) and not any(any(token in path for token in "*?[") for path in files)
+        concrete_worktrees = bool(worktrees) and not any(
+            any(token in path for token in "*?[") for path in worktrees
+        )
+        concrete_external_writers = bool(external_writers) and not any(
+            any(token in identity for token in "*?[") for identity in external_writers
+        )
+        validation_worktree = (
+            str(validation_root.resolve()).replace("\\", "/").casefold().rstrip("/")
+        )
+        claimed_worktrees = {
+            str(Path(path).resolve()).replace("\\", "/").casefold().rstrip("/")
+            for path in worktrees
+        }
+        isolated_worktrees = validation_worktree not in claimed_worktrees
+        if not all(
+            (
+                exact_virtual_files_conflict,
+                candidate.get("protected_surface_authorized") is True,
+                same_repository,
+                concrete_files,
+                concrete_worktrees,
+                concrete_external_writers,
+                isolated_worktrees,
+            )
+        ):
+            return conflicts or ["external_mutation_isolation"]
+        # The only conflict is the validation candidate's synthetic ** file
+        # claim. Real file, worktree, writer-scope, and external-writer
+        # collisions remain enforced by normal wave and active-lease checks.
+        return []
+
+    if not conflicts or execution_class != "repo_worktree":
+        return conflicts
+    if _repository_identity(candidate.get("repository")) != _repository_identity(validation_candidate.get("repository")):
+        return conflicts
+
     if not files or not worktrees or any(path in {"*", "**"} for path in files):
         return conflicts
     if any(any(token in path for token in "*?[") for path in worktrees):
