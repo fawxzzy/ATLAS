@@ -82,6 +82,112 @@ def _standing_packet(
     }
 
 
+def _external_attempt_packet(
+    packet_id: str = "data-api-containment",
+    *,
+    attempt_id: str = "FP-DATA-API-CONTAINMENT-RETRY-001",
+    expected_consumed_count: int = 0,
+    limit: int = 1,
+) -> dict[str, object]:
+    writer_scope = "provider.supabase.target.data-api-containment"
+    repository = "fawxzzy/fawxzzy-platform"
+    external_resource = "supabase:target:data-api"
+    packet = _standing_packet(
+        packet_id,
+        role_id="owner.platform-supabase",
+        repository=repository,
+        writer_scope=writer_scope,
+    )
+    packet.update(
+        {
+            "execution_class": "external_mutation",
+            "protected_surface_authorized": True,
+            "idempotency_key": f"{packet_id}:admission",
+            "resource_claims": {
+                "files": [],
+                "worktrees": [],
+                "ports": [],
+                "browsers": [],
+                "external_writers": [external_resource],
+            },
+            "external_attempt": {
+                "attempt_id": attempt_id,
+                "limit": limit,
+                "expected_consumed_count": expected_consumed_count,
+                "authorization_event_digest": {
+                    "event_id": "onv1_" + "c" * 64,
+                    "payload_digest": "sha256:" + "d" * 64,
+                },
+                "writer_scope": writer_scope,
+                "repository": repository,
+                "external_resource_identity": external_resource,
+            },
+        }
+    )
+    return packet
+
+
+def _external_attempt_authority_scope(packet: dict[str, object]) -> dict[str, object]:
+    claim = packet["external_attempt"]
+    return {
+        field: copy.deepcopy(claim[field])
+        for field in (
+            "attempt_id",
+            "limit",
+            "expected_consumed_count",
+            "writer_scope",
+            "repository",
+            "external_resource_identity",
+        )
+    }
+
+
+def _external_attempt_program_and_report(
+    packet: dict[str, object] | None = None,
+) -> tuple[dict[str, object], dict[str, object]]:
+    packet = packet or _external_attempt_packet()
+    program = _program_payload()
+    program.update(
+        {
+            "standing_packets": [packet],
+            "active_leases": [],
+            "scope_holds": [],
+            "delivery_intents": [],
+            "external_attempts": [],
+            "processed_events": [
+                {
+                    "event_id": packet["external_attempt"]["authorization_event_digest"]["event_id"],
+                    "payload_digest": packet["external_attempt"]["authorization_event_digest"]["payload_digest"],
+                    "source_role_id": "fawxzzy.authorization",
+                    "kind": "OPERATOR_DECISION",
+                    "external_attempt_authority": _external_attempt_authority_scope(packet),
+                }
+            ],
+        }
+    )
+    candidate = scheduler._candidate_from_standing_packet(
+        item=packet,
+        program=program,
+        root=Path("C:/ATLAS"),
+    )
+    if not candidate["safe"]:
+        raise AssertionError(candidate)
+    return program, {"selected_jobs": [candidate]}
+
+
+def _external_attempt_authority_history(packet: dict[str, object]) -> list[dict[str, object]]:
+    authorization = packet["external_attempt"]["authorization_event_digest"]
+    return [
+        {
+            "event_id": authorization["event_id"],
+            "payload_digest": authorization["payload_digest"],
+            "source_role_id": "fawxzzy.authorization",
+            "kind": "OPERATOR_DECISION",
+            "external_attempt_authority": _external_attempt_authority_scope(packet),
+        }
+    ]
+
+
 def _envelope(
     payload: dict[str, object],
     *,
@@ -522,7 +628,7 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertIn("transport_digest", standing["properties"]["authority"]["properties"])
         self.assertEqual(
             ["target_role_id", "execution_target", "owner_return", "owner_return_state"],
-            standing["allOf"][1]["then"]["required"],
+            standing["allOf"][2]["then"]["required"],
         )
         self.assertEqual(
             [scheduler.STANDING_LOCAL_SOURCE_PREPARATION],
@@ -531,7 +637,34 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(32, standing["properties"]["source_preparation"]["properties"]["path_allowlist"]["maxItems"])
         self.assertEqual(
             ["source_role_id", "source_preparation"],
-            standing["allOf"][0]["then"]["required"],
+            standing["allOf"][1]["then"]["required"],
+        )
+        self.assertFalse(schema["$defs"]["external_attempt_claim"]["additionalProperties"])
+        self.assertFalse(schema["$defs"]["external_attempt_authority"]["additionalProperties"])
+        self.assertFalse(schema["$defs"]["external_attempt_record"]["additionalProperties"])
+        self.assertEqual(1, schema["$defs"]["external_attempt_claim"]["properties"]["limit"]["const"])
+        self.assertEqual(0, schema["$defs"]["external_attempt_claim"]["properties"]["expected_consumed_count"]["const"])
+        self.assertEqual(1, schema["$defs"]["external_attempt_record"]["properties"]["limit"]["const"])
+        self.assertEqual(1, schema["$defs"]["external_attempt_record"]["properties"]["consumed_count"]["const"])
+        self.assertEqual(
+            "fawxzzy.authorization",
+            schema["$defs"]["external_attempt_record"]["properties"]["authorization_source_role_id"]["const"],
+        )
+        self.assertEqual(
+            "#/$defs/external_attempt_authority",
+            schema["$defs"]["external_attempt_record"]["properties"]["authorization_scope"]["$ref"],
+        )
+        self.assertIn(
+            "external_attempt_authority",
+            schema["properties"]["processed_events"]["items"]["properties"],
+        )
+        self.assertEqual(
+            "external_mutation",
+            standing["allOf"][0]["then"]["properties"]["execution_class"]["const"],
+        )
+        self.assertEqual(
+            "#/$defs/external_attempt_record",
+            schema["properties"]["external_attempts"]["items"]["$ref"],
         )
         self.assertEqual(
             {
@@ -631,6 +764,340 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             _write(root / relative, json.dumps(invalid, indent=2) + "\n")
             _, invalid_errors = scheduler.load_program(root, relative)
             self.assertEqual("scheduler_authority_mismatch", invalid_errors[0]["code"])
+
+    def test_external_attempt_first_consume_and_reserve_is_one_closed_transition(self) -> None:
+        program, report = _external_attempt_program_and_report()
+
+        reserved, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+
+        self.assertEqual(1, len(reservations))
+        self.assertEqual(1, len(reserved["external_attempts"]))
+        record = reserved["external_attempts"][0]
+        self.assertEqual("FP-DATA-API-CONTAINMENT-RETRY-001", record["attempt_id"])
+        self.assertEqual(1, record["consumed_count"])
+        self.assertEqual(_external_attempt_authority_scope(reserved["standing_packets"][0]), record["authorization_scope"])
+        self.assertEqual(reservations[0]["reservation_id"], record["reservation_id"])
+        self.assertEqual(record["attempt_id"], reserved["active_leases"][0]["external_attempt_id"])
+        self.assertEqual(record["attempt_id"], reserved["delivery_intents"][0]["external_attempt_id"])
+        self.assertEqual(record["attempt_id"], reserved["standing_packets"][0]["dispatch_reservation"]["external_attempt_id"])
+        self.assertEqual(1, report["portfolio_status"]["HEALTH"]["external_attempts_consumed"])
+
+    def test_external_attempt_claim_round_trips_through_canonical_envelope_ingestion(self) -> None:
+        packet = _external_attempt_packet()
+        authorization = _envelope(
+            {
+                "decision": "AUTHORIZE_SINGLE_EXTERNAL_ATTEMPT",
+                "external_attempt_authority": _external_attempt_authority_scope(packet),
+            },
+            idempotency_key="authorize-single-external-attempt",
+            source_role_id="fawxzzy.authorization",
+        )
+        authorization["kind"] = "OPERATOR_DECISION"
+        packet["external_attempt"]["authorization_event_digest"] = {
+            "event_id": authorization["event_id"],
+            "payload_digest": authorization["payload_digest"],
+        }
+        payload = {
+            "canonical_lifecycle_state": "READY",
+            "packet_id": packet["packet_id"],
+            "objective": packet["packet"],
+            "logical_role_id": packet["logical_role_id"],
+            "repository": packet["repository"],
+            "writer_scope": packet["writer_scope"],
+            "execution_class": packet["execution_class"],
+            "protected_surface_authorized": True,
+            "resource_claims": packet["resource_claims"],
+            "external_attempt": packet["external_attempt"],
+        }
+        envelope = _envelope(payload, idempotency_key=packet["idempotency_key"], source_role_id="fawxzzy.authorization")
+        envelope["source_role_id"] = "atlas.workflow-operations"
+
+        program, findings = scheduler.reconcile_runtime_program(
+            program=_program_payload(),
+            bindings_payload=_bindings(("owner.platform-supabase", packet["runtime_thread_id"], "idle")),
+            envelopes=[authorization, envelope],
+            root=Path("C:/ATLAS"),
+        )
+
+        self.assertEqual([], findings)
+        self.assertEqual(packet["external_attempt"], program["standing_packets"][0]["external_attempt"])
+        self.assertEqual(
+            _external_attempt_authority_scope(packet),
+            program["processed_events"][0]["external_attempt_authority"],
+        )
+        self.assertEqual([], program["external_attempts"])
+
+    def test_external_attempt_envelope_ingress_rejects_unbound_authorization(self) -> None:
+        for mutation in ("event_id", "payload_digest", "source_role_id", "kind"):
+            with self.subTest(mutation=mutation):
+                packet = _external_attempt_packet()
+                authorization = _envelope(
+                    {
+                        "decision": "AUTHORIZE_SINGLE_EXTERNAL_ATTEMPT",
+                        "external_attempt_authority": _external_attempt_authority_scope(packet),
+                    },
+                    idempotency_key="authorize-single-external-attempt",
+                    source_role_id="fawxzzy.authorization",
+                )
+                authorization["kind"] = "OPERATOR_DECISION"
+                packet["external_attempt"]["authorization_event_digest"] = {
+                    "event_id": authorization["event_id"],
+                    "payload_digest": authorization["payload_digest"],
+                }
+                if mutation == "event_id":
+                    packet["external_attempt"]["authorization_event_digest"]["event_id"] = "onv1_" + "e" * 64
+                elif mutation == "payload_digest":
+                    packet["external_attempt"]["authorization_event_digest"]["payload_digest"] = "sha256:" + "e" * 64
+                elif mutation == "source_role_id":
+                    authorization["source_role_id"] = "atlas.workflow-operations"
+                else:
+                    authorization["kind"] = "SOURCE_RECEIPT"
+                payload = {
+                    "canonical_lifecycle_state": "READY",
+                    "packet_id": packet["packet_id"],
+                    "objective": packet["packet"],
+                    "logical_role_id": packet["logical_role_id"],
+                    "repository": packet["repository"],
+                    "writer_scope": packet["writer_scope"],
+                    "execution_class": packet["execution_class"],
+                    "protected_surface_authorized": True,
+                    "resource_claims": packet["resource_claims"],
+                    "external_attempt": packet["external_attempt"],
+                }
+                envelope = _envelope(
+                    payload,
+                    idempotency_key=packet["idempotency_key"],
+                    source_role_id="atlas.workflow-operations",
+                )
+
+                program, findings = scheduler.reconcile_runtime_program(
+                    program=_program_payload(),
+                    bindings_payload=_bindings(("owner.platform-supabase", packet["runtime_thread_id"], "idle")),
+                    envelopes=[authorization, envelope],
+                    root=Path("C:/ATLAS"),
+                )
+
+                self.assertIn("external_attempt_authorization_unbound", [item["code"] for item in findings])
+                self.assertEqual([], program["standing_packets"])
+                self.assertEqual([], program["external_attempts"])
+
+    def test_external_attempt_authorization_scope_matrix_rejects_before_state_mutation(self) -> None:
+        mutations = {
+            "missing_scope": None,
+            "attempt_id": "OTHER-ATTEMPT",
+            "limit": 2,
+            "expected_consumed_count": 1,
+            "writer_scope": "provider.supabase.target.other-operation",
+            "repository": "fawxzzy/other-repository",
+            "external_resource_identity": "supabase:other:data-api",
+        }
+        for mutation, replacement in mutations.items():
+            with self.subTest(mutation=mutation):
+                packet = _external_attempt_packet()
+                authorization_payload = {"decision": "AUTHORIZE_DOCS_ONLY_WORDING"}
+                if mutation != "missing_scope":
+                    scope = _external_attempt_authority_scope(packet)
+                    scope[mutation] = replacement
+                    authorization_payload["external_attempt_authority"] = scope
+                authorization = _envelope(
+                    authorization_payload,
+                    idempotency_key=f"authorize-{mutation}",
+                    source_role_id="fawxzzy.authorization",
+                )
+                authorization["kind"] = "OPERATOR_DECISION"
+                packet["external_attempt"]["authorization_event_digest"] = {
+                    "event_id": authorization["event_id"],
+                    "payload_digest": authorization["payload_digest"],
+                }
+                payload = {
+                    "canonical_lifecycle_state": "READY",
+                    "packet_id": packet["packet_id"],
+                    "objective": packet["packet"],
+                    "logical_role_id": packet["logical_role_id"],
+                    "repository": packet["repository"],
+                    "writer_scope": packet["writer_scope"],
+                    "execution_class": packet["execution_class"],
+                    "protected_surface_authorized": True,
+                    "resource_claims": packet["resource_claims"],
+                    "external_attempt": packet["external_attempt"],
+                }
+                envelope = _envelope(
+                    payload,
+                    idempotency_key=packet["idempotency_key"],
+                    source_role_id="atlas.workflow-operations",
+                )
+
+                program, findings = scheduler.reconcile_runtime_program(
+                    program=_program_payload(),
+                    bindings_payload=_bindings(("owner.platform-supabase", packet["runtime_thread_id"], "idle")),
+                    envelopes=[authorization, envelope],
+                    root=Path("C:/ATLAS"),
+                )
+
+                self.assertIn("external_attempt_authorization_unbound", [item["code"] for item in findings])
+                self.assertEqual([], program["standing_packets"])
+                self.assertEqual([], program["external_attempts"])
+                self.assertEqual([], program["active_leases"])
+                self.assertEqual([], program["delivery_intents"])
+
+    def test_external_attempt_persisted_packet_rejects_authority_history_mismatch_transactionally(self) -> None:
+        packet = _external_attempt_packet()
+        program, report = _external_attempt_program_and_report(packet)
+        program["processed_events"][0]["external_attempt_authority"]["repository"] = "fawxzzy/other-repository"
+        before = copy.deepcopy(program)
+        candidate = scheduler._candidate_from_standing_packet(item=packet, program=program, root=Path("C:/ATLAS"))
+        self.assertFalse(candidate["safe"])
+        self.assertEqual("external_attempt_authorization_unbound", candidate["blocked_reason"])
+        report["selected_jobs"][0]["external_attempt"] = packet["external_attempt"]
+
+        with self.assertRaisesRegex(RuntimeError, "external_attempt_authorization_unbound"):
+            scheduler.reserve_selected_jobs(program=program, report=report)
+
+        self.assertEqual(before, program)
+        self.assertEqual([], program["external_attempts"])
+
+    def test_external_attempt_missing_claim_field_is_rejected_before_selection(self) -> None:
+        packet = _external_attempt_packet()
+        del packet["external_attempt"]["authorization_event_digest"]
+        program = _program_payload()
+        program["standing_packets"] = [packet]
+
+        candidate = scheduler._candidate_from_standing_packet(item=packet, program=program, root=Path("C:/ATLAS"))
+
+        self.assertFalse(candidate["safe"])
+        self.assertEqual("external_attempt_claim_invalid", candidate["blocked_reason"])
+
+    def test_external_attempt_one_shot_count_contract_is_rejected_during_candidate_admission(self) -> None:
+        for expected, limit, error in (
+            (1, 1, "external_attempt_expected_count_mismatch"),
+            (0, 2, "external_attempt_limit_unsupported"),
+        ):
+            with self.subTest(expected=expected, limit=limit):
+                packet = _external_attempt_packet(expected_consumed_count=expected, limit=limit)
+                original = copy.deepcopy(packet)
+                program = _program_payload()
+                program["processed_events"] = _external_attempt_authority_history(packet)
+                candidate = scheduler._candidate_from_standing_packet(
+                    item=packet,
+                    program=program,
+                    root=Path("C:/ATLAS"),
+                )
+                self.assertFalse(candidate["safe"])
+                self.assertEqual(error, candidate["blocked_reason"])
+                with self.assertRaisesRegex(RuntimeError, error):
+                    scheduler._prepare_external_attempt_record(
+                        packet,
+                        ledger=[],
+                        processed_events=_external_attempt_authority_history(packet),
+                        consumed_at="2026-08-01T00:00:00Z",
+                    )
+                self.assertEqual(original, packet)
+
+    def test_external_attempt_restart_and_cross_packet_replay_fail_closed(self) -> None:
+        program, report = _external_attempt_program_and_report()
+        reserved, _ = scheduler.reserve_selected_jobs(program=program, report=report)
+        restarted = json.loads(json.dumps(reserved, sort_keys=True))
+        restarted_candidate = scheduler._candidate_from_standing_packet(
+            item=restarted["standing_packets"][0],
+            program=restarted,
+            root=Path("C:/ATLAS"),
+        )
+        self.assertFalse(restarted_candidate["safe"])
+        self.assertEqual("standing_packet_not_ready", restarted_candidate["blocked_reason"])
+        self.assertEqual(1, len(restarted["external_attempts"]))
+        self.assertEqual(1, len(restarted["active_leases"]))
+
+        same_packet = copy.deepcopy(reserved["standing_packets"][0])
+        with self.assertRaisesRegex(RuntimeError, "external_attempt_already_consumed"):
+            scheduler._prepare_external_attempt_record(
+                same_packet,
+                ledger=restarted["external_attempts"],
+                processed_events=restarted["processed_events"],
+                consumed_at="2026-08-01T00:00:00Z",
+            )
+        other_packet = copy.deepcopy(same_packet)
+        other_packet["packet_id"] = "different-provider-packet"
+        other_packet["packet"] = "Execute different-provider-packet"
+        other_packet["idempotency_key"] = "different-provider-packet:admission"
+        with self.assertRaisesRegex(RuntimeError, "external_attempt_cross_packet_replay"):
+            scheduler._prepare_external_attempt_record(
+                other_packet,
+                ledger=restarted["external_attempts"],
+                processed_events=restarted["processed_events"],
+                consumed_at="2026-08-01T00:00:00Z",
+            )
+
+    def test_external_attempt_writer_collision_is_transactional(self) -> None:
+        program, report = _external_attempt_program_and_report()
+        program["active_leases"] = [
+            {
+                "reservation_id": "rsrv_" + "9" * 64,
+                "packet_id": "existing-provider-write",
+                "logical_role_id": "owner.platform-supabase",
+                "runtime_thread_id": "existing-thread",
+                "writer_scope": "provider.supabase.target.data-api-containment",
+                "repository": "fawxzzy/fawxzzy-platform",
+                "execution_class": "external_mutation",
+                "resource_claims": {
+                    "files": [],
+                    "worktrees": [],
+                    "ports": [],
+                    "browsers": [],
+                    "external_writers": ["supabase:target:data-api"],
+                },
+                "status": "active",
+            }
+        ]
+        before = copy.deepcopy(program)
+
+        with self.assertRaisesRegex(RuntimeError, "writer scope became leased"):
+            scheduler.reserve_selected_jobs(program=program, report=report)
+
+        self.assertEqual(before, program)
+        self.assertEqual([], program["external_attempts"])
+        self.assertEqual([], program["delivery_intents"])
+
+    def test_program_loader_rejects_invalid_or_duplicate_external_attempt_records(self) -> None:
+        program, report = _external_attempt_program_and_report()
+        reserved, _ = scheduler.reserve_selected_jobs(program=program, report=report)
+        complete = scheduler._initial_runtime_program()
+        for key in (
+            "standing_packets",
+            "active_leases",
+            "scope_holds",
+            "delivery_intents",
+            "external_attempts",
+            "processed_events",
+        ):
+            complete[key] = copy.deepcopy(reserved[key])
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            relative = "tmp/atlas/program.json"
+            _write(root / relative, json.dumps(complete, indent=2) + "\n")
+            loaded, errors = scheduler.load_program(root, relative)
+            self.assertIsNotNone(loaded)
+            self.assertEqual([], errors)
+
+            duplicate = copy.deepcopy(complete)
+            duplicate["external_attempts"].append(copy.deepcopy(duplicate["external_attempts"][0]))
+            _write(root / relative, json.dumps(duplicate, indent=2) + "\n")
+            _, duplicate_errors = scheduler.load_program(root, relative)
+            self.assertIn("program_duplicate_external_attempt", [item["code"] for item in duplicate_errors])
+
+            mismatched_scope = copy.deepcopy(complete)
+            mismatched_scope["external_attempts"][0]["authorization_scope"]["repository"] = "fawxzzy/other-repository"
+            _write(root / relative, json.dumps(mismatched_scope, indent=2) + "\n")
+            _, scope_errors = scheduler.load_program(root, relative)
+            self.assertIn("program_invalid_external_attempt", [item["code"] for item in scope_errors])
+
+            wrong_provenance = copy.deepcopy(complete)
+            wrong_provenance["processed_events"][0]["source_role_id"] = "atlas.workflow-operations"
+            _write(root / relative, json.dumps(wrong_provenance, indent=2) + "\n")
+            _, provenance_errors = scheduler.load_program(root, relative)
+            self.assertIn(
+                "program_invalid_external_attempt_authority",
+                [item["code"] for item in provenance_errors],
+            )
 
     def test_legacy_main_execution_and_owner_return_routes_are_rejected(self) -> None:
         cases = (

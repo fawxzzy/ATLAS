@@ -167,6 +167,56 @@ Canonical envelope ingestion persists `protected_surface_authorized` exactly;
 otherwise protected lifecycle wording remains blocked after handoff even when
 the originating authority admitted that bounded surface.
 
+### Guarded external-attempt consumption
+
+A mutating external-provider packet may carry one closed `external_attempt`
+claim. The claim binds its attempt ID and limit, the expected persisted
+consumption count, the authorizing event and payload digest, the exact writer
+scope, the repository identity, and one normalized external-resource identity.
+The resource must also appear in `resource_claims.external_writers`; the packet
+must be `external_mutation` and must carry explicit protected-surface authority.
+Missing, extra, malformed, mismatched, exhausted, or ineligible claim data fails
+closed before reservation.
+
+The first contract is deliberately one-shot: `limit` is exactly `1` and
+`expected_consumed_count` is exactly `0` in both schema and candidate
+admission. The claim's event and payload digest must also match exactly one
+previously validated `OPERATOR_DECISION` or `OPERATOR_DECISION_ANSWER` from
+`fawxzzy.authorization` in the canonical processed-event history. That decision
+must carry a closed `external_attempt_authority` object whose attempt ID,
+one-shot limit and expected count, writer scope, repository, and normalized
+external-resource identity equal the claim exactly. The scheduler retains that
+normalized scope with the processed decision and copies it into the immutable
+consumption record. A missing scope, unrelated decision, or event-ID, digest,
+role, kind, attempt, count, writer, repository, or resource mismatch is rejected
+before a standing packet, attempt record, reservation, lease, or delivery intent
+can change. The packet's separate `external_mutation`, protected-surface, exact
+writer-scope, repository, and resource-claim checks remain the execution and
+mutation-cap boundary.
+
+Under the existing exclusive program lock, the scheduler compares the claim to
+the immutable `external_attempts` ledger and prepares both the incremented
+consumption record and deterministic reservation. It commits that record, the
+`ACTIVE` packet, its lease, and its prepared delivery intent in the same atomic
+program replacement. Claim-bearing reservation is also isolated in memory: any
+validation, collision, or transition failure discards the working copy, leaving
+no partial attempt, lease, or delivery state.
+
+The ledger keeps one consumed record per attempt ID, including the originating
+packet, idempotency key, and reservation. An exact restart therefore observes
+the existing `ACTIVE` packet and correlated reservation without incrementing or
+creating a second lease. Reuse by the same packet is already consumed; reuse by
+a different packet or idempotency key is a cross-packet replay and fails closed.
+Terminal settlement releases the lease but never removes consumed-attempt
+history.
+
+Operator recovery is evidence-driven: after an ambiguous restart, inspect the
+canonical program under lock. If the ledger and correlated reservation are both
+present, reconcile the existing delivery only. If neither is present, a fresh
+authority may retry from the still-unconsumed count. If only one side is present,
+or identities differ, hold for scheduler repair; never reconstruct, decrement,
+or hand-edit the ledger and never issue the provider request.
+
 Repository identities are canonicalized before scope derivation, persistence,
 and collision checks. GitHub `owner/repo`, HTTPS, SSH, and `.git` aliases map to
 one lowercase owner/repository key; unrecognized URL identities fail closed.

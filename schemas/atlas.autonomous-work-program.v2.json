@@ -36,6 +36,95 @@
         "external_writers": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
       }
     },
+    "authorization_event_digest": {
+      "type": "object",
+      "required": ["event_id", "payload_digest"],
+      "additionalProperties": false,
+      "properties": {
+        "event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
+        "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      }
+    },
+    "external_attempt_authority": {
+      "type": "object",
+      "required": [
+        "attempt_id",
+        "limit",
+        "expected_consumed_count",
+        "writer_scope",
+        "repository",
+        "external_resource_identity"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": { "type": "string", "minLength": 1 },
+        "limit": { "const": 1 },
+        "expected_consumed_count": { "const": 0 },
+        "writer_scope": { "type": "string", "minLength": 1 },
+        "repository": { "type": "string", "pattern": "^[^/\\s]+/[^/\\s]+$" },
+        "external_resource_identity": { "type": "string", "minLength": 1 }
+      }
+    },
+    "external_attempt_claim": {
+      "type": "object",
+      "required": [
+        "attempt_id",
+        "limit",
+        "expected_consumed_count",
+        "authorization_event_digest",
+        "writer_scope",
+        "repository",
+        "external_resource_identity"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": { "type": "string", "minLength": 1 },
+        "limit": { "const": 1 },
+        "expected_consumed_count": { "const": 0 },
+        "authorization_event_digest": { "$ref": "#/$defs/authorization_event_digest" },
+        "writer_scope": { "type": "string", "minLength": 1 },
+        "repository": { "type": "string", "pattern": "^[^/\\s]+/[^/\\s]+$" },
+        "external_resource_identity": { "type": "string", "minLength": 1 }
+      }
+    },
+    "external_attempt_record": {
+      "type": "object",
+      "required": [
+        "attempt_id",
+        "limit",
+        "consumed_count",
+        "authorization_event_digest",
+        "authorization_source_role_id",
+        "authorization_kind",
+        "authorization_scope",
+        "writer_scope",
+        "repository",
+        "external_resource_identity",
+        "packet_id",
+        "idempotency_key",
+        "reservation_id",
+        "status",
+        "consumed_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": { "type": "string", "minLength": 1 },
+        "limit": { "const": 1 },
+        "consumed_count": { "const": 1 },
+        "authorization_event_digest": { "$ref": "#/$defs/authorization_event_digest" },
+        "authorization_source_role_id": { "const": "fawxzzy.authorization" },
+        "authorization_kind": { "enum": ["OPERATOR_DECISION", "OPERATOR_DECISION_ANSWER"] },
+        "authorization_scope": { "$ref": "#/$defs/external_attempt_authority" },
+        "writer_scope": { "type": "string", "minLength": 1 },
+        "repository": { "type": "string", "pattern": "^[^/\\s]+/[^/\\s]+$" },
+        "external_resource_identity": { "type": "string", "minLength": 1 },
+        "packet_id": { "type": "string", "minLength": 1 },
+        "idempotency_key": { "type": "string", "minLength": 1 },
+        "reservation_id": { "type": "string", "pattern": "^rsrv_[0-9a-f]{64}$" },
+        "status": { "const": "consumed" },
+        "consumed_at": { "type": "string", "minLength": 1 }
+      }
+    },
     "terminal_successor": {
       "enum": [
         "NEXT_AUTONOMOUS_PACKET",
@@ -103,6 +192,7 @@
           "runtime_status": { "type": "string", "minLength": 1 },
           "dependencies": { "type": "array", "items": { "type": "string" } },
           "resource_claims": { "$ref": "#/$defs/resource_claims" },
+          "external_attempt": { "$ref": "#/$defs/external_attempt_claim" },
           "policy_id": { "type": ["string", "null"] },
           "policy_ids": {
             "type": "array",
@@ -153,6 +243,16 @@
           "dispatch_reservation": { "type": "object" }
         },
         "allOf": [
+          {
+            "if": { "required": ["external_attempt"] },
+            "then": {
+              "required": ["protected_surface_authorized"],
+              "properties": {
+                "execution_class": { "const": "external_mutation" },
+                "protected_surface_authorized": { "const": true }
+              }
+            }
+          },
           {
             "if": {
               "required": ["authority_class"],
@@ -211,6 +311,7 @@
           "repository": { "type": "string", "minLength": 1 },
           "execution_class": { "enum": ["repo_worktree", "canonical_workspace", "external_mutation"] },
           "resource_claims": { "$ref": "#/$defs/resource_claims" },
+          "external_attempt_id": { "type": "string", "minLength": 1 },
           "status": { "enum": ["active", "recovery-required"] }
         },
         "additionalProperties": true
@@ -233,6 +334,7 @@
         ],
         "properties": {
           "reservation_id": { "type": "string", "pattern": "^rsrv_[0-9a-f]{64}$" },
+          "external_attempt_id": { "type": "string", "minLength": 1 },
           "status": { "enum": ["prepared", "delivered", "host-unavailable", "recovery-required"] },
           "turn_id": { "type": ["string", "null"] },
           "transport_digest": { "type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$" },
@@ -247,6 +349,10 @@
         },
         "additionalProperties": true
       }
+    },
+    "external_attempts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/external_attempt_record" }
     },
     "completed_packets": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
     "completed_receipts": {
@@ -270,6 +376,11 @@
           "event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
           "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
           "transport_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+          "source_role_id": { "type": ["string", "null"] },
+          "kind": { "type": ["string", "null"] },
+          "external_attempt_authority": {
+            "anyOf": [{ "$ref": "#/$defs/external_attempt_authority" }, { "type": "null" }]
+          },
           "target_role_id": { "type": ["string", "null"] },
           "execution_target": { "anyOf": [{ "$ref": "#/$defs/execution_target" }, { "type": "null" }] },
           "owner_return": { "anyOf": [{ "$ref": "#/$defs/owner_return" }, { "type": "null" }] }
