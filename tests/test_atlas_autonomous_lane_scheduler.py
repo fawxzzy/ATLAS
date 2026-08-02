@@ -2786,6 +2786,46 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         wildcard_files["resource_claims"]["files"] = ["ops/atlas/**"]
         cases["wildcard_files"] = wildcard_files
 
+        parent_traversal_files = _isolated_external_mutation_packet()
+        parent_traversal_files["resource_claims"]["files"] = ["../outside.txt"]
+        cases["parent_traversal_files"] = parent_traversal_files
+
+        drive_qualified_files = _isolated_external_mutation_packet()
+        drive_qualified_files["resource_claims"]["files"] = ["C:/ATLAS/AGENTS.md"]
+        cases["drive_qualified_files"] = drive_qualified_files
+
+        foreign_drive_qualified_files = _isolated_external_mutation_packet()
+        foreign_drive_qualified_files["resource_claims"]["files"] = [
+            "C:/other/repository/file.txt"
+        ]
+        cases["foreign_drive_qualified_files"] = foreign_drive_qualified_files
+
+        absolute_files = _isolated_external_mutation_packet()
+        absolute_files["resource_claims"]["files"] = ["/absolute/path"]
+        cases["absolute_files"] = absolute_files
+
+        dot_segment_files = _isolated_external_mutation_packet()
+        dot_segment_files["resource_claims"]["files"] = ["./relative"]
+        cases["dot_segment_files"] = dot_segment_files
+
+        duplicate_separator_files = _isolated_external_mutation_packet()
+        duplicate_separator_files["resource_claims"]["files"] = [
+            "ops//atlas/autonomous_lane_scheduler.py"
+        ]
+        cases["duplicate_separator_files"] = duplicate_separator_files
+
+        backslash_files = _isolated_external_mutation_packet()
+        backslash_files["resource_claims"]["files"] = [
+            "ops\\atlas\\autonomous_lane_scheduler.py"
+        ]
+        cases["backslash_files"] = backslash_files
+
+        whitespace_files = _isolated_external_mutation_packet()
+        whitespace_files["resource_claims"]["files"] = [
+            " ops/atlas/autonomous_lane_scheduler.py"
+        ]
+        cases["whitespace_files"] = whitespace_files
+
         wildcard_worktree = _isolated_external_mutation_packet()
         wildcard_worktree["resource_claims"]["worktrees"] = ["C:/w/*"]
         cases["wildcard_worktree"] = wildcard_worktree

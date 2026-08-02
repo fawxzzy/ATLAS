@@ -3603,6 +3603,17 @@ def _owner_return_delivery_proof(
     return OrderedDict(proof), None
 
 
+def _canonical_repository_relative_path(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return bool(
+        path == normalized == normalized.strip()
+        and not normalized.startswith("/")
+        and not re.match(r"^[a-zA-Z]:", normalized)
+        and not any(token in normalized for token in "*?[")
+        and all(part not in {"", ".", ".."} for part in normalized.split("/"))
+    )
+
+
 def _safe_standing_local_path(path: str) -> bool:
     normalized = path.replace("\\", "/").strip()
     lowered = normalized.casefold()
@@ -3621,14 +3632,7 @@ def _safe_standing_local_path(path: str) -> bool:
 
 
 def _safe_standing_local_worktree_claim(path: str) -> bool:
-    normalized = path.replace("\\", "/")
-    return bool(
-        path == normalized == normalized.strip()
-        and not normalized.startswith("/")
-        and not re.match(r"^[a-zA-Z]:", normalized)
-        and not any(token in normalized for token in "*?[")
-        and all(part not in {"", ".", ".."} for part in normalized.split("/"))
-    )
+    return _canonical_repository_relative_path(path)
 
 
 def _path_identity(path: Path) -> str:
@@ -3913,6 +3917,16 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root:
     owner_return = raw.get("owner_return") if isinstance(raw.get("owner_return"), dict) else None
     authority = raw.get("authority") if isinstance(raw.get("authority"), dict) else {}
     resource_claims = _resource_claims(raw.get("resource_claims"))
+    raw_resource_claims = raw.get("resource_claims")
+    raw_file_claims = (
+        raw_resource_claims.get("files", [])
+        if isinstance(raw_resource_claims, dict)
+        else []
+    )
+    noncanonical_external_file_claims = bool(raw_file_claims) and not all(
+        isinstance(path, str) and _canonical_repository_relative_path(path)
+        for path in raw_file_claims
+    )
     external_attempt, external_attempt_violation = _normalized_external_attempt_claim(
         raw,
         resource_claims=resource_claims,
@@ -3988,6 +4002,8 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root:
         root=root,
     ):
         blocked_reason = standing_violation
+    elif execution_class == "external_mutation" and noncanonical_external_file_claims:
+        blocked_reason = "external_file_claim_not_canonical"
     elif execution_class == "external_mutation" and not _resource_claims(raw.get("resource_claims")).get("external_writers"):
         blocked_reason = "external_writer_claim_required"
     elif (
@@ -4167,7 +4183,9 @@ def _candidate_conflicts_with_root_validation(
         validation_repository = _repository_identity(validation_candidate.get("repository"))
         same_repository = candidate_repository == validation_repository
         exact_virtual_files_conflict = conflicts == ["files"]
-        concrete_files = bool(files) and not any(any(token in path for token in "*?[") for path in files)
+        concrete_files = bool(files) and all(
+            _canonical_repository_relative_path(path) for path in files
+        )
         concrete_worktrees = bool(worktrees) and not any(
             any(token in path for token in "*?[") for path in worktrees
         )

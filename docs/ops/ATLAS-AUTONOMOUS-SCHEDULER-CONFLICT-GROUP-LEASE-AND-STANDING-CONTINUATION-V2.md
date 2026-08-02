@@ -263,13 +263,16 @@ serializes overlapping repository writers.
 A same-repository `external_mutation` may also continue beside the virtual root
 validation hold, but only when its initial conflict set is exactly `files`, it
 has explicit protected-surface authority, and it declares nonempty concrete
-file, isolated-worktree, and external-writer claims. Every claimed worktree must
-differ from the validation root. A missing or wildcard claim, a different
-repository, the validation worktree itself, or any additional writer-scope,
-worktree, external-writer, canonical-root, repository, port, or browser conflict
-keeps the packet blocked. This exception removes only the validation candidate's
-synthetic `**` file collision; normal execution-wave and active-lease collision
-checks remain unchanged.
+file, isolated-worktree, and external-writer claims. Every file claim must be a
+canonical repository-relative path: forward-slash spelling with no surrounding
+whitespace, leading slash, drive prefix, wildcard, empty segment, or `.` / `..`
+segment. Every claimed worktree must differ from the validation root. A missing,
+unbounded, or wildcard claim, a different repository, the validation worktree
+itself, or any additional writer-scope, worktree, external-writer,
+canonical-root, repository, port, or browser conflict keeps the packet blocked.
+This exception removes only the validation candidate's synthetic `**` file
+collision; normal execution-wave and active-lease collision checks remain
+unchanged.
 
 ## Continuation behavior
 
