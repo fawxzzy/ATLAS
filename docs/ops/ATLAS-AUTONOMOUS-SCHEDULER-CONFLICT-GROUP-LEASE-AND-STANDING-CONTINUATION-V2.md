@@ -122,7 +122,7 @@ the `ACTIVE` state, so it cannot expose the same packet twice.
 
 The same transaction records a `prepared` delivery intent containing the exact
 event, digest, packet, role, thread, and writer-scope identities. After the
-app-native send returns, MAIN settles that intent with the returned turn ID. An
+app-native send returns, 01 Ops settles that intent with the returned turn ID. An
 ambiguous result becomes `recovery-required`; the admitted recovery owner must
 inspect complete target history for the exact event ID and must not retry
 blindly. Active work without
@@ -173,7 +173,7 @@ its exact delivery intent is `prepared` and has no returned turn. Prepared
 cancellation requires the exact packet, writer scope, and reservation. A
 delivered packet cannot be cancelled. A recovery-required packet can be
 superseded only through the closed absence-proof transition above, issued by
-the Workflow Architect recovery owner or MAIN under exact recovery authority;
+the Workflow Architect recovery owner or 01 Ops under exact recovery authority;
 ordinary owner/review/manual routing does not require MAIN as a relay.
 
 `atlas.worker-lease.v2` now requires `writer_scope`; a lease without its
@@ -283,16 +283,16 @@ writer scope, and execution class. Legacy selector or validation output without
 that owner metadata is held as `root_owner_admission_required`; 01 Ops never
 becomes a catch-all source or semantic authority.
 
-When a receipt arrives, MAIN persists it, releases the correlated lease, and
+When a receipt arrives, 01 Ops persists it, releases the correlated lease, and
 immediately selects the next eligible wave. It does not wait for the next
 heartbeat. Heartbeats recover interrupted coordination only.
 
-MAIN writes changed canonical envelopes to
+01 Ops writes changed canonical envelopes to
 `tmp/atlas/autonomous-inbox-events.jsonl` and a fresh app-native role snapshot
 to `tmp/atlas/standing-role-bindings.latest.json`, runs the bridge and scheduler,
 then sends only the persisted `dispatch_plan` through the native task API.
 Program generation and selection are deterministic local code; task delivery
-remains app-native and uses the resolved `runtime_thread_id`. MAIN writes the
+remains app-native and uses the resolved `runtime_thread_id`. 01 Ops writes the
 app result to a bounded delivery-result JSON/JSONL input and reruns settlement
 under the same program lock before consuming later receipts.
 
