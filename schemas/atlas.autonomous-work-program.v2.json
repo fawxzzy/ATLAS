@@ -14,6 +14,28 @@
         "host_id": { "type": "string", "minLength": 1 }
       }
     },
+    "legacy_owner_return": {
+      "type": "object",
+      "required": ["logical_role_id", "thread_id", "delivery_order"],
+      "additionalProperties": false,
+      "properties": {
+        "logical_role_id": { "type": "string", "minLength": 1 },
+        "thread_id": { "type": "string", "minLength": 1 },
+        "host_id": { "type": "string", "minLength": 1 },
+        "delivery_order": {
+          "enum": [
+            "OWNER_FIRST",
+            "OWNER_FIRST_ALREADY_COMPLETED",
+            "OWNER_FIRST_DIRECT",
+            "OWNER_FIRST_THEN_00_MAIN",
+            "OWNER_FIRST_THEN_ATLAS_MAIN",
+            "OWNER_FIRST_THEN_MAIN_SETTLEMENT",
+            "PRIMARY_ONLY",
+            "PRIMARY_ONLY_AFTER_OWNER_TERMINAL_RECEIPT"
+          ]
+        }
+      }
+    },
     "execution_target": {
       "type": "object",
       "required": ["logical_role_id", "thread_id", "host_id"],
@@ -35,6 +57,118 @@
         "browsers": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
         "external_writers": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
       }
+    },
+    "authorization_event_digest": {
+      "type": "object",
+      "required": ["event_id", "payload_digest"],
+      "additionalProperties": false,
+      "properties": {
+        "event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
+        "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      }
+    },
+    "external_attempt_authority": {
+      "type": "object",
+      "required": [
+        "attempt_id",
+        "limit",
+        "expected_consumed_count",
+        "writer_scope",
+        "repository",
+        "external_resource_identity"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": { "type": "string", "minLength": 1 },
+        "limit": { "const": 1 },
+        "expected_consumed_count": { "const": 0 },
+        "writer_scope": { "type": "string", "minLength": 1 },
+        "repository": { "type": "string", "pattern": "^[^/\\s]+/[^/\\s]+$" },
+        "external_resource_identity": { "type": "string", "minLength": 1 }
+      }
+    },
+    "external_attempt_claim": {
+      "type": "object",
+      "required": [
+        "attempt_id",
+        "limit",
+        "expected_consumed_count",
+        "authorization_event_digest",
+        "writer_scope",
+        "repository",
+        "external_resource_identity"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": { "type": "string", "minLength": 1 },
+        "limit": { "const": 1 },
+        "expected_consumed_count": { "const": 0 },
+        "authorization_event_digest": { "$ref": "#/$defs/authorization_event_digest" },
+        "writer_scope": { "type": "string", "minLength": 1 },
+        "repository": { "type": "string", "pattern": "^[^/\\s]+/[^/\\s]+$" },
+        "external_resource_identity": { "type": "string", "minLength": 1 }
+      }
+    },
+    "external_attempt_record": {
+      "type": "object",
+      "required": [
+        "attempt_id",
+        "limit",
+        "consumed_count",
+        "authorization_event_digest",
+        "authorization_source_role_id",
+        "authorization_kind",
+        "authorization_scope",
+        "writer_scope",
+        "repository",
+        "external_resource_identity",
+        "packet_id",
+        "idempotency_key",
+        "reservation_id",
+        "status",
+        "consumed_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": { "type": "string", "minLength": 1 },
+        "limit": { "const": 1 },
+        "consumed_count": { "const": 1 },
+        "authorization_event_digest": { "$ref": "#/$defs/authorization_event_digest" },
+        "authorization_source_role_id": { "const": "fawxzzy.authorization" },
+        "authorization_kind": { "enum": ["OPERATOR_DECISION", "OPERATOR_DECISION_ANSWER"] },
+        "authorization_scope": { "$ref": "#/$defs/external_attempt_authority" },
+        "writer_scope": { "type": "string", "minLength": 1 },
+        "repository": { "type": "string", "pattern": "^[^/\\s]+/[^/\\s]+$" },
+        "external_resource_identity": { "type": "string", "minLength": 1 },
+        "packet_id": { "type": "string", "minLength": 1 },
+        "idempotency_key": { "type": "string", "minLength": 1 },
+        "reservation_id": { "type": "string", "pattern": "^rsrv_[0-9a-f]{64}$" },
+        "status": { "const": "consumed" },
+        "consumed_at": { "type": "string", "minLength": 1 }
+      }
+    },
+    "source_preparation": {
+      "type": "object",
+      "required": ["mode", "publication", "parent_commit", "path_allowlist"],
+      "properties": {
+        "mode": { "const": "LOCAL_ONLY_UNSTAGED" },
+        "publication": { "const": "HELD" },
+        "parent_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "path_allowlist": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "legacy_event_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160,
+      "pattern": "^[A-Z0-9][A-Z0-9_-]*:ANSWER$"
     },
     "terminal_successor": {
       "enum": [
@@ -103,6 +237,7 @@
           "runtime_status": { "type": "string", "minLength": 1 },
           "dependencies": { "type": "array", "items": { "type": "string" } },
           "resource_claims": { "$ref": "#/$defs/resource_claims" },
+          "external_attempt": { "$ref": "#/$defs/external_attempt_claim" },
           "policy_id": { "type": ["string", "null"] },
           "policy_ids": {
             "type": "array",
@@ -121,24 +256,13 @@
           "owner_return_proof": { "type": ["object", "null"] },
           "current_tracker_role_id": { "type": ["string", "null"] },
           "protected_surface_authorized": { "type": "boolean" },
-          "authority_class": { "enum": ["standing_local_source_preparation"] },
+          "authority_class": { "enum": [null, "standing_local_source_preparation"] },
           "source_role_id": { "type": "string", "minLength": 1 },
           "source_preparation": {
-            "type": "object",
-            "required": ["mode", "publication", "parent_commit", "path_allowlist"],
-            "properties": {
-              "mode": { "const": "LOCAL_ONLY_UNSTAGED" },
-              "publication": { "const": "HELD" },
-              "parent_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
-              "path_allowlist": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 32,
-                "uniqueItems": true,
-                "items": { "type": "string", "minLength": 1 }
-              }
-            },
-            "additionalProperties": false
+            "anyOf": [
+              { "$ref": "#/$defs/source_preparation" },
+              { "type": "null" }
+            ]
           },
           "authority": {
             "type": "object",
@@ -154,6 +278,16 @@
         },
         "allOf": [
           {
+            "if": { "required": ["external_attempt"] },
+            "then": {
+              "required": ["protected_surface_authorized"],
+              "properties": {
+                "execution_class": { "const": "external_mutation" },
+                "protected_surface_authorized": { "const": true }
+              }
+            }
+          },
+          {
             "if": {
               "required": ["authority_class"],
               "properties": {
@@ -161,7 +295,10 @@
               }
             },
             "then": {
-              "required": ["source_role_id", "source_preparation"]
+              "required": ["source_role_id", "source_preparation"],
+              "properties": {
+                "source_preparation": { "$ref": "#/$defs/source_preparation" }
+              }
             }
           },
           {
@@ -211,6 +348,7 @@
           "repository": { "type": "string", "minLength": 1 },
           "execution_class": { "enum": ["repo_worktree", "canonical_workspace", "external_mutation"] },
           "resource_claims": { "$ref": "#/$defs/resource_claims" },
+          "external_attempt_id": { "type": "string", "minLength": 1 },
           "status": { "enum": ["active", "recovery-required"] }
         },
         "additionalProperties": true
@@ -233,6 +371,7 @@
         ],
         "properties": {
           "reservation_id": { "type": "string", "pattern": "^rsrv_[0-9a-f]{64}$" },
+          "external_attempt_id": { "type": "string", "minLength": 1 },
           "status": { "enum": ["prepared", "delivered", "host-unavailable", "recovery-required"] },
           "turn_id": { "type": ["string", "null"] },
           "transport_digest": { "type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$" },
@@ -248,14 +387,44 @@
         "additionalProperties": true
       }
     },
+    "external_attempts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/external_attempt_record" }
+    },
     "completed_packets": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
     "completed_receipts": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "terminal_successor": { "$ref": "#/$defs/terminal_successor" }
+          "terminal_successor": { "type": "string" },
+          "receipt_path": { "type": "string", "minLength": 1 },
+          "receipt_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
         },
+        "oneOf": [
+          {
+            "not": {
+              "anyOf": [
+                { "required": ["receipt_path"] },
+                { "required": ["receipt_sha256"] }
+              ]
+            },
+            "properties": {
+              "terminal_successor": { "$ref": "#/$defs/terminal_successor" }
+            }
+          },
+          {
+            "required": ["receipt_path", "receipt_sha256"],
+            "properties": {
+              "terminal_successor": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160,
+                "pattern": "^[A-Z0-9][A-Z0-9_-]*$"
+              }
+            }
+          }
+        ],
         "additionalProperties": true
       }
     },
@@ -263,17 +432,50 @@
     "processed_events": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": ["event_id", "payload_digest"],
-        "additionalProperties": false,
-        "properties": {
-          "event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
-          "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-          "transport_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-          "target_role_id": { "type": ["string", "null"] },
-          "execution_target": { "anyOf": [{ "$ref": "#/$defs/execution_target" }, { "type": "null" }] },
-          "owner_return": { "anyOf": [{ "$ref": "#/$defs/owner_return" }, { "type": "null" }] }
-        }
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["event_id", "payload_digest"],
+            "additionalProperties": false,
+            "properties": {
+              "event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
+              "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+              "transport_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+              "source_role_id": { "type": ["string", "null"] },
+              "kind": { "type": ["string", "null"] },
+              "external_attempt_authority": {
+                "anyOf": [{ "$ref": "#/$defs/external_attempt_authority" }, { "type": "null" }]
+              },
+              "target_role_id": { "type": ["string", "null"] },
+              "execution_target": { "anyOf": [{ "$ref": "#/$defs/execution_target" }, { "type": "null" }] },
+              "owner_return": { "anyOf": [{ "$ref": "#/$defs/owner_return" }, { "type": "null" }] }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["event_id", "payload_digest", "target_role_id", "disposition"],
+            "additionalProperties": false,
+            "properties": {
+              "event_id": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" },
+                  { "$ref": "#/$defs/legacy_event_id" }
+                ]
+              },
+              "payload_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+              "target_role_id": { "type": "string", "minLength": 1 },
+              "execution_target": { "$ref": "#/$defs/execution_target" },
+              "owner_return": { "$ref": "#/$defs/legacy_owner_return" },
+              "disposition": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200,
+                "pattern": "^[A-Z0-9][A-Z0-9_-]*$"
+              },
+              "source_event_id": { "type": "string", "pattern": "^onv1_[0-9a-f]{64}$" }
+            }
+          }
+        ]
       }
     }
   },

@@ -75,6 +75,33 @@ then consumes terminal receipts. A missing snapshot without those journals
 still fails closed. This makes disposable `tmp` cleanup recoverable without
 inventing packets, leases, deliveries, or completions.
 
+### Canonical-program schema compatibility
+
+The v2 schema distinguishes current scheduler writes from immutable historical
+records without migrating or rewriting the canonical program:
+
+- an ordinary standing packet may persist `authority_class: null` and
+  `source_preparation: null`; selecting
+  `standing_local_source_preparation` still requires the existing closed
+  source-preparation object;
+- a current completion receipt remains limited to the five closed terminal
+  successors; only a receipt carrying both `receipt_path` and
+  `receipt_sha256` may use the bounded uppercase historical successor form;
+- a current processed event retains the strict current routing and authority
+  shape; only a record carrying `disposition` may use the strict historical
+  shape, the audited legacy owner-return delivery orders, an optional
+  `source_event_id`, or a bounded uppercase legacy decision ID ending in
+  `:ANSWER`.
+
+These discriminators are compatibility boundaries, not new writer authority.
+Current scheduler writers do not emit `receipt_path`, `receipt_sha256`, or
+`disposition`, so they cannot produce a historical variant accidentally.
+Unknown authority classes, standing authority with null source preparation,
+free-form current successors, unknown delivery orders, malformed dispositions,
+legacy IDs without a historical discriminator, and extra historical fields all
+remain invalid. Restart and replay preserve historical bytes; no compatibility
+path rewrites the program or widens execution authority.
+
 ## Lease behavior
 
 An active lease persists its repository, mutating execution class, and normalized
@@ -95,7 +122,7 @@ the `ACTIVE` state, so it cannot expose the same packet twice.
 
 The same transaction records a `prepared` delivery intent containing the exact
 event, digest, packet, role, thread, and writer-scope identities. After the
-app-native send returns, MAIN settles that intent with the returned turn ID. An
+app-native send returns, 01 Ops settles that intent with the returned turn ID. An
 ambiguous result becomes `recovery-required`; the admitted recovery owner must
 inspect complete target history for the exact event ID and must not retry
 blindly. Active work without
@@ -146,7 +173,7 @@ its exact delivery intent is `prepared` and has no returned turn. Prepared
 cancellation requires the exact packet, writer scope, and reservation. A
 delivered packet cannot be cancelled. A recovery-required packet can be
 superseded only through the closed absence-proof transition above, issued by
-the Workflow Architect recovery owner or MAIN under exact recovery authority;
+the Workflow Architect recovery owner or 01 Ops under exact recovery authority;
 ordinary owner/review/manual routing does not require MAIN as a relay.
 
 `atlas.worker-lease.v2` now requires `writer_scope`; a lease without its
@@ -158,14 +185,67 @@ The default scope for a `repo_worktree` job is derived from its repository. A
 conflict groups remain responsible for complete, non-overlapping file,
 worktree, port, browser, and external-writer claims.
 
-An `external_mutation` job does not claim repository files or worktrees. It
-must declare at least one exact `external_writers` resource, receives the same
-durable mutating lease as source writers, and conflicts on writer scope or an
-overlapping external writer. This lets PR lifecycle control continue beside a
-held root validation scope without weakening same-repository source isolation.
+An `external_mutation` job must declare at least one exact `external_writers`
+resource, receives the same durable mutating lease as source writers, and
+conflicts on writer scope or an overlapping external writer. It normally has no
+repository file or worktree claim. A protected branch or pull-request writer
+may retain exact source-file and isolated-worktree provenance; those additional
+claims participate in the ordinary file and worktree conflict checks.
 Canonical envelope ingestion persists `protected_surface_authorized` exactly;
 otherwise protected lifecycle wording remains blocked after handoff even when
 the originating authority admitted that bounded surface.
+
+### Guarded external-attempt consumption
+
+A mutating external-provider packet may carry one closed `external_attempt`
+claim. The claim binds its attempt ID and limit, the expected persisted
+consumption count, the authorizing event and payload digest, the exact writer
+scope, the repository identity, and one normalized external-resource identity.
+That resource must be the exact sole normalized entry in
+`resource_claims.external_writers`; membership is insufficient because an extra
+writer would widen the active lease beyond the Authorization decision. Duplicate,
+missing, extra, malformed, mismatched, exhausted, or ineligible claim data fails
+closed before reservation. The packet must also be `external_mutation` and carry
+explicit protected-surface authority.
+
+The first contract is deliberately one-shot: `limit` is exactly `1` and
+`expected_consumed_count` is exactly `0` in both schema and candidate
+admission. The claim's event and payload digest must also match exactly one
+previously validated `OPERATOR_DECISION` or `OPERATOR_DECISION_ANSWER` from
+`fawxzzy.authorization` in the canonical processed-event history. That decision
+must carry a closed `external_attempt_authority` object whose attempt ID,
+one-shot limit and expected count, writer scope, repository, and normalized
+external-resource identity equal the claim exactly. The scheduler retains that
+normalized scope with the processed decision and copies it into the immutable
+consumption record. A missing scope, unrelated decision, or event-ID, digest,
+role, kind, attempt, count, writer, repository, or resource mismatch is rejected
+before a standing packet, attempt record, reservation, lease, or delivery intent
+can change. The packet's separate `external_mutation`, protected-surface, exact
+writer-scope, repository, and resource-claim checks remain the execution and
+mutation-cap boundary.
+
+Under the existing exclusive program lock, the scheduler compares the claim to
+the immutable `external_attempts` ledger and prepares both the incremented
+consumption record and deterministic reservation. It commits that record, the
+`ACTIVE` packet, its lease, and its prepared delivery intent in the same atomic
+program replacement. Claim-bearing reservation is also isolated in memory: any
+validation, collision, or transition failure discards the working copy, leaving
+no partial attempt, lease, or delivery state.
+
+The ledger keeps one consumed record per attempt ID, including the originating
+packet, idempotency key, and reservation. An exact restart therefore observes
+the existing `ACTIVE` packet and correlated reservation without incrementing or
+creating a second lease. Reuse by the same packet is already consumed; reuse by
+a different packet or idempotency key is a cross-packet replay and fails closed.
+Terminal settlement releases the lease but never removes consumed-attempt
+history.
+
+Operator recovery is evidence-driven: after an ambiguous restart, inspect the
+canonical program under lock. If the ledger and correlated reservation are both
+present, reconcile the existing delivery only. If neither is present, a fresh
+authority may retry from the still-unconsumed count. If only one side is present,
+or identities differ, hold for scheduler repair; never reconstruct, decrement,
+or hand-edit the ledger and never issue the provider request.
 
 Repository identities are canonicalized before scope derivation, persistence,
 and collision checks. GitHub `owner/repo`, HTTPS, SSH, and `.git` aliases map to
@@ -182,6 +262,20 @@ from the validated checkout. Missing, catch-all, wildcard-worktree, or
 same-worktree claims fail closed; the ordinary wave conflict rule still
 serializes overlapping repository writers.
 
+A same-repository `external_mutation` may also continue beside the virtual root
+validation hold, but only when its initial conflict set is exactly `files`, it
+has explicit protected-surface authority, and it declares nonempty concrete
+file, isolated-worktree, and external-writer claims. Every file claim must be a
+canonical repository-relative path: forward-slash spelling with no surrounding
+whitespace, leading slash, drive prefix, wildcard, empty segment, or `.` / `..`
+segment. Every claimed worktree must differ from the validation root. A missing,
+unbounded, or wildcard claim, a different repository, the validation worktree
+itself, or any additional writer-scope, worktree, external-writer,
+canonical-root, repository, port, or browser conflict keeps the packet blocked.
+This exception removes only the validation candidate's synthetic `**` file
+collision; normal execution-wave and active-lease collision checks remain
+unchanged.
+
 ## Continuation behavior
 
 `01 Ops` consumes only already-authorized READY packets, selects the largest deterministic
@@ -194,16 +288,16 @@ writer scope, and execution class. Legacy selector or validation output without
 that owner metadata is held as `root_owner_admission_required`; 01 Ops never
 becomes a catch-all source or semantic authority.
 
-When a receipt arrives, MAIN persists it, releases the correlated lease, and
+When a receipt arrives, 01 Ops persists it, releases the correlated lease, and
 immediately selects the next eligible wave. It does not wait for the next
 heartbeat. Heartbeats recover interrupted coordination only.
 
-MAIN writes changed canonical envelopes to
+01 Ops writes changed canonical envelopes to
 `tmp/atlas/autonomous-inbox-events.jsonl` and a fresh app-native role snapshot
 to `tmp/atlas/standing-role-bindings.latest.json`, runs the bridge and scheduler,
 then sends only the persisted `dispatch_plan` through the native task API.
 Program generation and selection are deterministic local code; task delivery
-remains app-native and uses the resolved `runtime_thread_id`. MAIN writes the
+remains app-native and uses the resolved `runtime_thread_id`. 01 Ops writes the
 app result to a bounded delivery-result JSON/JSONL input and reruns settlement
 under the same program lock before consuming later receipts.
 

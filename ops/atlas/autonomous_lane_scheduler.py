@@ -3,6 +3,7 @@ from __future__ import annotations
 """Select deterministic dependency-ready waves under conflict-group leases."""
 
 import argparse
+import copy
 import hashlib
 import fnmatch
 import json
@@ -78,6 +79,8 @@ RECOVERY_ABSENCE_ENVELOPE_KIND = "DELIVERY_RECOVERY_PROOF"
 RECOVERY_ABSENCE_CALL_STATE = "TERMINALLY_LOST"
 RECOVERY_ABSENCE_AUTHORITIES = {OPERATIONS_ROLE_ID, "atlas.workflow-architect"}
 WORKFLOW_STANDARDIZATION_POLICY_ID = "ATLAS-WORKFLOW-STANDARDIZATION-20260721-001"
+AUTHORIZATION_ROLE_ID = "fawxzzy.authorization"
+AUTHORIZATION_EVENT_KINDS = {"OPERATOR_DECISION", "OPERATOR_DECISION_ANSWER"}
 CANONICAL_SCHEDULER_AUTHORITY = OrderedDict(
     [
         ("logical_role_id", OPERATIONS_ROLE_ID),
@@ -394,6 +397,7 @@ def load_program(root: Path, program_path: str) -> tuple[dict[str, Any] | None, 
         "active_leases",
         "scope_holds",
         "delivery_intents",
+        "external_attempts",
         "completed_packets",
         "completed_receipts",
         "processed_events",
@@ -422,6 +426,47 @@ def load_program(root: Path, program_path: str) -> tuple[dict[str, Any] | None, 
                 errors.append(_finding("program_invalid_active_lease", "Every active lease entry must persist a mutating execution_class."))
             if not isinstance(lease.get("resource_claims"), dict):
                 errors.append(_finding("program_invalid_active_lease", "Every active lease entry must persist resource_claims."))
+    if isinstance(payload.get("external_attempts"), list):
+        seen_attempt_ids: set[str] = set()
+        for attempt in payload["external_attempts"]:
+            violation = _external_attempt_ledger_violation(attempt)
+            if violation is not None:
+                errors.append(
+                    _finding(
+                        violation,
+                        "Every external-attempt ledger entry must satisfy the closed consumed-attempt contract.",
+                    )
+                )
+                continue
+            attempt_id = str(attempt["attempt_id"])
+            if attempt_id in seen_attempt_ids:
+                errors.append(
+                    _finding(
+                        "program_duplicate_external_attempt",
+                        "The external-attempt ledger may contain only one record per attempt_id.",
+                        attempt_id=attempt_id,
+                    )
+                )
+            seen_attempt_ids.add(attempt_id)
+    if isinstance(payload.get("processed_events"), list):
+        for event in payload["processed_events"]:
+            if not isinstance(event, dict) or event.get("external_attempt_authority") is None:
+                continue
+            authority, violation = _normalized_external_attempt_authority(
+                {"external_attempt_authority": event.get("external_attempt_authority")}
+            )
+            if (
+                violation is not None
+                or authority != event.get("external_attempt_authority")
+                or event.get("source_role_id") != AUTHORIZATION_ROLE_ID
+                or event.get("kind") not in AUTHORIZATION_EVENT_KINDS
+            ):
+                errors.append(
+                    _finding(
+                        "program_invalid_external_attempt_authority",
+                        "Processed external-attempt authority must be normalized and bound to Authorization provenance.",
+                    )
+                )
     return payload, errors
 
 
@@ -511,6 +556,7 @@ def _initial_runtime_program() -> OrderedDict[str, Any]:
             ("active_leases", []),
             ("scope_holds", []),
             ("delivery_intents", []),
+            ("external_attempts", []),
             ("completed_packets", []),
             ("completed_receipts", []),
             ("released_leases", []),
@@ -1680,6 +1726,7 @@ def reconcile_runtime_program(
     reconciled["schema_version"] = PROGRAM_SCHEMA_VERSION
     reconciled["scheduler_authority"] = OrderedDict(CANONICAL_SCHEDULER_AUTHORITY)
     reconciled.pop("forbidden_owner_lanes", None)
+    reconciled.setdefault("external_attempts", [])
     findings: list[OrderedDict[str, Any]] = []
     bindings = _binding_index(bindings_payload)
     standing = [item for item in reconciled.get("standing_packets", []) if isinstance(item, dict)]
@@ -1853,6 +1900,28 @@ def reconcile_runtime_program(
             terminal_successor_error["details"]["event_id"] = event_id
             findings.append(terminal_successor_error)
             continue
+        external_attempt_authority, external_attempt_authority_error = _normalized_external_attempt_authority(payload)
+        if external_attempt_authority_error is not None:
+            findings.append(
+                _finding(
+                    external_attempt_authority_error,
+                    "An external-attempt authorization scope must be closed, normalized, and one-shot.",
+                    event_id=event_id,
+                )
+            )
+            continue
+        if external_attempt_authority is not None and (
+            envelope.get("source_role_id") != AUTHORIZATION_ROLE_ID
+            or envelope.get("kind") not in AUTHORIZATION_EVENT_KINDS
+        ):
+            findings.append(
+                _finding(
+                    "external_attempt_authority_provenance_invalid",
+                    "Only a canonical Authorization decision may carry external-attempt authority.",
+                    event_id=event_id,
+                )
+            )
+            continue
         prior_event = processed.get(event_id)
         projection_replay = False
         if prior_event is not None:
@@ -1882,6 +1951,44 @@ def reconcile_runtime_program(
                     )
                 )
                 continue
+            prior_source_role_id = prior_event.get("source_role_id")
+            prior_kind = prior_event.get("kind")
+            prior_external_attempt_authority = prior_event.get("external_attempt_authority")
+            source_role_id = envelope.get("source_role_id")
+            kind = envelope.get("kind")
+            if prior_source_role_id is not None and prior_source_role_id != source_role_id:
+                findings.append(
+                    _finding(
+                        "event_provenance_collision",
+                        "One event_id cannot change its source role.",
+                        event_id=event_id,
+                    )
+                )
+                continue
+            if prior_kind is not None and prior_kind != kind:
+                findings.append(
+                    _finding(
+                        "event_provenance_collision",
+                        "One event_id cannot change its envelope kind.",
+                        event_id=event_id,
+                    )
+                )
+                continue
+            if prior_external_attempt_authority is not None and prior_external_attempt_authority != external_attempt_authority:
+                findings.append(
+                    _finding(
+                        "event_provenance_collision",
+                        "One event_id cannot change its external-attempt authorization scope.",
+                        event_id=event_id,
+                    )
+                )
+                continue
+            if prior_source_role_id is None:
+                prior_event["source_role_id"] = source_role_id
+            if prior_kind is None:
+                prior_event["kind"] = kind
+            if prior_external_attempt_authority is None and external_attempt_authority is not None:
+                prior_event["external_attempt_authority"] = external_attempt_authority
             replay_packet_id = str(payload.get("packet_id") or "")
             replay_state = str(payload.get("canonical_lifecycle_state") or payload.get("state") or "").upper()
             replay_packet = packets.get(replay_packet_id)
@@ -1905,7 +2012,9 @@ def reconcile_runtime_program(
                     ("event_id", event_id),
                     ("payload_digest", payload_digest),
                     ("transport_digest", transport_digest),
-                    ("transport_digest", transport_digest),
+                    ("source_role_id", envelope.get("source_role_id")),
+                    ("kind", envelope.get("kind")),
+                    ("external_attempt_authority", external_attempt_authority),
                     ("target_role_id", envelope.get("target_role_id")),
                     ("execution_target", execution_target),
                     ("owner_return", owner_return),
@@ -2554,6 +2663,21 @@ def reconcile_runtime_program(
             finding.setdefault("details", {})
             finding["details"].update({"event_id": event_id, "packet_id": packet_id})
         findings.extend(claim_findings)
+        external_attempt, external_attempt_violation = _normalized_external_attempt_claim(
+            payload,
+            resource_claims=resource_claims,
+            processed_events=processed_items,
+        )
+        if external_attempt_violation is not None:
+            findings.append(
+                _finding(
+                    external_attempt_violation,
+                    "External-attempt authority failed its closed provider-attempt claim contract.",
+                    event_id=event_id,
+                    packet_id=packet_id,
+                )
+            )
+            continue
         binding = execution_binding if transport_required else bindings.get(role_id)
         runtime_thread_id = binding.get("current_runtime_id") if binding else None
         runtime_status = str(binding.get("runtime_status") or "missing") if binding else "missing"
@@ -2610,6 +2734,8 @@ def reconcile_runtime_program(
                 ("idempotency_key", envelope.get("idempotency_key")),
             ]
         )
+        if external_attempt is not None:
+            candidate["external_attempt"] = external_attempt
         requested_reservation_id = payload.get("reservation_id")
         if isinstance(requested_reservation_id, str) and requested_reservation_id:
             deterministic_reservation_id = _deterministic_reservation_id(candidate)
@@ -2924,6 +3050,324 @@ def _resource_claims(value: Any) -> OrderedDict[str, list[str]]:
     return claims
 
 
+def _normalized_external_attempt_authority(
+    value: Any,
+) -> tuple[OrderedDict[str, Any] | None, str | None]:
+    """Return the closed external-attempt scope carried by one Authorization decision."""
+
+    raw = value.get("external_attempt_authority") if isinstance(value, dict) else None
+    if raw is None:
+        return None, None
+    required = {
+        "attempt_id",
+        "limit",
+        "expected_consumed_count",
+        "writer_scope",
+        "repository",
+        "external_resource_identity",
+    }
+    if not isinstance(raw, dict) or set(raw) != required:
+        return None, "external_attempt_authority_invalid"
+    attempt_id = raw.get("attempt_id")
+    limit = raw.get("limit")
+    expected = raw.get("expected_consumed_count")
+    writer_scope = raw.get("writer_scope")
+    repository = _repository_identity(raw.get("repository"))
+    raw_external_resource_identity = raw.get("external_resource_identity")
+    external_resource_identity = (
+        _external_writer_identity(raw_external_resource_identity)
+        if isinstance(raw_external_resource_identity, str)
+        else ""
+    )
+    if not isinstance(attempt_id, str) or not attempt_id.strip():
+        return None, "external_attempt_authority_invalid"
+    if type(limit) is not int or limit != 1:
+        return None, "external_attempt_authority_limit_unsupported"
+    if type(expected) is not int or expected != 0:
+        return None, "external_attempt_authority_expected_count_mismatch"
+    if not isinstance(writer_scope, str) or not writer_scope.strip() or not repository or not external_resource_identity:
+        return None, "external_attempt_authority_invalid"
+    return (
+        OrderedDict(
+            [
+                ("attempt_id", attempt_id.strip()),
+                ("limit", limit),
+                ("expected_consumed_count", expected),
+                ("writer_scope", writer_scope.strip()),
+                ("repository", repository),
+                ("external_resource_identity", external_resource_identity),
+            ]
+        ),
+        None,
+    )
+
+
+def _external_attempt_scope_from_claim(claim: dict[str, Any]) -> OrderedDict[str, Any]:
+    return OrderedDict(
+        (field, claim[field])
+        for field in (
+            "attempt_id",
+            "limit",
+            "expected_consumed_count",
+            "writer_scope",
+            "repository",
+            "external_resource_identity",
+        )
+    )
+
+
+def _external_attempt_scope_from_record(record: dict[str, Any]) -> OrderedDict[str, Any]:
+    return OrderedDict(
+        [
+            ("attempt_id", record["attempt_id"]),
+            ("limit", record["limit"]),
+            ("expected_consumed_count", 0),
+            ("writer_scope", record["writer_scope"]),
+            ("repository", record["repository"]),
+            ("external_resource_identity", record["external_resource_identity"]),
+        ]
+    )
+
+
+def _matching_external_attempt_authorities(
+    claim: dict[str, Any],
+    processed_events: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    authorization = claim["authorization_event_digest"]
+    scope = _external_attempt_scope_from_claim(claim)
+    return [
+        item
+        for item in processed_events
+        if isinstance(item, dict)
+        and item.get("event_id") == authorization["event_id"]
+        and item.get("payload_digest") == authorization["payload_digest"]
+        and item.get("source_role_id") == AUTHORIZATION_ROLE_ID
+        and item.get("kind") in AUTHORIZATION_EVENT_KINDS
+        and item.get("external_attempt_authority") == scope
+    ]
+
+
+def _normalized_external_attempt_claim(
+    value: Any,
+    *,
+    resource_claims: dict[str, Any] | None = None,
+    processed_events: list[dict[str, Any]] | None = None,
+) -> tuple[OrderedDict[str, Any] | None, str | None]:
+    """Return a closed, normalized external-attempt claim or its exact violation."""
+
+    raw = value.get("external_attempt") if isinstance(value, dict) else None
+    if raw is None:
+        return None, None
+    if not isinstance(raw, dict):
+        return None, "external_attempt_claim_invalid"
+    required = {
+        "attempt_id",
+        "limit",
+        "expected_consumed_count",
+        "authorization_event_digest",
+        "writer_scope",
+        "repository",
+        "external_resource_identity",
+    }
+    if set(raw) != required:
+        return None, "external_attempt_claim_invalid"
+    authorization = raw.get("authorization_event_digest")
+    if not isinstance(authorization, dict) or set(authorization) != {"event_id", "payload_digest"}:
+        return None, "external_attempt_authorization_invalid"
+    event_id = authorization.get("event_id")
+    payload_digest = authorization.get("payload_digest")
+    if not isinstance(event_id, str) or not EVENT_ID_PATTERN.fullmatch(event_id):
+        return None, "external_attempt_authorization_invalid"
+    if not isinstance(payload_digest, str) or not PAYLOAD_DIGEST_PATTERN.fullmatch(payload_digest):
+        return None, "external_attempt_authorization_invalid"
+    attempt_id = raw.get("attempt_id")
+    limit = raw.get("limit")
+    expected = raw.get("expected_consumed_count")
+    writer_scope = raw.get("writer_scope")
+    repository = _repository_identity(raw.get("repository"))
+    raw_external_resource_identity = raw.get("external_resource_identity")
+    external_resource_identity = (
+        _external_writer_identity(raw_external_resource_identity)
+        if isinstance(raw_external_resource_identity, str)
+        else ""
+    )
+    if not isinstance(attempt_id, str) or not attempt_id.strip():
+        return None, "external_attempt_claim_invalid"
+    if type(limit) is not int or type(expected) is not int:
+        return None, "external_attempt_count_invalid"
+    if limit != 1:
+        return None, "external_attempt_limit_unsupported"
+    if expected != 0:
+        return None, "external_attempt_expected_count_mismatch"
+    if not isinstance(writer_scope, str) or not writer_scope.strip() or not repository or not external_resource_identity:
+        return None, "external_attempt_identity_invalid"
+    packet = value if isinstance(value, dict) else {}
+    if str(packet.get("execution_class") or "") != "external_mutation":
+        return None, "external_attempt_execution_class_forbidden"
+    if packet.get("protected_surface_authorized") is not True:
+        return None, "external_attempt_protected_authority_required"
+    if str(packet.get("writer_scope") or "") != writer_scope.strip():
+        return None, "external_attempt_writer_scope_mismatch"
+    if _repository_identity(packet.get("repository")) != repository:
+        return None, "external_attempt_repository_mismatch"
+    raw_resource_claims = packet.get("resource_claims")
+    raw_external_writers = (
+        raw_resource_claims.get("external_writers")
+        if isinstance(raw_resource_claims, dict)
+        else None
+    )
+    normalized_external_writers = (
+        [_external_writer_identity(item) for item in raw_external_writers]
+        if isinstance(raw_external_writers, list)
+        and all(isinstance(item, str) and item.strip() for item in raw_external_writers)
+        else []
+    )
+    claims = _resource_claims(resource_claims if resource_claims is not None else raw_resource_claims)
+    if (
+        claims["external_writers"] != [external_resource_identity]
+        or normalized_external_writers != [external_resource_identity]
+    ):
+        return None, "external_attempt_resource_claim_mismatch"
+    claim = OrderedDict(
+            [
+                ("attempt_id", attempt_id.strip()),
+                ("limit", limit),
+                ("expected_consumed_count", expected),
+                (
+                    "authorization_event_digest",
+                    OrderedDict([("event_id", event_id), ("payload_digest", payload_digest)]),
+                ),
+                ("writer_scope", writer_scope.strip()),
+                ("repository", repository),
+                ("external_resource_identity", external_resource_identity),
+            ]
+    )
+    if len(_matching_external_attempt_authorities(claim, processed_events or [])) != 1:
+        return None, "external_attempt_authorization_unbound"
+    return claim, None
+
+
+def _external_attempt_ledger_violation(value: Any) -> str | None:
+    """Validate one immutable consumed-attempt record without trusting schema validation alone."""
+
+    if not isinstance(value, dict):
+        return "program_invalid_external_attempt"
+    required = {
+        "attempt_id",
+        "limit",
+        "consumed_count",
+        "authorization_event_digest",
+        "authorization_source_role_id",
+        "authorization_kind",
+        "authorization_scope",
+        "writer_scope",
+        "repository",
+        "external_resource_identity",
+        "packet_id",
+        "idempotency_key",
+        "reservation_id",
+        "status",
+        "consumed_at",
+    }
+    if set(value) != required:
+        return "program_invalid_external_attempt"
+    authorization = value.get("authorization_event_digest")
+    if not isinstance(authorization, dict) or set(authorization) != {"event_id", "payload_digest"}:
+        return "program_invalid_external_attempt"
+    if not isinstance(authorization.get("event_id"), str) or not EVENT_ID_PATTERN.fullmatch(authorization["event_id"]):
+        return "program_invalid_external_attempt"
+    if not isinstance(authorization.get("payload_digest"), str) or not PAYLOAD_DIGEST_PATTERN.fullmatch(
+        authorization["payload_digest"]
+    ):
+        return "program_invalid_external_attempt"
+    if value.get("authorization_source_role_id") != AUTHORIZATION_ROLE_ID:
+        return "program_invalid_external_attempt"
+    if value.get("authorization_kind") not in AUTHORIZATION_EVENT_KINDS:
+        return "program_invalid_external_attempt"
+    limit = value.get("limit")
+    consumed_count = value.get("consumed_count")
+    if type(limit) is not int or limit != 1 or type(consumed_count) is not int or consumed_count != 1:
+        return "program_invalid_external_attempt"
+    if value.get("status") != "consumed":
+        return "program_invalid_external_attempt"
+    if not isinstance(value.get("attempt_id"), str) or not value["attempt_id"].strip():
+        return "program_invalid_external_attempt"
+    if not isinstance(value.get("writer_scope"), str) or not value["writer_scope"].strip():
+        return "program_invalid_external_attempt"
+    external_resource_identity = value.get("external_resource_identity")
+    if not _repository_identity(value.get("repository")) or not isinstance(
+        external_resource_identity, str
+    ) or not _external_writer_identity(external_resource_identity):
+        return "program_invalid_external_attempt"
+    if not isinstance(value.get("packet_id"), str) or not value["packet_id"].strip():
+        return "program_invalid_external_attempt"
+    if not isinstance(value.get("idempotency_key"), str) or not value["idempotency_key"].strip():
+        return "program_invalid_external_attempt"
+    if not isinstance(value.get("reservation_id"), str) or not re.fullmatch(r"rsrv_[0-9a-f]{64}", value["reservation_id"]):
+        return "program_invalid_external_attempt"
+    if not isinstance(value.get("consumed_at"), str) or not value["consumed_at"].strip():
+        return "program_invalid_external_attempt"
+    authority_scope, authority_scope_error = _normalized_external_attempt_authority(
+        {"external_attempt_authority": value.get("authorization_scope")}
+    )
+    if authority_scope_error is not None or authority_scope != _external_attempt_scope_from_record(value):
+        return "program_invalid_external_attempt"
+    return None
+
+
+def _prepare_external_attempt_record(
+    packet: dict[str, Any],
+    *,
+    ledger: list[dict[str, Any]],
+    processed_events: list[dict[str, Any]],
+    consumed_at: str,
+) -> OrderedDict[str, Any] | None:
+    """Compare-and-prepare one consumption record for the packet's deterministic reservation."""
+
+    claim, violation = _normalized_external_attempt_claim(packet, processed_events=processed_events)
+    if violation is not None:
+        raise RuntimeError(violation)
+    if claim is None:
+        return None
+    matching_authority = _matching_external_attempt_authorities(claim, processed_events)[0]
+    attempt_id = str(claim["attempt_id"])
+    existing = [item for item in ledger if isinstance(item, dict) and item.get("attempt_id") == attempt_id]
+    if len(existing) > 1:
+        raise RuntimeError("program_duplicate_external_attempt")
+    if existing:
+        recorded = existing[0]
+        if (
+            recorded.get("packet_id") != packet.get("packet_id")
+            or recorded.get("idempotency_key") != packet.get("idempotency_key")
+        ):
+            raise RuntimeError("external_attempt_cross_packet_replay")
+        raise RuntimeError("external_attempt_already_consumed")
+    expected = int(claim["expected_consumed_count"])
+    if expected != 0:
+        raise RuntimeError("external_attempt_expected_count_mismatch")
+    if expected + 1 > int(claim["limit"]):
+        raise RuntimeError("external_attempt_limit_exhausted")
+    return OrderedDict(
+        [
+            ("attempt_id", attempt_id),
+            ("limit", claim["limit"]),
+            ("consumed_count", expected + 1),
+            ("authorization_event_digest", claim["authorization_event_digest"]),
+            ("authorization_source_role_id", AUTHORIZATION_ROLE_ID),
+            ("authorization_kind", matching_authority["kind"]),
+            ("authorization_scope", matching_authority["external_attempt_authority"]),
+            ("writer_scope", claim["writer_scope"]),
+            ("repository", claim["repository"]),
+            ("external_resource_identity", claim["external_resource_identity"]),
+            ("packet_id", packet.get("packet_id")),
+            ("idempotency_key", packet.get("idempotency_key")),
+            ("reservation_id", _deterministic_reservation_id(packet)),
+            ("status", "consumed"),
+            ("consumed_at", consumed_at),
+        ]
+    )
+
+
 def _resource_claims_from_payload(
     payload: dict[str, Any],
 ) -> tuple[OrderedDict[str, list[str]], list[OrderedDict[str, Any]], str | None]:
@@ -3174,6 +3618,17 @@ def _owner_return_delivery_proof(
     return OrderedDict(proof), None
 
 
+def _canonical_repository_relative_path(path: str) -> bool:
+    normalized = path.replace("\\", "/")
+    return bool(
+        path == normalized == normalized.strip()
+        and not normalized.startswith("/")
+        and not re.match(r"^[a-zA-Z]:", normalized)
+        and not any(token in normalized for token in "*?[")
+        and all(part not in {"", ".", ".."} for part in normalized.split("/"))
+    )
+
+
 def _safe_standing_local_path(path: str) -> bool:
     normalized = path.replace("\\", "/").strip()
     lowered = normalized.casefold()
@@ -3192,14 +3647,7 @@ def _safe_standing_local_path(path: str) -> bool:
 
 
 def _safe_standing_local_worktree_claim(path: str) -> bool:
-    normalized = path.replace("\\", "/")
-    return bool(
-        path == normalized == normalized.strip()
-        and not normalized.startswith("/")
-        and not re.match(r"^[a-zA-Z]:", normalized)
-        and not any(token in normalized for token in "*?[")
-        and all(part not in {"", ".", ".."} for part in normalized.split("/"))
-    )
+    return _canonical_repository_relative_path(path)
 
 
 def _path_identity(path: Path) -> str:
@@ -3483,6 +3931,22 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root:
     execution_target = raw.get("execution_target") if isinstance(raw.get("execution_target"), dict) else None
     owner_return = raw.get("owner_return") if isinstance(raw.get("owner_return"), dict) else None
     authority = raw.get("authority") if isinstance(raw.get("authority"), dict) else {}
+    resource_claims = _resource_claims(raw.get("resource_claims"))
+    raw_resource_claims = raw.get("resource_claims")
+    raw_file_claims = (
+        raw_resource_claims.get("files", [])
+        if isinstance(raw_resource_claims, dict)
+        else []
+    )
+    noncanonical_external_file_claims = bool(raw_file_claims) and not all(
+        isinstance(path, str) and _canonical_repository_relative_path(path)
+        for path in raw_file_claims
+    )
+    external_attempt, external_attempt_violation = _normalized_external_attempt_claim(
+        raw,
+        resource_claims=resource_claims,
+        processed_events=[item for item in program.get("processed_events", []) if isinstance(item, dict)],
+    )
     owner_return_required = _is_standardized_payload(raw)
     dispatch_reservation = raw.get("dispatch_reservation") if isinstance(raw.get("dispatch_reservation"), dict) else {}
     resume_authority = raw.get("resume_authority") if isinstance(raw.get("resume_authority"), dict) else {}
@@ -3545,12 +4009,16 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root:
         blocked_reason = "writer_scope_forbidden"
     elif not _authority_is_canonical(raw.get("authority")):
         blocked_reason = "canonical_authority_required"
+    elif external_attempt_violation is not None:
+        blocked_reason = external_attempt_violation
     elif standing_violation := _standing_local_source_preparation_violation(
         raw,
         source_role_id=raw.get("source_role_id"),
         root=root,
     ):
         blocked_reason = standing_violation
+    elif execution_class == "external_mutation" and noncanonical_external_file_claims:
+        blocked_reason = "external_file_claim_not_canonical"
     elif execution_class == "external_mutation" and not _resource_claims(raw.get("resource_claims")).get("external_writers"):
         blocked_reason = "external_writer_claim_required"
     elif (
@@ -3591,7 +4059,8 @@ def _candidate_from_standing_packet(*, item: Any, program: dict[str, Any], root:
             ("writer_scope", writer_scope),
             ("execution_class", execution_class),
             ("dependencies", _string_list(raw.get("dependencies", []))),
-            ("resource_claims", _resource_claims(raw.get("resource_claims"))),
+            ("resource_claims", resource_claims),
+            ("external_attempt", external_attempt),
             ("protected_surface_authorized", raw.get("protected_surface_authorized") is True),
             ("authority_class", raw.get("authority_class")),
             ("source_role_id", raw.get("source_role_id")),
@@ -3715,16 +4184,59 @@ def _candidate_conflicts_with_root_validation(
     conflicts = _candidate_conflicts(candidate, validation_candidate)
     # Validation cleanup is a virtual root hold, not a writer. Read-only work
     # may inspect the held checkout; real active leases are enforced later.
-    if candidate.get("execution_class") == "read_only":
+    execution_class = candidate.get("execution_class")
+    if execution_class == "read_only":
         return []
-    if not conflicts or candidate.get("execution_class") != "repo_worktree":
-        return conflicts
-    if _repository_identity(candidate.get("repository")) != _repository_identity(validation_candidate.get("repository")):
-        return conflicts
 
     claims = _resource_claims(candidate.get("resource_claims"))
     files = claims["files"]
     worktrees = claims["worktrees"]
+    external_writers = claims["external_writers"]
+
+    if execution_class == "external_mutation" and (files or worktrees):
+        candidate_repository = _repository_identity(candidate.get("repository"))
+        validation_repository = _repository_identity(validation_candidate.get("repository"))
+        same_repository = candidate_repository == validation_repository
+        exact_virtual_files_conflict = conflicts == ["files"]
+        concrete_files = bool(files) and all(
+            _canonical_repository_relative_path(path) for path in files
+        )
+        concrete_worktrees = bool(worktrees) and not any(
+            any(token in path for token in "*?[") for path in worktrees
+        )
+        concrete_external_writers = bool(external_writers) and not any(
+            any(token in identity for token in "*?[") for identity in external_writers
+        )
+        validation_worktree = (
+            str(validation_root.resolve()).replace("\\", "/").casefold().rstrip("/")
+        )
+        claimed_worktrees = {
+            str(Path(path).resolve()).replace("\\", "/").casefold().rstrip("/")
+            for path in worktrees
+        }
+        isolated_worktrees = validation_worktree not in claimed_worktrees
+        if not all(
+            (
+                exact_virtual_files_conflict,
+                candidate.get("protected_surface_authorized") is True,
+                same_repository,
+                concrete_files,
+                concrete_worktrees,
+                concrete_external_writers,
+                isolated_worktrees,
+            )
+        ):
+            return conflicts or ["external_mutation_isolation"]
+        # The only conflict is the validation candidate's synthetic ** file
+        # claim. Real file, worktree, writer-scope, and external-writer
+        # collisions remain enforced by normal wave and active-lease checks.
+        return []
+
+    if not conflicts or execution_class != "repo_worktree":
+        return conflicts
+    if _repository_identity(candidate.get("repository")) != _repository_identity(validation_candidate.get("repository")):
+        return conflicts
+
     if not files or not worktrees or any(path in {"*", "**"} for path in files):
         return conflicts
     if any(any(token in path for token in "*?[") for path in worktrees):
@@ -4393,6 +4905,16 @@ def _attach_operational_projection(
                         ("scheduler", scheduler_health),
                         ("standing_packets", len(rows)),
                         ("active_leases", len(leases)),
+                        (
+                            "external_attempts_consumed",
+                            len(
+                                [
+                                    item
+                                    for item in program.get("external_attempts", [])
+                                    if isinstance(item, dict) and item.get("status") == "consumed"
+                                ]
+                            ),
+                        ),
                         ("watchdog_recovery_packets", len(watchdogs)),
                         ("watchdog_codes", watchdog_codes),
                         ("blocking_watchdog_codes", blocking_watchdog_codes),
@@ -4615,6 +5137,33 @@ def reserve_selected_jobs(
     program: dict[str, Any],
     report: dict[str, Any],
 ) -> tuple[dict[str, Any], list[OrderedDict[str, Any]]]:
+    """Reserve jobs, isolating external-attempt consumption until the whole transition succeeds."""
+
+    selected = [
+        item
+        for item in report.get("selected_jobs", [])
+        if isinstance(item, dict) and item.get("source") == "standing_task"
+    ]
+    if not any(item.get("external_attempt") is not None for item in selected):
+        return _reserve_selected_jobs_in_place(program=program, report=report)
+    working_program = copy.deepcopy(program)
+    working_report = copy.deepcopy(report)
+    reserved, reservations = _reserve_selected_jobs_in_place(
+        program=working_program,
+        report=working_report,
+    )
+    program.clear()
+    program.update(reserved)
+    report.clear()
+    report.update(working_report)
+    return program, reservations
+
+
+def _reserve_selected_jobs_in_place(
+    *,
+    program: dict[str, Any],
+    report: dict[str, Any],
+) -> tuple[dict[str, Any], list[OrderedDict[str, Any]]]:
     """Transition selected standing packets to ACTIVE and acquire writer leases."""
 
     selected = [item for item in report.get("selected_jobs", []) if isinstance(item, dict) and item.get("source") == "standing_task"]
@@ -4624,8 +5173,41 @@ def reserve_selected_jobs(
     packet_index = {str(item.get("packet_id")): item for item in standing if item.get("packet_id")}
     active_leases = [item for item in program.get("active_leases", []) if isinstance(item, dict)]
     delivery_intents = [item for item in program.get("delivery_intents", []) if isinstance(item, dict)]
+    external_attempts = [item for item in program.get("external_attempts", []) if isinstance(item, dict)]
     reservations: list[OrderedDict[str, Any]] = []
     reserved_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    seen_attempt_ids: set[str] = set()
+    for attempt in external_attempts:
+        violation = _external_attempt_ledger_violation(attempt)
+        if violation is not None:
+            raise RuntimeError(violation)
+        attempt_id = str(attempt["attempt_id"])
+        if attempt_id in seen_attempt_ids:
+            raise RuntimeError("program_duplicate_external_attempt")
+        seen_attempt_ids.add(attempt_id)
+
+    prepared_attempts: dict[str, OrderedDict[str, Any]] = {}
+    pending_attempts = copy.deepcopy(external_attempts)
+    for job in selected:
+        packet_id = str(job.get("packet_id") or "")
+        packet = packet_index.get(packet_id)
+        if packet is None:
+            raise RuntimeError(f"selected packet is no longer eligible: {packet_id}")
+        if job.get("external_attempt") is None:
+            continue
+        if job.get("recovery_resume") is True:
+            raise RuntimeError("external_attempt_recovery_requires_existing_reservation")
+        record = _prepare_external_attempt_record(
+            packet,
+            ledger=pending_attempts,
+            processed_events=[item for item in program.get("processed_events", []) if isinstance(item, dict)],
+            consumed_at=reserved_at,
+        )
+        if record is None:
+            raise RuntimeError("external_attempt_claim_missing")
+        prepared_attempts[packet_id] = record
+        pending_attempts.append(record)
 
     recovery_contexts: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {}
     scope_holds = [item for item in program.get("scope_holds", []) if isinstance(item, dict)]
@@ -4757,6 +5339,11 @@ def reserve_selected_jobs(
         ):
             raise RuntimeError(f"writer scope became leased before reservation: {writer_scope}")
         reservation_id = _deterministic_reservation_id(packet)
+        external_attempt = prepared_attempts.get(packet_id)
+        if external_attempt is not None:
+            if external_attempt["reservation_id"] != reservation_id:
+                raise RuntimeError("external_attempt_reservation_mismatch")
+            external_attempts.append(external_attempt)
         packet["state"] = "ACTIVE"
         packet["dispatch_reservation"] = OrderedDict(
             [
@@ -4765,6 +5352,8 @@ def reserve_selected_jobs(
                 ("runtime_thread_id", packet.get("runtime_thread_id")),
             ]
         )
+        if external_attempt is not None:
+            packet["dispatch_reservation"]["external_attempt_id"] = external_attempt["attempt_id"]
         reservation = OrderedDict(
             [
                 ("reservation_id", reservation_id),
@@ -4778,9 +5367,10 @@ def reserve_selected_jobs(
                 ("owner_return", packet.get("owner_return")),
             ]
         )
+        if external_attempt is not None:
+            reservation["external_attempt_id"] = external_attempt["attempt_id"]
         packet["owner_return_state"] = "PENDING" if packet.get("owner_return") else packet.get("owner_return_state")
-        delivery_intents.append(
-            OrderedDict(
+        delivery_intent = OrderedDict(
                 [
                     ("reservation_id", reservation_id),
                     ("packet_id", packet_id),
@@ -4799,11 +5389,12 @@ def reserve_selected_jobs(
                     ("prepared_at", reserved_at),
                     ("turn_id", None),
                 ]
-            )
         )
+        if external_attempt is not None:
+            delivery_intent["external_attempt_id"] = external_attempt["attempt_id"]
+        delivery_intents.append(delivery_intent)
         if job.get("execution_class") in MUTATING_EXECUTION_CLASSES:
-            active_leases.append(
-                OrderedDict(
+            active_lease = OrderedDict(
                     [
                         ("reservation_id", reservation_id),
                         ("packet_id", packet_id),
@@ -4818,8 +5409,10 @@ def reserve_selected_jobs(
                         ("heartbeat_at", reserved_at),
                         ("authority_event_id", authority.get("event_id")),
                     ]
-                )
             )
+            if external_attempt is not None:
+                active_lease["external_attempt_id"] = external_attempt["attempt_id"]
+            active_leases.append(active_lease)
         job["reservation_id"] = reservation_id
         job["runtime_thread_id"] = packet.get("runtime_thread_id")
         job["owner_return"] = packet.get("owner_return")
@@ -4828,6 +5421,7 @@ def reserve_selected_jobs(
     program["standing_packets"] = standing
     program["active_leases"] = active_leases
     program["delivery_intents"] = delivery_intents
+    program["external_attempts"] = external_attempts
     report["dispatch_reservations"] = reservations
     report["program_persisted_before_dispatch"] = True
     _attach_operational_projection(report=report, program=program)
