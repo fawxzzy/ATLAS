@@ -1096,6 +1096,53 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
                 self.assertEqual([], program["active_leases"])
                 self.assertEqual([], program["delivery_intents"])
 
+    def test_external_attempt_rejects_unapproved_or_duplicate_external_writers_transactionally(self) -> None:
+        cases = {
+            "additional_unapproved_writer": [
+                "supabase:target:data-api",
+                "supabase:target:production-write",
+            ],
+            "duplicate_normalized_writer": [
+                "supabase:target:data-api",
+                " supabase:target:data-api ",
+            ],
+        }
+        for case, external_writers in cases.items():
+            with self.subTest(case=case):
+                packet = _external_attempt_packet()
+                packet["resource_claims"]["external_writers"] = external_writers
+                program = _program_payload()
+                program.update(
+                    {
+                        "standing_packets": [packet],
+                        "active_leases": [],
+                        "delivery_intents": [],
+                        "external_attempts": [],
+                        "processed_events": _external_attempt_authority_history(packet),
+                    }
+                )
+                before = copy.deepcopy(program)
+
+                candidate = scheduler._candidate_from_standing_packet(
+                    item=packet,
+                    program=program,
+                    root=Path("C:/ATLAS"),
+                )
+
+                self.assertFalse(candidate["safe"])
+                self.assertEqual("external_attempt_resource_claim_mismatch", candidate["blocked_reason"])
+                with self.assertRaisesRegex(RuntimeError, "external_attempt_resource_claim_mismatch"):
+                    scheduler._prepare_external_attempt_record(
+                        packet,
+                        ledger=program["external_attempts"],
+                        processed_events=program["processed_events"],
+                        consumed_at="2026-08-02T00:00:00Z",
+                    )
+                self.assertEqual(before, program)
+                self.assertEqual([], program["external_attempts"])
+                self.assertEqual([], program["active_leases"])
+                self.assertEqual([], program["delivery_intents"])
+
     def test_external_attempt_persisted_packet_rejects_authority_history_mismatch_transactionally(self) -> None:
         packet = _external_attempt_packet()
         program, report = _external_attempt_program_and_report(packet)

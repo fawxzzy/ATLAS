@@ -3210,8 +3210,23 @@ def _normalized_external_attempt_claim(
         return None, "external_attempt_writer_scope_mismatch"
     if _repository_identity(packet.get("repository")) != repository:
         return None, "external_attempt_repository_mismatch"
-    claims = _resource_claims(resource_claims if resource_claims is not None else packet.get("resource_claims"))
-    if external_resource_identity not in claims["external_writers"]:
+    raw_resource_claims = packet.get("resource_claims")
+    raw_external_writers = (
+        raw_resource_claims.get("external_writers")
+        if isinstance(raw_resource_claims, dict)
+        else None
+    )
+    normalized_external_writers = (
+        [_external_writer_identity(item) for item in raw_external_writers]
+        if isinstance(raw_external_writers, list)
+        and all(isinstance(item, str) and item.strip() for item in raw_external_writers)
+        else []
+    )
+    claims = _resource_claims(resource_claims if resource_claims is not None else raw_resource_claims)
+    if (
+        claims["external_writers"] != [external_resource_identity]
+        or normalized_external_writers != [external_resource_identity]
+    ):
         return None, "external_attempt_resource_claim_mismatch"
     claim = OrderedDict(
             [

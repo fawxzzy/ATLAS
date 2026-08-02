@@ -201,10 +201,12 @@ A mutating external-provider packet may carry one closed `external_attempt`
 claim. The claim binds its attempt ID and limit, the expected persisted
 consumption count, the authorizing event and payload digest, the exact writer
 scope, the repository identity, and one normalized external-resource identity.
-The resource must also appear in `resource_claims.external_writers`; the packet
-must be `external_mutation` and must carry explicit protected-surface authority.
-Missing, extra, malformed, mismatched, exhausted, or ineligible claim data fails
-closed before reservation.
+That resource must be the exact sole normalized entry in
+`resource_claims.external_writers`; membership is insufficient because an extra
+writer would widen the active lease beyond the Authorization decision. Duplicate,
+missing, extra, malformed, mismatched, exhausted, or ineligible claim data fails
+closed before reservation. The packet must also be `external_mutation` and carry
+explicit protected-surface authority.
 
 The first contract is deliberately one-shot: `limit` is exactly `1` and
 `expected_consumed_count` is exactly `0` in both schema and candidate
