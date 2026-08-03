@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import io
 import json
+import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -101,6 +103,25 @@ def _base_report(*, status: str = preflight.STATUS_OK) -> dict[str, object]:
 
 
 class AtlasAiWorkSessionPreflightTests(unittest.TestCase):
+    def _init_repo(self, path: Path, *, remote: str = "https://github.com/fawxzzy/ATLAS.git") -> None:
+        path.mkdir(parents=True)
+        subprocess.run(["git", "init", "--quiet", str(path)], check=True)
+        subprocess.run(["git", "-C", str(path), "remote", "add", "origin", remote], check=True)
+
+    def _write_validation_receipt(self, root: Path, *, stack_root: Path | str | None = None) -> None:
+        receipt_path = root / "runtime/receipts/validation/stack-validation.latest.json"
+        receipt_path.parent.mkdir(parents=True)
+        receipt_path.write_text(
+            json.dumps(
+                {
+                    "stack_root": str(stack_root if stack_root is not None else root.resolve()),
+                    "summary": {"critical": 0, "error": 0, "warning": 2, "info": 1},
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
     def _patch_collectors(self, *, projection_status: str = preflight.STATUS_OK, continuity_items: list[dict[str, object]] | None = None):
         branch_state = {
             "branch": "main",
@@ -254,6 +275,179 @@ class AtlasAiWorkSessionPreflightTests(unittest.TestCase):
         self.assertIsNone(resolved)
         self.assertEqual("absolute_output_path", error["code"])
 
+    def test_collect_validation_defaults_to_source_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_root = Path(temp_dir) / "source"
+            self._init_repo(source_root)
+            self._write_validation_receipt(source_root)
+
+            validation = preflight.collect_validation(source_root)
+
+        self.assertTrue(validation["available"])
+        self.assertEqual("exact", validation["binding_status"])
+        self.assertEqual(validation["source_root"], validation["validation_root"])
+        self.assertEqual("github.com/fawxzzy/atlas", validation["repository"])
+
+    def test_collect_validation_accepts_explicit_same_repository_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_root = Path(temp_dir) / "source"
+            validation_root = Path(temp_dir) / "validation"
+            self._init_repo(source_root)
+            self._init_repo(validation_root, remote="git@github.com:fawxzzy/ATLAS.git")
+            self._write_validation_receipt(validation_root)
+
+            validation = preflight.collect_validation(source_root, validation_root=validation_root)
+
+        self.assertTrue(validation["available"])
+        self.assertEqual("exact", validation["binding_status"])
+        self.assertEqual(2, validation["warning"])
+        self.assertEqual(1, validation["info"])
+
+    def test_collect_validation_rejects_different_repository(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_root = Path(temp_dir) / "source"
+            validation_root = Path(temp_dir) / "validation"
+            self._init_repo(source_root)
+            self._init_repo(validation_root, remote="https://github.com/fawxzzy/other.git")
+            self._write_validation_receipt(validation_root)
+
+            validation = preflight.collect_validation(source_root, validation_root=validation_root)
+
+        self.assertFalse(validation["available"])
+        self.assertEqual("blocked", validation["binding_status"])
+        self.assertEqual("validation_root_repository_mismatch", validation["binding_error"]["code"])
+
+    def test_collect_validation_rejects_receipt_stack_root_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_root = Path(temp_dir) / "source"
+            validation_root = Path(temp_dir) / "validation"
+            self._init_repo(source_root)
+            self._init_repo(validation_root)
+            self._write_validation_receipt(validation_root, stack_root=Path(temp_dir) / "other")
+
+            validation = preflight.collect_validation(source_root, validation_root=validation_root)
+
+        self.assertFalse(validation["available"])
+        self.assertEqual("validation_receipt_root_mismatch", validation["binding_error"]["code"])
+
+    def test_collect_validation_rejects_relative_receipt_stack_root_even_when_cwd_matches(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_root = Path(temp_dir) / "source"
+            validation_root = Path(temp_dir) / "validation"
+            self._init_repo(source_root)
+            self._init_repo(validation_root)
+            self._write_validation_receipt(validation_root, stack_root="validation")
+
+            original_cwd = Path.cwd()
+            try:
+                os.chdir(temp_dir)
+                validation = preflight.collect_validation(source_root, validation_root=validation_root)
+            finally:
+                os.chdir(original_cwd)
+
+        self.assertFalse(validation["available"])
+        self.assertEqual("blocked", validation["binding_status"])
+        self.assertEqual("validation_receipt_root_mismatch", validation["binding_error"]["code"])
+        self.assertEqual("validation", validation["receipt_stack_root"])
+
+    def test_collect_validation_rejects_missing_explicit_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_root = Path(temp_dir) / "source"
+            self._init_repo(source_root)
+
+            validation = preflight.collect_validation(
+                source_root,
+                validation_root=Path(temp_dir) / "missing",
+            )
+
+        self.assertFalse(validation["available"])
+        self.assertEqual("validation_root_unavailable", validation["binding_error"]["code"])
+
+    def test_collect_validation_rejects_relative_explicit_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_root = Path(temp_dir) / "source"
+            self._init_repo(source_root)
+
+            validation = preflight.collect_validation(
+                source_root,
+                validation_root=Path("implicit-validation-root"),
+            )
+
+        self.assertFalse(validation["available"])
+        self.assertEqual("validation_root_not_absolute", validation["binding_error"]["code"])
+
+    def test_root_binding_rejects_windows_reparse_attribute(self) -> None:
+        candidate = mock.Mock(spec=Path)
+        candidate.exists.return_value = True
+        candidate.is_dir.return_value = True
+        candidate.is_symlink.return_value = False
+        candidate.lstat.return_value = mock.Mock(st_file_attributes=0x400)
+        candidate.__str__ = mock.Mock(return_value="C:/junctioned-root")
+
+        identity, error = preflight._root_binding_identity(candidate, label="validation_root")
+
+        self.assertIsNone(identity)
+        self.assertEqual("validation_root_ambiguous", error["code"])
+
+    def test_root_binding_rejects_indirect_symlink_or_junction_alias(self) -> None:
+        candidate = mock.Mock(spec=Path)
+        candidate.exists.return_value = True
+        candidate.is_dir.return_value = True
+        candidate.is_symlink.return_value = False
+        candidate.lstat.return_value = mock.Mock(st_file_attributes=0)
+        candidate.resolve.return_value = Path("C:/real/root")
+        candidate.__fspath__ = mock.Mock(return_value="C:/alias/root")
+        candidate.__str__ = mock.Mock(return_value="C:/alias/root")
+
+        identity, error = preflight._root_binding_identity(candidate, label="validation_root")
+
+        self.assertIsNone(identity)
+        self.assertEqual("validation_root_ambiguous", error["code"])
+
+    def test_root_binding_preserves_case_when_filesystem_identity_is_case_sensitive(self) -> None:
+        candidate = mock.Mock(spec=Path)
+        candidate.exists.return_value = True
+        candidate.is_dir.return_value = True
+        candidate.is_symlink.return_value = False
+        candidate.lstat.return_value = mock.Mock(st_file_attributes=0)
+        candidate.resolve.return_value = Path("C:/ATLAS")
+        candidate.__fspath__ = mock.Mock(return_value="C:/atlas")
+        candidate.__str__ = mock.Mock(return_value="C:/atlas")
+
+        with mock.patch.object(preflight, "_filesystem_identity_is_case_insensitive", return_value=False):
+            identity, error = preflight._root_binding_identity(candidate, label="validation_root")
+
+        self.assertIsNone(identity)
+        self.assertEqual("validation_root_ambiguous", error["code"])
+
+    def test_root_binding_folds_case_only_when_filesystem_identity_is_proven_insensitive(self) -> None:
+        candidate = mock.Mock(spec=Path)
+        candidate.exists.return_value = True
+        candidate.is_dir.return_value = True
+        candidate.is_symlink.return_value = False
+        candidate.lstat.return_value = mock.Mock(st_file_attributes=0)
+        candidate.resolve.return_value = Path("C:/ATLAS")
+        candidate.__fspath__ = mock.Mock(return_value="C:/atlas")
+        candidate.__str__ = mock.Mock(return_value="C:/atlas")
+
+        with mock.patch.object(
+            preflight,
+            "_filesystem_identity_is_case_insensitive",
+            return_value=True,
+        ), mock.patch.object(
+            preflight,
+            "_git_stdout",
+            side_effect=[
+                (0, "C:/ATLAS"),
+                (0, "https://github.com/fawxzzy/ATLAS.git"),
+            ],
+        ):
+            identity, error = preflight._root_binding_identity(candidate, label="validation_root")
+
+        self.assertIsNone(error)
+        self.assertEqual("c:/atlas", identity["path_identity"])
+        self.assertEqual("github.com/fawxzzy/atlas", identity["repository"])
+
     def test_contradictory_authoritative_inputs_fail_closed(self) -> None:
         patcher, values = self._patch_collectors(continuity_items=[{"marker": "AI Work Session Stability & Auto-Sync Loop"}])
         with patcher as mocks:
@@ -294,6 +488,25 @@ class AtlasAiWorkSessionPreflightTests(unittest.TestCase):
                     code = preflight.main(["--json", "--output", "tmp/preflight.json"])
             self.assertEqual(0, code)
             self.assertTrue(output_path.exists())
+
+    def test_main_forwards_explicit_validation_root(self) -> None:
+        report = _base_report(status=preflight.STATUS_OK)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            validation_root = root / "validation"
+            with mock.patch.object(preflight, "atlas_root", return_value=root), mock.patch.object(
+                preflight, "build_report", return_value=report
+            ) as build_report:
+                with mock.patch("sys.stdout", io.StringIO()):
+                    code = preflight.main(["--json", "--validation-root", str(validation_root)])
+
+        self.assertEqual(0, code)
+        build_report.assert_called_once_with(
+            root=root.resolve(),
+            scope="root",
+            owner=None,
+            validation_root=validation_root,
+        )
 
     def test_main_returns_blocker_for_protected_output_path(self) -> None:
         report = _base_report(status=preflight.STATUS_OK)
