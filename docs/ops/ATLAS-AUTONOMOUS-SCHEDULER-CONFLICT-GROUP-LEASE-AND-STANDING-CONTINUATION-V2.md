@@ -262,6 +262,18 @@ from the validated checkout. Missing, catch-all, wildcard-worktree, or
 same-worktree claims fail closed; the ordinary wave conflict rule still
 serializes overlapping repository writers.
 
+The scheduler may bind that checkout explicitly with `--validation-root` when
+its source checkout is a separate canonical runtime worktree. The default
+remains the source root for compatibility. Both roots must be direct,
+unambiguous Git roots with the same normalized origin repository, and the
+validation receipt's `stack_root` must exactly equal the normalized validation
+root. Missing roots, different repositories, receipt mismatch, or symlink,
+junction, and other reparse-point ambiguity block selection. The bound
+validation root governs only preflight receipt lookup and validation-isolation
+conflicts; program, bridge input, prompt, and output paths remain rooted at the
+scheduler source checkout. Environment overrides, implicit root search, and
+receipt copy or rewrite are not supported.
+
 A same-repository `external_mutation` may also continue beside the virtual root
 validation hold, but only when its initial conflict set is exactly `files`, it
 has explicit protected-surface authority, and it declares nonempty concrete

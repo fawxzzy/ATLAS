@@ -4585,6 +4585,11 @@ def _validation_state(preflight_report: dict[str, Any]) -> OrderedDict[str, Any]
     residue = preflight_report.get("local_residue", {}) if isinstance(preflight_report.get("local_residue"), dict) else {}
     return OrderedDict(
         [
+            ("available", validation.get("available")),
+            ("binding_status", validation.get("binding_status")),
+            ("binding_error", validation.get("binding_error")),
+            ("source_root", validation.get("source_root")),
+            ("validation_root", validation.get("validation_root")),
             ("critical", int(validation.get("critical", 0) or 0)),
             ("error", int(validation.get("error", 0) or 0)),
             ("warning", int(validation.get("warning", 0) or 0)),
@@ -5439,10 +5444,15 @@ def build_report(
     preflight_report: dict[str, Any] | None = None,
     selector_report: dict[str, Any] | None = None,
     planner_report: dict[str, Any] | None = None,
+    validation_root: Path | None = None,
 ) -> OrderedDict[str, Any]:
     branch, head = _branch_state(root)
     parity = _parity_state(root)
-    preflight_report = preflight_report or ai_work_session_preflight.build_report(root=root, scope="root")
+    preflight_report = preflight_report or ai_work_session_preflight.build_report(
+        root=root,
+        scope="root",
+        validation_root=validation_root,
+    )
     selector_report = selector_report or _load_selector(root)
     planner_report = planner_report or planner.build_report(root=root)
 
@@ -5534,7 +5544,11 @@ def build_report(
     stop_reason = "no_safe_candidate"
     safe_to_execute = False
 
-    if validation_state["critical"] > 0 or validation_state["error"] > 0:
+    validation_binding_blocked = (
+        validation_state.get("binding_status") == "blocked"
+        or validation_state.get("available") is False
+    )
+    if validation_binding_blocked or validation_state["critical"] > 0 or validation_state["error"] > 0:
         validation_cleanup_candidate = OrderedDict(
             [
                 ("marker", "ATLAS root"),
@@ -5563,13 +5577,16 @@ def build_report(
         )
         # Validation owns the checkout being validated. A same-repository
         # worktree may continue only with complete, distinct isolation claims.
-        disjoint_candidates = [
+        bound_validation_root = Path(
+            str(validation_state.get("validation_root") or validation_root or root)
+        )
+        disjoint_candidates = [] if validation_binding_blocked else [
             candidate
             for candidate in sorted_candidates
             if not _candidate_conflicts_with_root_validation(
                 candidate,
                 validation_cleanup_candidate,
-                validation_root=root,
+                validation_root=bound_validation_root,
             )
         ]
         selected_jobs, wave_blocked, deferred_candidates = _select_execution_wave(
@@ -5617,6 +5634,13 @@ def build_report(
         stop_reason = None
         safe_to_execute = True
 
+    recommended_validation_root = validation_state.get("validation_root") or validation_root
+    validation_root_argument = ""
+    if recommended_validation_root:
+        validation_root_argument = (
+            f' --validation-root "{normalize_slashes(str(recommended_validation_root))}"'
+        )
+
     report = OrderedDict(
         [
             ("schema_version", SCHEMA_VERSION),
@@ -5657,7 +5681,8 @@ def build_report(
             ("prompt_output", prompt_output_path),
             (
                 "next_recommended_command",
-                "python ops/atlas/autonomous_lane_scheduler.py --json --program tmp/atlas/autonomous-work-program.json --bindings tmp/atlas/standing-role-bindings.latest.json --envelopes tmp/atlas/autonomous-inbox-events.jsonl --delivery-results tmp/atlas/delivery-results.latest.jsonl --max-candidates 30 --output tmp/atlas/autonomous-lane-scheduler.latest.json --prompt-output tmp/atlas/codex-autocomplete-prompt.latest.md",
+                "python ops/atlas/autonomous_lane_scheduler.py --json --program tmp/atlas/autonomous-work-program.json --bindings tmp/atlas/standing-role-bindings.latest.json --envelopes tmp/atlas/autonomous-inbox-events.jsonl --delivery-results tmp/atlas/delivery-results.latest.jsonl --max-candidates 30 --output tmp/atlas/autonomous-lane-scheduler.latest.json --prompt-output tmp/atlas/codex-autocomplete-prompt.latest.md"
+                + validation_root_argument,
             ),
         ]
     )
@@ -5679,6 +5704,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--explain", action="store_true", help="Reserved for verbose output compatibility.")
     parser.add_argument("--allow-reselection", action="store_true", help="Override program allow_reselection to true.")
     parser.add_argument("--current-marker", help="Optional explicit current marker override.")
+    parser.add_argument(
+        "--validation-root",
+        type=Path,
+        help="Explicit canonical validation checkout; defaults to the scheduler source root.",
+    )
     return parser.parse_args(argv)
 
 
@@ -5825,6 +5855,7 @@ def main(argv: list[str] | None = None) -> int:
                 max_candidates=args.max_candidates,
                 prompt_output_path=normalize_slashes(args.prompt_output),
                 current_marker=args.current_marker,
+                validation_root=args.validation_root,
             )
             program, _ = reserve_selected_jobs(program=program, report=report)
             report["bridge_findings"] = bridge_findings

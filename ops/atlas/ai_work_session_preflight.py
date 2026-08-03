@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -125,13 +127,167 @@ def collect_branch_state(root: Path) -> dict[str, Any]:
     }
 
 
-def collect_validation(root: Path) -> dict[str, Any]:
-    report_path = root / "runtime" / "receipts" / "validation" / "stack-validation.latest.json"
+def _normalized_path_identity(path: Path | str) -> str:
+    return normalize_slashes(str(Path(path).resolve(strict=False))).casefold().rstrip("/")
+
+
+def _remote_repository_identity(remote: str) -> str | None:
+    value = remote.strip().replace("\\", "/")
+    match = re.match(
+        r"^(?:https?://|ssh://(?:[^@/]+@)?|git@)([^/:]+)(?:/|:)([^/]+)/([^/]+?)(?:\.git)?/?$",
+        value,
+        flags=re.IGNORECASE,
+    )
+    if match is None:
+        return None
+    host, owner, repository = match.groups()
+    return f"{host.casefold()}/{owner.casefold()}/{repository.casefold()}"
+
+
+def _root_binding_identity(path: Path, *, label: str) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    try:
+        if not path.exists() or not path.is_dir():
+            return None, {
+                "code": f"{label}_unavailable",
+                "message": f"The explicit {label.replace('_', ' ')} must be an existing directory.",
+                "path": normalize_slashes(str(path)),
+            }
+        attributes = int(getattr(path.lstat(), "st_file_attributes", 0) or 0)
+        if path.is_symlink() or attributes & int(getattr(os, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)):
+            return None, {
+                "code": f"{label}_ambiguous",
+                "message": f"The explicit {label.replace('_', ' ')} cannot be a symlink, junction, or other reparse point.",
+                "path": normalize_slashes(str(path)),
+            }
+        resolved = path.resolve(strict=True)
+        requested_absolute = normalize_slashes(os.path.abspath(os.fspath(path))).casefold().rstrip("/")
+        if requested_absolute != normalize_slashes(str(resolved)).casefold().rstrip("/"):
+            return None, {
+                "code": f"{label}_ambiguous",
+                "message": f"The explicit {label.replace('_', ' ')} cannot traverse a symlink or junction.",
+                "path": normalize_slashes(str(path)),
+            }
+    except (OSError, RuntimeError) as exc:
+        return None, {
+            "code": f"{label}_ambiguous",
+            "message": f"The explicit {label.replace('_', ' ')} could not be resolved unambiguously.",
+            "path": normalize_slashes(str(path)),
+            "error": str(exc),
+        }
+
+    top_code, top_level = _git_stdout(resolved, "rev-parse", "--show-toplevel")
+    if top_code != 0 or not top_level or _normalized_path_identity(top_level) != _normalized_path_identity(resolved):
+        return None, {
+            "code": f"{label}_not_repository_root",
+            "message": f"The explicit {label.replace('_', ' ')} must be the canonical root of its Git repository.",
+            "path": normalize_slashes(str(resolved)),
+        }
+    remote_code, remote = _git_stdout(resolved, "remote", "get-url", "origin")
+    repository = _remote_repository_identity(remote) if remote_code == 0 else None
+    if repository is None:
+        return None, {
+            "code": f"{label}_repository_identity_unavailable",
+            "message": f"The explicit {label.replace('_', ' ')} must expose an unambiguous origin repository identity.",
+            "path": normalize_slashes(str(resolved)),
+        }
+    return {
+        "path": normalize_slashes(str(resolved)),
+        "path_identity": _normalized_path_identity(resolved),
+        "repository": repository,
+    }, None
+
+
+def resolve_validation_root_binding(*, source_root: Path, validation_root: Path | None = None) -> dict[str, Any]:
+    requested_validation_root = validation_root if validation_root is not None else source_root
+    source, source_error = _root_binding_identity(source_root, label="source_root")
+    if source_error is not None:
+        return {"status": "blocked", "error": source_error}
+    if validation_root is not None and not validation_root.is_absolute():
+        return {
+            "status": "blocked",
+            "source_root": source,
+            "error": {
+                "code": "validation_root_not_absolute",
+                "message": "The explicit validation root must be an absolute path; implicit root search is forbidden.",
+                "path": normalize_slashes(str(validation_root)),
+            },
+        }
+    validation, validation_error = _root_binding_identity(requested_validation_root, label="validation_root")
+    if validation_error is not None:
+        return {"status": "blocked", "source_root": source, "error": validation_error}
+    if source is None or validation is None or source["repository"] != validation["repository"]:
+        return {
+            "status": "blocked",
+            "source_root": source,
+            "validation_root": validation,
+            "error": {
+                "code": "validation_root_repository_mismatch",
+                "message": "Source root and validation root must identify the same canonical repository.",
+            },
+        }
+    return {
+        "status": "exact",
+        "source_root": source,
+        "validation_root": validation,
+        "repository": source["repository"],
+    }
+
+
+def collect_validation(root: Path, validation_root: Path | None = None) -> dict[str, Any]:
+    binding = resolve_validation_root_binding(source_root=root, validation_root=validation_root)
+    validation_identity = binding.get("validation_root") if isinstance(binding.get("validation_root"), dict) else {}
+    source_identity = binding.get("source_root") if isinstance(binding.get("source_root"), dict) else {}
+    if binding.get("status") != "exact":
+        return {
+            "report_ref": None,
+            "available": False,
+            "binding_status": "blocked",
+            "binding_error": binding.get("error"),
+            "source_root": source_identity.get("path"),
+            "validation_root": validation_identity.get("path"),
+            "repository": binding.get("repository"),
+            "critical": 0,
+            "error": 0,
+            "warning": 0,
+            "info": 0,
+        }
+
+    bound_validation_root = Path(str(validation_identity["path"]))
+    report_path = bound_validation_root / "runtime" / "receipts" / "validation" / "stack-validation.latest.json"
     payload = _read_json(report_path)
     summary = payload.get("summary", {}) if isinstance(payload, dict) else {}
+    receipt_stack_root = payload.get("stack_root") if isinstance(payload, dict) else None
+    receipt_stack_root_path = (
+        Path(receipt_stack_root)
+        if isinstance(receipt_stack_root, str) and bool(receipt_stack_root.strip())
+        else None
+    )
+    receipt_matches = (
+        receipt_stack_root_path is not None
+        and receipt_stack_root_path.is_absolute()
+        and _normalized_path_identity(receipt_stack_root_path) == validation_identity["path_identity"]
+    )
+    binding_error = None
+    if payload is not None and not receipt_matches:
+        binding_error = {
+            "code": "validation_receipt_root_mismatch",
+            "message": "Validation receipt stack_root must exactly match the normalized validation root.",
+            "receipt_stack_root": normalize_slashes(str(receipt_stack_root or "")),
+            "validation_root": validation_identity["path"],
+        }
     return {
-        "report_ref": atlas_relative(report_path, root=root),
-        "available": payload is not None,
+        "report_ref": (
+            atlas_relative(report_path, root=root)
+            if validation_identity["path_identity"] == source_identity.get("path_identity")
+            else normalize_slashes(str(report_path))
+        ),
+        "available": payload is not None and receipt_matches,
+        "binding_status": "exact" if payload is None or receipt_matches else "blocked",
+        "binding_error": binding_error,
+        "source_root": source_identity.get("path"),
+        "validation_root": validation_identity.get("path"),
+        "repository": binding.get("repository"),
+        "receipt_stack_root": normalize_slashes(str(receipt_stack_root)) if isinstance(receipt_stack_root, str) else None,
         "critical": int(summary.get("critical", 0) or 0),
         "error": int(summary.get("error", 0) or 0),
         "warning": int(summary.get("warning", 0) or 0),
@@ -413,7 +569,13 @@ def build_required_followups(
     return followups
 
 
-def build_report(*, root: Path, scope: str, owner: str | None = None) -> dict[str, Any]:
+def build_report(
+    *,
+    root: Path,
+    scope: str,
+    owner: str | None = None,
+    validation_root: Path | None = None,
+) -> dict[str, Any]:
     blockers: list[dict[str, Any]] = []
     warnings: list[dict[str, Any]] = []
 
@@ -424,8 +586,10 @@ def build_report(*, root: Path, scope: str, owner: str | None = None) -> dict[st
     if parity.get("status") == "unavailable":
         blockers.append(_blocker("parity_truth_unavailable", "Authoritative parity truth is unavailable."))
 
-    validation = collect_validation(root)
-    if not validation.get("available"):
+    validation = collect_validation(root, validation_root=validation_root)
+    if validation.get("binding_status") == "blocked" and isinstance(validation.get("binding_error"), dict):
+        blockers.append(dict(validation["binding_error"]))
+    elif not validation.get("available"):
         blockers.append(_blocker("validation_unavailable", "Required validation receipt is unavailable."))
     elif int(validation.get("critical", 0) or 0) > 0 or int(validation.get("error", 0) or 0) > 0:
         blockers.append(
@@ -580,6 +744,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--json", action="store_true", help="Emit JSON only on stdout.")
     parser.add_argument("--scope", choices=sorted(SCOPES), default="root")
     parser.add_argument("--owner")
+    parser.add_argument(
+        "--validation-root",
+        type=Path,
+        help="Explicit canonical validation checkout; defaults to the scheduler source root.",
+    )
     parser.add_argument("--strict", action="store_true")
     parser.add_argument("--output")
     return parser.parse_args(argv)
@@ -589,7 +758,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     root = atlas_root().resolve()
     try:
-        report = build_report(root=root, scope=args.scope, owner=args.owner)
+        report = build_report(
+            root=root,
+            scope=args.scope,
+            owner=args.owner,
+            validation_root=args.validation_root,
+        )
         if args.output:
             resolved_output, output_error = validate_output_path(root=root, output_path=args.output)
             if output_error is not None:

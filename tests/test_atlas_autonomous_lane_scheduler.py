@@ -2572,6 +2572,104 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
             )
         )
 
+    def test_explicit_validation_root_is_forwarded_to_preflight(self) -> None:
+        validation_root = Path("C:/ATLAS")
+        preflight_payload = _preflight_payload()
+        with patch.object(scheduler, "_branch_state", return_value=("main", "a" * 40)), patch.object(
+            scheduler, "_parity_state", return_value={"status": "clean", "behind": 0, "ahead": 0}
+        ), patch.object(
+            scheduler.ai_work_session_preflight,
+            "build_report",
+            return_value=preflight_payload,
+        ) as build_preflight, patch.object(
+            scheduler, "_load_selector", return_value=_selector_payload()
+        ), patch.object(
+            scheduler.planner, "build_report", return_value=_planner_payload([])
+        ):
+            report = scheduler.build_report(
+                root=Path("C:/w/asr"),
+                validation_root=validation_root,
+                program=_program_payload(),
+                max_candidates=30,
+            )
+
+        build_preflight.assert_called_once_with(
+            root=Path("C:/w/asr"),
+            scope="root",
+            validation_root=validation_root,
+        )
+        self.assertIn('--validation-root "C:/ATLAS"', report["next_recommended_command"])
+
+    def test_invalid_validation_root_binding_holds_every_candidate(self) -> None:
+        program = _program_payload()
+        program["standing_packets"] = [_isolated_external_mutation_packet()]
+        program_before = copy.deepcopy(program)
+        preflight_payload = _preflight_payload()
+        preflight_payload["status"] = "blocker"
+        preflight_payload["validation"].update(
+            {
+                "available": False,
+                "binding_status": "blocked",
+                "binding_error": {"code": "validation_root_repository_mismatch"},
+            }
+        )
+
+        report = scheduler.build_report(
+            root=Path("C:/w/asr"),
+            validation_root=Path("C:/ATLAS"),
+            program=program,
+            max_candidates=30,
+            preflight_report=preflight_payload,
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual([], report["selected_jobs"])
+        self.assertEqual("blocked", report["validation_state"]["binding_status"])
+        reserved, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        self.assertEqual(program_before, reserved)
+        self.assertEqual([], reservations)
+
+    def test_validation_isolation_uses_explicit_root_not_scheduler_source(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "runtime-source-fix",
+            role_id="atlas.workflow-architect",
+            repository="fawxzzy/ATLAS",
+            writer_scope="source.atlas.runtime-fix",
+        )
+        packet["resource_claims"] = {
+            "files": ["ops/atlas/autonomous_lane_scheduler.py"],
+            "worktrees": ["C:/w/asr"],
+            "ports": [],
+            "browsers": [],
+            "external_writers": [],
+        }
+        program["standing_packets"] = [packet]
+        preflight_payload = _preflight_payload(error=1)
+        preflight_payload["validation"].update(
+            {
+                "available": True,
+                "binding_status": "exact",
+                "source_root": "C:/w/asr",
+                "validation_root": "C:/ATLAS",
+            }
+        )
+
+        report = scheduler.build_report(
+            root=Path("C:/w/asr"),
+            validation_root=Path("C:/ATLAS"),
+            program=program,
+            max_candidates=30,
+            preflight_report=preflight_payload,
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(["runtime-source-fix"], [job["packet_id"] for job in report["selected_jobs"]])
+
     def test_root_validation_does_not_suppress_same_root_read_only_packet(self) -> None:
         program = _program_payload()
         packet = _standing_packet(
@@ -6821,6 +6919,49 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         self.assertEqual(scheduler.SCHEMA_VERSION, payload["schema_version"])
         self.assertIn("Execution wave:", prompt_text)
         self.assertIn("Continuation rule:", prompt_text)
+
+    def test_main_keeps_program_paths_source_rooted_with_explicit_validation_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            validation_root = Path("C:/ATLAS")
+            _write(root / "tmp/atlas/program.json", json.dumps(_program_payload(), indent=2) + "\n")
+            with patch.object(scheduler, "atlas_root", return_value=root), patch.object(
+                scheduler, "_branch_state", return_value=("main", "abc123")
+            ), patch.object(
+                scheduler, "_parity_state", return_value={"status": "clean", "behind": 0, "ahead": 0}
+            ), patch.object(
+                scheduler, "_load_selector", return_value=_selector_payload()
+            ), patch.object(
+                scheduler.ai_work_session_preflight,
+                "build_report",
+                return_value=_preflight_payload(),
+            ) as build_preflight, patch.object(
+                scheduler.planner, "build_report", return_value=_planner_payload([])
+            ):
+                with redirect_stdout(io.StringIO()):
+                    exit_code = scheduler.main(
+                        [
+                            "--json",
+                            "--program",
+                            "tmp/atlas/program.json",
+                            "--validation-root",
+                            str(validation_root),
+                            "--output",
+                            "tmp/atlas/report.json",
+                            "--prompt-output",
+                            "tmp/atlas/prompt.md",
+                        ]
+                    )
+
+            self.assertTrue((root / "tmp/atlas/program.json").exists())
+            self.assertTrue((root / "tmp/atlas/report.json").exists())
+
+        self.assertEqual(0, exit_code)
+        build_preflight.assert_called_once_with(
+            root=root,
+            scope="root",
+            validation_root=validation_root,
+        )
 
     def test_main_atomically_persists_dispatch_before_output(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
