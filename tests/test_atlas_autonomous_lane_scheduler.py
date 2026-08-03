@@ -2630,6 +2630,226 @@ class AutonomousLaneSchedulerTests(unittest.TestCase):
         reserved, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
         self.assertEqual(program_before, reserved)
         self.assertEqual([], reservations)
+        self.assertTrue(
+            any(
+                candidate.get("packet_id") == "atlas-draft-publication"
+                and candidate.get("blocked_reason") == "validation_binding_scope_uncertain"
+                for candidate in report["blocked_candidates"]
+            )
+        )
+
+    def test_invalid_validation_root_binding_preserves_provably_disjoint_candidate(self) -> None:
+        program = _program_payload()
+        disjoint = _standing_packet(
+            "platform-gate-ratchet-publication",
+            role_id="owner.platform-supabase",
+            repository="fawxzzy/fawxzzy-platform",
+            writer_scope="github.fawxzzy-platform.gate-ratchet",
+        )
+        disjoint["execution_class"] = "external_mutation"
+        disjoint["resource_claims"] = {
+            "files": ["schemas/migration-gate.schema.json"],
+            "worktrees": ["C:/w/platform-gate-ratchet"],
+            "ports": [],
+            "browsers": [],
+            "external_writers": ["git-branch:fawxzzy/fawxzzy-platform:codex/gate-ratchet"],
+        }
+        program["standing_packets"] = [disjoint]
+        preflight_payload = _preflight_payload()
+        preflight_payload["status"] = "blocker"
+        preflight_payload["validation"].update(
+            {
+                "available": False,
+                "binding_status": "blocked",
+                "binding_error": {"code": "validation_receipt_root_mismatch"},
+            }
+        )
+
+        report = scheduler.build_report(
+            root=Path("C:/w/asr"),
+            validation_root=Path("C:/ATLAS"),
+            program=program,
+            max_candidates=30,
+            preflight_report=preflight_payload,
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_EXECUTE, report["status"])
+        self.assertEqual(
+            ["platform-gate-ratchet-publication"],
+            [job["packet_id"] for job in report["selected_jobs"]],
+        )
+        reserved, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        self.assertEqual(1, len(reservations))
+        self.assertEqual(1, len(reserved["active_leases"]))
+
+    def test_invalid_validation_root_binding_partitions_disjoint_and_same_repository_candidates(self) -> None:
+        program = _program_payload()
+        same_repository = _isolated_external_mutation_packet("atlas-held-publication")
+        disjoint = _standing_packet(
+            "platform-gate-ratchet-publication",
+            role_id="owner.platform-supabase",
+            repository="fawxzzy/fawxzzy-platform",
+            writer_scope="github.fawxzzy-platform.gate-ratchet",
+        )
+        disjoint["execution_class"] = "external_mutation"
+        disjoint["resource_claims"] = {
+            "files": ["schemas/migration-gate.schema.json"],
+            "worktrees": ["C:/w/platform-gate-ratchet"],
+            "ports": [],
+            "browsers": [],
+            "external_writers": ["git-branch:fawxzzy/fawxzzy-platform:codex/gate-ratchet"],
+        }
+        program["standing_packets"] = [same_repository, disjoint]
+        preflight_payload = _preflight_payload()
+        preflight_payload["status"] = "blocker"
+        preflight_payload["validation"].update(
+            {
+                "available": False,
+                "binding_status": "blocked",
+                "binding_error": {"code": "validation_receipt_root_mismatch"},
+            }
+        )
+
+        report = scheduler.build_report(
+            root=Path("C:/w/asr"),
+            validation_root=Path("C:/ATLAS"),
+            program=program,
+            max_candidates=30,
+            preflight_report=preflight_payload,
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(
+            ["platform-gate-ratchet-publication"],
+            [job["packet_id"] for job in report["selected_jobs"]],
+        )
+        self.assertTrue(
+            any(
+                candidate.get("packet_id") == "atlas-held-publication"
+                and candidate.get("blocked_reason") == "validation_binding_scope_uncertain"
+                for candidate in report["blocked_candidates"]
+            )
+        )
+        reserved, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        self.assertEqual(1, len(reservations))
+        self.assertEqual(
+            "platform-gate-ratchet-publication",
+            reserved["active_leases"][0]["packet_id"],
+        )
+        self.assertFalse(
+            any(
+                lease.get("packet_id") == "atlas-held-publication"
+                for lease in reserved["active_leases"]
+            )
+        )
+
+    def test_invalid_validation_root_binding_holds_ambiguous_disjoint_claims(self) -> None:
+        cases = {
+            "wildcard_file": {
+                "files": ["schemas/**"],
+                "worktrees": ["C:/w/platform-gate-ratchet"],
+                "external_writers": ["git-branch:fawxzzy/fawxzzy-platform:codex/gate-ratchet"],
+            },
+            "relative_worktree": {
+                "files": ["schemas/migration-gate.schema.json"],
+                "worktrees": ["platform-gate-ratchet"],
+                "external_writers": ["git-branch:fawxzzy/fawxzzy-platform:codex/gate-ratchet"],
+            },
+            "wildcard_external_writer": {
+                "files": ["schemas/migration-gate.schema.json"],
+                "worktrees": ["C:/w/platform-gate-ratchet"],
+                "external_writers": ["provider:*"],
+            },
+        }
+        for label, partial_claims in cases.items():
+            with self.subTest(label=label):
+                program = _program_payload()
+                packet = _standing_packet(
+                    f"platform-{label}",
+                    role_id="owner.platform-supabase",
+                    repository="fawxzzy/fawxzzy-platform",
+                    writer_scope=f"repo.platform.{label}",
+                )
+                packet["execution_class"] = "external_mutation"
+                packet["resource_claims"] = {
+                    "ports": [],
+                    "browsers": [],
+                    **partial_claims,
+                }
+                program["standing_packets"] = [packet]
+                program_before = copy.deepcopy(program)
+                preflight_payload = _preflight_payload()
+                preflight_payload["status"] = "blocker"
+                preflight_payload["validation"].update(
+                    {
+                        "available": False,
+                        "binding_status": "blocked",
+                        "binding_error": {"code": "validation_receipt_root_mismatch"},
+                    }
+                )
+
+                report = scheduler.build_report(
+                    root=Path("C:/w/asr"),
+                    validation_root=Path("C:/ATLAS"),
+                    program=program,
+                    max_candidates=30,
+                    preflight_report=preflight_payload,
+                    selector_report=_selector_payload(),
+                    planner_report=_planner_payload([]),
+                )
+
+                self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+                self.assertEqual([], report["selected_jobs"])
+                reserved, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+                self.assertEqual(program_before, reserved)
+                self.assertEqual([], reservations)
+
+    def test_invalid_validation_root_binding_holds_same_repository_read_only_candidate(self) -> None:
+        program = _program_payload()
+        packet = _standing_packet(
+            "atlas-root-readback",
+            role_id="atlas.runtime",
+            repository="fawxzzy/ATLAS",
+            writer_scope="read.atlas.root",
+        )
+        packet["execution_class"] = "read_only"
+        packet["resource_claims"] = {
+            "files": ["runtime/receipts/validation/stack-validation.latest.json"],
+            "worktrees": ["C:/ATLAS"],
+            "ports": [],
+            "browsers": [],
+            "external_writers": [],
+        }
+        program["standing_packets"] = [packet]
+        program_before = copy.deepcopy(program)
+        preflight_payload = _preflight_payload()
+        preflight_payload["status"] = "blocker"
+        preflight_payload["validation"].update(
+            {
+                "available": False,
+                "binding_status": "blocked",
+                "binding_error": {"code": "validation_receipt_root_mismatch"},
+            }
+        )
+
+        report = scheduler.build_report(
+            root=Path("C:/w/asr"),
+            validation_root=Path("C:/ATLAS"),
+            program=program,
+            max_candidates=30,
+            preflight_report=preflight_payload,
+            selector_report=_selector_payload(),
+            planner_report=_planner_payload([]),
+        )
+
+        self.assertEqual(scheduler.STATUS_HOLD, report["status"])
+        self.assertEqual([], report["selected_jobs"])
+        reserved, reservations = scheduler.reserve_selected_jobs(program=program, report=report)
+        self.assertEqual(program_before, reserved)
+        self.assertEqual([], reservations)
 
     def test_validation_isolation_uses_explicit_root_not_scheduler_source(self) -> None:
         program = _program_payload()

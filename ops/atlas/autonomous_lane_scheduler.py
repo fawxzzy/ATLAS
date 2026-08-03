@@ -4256,6 +4256,71 @@ def _candidate_conflicts_with_root_validation(
     return []
 
 
+def _candidate_is_provably_disjoint_from_blocked_validation(
+    candidate: dict[str, Any],
+    validation_candidate: dict[str, Any],
+    *,
+    validation_root: Path,
+) -> bool:
+    """Retain only candidates whose complete mutation identity is disjoint."""
+
+    if candidate.get("execution_class") not in {"read_only", "repo_worktree", "external_mutation"}:
+        return False
+
+    candidate_repository = _repository_identity(candidate.get("repository"))
+    validation_repository = _repository_identity(validation_candidate.get("repository"))
+    writer_scope = candidate.get("writer_scope")
+    validation_writer_scope = validation_candidate.get("writer_scope")
+    if (
+        not candidate_repository
+        or not validation_repository
+        or candidate_repository == validation_repository
+        or not isinstance(writer_scope, str)
+        or writer_scope != writer_scope.strip()
+        or not writer_scope
+        or any(token in writer_scope for token in "*?[")
+        or writer_scope == validation_writer_scope
+    ):
+        return False
+
+    claims = _resource_claims(candidate.get("resource_claims"))
+    files = claims["files"]
+    worktrees = claims["worktrees"]
+    external_writers = claims["external_writers"]
+    if candidate.get("execution_class") == "repo_worktree" and (not files or not worktrees):
+        return False
+    if candidate.get("execution_class") == "external_mutation" and not external_writers:
+        return False
+    if files and not all(_canonical_repository_relative_path(path) for path in files):
+        return False
+    if worktrees and not all(
+        Path(path).is_absolute()
+        and path == path.strip().replace("\\", "/")
+        and not any(token in path for token in "*?[")
+        for path in worktrees
+    ):
+        return False
+    if external_writers and not all(
+        identity == identity.strip()
+        and not any(token in identity for token in "*?[")
+        and _external_writer_identity(identity) == identity
+        for identity in external_writers
+    ):
+        return False
+    if any(
+        identity != identity.strip().replace("\\", "/")
+        or any(token in identity for token in "*?[")
+        for kind in ("ports", "browsers")
+        for identity in claims[kind]
+    ):
+        return False
+
+    validation_worktree = _path_identity(validation_root.resolve())
+    if validation_worktree in {_path_identity(Path(path).resolve()) for path in worktrees}:
+        return False
+    return not _candidate_conflicts(candidate, validation_candidate)
+
+
 def _active_writer_scopes(program: dict[str, Any]) -> set[str]:
     leases = program.get("active_leases", [])
     if not isinstance(leases, list):
@@ -5580,15 +5645,29 @@ def build_report(
         bound_validation_root = Path(
             str(validation_state.get("validation_root") or validation_root or root)
         )
-        disjoint_candidates = [] if validation_binding_blocked else [
-            candidate
-            for candidate in sorted_candidates
-            if not _candidate_conflicts_with_root_validation(
-                candidate,
-                validation_cleanup_candidate,
-                validation_root=bound_validation_root,
-            )
-        ]
+        if validation_binding_blocked:
+            disjoint_candidates = []
+            for candidate in sorted_candidates:
+                if _candidate_is_provably_disjoint_from_blocked_validation(
+                    candidate,
+                    validation_cleanup_candidate,
+                    validation_root=bound_validation_root,
+                ):
+                    disjoint_candidates.append(candidate)
+                else:
+                    blocked_candidate = OrderedDict(candidate)
+                    blocked_candidate["blocked_reason"] = "validation_binding_scope_uncertain"
+                    blocked_candidates.append(blocked_candidate)
+        else:
+            disjoint_candidates = [
+                candidate
+                for candidate in sorted_candidates
+                if not _candidate_conflicts_with_root_validation(
+                    candidate,
+                    validation_cleanup_candidate,
+                    validation_root=bound_validation_root,
+                )
+            ]
         selected_jobs, wave_blocked, deferred_candidates = _select_execution_wave(
             program=program,
             candidates=disjoint_candidates,

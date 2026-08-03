@@ -404,6 +404,50 @@ class AtlasAiWorkSessionPreflightTests(unittest.TestCase):
         self.assertIsNone(identity)
         self.assertEqual("validation_root_ambiguous", error["code"])
 
+    def test_root_binding_preserves_case_when_filesystem_identity_is_case_sensitive(self) -> None:
+        candidate = mock.Mock(spec=Path)
+        candidate.exists.return_value = True
+        candidate.is_dir.return_value = True
+        candidate.is_symlink.return_value = False
+        candidate.lstat.return_value = mock.Mock(st_file_attributes=0)
+        candidate.resolve.return_value = Path("C:/ATLAS")
+        candidate.__fspath__ = mock.Mock(return_value="C:/atlas")
+        candidate.__str__ = mock.Mock(return_value="C:/atlas")
+
+        with mock.patch.object(preflight, "_filesystem_identity_is_case_insensitive", return_value=False):
+            identity, error = preflight._root_binding_identity(candidate, label="validation_root")
+
+        self.assertIsNone(identity)
+        self.assertEqual("validation_root_ambiguous", error["code"])
+
+    def test_root_binding_folds_case_only_when_filesystem_identity_is_proven_insensitive(self) -> None:
+        candidate = mock.Mock(spec=Path)
+        candidate.exists.return_value = True
+        candidate.is_dir.return_value = True
+        candidate.is_symlink.return_value = False
+        candidate.lstat.return_value = mock.Mock(st_file_attributes=0)
+        candidate.resolve.return_value = Path("C:/ATLAS")
+        candidate.__fspath__ = mock.Mock(return_value="C:/atlas")
+        candidate.__str__ = mock.Mock(return_value="C:/atlas")
+
+        with mock.patch.object(
+            preflight,
+            "_filesystem_identity_is_case_insensitive",
+            return_value=True,
+        ), mock.patch.object(
+            preflight,
+            "_git_stdout",
+            side_effect=[
+                (0, "C:/ATLAS"),
+                (0, "https://github.com/fawxzzy/ATLAS.git"),
+            ],
+        ):
+            identity, error = preflight._root_binding_identity(candidate, label="validation_root")
+
+        self.assertIsNone(error)
+        self.assertEqual("c:/atlas", identity["path_identity"])
+        self.assertEqual("github.com/fawxzzy/atlas", identity["repository"])
+
     def test_contradictory_authoritative_inputs_fail_closed(self) -> None:
         patcher, values = self._patch_collectors(continuity_items=[{"marker": "AI Work Session Stability & Auto-Sync Loop"}])
         with patcher as mocks:

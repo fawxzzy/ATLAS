@@ -127,8 +127,43 @@ def collect_branch_state(root: Path) -> dict[str, Any]:
     }
 
 
+def _case_variant(path: Path) -> Path | None:
+    value = str(path)
+    for index in range(len(value) - 1, -1, -1):
+        character = value[index]
+        if character.islower():
+            replacement = character.upper()
+        elif character.isupper():
+            replacement = character.lower()
+        else:
+            continue
+        return Path(f"{value[:index]}{replacement}{value[index + 1:]}")
+    return None
+
+
+def _filesystem_identity_is_case_insensitive(path: Path) -> bool:
+    """Fold path case only when an alternate spelling proves the same identity."""
+
+    alternate = _case_variant(path)
+    if alternate is None:
+        return False
+    try:
+        return alternate.exists() and os.path.samefile(path, alternate)
+    except (OSError, RuntimeError):
+        return False
+
+
+def _path_text_identity(path: Path | str, *, case_insensitive: bool) -> str:
+    identity = normalize_slashes(str(path)).rstrip("/")
+    return identity.casefold() if case_insensitive else identity
+
+
 def _normalized_path_identity(path: Path | str) -> str:
-    return normalize_slashes(str(Path(path).resolve(strict=False))).casefold().rstrip("/")
+    resolved = Path(path).resolve(strict=False)
+    return _path_text_identity(
+        resolved,
+        case_insensitive=_filesystem_identity_is_case_insensitive(resolved),
+    )
 
 
 def _remote_repository_identity(remote: str) -> str | None:
@@ -160,8 +195,13 @@ def _root_binding_identity(path: Path, *, label: str) -> tuple[dict[str, Any] | 
                 "path": normalize_slashes(str(path)),
             }
         resolved = path.resolve(strict=True)
-        requested_absolute = normalize_slashes(os.path.abspath(os.fspath(path))).casefold().rstrip("/")
-        if requested_absolute != normalize_slashes(str(resolved)).casefold().rstrip("/"):
+        case_insensitive = _filesystem_identity_is_case_insensitive(resolved)
+        requested_absolute = _path_text_identity(
+            os.path.abspath(os.fspath(path)),
+            case_insensitive=case_insensitive,
+        )
+        resolved_identity = _path_text_identity(resolved, case_insensitive=case_insensitive)
+        if requested_absolute != resolved_identity:
             return None, {
                 "code": f"{label}_ambiguous",
                 "message": f"The explicit {label.replace('_', ' ')} cannot traverse a symlink or junction.",

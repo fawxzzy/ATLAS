@@ -267,12 +267,26 @@ its source checkout is a separate canonical runtime worktree. The default
 remains the source root for compatibility. Both roots must be direct,
 unambiguous Git roots with the same normalized origin repository, and the
 validation receipt's `stack_root` must exactly equal the normalized validation
-root. Missing roots, different repositories, receipt mismatch, or symlink,
-junction, and other reparse-point ambiguity block selection. The bound
-validation root governs only preflight receipt lookup and validation-isolation
-conflicts; program, bridge input, prompt, and output paths remain rooted at the
-scheduler source checkout. Environment overrides, implicit root search, and
-receipt copy or rewrite are not supported.
+root. The receipt value must be a nonempty absolute path before normalization.
+Path identity preserves case unless an alternate-case spelling is proven to be
+the same filesystem object; case-insensitive aliases therefore remain compatible
+without merging distinct paths on case-sensitive filesystems. Missing roots,
+different repositories, receipt mismatch, or symlink, junction, and other
+reparse-point ambiguity block selection. The bound validation root governs only
+preflight receipt lookup and validation-isolation conflicts; program, bridge
+input, prompt, and output paths remain rooted at the scheduler source checkout.
+Environment overrides, implicit root search, and receipt copy or rewrite are not
+supported.
+
+If the validation-root binding itself is blocked, the scheduler retains only
+candidates whose canonical repository differs from the validation repository
+and whose writer scope plus every applicable file, worktree, port, browser, and
+external-writer identity is closed and non-wildcard. Repository worktree writers
+must provide concrete files and an absolute worktree; external mutations must
+provide a canonical external writer. Same-repository, same-worktree, wildcard,
+relative-worktree, incomplete, or otherwise ambiguous candidates remain held.
+The surviving candidates still pass through the ordinary deterministic wave,
+active-lease, dependency, replay, and collision checks.
 
 A same-repository `external_mutation` may also continue beside the virtual root
 validation hold, but only when its initial conflict set is exactly `files`, it
