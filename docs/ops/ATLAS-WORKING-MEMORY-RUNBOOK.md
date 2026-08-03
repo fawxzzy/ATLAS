@@ -130,6 +130,10 @@ The deterministic catalog is written to:
 
 - `runtime/cortex/catalog/memory/working-memory.latest.json`
 
+Generated JSON has one canonical byte representation: UTF-8, two-space indentation,
+and exactly one trailing LF. Writers compare and persist those exact bytes; CRLF is
+drift and is normalized by the canonical producer on its next changed-byte check.
+
 Awareness and status consume this catalog as a read model. The source of truth remains the JSON artifacts under `docs/memory/**`.
 
 ## Supersession Rules
