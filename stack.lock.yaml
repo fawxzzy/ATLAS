@@ -217,9 +217,6 @@ source_pins:
     ref: "main"
     commit: "da4d71afaecb19f470ce60ba182776d9fb0589e1"
     dirty: false
-    production_ref: null
-    production_commit: null
-    production_promotion_status: "not_configured"
   mazer:
     path: "repos/mazer"
     remote: "https://github.com/fawxzzy/mazer.git"
@@ -227,7 +224,14 @@ source_pins:
     ref: "codex/player-goal-default-colors"
     commit: "a537d2d17429bdf0482989c280373a6ea751f9c0"
     dirty: true
+deployment_promotion_probe_count: 2
+deployment_promotion_probes:
+  fitness:
+    production_ref: null
+    production_commit: null
+    production_promotion_status: "not_configured"
+  mazer:
     production_ref: "main"
-    production_commit: "4c61943eb4c8b4e98a5cbb9054f3c927bb724950"
+    production_commit: "99ecfe4c3db57c554f2e440e7427fa2148d030cc"
     production_promotion_status: "not_promoted"
-lock_digest: "sha256:3f988f78bc9ab907338b5d1d438677c4cb3b47785d280a2b447f92287dca52dd"
+lock_digest: "sha256:26b433b6bf468bb3ef75f25b685eb15d189e6ca60a9a68f67a9352c61ea4d012"

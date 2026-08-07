@@ -228,6 +228,17 @@ def build_repo_inventory(
     initiative_index, initiative_digest = _initiative_index(base_root, repo_paths)
     lock_components = loaded_lock.get("components", {}) if isinstance(loaded_lock.get("components"), dict) else {}
     lock_source_pins = loaded_lock.get("source_pins", {}) if isinstance(loaded_lock.get("source_pins"), dict) else {}
+    # deployment_promotion_probes is a structurally separate, live-derived
+    # inference about each source-pinned repo's remote state (a real
+    # `git ls-remote` re-run every generation, not an immutable receipt of an
+    # observed deployment) — kept apart from source_pins' deterministic local
+    # git evidence. See the module-level comment above SOURCE_PIN_FIELDS in
+    # ops/stack/generate_lockfile.py for the full rationale.
+    lock_deployment_promotion_probes = (
+        loaded_lock.get("deployment_promotion_probes", {})
+        if isinstance(loaded_lock.get("deployment_promotion_probes"), dict)
+        else {}
+    )
     lock_config = stack_config.get("stack_lock", {}) if isinstance(stack_config.get("stack_lock"), dict) else {}
 
     repos: list[dict[str, Any]] = []
@@ -256,6 +267,11 @@ def build_repo_inventory(
         # may still carry a generator-derived source pin; fall back to it so
         # their real, digest-guarded commit identity is visible here too.
         source_pin = lock_source_pins.get(repo_id) if isinstance(lock_source_pins.get(repo_id), dict) else {}
+        deployment_promotion_probe = (
+            lock_deployment_promotion_probes.get(repo_id)
+            if isinstance(lock_deployment_promotion_probes.get(repo_id), dict)
+            else {}
+        )
         related_initiatives = initiative_index.get(repo_id, [])
         root_blocking = _repo_blocks_root(repo_id, repo_info, lock_config)
         dirty_blocks_root = bool(live_state["dirty"] is True and root_blocking)
@@ -295,9 +311,9 @@ def build_repo_inventory(
                 "dirty": live_state["dirty"],
                 "root_blocking": root_blocking,
                 "dirty_blocks_root": dirty_blocks_root,
-                "production_ref": source_pin.get("production_ref"),
-                "production_commit": source_pin.get("production_commit"),
-                "production_promotion_status": source_pin.get("production_promotion_status"),
+                "production_ref": deployment_promotion_probe.get("production_ref"),
+                "production_commit": deployment_promotion_probe.get("production_commit"),
+                "production_promotion_status": deployment_promotion_probe.get("production_promotion_status"),
                 "trust_class": lock_component.get("trust_class") or repo_trust_class(repo_id, repo_info, lock_config),
                 "release_eligible": (
                     bool(lock_component.get("release_eligible"))

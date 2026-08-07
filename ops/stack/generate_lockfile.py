@@ -37,6 +37,7 @@ LOCK_METADATA_FIELDS = (
     "stack_manifest_digest",
     "component_count",
     "source_pin_count",
+    "deployment_promotion_probe_count",
     "refresh_scope",
 )
 LOCK_EXCLUDED_SURFACE_FIELDS = (
@@ -54,6 +55,8 @@ SOURCE_PIN_FIELDS = (
     "ref",
     "commit",
     "dirty",
+)
+DEPLOYMENT_PROMOTION_PROBE_FIELDS = (
     "production_ref",
     "production_commit",
     "production_promotion_status",
@@ -64,6 +67,38 @@ SOURCE_PIN_FIELDS = (
 # application repos such as Fitness/Mazer) but still need their real, current
 # source-commit identity captured from git evidence rather than hand-typed
 # into stack.yaml. They never affect trust_class/release_eligible semantics.
+#
+# `source_pins` and `deployment_promotion_probes` are deliberately two
+# separate top-level structures rather than one merged dict, because they
+# carry two evidence classes with very different reliability/immutability
+# properties:
+#
+#   - `source_pins[repo_id]` is deterministic, purely-local git evidence
+#     (`path`/`remote`/`ref_type`/`ref`/`commit`/`dirty`) read directly from
+#     the repo's local checkout via `git rev-parse`/`git status`/etc. Given
+#     the same local checkout state, any two runs (by anyone, anywhere)
+#     produce byte-identical output. It is evidence about *this machine's
+#     copy* of the repo, nothing more.
+#
+#   - `deployment_promotion_probes[repo_id]` is a *live, point-in-time
+#     inference* about the remote's state: it runs a real `git ls-remote`
+#     against the repo's actual configured remote at generation time and
+#     compares the result to the local evidence above. This is NOT an
+#     immutable receipt of an actually-observed deployment/promotion event
+#     (unlike, say, a real Vercel deployment id captured once at the moment
+#     of an actual `vercel promote` call) — it is re-derived from scratch on
+#     every generator run, and a re-run five minutes later against the exact
+#     same local `commit` can legitimately produce a different
+#     `production_promotion_status` if the remote branch moved in the
+#     meantime. Treat this structure as a best-effort, re-derived guess at
+#     promotion state, not a captured record of a real deployment — do not
+#     oversell its authority by its name alone.
+#
+# Mixing these into one dict made it impossible to tell, from the
+# drift/digest machinery alone, whether a lockfile mismatch meant "the local
+# checkout changed" (rare, significant) or "the remote moved since the last
+# regeneration" (routine, expected to happen constantly). Splitting them lets
+# `describe_lock_payload_drift` report on each independently.
 PROMOTION_STATUS_NOT_CONFIGURED = "not_configured"
 PROMOTION_STATUS_NO_REMOTE = "no_remote"
 PROMOTION_STATUS_REMOTE_UNREACHABLE = "remote_unreachable"
@@ -299,26 +334,39 @@ def resolve_production_promotion(
     return remote_commit, status
 
 
-def build_source_pins(config: dict[str, Any], root: Path) -> dict[str, dict[str, Any]]:
+def _resolve_source_pinned_repo_path(config: dict[str, Any], root: Path, repo_id: str) -> tuple[str, Path]:
     registry = config.get("repo_registry", {})
-    lock_config = config.get("stack_lock", {}) if isinstance(config.get("stack_lock"), dict) else {}
+    repo_info = registry.get(repo_id)
+    if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
+        raise ValueError(f"Source-pinned repo '{repo_id}' is missing a valid repo_registry entry.")
+    coordinate, repo_path = resolve_declared_root_path(
+        repo_info["path"],
+        root=root,
+        label=f"repo_registry.{repo_id}.path",
+    )
+    if not repo_path.exists():
+        raise FileNotFoundError(f"Source-pinned repo path does not exist: {atlas_relative(repo_path, root=root)}")
+    if not repo_path.is_dir():
+        raise ValueError(f"Source-pinned repo path is not a directory: {atlas_relative(repo_path, root=root)}")
+    if not repo_is_git_root(repo_path):
+        raise ValueError(f"Source-pinned repo is not a git root: {atlas_relative(repo_path, root=root)}")
+    return coordinate, repo_path
+
+
+def build_source_pins(config: dict[str, Any], root: Path) -> dict[str, dict[str, Any]]:
+    """Deterministic, purely-local git evidence for source-pinned repos.
+
+    Every field here is read directly from the repo's local checkout
+    (`git rev-parse`/`git status`/etc.) and is reproducible byte-for-byte by
+    anyone running this against the same local state. This function
+    deliberately does NOT touch the network or the repo's remote — see the
+    module-level comment above `SOURCE_PIN_FIELDS` for why that evidence
+    class lives in `build_deployment_promotion_probes` instead.
+    """
     pins: dict[str, dict[str, Any]] = {}
 
     for repo_id in source_pin_repo_ids(config):
-        repo_info = registry.get(repo_id)
-        if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
-            raise ValueError(f"Source-pinned repo '{repo_id}' is missing a valid repo_registry entry.")
-        coordinate, repo_path = resolve_declared_root_path(
-            repo_info["path"],
-            root=root,
-            label=f"repo_registry.{repo_id}.path",
-        )
-        if not repo_path.exists():
-            raise FileNotFoundError(f"Source-pinned repo path does not exist: {atlas_relative(repo_path, root=root)}")
-        if not repo_path.is_dir():
-            raise ValueError(f"Source-pinned repo path is not a directory: {atlas_relative(repo_path, root=root)}")
-        if not repo_is_git_root(repo_path):
-            raise ValueError(f"Source-pinned repo is not a git root: {atlas_relative(repo_path, root=root)}")
+        coordinate, repo_path = _resolve_source_pinned_repo_path(config, root, repo_id)
 
         code, commit = git_output(repo_path, "rev-parse", "HEAD")
         if code != 0 or not commit:
@@ -326,15 +374,6 @@ def build_source_pins(config: dict[str, Any], root: Path) -> dict[str, dict[str,
         ref_type, ref = current_ref(repo_path, commit)
         dirty = bool(git_status_lines(repo_path))
         remote_url = current_remote(repo_path)
-        remote_name = current_remote_name(repo_path)
-        production_ref = source_pin_production_ref(repo_id, lock_config)
-        production_commit, production_promotion_status = resolve_production_promotion(
-            repo_path,
-            commit=commit,
-            dirty=dirty,
-            remote_name=remote_name,
-            production_ref=production_ref,
-        )
         pins[repo_id] = {
             "path": coordinate,
             "remote": remote_url,
@@ -342,11 +381,51 @@ def build_source_pins(config: dict[str, Any], root: Path) -> dict[str, dict[str,
             "ref": ref,
             "commit": commit,
             "dirty": dirty,
+        }
+    return pins
+
+
+def build_deployment_promotion_probes(
+    config: dict[str, Any],
+    root: Path,
+    source_pins: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Live, re-derived inference about each source-pinned repo's remote state.
+
+    Each entry runs a real `git ls-remote` against the repo's own configured
+    remote at generation time and compares it against the local evidence
+    already captured in `source_pins`. This is NOT an immutable receipt of
+    an actually-observed deployment/promotion event — it is recomputed from
+    scratch on every call, and can legitimately change between two runs
+    against the exact same local `commit` if the remote branch moved. See
+    the module-level comment above `SOURCE_PIN_FIELDS` for the full
+    rationale for keeping this structurally separate from `source_pins`.
+    """
+    lock_config = config.get("stack_lock", {}) if isinstance(config.get("stack_lock"), dict) else {}
+    probes: dict[str, dict[str, Any]] = {}
+
+    for repo_id in source_pin_repo_ids(config):
+        pin = source_pins.get(repo_id)
+        if not isinstance(pin, dict):
+            # No local evidence was captured for this repo (build_source_pins
+            # would already have raised), so there is nothing to probe against.
+            continue
+        _, repo_path = _resolve_source_pinned_repo_path(config, root, repo_id)
+        remote_name = current_remote_name(repo_path)
+        production_ref = source_pin_production_ref(repo_id, lock_config)
+        production_commit, production_promotion_status = resolve_production_promotion(
+            repo_path,
+            commit=str(pin.get("commit", "")),
+            dirty=bool(pin.get("dirty", False)),
+            remote_name=remote_name,
+            production_ref=production_ref,
+        )
+        probes[repo_id] = {
             "production_ref": production_ref,
             "production_commit": production_commit,
             "production_promotion_status": production_promotion_status,
         }
-    return pins
+    return probes
 
 
 def repo_trust_class(repo_id: str, repo_info: dict[str, Any], lock_config: dict[str, Any]) -> str:
@@ -479,9 +558,10 @@ def normalize_excluded_surface(surface: dict[str, Any]) -> dict[str, Any]:
 
 
 def normalize_source_pin(pin: dict[str, Any]) -> dict[str, Any]:
+    """Normalize the deterministic, purely-local-git-evidence half of a
+    source-pinned repo. Deliberately carries no production/promotion
+    fields — see `normalize_deployment_promotion_probe` for those."""
     remote = pin.get("remote")
-    production_commit = pin.get("production_commit")
-    production_ref = pin.get("production_ref")
     return {
         "path": normalize_slashes(str(pin.get("path", ""))),
         "remote": normalize_slashes(str(remote)) if isinstance(remote, str) and remote else None,
@@ -489,11 +569,23 @@ def normalize_source_pin(pin: dict[str, Any]) -> dict[str, Any]:
         "ref": str(pin.get("ref", "")),
         "commit": str(pin.get("commit", "")),
         "dirty": bool(pin.get("dirty", False)),
+    }
+
+
+def normalize_deployment_promotion_probe(probe: dict[str, Any]) -> dict[str, Any]:
+    """Normalize the live, re-derived-inference half of a source-pinned
+    repo's remote state. See the module-level comment above
+    `SOURCE_PIN_FIELDS` for why this is not merged into `source_pins`."""
+    production_commit = probe.get("production_commit")
+    production_ref = probe.get("production_ref")
+    return {
         "production_ref": str(production_ref) if isinstance(production_ref, str) and production_ref else None,
         "production_commit": (
             str(production_commit) if isinstance(production_commit, str) and production_commit else None
         ),
-        "production_promotion_status": str(pin.get("production_promotion_status", PROMOTION_STATUS_NOT_CONFIGURED)),
+        "production_promotion_status": str(
+            probe.get("production_promotion_status", PROMOTION_STATUS_NOT_CONFIGURED)
+        ),
     }
 
 
@@ -528,6 +620,16 @@ def normalize_lock_payload(payload: dict[str, Any]) -> dict[str, Any]:
             if isinstance(pin, dict):
                 source_pins[pin_id] = normalize_source_pin(pin)
 
+    raw_deployment_promotion_probes = payload.get("deployment_promotion_probes", {})
+    deployment_promotion_probes: dict[str, dict[str, Any]] = {}
+    if isinstance(raw_deployment_promotion_probes, dict):
+        for probe_id, probe in sorted(
+            ((str(raw_key), raw_value) for raw_key, raw_value in raw_deployment_promotion_probes.items()),
+            key=lambda item: item[0],
+        ):
+            if isinstance(probe, dict):
+                deployment_promotion_probes[probe_id] = normalize_deployment_promotion_probe(probe)
+
     body = {
         "schema_version": str(payload.get("schema_version", STACK_LOCK_SCHEMA_VERSION)),
         "stack_manifest_path": normalize_slashes(str(payload.get("stack_manifest_path", "stack.yaml"))),
@@ -537,6 +639,8 @@ def normalize_lock_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "excluded_surfaces": excluded,
         "source_pin_count": len(source_pins),
         "source_pins": source_pins,
+        "deployment_promotion_probe_count": len(deployment_promotion_probes),
+        "deployment_promotion_probes": deployment_promotion_probes,
     }
     if payload.get("refresh_scope") is not None:
         repo_ids = scoped_refresh_repo_ids(payload)
@@ -644,6 +748,13 @@ def lock_source_pin_field_drift(
     return [field for field in SOURCE_PIN_FIELDS if locked.get(field) != generated.get(field)]
 
 
+def lock_deployment_promotion_probe_field_drift(
+    locked: dict[str, Any],
+    generated: dict[str, Any],
+) -> list[str]:
+    return [field for field in DEPLOYMENT_PROMOTION_PROBE_FIELDS if locked.get(field) != generated.get(field)]
+
+
 def classify_component_drift_fields(drift_fields: list[str]) -> str:
     return "worktree" if drift_fields == ["dirty"] else "pin"
 
@@ -700,6 +811,30 @@ def describe_lock_payload_drift(
                 "fields": drift_fields,
             }
 
+    deployment_promotion_probe_drift: dict[str, dict[str, Any]] = {}
+    locked_probes = (
+        locked.get("deployment_promotion_probes") if isinstance(locked.get("deployment_promotion_probes"), dict) else {}
+    )
+    generated_probes = (
+        generated.get("deployment_promotion_probes")
+        if isinstance(generated.get("deployment_promotion_probes"), dict)
+        else {}
+    )
+    for probe_id in sorted(set(locked_probes) | set(generated_probes)):
+        locked_probe = locked_probes.get(probe_id)
+        generated_probe = generated_probes.get(probe_id)
+        if not isinstance(locked_probe, dict) or not isinstance(generated_probe, dict):
+            deployment_promotion_probe_drift[probe_id] = {"kind": "membership", "fields": []}
+            continue
+        drift_fields = lock_deployment_promotion_probe_field_drift(locked_probe, generated_probe)
+        if drift_fields:
+            # Every field here is a live-derived inference (see the
+            # module-level comment above SOURCE_PIN_FIELDS), so drift in
+            # this structure is routine/expected, not a "pin" mismatch —
+            # tag it distinctly so consumers can treat it as lower-severity
+            # than component/source-pin drift.
+            deployment_promotion_probe_drift[probe_id] = {"kind": "promotion", "fields": drift_fields}
+
     metadata_fields = [field for field in LOCK_METADATA_FIELDS if locked.get(field) != generated.get(field)]
     return {
         "locked": locked,
@@ -707,8 +842,15 @@ def describe_lock_payload_drift(
         "components": component_drift,
         "excluded_surfaces": excluded_surface_drift,
         "source_pins": source_pin_drift,
+        "deployment_promotion_probes": deployment_promotion_probe_drift,
         "metadata_fields": metadata_fields,
-        "has_drift": bool(component_drift or excluded_surface_drift or source_pin_drift or metadata_fields),
+        "has_drift": bool(
+            component_drift
+            or excluded_surface_drift
+            or source_pin_drift
+            or deployment_promotion_probe_drift
+            or metadata_fields
+        ),
     }
 
 
@@ -764,6 +906,7 @@ def build_lock_payload(
             "release_eligible": repo_release_eligible(repo_id, repo_info, lock_config),
         }
 
+    source_pins = build_source_pins(stack_config, base)
     payload = {
         "schema_version": STACK_LOCK_SCHEMA_VERSION,
         "stack_manifest_path": atlas_relative(base / "stack.yaml", root=base),
@@ -771,7 +914,8 @@ def build_lock_payload(
         "component_count": len(components),
         "components": components,
         "excluded_surfaces": excluded_surfaces(stack_config, base),
-        "source_pins": build_source_pins(stack_config, base),
+        "source_pins": source_pins,
+        "deployment_promotion_probes": build_deployment_promotion_probes(stack_config, base, source_pins),
     }
     return normalize_lock_payload(payload)
 
@@ -926,6 +1070,7 @@ def main() -> int:
                 "component_count": payload["component_count"],
                 "excluded_surface_count": len(payload["excluded_surfaces"]),
                 "source_pin_count": payload["source_pin_count"],
+                "deployment_promotion_probe_count": payload["deployment_promotion_probe_count"],
                 "refresh_repo_ids": sorted(refresh_repo_ids),
                 "baseline_git_ref": args.baseline_git_ref,
                 "lock_digest": payload["lock_digest"],

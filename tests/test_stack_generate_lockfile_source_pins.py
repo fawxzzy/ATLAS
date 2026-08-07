@@ -12,19 +12,32 @@ from ops.stack.generate_lockfile import (
     PROMOTION_STATUS_NOT_PROMOTED,
     PROMOTION_STATUS_PROMOTED_DIRTY_WORKTREE,
     PROMOTION_STATUS_PROMOTED_VERIFIED_CLEAN,
+    build_deployment_promotion_probes,
     build_lock_payload,
     build_source_pins,
 )
 
 
 class StackGenerateLockfileSourcePinsTests(unittest.TestCase):
-    """Covers the generator's source_pins mechanism for repos that are
-    deliberately excluded from stack.lock.yaml's governed
+    """Covers the generator's source_pins / deployment_promotion_probes split
+    for repos that are deliberately excluded from stack.lock.yaml's governed
     components/include_repo_ids set (e.g. unmanaged application repos such
-    as Fitness/Mazer) but still need real, git-evidence-backed source-commit
-    and production-promotion identity captured into the same
-    digest-guarded stack.lock.yaml output, instead of being hand-typed into
-    stack.yaml.
+    as Fitness/Mazer) but still need real, git-evidence-backed identity
+    captured into the same digest-guarded stack.lock.yaml output, instead of
+    being hand-typed into stack.yaml.
+
+    The two structures are intentionally separate:
+
+    - `source_pins[repo_id]` is deterministic, purely-local git evidence
+      (path/remote/ref_type/ref/commit/dirty) — reproducible byte-for-byte
+      by anyone running against the same local checkout state.
+    - `deployment_promotion_probes[repo_id]` is a live, re-derived
+      inference about the remote's state (production_ref/production_commit/
+      production_promotion_status), obtained via a real `git ls-remote`
+      against the repo's configured remote at generation time. It is NOT an
+      immutable receipt of an observed deployment event, and can legitimately
+      change between two runs against the exact same local commit if the
+      remote branch moved in between.
     """
 
     def setUp(self) -> None:
@@ -76,7 +89,8 @@ class StackGenerateLockfileSourcePinsTests(unittest.TestCase):
         }
 
     # -- Determinism: running the generator twice against the same real
-    # git evidence must produce byte-identical, digest-identical output. --
+    # git evidence must produce byte-identical, digest-identical output,
+    # across BOTH structures. --
 
     def test_source_pins_are_deterministic_across_runs(self) -> None:
         repo_path = self._init_repo("repos/fitness")
@@ -88,13 +102,19 @@ class StackGenerateLockfileSourcePinsTests(unittest.TestCase):
 
         self.assertEqual(first, second)
         self.assertEqual(first["lock_digest"], second["lock_digest"])
+
         self.assertEqual(commit, first["source_pins"]["fitness"]["commit"])
         self.assertFalse(first["source_pins"]["fitness"]["dirty"])
+        self.assertNotIn("production_commit", first["source_pins"]["fitness"])
+        self.assertNotIn("production_promotion_status", first["source_pins"]["fitness"])
+
         self.assertEqual(
             PROMOTION_STATUS_NOT_CONFIGURED,
-            first["source_pins"]["fitness"]["production_promotion_status"],
+            first["deployment_promotion_probes"]["fitness"]["production_promotion_status"],
         )
-        self.assertIsNone(first["source_pins"]["fitness"]["production_commit"])
+        self.assertIsNone(first["deployment_promotion_probes"]["fitness"]["production_commit"])
+        self.assertEqual(1, first["source_pin_count"])
+        self.assertEqual(1, first["deployment_promotion_probe_count"])
 
     def test_source_pin_reflects_real_dirty_worktree_evidence(self) -> None:
         repo_path = self._init_repo("repos/fitness")
@@ -111,7 +131,8 @@ class StackGenerateLockfileSourcePinsTests(unittest.TestCase):
     # -- Production-promotion status derived from a real `git ls-remote`
     # against the repo's own configured remote (no fabricated Vercel call,
     # no network dependency in the test: the "remote" is a real local bare
-    # git repo, so ls-remote is a genuine git evidence-gathering call). --
+    # git repo, so ls-remote is a genuine git evidence-gathering call).
+    # These now live in deployment_promotion_probes, not source_pins. --
 
     def test_production_promotion_status_promoted_verified_clean(self) -> None:
         remote_path = self.root / "remote-mazer.git"
@@ -128,10 +149,12 @@ class StackGenerateLockfileSourcePinsTests(unittest.TestCase):
             repo_overrides={"mazer": {"production_promotion_ref": "main"}},
         )
         pins = build_source_pins(config, self.root)
+        probes = build_deployment_promotion_probes(config, self.root, pins)
 
-        self.assertEqual(PROMOTION_STATUS_PROMOTED_VERIFIED_CLEAN, pins["mazer"]["production_promotion_status"])
-        self.assertEqual(commit, pins["mazer"]["production_commit"])
+        self.assertEqual(PROMOTION_STATUS_PROMOTED_VERIFIED_CLEAN, probes["mazer"]["production_promotion_status"])
+        self.assertEqual(commit, probes["mazer"]["production_commit"])
         self.assertEqual(commit, pins["mazer"]["commit"])
+        self.assertNotIn("production_commit", pins["mazer"])
 
     def test_production_promotion_status_not_promoted_when_local_diverges(self) -> None:
         remote_path = self.root / "remote-mazer.git"
@@ -151,11 +174,12 @@ class StackGenerateLockfileSourcePinsTests(unittest.TestCase):
             repo_overrides={"mazer": {"production_promotion_ref": "main"}},
         )
         pins = build_source_pins(config, self.root)
+        probes = build_deployment_promotion_probes(config, self.root, pins)
 
         self.assertNotEqual(local_commit, production_commit)
-        self.assertEqual(PROMOTION_STATUS_NOT_PROMOTED, pins["mazer"]["production_promotion_status"])
+        self.assertEqual(PROMOTION_STATUS_NOT_PROMOTED, probes["mazer"]["production_promotion_status"])
         self.assertEqual(local_commit, pins["mazer"]["commit"])
-        self.assertEqual(production_commit, pins["mazer"]["production_commit"])
+        self.assertEqual(production_commit, probes["mazer"]["production_commit"])
 
     def test_production_promotion_status_promoted_dirty_worktree(self) -> None:
         remote_path = self.root / "remote-mazer.git"
@@ -173,17 +197,66 @@ class StackGenerateLockfileSourcePinsTests(unittest.TestCase):
             repo_overrides={"mazer": {"production_promotion_ref": "main"}},
         )
         pins = build_source_pins(config, self.root)
+        probes = build_deployment_promotion_probes(config, self.root, pins)
 
-        self.assertEqual(PROMOTION_STATUS_PROMOTED_DIRTY_WORKTREE, pins["mazer"]["production_promotion_status"])
-        self.assertEqual(commit, pins["mazer"]["production_commit"])
+        self.assertTrue(pins["mazer"]["dirty"])
+        self.assertEqual(PROMOTION_STATUS_PROMOTED_DIRTY_WORKTREE, probes["mazer"]["production_promotion_status"])
+        self.assertEqual(commit, probes["mazer"]["production_commit"])
+
+    def test_deployment_promotion_probe_can_change_while_local_commit_is_unchanged(self) -> None:
+        """The whole point of the split: a repeat run against the exact same
+        local commit can produce a different production_promotion_status if
+        the remote moved in between — this must NOT be possible for
+        source_pins' local-evidence fields, which are pinned by the local
+        checkout alone."""
+        remote_path = self.root / "remote-mazer.git"
+        subprocess.run(["git", "init", "--quiet", "--bare", str(remote_path)], check=True)
+
+        repo_path = self._init_repo("repos/mazer")
+        first_commit = self._commit(repo_path, "first commit")
+        self._run_git(repo_path, "remote", "add", "origin", str(remote_path))
+        self._run_git(repo_path, "push", "--quiet", "origin", "main")
+
+        config = self._config(
+            source_pin_repo_ids=["mazer"],
+            repo_paths={"mazer": "repos/mazer"},
+            repo_overrides={"mazer": {"production_promotion_ref": "main"}},
+        )
+        pins_before = build_source_pins(config, self.root)
+        probes_before = build_deployment_promotion_probes(config, self.root, pins_before)
+        self.assertEqual(PROMOTION_STATUS_PROMOTED_VERIFIED_CLEAN, probes_before["mazer"]["production_promotion_status"])
+
+        # Advance the remote without touching the local checkout at all. The
+        # bare remote's own HEAD symref doesn't necessarily point at "main"
+        # (it was created empty, before any push set a default branch), so
+        # explicitly check out "main" after cloning rather than relying on
+        # whatever branch git clone puts the new clone on by default.
+        other_clone = self.root / "other-clone"
+        self._run_git(self.root, "clone", "--quiet", str(remote_path), str(other_clone))
+        self._run_git(other_clone, "config", "user.name", "ATLAS Test")
+        self._run_git(other_clone, "config", "user.email", "atlas-test@example.invalid")
+        self._run_git(other_clone, "checkout", "--quiet", "main")
+        self._commit(other_clone, "second commit, pushed from elsewhere")
+        self._run_git(other_clone, "push", "--quiet", "origin", "main")
+
+        pins_after = build_source_pins(config, self.root)
+        probes_after = build_deployment_promotion_probes(config, self.root, pins_after)
+
+        # Local evidence is unchanged (same local commit, same worktree).
+        self.assertEqual(pins_before["mazer"], pins_after["mazer"])
+        self.assertEqual(first_commit, pins_after["mazer"]["commit"])
+        # But the live-derived promotion inference now disagrees, because the
+        # remote moved out from under an unchanged local checkout.
+        self.assertEqual(PROMOTION_STATUS_NOT_PROMOTED, probes_after["mazer"]["production_promotion_status"])
 
     # -- Feed a known SHA (via a mocked git backend that stands in for the
     # subprocess boundary only) and assert the exact expected rendered
-    # source pin, matching the real evidence observed against the actual
-    # fawxzzy/mazer repo at the time this generator extension was written:
-    # a feature-branch HEAD that has not yet reached remote main. --
+    # source pin and deployment promotion probe, matching the real evidence
+    # observed against the actual fawxzzy/mazer repo at the time this
+    # generator extension was written: a feature-branch HEAD that has not
+    # yet reached remote main. --
 
-    def test_known_commit_sha_produces_exact_expected_source_pin(self) -> None:
+    def test_known_commit_sha_produces_exact_expected_source_pin_and_probe(self) -> None:
         known_local_sha = "a537d2d17429bdf0482989c280373a6ea751f9c0"
         known_production_sha = "4c61943eb4c8b4e98a5cbb9054f3c927bb724950"
 
@@ -216,6 +289,7 @@ class StackGenerateLockfileSourcePinsTests(unittest.TestCase):
 
         with patch("ops.stack.generate_lockfile.git_output", side_effect=fake_git_output):
             pins = build_source_pins(config, self.root)
+            probes = build_deployment_promotion_probes(config, self.root, pins)
 
         self.assertEqual(
             {
@@ -225,11 +299,16 @@ class StackGenerateLockfileSourcePinsTests(unittest.TestCase):
                 "ref": "codex/player-goal-default-colors",
                 "commit": known_local_sha,
                 "dirty": True,
+            },
+            pins["mazer"],
+        )
+        self.assertEqual(
+            {
                 "production_ref": "main",
                 "production_commit": known_production_sha,
                 "production_promotion_status": PROMOTION_STATUS_NOT_PROMOTED,
             },
-            pins["mazer"],
+            probes["mazer"],
         )
 
     def test_source_pins_do_not_alter_governed_component_set(self) -> None:
@@ -254,8 +333,10 @@ class StackGenerateLockfileSourcePinsTests(unittest.TestCase):
         self.assertIn("foundation", payload["components"])
         self.assertNotIn("fitness", payload["components"])
         self.assertIn("fitness", payload["source_pins"])
+        self.assertIn("fitness", payload["deployment_promotion_probes"])
         self.assertEqual(1, payload["component_count"])
         self.assertEqual(1, payload["source_pin_count"])
+        self.assertEqual(1, payload["deployment_promotion_probe_count"])
 
 
 if __name__ == "__main__":
