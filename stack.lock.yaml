@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:e90e26e71130ad266550bca6e36bf27696fcaf172a5dc09dab7d10d23762f14f"
+stack_manifest_digest: "sha256:b3995224d47969b15be00ebc586b7a2a2566a4ee201f30911c02b4eab7e94ed2"
 component_count: 9
 components:
   _stack:
@@ -224,14 +224,4 @@ source_pins:
     ref: "codex/player-goal-default-colors"
     commit: "a537d2d17429bdf0482989c280373a6ea751f9c0"
     dirty: true
-deployment_promotion_probe_count: 2
-deployment_promotion_probes:
-  fitness:
-    production_ref: null
-    production_commit: null
-    production_promotion_status: "not_configured"
-  mazer:
-    production_ref: "main"
-    production_commit: "99ecfe4c3db57c554f2e440e7427fa2148d030cc"
-    production_promotion_status: "not_promoted"
-lock_digest: "sha256:26b433b6bf468bb3ef75f25b685eb15d189e6ca60a9a68f67a9352c61ea4d012"
+lock_digest: "sha256:41a69fed0ddf626a669124bcbf1fd19893dec46cb2c9172b375259e8a13e8cf6"

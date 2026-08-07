@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -15,19 +16,39 @@ from ops.atlas.operational_identity import inventory_identity_projection, operat
 from ops.cortex._artifacts import stable_json_digest
 from ops.cortex.index_working_memory import build_working_memory_catalog
 from ops.stack.generate_lockfile import (
+    ALIGNMENT_STATUS_UNKNOWN,
     current_ref,
     current_remote,
     declared_root_coordinate,
     default_lockfile_path,
+    default_remote_ref_alignment_path,
     git_output,
     git_status_lines,
     load_lockfile,
+    load_remote_ref_alignment_report,
     parse_porcelain_path,
+    remote_ref_alignment_entry_with_staleness,
     repo_is_git_root,
     repo_release_eligible,
     repo_trust_class,
     resolve_declared_root_path,
 )
+
+# These 5 keys are read from the separate, explicitly-mutable
+# `stack.remote-ref-alignment.yaml` report (see generate_lockfile.py), never
+# from stack.lock.yaml. They must never participate in this module's own
+# `content_digest` — see `_strip_remote_alignment_fields` / `build_repo_inventory`.
+REMOTE_ALIGNMENT_OUTPUT_FIELDS = (
+    "remote_ref_alignment_ref",
+    "remote_ref_alignment_remote_commit",
+    "remote_ref_alignment_status",
+    "remote_ref_alignment_unavailable_reason",
+    "remote_ref_alignment_checked_at",
+)
+
+
+def _strip_remote_alignment_fields(repo_entry: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in repo_entry.items() if key not in REMOTE_ALIGNMENT_OUTPUT_FIELDS}
 
 REPO_INVENTORY_SCHEMA_VERSION = "atlas.stack.repo-inventory.v1"
 REPO_INVENTORY_SUMMARY_VERSION = "atlas.stack.repo-inventory.summary.v1"
@@ -228,17 +249,26 @@ def build_repo_inventory(
     initiative_index, initiative_digest = _initiative_index(base_root, repo_paths)
     lock_components = loaded_lock.get("components", {}) if isinstance(loaded_lock.get("components"), dict) else {}
     lock_source_pins = loaded_lock.get("source_pins", {}) if isinstance(loaded_lock.get("source_pins"), dict) else {}
-    # deployment_promotion_probes is a structurally separate, live-derived
-    # inference about each source-pinned repo's remote state (a real
-    # `git ls-remote` re-run every generation, not an immutable receipt of an
-    # observed deployment) — kept apart from source_pins' deterministic local
-    # git evidence. See the module-level comment above SOURCE_PIN_FIELDS in
-    # ops/stack/generate_lockfile.py for the full rationale.
-    lock_deployment_promotion_probes = (
-        loaded_lock.get("deployment_promotion_probes", {})
-        if isinstance(loaded_lock.get("deployment_promotion_probes"), dict)
+    # `remote_ref_alignment` is read from a wholly separate, explicitly-mutable
+    # file (stack.remote-ref-alignment.yaml), never from stack.lock.yaml. It
+    # is a live, point-in-time `git ls-remote`-derived observation, not an
+    # immutable receipt of an observed deployment, and it must never
+    # participate in this inventory's own `content_digest` — see
+    # `_strip_remote_alignment_fields` below and the module-level comment
+    # above REMOTE_REF_ALIGNMENT_SCHEMA_VERSION in
+    # ops/stack/generate_lockfile.py for the full rationale. A missing report
+    # file, or a missing/stale entry within it, renders explicit
+    # `ALIGNMENT_STATUS_UNKNOWN`/`ALIGNMENT_STATUS_STALE` per-repo below —
+    # never silently omitted, never defaulted to a status that could be
+    # misread as a real finding.
+    remote_alignment_path = default_remote_ref_alignment_path(stack_config, base_root)
+    remote_alignment_report = load_remote_ref_alignment_report(remote_alignment_path)
+    remote_alignment_entries = (
+        remote_alignment_report.get("remote_ref_alignment", {})
+        if isinstance(remote_alignment_report, dict) and isinstance(remote_alignment_report.get("remote_ref_alignment"), dict)
         else {}
     )
+    staleness_reference_time = datetime.now(timezone.utc)
     lock_config = stack_config.get("stack_lock", {}) if isinstance(stack_config.get("stack_lock"), dict) else {}
 
     repos: list[dict[str, Any]] = []
@@ -267,10 +297,12 @@ def build_repo_inventory(
         # may still carry a generator-derived source pin; fall back to it so
         # their real, digest-guarded commit identity is visible here too.
         source_pin = lock_source_pins.get(repo_id) if isinstance(lock_source_pins.get(repo_id), dict) else {}
-        deployment_promotion_probe = (
-            lock_deployment_promotion_probes.get(repo_id)
-            if isinstance(lock_deployment_promotion_probes.get(repo_id), dict)
-            else {}
+        raw_remote_alignment_entry = (
+            remote_alignment_entries.get(repo_id) if isinstance(remote_alignment_entries.get(repo_id), dict) else None
+        )
+        remote_alignment = remote_ref_alignment_entry_with_staleness(
+            raw_remote_alignment_entry,
+            now=staleness_reference_time,
         )
         related_initiatives = initiative_index.get(repo_id, [])
         root_blocking = _repo_blocks_root(repo_id, repo_info, lock_config)
@@ -311,9 +343,15 @@ def build_repo_inventory(
                 "dirty": live_state["dirty"],
                 "root_blocking": root_blocking,
                 "dirty_blocks_root": dirty_blocks_root,
-                "production_ref": deployment_promotion_probe.get("production_ref"),
-                "production_commit": deployment_promotion_probe.get("production_commit"),
-                "production_promotion_status": deployment_promotion_probe.get("production_promotion_status"),
+                # Evidence of remote-ref alignment, not proof of a deployment
+                # or of what is running in production anywhere. See the
+                # loader comment above and REMOTE_REF_ALIGNMENT_SCHEMA_VERSION
+                # in ops/stack/generate_lockfile.py.
+                "remote_ref_alignment_ref": remote_alignment.get("ref"),
+                "remote_ref_alignment_remote_commit": remote_alignment.get("remote_commit"),
+                "remote_ref_alignment_status": remote_alignment.get("alignment_status"),
+                "remote_ref_alignment_unavailable_reason": remote_alignment.get("unavailable_reason"),
+                "remote_ref_alignment_checked_at": remote_alignment.get("checked_at"),
                 "trust_class": lock_component.get("trust_class") or repo_trust_class(repo_id, repo_info, lock_config),
                 "release_eligible": (
                     bool(lock_component.get("release_eligible"))
@@ -374,7 +412,21 @@ def build_repo_inventory(
         "excluded_surface_count": len(excluded_surfaces),
         "excluded_surfaces": excluded_surfaces,
     }
-    return body | {"content_digest": stable_json_digest(body)}
+    # `content_digest` is computed over a view of `body` with every
+    # `remote_ref_alignment_*` field stripped from each repo entry, so this
+    # inventory's own digest is exactly as network-independent as
+    # `stack.lock.yaml`'s `lock_digest`: the remote branch moving, or the
+    # network being unavailable, changes what `repos[i]["remote_ref_alignment_*"]`
+    # says, but never changes `content_digest`. The digest is computed first,
+    # over the stripped view, then attached to the real `body` (which does
+    # carry the remote_ref_alignment_* fields) below — mirroring the same
+    # "compute over a clean view, then merge" pattern
+    # `normalize_lock_payload` uses for `lock_digest`.
+    digest_body = {
+        **body,
+        "repos": [_strip_remote_alignment_fields(item) for item in repos],
+    }
+    return body | {"content_digest": stable_json_digest(digest_body)}
 
 
 def summarize_repo_inventory(payload: dict[str, Any]) -> dict[str, Any]:

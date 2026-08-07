@@ -322,7 +322,13 @@ stack_lock:
       trust_class: trusted
       release_eligible: false
     mazer:
-      production_promotion_ref: main
+      # Branch to compare against in the separate, non-digest-guarded
+      # stack.remote-ref-alignment.yaml report (ops/stack/generate_lockfile.py
+      # build_remote_ref_alignment_report). Deliberately not named
+      # "production_promotion_ref" — this only configures a remote-ref
+      # alignment comparison, not evidence of a deployment or of what is
+      # running in production anywhere.
+      remote_ref_alignment_ref: main
   excluded_surfaces:
     fitness_reclone_recovery_checkout:
       path: repos/fawxzzy-fitness.reclone.20260502-195639

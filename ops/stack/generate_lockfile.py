@@ -6,8 +6,9 @@ import hashlib
 import json
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path, PureWindowsPath
-from typing import Any
+from typing import Any, Callable
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -37,7 +38,6 @@ LOCK_METADATA_FIELDS = (
     "stack_manifest_digest",
     "component_count",
     "source_pin_count",
-    "deployment_promotion_probe_count",
     "refresh_scope",
 )
 LOCK_EXCLUDED_SURFACE_FIELDS = (
@@ -56,55 +56,111 @@ SOURCE_PIN_FIELDS = (
     "commit",
     "dirty",
 )
-DEPLOYMENT_PROMOTION_PROBE_FIELDS = (
-    "production_ref",
-    "production_commit",
-    "production_promotion_status",
-)
 
+# ---------------------------------------------------------------------------
+# Evidence-class boundary: `source_pins` vs. `remote_ref_alignment`
+# ---------------------------------------------------------------------------
+#
 # Source pins cover repos that are deliberately excluded from stack.lock.yaml's
 # governed `components`/`include_repo_ids` release-management set (unmanaged
 # application repos such as Fitness/Mazer) but still need their real, current
 # source-commit identity captured from git evidence rather than hand-typed
 # into stack.yaml. They never affect trust_class/release_eligible semantics.
 #
-# `source_pins` and `deployment_promotion_probes` are deliberately two
-# separate top-level structures rather than one merged dict, because they
-# carry two evidence classes with very different reliability/immutability
-# properties:
+# This module produces two evidence classes with fundamentally different
+# reliability/immutability properties, and they are kept in two entirely
+# separate artifacts (not just separate top-level keys of the same payload):
 #
-#   - `source_pins[repo_id]` is deterministic, purely-local git evidence
+#   - `source_pins[repo_id]` (this file, part of `stack.lock.yaml`, part of
+#     `lock_digest`) is deterministic, purely-local git evidence
 #     (`path`/`remote`/`ref_type`/`ref`/`commit`/`dirty`) read directly from
 #     the repo's local checkout via `git rev-parse`/`git status`/etc. Given
-#     the same local checkout state, any two runs (by anyone, anywhere)
-#     produce byte-identical output. It is evidence about *this machine's
-#     copy* of the repo, nothing more.
+#     the same local checkout state, any two runs (by anyone, anywhere, with
+#     or without network access) produce byte-identical output. Nothing in
+#     `build_lock_payload`, `normalize_lock_payload`, or
+#     `build_canonical_lockfile_artifacts` ever performs a network call —
+#     that is a load-bearing property of "deterministic lock rendering",
+#     not an incidental one, and is exercised directly by
+#     `tests/test_stack_remote_ref_alignment.py`.
 #
-#   - `deployment_promotion_probes[repo_id]` is a *live, point-in-time
-#     inference* about the remote's state: it runs a real `git ls-remote`
-#     against the repo's actual configured remote at generation time and
-#     compares the result to the local evidence above. This is NOT an
-#     immutable receipt of an actually-observed deployment/promotion event
-#     (unlike, say, a real Vercel deployment id captured once at the moment
-#     of an actual `vercel promote` call) — it is re-derived from scratch on
-#     every generator run, and a re-run five minutes later against the exact
+#   - `remote_ref_alignment[repo_id]` (a wholly separate file,
+#     `stack.remote-ref-alignment.yaml` by default — see
+#     `build_remote_ref_alignment_payload` / `default_remote_ref_alignment_path`
+#     below) is a *live, point-in-time observation* about the remote's state:
+#     it runs a real `git ls-remote` against the repo's actual configured
+#     remote at generation time and compares the result to the local evidence
+#     captured in `source_pins`. It answers "does this remote ref currently
+#     point at the same commit as this local checkout?" — nothing more. It is
+#     NOT an immutable receipt of an actually-observed deployment/promotion
+#     event (unlike, say, a real Vercel deployment id captured once at the
+#     moment of an actual `vercel promote` call), it is NOT proof of what is
+#     running in production, and it must never be read, named, or documented
+#     that way. It is re-derived from scratch on every invocation of the
+#     report generator, and a re-run five minutes later against the exact
 #     same local `commit` can legitimately produce a different
-#     `production_promotion_status` if the remote branch moved in the
-#     meantime. Treat this structure as a best-effort, re-derived guess at
-#     promotion state, not a captured record of a real deployment — do not
-#     oversell its authority by its name alone.
+#     `alignment_status` if the remote branch moved in the meantime, or
+#     `ALIGNMENT_STATUS_UNKNOWN` if the network is unavailable. This file
+#     carries no digest of its own and is explicitly excluded from
+#     `lock_digest`'s input — see `normalize_lock_payload`, which never reads
+#     it, and `build_lock_payload`, which never calls
+#     `build_remote_ref_alignment_payload`.
 #
-# Mixing these into one dict made it impossible to tell, from the
-# drift/digest machinery alone, whether a lockfile mismatch meant "the local
-# checkout changed" (rare, significant) or "the remote moved since the last
-# regeneration" (routine, expected to happen constantly). Splitting them lets
-# `describe_lock_payload_drift` report on each independently.
-PROMOTION_STATUS_NOT_CONFIGURED = "not_configured"
-PROMOTION_STATUS_NO_REMOTE = "no_remote"
-PROMOTION_STATUS_REMOTE_UNREACHABLE = "remote_unreachable"
-PROMOTION_STATUS_NOT_PROMOTED = "not_promoted"
-PROMOTION_STATUS_PROMOTED_DIRTY_WORKTREE = "promoted_dirty_worktree"
-PROMOTION_STATUS_PROMOTED_VERIFIED_CLEAN = "promoted_verified_clean"
+# Two prior passes on this PR mixed these into one dict, and then split them
+# into two dicts inside the *same* digest-guarded lockfile — both of which
+# left the live network result inside `lock_digest`'s input. The repo owner's
+# review (see PR #161) was explicit that this is the actual defect: a
+# digest-guarded artifact whose bytes can change purely because a live
+# network call returned a different answer, with zero change to any real
+# deterministic source evidence. The fix here is structural, not cosmetic:
+# `remote_ref_alignment` lives in a different file, is never passed through
+# `normalize_lock_payload`, and `build_lock_payload` never calls the function
+# that performs the `git ls-remote` call at all.
+REMOTE_REF_ALIGNMENT_SCHEMA_VERSION = "atlas.stack.remote-ref-alignment.v1"
+REMOTE_REF_ALIGNMENT_FIELDS = (
+    "path",
+    "ref",
+    "remote",
+    "local_commit",
+    "local_dirty",
+    "remote_commit",
+    "alignment_status",
+    "unavailable_reason",
+    "checked_at",
+)
+# How stale a persisted `remote_ref_alignment` entry may be before a
+# *consumer* (e.g. export_repo_inventory.py) must stop presenting its
+# recorded alignment_status as current and instead render `STALE`. This is a
+# read-time judgment applied by whoever loads the report later, not a
+# property the generator itself ever sets — a report the generator just wrote
+# is never stale relative to its own `checked_at`.
+REMOTE_REF_ALIGNMENT_STALE_AFTER = timedelta(hours=24)
+
+# Honest, non-authoritative status vocabulary for `remote_ref_alignment`.
+# `ALIGNMENT_STATUS_UNKNOWN` and `ALIGNMENT_STATUS_STALE` are explicit
+# "no reliable answer" values — a missing or unrefreshed observation must
+# render as one of these two literal strings, never silently omitted and
+# never defaulted to one of the "real answer" statuses below (which could be
+# misread as an actual finding).
+ALIGNMENT_STATUS_UNKNOWN = "UNKNOWN"
+ALIGNMENT_STATUS_STALE = "STALE"
+ALIGNMENT_STATUS_ALIGNED_CLEAN = "aligned_clean"
+ALIGNMENT_STATUS_ALIGNED_DIRTY_WORKTREE = "aligned_dirty_worktree"
+ALIGNMENT_STATUS_NOT_ALIGNED = "not_aligned"
+ALIGNMENT_STATUSES = {
+    ALIGNMENT_STATUS_UNKNOWN,
+    ALIGNMENT_STATUS_STALE,
+    ALIGNMENT_STATUS_ALIGNED_CLEAN,
+    ALIGNMENT_STATUS_ALIGNED_DIRTY_WORKTREE,
+    ALIGNMENT_STATUS_NOT_ALIGNED,
+}
+
+# Diagnostic detail for *why* alignment_status is ALIGNMENT_STATUS_UNKNOWN.
+# Kept as a secondary field so the primary `alignment_status` value stays
+# honestly one of the values above (never "not_configured" etc. standing in
+# as if it were a real alignment finding).
+ALIGNMENT_UNAVAILABLE_REASON_NOT_CONFIGURED = "not_configured"
+ALIGNMENT_UNAVAILABLE_REASON_NO_REMOTE = "no_remote"
+ALIGNMENT_UNAVAILABLE_REASON_REMOTE_UNREACHABLE = "remote_unreachable"
 
 
 def declared_root_coordinate(raw_path: str, *, root: Path, label: str = "Path") -> str:
@@ -302,36 +358,53 @@ def source_pin_repo_ids(config: dict[str, Any]) -> list[str]:
     return sorted({str(item) for item in raw if str(item).strip()})
 
 
-def source_pin_production_ref(repo_id: str, lock_config: dict[str, Any]) -> str | None:
+def source_pin_remote_ref(repo_id: str, lock_config: dict[str, Any]) -> str | None:
+    """The branch name (if any) that `remote_ref_alignment` should compare
+    this repo's local commit against on its remote, e.g. `"main"`. Read from
+    `stack_lock.repo_overrides.<repo_id>.remote_ref_alignment_ref` — a
+    deliberately non-"production"/"promotion" config key name, since the
+    comparison it configures is alignment with a ref, not evidence of what is
+    deployed anywhere."""
     overrides = lock_config.get("repo_overrides", {})
     if not isinstance(overrides, dict):
         return None
     repo_override = overrides.get(repo_id, {})
     if not isinstance(repo_override, dict):
         return None
-    ref = repo_override.get("production_promotion_ref")
+    ref = repo_override.get("remote_ref_alignment_ref")
     return ref.strip() if isinstance(ref, str) and ref.strip() else None
 
 
-def resolve_production_promotion(
+def resolve_remote_ref_alignment(
     repo_path: Path,
     *,
     commit: str,
     dirty: bool,
     remote_name: str | None,
-    production_ref: str | None,
-) -> tuple[str | None, str]:
-    if not production_ref:
-        return None, PROMOTION_STATUS_NOT_CONFIGURED
+    ref: str | None,
+) -> tuple[str | None, str, str | None]:
+    """Perform the one live network call this module makes: a real
+    `git ls-remote` against `repo_path`'s own configured remote, compared to
+    the given local `commit`. Returns
+    `(remote_commit, alignment_status, unavailable_reason)`.
+
+    This function is intentionally never called from `build_lock_payload` /
+    `build_canonical_lockfile_artifacts` / `normalize_lock_payload` — see the
+    module-level comment above `REMOTE_REF_ALIGNMENT_SCHEMA_VERSION`. It is
+    only called from `build_remote_ref_alignment_report`, which writes a
+    separate, non-digest-guarded file.
+    """
+    if not ref:
+        return None, ALIGNMENT_STATUS_UNKNOWN, ALIGNMENT_UNAVAILABLE_REASON_NOT_CONFIGURED
     if not remote_name:
-        return None, PROMOTION_STATUS_NO_REMOTE
-    remote_commit = git_ls_remote_head(repo_path, remote_name, production_ref)
+        return None, ALIGNMENT_STATUS_UNKNOWN, ALIGNMENT_UNAVAILABLE_REASON_NO_REMOTE
+    remote_commit = git_ls_remote_head(repo_path, remote_name, ref)
     if remote_commit is None:
-        return None, PROMOTION_STATUS_REMOTE_UNREACHABLE
+        return None, ALIGNMENT_STATUS_UNKNOWN, ALIGNMENT_UNAVAILABLE_REASON_REMOTE_UNREACHABLE
     if remote_commit != commit:
-        return remote_commit, PROMOTION_STATUS_NOT_PROMOTED
-    status = PROMOTION_STATUS_PROMOTED_DIRTY_WORKTREE if dirty else PROMOTION_STATUS_PROMOTED_VERIFIED_CLEAN
-    return remote_commit, status
+        return remote_commit, ALIGNMENT_STATUS_NOT_ALIGNED, None
+    status = ALIGNMENT_STATUS_ALIGNED_DIRTY_WORKTREE if dirty else ALIGNMENT_STATUS_ALIGNED_CLEAN
+    return remote_commit, status, None
 
 
 def _resolve_source_pinned_repo_path(config: dict[str, Any], root: Path, repo_id: str) -> tuple[str, Path]:
@@ -360,8 +433,9 @@ def build_source_pins(config: dict[str, Any], root: Path) -> dict[str, dict[str,
     (`git rev-parse`/`git status`/etc.) and is reproducible byte-for-byte by
     anyone running this against the same local state. This function
     deliberately does NOT touch the network or the repo's remote — see the
-    module-level comment above `SOURCE_PIN_FIELDS` for why that evidence
-    class lives in `build_deployment_promotion_probes` instead.
+    module-level comment above `REMOTE_REF_ALIGNMENT_SCHEMA_VERSION` for why
+    that evidence class lives in `build_remote_ref_alignment_report` instead,
+    in a wholly separate artifact.
     """
     pins: dict[str, dict[str, Any]] = {}
 
@@ -385,47 +459,227 @@ def build_source_pins(config: dict[str, Any], root: Path) -> dict[str, dict[str,
     return pins
 
 
-def build_deployment_promotion_probes(
+def _utcnow_iso(now: datetime | None = None) -> str:
+    moment = now or datetime.now(timezone.utc)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    return moment.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _parse_iso(value: Any) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    text = value.strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def build_remote_ref_alignment_report(
     config: dict[str, Any],
     root: Path,
     source_pins: dict[str, dict[str, Any]],
+    *,
+    now: datetime | None = None,
 ) -> dict[str, dict[str, Any]]:
-    """Live, re-derived inference about each source-pinned repo's remote state.
+    """Live, re-derived observation of each source-pinned repo's remote-ref
+    alignment. THIS IS THE ONLY FUNCTION IN THIS MODULE THAT PERFORMS A
+    NETWORK CALL (`git ls-remote`, via `resolve_remote_ref_alignment`).
 
-    Each entry runs a real `git ls-remote` against the repo's own configured
-    remote at generation time and compares it against the local evidence
-    already captured in `source_pins`. This is NOT an immutable receipt of
-    an actually-observed deployment/promotion event — it is recomputed from
-    scratch on every call, and can legitimately change between two runs
-    against the exact same local `commit` if the remote branch moved. See
-    the module-level comment above `SOURCE_PIN_FIELDS` for the full
-    rationale for keeping this structurally separate from `source_pins`.
+    Each entry compares the repo's own configured remote at generation time
+    against the local evidence already captured in `source_pins`. This is
+    evidence of remote-ref alignment, not proof of a deployment or of what is
+    running in production anywhere — see the module-level comment above
+    `REMOTE_REF_ALIGNMENT_SCHEMA_VERSION`. It is recomputed from scratch on
+    every call and can legitimately change between two calls against the
+    exact same local `commit` if the remote branch moved, or render
+    `ALIGNMENT_STATUS_UNKNOWN` if the network is unavailable.
+
+    Deliberately NOT called from `build_lock_payload` — its output must never
+    reach `normalize_lock_payload` / `lock_digest`. See
+    `build_remote_ref_alignment_payload` for the separate, non-digest-guarded
+    artifact this feeds.
     """
     lock_config = config.get("stack_lock", {}) if isinstance(config.get("stack_lock"), dict) else {}
-    probes: dict[str, dict[str, Any]] = {}
+    checked_at = _utcnow_iso(now)
+    report: dict[str, dict[str, Any]] = {}
 
     for repo_id in source_pin_repo_ids(config):
         pin = source_pins.get(repo_id)
         if not isinstance(pin, dict):
             # No local evidence was captured for this repo (build_source_pins
-            # would already have raised), so there is nothing to probe against.
+            # would already have raised), so there is nothing to compare against.
             continue
         _, repo_path = _resolve_source_pinned_repo_path(config, root, repo_id)
         remote_name = current_remote_name(repo_path)
-        production_ref = source_pin_production_ref(repo_id, lock_config)
-        production_commit, production_promotion_status = resolve_production_promotion(
+        ref = source_pin_remote_ref(repo_id, lock_config)
+        remote_commit, alignment_status, unavailable_reason = resolve_remote_ref_alignment(
             repo_path,
             commit=str(pin.get("commit", "")),
             dirty=bool(pin.get("dirty", False)),
             remote_name=remote_name,
-            production_ref=production_ref,
+            ref=ref,
         )
-        probes[repo_id] = {
-            "production_ref": production_ref,
-            "production_commit": production_commit,
-            "production_promotion_status": production_promotion_status,
+        report[repo_id] = {
+            "path": pin.get("path"),
+            "ref": ref,
+            "remote": pin.get("remote"),
+            "local_commit": pin.get("commit"),
+            "local_dirty": bool(pin.get("dirty", False)),
+            "remote_commit": remote_commit,
+            "alignment_status": alignment_status,
+            "unavailable_reason": unavailable_reason,
+            "checked_at": checked_at,
         }
-    return probes
+    return report
+
+
+def normalize_remote_ref_alignment_entry(entry: dict[str, Any] | None) -> dict[str, Any]:
+    """Normalize one `remote_ref_alignment[repo_id]` entry. A missing/invalid
+    entry normalizes to an explicit, fully-`UNKNOWN` shape rather than being
+    silently omitted."""
+    if not isinstance(entry, dict):
+        return {
+            "path": None,
+            "ref": None,
+            "remote": None,
+            "local_commit": None,
+            "local_dirty": None,
+            "remote_commit": None,
+            "alignment_status": ALIGNMENT_STATUS_UNKNOWN,
+            "unavailable_reason": ALIGNMENT_UNAVAILABLE_REASON_NOT_CONFIGURED,
+            "checked_at": None,
+        }
+    remote_commit = entry.get("remote_commit")
+    alignment_status = str(entry.get("alignment_status", ALIGNMENT_STATUS_UNKNOWN))
+    if alignment_status not in ALIGNMENT_STATUSES:
+        # Never let an unrecognized value masquerade as a real finding.
+        alignment_status = ALIGNMENT_STATUS_UNKNOWN
+    unavailable_reason = entry.get("unavailable_reason")
+    return {
+        "path": entry.get("path"),
+        "ref": entry.get("ref") if isinstance(entry.get("ref"), str) and entry.get("ref") else None,
+        "remote": entry.get("remote") if isinstance(entry.get("remote"), str) and entry.get("remote") else None,
+        "local_commit": entry.get("local_commit"),
+        "local_dirty": bool(entry.get("local_dirty")) if entry.get("local_dirty") is not None else None,
+        "remote_commit": str(remote_commit) if isinstance(remote_commit, str) and remote_commit else None,
+        "alignment_status": alignment_status,
+        "unavailable_reason": (
+            str(unavailable_reason) if isinstance(unavailable_reason, str) and unavailable_reason else None
+        ),
+        "checked_at": entry.get("checked_at") if isinstance(entry.get("checked_at"), str) else None,
+    }
+
+
+def remote_ref_alignment_entry_with_staleness(
+    entry: dict[str, Any] | None,
+    *,
+    now: datetime | None = None,
+    stale_after: timedelta = REMOTE_REF_ALIGNMENT_STALE_AFTER,
+) -> dict[str, Any]:
+    """Read-time staleness check applied by *consumers* of a persisted
+    `remote_ref_alignment` report (e.g. `export_repo_inventory.py`), not by
+    the generator itself. A missing entry renders `ALIGNMENT_STATUS_UNKNOWN`.
+    An entry whose `checked_at` is older than `stale_after` (or unparsable)
+    renders `ALIGNMENT_STATUS_STALE`, regardless of what alignment_status was
+    recorded at generation time — an old observation must not be presented as
+    a current answer."""
+    normalized = normalize_remote_ref_alignment_entry(entry)
+    if normalized["alignment_status"] == ALIGNMENT_STATUS_UNKNOWN:
+        return normalized
+    checked_at = _parse_iso(normalized.get("checked_at"))
+    moment = now or datetime.now(timezone.utc)
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    if checked_at is None or (moment - checked_at) > stale_after:
+        return {**normalized, "alignment_status": ALIGNMENT_STATUS_STALE}
+    return normalized
+
+
+def build_remote_ref_alignment_payload(
+    config: dict[str, Any],
+    root: Path,
+    *,
+    source_pins: dict[str, dict[str, Any]] | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Build the full body of the separate, explicitly-mutable
+    `stack.remote-ref-alignment.yaml` artifact. This is never fed into
+    `normalize_lock_payload` and carries no `lock_digest`-style guard of its
+    own — it is expected to change on every run whenever the network or a
+    remote branch state changes, and that is by design, not a defect."""
+    pins = source_pins if source_pins is not None else build_source_pins(config, root)
+    moment = now or datetime.now(timezone.utc)
+    report = build_remote_ref_alignment_report(config, root, pins, now=moment)
+    normalized_report = {
+        repo_id: normalize_remote_ref_alignment_entry(entry) for repo_id, entry in sorted(report.items())
+    }
+    return {
+        "schema_version": REMOTE_REF_ALIGNMENT_SCHEMA_VERSION,
+        "stack_manifest_path": atlas_relative(root / "stack.yaml", root=root),
+        "mutable": True,
+        "digest_guarded": False,
+        "generated_at": _utcnow_iso(moment),
+        "remote_ref_alignment_count": len(normalized_report),
+        "remote_ref_alignment": normalized_report,
+    }
+
+
+def default_remote_ref_alignment_path(config: dict[str, Any] | None = None, root: Path | None = None) -> Path:
+    base = (root or atlas_root()).resolve()
+    stack_config = config or load_stack_config(base / "stack.yaml")
+    lock_config = stack_config.get("stack_lock", {})
+    if isinstance(lock_config, dict) and isinstance(lock_config.get("remote_ref_alignment_path"), str):
+        _, alignment_path = resolve_declared_root_path(
+            lock_config["remote_ref_alignment_path"],
+            root=base,
+            label="stack_lock.remote_ref_alignment_path",
+        )
+        return alignment_path
+    return base / "stack.remote-ref-alignment.yaml"
+
+
+def load_remote_ref_alignment_report(path: Path) -> dict[str, Any] | None:
+    """Load a previously-written `stack.remote-ref-alignment.yaml`. Returns
+    `None` (not an exception, not an empty dict masquerading as "no drift")
+    when the file is absent — callers must treat that as "no observation
+    available" and render `ALIGNMENT_STATUS_UNKNOWN` per-repo, exactly as
+    `remote_ref_alignment_entry_with_staleness(None)` already does."""
+    if not path.exists():
+        return None
+    payload = load_stack_config(path)
+    if not isinstance(payload, dict):
+        return None
+    return payload
+
+
+def write_remote_ref_alignment_report(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(render_lockfile_bytes(payload))
+
+
+def build_canonical_remote_ref_alignment_artifacts(
+    config: dict[str, Any] | None = None,
+    root: Path | None = None,
+    *,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    base = (root or atlas_root()).resolve()
+    stack_config = config or load_stack_config(base / "stack.yaml")
+    payload = build_remote_ref_alignment_payload(stack_config, base, now=now)
+    text = render_lockfile_text(payload)
+    return {
+        "payload": payload,
+        "text": text,
+        "bytes": text.encode("utf-8"),
+        "output_path": default_remote_ref_alignment_path(stack_config, base),
+    }
 
 
 def repo_trust_class(repo_id: str, repo_info: dict[str, Any], lock_config: dict[str, Any]) -> str:
@@ -559,8 +813,10 @@ def normalize_excluded_surface(surface: dict[str, Any]) -> dict[str, Any]:
 
 def normalize_source_pin(pin: dict[str, Any]) -> dict[str, Any]:
     """Normalize the deterministic, purely-local-git-evidence half of a
-    source-pinned repo. Deliberately carries no production/promotion
-    fields — see `normalize_deployment_promotion_probe` for those."""
+    source-pinned repo. Deliberately carries no remote/alignment fields —
+    those live only in the separate `remote_ref_alignment` artifact produced
+    by `build_remote_ref_alignment_payload`, which is never normalized by, or
+    folded into, `normalize_lock_payload`."""
     remote = pin.get("remote")
     return {
         "path": normalize_slashes(str(pin.get("path", ""))),
@@ -569,23 +825,6 @@ def normalize_source_pin(pin: dict[str, Any]) -> dict[str, Any]:
         "ref": str(pin.get("ref", "")),
         "commit": str(pin.get("commit", "")),
         "dirty": bool(pin.get("dirty", False)),
-    }
-
-
-def normalize_deployment_promotion_probe(probe: dict[str, Any]) -> dict[str, Any]:
-    """Normalize the live, re-derived-inference half of a source-pinned
-    repo's remote state. See the module-level comment above
-    `SOURCE_PIN_FIELDS` for why this is not merged into `source_pins`."""
-    production_commit = probe.get("production_commit")
-    production_ref = probe.get("production_ref")
-    return {
-        "production_ref": str(production_ref) if isinstance(production_ref, str) and production_ref else None,
-        "production_commit": (
-            str(production_commit) if isinstance(production_commit, str) and production_commit else None
-        ),
-        "production_promotion_status": str(
-            probe.get("production_promotion_status", PROMOTION_STATUS_NOT_CONFIGURED)
-        ),
     }
 
 
@@ -620,16 +859,11 @@ def normalize_lock_payload(payload: dict[str, Any]) -> dict[str, Any]:
             if isinstance(pin, dict):
                 source_pins[pin_id] = normalize_source_pin(pin)
 
-    raw_deployment_promotion_probes = payload.get("deployment_promotion_probes", {})
-    deployment_promotion_probes: dict[str, dict[str, Any]] = {}
-    if isinstance(raw_deployment_promotion_probes, dict):
-        for probe_id, probe in sorted(
-            ((str(raw_key), raw_value) for raw_key, raw_value in raw_deployment_promotion_probes.items()),
-            key=lambda item: item[0],
-        ):
-            if isinstance(probe, dict):
-                deployment_promotion_probes[probe_id] = normalize_deployment_promotion_probe(probe)
-
+    # NOTE: `payload` may legitimately still carry a `deployment_promotion_probes`
+    # or `remote_ref_alignment` key (e.g. when normalizing an old lockfile
+    # written by a prior pass of this generator, or a payload some caller
+    # merged extra data into) — it is deliberately never read here. Nothing
+    # network-derived may reach `body` before `lock_digest` is computed below.
     body = {
         "schema_version": str(payload.get("schema_version", STACK_LOCK_SCHEMA_VERSION)),
         "stack_manifest_path": normalize_slashes(str(payload.get("stack_manifest_path", "stack.yaml"))),
@@ -639,8 +873,6 @@ def normalize_lock_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "excluded_surfaces": excluded,
         "source_pin_count": len(source_pins),
         "source_pins": source_pins,
-        "deployment_promotion_probe_count": len(deployment_promotion_probes),
-        "deployment_promotion_probes": deployment_promotion_probes,
     }
     if payload.get("refresh_scope") is not None:
         repo_ids = scoped_refresh_repo_ids(payload)
@@ -748,13 +980,6 @@ def lock_source_pin_field_drift(
     return [field for field in SOURCE_PIN_FIELDS if locked.get(field) != generated.get(field)]
 
 
-def lock_deployment_promotion_probe_field_drift(
-    locked: dict[str, Any],
-    generated: dict[str, Any],
-) -> list[str]:
-    return [field for field in DEPLOYMENT_PROMOTION_PROBE_FIELDS if locked.get(field) != generated.get(field)]
-
-
 def classify_component_drift_fields(drift_fields: list[str]) -> str:
     return "worktree" if drift_fields == ["dirty"] else "pin"
 
@@ -811,30 +1036,16 @@ def describe_lock_payload_drift(
                 "fields": drift_fields,
             }
 
-    deployment_promotion_probe_drift: dict[str, dict[str, Any]] = {}
-    locked_probes = (
-        locked.get("deployment_promotion_probes") if isinstance(locked.get("deployment_promotion_probes"), dict) else {}
-    )
-    generated_probes = (
-        generated.get("deployment_promotion_probes")
-        if isinstance(generated.get("deployment_promotion_probes"), dict)
-        else {}
-    )
-    for probe_id in sorted(set(locked_probes) | set(generated_probes)):
-        locked_probe = locked_probes.get(probe_id)
-        generated_probe = generated_probes.get(probe_id)
-        if not isinstance(locked_probe, dict) or not isinstance(generated_probe, dict):
-            deployment_promotion_probe_drift[probe_id] = {"kind": "membership", "fields": []}
-            continue
-        drift_fields = lock_deployment_promotion_probe_field_drift(locked_probe, generated_probe)
-        if drift_fields:
-            # Every field here is a live-derived inference (see the
-            # module-level comment above SOURCE_PIN_FIELDS), so drift in
-            # this structure is routine/expected, not a "pin" mismatch —
-            # tag it distinctly so consumers can treat it as lower-severity
-            # than component/source-pin drift.
-            deployment_promotion_probe_drift[probe_id] = {"kind": "promotion", "fields": drift_fields}
-
+    # NOTE: there is deliberately no `deployment_promotion_probes` /
+    # `remote_ref_alignment` drift section here. `normalize_lock_payload`
+    # never reads that key from either `locked_payload` or `generated_payload`
+    # (see the NOTE inside `normalize_lock_payload`), so it cannot appear in
+    # `locked`/`generated` above, and it must never be able to influence
+    # `has_drift` or `lock_digest` — that is the entire point of this fix.
+    # Remote-ref-alignment drift/staleness is a read-time concern for
+    # consumers of the separate `stack.remote-ref-alignment.yaml` artifact
+    # (see `remote_ref_alignment_entry_with_staleness`), not something the
+    # digest-guarded lock comparison here reports on.
     metadata_fields = [field for field in LOCK_METADATA_FIELDS if locked.get(field) != generated.get(field)]
     return {
         "locked": locked,
@@ -842,13 +1053,11 @@ def describe_lock_payload_drift(
         "components": component_drift,
         "excluded_surfaces": excluded_surface_drift,
         "source_pins": source_pin_drift,
-        "deployment_promotion_probes": deployment_promotion_probe_drift,
         "metadata_fields": metadata_fields,
         "has_drift": bool(
             component_drift
             or excluded_surface_drift
             or source_pin_drift
-            or deployment_promotion_probe_drift
             or metadata_fields
         ),
     }
@@ -906,6 +1115,13 @@ def build_lock_payload(
             "release_eligible": repo_release_eligible(repo_id, repo_info, lock_config),
         }
 
+    # `build_source_pins` is the only source-evidence call in this function,
+    # and it never touches the network (see its docstring). Deliberately no
+    # `build_remote_ref_alignment_report` call anywhere in this function, or
+    # anywhere else in the call chain from `build_lock_payload` through
+    # `normalize_lock_payload` to `lock_digest` — "deterministic lock
+    # rendering" performs zero network I/O, structurally, not just by
+    # omission of a field afterward.
     source_pins = build_source_pins(stack_config, base)
     payload = {
         "schema_version": STACK_LOCK_SCHEMA_VERSION,
@@ -915,7 +1131,6 @@ def build_lock_payload(
         "components": components,
         "excluded_surfaces": excluded_surfaces(stack_config, base),
         "source_pins": source_pins,
-        "deployment_promotion_probes": build_deployment_promotion_probes(stack_config, base, source_pins),
     }
     return normalize_lock_payload(payload)
 
@@ -1032,6 +1247,15 @@ def main() -> int:
         help="Object-addressed git ref supplying unselected component pins for a scoped refresh.",
     )
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--skip-remote-ref-alignment",
+        action="store_true",
+        help=(
+            "Skip generating stack.remote-ref-alignment.yaml (the separate, "
+            "non-digest-guarded, live git-ls-remote-derived report). Has no "
+            "effect on stack.lock.yaml, which never performs network I/O."
+        ),
+    )
     args = parser.parse_args()
 
     stack_file = resolve_atlas_path(args.stack_file)
@@ -1061,6 +1285,21 @@ def main() -> int:
     if not args.dry_run:
         write_lockfile(output_path, payload)
 
+    remote_ref_alignment_summary: dict[str, Any] | None = None
+    if not args.skip_remote_ref_alignment:
+        # This is a deliberately separate step, using a deliberately separate
+        # artifact, from everything above. Nothing computed here is fed back
+        # into `payload` or `lock_digest`.
+        alignment_artifacts = build_canonical_remote_ref_alignment_artifacts(config=config, root=root)
+        alignment_payload = alignment_artifacts["payload"]
+        if not args.dry_run:
+            write_remote_ref_alignment_report(alignment_artifacts["output_path"], alignment_payload)
+        remote_ref_alignment_summary = {
+            "output_path": atlas_relative(alignment_artifacts["output_path"], root=root),
+            "remote_ref_alignment_count": alignment_payload["remote_ref_alignment_count"],
+            "generated_at": alignment_payload["generated_at"],
+        }
+
     print(
         json.dumps(
             {
@@ -1070,10 +1309,10 @@ def main() -> int:
                 "component_count": payload["component_count"],
                 "excluded_surface_count": len(payload["excluded_surfaces"]),
                 "source_pin_count": payload["source_pin_count"],
-                "deployment_promotion_probe_count": payload["deployment_promotion_probe_count"],
                 "refresh_repo_ids": sorted(refresh_repo_ids),
                 "baseline_git_ref": args.baseline_git_ref,
                 "lock_digest": payload["lock_digest"],
+                "remote_ref_alignment": remote_ref_alignment_summary,
             },
             indent=2,
         )

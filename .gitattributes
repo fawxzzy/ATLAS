@@ -1,4 +1,5 @@
 stack.lock.yaml text eol=lf
+stack.remote-ref-alignment.yaml text eol=lf
 data/cortex/simulation-replays/** text eol=lf
 data/knowledge-candidates/** text eol=lf
 docs/ops/ATLAS-CREATION-OS-* text eol=lf
