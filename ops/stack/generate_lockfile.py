@@ -36,6 +36,7 @@ LOCK_METADATA_FIELDS = (
     "stack_manifest_path",
     "stack_manifest_digest",
     "component_count",
+    "source_pin_count",
     "refresh_scope",
 )
 LOCK_EXCLUDED_SURFACE_FIELDS = (
@@ -46,6 +47,29 @@ LOCK_EXCLUDED_SURFACE_FIELDS = (
     "reason",
 )
 SCOPED_PIN_FIELDS = ("remote", "ref_type", "ref", "commit", "dirty")
+SOURCE_PIN_FIELDS = (
+    "path",
+    "remote",
+    "ref_type",
+    "ref",
+    "commit",
+    "dirty",
+    "production_ref",
+    "production_commit",
+    "production_promotion_status",
+)
+
+# Source pins cover repos that are deliberately excluded from stack.lock.yaml's
+# governed `components`/`include_repo_ids` release-management set (unmanaged
+# application repos such as Fitness/Mazer) but still need their real, current
+# source-commit identity captured from git evidence rather than hand-typed
+# into stack.yaml. They never affect trust_class/release_eligible semantics.
+PROMOTION_STATUS_NOT_CONFIGURED = "not_configured"
+PROMOTION_STATUS_NO_REMOTE = "no_remote"
+PROMOTION_STATUS_REMOTE_UNREACHABLE = "remote_unreachable"
+PROMOTION_STATUS_NOT_PROMOTED = "not_promoted"
+PROMOTION_STATUS_PROMOTED_DIRTY_WORKTREE = "promoted_dirty_worktree"
+PROMOTION_STATUS_PROMOTED_VERIFIED_CLEAN = "promoted_verified_clean"
 
 
 def declared_root_coordinate(raw_path: str, *, root: Path, label: str = "Path") -> str:
@@ -204,6 +228,127 @@ def current_remote(repo_path: Path) -> str | None:
     return None
 
 
+def current_remote_name(repo_path: Path) -> str | None:
+    code, stdout = git_output(repo_path, "remote")
+    if code != 0:
+        return None
+    names = [line.strip() for line in stdout.splitlines() if line.strip()]
+    if not names:
+        return None
+    return "origin" if "origin" in names else names[0]
+
+
+def git_ls_remote_head(repo_path: Path, remote_name: str, ref: str) -> str | None:
+    """Resolve the current tip commit of `ref` on `remote_name` via a live `git ls-remote`.
+
+    This is a real network query against the repo's own configured remote — it
+    reports the remote's current state directly, independent of whatever the
+    local checkout happens to have fetched or have checked out.
+    """
+    code, stdout = git_output(repo_path, "ls-remote", "--exit-code", remote_name, f"refs/heads/{ref}")
+    if code != 0 or not stdout:
+        return None
+    first_line = stdout.splitlines()[0].strip()
+    if not first_line:
+        return None
+    sha = first_line.split()[0].strip()
+    if len(sha) != 40 or any(character not in "0123456789abcdef" for character in sha.lower()):
+        return None
+    return sha.lower()
+
+
+def source_pin_repo_ids(config: dict[str, Any]) -> list[str]:
+    lock_config = config.get("stack_lock", {})
+    if not isinstance(lock_config, dict):
+        return []
+    raw = lock_config.get("source_pin_repo_ids")
+    if not isinstance(raw, list):
+        return []
+    return sorted({str(item) for item in raw if str(item).strip()})
+
+
+def source_pin_production_ref(repo_id: str, lock_config: dict[str, Any]) -> str | None:
+    overrides = lock_config.get("repo_overrides", {})
+    if not isinstance(overrides, dict):
+        return None
+    repo_override = overrides.get(repo_id, {})
+    if not isinstance(repo_override, dict):
+        return None
+    ref = repo_override.get("production_promotion_ref")
+    return ref.strip() if isinstance(ref, str) and ref.strip() else None
+
+
+def resolve_production_promotion(
+    repo_path: Path,
+    *,
+    commit: str,
+    dirty: bool,
+    remote_name: str | None,
+    production_ref: str | None,
+) -> tuple[str | None, str]:
+    if not production_ref:
+        return None, PROMOTION_STATUS_NOT_CONFIGURED
+    if not remote_name:
+        return None, PROMOTION_STATUS_NO_REMOTE
+    remote_commit = git_ls_remote_head(repo_path, remote_name, production_ref)
+    if remote_commit is None:
+        return None, PROMOTION_STATUS_REMOTE_UNREACHABLE
+    if remote_commit != commit:
+        return remote_commit, PROMOTION_STATUS_NOT_PROMOTED
+    status = PROMOTION_STATUS_PROMOTED_DIRTY_WORKTREE if dirty else PROMOTION_STATUS_PROMOTED_VERIFIED_CLEAN
+    return remote_commit, status
+
+
+def build_source_pins(config: dict[str, Any], root: Path) -> dict[str, dict[str, Any]]:
+    registry = config.get("repo_registry", {})
+    lock_config = config.get("stack_lock", {}) if isinstance(config.get("stack_lock"), dict) else {}
+    pins: dict[str, dict[str, Any]] = {}
+
+    for repo_id in source_pin_repo_ids(config):
+        repo_info = registry.get(repo_id)
+        if not isinstance(repo_info, dict) or not isinstance(repo_info.get("path"), str):
+            raise ValueError(f"Source-pinned repo '{repo_id}' is missing a valid repo_registry entry.")
+        coordinate, repo_path = resolve_declared_root_path(
+            repo_info["path"],
+            root=root,
+            label=f"repo_registry.{repo_id}.path",
+        )
+        if not repo_path.exists():
+            raise FileNotFoundError(f"Source-pinned repo path does not exist: {atlas_relative(repo_path, root=root)}")
+        if not repo_path.is_dir():
+            raise ValueError(f"Source-pinned repo path is not a directory: {atlas_relative(repo_path, root=root)}")
+        if not repo_is_git_root(repo_path):
+            raise ValueError(f"Source-pinned repo is not a git root: {atlas_relative(repo_path, root=root)}")
+
+        code, commit = git_output(repo_path, "rev-parse", "HEAD")
+        if code != 0 or not commit:
+            raise ValueError(f"Unable to resolve HEAD for source-pinned repo '{repo_id}'.")
+        ref_type, ref = current_ref(repo_path, commit)
+        dirty = bool(git_status_lines(repo_path))
+        remote_url = current_remote(repo_path)
+        remote_name = current_remote_name(repo_path)
+        production_ref = source_pin_production_ref(repo_id, lock_config)
+        production_commit, production_promotion_status = resolve_production_promotion(
+            repo_path,
+            commit=commit,
+            dirty=dirty,
+            remote_name=remote_name,
+            production_ref=production_ref,
+        )
+        pins[repo_id] = {
+            "path": coordinate,
+            "remote": remote_url,
+            "ref_type": ref_type,
+            "ref": ref,
+            "commit": commit,
+            "dirty": dirty,
+            "production_ref": production_ref,
+            "production_commit": production_commit,
+            "production_promotion_status": production_promotion_status,
+        }
+    return pins
+
+
 def repo_trust_class(repo_id: str, repo_info: dict[str, Any], lock_config: dict[str, Any]) -> str:
     overrides = lock_config.get("repo_overrides", {})
     if isinstance(overrides, dict):
@@ -333,6 +478,25 @@ def normalize_excluded_surface(surface: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def normalize_source_pin(pin: dict[str, Any]) -> dict[str, Any]:
+    remote = pin.get("remote")
+    production_commit = pin.get("production_commit")
+    production_ref = pin.get("production_ref")
+    return {
+        "path": normalize_slashes(str(pin.get("path", ""))),
+        "remote": normalize_slashes(str(remote)) if isinstance(remote, str) and remote else None,
+        "ref_type": str(pin.get("ref_type", "")),
+        "ref": str(pin.get("ref", "")),
+        "commit": str(pin.get("commit", "")),
+        "dirty": bool(pin.get("dirty", False)),
+        "production_ref": str(production_ref) if isinstance(production_ref, str) and production_ref else None,
+        "production_commit": (
+            str(production_commit) if isinstance(production_commit, str) and production_commit else None
+        ),
+        "production_promotion_status": str(pin.get("production_promotion_status", PROMOTION_STATUS_NOT_CONFIGURED)),
+    }
+
+
 def normalize_lock_payload(payload: dict[str, Any]) -> dict[str, Any]:
     raw_components = payload.get("components", {})
     components: dict[str, dict[str, Any]] = {}
@@ -354,6 +518,16 @@ def normalize_lock_payload(payload: dict[str, Any]) -> dict[str, Any]:
             if isinstance(surface, dict):
                 excluded[surface_id] = normalize_excluded_surface(surface)
 
+    raw_source_pins = payload.get("source_pins", {})
+    source_pins: dict[str, dict[str, Any]] = {}
+    if isinstance(raw_source_pins, dict):
+        for pin_id, pin in sorted(
+            ((str(raw_key), raw_value) for raw_key, raw_value in raw_source_pins.items()),
+            key=lambda item: item[0],
+        ):
+            if isinstance(pin, dict):
+                source_pins[pin_id] = normalize_source_pin(pin)
+
     body = {
         "schema_version": str(payload.get("schema_version", STACK_LOCK_SCHEMA_VERSION)),
         "stack_manifest_path": normalize_slashes(str(payload.get("stack_manifest_path", "stack.yaml"))),
@@ -361,6 +535,8 @@ def normalize_lock_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "component_count": len(components),
         "components": components,
         "excluded_surfaces": excluded,
+        "source_pin_count": len(source_pins),
+        "source_pins": source_pins,
     }
     if payload.get("refresh_scope") is not None:
         repo_ids = scoped_refresh_repo_ids(payload)
@@ -461,6 +637,13 @@ def lock_surface_field_drift(
     return [field for field in LOCK_EXCLUDED_SURFACE_FIELDS if locked.get(field) != generated.get(field)]
 
 
+def lock_source_pin_field_drift(
+    locked: dict[str, Any],
+    generated: dict[str, Any],
+) -> list[str]:
+    return [field for field in SOURCE_PIN_FIELDS if locked.get(field) != generated.get(field)]
+
+
 def classify_component_drift_fields(drift_fields: list[str]) -> str:
     return "worktree" if drift_fields == ["dirty"] else "pin"
 
@@ -501,14 +684,31 @@ def describe_lock_payload_drift(
         if drift_fields:
             excluded_surface_drift[surface_id] = {"kind": "fields", "fields": drift_fields}
 
+    source_pin_drift: dict[str, dict[str, Any]] = {}
+    locked_source_pins = locked.get("source_pins") if isinstance(locked.get("source_pins"), dict) else {}
+    generated_source_pins = generated.get("source_pins") if isinstance(generated.get("source_pins"), dict) else {}
+    for pin_id in sorted(set(locked_source_pins) | set(generated_source_pins)):
+        locked_pin = locked_source_pins.get(pin_id)
+        generated_pin = generated_source_pins.get(pin_id)
+        if not isinstance(locked_pin, dict) or not isinstance(generated_pin, dict):
+            source_pin_drift[pin_id] = {"kind": "membership", "fields": []}
+            continue
+        drift_fields = lock_source_pin_field_drift(locked_pin, generated_pin)
+        if drift_fields:
+            source_pin_drift[pin_id] = {
+                "kind": "worktree" if drift_fields == ["dirty"] else "pin",
+                "fields": drift_fields,
+            }
+
     metadata_fields = [field for field in LOCK_METADATA_FIELDS if locked.get(field) != generated.get(field)]
     return {
         "locked": locked,
         "generated": generated,
         "components": component_drift,
         "excluded_surfaces": excluded_surface_drift,
+        "source_pins": source_pin_drift,
         "metadata_fields": metadata_fields,
-        "has_drift": bool(component_drift or excluded_surface_drift or metadata_fields),
+        "has_drift": bool(component_drift or excluded_surface_drift or source_pin_drift or metadata_fields),
     }
 
 
@@ -571,6 +771,7 @@ def build_lock_payload(
         "component_count": len(components),
         "components": components,
         "excluded_surfaces": excluded_surfaces(stack_config, base),
+        "source_pins": build_source_pins(stack_config, base),
     }
     return normalize_lock_payload(payload)
 
@@ -724,6 +925,7 @@ def main() -> int:
                 "output_path": atlas_relative(output_path, root=root),
                 "component_count": payload["component_count"],
                 "excluded_surface_count": len(payload["excluded_surfaces"]),
+                "source_pin_count": payload["source_pin_count"],
                 "refresh_repo_ids": sorted(refresh_repo_ids),
                 "baseline_git_ref": args.baseline_git_ref,
                 "lock_digest": payload["lock_digest"],

@@ -163,7 +163,6 @@ repo_registry:
     role: application
     status: unmanaged
     root_blocking: false
-    source_commit: 7c0baa3eda18508bc334bb85884e25c08ee211da
     validation:
       generated_state_cleanup:
         command: node ../../ops/validation/repo_generated_state_cleanup_wrapper.mjs --run "node scripts/cleanup-repo.mjs --include-build-cache --include-node-modules --include-playbook-state --relocate-to-tmp --report-path ../../runtime/state/repo-cleanup/fitness.validation.latest.json" --retain .vercel=protected_local_vercel_linkage --report-path ../../runtime/state/repo-cleanup/fitness.validation.latest.json
@@ -178,9 +177,6 @@ repo_registry:
     role: application
     status: unmanaged
     root_blocking: false
-    source_commit: 4c61943eb4c8b4e98a5cbb9054f3c927bb724950
-    production_commit: 4c61943eb4c8b4e98a5cbb9054f3c927bb724950
-    production_promotion_status: promoted_verified_clean
   socials-os:
     path: repos/socials-os
     role: analytics-data-system
@@ -294,6 +290,9 @@ stack_lock:
     - stream
     - nat1-games
     - playbook-demo
+  source_pin_repo_ids:
+    - fitness
+    - mazer
   repo_overrides:
     _stack:
       trust_class: trusted
@@ -322,6 +321,8 @@ stack_lock:
     playbook-demo:
       trust_class: trusted
       release_eligible: false
+    mazer:
+      production_promotion_ref: main
   excluded_surfaces:
     fitness_reclone_recovery_checkout:
       path: repos/fawxzzy-fitness.reclone.20260502-195639

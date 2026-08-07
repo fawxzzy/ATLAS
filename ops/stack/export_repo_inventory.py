@@ -227,6 +227,7 @@ def build_repo_inventory(
         repo_paths[coordinate] = str(repo_id)
     initiative_index, initiative_digest = _initiative_index(base_root, repo_paths)
     lock_components = loaded_lock.get("components", {}) if isinstance(loaded_lock.get("components"), dict) else {}
+    lock_source_pins = loaded_lock.get("source_pins", {}) if isinstance(loaded_lock.get("source_pins"), dict) else {}
     lock_config = stack_config.get("stack_lock", {}) if isinstance(stack_config.get("stack_lock"), dict) else {}
 
     repos: list[dict[str, Any]] = []
@@ -250,6 +251,11 @@ def build_repo_inventory(
             }
         live_state = _live_repo_state(repo_path, ignored_dirty_paths=ignored_dirty_paths)
         lock_component = lock_components.get(repo_id) if isinstance(lock_components.get(repo_id), dict) else {}
+        # Repos that are deliberately excluded from stack.lock.yaml's governed
+        # components/include_repo_ids set (e.g. unmanaged application repos)
+        # may still carry a generator-derived source pin; fall back to it so
+        # their real, digest-guarded commit identity is visible here too.
+        source_pin = lock_source_pins.get(repo_id) if isinstance(lock_source_pins.get(repo_id), dict) else {}
         related_initiatives = initiative_index.get(repo_id, [])
         root_blocking = _repo_blocks_root(repo_id, repo_info, lock_config)
         dirty_blocks_root = bool(live_state["dirty"] is True and root_blocking)
@@ -279,16 +285,19 @@ def build_repo_inventory(
                 "playbook_adoption_owner_ref": str(repo_info.get("playbook_adoption_owner_ref", "") or ""),
                 "status": str(repo_info.get("status", "unknown")),
                 "remote_url": live_state["remote_url"],
-                "pinned_commit": lock_component.get("commit"),
+                "pinned_commit": lock_component.get("commit") or source_pin.get("commit"),
                 "current_commit": live_state["current_commit"],
-                "pinned_ref_type": lock_component.get("ref_type"),
-                "pinned_ref": lock_component.get("ref"),
+                "pinned_ref_type": lock_component.get("ref_type") or source_pin.get("ref_type"),
+                "pinned_ref": lock_component.get("ref") or source_pin.get("ref"),
                 "current_ref_type": live_state["current_ref_type"],
                 "current_ref": live_state["current_ref"],
                 "branch": live_state["branch"],
                 "dirty": live_state["dirty"],
                 "root_blocking": root_blocking,
                 "dirty_blocks_root": dirty_blocks_root,
+                "production_ref": source_pin.get("production_ref"),
+                "production_commit": source_pin.get("production_commit"),
+                "production_promotion_status": source_pin.get("production_promotion_status"),
                 "trust_class": lock_component.get("trust_class") or repo_trust_class(repo_id, repo_info, lock_config),
                 "release_eligible": (
                     bool(lock_component.get("release_eligible"))

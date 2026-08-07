@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:e9f0e16fb6516e6a8694045d425ed61a6bcce5fb54dbc92afa3049088d5d788b"
+stack_manifest_digest: "sha256:e90e26e71130ad266550bca6e36bf27696fcaf172a5dc09dab7d10d23762f14f"
 component_count: 9
 components:
   _stack:
@@ -208,10 +208,26 @@ excluded_surfaces:
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
-refresh_scope:
-  mode: "scoped"
-  baseline_ref: "5bea9e4d07c229a5658155f89b9e53f4ff372686"
-  repo_ids:
-    _stack: true
-    discordos: true
-lock_digest: "sha256:50d68e99dc46b0d91939a163634eb345103e9949628131d56d8de9680e6bc61c"
+source_pin_count: 2
+source_pins:
+  fitness:
+    path: "repos/fawxzzy-fitness"
+    remote: "https://github.com/fawxzzy/fawxzzy-fitness.git"
+    ref_type: "branch"
+    ref: "main"
+    commit: "da4d71afaecb19f470ce60ba182776d9fb0589e1"
+    dirty: false
+    production_ref: null
+    production_commit: null
+    production_promotion_status: "not_configured"
+  mazer:
+    path: "repos/mazer"
+    remote: "https://github.com/fawxzzy/mazer.git"
+    ref_type: "branch"
+    ref: "codex/player-goal-default-colors"
+    commit: "a537d2d17429bdf0482989c280373a6ea751f9c0"
+    dirty: true
+    production_ref: "main"
+    production_commit: "4c61943eb4c8b4e98a5cbb9054f3c927bb724950"
+    production_promotion_status: "not_promoted"
+lock_digest: "sha256:3f988f78bc9ab907338b5d1d438677c4cb3b47785d280a2b447f92287dca52dd"
