@@ -290,6 +290,9 @@ stack_lock:
     - stream
     - nat1-games
     - playbook-demo
+  source_pin_repo_ids:
+    - fitness
+    - mazer
   repo_overrides:
     _stack:
       trust_class: trusted
@@ -318,6 +321,14 @@ stack_lock:
     playbook-demo:
       trust_class: trusted
       release_eligible: false
+    mazer:
+      # Branch to compare against in the separate, non-digest-guarded
+      # stack.remote-ref-alignment.yaml report (ops/stack/generate_lockfile.py
+      # build_remote_ref_alignment_report). Deliberately not named
+      # "production_promotion_ref" — this only configures a remote-ref
+      # alignment comparison, not evidence of a deployment or of what is
+      # running in production anywhere.
+      remote_ref_alignment_ref: main
   excluded_surfaces:
     fitness_reclone_recovery_checkout:
       path: repos/fawxzzy-fitness.reclone.20260502-195639
