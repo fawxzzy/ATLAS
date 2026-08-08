@@ -1,0 +1,76 @@
+{
+  "contract_version": "atlas.machine-policy.v1",
+  "policy_id": "mpol_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "name": "Wave 0A metadata-only baseline",
+  "revision": 1,
+  "authority_levels": {
+    "L0": {
+      "description": "Redacted metadata observation with no machine mutation.",
+      "machine_mutation": false,
+      "operator_approval_required": false,
+      "executor": "atlas"
+    },
+    "L1": {
+      "description": "Desired-state comparison and proposal generation only.",
+      "machine_mutation": false,
+      "operator_approval_required": false,
+      "executor": "atlas"
+    },
+    "L2": {
+      "description": "Bounded reversible local execution by Lifeline after explicit admission.",
+      "machine_mutation": true,
+      "operator_approval_required": true,
+      "executor": "lifeline"
+    },
+    "L3": {
+      "description": "Elevated or service-affecting execution by Lifeline with explicit operator approval.",
+      "machine_mutation": true,
+      "operator_approval_required": true,
+      "executor": "lifeline"
+    },
+    "L4": {
+      "description": "Destructive, recovery, or security-sensitive execution with dedicated safeguards.",
+      "machine_mutation": true,
+      "operator_approval_required": true,
+      "executor": "lifeline"
+    }
+  },
+  "privacy": {
+    "file_contents_allowed": false,
+    "environment_values_allowed": false,
+    "network_upload_allowed": false,
+    "user_labels_redacted": true
+  },
+  "protected_zones": [
+    "secrets",
+    "user profiles",
+    "cloud placeholders",
+    "network shares",
+    "reparse targets",
+    "recovery partitions"
+  ],
+  "collector_rules": {
+    "allowed_families": [
+      "machine_identity",
+      "fixed_local_volumes"
+    ],
+    "deferred_families": [
+      "top-level directory aggregation and configurable large-file metadata scan",
+      "WinGet, AppX/MSIX, and read-only uninstall-registry application inventory",
+      "startup, services, scheduled tasks, and optional already-installed Autoruns adapter",
+      "developer-tool discovery",
+      "bounded performance sampling",
+      "recovery and security status collectors",
+      "complete whole-machine baseline acceptance across all collector families"
+    ],
+    "follow_reparse_points": false,
+    "hydrate_cloud_placeholders": false,
+    "traverse_network_shares": false,
+    "infer_deletion_safety": false
+  },
+  "proposal_rules": {
+    "atlas_may_execute": false,
+    "lifeline_receipt_required": true,
+    "silence_is_approval": false
+  }
+}

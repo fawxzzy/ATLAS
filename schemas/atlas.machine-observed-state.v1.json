@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.machine-observed-state.v1.json",
+  "title": "ATLAS machine observed state v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "observation_id",
+    "collected_at_utc",
+    "volatile_fields",
+    "machine_identity",
+    "fixed_local_volumes",
+    "collector_status",
+    "collector_errors",
+    "privacy"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.machine-observed-state.v1"
+    },
+    "observation_id": {
+      "type": "string",
+      "pattern": "^mobs_[0-9a-f]{64}$"
+    },
+    "collected_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "volatile_fields": {
+      "const": [
+        "/collected_at_utc",
+        "/observation_id"
+      ]
+    },
+    "machine_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host_fingerprint",
+        "host_label",
+        "os_family",
+        "os_release",
+        "os_version",
+        "architecture"
+      ],
+      "properties": {
+        "host_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "host_label": {
+          "const": "[REDACTED]"
+        },
+        "os_family": {
+          "type": "string",
+          "pattern": "^[a-z0-9._+-]{1,64}$"
+        },
+        "os_release": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "os_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "architecture": {
+          "type": "string",
+          "pattern": "^[a-z0-9._+-]{1,64}$"
+        }
+      }
+    },
+    "fixed_local_volumes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "volume_id",
+          "drive_type",
+          "filesystem",
+          "capacity_bytes",
+          "free_bytes",
+          "serial_fingerprint"
+        ],
+        "properties": {
+          "volume_id": {
+            "type": "string",
+            "pattern": "^[A-Z]:$"
+          },
+          "drive_type": {
+            "const": "fixed"
+          },
+          "filesystem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[A-Za-z0-9._+-]{1,32}$"
+          },
+          "capacity_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "free_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "serial_fingerprint": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "collector_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "machine_identity",
+        "fixed_local_volumes"
+      ],
+      "properties": {
+        "machine_identity": {
+          "enum": [
+            "collected",
+            "failed"
+          ]
+        },
+        "fixed_local_volumes": {
+          "enum": [
+            "collected",
+            "partial",
+            "failed",
+            "unsupported"
+          ]
+        }
+      }
+    },
+    "collector_errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "collector",
+          "code",
+          "message",
+          "recoverable"
+        ],
+        "properties": {
+          "collector": {
+            "enum": [
+              "machine_identity",
+              "fixed_local_volumes"
+            ]
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]{2,63}$"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "recoverable": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "redaction_applied",
+        "file_contents_read",
+        "reparse_points_followed",
+        "cloud_placeholders_hydrated",
+        "network_shares_traversed",
+        "environment_values_collected",
+        "deletion_safety_inferred"
+      ],
+      "properties": {
+        "redaction_applied": {
+          "const": true
+        },
+        "file_contents_read": {
+          "const": false
+        },
+        "reparse_points_followed": {
+          "const": false
+        },
+        "cloud_placeholders_hydrated": {
+          "const": false
+        },
+        "network_shares_traversed": {
+          "const": false
+        },
+        "environment_values_collected": {
+          "const": false
+        },
+        "deletion_safety_inferred": {
+          "const": false
+        }
+      }
+    }
+  }
+}
