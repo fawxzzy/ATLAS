@@ -162,6 +162,16 @@ ALIGNMENT_UNAVAILABLE_REASON_NOT_CONFIGURED = "not_configured"
 ALIGNMENT_UNAVAILABLE_REASON_NO_REMOTE = "no_remote"
 ALIGNMENT_UNAVAILABLE_REASON_REMOTE_UNREACHABLE = "remote_unreachable"
 
+# Wall-clock ceiling for the one live network call this module makes
+# (`git ls-remote`, inside `git_ls_remote_head`). Without this, a hung
+# network call would stall the whole generator indefinitely instead of
+# degrading cleanly to `ALIGNMENT_STATUS_UNKNOWN` /
+# `ALIGNMENT_UNAVAILABLE_REASON_REMOTE_UNREACHABLE`, exactly as a
+# same-process `git ls-remote` failure already does. Purely-local `git`
+# invocations (status, symbolic-ref, describe, remote get-url, rev-parse)
+# are not expected to block on the network and are left untimed by default.
+GIT_LS_REMOTE_TIMEOUT_SECONDS = 10.0
+
 
 def declared_root_coordinate(raw_path: str, *, root: Path, label: str = "Path") -> str:
     """Return a canonical root-relative presentation coordinate.
@@ -241,15 +251,28 @@ def stable_json_digest(value: Any) -> str:
     return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
 
 
-def git_output(repo_path: Path, *args: str) -> tuple[int, str]:
-    completed = subprocess.run(
-        ["git", "-C", str(repo_path), *args],
-        check=False,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
+def git_output(repo_path: Path, *args: str, timeout: float | None = None) -> tuple[int, str]:
+    """Run a `git` subprocess and return `(returncode, stdout)`.
+
+    `timeout`, when given, bounds how long the subprocess may run. A timeout
+    is treated exactly like any other non-zero-exit git failure: callers
+    already branch on `code != 0` (e.g. `git_lines`, `git_status_lines`,
+    `current_ref`, `git_ls_remote_head`), so a hung subprocess degrades to
+    the same "this git call didn't succeed" path those callers already
+    handle — never a stall, never an unhandled exception here.
+    """
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(repo_path), *args],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired:
+        return 124, ""
     return completed.returncode, completed.stdout.rstrip("\n").rstrip("\r")
 
 
@@ -335,8 +358,19 @@ def git_ls_remote_head(repo_path: Path, remote_name: str, ref: str) -> str | Non
     This is a real network query against the repo's own configured remote — it
     reports the remote's current state directly, independent of whatever the
     local checkout happens to have fetched or have checked out.
+
+    Bounded by `GIT_LS_REMOTE_TIMEOUT_SECONDS` so a hung/unreachable remote
+    degrades cleanly (returns `None`, same as any other failed `ls-remote`)
+    instead of blocking the caller indefinitely.
     """
-    code, stdout = git_output(repo_path, "ls-remote", "--exit-code", remote_name, f"refs/heads/{ref}")
+    code, stdout = git_output(
+        repo_path,
+        "ls-remote",
+        "--exit-code",
+        remote_name,
+        f"refs/heads/{ref}",
+        timeout=GIT_LS_REMOTE_TIMEOUT_SECONDS,
+    )
     if code != 0 or not stdout:
         return None
     first_line = stdout.splitlines()[0].strip()
@@ -1289,16 +1323,37 @@ def main() -> int:
     if not args.skip_remote_ref_alignment:
         # This is a deliberately separate step, using a deliberately separate
         # artifact, from everything above. Nothing computed here is fed back
-        # into `payload` or `lock_digest`.
-        alignment_artifacts = build_canonical_remote_ref_alignment_artifacts(config=config, root=root)
-        alignment_payload = alignment_artifacts["payload"]
-        if not args.dry_run:
-            write_remote_ref_alignment_report(alignment_artifacts["output_path"], alignment_payload)
-        remote_ref_alignment_summary = {
-            "output_path": atlas_relative(alignment_artifacts["output_path"], root=root),
-            "remote_ref_alignment_count": alignment_payload["remote_ref_alignment_count"],
-            "generated_at": alignment_payload["generated_at"],
-        }
+        # into `payload` or `lock_digest` — and, deliberately, nothing that
+        # goes wrong here may turn into an unhandled crash: `stack.lock.yaml`
+        # (the digest-guarded artifact) has already been written successfully
+        # by this point, and a network-shaped failure in this best-effort
+        # step (an unreachable remote, an unexpected `git` error, or anything
+        # else `build_canonical_remote_ref_alignment_artifacts` might raise)
+        # should degrade to a reported, honest failure summary — matching the
+        # same "unreachable/unavailable degrades to UNKNOWN, never a crash"
+        # contract `resolve_remote_ref_alignment` already applies per-repo —
+        # rather than discard the lockfile write's success via a traceback.
+        try:
+            alignment_artifacts = build_canonical_remote_ref_alignment_artifacts(config=config, root=root)
+            alignment_payload = alignment_artifacts["payload"]
+            if not args.dry_run:
+                write_remote_ref_alignment_report(alignment_artifacts["output_path"], alignment_payload)
+            remote_ref_alignment_summary = {
+                "output_path": atlas_relative(alignment_artifacts["output_path"], root=root),
+                "remote_ref_alignment_count": alignment_payload["remote_ref_alignment_count"],
+                "generated_at": alignment_payload["generated_at"],
+            }
+        except Exception as error:  # noqa: BLE001 - deliberately broad, see comment above
+            print(
+                f"warning: remote-ref-alignment step failed after stack.lock.yaml was written "
+                f"successfully; degrading to UNKNOWN rather than crashing ({type(error).__name__}: {error})",
+                file=sys.stderr,
+            )
+            remote_ref_alignment_summary = {
+                "error": f"{type(error).__name__}: {error}",
+                "remote_ref_alignment_count": None,
+                "generated_at": None,
+            }
 
     print(
         json.dumps(

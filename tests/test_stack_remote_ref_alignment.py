@@ -211,6 +211,66 @@ class RemoteRefAlignmentGeneratorTests(unittest.TestCase):
         self.assertEqual(ALIGNMENT_UNAVAILABLE_REASON_REMOTE_UNREACHABLE, report["mazer"]["unavailable_reason"])
         self.assertIsNone(report["mazer"]["remote_commit"])
 
+    def test_hung_ls_remote_times_out_and_yields_unknown_not_a_stall(self) -> None:
+        """A hung `git ls-remote` (e.g. an unreachable/black-holed remote
+        that never returns) must degrade the same way a fast, clean failure
+        already does — UNKNOWN/remote_unreachable — rather than block the
+        generator indefinitely. Simulated by patching `subprocess.run` to
+        raise `TimeoutExpired` only for the `ls-remote` invocation; every
+        other git call in this test (init, commit, remote add) is real and
+        untouched by the patch."""
+        repo_path = self._init_repo("repos/mazer")
+        self._commit(repo_path, "commit")
+        remote_path = self.root / "remote-mazer.git"
+        subprocess.run(["git", "init", "--quiet", "--bare", str(remote_path)], check=True)
+        self._run_git(repo_path, "remote", "add", "origin", str(remote_path))
+
+        config = self._config(
+            source_pin_repo_ids=["mazer"],
+            repo_paths={"mazer": "repos/mazer"},
+            repo_overrides={"mazer": {"remote_ref_alignment_ref": "main"}},
+        )
+        pins = build_source_pins(config, self.root)
+
+        real_subprocess_run = subprocess.run
+
+        def hang_only_on_ls_remote(cmd, *args, **kwargs):
+            if isinstance(cmd, (list, tuple)) and "ls-remote" in cmd:
+                raise subprocess.TimeoutExpired(cmd=cmd, timeout=kwargs.get("timeout"))
+            return real_subprocess_run(cmd, *args, **kwargs)
+
+        with patch("ops.stack.generate_lockfile.subprocess.run", side_effect=hang_only_on_ls_remote):
+            report = build_remote_ref_alignment_report(config, self.root, pins)
+
+        self.assertEqual(ALIGNMENT_STATUS_UNKNOWN, report["mazer"]["alignment_status"])
+        self.assertEqual(ALIGNMENT_UNAVAILABLE_REASON_REMOTE_UNREACHABLE, report["mazer"]["unavailable_reason"])
+        self.assertIsNone(report["mazer"]["remote_commit"])
+
+    def test_git_ls_remote_head_passes_a_bounded_timeout(self) -> None:
+        """Structural proof that the network call is actually bounded: patch
+        `subprocess.run` and assert the `ls-remote` invocation carries a
+        finite, positive `timeout=` kwarg (not `None`, which would mean an
+        unbounded wait)."""
+        from ops.stack.generate_lockfile import GIT_LS_REMOTE_TIMEOUT_SECONDS, git_ls_remote_head
+
+        repo_path = self._init_repo("repos/mazer")
+        self._commit(repo_path, "commit")
+
+        captured_timeouts: list[float | None] = []
+        real_subprocess_run = subprocess.run
+
+        def capture_timeout(cmd, *args, **kwargs):
+            if isinstance(cmd, (list, tuple)) and "ls-remote" in cmd:
+                captured_timeouts.append(kwargs.get("timeout"))
+            return real_subprocess_run(cmd, *args, **kwargs)
+
+        with patch("ops.stack.generate_lockfile.subprocess.run", side_effect=capture_timeout):
+            git_ls_remote_head(repo_path, "origin", "main")
+
+        self.assertEqual([GIT_LS_REMOTE_TIMEOUT_SECONDS], captured_timeouts)
+        self.assertIsNotNone(captured_timeouts[0])
+        self.assertGreater(captured_timeouts[0], 0)
+
     # -- The whole point of the fix: network availability / remote movement
     # must not change source_pins or lock_digest — only the separate report
     # changes. --
