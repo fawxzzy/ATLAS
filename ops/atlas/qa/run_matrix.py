@@ -25,6 +25,7 @@ from ops.atlas.qa._common import (
     load_schema,
     payload_with_digest,
     resolve_ref,
+    resolve_execution_target_url,
     stamp_now,
     utc_now,
     validate_adapter_manifest,
@@ -243,7 +244,10 @@ def run_matrix(
                 "fallback_behavior": str(lens.get("fallback_behavior") or ("manual_review" if proof_kind == "real" else "blocked")),
                 "execution_mode": execution_mode,
                 "status": status,
-                "url_target": str(lens.get("url_target") or adapter.get("start", {}).get("default_url") or ""),
+                "url_target": resolve_execution_target_url(
+                    str(lens.get("url_target") or adapter.get("start", {}).get("default_url") or ""),
+                    execution_mode=execution_mode,
+                ),
                 "git_sha": git_sha,
             }
             if command_ref:

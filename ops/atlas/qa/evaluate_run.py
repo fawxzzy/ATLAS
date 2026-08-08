@@ -161,6 +161,16 @@ def evaluate_run(
             if _tier_from_artifact(artifact) in {"physical_device", "manual_attestation"}
         }
     ]
+    manual_required_lanes = sorted(
+        {
+            lens_id
+            for lens_id in [
+                *unresolved_manual_lenses,
+                *(str(item.get("lens_id") or "") for item in manual_artifacts),
+            ]
+            if lens_id
+        }
+    )
     visual_diffs, visual_findings = evaluate_visual_diffs(
         root=base_root,
         run_root=result_path.resolve().parent,
@@ -188,7 +198,7 @@ def evaluate_run(
                 "message": f"Missing {len(missing_artifacts)} required artifacts.",
             }
         )
-    if manual_artifacts or unresolved_manual_lenses:
+    if manual_required_lanes:
         findings.append(
             {
                 "severity": "warning",
@@ -234,7 +244,7 @@ def evaluate_run(
     artifact_status = "complete" if not missing_artifacts and not invalid_artifacts else "incomplete"
     if require_real_device_on == "never":
         certification_status = "satisfied"
-    elif unresolved_manual_lenses or manual_artifacts:
+    elif manual_required_lanes:
         certification_status = "manual_required" if allow_manual else "missing"
     elif any(_tier_from_artifact(item) == "manual_attestation" for item in [*present_artifacts, *manual_attested_artifacts]):
         certification_status = "manual_attested"
@@ -274,7 +284,7 @@ def evaluate_run(
             ),
             "satisfied_evidence_tiers": [] if result_payload["mode"] == "dry_run" else sorted(satisfied_tiers),
             "missing_evidence_tiers": [] if result_payload["mode"] == "dry_run" else missing_tiers,
-            "manual_required_lanes": [] if result_payload["mode"] == "dry_run" else unresolved_manual_lenses,
+            "manual_required_lanes": [] if result_payload["mode"] == "dry_run" else manual_required_lanes,
             "visual_status": visual_status,
             "visual_diff_count": len(visual_diffs),
             "test_evidence_status": test_summary.get("status", "not_configured") if required_test_evidence else "not_configured",

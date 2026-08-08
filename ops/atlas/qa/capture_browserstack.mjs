@@ -45,18 +45,122 @@ function isIos(config) {
   return String(config.osName || "").toLowerCase().startsWith("ios");
 }
 
-export function buildCapabilities(providerPayload, config) {
+function isLoopbackSourceUrl(config) {
+  try {
+    const parsed = new URL(String(config.sourceUrl || ""));
+    const hostname = parsed.hostname.trim().toLowerCase();
+    return hostname === "127.0.0.1" || hostname === "localhost" || hostname === "::1";
+  } catch {
+    return false;
+  }
+}
+
+function shouldEnableBrowserStackLocal(config, env = process.env) {
+  const explicit = String(env.BROWSERSTACK_LOCAL || "").trim().toLowerCase();
+  if (explicit === "1" || explicit === "true" || explicit === "yes") {
+    return true;
+  }
+  if (explicit === "0" || explicit === "false" || explicit === "no") {
+    return false;
+  }
+  return isLoopbackSourceUrl(config);
+}
+
+export function resolveBrowserStackNavigationUrl(config, env = process.env) {
+  const sourceUrl = String(config.sourceUrl || "");
+  if (!shouldEnableBrowserStackLocal(config, env) || isAndroid(config)) {
+    return sourceUrl;
+  }
+  try {
+    const parsed = new URL(sourceUrl);
+    const hostname = parsed.hostname.trim().toLowerCase();
+    if (hostname === "127.0.0.1" || hostname === "localhost" || hostname === "::1") {
+      parsed.hostname = "bs-local.com";
+      return parsed.toString();
+    }
+  } catch {
+    return sourceUrl;
+  }
+  return sourceUrl;
+}
+
+export function resolveBrowserStackWaitUntil(config) {
+  const waitUntil = String(config.waitUntil || "networkidle").trim() || "networkidle";
+  if (config.readySelector && waitUntil === "networkidle") {
+    return "domcontentloaded";
+  }
+  return waitUntil;
+}
+
+function resolveBrowserStackLocalIdentifier(env = process.env) {
+  const identifier = String(env.BROWSERSTACK_LOCAL_IDENTIFIER || "").trim();
+  return identifier || null;
+}
+
+function resolveReadyState(config) {
+  const allowedStates = new Set(["attached", "detached", "hidden", "visible"]);
+  const requestedState = String(config.readyState || "visible").toLowerCase();
+  if (!allowedStates.has(requestedState)) {
+    throw new Error(`Unsupported readyState: ${config.readyState}`);
+  }
+  return requestedState;
+}
+
+export function isReadySelectorTimeout(error) {
+  const message = error instanceof Error ? error.message : String(error || "");
+  return /waitForSelector: Timeout|Timeout \d+ms exceeded[\s\S]*waiting for locator/i.test(message);
+}
+
+export function hasMeaningfulBodyTextPreview(value) {
+  const normalized = String(value || "").replace(/\s+/g, " ").trim();
+  return normalized.length >= 20;
+}
+
+async function readySelectorFallbackSnapshot({ page, config, error }) {
+  if (!config.readySelector || !isReadySelectorTimeout(error)) {
+    return { continueCapture: false };
+  }
+  const bodyTextPreview = await safePageDebugValue(
+    () => page.evaluate(() => (document.body?.innerText || "").slice(0, 500)),
+    "",
+  );
+  const documentReadyState = await safePageDebugValue(() => page.evaluate(() => document.readyState), null);
+  if (!hasMeaningfulBodyTextPreview(bodyTextPreview)) {
+    return {
+      continueCapture: false,
+      bodyTextPreview,
+      documentReadyState,
+    };
+  }
+  return {
+    continueCapture: true,
+    reason: "ready_selector_timeout_with_rendered_body",
+    readySelector: String(config.readySelector || ""),
+    readyState: resolveReadyState(config),
+    documentReadyState,
+    bodyTextPreview,
+  };
+}
+
+export function buildCapabilities(providerPayload, config, env = process.env) {
   const defaults = {
     project: "ATLAS QA LLEL",
     build: config.runId,
     name: `${config.scenarioId}:${config.lensId}`,
-    "browserstack.username": process.env.BROWSERSTACK_USERNAME,
-    "browserstack.accessKey": process.env.BROWSERSTACK_ACCESS_KEY,
+    "browserstack.username": env.BROWSERSTACK_USERNAME,
+    "browserstack.accessKey": env.BROWSERSTACK_ACCESS_KEY,
     "browserstack.networkLogs": "true",
     "browserstack.debug": "true",
     "browserstack.playwrightVersion": "1.latest",
     "client.playwrightVersion": localPlaywrightVersion(),
   };
+  if (shouldEnableBrowserStackLocal(config, env)) {
+    defaults["browserstack.local"] = "true";
+    const localIdentifier = resolveBrowserStackLocalIdentifier(env);
+    if (localIdentifier) {
+      defaults["browserstack.localIdentifier"] = localIdentifier;
+    }
+  }
   const browserName = String(config.browserName || config.browserEngine || "chrome").toLowerCase();
   if (isAndroid(config)) {
     return {
@@ -84,8 +188,98 @@ export function buildCapabilities(providerPayload, config) {
     os_version: config.osVersion || "11",
     browser: browserName === "chromium" ? "chrome" : browserName,
     browser_version: config.browserVersion || "latest",
-    resolution: `${config.viewport.width}x${config.viewport.height}`,
   };
+}
+
+async function safePageDebugValue(getValue, fallback = null) {
+  try {
+    return await getValue();
+  } catch {
+    return fallback;
+  }
+}
+
+export function isBrowserStackSocketFailure(error) {
+  const message = error instanceof Error ? error.message : String(error || "");
+  return /socket idle from a long time|playwright connection closed|browser has been closed|target closed/i.test(message);
+}
+
+async function writeFailureDebug({ page, config, outputDir, error }) {
+  const screenshotPath = path.join(outputDir, "failure.png");
+  const debugPath = path.join(outputDir, "failure.debug.json");
+  await fs.mkdir(outputDir, { recursive: true });
+
+  const skipPageProbes = isBrowserStackSocketFailure(error);
+  if (!skipPageProbes) {
+    await safePageDebugValue(() => page.screenshot({ path: screenshotPath, fullPage: true, timeout: 10000 }));
+  }
+  const payload = {
+    capturedAt: new Date().toISOString(),
+    sourceUrl: String(config.sourceUrl || ""),
+    currentUrl: skipPageProbes ? "" : await safePageDebugValue(() => page.url(), ""),
+    title: skipPageProbes ? "" : await safePageDebugValue(() => page.title(), ""),
+    readySelector: String(config.readySelector || ""),
+    readyState: resolveReadyState(config),
+    errorMessage: error instanceof Error ? error.message : String(error),
+    documentReadyState: skipPageProbes ? null : await safePageDebugValue(() => page.evaluate(() => document.readyState), null),
+    htmlDataset: skipPageProbes ? null : await safePageDebugValue(() => page.evaluate(() => ({ ...document.documentElement.dataset })), null),
+    bodyDataset: skipPageProbes ? null : await safePageDebugValue(() => page.evaluate(() => document.body ? ({ ...document.body.dataset }) : null), null),
+    bodyTextPreview: skipPageProbes ? "" : await safePageDebugValue(
+      () => page.evaluate(() => (document.body?.innerText || "").slice(0, 500)),
+      "",
+    ),
+    pageProbesSkipped: skipPageProbes,
+  };
+  await fs.writeFile(debugPath, JSON.stringify(payload, null, 2) + "\n", "utf8");
+  return {
+    debugPath,
+    screenshotPath,
+    currentUrl: payload.currentUrl,
+    title: payload.title,
+  };
+}
+
+async function captureScreenshotWithFallbacks({ page, config, screenshotPath, outputDir }) {
+  const timeout = Number.isFinite(Number(config.screenshotTimeoutMs)) ? Number(config.screenshotTimeoutMs) : 20000;
+  const attempts = [
+    async () => {
+      await page.screenshot({ path: screenshotPath, fullPage: Boolean(config.fullPage), timeout });
+      return "page";
+    },
+    async () => {
+      const body = page.locator("body");
+      await body.screenshot({ path: screenshotPath, timeout });
+      return "body";
+    },
+    async () => {
+      const html = page.locator("html");
+      await html.screenshot({ path: screenshotPath, timeout });
+      return "html";
+    },
+  ];
+
+  let lastError = null;
+  for (const attempt of attempts) {
+    try {
+      return await attempt();
+    } catch (error) {
+      lastError = error;
+      if (isBrowserStackSocketFailure(error)) {
+        break;
+      }
+    }
+  }
+
+  const debug = await writeFailureDebug({ page, config, outputDir, error: lastError });
+  const detail = [
+    `Provider screenshot failed for lens ${config.lensId}.`,
+    `currentUrl=${debug.currentUrl || String(config.sourceUrl || "")}`,
+    debug.title ? `title=${debug.title}` : null,
+    `debug=${debug.debugPath}`,
+    `screenshot=${debug.screenshotPath}`,
+    lastError instanceof Error ? `reason=${lastError.message}` : null,
+  ].filter(Boolean).join(" ");
+  throw new Error(detail);
 }
 
 async function main() {
@@ -109,14 +303,27 @@ async function main() {
 
   const capabilities = buildCapabilities(providerPayload, config);
   const endpoint = `wss://cdp.browserstack.com/playwright?caps=${encodeURIComponent(JSON.stringify(capabilities))}`;
+  const androidSession = isAndroid(config);
+  const navigationConfig = { ...config, sourceUrl: resolveBrowserStackNavigationUrl(config) };
   const browserType = String(config.browserEngine || "").toLowerCase() === "webkit" ? playwright.webkit : playwright.chromium;
-  const browser = await browserType.connect({ wsEndpoint: endpoint });
-  const context = await browser.newContext({
-    viewport: {
-      width: config.viewport.width,
-      height: config.viewport.height,
-    },
-  });
+  const browser = androidSession ? null : await browserType.connect({ wsEndpoint: endpoint });
+  const device = androidSession ? await playwright._android.connect(endpoint) : null;
+  if (device) {
+    try {
+      await device.shell("am force-stop com.android.chrome");
+    } catch {
+      // Best effort only.
+    }
+  }
+  const context = androidSession
+    ? await device.launchBrowser()
+    : await browser.newContext({
+      viewport: {
+        width: config.viewport.width,
+        height: config.viewport.height,
+      },
+    });
+  context.setDefaultTimeout(20000);
   const page = await context.newPage();
   const consoleLines = [];
   const networkEntries = [];
@@ -134,18 +341,50 @@ async function main() {
     });
   });
 
-  await page.goto(config.sourceUrl, { waitUntil: config.waitUntil || "networkidle" });
-  if (config.readySelector) {
-    await page.waitForSelector(config.readySelector, { state: "visible", timeout: config.readyTimeoutMs || 30000 });
+  try {
+    await page.goto(navigationConfig.sourceUrl, { waitUntil: resolveBrowserStackWaitUntil(navigationConfig) });
+  } catch (error) {
+    const debug = await writeFailureDebug({ page, config: navigationConfig, outputDir, error });
+    const detail = [
+      `Provider capture failed before ready state for lens ${config.lensId}.`,
+      `currentUrl=${debug.currentUrl || String(navigationConfig.sourceUrl || "")}`,
+      debug.title ? `title=${debug.title}` : null,
+      `debug=${debug.debugPath}`,
+      `screenshot=${debug.screenshotPath}`,
+    ].filter(Boolean).join(" ");
+    throw new Error(detail);
   }
-  if (config.settleMs) {
-    await page.waitForTimeout(config.settleMs);
+  let readySelectorFallback = null;
+  if (navigationConfig.readySelector) {
+    try {
+      await page.waitForSelector(navigationConfig.readySelector, {
+        state: resolveReadyState(navigationConfig),
+        timeout: navigationConfig.readyTimeoutMs || 30000,
+      });
+    } catch (error) {
+      const fallback = await readySelectorFallbackSnapshot({ page, config: navigationConfig, error });
+      if (!fallback.continueCapture) {
+        const debug = await writeFailureDebug({ page, config: navigationConfig, outputDir, error });
+        const detail = [
+          `Provider capture failed before ready state for lens ${config.lensId}.`,
+          `currentUrl=${debug.currentUrl || String(navigationConfig.sourceUrl || "")}`,
+          debug.title ? `title=${debug.title}` : null,
+          `debug=${debug.debugPath}`,
+          `screenshot=${debug.screenshotPath}`,
+        ].filter(Boolean).join(" ");
+        throw new Error(detail);
+      }
+      readySelectorFallback = fallback;
+    }
+  }
+  if (navigationConfig.settleMs) {
+    await page.waitForTimeout(navigationConfig.settleMs);
   }
 
   const screenshotPath = path.join(outputDir, "screenshot.png");
   const consolePath = path.join(outputDir, "console.log");
   const networkPath = path.join(outputDir, "network.json");
-  await page.screenshot({ path: screenshotPath, fullPage: Boolean(config.fullPage) });
+  const screenshotStrategy = await captureScreenshotWithFallbacks({ page, config: navigationConfig, screenshotPath, outputDir });
   await fs.writeFile(consolePath, consoleLines.map((item) => `[${item.type}] ${item.text}`).join("\n"), "utf8");
   await fs.writeFile(networkPath, JSON.stringify(networkEntries, null, 2) + "\n", "utf8");
 
@@ -184,13 +423,21 @@ async function main() {
       console_log: consolePath,
       network_log: networkPath,
     },
+    screenshot_strategy: screenshotStrategy,
   };
+  if (readySelectorFallback) {
+    metadata.ready_selector_fallback = readySelectorFallback;
+  }
   const metadataPath = path.join(outputDir, "capture.metadata.json");
   const metadataBody = JSON.stringify(metadata, null, 2) + "\n";
   await fs.writeFile(metadataPath, metadataBody, "utf8");
 
   await context.close();
-  await browser.close();
+  if (device) {
+    await device.close();
+  } else if (browser) {
+    await browser.close();
+  }
 
   process.stdout.write(
     JSON.stringify({
