@@ -39,6 +39,22 @@ from ops.atlas.qa.validate_artifacts import validate_artifact_manifest_file
 from ops.cortex._artifacts import write_json
 
 
+def _adapter_server_log_path(root: Path, adapter_payload: dict[str, object]) -> Path:
+    repo_id = str(adapter_payload.get("repo_id") or "unknown").strip() or "unknown"
+    return root / "runtime" / "atlas" / "qa" / "adapter-server" / f"{repo_id}.latest.log"
+
+
+def _read_log_tail(path: Path | None, *, max_lines: int = 40) -> str:
+    if not isinstance(path, Path) or not path.exists():
+        return ""
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return ""
+    tail = lines[-max_lines:]
+    return "\n".join(tail).strip()
+
+
 def _stack_validation(
     root: Path,
     *,
@@ -66,9 +82,21 @@ def _stack_validation(
     return report_path
 
 
-def _wait_for_url(url: str, *, timeout_s: int = 90) -> None:
+def _wait_for_url(
+    url: str,
+    *,
+    timeout_s: int = 90,
+    process: subprocess.Popen[str] | None = None,
+    log_path: Path | None = None,
+) -> None:
     deadline = time.time() + timeout_s
     while time.time() < deadline:
+        if process is not None and process.poll() is not None:
+            log_tail = _read_log_tail(log_path)
+            detail = f"Adapter server exited before ready URL became available: {url} (exit code {process.returncode})."
+            if log_tail:
+                detail = f"{detail}\n--- adapter server log tail ---\n{log_tail}"
+            raise RuntimeError(detail)
         try:
             with urllib.request.urlopen(url, timeout=3) as response:
                 if 200 <= int(response.status) < 500:
@@ -76,7 +104,11 @@ def _wait_for_url(url: str, *, timeout_s: int = 90) -> None:
         except (urllib.error.URLError, TimeoutError, ValueError):
             pass
         time.sleep(1.0)
-    raise RuntimeError(f"Timed out waiting for ready URL: {url}")
+    log_tail = _read_log_tail(log_path)
+    detail = f"Timed out waiting for ready URL: {url}"
+    if log_tail:
+        detail = f"{detail}\n--- adapter server log tail ---\n{log_tail}"
+    raise RuntimeError(detail)
 
 
 def _run_adapter_prepare(root: Path, adapter_payload: dict[str, object]) -> dict[str, object] | None:
@@ -113,26 +145,43 @@ def _start_adapter_server(root: Path, adapter_payload: dict[str, object]) -> sub
     if not isinstance(command, str) or not command.strip():
         return None
     repo_root = root / str(adapter_payload["repo_path"])
+    log_path = _adapter_server_log_path(root, adapter_payload)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_handle = log_path.open("w", encoding="utf-8")
     creationflags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
     process = subprocess.Popen(
         command,
         cwd=str(repo_root),
         shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stdout=log_handle,
+        stderr=subprocess.STDOUT,
         text=True,
         creationflags=creationflags,
     )
-    if default_url:
-        ready_url = f"{default_url.rstrip('/')}/{ready_path.lstrip('/')}" if ready_path else default_url
-        _wait_for_url(ready_url)
+    setattr(process, "_atlas_log_handle", log_handle)
+    setattr(process, "_atlas_log_path", str(log_path))
+    try:
+        if default_url:
+            ready_url = f"{default_url.rstrip('/')}/{ready_path.lstrip('/')}" if ready_path else default_url
+            _wait_for_url(ready_url, process=process, log_path=log_path)
+    except Exception:
+        if process.poll() is None:
+            try:
+                process.terminate()
+            except Exception:
+                pass
+        log_handle.close()
+        raise
     return process
 
 
 def _stop_adapter_server(process: subprocess.Popen[str] | None) -> None:
     if process is None:
         return
+    log_handle = getattr(process, "_atlas_log_handle", None)
     if process.poll() is not None:
+        if log_handle is not None and not log_handle.closed:
+            log_handle.close()
         return
     try:
         subprocess.run(
@@ -143,6 +192,9 @@ def _stop_adapter_server(process: subprocess.Popen[str] | None) -> None:
         )
     except Exception:
         process.terminate()
+    finally:
+        if log_handle is not None and not log_handle.closed:
+            log_handle.close()
 
 
 def _load_scenario(

@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.parse
 from pathlib import Path
 from typing import Any
@@ -49,6 +50,41 @@ def _redact_provider_output(text: str, secrets: dict[str, str]) -> str:
     return redacted
 
 
+def _capture_attempts() -> int:
+    raw_value = os.environ.get("BROWSERSTACK_CAPTURE_ATTEMPTS", "").strip()
+    if not raw_value:
+        return 4
+    try:
+        return max(1, min(5, int(raw_value)))
+    except ValueError:
+        return 2
+
+
+def _capture_timeout_s() -> int:
+    raw_value = os.environ.get("BROWSERSTACK_CAPTURE_TIMEOUT_SECONDS", "").strip()
+    if not raw_value:
+        return 300
+    try:
+        return max(60, min(900, int(raw_value)))
+    except ValueError:
+        return 300
+
+
+def _is_transient_provider_failure(detail: str) -> bool:
+    normalized = detail.lower()
+    transient_markers = (
+        "socket idle from a long time",
+        "target closed",
+        "browser has been closed",
+        "playwright connection closed",
+        "websocket",
+        "capture timed out",
+        "timed out after",
+        "timed out waiting",
+    )
+    return any(marker in normalized for marker in transient_markers)
+
+
 def capture_with_browserstack_provider(
     *,
     root: Path,
@@ -68,22 +104,49 @@ def capture_with_browserstack_provider(
     script_path = (root / "ops" / "atlas" / "qa" / "capture_browserstack.mjs").resolve()
     env = os.environ.copy()
     env.update(env_values)
-    completed = subprocess.run(
-        ["node", str(script_path), "--config", str(temp_path)],
-        cwd=str(root),
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-        env=env,
-    )
+    completed: subprocess.CompletedProcess[str] | None = None
+    attempts = _capture_attempts()
+    timeout_s = _capture_timeout_s()
     try:
-        temp_path.unlink(missing_ok=True)
-    except OSError:
-        pass
-    if completed.returncode != 0:
-        detail = completed.stderr.strip() or completed.stdout.strip() or "capture_browserstack failed."
+        for attempt_index in range(attempts):
+            try:
+                completed = subprocess.run(
+                    ["node", str(script_path), "--config", str(temp_path)],
+                    cwd=str(root),
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    check=False,
+                    env=env,
+                    timeout=timeout_s,
+                )
+            except subprocess.TimeoutExpired as exc:
+                stdout = exc.stdout if isinstance(exc.stdout, str) else ""
+                stderr = exc.stderr if isinstance(exc.stderr, str) else ""
+                completed = subprocess.CompletedProcess(
+                    args=exc.cmd,
+                    returncode=124,
+                    stdout=stdout,
+                    stderr=stderr or f"BrowserStack capture timed out after {timeout_s} seconds.",
+                )
+            if completed.returncode == 0:
+                break
+            detail = completed.stderr.strip() or completed.stdout.strip() or "capture_browserstack failed."
+            if attempt_index >= attempts - 1 or not _is_transient_provider_failure(detail):
+                break
+            time.sleep(min(3, attempt_index + 1))
+    finally:
+        try:
+            temp_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+    if completed is None or completed.returncode != 0:
+        detail = (
+            completed.stderr.strip() or completed.stdout.strip() or "capture_browserstack failed."
+            if completed is not None
+            else "capture_browserstack failed."
+        )
         raise RuntimeError(_redact_provider_output(detail, env_values))
     payload = json.loads(completed.stdout)
     if not isinstance(payload, dict):

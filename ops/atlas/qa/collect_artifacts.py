@@ -23,6 +23,7 @@ from ops.atlas.qa._common import (
     load_provider_manifest,
     payload_with_digest,
     resolve_ref,
+    resolve_execution_target_url,
     utc_now,
     validate_artifact_manifest,
     validate_result_payload,
@@ -125,6 +126,11 @@ def _target_file_for_kind(output_dir: Path, artifact_kind: str) -> Path:
     return output_dir / f"{artifact_kind}.json"
 
 
+def _write_capture_failure_note(output_dir: Path, detail: str) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "capture.failure.txt").write_text(f"{detail.rstrip()}\n", encoding="utf-8")
+
+
 def _build_capture_config(
     *,
     repo_root: Path,
@@ -137,7 +143,10 @@ def _build_capture_config(
 ) -> dict[str, Any]:
     capture = adapter.get("capture", {}) if isinstance(adapter.get("capture"), dict) else {}
     start = adapter.get("start", {}) if isinstance(adapter.get("start"), dict) else {}
-    target_url = str(start.get("default_url") or "")
+    target_url = resolve_execution_target_url(
+        str(start.get("default_url") or ""),
+        execution_mode=str(lens.get("execution_mode") or ""),
+    )
     entrypoint = scenario.get("entrypoint", {}) if isinstance(scenario.get("entrypoint"), dict) else {}
     entry_path = str(entrypoint.get("path") or "").strip()
     if entry_path and target_url.rstrip("/"):
@@ -156,6 +165,7 @@ def _build_capture_config(
         "waitUntil": str(capture.get("wait_until") or "networkidle"),
         "settleMs": int(capture.get("settle_ms") or 0),
         "readySelector": capture.get("ready_selector"),
+        "readyState": str(capture.get("ready_state") or "visible"),
         "readyTimeoutMs": int(capture.get("ready_timeout_ms") or 30000),
         "fullPage": bool(capture.get("full_page")),
         "disableAnimations": bool(capture.get("disable_animations", True)),
@@ -169,6 +179,72 @@ def _build_capture_config(
         "lensProfileId": str(lens["profile_id"]),
         "evidenceKind": str(lens.get("evidence_kind") or ""),
     }
+
+
+def _provider_capture_config(
+    *,
+    base_config: dict[str, Any],
+    lens_id: str,
+    lens: dict[str, Any],
+    lens_profile: dict[str, Any],
+    provider_type: str,
+) -> dict[str, Any]:
+    explicit_values = {
+        "deviceModel": lens.get("device_model"),
+        "osName": lens.get("os_name"),
+        "osVersion": lens.get("os_version"),
+        "browserName": lens.get("browser_name"),
+        "browserVersion": lens.get("browser_version"),
+    }
+    defaults_by_lens = {
+        "desktop.chromium.real": {
+            "deviceModel": "Windows Desktop",
+            "osName": "Windows",
+            "osVersion": "11",
+            "browserName": "chrome",
+            "browserVersion": "latest",
+        },
+        "android.chrome.real": {
+            "deviceModel": "Samsung Galaxy S23",
+            "osName": "Android",
+            "osVersion": "13.0",
+            "browserName": "chrome",
+            "browserVersion": "latest",
+        },
+        "iphone.webkit.real": {
+            "deviceModel": "iPhone 15",
+            "osName": "iOS",
+            "osVersion": "17",
+            "browserName": "safari",
+            "browserVersion": "17",
+        },
+    }
+    profile_browser_name = str(lens_profile.get("browser_engine") or "").strip().lower()
+    normalized_browser_name = {
+        "chromium": "chrome",
+        "webkit": "safari",
+    }.get(profile_browser_name, profile_browser_name)
+    defaults = defaults_by_lens.get(lens_id, {})
+    merged = {
+        **base_config,
+        "deviceModel": explicit_values["deviceModel"] or defaults.get("deviceModel"),
+        "osName": explicit_values["osName"] or defaults.get("osName"),
+        "osVersion": explicit_values["osVersion"] or defaults.get("osVersion"),
+        "browserName": explicit_values["browserName"] or defaults.get("browserName") or normalized_browser_name,
+        "browserVersion": explicit_values["browserVersion"] or defaults.get("browserVersion") or "latest",
+        "providerType": provider_type,
+    }
+    missing = [
+        key
+        for key in ("deviceModel", "osName", "osVersion", "browserName", "browserVersion")
+        if not isinstance(merged.get(key), str) or not str(merged.get(key)).strip()
+    ]
+    if missing:
+        raise RuntimeError(
+            f"Lens '{lens_id}' requires explicit provider capability mapping before provider_capture can run. "
+            f"Missing: {', '.join(missing)}."
+        )
+    return merged
 
 
 def _capture_cache(
@@ -217,16 +293,22 @@ def _capture_cache(
             if not isinstance(provider_manifest_ref, str) or not provider_manifest_ref.strip():
                 raise RuntimeError(f"Lens '{lens_id}' requires provider_capture but does not declare provider_manifest_ref.")
             provider_payload, _ = load_provider_manifest(root=ROOT, provider_manifest_ref=provider_manifest_ref)
-            provider_config = {
-                **config,
-                "deviceModel": lens.get("device_model") or profile.get("emulation_profile") or lens_id,
-                "osName": lens.get("os_name") or ("iOS" if "iphone" in lens_id else "Android" if "android" in lens_id else "Desktop"),
-                "osVersion": lens.get("os_version") or "unspecified",
-                "browserName": lens.get("browser_name") or profile.get("browser_engine"),
-                "browserVersion": lens.get("browser_version") or "unspecified",
-                "providerType": provider_payload.get("provider_type"),
-            }
-            cache[lens_id] = capture_with_provider(root=ROOT, provider_manifest_ref=provider_manifest_ref, config=provider_config)
+            provider_config = _provider_capture_config(
+                base_config=config,
+                lens_id=lens_id,
+                lens=lens,
+                lens_profile=profile,
+                provider_type=str(provider_payload.get("provider_type") or ""),
+            )
+            try:
+                cache[lens_id] = capture_with_provider(root=ROOT, provider_manifest_ref=provider_manifest_ref, config=provider_config)
+            except Exception as exc:
+                fallback_behavior = str(matrix_entry.get("fallback_behavior") or lens.get("fallback_behavior") or "")
+                proof_kind = str(matrix_entry.get("proof_kind") or lens.get("proof_kind") or "")
+                if proof_kind == "real" and fallback_behavior in {"manual_attestation", "manual_review", "optional"}:
+                    _write_capture_failure_note(output_dir, f"provider_capture_failed lens={lens_id} detail={exc}")
+                    continue
+                raise
         else:
             cache[lens_id] = capture_with_playwright(root=ROOT, config=config)
     return cache

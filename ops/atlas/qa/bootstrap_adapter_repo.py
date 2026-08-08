@@ -44,6 +44,31 @@ def _status_porcelain(repo_path: Path) -> list[str]:
     return [line for line in stdout.splitlines() if line.strip()]
 
 
+def _ensure_commit_available(repo_path: Path, requested_sha: str) -> tuple[bool, str]:
+    code, _, stderr = _git(repo_path, "cat-file", "-e", f"{requested_sha}^{{commit}}")
+    if code == 0:
+        return True, ""
+    first_error = stderr
+
+    # Reused CI worktrees may carry a narrow remote refspec. Fetch all branch refs
+    # before declaring a just-pushed target SHA unavailable.
+    code, _, fetch_stderr = _git(
+        repo_path,
+        "fetch",
+        "--tags",
+        "--prune",
+        "origin",
+        "+refs/heads/*:refs/remotes/origin/*",
+    )
+    if code != 0:
+        return False, fetch_stderr or first_error
+
+    code, _, stderr = _git(repo_path, "cat-file", "-e", f"{requested_sha}^{{commit}}")
+    if code == 0:
+        return True, ""
+    return False, stderr or first_error or f"requested commit '{requested_sha}' is not available after fetch."
+
+
 def _load_adapter(*, root: Path, adapter_id: str) -> tuple[dict[str, Any], Path]:
     adapter_path = default_adapter_dir(root=root) / f"{adapter_id}.json"
     if not adapter_path.exists():
@@ -148,8 +173,8 @@ def bootstrap_adapter_repo(
         result["status"] = "failed"
         result["message"] = stderr or "git fetch failed."
         raise RuntimeError(result["message"])
-    code, _, stderr = _git(repo_path, "cat-file", "-e", f"{requested_sha}^{{commit}}")
-    if code != 0:
+    commit_available, stderr = _ensure_commit_available(repo_path, requested_sha)
+    if not commit_available:
         result["status"] = "failed"
         result["message"] = stderr or f"requested commit '{requested_sha}' is not available after fetch."
         raise RuntimeError(result["message"])

@@ -14,11 +14,13 @@ from PIL import Image
 
 from ops.atlas.qa.baselines import bless_baseline, propose_baselines
 from ops.atlas.qa.bootstrap_adapter_repo import bootstrap_adapter_repo
-from ops.atlas.qa.ci_gate import _materialize_runtime_waivers, _provider_override_file, _provider_status
+from ops.atlas.qa.ci_gate import _materialize_runtime_waivers, _provider_override_file, _provider_status, _wait_for_url
 from ops.atlas.qa.adoption_drift import build_adoption_drift
 from ops.atlas.qa.bootstrap_release_repos import bootstrap_release_repos
 from ops.atlas.qa.compatibility_report import compatibility_report
+from ops.atlas.qa.collect_artifacts import _capture_cache
 from ops.atlas.qa.evidence_index import build_evidence_index
+from ops.atlas.qa.evaluate_run import evaluate_run
 from ops.atlas.qa.github_secret_readiness import github_secret_readiness
 from ops.atlas.qa.manual_attestation import (
     build_manual_attestation_packet_prep,
@@ -212,6 +214,8 @@ class AtlasQaPipelineTests(unittest.TestCase):
             "atlas.qa.capture_receipt.v1.json",
             "atlas.qa.visual_baseline.v1.json",
             "atlas.qa.adapter.v1.json",
+            "atlas.qa.artifact.v1.json",
+            "atlas.qa.result.v1.json",
             "atlas.qa.scenario.v1.json",
             "atlas.qa.test_evidence.v1.json",
             "atlas.qa.evidence_index.v1.json",
@@ -425,6 +429,73 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertEqual(commit, result["checkout_sha"])
         self.assertTrue((root / result["bootstrap_adapter_repo_ref"]).exists())
         self.assertEqual(commit, _git(root / "repos" / "fawxzzy-fitness", "rev-parse", "HEAD"))
+
+    def test_bootstrap_adapter_repo_refetches_all_heads_for_narrow_refspec(self) -> None:
+        root = self._temp_root()
+        remote_repo = root / "tmp-remote-fitness"
+        initial_commit = _init_committed_repo(remote_repo, content="# fitness\n")
+        _git(remote_repo, "branch", "old", initial_commit)
+        (remote_repo / "README.md").write_text("# fitness\n\nready\n", encoding="utf-8")
+        _git(remote_repo, "add", "README.md")
+        _git(remote_repo, "commit", "-m", "target")
+        target_commit = _git(remote_repo, "rev-parse", "HEAD")
+
+        repo_path = root / "repos" / "fawxzzy-fitness"
+        repo_path.mkdir(parents=True, exist_ok=True)
+        _git(repo_path, "init")
+        _git(repo_path, "remote", "add", "origin", str(remote_repo.resolve()))
+        _git(repo_path, "config", "remote.origin.fetch", "+refs/heads/old:refs/remotes/origin/old")
+        _git(repo_path, "fetch", "--tags", "--prune", "origin")
+        _git(repo_path, "checkout", "--detach", initial_commit)
+
+        (root / "ops" / "atlas" / "qa" / "adapters").mkdir(parents=True, exist_ok=True)
+        _write_json(
+            root / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json",
+            {
+                "contract_version": "atlas.qa.adapter.v1",
+                "adapter_id": "fitness.web",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "framework": "nextjs",
+                "commands": {
+                    "verify": {
+                        "command": "npm run verify",
+                    }
+                },
+                "prepare": {
+                    "kind": "command",
+                    "command": "npm install",
+                },
+                "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                "lenses": [
+                    {
+                        "lens_id": "desktop.chromium.emulated",
+                        "profile_id": "desktop.chromium",
+                        "proof_kind": "emulated",
+                        "evidence_kind": "emulated_browser",
+                        "required_for": ["evidence"],
+                        "promotion_tier": "emulated_browser",
+                        "fallback_behavior": "blocked",
+                        "execution_mode": "browser_capture",
+                    }
+                ],
+            },
+        )
+        _write_repo_inventory(
+            root,
+            repos=[
+                {
+                    "logical_id": "fitness",
+                    "local_path": "repos/fawxzzy-fitness",
+                    "remote_url": str(remote_repo.resolve()),
+                    "current_commit": target_commit,
+                }
+            ],
+        )
+
+        result = bootstrap_adapter_repo(root=root, adapter="fitness.web", target_sha=target_commit)
+        self.assertEqual(target_commit, result["checkout_sha"])
+        self.assertEqual(target_commit, _git(repo_path, "rev-parse", "HEAD"))
 
     def test_declared_surface_scan_coverage_accepts_required_surfaces(self) -> None:
         root = self._temp_root()
@@ -1176,6 +1247,144 @@ class AtlasQaPipelineTests(unittest.TestCase):
         self.assertEqual("waived", promotion["summary"]["real_device_proof"])
         self.assertEqual(["android.chrome.real.manual"], promotion["waived_lanes"])
         self.assertEqual([], promotion["manual_required_lanes"])
+
+    def test_evaluate_run_carries_manual_required_artifact_lanes_into_promotion(self) -> None:
+        root = self._temp_root()
+        run_root = root / "runtime" / "atlas" / "qa" / "runs" / "run-1"
+        artifact_path, _ = self._base_manifest(root=root)
+        scenario_path = root / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json"
+        scenario_path.parent.mkdir(parents=True, exist_ok=True)
+        _write_json(
+            scenario_path,
+            {
+                "contract_version": "atlas.qa.scenario.v1",
+                "scenario_id": "fitness.progression-pr-smoke",
+                "title": "fixture",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "adapter_id": "fitness.web",
+                "criticality": "high",
+                "entrypoint": {"path": "/"},
+                "proof": {
+                    "pr_lenses": ["desktop.chromium.emulated"],
+                    "certify_lenses": ["iphone.webkit.real"],
+                    "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                    "real_device_strategy": "preview_only",
+                },
+                "required_artifacts": [],
+                "execution": {"pr_command_sequence": [], "certify_command_sequence": []},
+                "promotion": {
+                    "require_executable_truth": True,
+                    "require_pr_artifacts": True,
+                    "require_real_device_on": "release",
+                    "allow_manual_certification": True,
+                    "max_flaky_lenses": 0,
+                },
+            },
+        )
+        _write_json(
+            run_root / "matrix.result.json",
+            {
+                "contract_version": "atlas.qa.result.v1",
+                "result_id": "sha256:" + ("6" * 64),
+                "generated_at": "2026-05-11T00:00:00Z",
+                "runner_version": "test",
+                "stage": "executed",
+                "run_id": "run-1",
+                "scenario_ref": "ops/atlas/qa/scenarios/fitness.progression-pr-smoke.json",
+                "repo_id": "fitness",
+                "repo_path": "repos/fawxzzy-fitness",
+                "git_sha": "abcdef1234567890",
+                "adapter_id": "fitness.web",
+                "adapter_ref": "ops/atlas/qa/adapters/fitness.web.json",
+                "lens_manifest_ref": "ops/atlas/qa/lenses/atlas-default-web.v1.json",
+                "mode": "execute",
+                "summary": {
+                    "overall_status": "ready",
+                    "executable_status": "clean",
+                    "artifact_status": "complete",
+                    "certification_status": "satisfied",
+                    "highest_satisfied_tier": "emulated_browser",
+                    "satisfied_evidence_tiers": ["emulated_browser"],
+                    "missing_evidence_tiers": ["physical_device"],
+                    "manual_required_lanes": [],
+                    "visual_status": "not_configured",
+                    "visual_diff_count": 0,
+                    "test_evidence_status": "not_configured",
+                    "required_test_evidence_count": 0,
+                    "lens_count": 2,
+                    "failing_lens_count": 0,
+                    "finding_count": 0,
+                },
+                "matrix": [
+                    {
+                        "lens_id": "desktop.chromium.emulated",
+                        "lens_profile_id": "desktop.chromium",
+                        "proof_kind": "emulated",
+                        "evidence_kind": "emulated_browser",
+                        "promotion_tier": "emulated_browser",
+                        "fallback_behavior": "blocked",
+                        "execution_mode": "browser_capture",
+                        "status": "pass",
+                    },
+                    {
+                        "lens_id": "iphone.webkit.real",
+                        "lens_profile_id": "iphone.webkit",
+                        "proof_kind": "real",
+                        "evidence_kind": "physical_device",
+                        "promotion_tier": "physical_device",
+                        "fallback_behavior": "manual_attestation",
+                        "execution_mode": "provider_capture",
+                        "status": "pass",
+                    },
+                ],
+                "findings": [],
+                "artifact_manifest_refs": [],
+            },
+        )
+        artifact_payload = load_json_object(artifact_path)
+        artifact_payload["artifacts"].append(
+            {
+                "artifact_id": "run-1:main:iphone.webkit.real:screenshot",
+                "artifact_kind": "screenshot",
+                "step_id": "main",
+                "lens_id": "iphone.webkit.real",
+                "proof_kind": "real",
+                "required": True,
+                "status": "manual_required",
+                "content_type": "image/png",
+                "notes": [],
+            }
+        )
+        artifact_payload["summary"]["artifact_count"] = 2
+        artifact_payload["summary"]["required_count"] = 2
+        artifact_payload["summary"]["manual_required_count"] = 1
+        _write_json(artifact_path, artifact_payload)
+        _write_json(
+            run_root / "captures" / "desktop.chromium.emulated" / "capture.metadata.json",
+            {
+                "contract_version": "atlas.qa.capture_receipt.v1",
+                "run_id": "run-1",
+                "scenario_id": "fitness.progression-pr-smoke",
+                "adapter_id": "fitness.web",
+                "repo_id": "fitness",
+                "git_sha": "abcdef1234567890",
+                "lens_id": "desktop.chromium.emulated",
+                "captured_at": "2026-05-11T00:00:00Z",
+                "source_url": "http://127.0.0.1:3000/dev/mobile-regression",
+                "capture_backend": "playwright",
+                "capture_method": "browser_emulation",
+            },
+        )
+
+        evaluated = evaluate_run(root=root, run_id="run-1")
+        self.assertEqual("manual_required", evaluated["summary"]["certification_status"])
+        self.assertEqual(["iphone.webkit.real"], evaluated["summary"]["manual_required_lanes"])
+
+        promotion = promote_run(root=root, run_id="run-1", scenario_path=scenario_path)
+        self.assertEqual("manual_review", promotion["promotion_status"])
+        self.assertEqual("manual_required", promotion["summary"]["real_device_proof"])
+        self.assertEqual(["iphone.webkit.real"], promotion["manual_required_lanes"])
 
     def test_promote_run_rejects_wrong_run_waiver(self) -> None:
         root = self._temp_root()
@@ -2144,6 +2353,17 @@ class AtlasQaPipelineTests(unittest.TestCase):
             status["missing_env_vars"],
         )
 
+    def test_wait_for_url_reports_adapter_server_log_tail_when_process_exits_early(self) -> None:
+        root = self._temp_root()
+        log_path = root / "runtime" / "atlas" / "qa" / "adapter-server" / "fitness.latest.log"
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        log_path.write_text("fitness dev server crashed\nError: missing fixture\n", encoding="utf-8")
+        process = mock.Mock()
+        process.poll.return_value = 17
+        process.returncode = 17
+        with self.assertRaisesRegex(RuntimeError, "adapter server log tail"):
+            _wait_for_url("http://127.0.0.1:3002/api/health", timeout_s=1, process=process, log_path=log_path)
+
     def test_provider_readiness_reports_browserstack_ready_for_fitness_release_lenses(self) -> None:
         with mock.patch.dict("os.environ", {"BROWSERSTACK_USERNAME": "user", "BROWSERSTACK_ACCESS_KEY": "key"}, clear=False):
             report = provider_readiness(
@@ -2384,6 +2604,326 @@ console.log(JSON.stringify(caps));
         self.assertNotIn("resolution", caps)
         self.assertNotIn("browserstack.console", caps)
 
+    def test_browserstack_capture_builds_android_capabilities_for_real_mobile(self) -> None:
+        script = """
+import { buildCapabilities } from './ops/atlas/qa/capture_browserstack.mjs';
+const caps = buildCapabilities({}, {
+  runId: 'run-1',
+  scenarioId: 'fitness.progression-pr-smoke',
+  lensId: 'android.chrome.real',
+  browserEngine: 'chromium',
+  viewport: { width: 412, height: 915 },
+  deviceModel: 'Samsung Galaxy S23',
+  osName: 'Android',
+  osVersion: '13.0',
+  browserName: 'chrome',
+  browserVersion: 'latest'
+});
+console.log(JSON.stringify(caps));
+"""
+        completed = subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        caps = json.loads(completed.stdout)
+        self.assertEqual("chrome", caps["browser"])
+        self.assertEqual("Samsung Galaxy S23", caps["deviceName"])
+        self.assertEqual("13.0", caps["osVersion"])
+        self.assertEqual("true", caps["realMobile"])
+        self.assertNotIn("resolution", caps)
+
+    def test_browserstack_capture_builds_desktop_capabilities_without_provider_resolution(self) -> None:
+        script = """
+import { buildCapabilities } from './ops/atlas/qa/capture_browserstack.mjs';
+const caps = buildCapabilities({}, {
+  runId: 'run-1',
+  scenarioId: 'fitness.progression-pr-smoke',
+  lensId: 'desktop.chromium.real',
+  browserEngine: 'chromium',
+  viewport: { width: 1440, height: 1024 },
+  deviceModel: 'Windows Desktop',
+  osName: 'Windows',
+  osVersion: '11',
+  browserName: 'chrome',
+  browserVersion: 'latest'
+});
+console.log(JSON.stringify(caps));
+"""
+        completed = subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        caps = json.loads(completed.stdout)
+        self.assertEqual("chrome", caps["browser"])
+        self.assertEqual("Windows", caps["os"])
+        self.assertEqual("11", caps["os_version"])
+        self.assertEqual("latest", caps["browser_version"])
+        self.assertNotIn("resolution", caps)
+
+    def test_browserstack_capture_enables_local_testing_for_loopback_targets(self) -> None:
+        script = """
+import { buildCapabilities } from './ops/atlas/qa/capture_browserstack.mjs';
+const caps = buildCapabilities({}, {
+  runId: 'run-1',
+  scenarioId: 'fitness.progression-pr-smoke',
+  lensId: 'desktop.chromium.real',
+  browserEngine: 'chromium',
+  sourceUrl: 'http://127.0.0.1:3002/dev/mobile-regression',
+  viewport: { width: 1440, height: 1024 },
+  deviceModel: 'Windows Desktop',
+  osName: 'Windows',
+  osVersion: '11',
+  browserName: 'chrome',
+  browserVersion: 'latest'
+}, {
+  BROWSERSTACK_USERNAME: 'user',
+  BROWSERSTACK_ACCESS_KEY: 'key',
+  BROWSERSTACK_LOCAL_IDENTIFIER: 'atlas-local-1'
+});
+console.log(JSON.stringify(caps));
+"""
+        completed = subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        caps = json.loads(completed.stdout)
+        self.assertEqual("true", caps["browserstack.local"])
+        self.assertEqual("atlas-local-1", caps["browserstack.localIdentifier"])
+
+    def test_browserstack_capture_rewrites_loopback_navigation_for_desktop_local(self) -> None:
+        script = """
+import { resolveBrowserStackNavigationUrl, resolveBrowserStackWaitUntil } from './ops/atlas/qa/capture_browserstack.mjs';
+const desktopUrl = resolveBrowserStackNavigationUrl({
+  lensId: 'desktop.chromium.real',
+  osName: 'Windows',
+  sourceUrl: 'http://127.0.0.1:3002/dev/mobile-regression?scenario=today-progression-status'
+}, {
+  BROWSERSTACK_USERNAME: 'user',
+  BROWSERSTACK_ACCESS_KEY: 'key',
+  BROWSERSTACK_LOCAL_IDENTIFIER: 'atlas-local-1'
+});
+const androidUrl = resolveBrowserStackNavigationUrl({
+  lensId: 'android.chrome.real',
+  osName: 'Android',
+  sourceUrl: 'http://127.0.0.1:3002/dev/mobile-regression?scenario=today-progression-status'
+}, {
+  BROWSERSTACK_USERNAME: 'user',
+  BROWSERSTACK_ACCESS_KEY: 'key',
+  BROWSERSTACK_LOCAL_IDENTIFIER: 'atlas-local-1'
+});
+const waitUntilWithSelector = resolveBrowserStackWaitUntil({
+  waitUntil: 'networkidle',
+  readySelector: "body[data-mobile-regression='true']"
+});
+const waitUntilWithoutSelector = resolveBrowserStackWaitUntil({
+  waitUntil: 'networkidle'
+});
+console.log(JSON.stringify({ desktopUrl, androidUrl, waitUntilWithSelector, waitUntilWithoutSelector }));
+"""
+        completed = subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        urls = json.loads(completed.stdout)
+        self.assertEqual(
+            "http://bs-local.com:3002/dev/mobile-regression?scenario=today-progression-status",
+            urls["desktopUrl"],
+        )
+        self.assertEqual(
+            "http://127.0.0.1:3002/dev/mobile-regression?scenario=today-progression-status",
+            urls["androidUrl"],
+        )
+        self.assertEqual("domcontentloaded", urls["waitUntilWithSelector"])
+        self.assertEqual("networkidle", urls["waitUntilWithoutSelector"])
+
+    def test_browserstack_ready_selector_timeout_fallback_requires_rendered_body(self) -> None:
+        script = """
+import { hasMeaningfulBodyTextPreview, isReadySelectorTimeout } from './ops/atlas/qa/capture_browserstack.mjs';
+const timeout = new Error(`page.waitForSelector: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('body[data-mobile-regression=\\'true\\']')
+`);
+const socket = new Error('page.screenshot: Socket idle from a long time');
+console.log(JSON.stringify({
+  selectorTimeout: isReadySelectorTimeout(timeout),
+  socketTimeout: isReadySelectorTimeout(socket),
+  renderedBody: hasMeaningfulBodyTextPreview('Today Routines History Account Back Squat Current Target'),
+  blankBody: hasMeaningfulBodyTextPreview('   \\n\\t ')
+}));
+"""
+        completed = subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        self.assertEqual(0, completed.returncode, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertTrue(payload["selectorTimeout"])
+        self.assertFalse(payload["socketTimeout"])
+        self.assertTrue(payload["renderedBody"])
+        self.assertFalse(payload["blankBody"])
+
+    def test_capture_cache_uses_provider_safe_defaults_for_browserstack_real_lenses(self) -> None:
+        adapter_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json")
+        for item in adapter_payload["lenses"]:
+            if isinstance(item, dict) and item.get("proof_kind") == "real":
+                item["execution_mode"] = "provider_capture"
+                item["provider_manifest_ref"] = "ops/atlas/qa/providers/browserstack.playwright.v1.json"
+
+        lens_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "lenses" / "atlas-default-web.v1.json")
+        lens_profiles = {
+            str(item["lens_id"]): item
+            for item in lens_payload["lenses"]
+            if isinstance(item, dict) and isinstance(item.get("lens_id"), str)
+        }
+        result_payload = {
+            "run_id": "run-1",
+            "scenario_id": "fitness.progression-pr-smoke",
+            "adapter_id": "fitness.web",
+            "repo_id": "fitness",
+            "git_sha": "abcdef1234567890",
+        }
+        scenario_payload = {"scenario_id": "fitness.progression-pr-smoke", "entrypoint": {"path": "/dev/mobile-regression"}}
+        result_by_lens = {
+            "desktop.chromium.real": {"execution_mode": "provider_capture"},
+            "android.chrome.real": {"execution_mode": "provider_capture"},
+            "iphone.webkit.real": {"execution_mode": "provider_capture"},
+        }
+        captured: dict[str, dict] = {}
+
+        def _fake_capture_with_provider(*, root: Path, provider_manifest_ref: str, config: dict[str, object]) -> dict[str, object]:
+            captured[str(config["lensId"])] = dict(config)
+            return {"metadata_path": str(root / "tmp" / f"{config['lensId']}.metadata.json"), "outputs": {}}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with mock.patch.dict("os.environ", {"ATLAS_QA_PROVIDER_BASE_URL": "https://atlas-provider.example"}, clear=False):
+                with mock.patch("ops.atlas.qa.collect_artifacts.capture_with_provider", side_effect=_fake_capture_with_provider):
+                    _capture_cache(
+                        execute=True,
+                        repo_root=ROOT / "repos" / "fawxzzy-fitness",
+                        run_root=Path(temp_dir),
+                        adapter=adapter_payload,
+                        scenario=scenario_payload,
+                        result_payload=result_payload,
+                        lens_payload=lens_payload,
+                        lens_profiles=lens_profiles,
+                        result_by_lens=result_by_lens,
+                    )
+
+        self.assertEqual("Windows Desktop", captured["desktop.chromium.real"]["deviceModel"])
+        self.assertEqual("Windows", captured["desktop.chromium.real"]["osName"])
+        self.assertEqual("11", captured["desktop.chromium.real"]["osVersion"])
+        self.assertEqual("chrome", captured["desktop.chromium.real"]["browserName"])
+        self.assertEqual("latest", captured["desktop.chromium.real"]["browserVersion"])
+        # Current main's fitness.web.json adapter fixture does not set a
+        # capture.ready_state override for this lens (that's Fitness-owned
+        # product config, deliberately not carried over in this extraction —
+        # only the generic ready_state override mechanism itself is), so the
+        # code's own documented default applies here.
+        self.assertEqual("visible", captured["desktop.chromium.real"]["readyState"])
+        self.assertEqual("https://atlas-provider.example/dev/mobile-regression", captured["desktop.chromium.real"]["sourceUrl"])
+        self.assertEqual("Samsung Galaxy S23", captured["android.chrome.real"]["deviceModel"])
+        self.assertEqual("Android", captured["android.chrome.real"]["osName"])
+        self.assertEqual("13.0", captured["android.chrome.real"]["osVersion"])
+        self.assertEqual("iPhone 15", captured["iphone.webkit.real"]["deviceModel"])
+        self.assertEqual("iOS", captured["iphone.webkit.real"]["osName"])
+        self.assertEqual("17", captured["iphone.webkit.real"]["osVersion"])
+
+    def test_capture_cache_degrades_real_provider_failures_to_manual_required_when_allowed(self) -> None:
+        adapter_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "adapters" / "fitness.web.json")
+        for item in adapter_payload["lenses"]:
+            if isinstance(item, dict) and item.get("proof_kind") == "real":
+                item["execution_mode"] = "provider_capture"
+                item["provider_manifest_ref"] = "ops/atlas/qa/providers/browserstack.playwright.v1.json"
+
+        lens_payload = load_json_object(ROOT / "ops" / "atlas" / "qa" / "lenses" / "atlas-default-web.v1.json")
+        lens_profiles = {
+            str(item["lens_id"]): item
+            for item in lens_payload["lenses"]
+            if isinstance(item, dict) and isinstance(item.get("lens_id"), str)
+        }
+        result_payload = {
+            "run_id": "run-1",
+            "scenario_id": "fitness.progression-pr-smoke",
+            "adapter_id": "fitness.web",
+            "repo_id": "fitness",
+            "git_sha": "abcdef1234567890",
+        }
+        scenario_payload = {"scenario_id": "fitness.progression-pr-smoke", "entrypoint": {"path": "/dev/mobile-regression"}}
+        result_by_lens = {
+            "desktop.chromium.real": {"execution_mode": "provider_capture", "proof_kind": "real", "fallback_behavior": "manual_attestation"},
+            "android.chrome.real": {"execution_mode": "provider_capture", "proof_kind": "real", "fallback_behavior": "manual_attestation"},
+            "iphone.webkit.real": {"execution_mode": "provider_capture", "proof_kind": "real", "fallback_behavior": "manual_attestation"},
+        }
+        captured: dict[str, dict] = {}
+
+        def _fake_capture_with_provider(*, root: Path, provider_manifest_ref: str, config: dict[str, object]) -> dict[str, object]:
+            lens_id = str(config["lensId"])
+            if lens_id == "iphone.webkit.real":
+                raise RuntimeError("provider screenshot stalled")
+            captured[lens_id] = config
+            return {
+                "metadata_path": str(root / "runtime" / "atlas" / "qa" / "runs" / "run-1" / "captures" / lens_id / "capture.metadata.json"),
+                "outputs": {
+                    "screenshot": str(root / "runtime" / "atlas" / "qa" / "runs" / "run-1" / "captures" / lens_id / "screenshot.png"),
+                    "console_log": str(root / "runtime" / "atlas" / "qa" / "runs" / "run-1" / "captures" / lens_id / "console.log"),
+                    "network_log": str(root / "runtime" / "atlas" / "qa" / "runs" / "run-1" / "captures" / lens_id / "network.json"),
+                },
+            }
+
+        run_root = ROOT / "tmp" / "unit-capture-cache-provider-failure"
+        if run_root.exists():
+            shutil.rmtree(run_root)
+        self.addCleanup(lambda: shutil.rmtree(run_root, ignore_errors=True))
+
+        with mock.patch("ops.atlas.qa.collect_artifacts.capture_with_provider", side_effect=_fake_capture_with_provider):
+            cache = _capture_cache(
+                execute=True,
+                repo_root=ROOT / "repos" / "fawxzzy-fitness",
+                run_root=run_root,
+                adapter=adapter_payload,
+                scenario=scenario_payload,
+                result_payload=result_payload,
+                lens_payload=lens_payload,
+                lens_profiles=lens_profiles,
+                result_by_lens=result_by_lens,
+            )
+
+        self.assertIn("desktop.chromium.real", cache)
+        self.assertIn("android.chrome.real", cache)
+        self.assertNotIn("iphone.webkit.real", cache)
+        failure_note = run_root / "captures" / "iphone.webkit.real" / "capture.failure.txt"
+        self.assertTrue(failure_note.exists())
+        self.assertIn("provider screenshot stalled", failure_note.read_text(encoding="utf-8"))
+
     def test_run_matrix_dry_run_honors_explicit_real_lens_command_ref(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
@@ -2395,18 +2935,20 @@ console.log(JSON.stringify(caps));
                 item["provider_manifest_ref"] = "ops/atlas/qa/providers/browserstack.playwright.v1.json"
                 item["command_ref"] = "qa_visual"
         _write_json(adapter_dir / "fitness.web.json", adapter_payload)
-        result = run_matrix(
-            root=ROOT,
-            scenario_path=ROOT / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json",
-            adapter_id="fitness.web",
-            adapter_dir=adapter_dir,
-            output_root=adapter_dir,
-            dry_run=True,
-        )
+        with mock.patch.dict("os.environ", {"ATLAS_QA_PROVIDER_BASE_URL": "https://atlas-provider.example"}, clear=False):
+            result = run_matrix(
+                root=ROOT,
+                scenario_path=ROOT / "ops" / "atlas" / "qa" / "scenarios" / "fitness.progression-pr-smoke.json",
+                adapter_id="fitness.web",
+                adapter_dir=adapter_dir,
+                output_root=adapter_dir,
+                dry_run=True,
+            )
         self.assertFalse(any(item["code"] == "missing_command_ref" for item in result["findings"]))
         real_lenses = [item for item in result["matrix"] if item["proof_kind"] == "real"]
         self.assertTrue(real_lenses)
         self.assertTrue(all(item.get("command_ref") == "qa_visual" for item in real_lenses))
+        self.assertTrue(all(item.get("url_target") == "https://atlas-provider.example" for item in real_lenses))
 
     def test_browserstack_provider_redacts_credentials_from_subprocess_failure(self) -> None:
         username = "atlas-browserstack-user"
@@ -2458,6 +3000,198 @@ console.log(JSON.stringify(caps));
         self.assertNotIn(access_key, message)
         self.assertNotIn(encoded_access_key, message)
         self.assertIn("[REDACTED]", message)
+
+    def test_browserstack_capture_classifies_socket_idle_as_session_failure(self) -> None:
+        script = """
+import { isBrowserStackSocketFailure } from './ops/atlas/qa/capture_browserstack.mjs';
+if (!isBrowserStackSocketFailure(new Error('locator.screenshot: page.screenshot: Socket idle from a long time'))) {
+  throw new Error('socket idle should be classified as a BrowserStack session failure');
+}
+if (isBrowserStackSocketFailure(new Error('strict mode violation'))) {
+  throw new Error('non-session screenshot errors should still allow same-session fallback');
+}
+"""
+        subprocess.run(
+            ["node", "--input-type=module", "-e", script],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    def test_browserstack_provider_retries_transient_socket_idle_failure(self) -> None:
+        failure = subprocess.CompletedProcess(
+            args=["node", "capture_browserstack.mjs"],
+            returncode=1,
+            stdout="",
+            stderr="Provider screenshot failed for lens iphone.webkit.real. reason=Socket idle from a long time",
+        )
+        success = subprocess.CompletedProcess(
+            args=["node", "capture_browserstack.mjs"],
+            returncode=0,
+            stdout=json.dumps(
+                {
+                    "provider_id": "browserstack.playwright",
+                    "provider_run_id": "run-1:iphone.webkit.real",
+                    "metadata_path": str(ROOT / "tmp" / "qa-provider-test" / "capture.metadata.json"),
+                    "outputs": {},
+                }
+            ),
+            stderr="",
+        )
+        with mock.patch.dict(
+            "os.environ",
+            {
+                "BROWSERSTACK_USERNAME": "atlas-browserstack-user",
+                "BROWSERSTACK_ACCESS_KEY": "atlas-browserstack-key",
+                "BROWSERSTACK_CAPTURE_ATTEMPTS": "2",
+            },
+            clear=False,
+        ):
+            with mock.patch(
+                "ops.atlas.qa.providers.browserstack_provider.subprocess.run",
+                side_effect=[failure, success],
+            ) as run_mock:
+                with mock.patch("ops.atlas.qa.providers.browserstack_provider.time.sleep") as sleep_mock:
+                    payload = capture_with_provider(
+                        root=ROOT,
+                        provider_manifest_ref="ops/atlas/qa/providers/browserstack.playwright.v1.json",
+                        config={
+                            "repoRoot": str(ROOT / "repos" / "fawxzzy-fitness"),
+                            "outputDir": str(ROOT / "tmp" / "qa-provider-test"),
+                            "browserEngine": "webkit",
+                            "viewport": {"width": 393, "height": 852, "device_scale_factor": 3},
+                            "sourceUrl": "https://example.com",
+                            "runId": "run-1",
+                            "scenarioId": "fixture",
+                            "adapterId": "fixture.web",
+                            "repoId": "fitness",
+                            "gitSha": "abcdef1234567890",
+                            "lensId": "iphone.webkit.real",
+                            "lensProfileId": "iphone.webkit",
+                            "deviceModel": "iPhone 15",
+                            "osName": "iOS",
+                            "osVersion": "17",
+                            "browserName": "safari",
+                            "browserVersion": "17",
+                        },
+                    )
+        self.assertEqual("run-1:iphone.webkit.real", payload["provider_run_id"])
+        self.assertEqual(2, run_mock.call_count)
+        sleep_mock.assert_called_once()
+
+    def test_browserstack_provider_retries_capture_timeout(self) -> None:
+        timeout = subprocess.TimeoutExpired(
+            cmd=["node", "capture_browserstack.mjs"],
+            timeout=60,
+            output="",
+            stderr="",
+        )
+        success = subprocess.CompletedProcess(
+            args=["node", "capture_browserstack.mjs"],
+            returncode=0,
+            stdout=json.dumps(
+                {
+                    "provider_id": "browserstack.playwright",
+                    "provider_run_id": "run-1:iphone.webkit.real",
+                    "metadata_path": str(ROOT / "tmp" / "qa-provider-test" / "capture.metadata.json"),
+                    "outputs": {},
+                }
+            ),
+            stderr="",
+        )
+        with mock.patch.dict(
+            "os.environ",
+            {
+                "BROWSERSTACK_USERNAME": "atlas-browserstack-user",
+                "BROWSERSTACK_ACCESS_KEY": "atlas-browserstack-key",
+                "BROWSERSTACK_CAPTURE_ATTEMPTS": "2",
+                "BROWSERSTACK_CAPTURE_TIMEOUT_SECONDS": "60",
+            },
+            clear=False,
+        ):
+            with mock.patch(
+                "ops.atlas.qa.providers.browserstack_provider.subprocess.run",
+                side_effect=[timeout, success],
+            ) as run_mock:
+                with mock.patch("ops.atlas.qa.providers.browserstack_provider.time.sleep") as sleep_mock:
+                    payload = capture_with_provider(
+                        root=ROOT,
+                        provider_manifest_ref="ops/atlas/qa/providers/browserstack.playwright.v1.json",
+                        config={
+                            "repoRoot": str(ROOT / "repos" / "fawxzzy-fitness"),
+                            "outputDir": str(ROOT / "tmp" / "qa-provider-test"),
+                            "browserEngine": "webkit",
+                            "viewport": {"width": 393, "height": 852, "device_scale_factor": 3},
+                            "sourceUrl": "https://example.com",
+                            "runId": "run-1",
+                            "scenarioId": "fixture",
+                            "adapterId": "fixture.web",
+                            "repoId": "fitness",
+                            "gitSha": "abcdef1234567890",
+                            "lensId": "iphone.webkit.real",
+                            "lensProfileId": "iphone.webkit",
+                            "deviceModel": "iPhone 15",
+                            "osName": "iOS",
+                            "osVersion": "17",
+                            "browserName": "safari",
+                            "browserVersion": "17",
+                        },
+                    )
+        self.assertEqual("run-1:iphone.webkit.real", payload["provider_run_id"])
+        self.assertEqual(2, run_mock.call_count)
+        self.assertEqual(60, run_mock.call_args_list[0].kwargs["timeout"])
+        sleep_mock.assert_called_once()
+
+    def test_browserstack_provider_defaults_to_four_transient_attempts(self) -> None:
+        failures = [
+            subprocess.CompletedProcess(
+                args=["node", "capture_browserstack.mjs"],
+                returncode=1,
+                stdout="",
+                stderr="Provider screenshot failed for lens iphone.webkit.real. reason=Socket idle from a long time",
+            )
+            for _ in range(4)
+        ]
+        with mock.patch.dict(
+            "os.environ",
+            {
+                "BROWSERSTACK_USERNAME": "atlas-browserstack-user",
+                "BROWSERSTACK_ACCESS_KEY": "atlas-browserstack-key",
+            },
+            clear=False,
+        ):
+            with mock.patch(
+                "ops.atlas.qa.providers.browserstack_provider.subprocess.run",
+                side_effect=failures,
+            ) as run_mock:
+                with mock.patch("ops.atlas.qa.providers.browserstack_provider.time.sleep") as sleep_mock:
+                    with self.assertRaisesRegex(RuntimeError, "Socket idle from a long time"):
+                        capture_with_provider(
+                            root=ROOT,
+                            provider_manifest_ref="ops/atlas/qa/providers/browserstack.playwright.v1.json",
+                            config={
+                                "repoRoot": str(ROOT / "repos" / "fawxzzy-fitness"),
+                                "outputDir": str(ROOT / "tmp" / "qa-provider-test"),
+                                "browserEngine": "webkit",
+                                "viewport": {"width": 393, "height": 852, "device_scale_factor": 3},
+                                "sourceUrl": "https://example.com",
+                                "runId": "run-1",
+                                "scenarioId": "fixture",
+                                "adapterId": "fixture.web",
+                                "repoId": "fitness",
+                                "gitSha": "abcdef1234567890",
+                                "lensId": "iphone.webkit.real",
+                                "lensProfileId": "iphone.webkit",
+                                "deviceModel": "iPhone 15",
+                                "osName": "iOS",
+                                "osVersion": "17",
+                                "browserName": "safari",
+                                "browserVersion": "17",
+                            },
+                        )
+        self.assertEqual(4, run_mock.call_count)
+        self.assertEqual(3, sleep_mock.call_count)
 
     def test_compatibility_report_marks_fitness_contract_compatible(self) -> None:
         report = compatibility_report(root=ROOT, adapter="fitness.web", scenario="fitness.progression-pr-smoke")
@@ -3553,6 +4287,7 @@ console.log(JSON.stringify(caps));
         with mock.patch.dict(
             "os.environ",
             {
+                "ATLAS_QA_ORIGIN_TYPE": "",
                 "GITHUB_ACTIONS": "true",
                 "GITHUB_EVENT_NAME": "workflow_dispatch",
                 "ATLAS_QA_ORIGIN_TYPE": "",
