@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.machine-execution-receipt.v1.json",
+  "title": "ATLAS machine execution receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "execution_receipt_id",
+    "proposal_id",
+    "target_machine_id",
+    "executor",
+    "authority_level",
+    "status",
+    "started_at_utc",
+    "finished_at_utc",
+    "result_digest",
+    "mutation_summary",
+    "errors"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.machine-execution-receipt.v1"
+    },
+    "execution_receipt_id": {
+      "type": "string",
+      "pattern": "^mexr_[0-9a-f]{64}$"
+    },
+    "proposal_id": {
+      "type": "string",
+      "pattern": "^mapr_[0-9a-f]{64}$"
+    },
+    "target_machine_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "executor": {
+      "const": "lifeline"
+    },
+    "authority_level": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2",
+        "L3",
+        "L4"
+      ]
+    },
+    "status": {
+      "enum": [
+        "REJECTED",
+        "STARTED",
+        "SUCCEEDED",
+        "FAILED",
+        "ROLLED_BACK"
+      ]
+    },
+    "started_at_utc": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "finished_at_utc": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "result_digest": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "mutation_summary": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 512
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "message",
+          "recoverable"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]{2,63}$"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "recoverable": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

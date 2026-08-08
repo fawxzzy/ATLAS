@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.machine-desired-state.v1.json",
+  "title": "ATLAS machine desired state v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "desired_state_id",
+    "target_machine_id",
+    "policy_id",
+    "created_at_utc",
+    "maximum_authority_level",
+    "controls"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.machine-desired-state.v1"
+    },
+    "desired_state_id": {
+      "type": "string",
+      "pattern": "^mdes_[0-9a-f]{64}$"
+    },
+    "target_machine_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "policy_id": {
+      "type": "string",
+      "pattern": "^mpol_[0-9a-f]{64}$"
+    },
+    "created_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "maximum_authority_level": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2",
+        "L3",
+        "L4"
+      ]
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "control_id",
+          "category",
+          "desired_condition",
+          "enforcement",
+          "protected"
+        ],
+        "properties": {
+          "control_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{3,128}$"
+          },
+          "category": {
+            "enum": [
+              "identity",
+              "storage",
+              "applications",
+              "startup",
+              "services",
+              "performance",
+              "recovery",
+              "security"
+            ]
+          },
+          "desired_condition": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "enforcement": {
+            "enum": [
+              "observe_only",
+              "proposal_only",
+              "lifeline_required"
+            ]
+          },
+          "protected": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

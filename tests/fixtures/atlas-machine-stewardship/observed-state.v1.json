@@ -1,0 +1,41 @@
+{
+  "contract_version": "atlas.machine-observed-state.v1",
+  "observation_id": "mobs_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "collected_at_utc": "2026-07-29T00:00:00Z",
+  "volatile_fields": [
+    "/collected_at_utc",
+    "/observation_id"
+  ],
+  "machine_identity": {
+    "host_fingerprint": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "host_label": "[REDACTED]",
+    "os_family": "windows",
+    "os_release": "11",
+    "os_version": "10.0.26100",
+    "architecture": "amd64"
+  },
+  "fixed_local_volumes": [
+    {
+      "volume_id": "C:",
+      "drive_type": "fixed",
+      "filesystem": "NTFS",
+      "capacity_bytes": 1000000,
+      "free_bytes": 400000,
+      "serial_fingerprint": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  ],
+  "collector_status": {
+    "machine_identity": "collected",
+    "fixed_local_volumes": "collected"
+  },
+  "collector_errors": [],
+  "privacy": {
+    "redaction_applied": true,
+    "file_contents_read": false,
+    "reparse_points_followed": false,
+    "cloud_placeholders_hydrated": false,
+    "network_shares_traversed": false,
+    "environment_values_collected": false,
+    "deletion_safety_inferred": false
+  }
+}

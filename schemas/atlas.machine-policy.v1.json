@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://schemas/atlas.machine-policy.v1.json",
+  "title": "ATLAS machine policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "policy_id",
+    "name",
+    "revision",
+    "authority_levels",
+    "privacy",
+    "protected_zones",
+    "collector_rules",
+    "proposal_rules"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.machine-policy.v1"
+    },
+    "policy_id": {
+      "type": "string",
+      "pattern": "^mpol_[0-9a-f]{64}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "authority_levels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "L0",
+        "L1",
+        "L2",
+        "L3",
+        "L4"
+      ],
+      "properties": {
+        "L0": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "description",
+            "machine_mutation",
+            "operator_approval_required",
+            "executor"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "machine_mutation": {
+              "const": false
+            },
+            "operator_approval_required": {
+              "const": false
+            },
+            "executor": {
+              "const": "atlas"
+            }
+          }
+        },
+        "L1": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "description",
+            "machine_mutation",
+            "operator_approval_required",
+            "executor"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "machine_mutation": {
+              "const": false
+            },
+            "operator_approval_required": {
+              "const": false
+            },
+            "executor": {
+              "const": "atlas"
+            }
+          }
+        },
+        "L2": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "description",
+            "machine_mutation",
+            "operator_approval_required",
+            "executor"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "machine_mutation": {
+              "const": true
+            },
+            "operator_approval_required": {
+              "const": true
+            },
+            "executor": {
+              "const": "lifeline"
+            }
+          }
+        },
+        "L3": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "description",
+            "machine_mutation",
+            "operator_approval_required",
+            "executor"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "machine_mutation": {
+              "const": true
+            },
+            "operator_approval_required": {
+              "const": true
+            },
+            "executor": {
+              "const": "lifeline"
+            }
+          }
+        },
+        "L4": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "description",
+            "machine_mutation",
+            "operator_approval_required",
+            "executor"
+          ],
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "machine_mutation": {
+              "const": true
+            },
+            "operator_approval_required": {
+              "const": true
+            },
+            "executor": {
+              "const": "lifeline"
+            }
+          }
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "file_contents_allowed",
+        "environment_values_allowed",
+        "network_upload_allowed",
+        "user_labels_redacted"
+      ],
+      "properties": {
+        "file_contents_allowed": {
+          "const": false
+        },
+        "environment_values_allowed": {
+          "const": false
+        },
+        "network_upload_allowed": {
+          "const": false
+        },
+        "user_labels_redacted": {
+          "const": true
+        }
+      }
+    },
+    "protected_zones": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      }
+    },
+    "collector_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed_families",
+        "deferred_families",
+        "follow_reparse_points",
+        "hydrate_cloud_placeholders",
+        "traverse_network_shares",
+        "infer_deletion_safety"
+      ],
+      "properties": {
+        "allowed_families": {
+          "const": [
+            "machine_identity",
+            "fixed_local_volumes"
+          ]
+        },
+        "deferred_families": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "follow_reparse_points": {
+          "const": false
+        },
+        "hydrate_cloud_placeholders": {
+          "const": false
+        },
+        "traverse_network_shares": {
+          "const": false
+        },
+        "infer_deletion_safety": {
+          "const": false
+        }
+      }
+    },
+    "proposal_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "atlas_may_execute",
+        "lifeline_receipt_required",
+        "silence_is_approval"
+      ],
+      "properties": {
+        "atlas_may_execute": {
+          "const": false
+        },
+        "lifeline_receipt_required": {
+          "const": true
+        },
+        "silence_is_approval": {
+          "const": false
+        }
+      }
+    }
+  }
+}
