@@ -2,7 +2,7 @@ schema_version: "atlas.stack.remote-ref-alignment.v1"
 stack_manifest_path: "stack.yaml"
 mutable: true
 digest_guarded: false
-generated_at: "2026-08-07T19:59:25.530784Z"
+generated_at: "2026-08-11T04:39:28.384890Z"
 remote_ref_alignment_count: 2
 remote_ref_alignment:
   fitness:
@@ -14,14 +14,14 @@ remote_ref_alignment:
     remote_commit: null
     alignment_status: "UNKNOWN"
     unavailable_reason: "not_configured"
-    checked_at: "2026-08-07T19:59:25.530784Z"
+    checked_at: "2026-08-11T04:39:28.384890Z"
   mazer:
     path: "repos/mazer"
     ref: "main"
     remote: "https://github.com/fawxzzy/mazer.git"
     local_commit: "a537d2d17429bdf0482989c280373a6ea751f9c0"
     local_dirty: true
-    remote_commit: "222c716b7365377b28ed91e414631bcbe38ed7c0"
+    remote_commit: "bbc299e2115d2f7139dda67924a1470dc0119755"
     alignment_status: "not_aligned"
     unavailable_reason: null
-    checked_at: "2026-08-07T19:59:25.530784Z"
+    checked_at: "2026-08-11T04:39:28.384890Z"
