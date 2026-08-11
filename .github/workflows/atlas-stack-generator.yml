@@ -1,0 +1,67 @@
+name: Atlas Stack Generator
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/atlas-stack-generator.yml"
+      - ".gitattributes"
+      - "stack.yaml"
+      - "stack.lock.yaml"
+      - "stack.remote-ref-alignment.yaml"
+      - "ops/_atlas.py"
+      - "ops/stack/generate_lockfile.py"
+      - "ops/stack/export_repo_inventory.py"
+      - "ops/validation/validate_stack.py"
+      - "tests/test_stack_generate_lockfile_source_pins.py"
+      - "tests/test_stack_generate_lockfile_main_resilience.py"
+      - "tests/test_stack_remote_ref_alignment.py"
+      - "tests/test_stack_component_topology_projection.py"
+      - "tests/test_stack_lock_gitattributes.py"
+      - "tests/validation/test_validate_stack_lock_refresh.py"
+      - "tests/validation/test_validate_stack_resume_contract.py"
+      - "tests/validation/test_validate_stack_execution_receipt_repairs.py"
+      - "tests/validation/test_validate_stack_mutable_state_rules.py"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: validate (${{ matrix.os }}, py${{ matrix.python-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install PyYAML
+        run: python -m pip install pyyaml==6.0.3
+
+      - name: Run stack-generator, repo-inventory, and stack-validation test suites
+        shell: bash
+        run: |
+          python -m unittest \
+            tests.test_stack_generate_lockfile_source_pins \
+            tests.test_stack_generate_lockfile_main_resilience \
+            tests.test_stack_remote_ref_alignment \
+            tests.test_stack_component_topology_projection \
+            tests.test_stack_lock_gitattributes \
+            tests.validation.test_validate_stack_lock_refresh \
+            tests.validation.test_validate_stack_resume_contract \
+            tests.validation.test_validate_stack_execution_receipt_repairs \
+            tests.validation.test_validate_stack_mutable_state_rules \
+            -v

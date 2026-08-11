@@ -42,6 +42,7 @@ from ops.atlas.qa.visual_diff import evaluate_visual_diffs
 from ops.atlas.qa._common import (
     build_receipt_origin,
     load_json_object,
+    resolve_execution_target_url,
     validate_adapter_manifest,
     validate_provider_manifest,
     validate_scenario_manifest,
@@ -4301,6 +4302,79 @@ if (isBrowserStackSocketFailure(new Error('strict mode violation'))) {
                 command="python ops/atlas/qa/promote_run.py",
             )
         self.assertEqual("protected_manual", origin["origin_type"])
+
+    def test_resolve_execution_target_url_passes_through_non_provider_capture(self) -> None:
+        self.assertEqual(
+            "http://127.0.0.1:3000/path",
+            resolve_execution_target_url(
+                "http://127.0.0.1:3000/path/",
+                execution_mode="local",
+                env={"ATLAS_QA_PROVIDER_BASE_URL": "https://tunnel.example"},
+            ),
+        )
+
+    def test_resolve_execution_target_url_passes_through_non_loopback(self) -> None:
+        self.assertEqual(
+            "https://staging.example/path",
+            resolve_execution_target_url(
+                "https://staging.example/path",
+                execution_mode="provider_capture",
+                env={"ATLAS_QA_PROVIDER_BASE_URL": "https://tunnel.example"},
+            ),
+        )
+
+    def test_resolve_execution_target_url_empty_url_returns_empty(self) -> None:
+        self.assertEqual(
+            "",
+            resolve_execution_target_url("", execution_mode="provider_capture", env={}),
+        )
+
+    def test_resolve_execution_target_url_uses_generic_provider_base_url(self) -> None:
+        self.assertEqual(
+            "https://tunnel.example",
+            resolve_execution_target_url(
+                "http://127.0.0.1:3000/",
+                execution_mode="provider_capture",
+                env={"ATLAS_QA_PROVIDER_BASE_URL": "https://tunnel.example/"},
+            ),
+        )
+
+    def test_resolve_execution_target_url_falls_back_to_legacy_fitness_tunnel_url(self) -> None:
+        # ATLAS_QA_PROVIDER_BASE_URL is the product-neutral variable. Any
+        # caller (CI secret, local shell profile, etc.) still relying on the
+        # older Fitness-specific FITNESS_QA_TUNNEL_URL name must keep
+        # working unchanged when the generic variable is not set.
+        self.assertEqual(
+            "https://legacy-fitness-tunnel.example",
+            resolve_execution_target_url(
+                "http://127.0.0.1:3000/",
+                execution_mode="provider_capture",
+                env={"FITNESS_QA_TUNNEL_URL": "https://legacy-fitness-tunnel.example/"},
+            ),
+        )
+
+    def test_resolve_execution_target_url_generic_variable_takes_priority_over_legacy(self) -> None:
+        self.assertEqual(
+            "https://generic-wins.example",
+            resolve_execution_target_url(
+                "http://127.0.0.1:3000/",
+                execution_mode="provider_capture",
+                env={
+                    "ATLAS_QA_PROVIDER_BASE_URL": "https://generic-wins.example/",
+                    "FITNESS_QA_TUNNEL_URL": "https://legacy-loses.example/",
+                },
+            ),
+        )
+
+    def test_resolve_execution_target_url_no_override_returns_original_loopback_target(self) -> None:
+        self.assertEqual(
+            "http://127.0.0.1:3000",
+            resolve_execution_target_url(
+                "http://127.0.0.1:3000/",
+                execution_mode="provider_capture",
+                env={},
+            ),
+        )
 
     def test_release_readiness_blocks_wrong_target_sha(self) -> None:
         root = self._temp_root()

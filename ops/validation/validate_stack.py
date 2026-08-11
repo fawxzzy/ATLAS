@@ -1905,7 +1905,12 @@ def iter_repo_archive_surface_candidates(root: Path) -> list[Path]:
     ]
 
 
-def validate_archive_registry(stack_file: Path, config: dict[str, Any]) -> list[Finding]:
+def validate_archive_registry(
+    stack_file: Path,
+    config: dict[str, Any],
+    *,
+    allow_missing_present_surfaces: bool = False,
+) -> list[Finding]:
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
     archives = config.get("archives", {})
@@ -2089,6 +2094,16 @@ def validate_archive_registry(stack_file: Path, config: dict[str, Any]) -> list[
         )
         actual_exists = actual_path.exists()
         if bool(entry.get("present")) != actual_exists:
+            if allow_missing_present_surfaces and bool(entry.get("present")) and not actual_exists:
+                findings.append(
+                    Finding(
+                        "warning",
+                        "archive-present-state-unverified",
+                        entry_path,
+                        f"Archive registry present flag for '{relative_path}' could not be verified in sparse validation because the filesystem path is absent.",
+                    )
+                )
+                continue
             findings.append(
                 Finding(
                     "error",
@@ -3192,7 +3207,7 @@ def build_findings(
     findings.extend(validate_tool_registry(root))
     findings.extend(validate_subsystem_registry(stack_file, config))
     findings.extend(validate_playbook_enforcement_tracking(stack_file, config))
-    findings.extend(validate_archive_registry(stack_file, config))
+    findings.extend(validate_archive_registry(stack_file, config, allow_missing_present_surfaces=sparse_mode))
     if not sparse_mode:
         findings.extend(validate_execution_receipt_repairs(stack_file))
         findings.extend(validate_verta_trust_gate(stack_file, config))
