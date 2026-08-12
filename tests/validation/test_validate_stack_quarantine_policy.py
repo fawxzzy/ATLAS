@@ -285,6 +285,33 @@ class ValidateStackQuarantinePolicyTests(unittest.TestCase):
 
         self.assertEqual([], findings)
 
+    def test_present_archive_missing_fails_full_validation(self) -> None:
+        root = self._temp_root()
+        (root / "repos").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "Verta-Core.zip").write_text("archive", encoding="utf-8")
+        self._write_archive_registry(root, self._current_archive_entries())
+
+        findings = validate_archive_registry(root / "stack.yaml", self._config())
+
+        self.assertIn("archive-present-state-drift", {finding.category for finding in findings})
+
+    def test_present_archive_missing_warns_in_sparse_validation(self) -> None:
+        root = self._temp_root()
+        (root / "repos").mkdir(parents=True, exist_ok=True)
+        (root / "repos" / "Verta-Core.zip").write_text("archive", encoding="utf-8")
+        self._write_archive_registry(root, self._current_archive_entries())
+
+        findings = validate_archive_registry(
+            root / "stack.yaml",
+            self._config(),
+            allow_missing_present_surfaces=True,
+        )
+
+        self.assertFalse(any(finding.category == "archive-present-state-drift" for finding in findings))
+        unverified = [finding for finding in findings if finding.category == "archive-present-state-unverified"]
+        self.assertEqual(1, len(unverified))
+        self.assertEqual("warning", unverified[0].severity)
+
     def test_unregistered_archive_surface_fails(self) -> None:
         root = self._temp_root()
         (root / "repos" / "repo-backups").mkdir(parents=True, exist_ok=True)

@@ -104,7 +104,15 @@ class ValidateStackRootLockRefreshTests(unittest.TestCase):
     def _temp_root(self) -> Path:
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
-        root = Path(temp_dir.name)
+        # Resolve immediately: on some hosted CI runners (observed on
+        # GitHub Actions windows-latest) the raw tempfile path uses a
+        # short (8.3-style) alias (e.g. "RUNNER~1") that differs from the
+        # long-form path production code obtains via `Path.resolve()`
+        # (e.g. via `stack_file.parent.resolve()` in validate_stack.py).
+        # Without resolving here, identity/membership comparisons against
+        # production-computed paths fail purely on path-form mismatch,
+        # not on any real logic difference.
+        root = Path(temp_dir.name).resolve()
         (root / "AGENTS.md").write_text("# temp\n", encoding="utf-8")
         (root / "README-STACK.md").write_text("# temp\n", encoding="utf-8")
         return root

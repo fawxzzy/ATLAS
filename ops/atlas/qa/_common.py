@@ -148,6 +148,12 @@ def resolve_execution_target_url(
         return target_url.rstrip("/")
 
     env_map = env or os.environ
+    # ATLAS_QA_PROVIDER_BASE_URL is the product-neutral variable this
+    # generic pipeline module should read. FITNESS_QA_TUNNEL_URL is kept as
+    # a fallback only, for backward compatibility with callers (CI secrets,
+    # local shell profiles) that predate the generic name; it must never
+    # take priority over the generic variable, and no other product-specific
+    # name should be added here going forward.
     override_url = (
         str(env_map.get("ATLAS_QA_PROVIDER_BASE_URL", "")).strip()
         or str(env_map.get("FITNESS_QA_TUNNEL_URL", "")).strip()
