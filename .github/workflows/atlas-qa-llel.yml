@@ -162,16 +162,34 @@ jobs:
         run: |
           python ops/atlas/qa/provider_readiness.py --provider "ops/atlas/qa/providers/${QA_PROVIDER}.json" --adapter "${QA_ADAPTER}" --scenario "${QA_SCENARIO}"
 
+      - name: Set up BrowserStack environment
+        if: env.QA_PROVIDER == 'browserstack.playwright.v1'
+        uses: browserstack/github-actions/setup-env@master
+        with:
+          username: ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+
       - name: Install browser runtime
         if: env.QA_MODE != 'dry-run' && steps.adapter.outputs.capture_tool == 'playwright'
         working-directory: ${{ steps.adapter.outputs.repo_path }}
         run: npx playwright install --with-deps chromium webkit
+
+      - name: Start BrowserStack Local
+        id: browserstack-local
+        if: env.QA_PROVIDER == 'browserstack.playwright.v1'
+        uses: browserstack/github-actions/setup-local@master
+        with:
+          local-testing: start
+          local-logging-level: all-logs
+          local-identifier: atlas-qa-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Run ATLAS QA gate
         shell: bash
         env:
           BROWSERSTACK_USERNAME: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_USERNAME || '' }}
           BROWSERSTACK_ACCESS_KEY: ${{ github.event_name == 'workflow_dispatch' && secrets.BROWSERSTACK_ACCESS_KEY || '' }}
+          BROWSERSTACK_LOCAL: ${{ env.QA_PROVIDER == 'browserstack.playwright.v1' && 'true' || 'false' }}
+          BROWSERSTACK_LOCAL_IDENTIFIER: atlas-qa-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           cmd=(python ops/atlas/qa/ci_gate.py --mode "${QA_MODE}" --scenario "${QA_SCENARIO}" --adapter "${QA_ADAPTER}")
           if [ "${QA_PROVIDER}" != "none" ]; then
@@ -181,6 +199,13 @@ jobs:
             cmd+=(--allow-missing-locked-repos --require-present-repo-id "${{ steps.adapter.outputs.repo_id }}")
           fi
           "${cmd[@]}"
+
+      - name: Stop BrowserStack Local
+        if: always() && env.QA_PROVIDER == 'browserstack.playwright.v1' && steps.browserstack-local.outcome == 'success'
+        uses: browserstack/github-actions/setup-local@master
+        with:
+          local-testing: stop
+          local-identifier: atlas-qa-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload QA artifacts
         if: always()

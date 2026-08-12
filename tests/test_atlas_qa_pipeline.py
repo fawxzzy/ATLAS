@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock
 
+import yaml
 from PIL import Image
 
 from ops.atlas.qa.baselines import bless_baseline, propose_baselines
@@ -4994,6 +4995,91 @@ if (isBrowserStackSocketFailure(new Error('strict mode violation'))) {
         self.assertNotIn("working-directory: repos/fawxzzy-playbook", workflow)
         self.assertNotIn("working-directory: repos/fawxzzy-foundation", workflow)
         self.assertNotIn("working-directory: repos/fawxzzy-lifeline", workflow)
+
+    @staticmethod
+    def _atlas_qa_llel_steps() -> list[dict]:
+        workflow = yaml.safe_load(
+            (ROOT / ".github" / "workflows" / "atlas-qa-llel.yml").read_text(encoding="utf-8")
+        )
+        return workflow["jobs"]["atlas-qa-llel"]["steps"]
+
+    @classmethod
+    def _atlas_qa_llel_step(cls, name: str) -> dict:
+        for step in cls._atlas_qa_llel_steps():
+            if step.get("name") == name:
+                return step
+        raise AssertionError(f"no step named {name!r} in atlas-qa-llel job")
+
+    def test_browserstack_local_tunnel_start_is_provider_guarded_and_product_neutral(self) -> None:
+        # The Local tunnel should turn on for any adapter running the
+        # BrowserStack Playwright provider, not just one hard-coded product
+        # (this generalizes the guard past its original repo_id == 'fitness'
+        # gate, matching how BROWSERSTACK_LOCAL is already computed generically
+        # for the QA gate step below).
+        setup_env_step = self._atlas_qa_llel_step("Set up BrowserStack environment")
+        self.assertEqual(setup_env_step.get("if"), "env.QA_PROVIDER == 'browserstack.playwright.v1'")
+        self.assertEqual(setup_env_step.get("uses"), "browserstack/github-actions/setup-env@master")
+
+        start_step = self._atlas_qa_llel_step("Start BrowserStack Local")
+        self.assertEqual(start_step.get("id"), "browserstack-local")
+        self.assertEqual(start_step.get("if"), "env.QA_PROVIDER == 'browserstack.playwright.v1'")
+        self.assertNotIn("repo_id", start_step.get("if", ""))
+        self.assertEqual(start_step.get("uses"), "browserstack/github-actions/setup-local@master")
+        self.assertEqual(start_step["with"].get("local-testing"), "start")
+
+    def test_browserstack_local_tunnel_stop_never_stops_a_tunnel_it_never_started(self) -> None:
+        # `always()` makes the stop step run even when the QA gate step above
+        # it failed (so a started tunnel is never leaked on a failed run),
+        # while the `steps.browserstack-local.outcome == 'success'` clause
+        # keeps it from ever trying to stop a tunnel that was skipped or that
+        # itself failed to start.
+        stop_step = self._atlas_qa_llel_step("Stop BrowserStack Local")
+        condition = stop_step.get("if", "")
+        self.assertTrue(condition.startswith("always() &&"))
+        self.assertIn("env.QA_PROVIDER == 'browserstack.playwright.v1'", condition)
+        self.assertIn("steps.browserstack-local.outcome == 'success'", condition)
+        self.assertNotIn("repo_id", condition)
+        self.assertEqual(stop_step.get("uses"), "browserstack/github-actions/setup-local@master")
+        self.assertEqual(stop_step["with"].get("local-testing"), "stop")
+
+    def test_browserstack_local_tunnel_start_and_stop_share_one_run_scoped_identifier(self) -> None:
+        # Start, Stop, and the QA gate's own BROWSERSTACK_LOCAL_IDENTIFIER env
+        # var must all resolve to the exact same expression, otherwise the
+        # gate step could talk to a different tunnel instance than the one
+        # actually started/stopped for this run.
+        expected_identifier = "atlas-qa-${{ github.run_id }}-${{ github.run_attempt }}"
+        start_step = self._atlas_qa_llel_step("Start BrowserStack Local")
+        stop_step = self._atlas_qa_llel_step("Stop BrowserStack Local")
+        gate_step = self._atlas_qa_llel_step("Run ATLAS QA gate")
+        self.assertEqual(start_step["with"].get("local-identifier"), expected_identifier)
+        self.assertEqual(stop_step["with"].get("local-identifier"), expected_identifier)
+        self.assertEqual(gate_step["env"].get("BROWSERSTACK_LOCAL_IDENTIFIER"), expected_identifier)
+        self.assertEqual(
+            gate_step["env"].get("BROWSERSTACK_LOCAL"),
+            "${{ env.QA_PROVIDER == 'browserstack.playwright.v1' && 'true' || 'false' }}",
+        )
+
+    def test_browserstack_local_tunnel_steps_are_ordered_start_gate_stop(self) -> None:
+        names = [step.get("name") for step in self._atlas_qa_llel_steps()]
+        start_index = names.index("Start BrowserStack Local")
+        gate_index = names.index("Run ATLAS QA gate")
+        stop_index = names.index("Stop BrowserStack Local")
+        self.assertLess(start_index, gate_index)
+        self.assertLess(gate_index, stop_index)
+
+    def test_browserstack_local_tunnel_wiring_carries_no_fitness_specific_env(self) -> None:
+        # The extraction is meant to be product-neutral infrastructure only;
+        # none of the app-specific env vars from the original draft (Fitness
+        # Supabase config, a fixed Fitness app URL/port) should have come
+        # along for the ride.
+        workflow = (ROOT / ".github" / "workflows" / "atlas-qa-llel.yml").read_text(encoding="utf-8")
+        for leaked in (
+            "NEXT_PUBLIC_SUPABASE_URL",
+            "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+            "NEXT_PUBLIC_APP_URL",
+            "ALLOW_PROD_SUPABASE_IN_DEV",
+        ):
+            self.assertNotIn(leaked, workflow)
 
     def test_release_snapshot_copies_fitness_waiver_pack(self) -> None:
         root = self._temp_root()
