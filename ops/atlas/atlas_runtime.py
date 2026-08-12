@@ -10,12 +10,13 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import re
 import sqlite3
 import time
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Mapping
+from typing import Any, Iterable, Mapping
 
 
 STATES = {
@@ -23,6 +24,30 @@ STATES = {
     "PAUSED_USAGE", "PAUSED_RUNTIME", "BLOCKED_DEPENDENCY", "SUCCEEDED",
     "FAILED", "CANCELLED", "SUPERSEDED", "UNKNOWN",
 }
+
+CONTINUATION_PACKET_STATES = {
+    "BLOCKED_AUTHORIZATION", "BLOCKED_COST", "BLOCKED_DEPENDENCY",
+    "DEAD_LETTER", "DISPATCH_PENDING", "ACTIVE", "READY",
+    "RESUMABLE_QUEUED", "SETTLED", "WAITING_CONFLICT",
+}
+CONTINUATION_OUTBOX_STATES = {
+    "PENDING", "LEASED", "DISPATCHED", "CONFIRMED", "DEAD_LETTER",
+}
+CONTINUATION_DESIRED_STATES = {
+    "ACTIVE_COMPUTE", "DISPATCH_PENDING", "QUEUED", "TERMINAL",
+    "WAITING_AUTHORIZATION", "WAITING_COST", "WAITING_EXTERNAL",
+}
+CONTINUATION_OBSERVED_STATES = {
+    "ACTIVE_COMPUTE", "EXPECTED_IDLE", "TERMINAL", "UNEXPECTED_IDLE",
+    "UNKNOWN",
+}
+RESUMABLE_TRIGGER_FAILURES = {"CAPACITY_EXHAUSTED", "TOKEN_EXHAUSTED"}
+_CONTEXT_FORBIDDEN_KEYS = {
+    "api_key", "credential", "password", "prompt", "raw", "secret", "token",
+    "transcript", "user_content", "output",
+}
+_DRIVE_RELATIVE_PATH = re.compile(r"^[A-Za-z]:[^\\/].*")
+_PROTOTYPE_POLLUTION_KEYS = {"__proto__", "constructor", "prototype"}
 
 
 @dataclass(frozen=True)
@@ -65,6 +90,28 @@ class WatchdogReservation:
     expires_at: float
 
 
+@dataclass(frozen=True)
+class ContinuationOutboxItem:
+    trigger_key: str
+    owner_id: str
+    binding_epoch: int
+    packet_id: str
+    thread_id: str
+    context_pack_id: str
+    payload_digest: str
+    attempt_count: int
+    leased_until: float
+
+
+@dataclass(frozen=True)
+class ContinuationCommit:
+    packet_id: str
+    successor_packet_id: str | None
+    trigger_key: str | None
+    owner_revision: int
+    replayed: bool
+
+
 class AtlasRuntime:
     """SQLite/WAL-backed queue and truth store for one ATLAS runtime."""
 
@@ -74,7 +121,9 @@ class AtlasRuntime:
         self.db = sqlite3.connect(self.database, timeout=30, isolation_level=None)
         self.db.row_factory = sqlite3.Row
         self.db.execute("PRAGMA journal_mode=WAL")
+        self.db.execute("PRAGMA synchronous=FULL")
         self.db.execute("PRAGMA foreign_keys=ON")
+        self.db.execute("PRAGMA busy_timeout=5000")
         self._init_schema()
 
     def close(self) -> None:
@@ -141,11 +190,97 @@ class AtlasRuntime:
               receipt_count INTEGER NOT NULL CHECK(receipt_count >= 0),
               receipt_set_digest TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS continuation_owners (
+              owner_id TEXT PRIMARY KEY,
+              thread_id TEXT NOT NULL UNIQUE,
+              binding_epoch INTEGER NOT NULL CHECK(binding_epoch >= 1),
+              desired_state TEXT NOT NULL CHECK(desired_state IN (
+                'ACTIVE_COMPUTE','DISPATCH_PENDING','QUEUED','TERMINAL',
+                'WAITING_AUTHORIZATION','WAITING_COST','WAITING_EXTERNAL')),
+              observed_state TEXT NOT NULL CHECK(observed_state IN (
+                'ACTIVE_COMPUTE','EXPECTED_IDLE','TERMINAL','UNEXPECTED_IDLE','UNKNOWN')),
+              revision INTEGER NOT NULL CHECK(revision >= 0),
+              active_turn_id TEXT,
+              evidence_at REAL,
+              created_at REAL NOT NULL,
+              updated_at REAL NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS continuation_context_packs (
+              context_pack_id TEXT PRIMARY KEY,
+              payload TEXT NOT NULL,
+              payload_digest TEXT NOT NULL UNIQUE,
+              created_at REAL NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS continuation_packets (
+              packet_id TEXT PRIMARY KEY,
+              owner_id TEXT NOT NULL REFERENCES continuation_owners(owner_id),
+              state TEXT NOT NULL CHECK(state IN (
+                'BLOCKED_AUTHORIZATION','BLOCKED_COST','BLOCKED_DEPENDENCY',
+                'DEAD_LETTER','DISPATCH_PENDING','ACTIVE','READY',
+                'RESUMABLE_QUEUED','SETTLED','WAITING_CONFLICT')),
+              priority INTEGER NOT NULL,
+              conflict_key TEXT NOT NULL,
+              after_packet_id TEXT,
+              context_pack_id TEXT NOT NULL REFERENCES continuation_context_packs(context_pack_id),
+              authorization_kind TEXT NOT NULL,
+              cost_kind TEXT NOT NULL,
+              logical_identity TEXT NOT NULL UNIQUE,
+              content_digest TEXT NOT NULL,
+              terminal_digest TEXT,
+              created_at REAL NOT NULL,
+              updated_at REAL NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS continuation_claims (
+              conflict_key TEXT PRIMARY KEY,
+              packet_id TEXT NOT NULL UNIQUE REFERENCES continuation_packets(packet_id),
+              owner_id TEXT NOT NULL REFERENCES continuation_owners(owner_id),
+              binding_epoch INTEGER NOT NULL,
+              claimed_at REAL NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS continuation_outbox (
+              trigger_key TEXT PRIMARY KEY,
+              owner_id TEXT NOT NULL REFERENCES continuation_owners(owner_id),
+              binding_epoch INTEGER NOT NULL,
+              packet_id TEXT NOT NULL REFERENCES continuation_packets(packet_id),
+              context_pack_id TEXT NOT NULL REFERENCES continuation_context_packs(context_pack_id),
+              payload_digest TEXT NOT NULL,
+              state TEXT NOT NULL CHECK(state IN (
+                'PENDING','LEASED','DISPATCHED','CONFIRMED','DEAD_LETTER')),
+              attempt_count INTEGER NOT NULL DEFAULT 0 CHECK(attempt_count >= 0),
+              lease_owner TEXT,
+              leased_until REAL,
+              dispatched_at REAL,
+              confirmation_deadline REAL,
+              delivery_method TEXT,
+              thread_id TEXT,
+              turn_id TEXT,
+              error_class TEXT,
+              created_at REAL NOT NULL,
+              updated_at REAL NOT NULL
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS continuation_one_open_trigger
+              ON continuation_outbox(packet_id)
+              WHERE state IN ('PENDING','LEASED','DISPATCHED');
+            CREATE INDEX IF NOT EXISTS continuation_outbox_ready
+              ON continuation_outbox(state, created_at);
+            CREATE TABLE IF NOT EXISTS continuation_metrics (
+              metric_id INTEGER PRIMARY KEY AUTOINCREMENT,
+              owner_id TEXT,
+              packet_id TEXT,
+              name TEXT NOT NULL,
+              value REAL NOT NULL,
+              created_at REAL NOT NULL
+            );
             """
         )
         columns = {row["name"] for row in self.db.execute("PRAGMA table_info(tasks)")}
         if "depends_on" not in columns:
             self.db.execute("ALTER TABLE tasks ADD COLUMN depends_on TEXT NOT NULL DEFAULT '[]'")
+        outbox_columns = {
+            row["name"] for row in self.db.execute("PRAGMA table_info(continuation_outbox)")
+        }
+        if "delivery_method" not in outbox_columns:
+            self.db.execute("ALTER TABLE continuation_outbox ADD COLUMN delivery_method TEXT")
         watchdog_columns = {
             row["name"] for row in self.db.execute("PRAGMA table_info(watchdog_runs)")
         }
@@ -678,6 +813,866 @@ class AtlasRuntime:
             )
             for row in rows
         )
+
+    @staticmethod
+    def _canonical_json(value: object) -> str:
+        return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    @classmethod
+    def _assert_context_safe(cls, value: object, *, path: str = "$") -> None:
+        """Reject context that could become a transcript or credential store."""
+        if isinstance(value, Mapping):
+            for key, child in value.items():
+                if not isinstance(key, str):
+                    raise ValueError(f"{path}: context keys must be strings")
+                normalized = key.casefold().replace("-", "_")
+                if normalized in _PROTOTYPE_POLLUTION_KEYS:
+                    raise ValueError(f"{path}.{key}: prototype-polluting context field")
+                if normalized in _CONTEXT_FORBIDDEN_KEYS or any(
+                    forbidden in normalized
+                    for forbidden in ("secret", "credential", "password", "raw_", "_raw", "output")
+                ):
+                    raise ValueError(f"{path}.{key}: forbidden context field")
+                cls._assert_context_safe(child, path=f"{path}.{key}")
+        elif isinstance(value, (list, tuple)):
+            for index, child in enumerate(value):
+                cls._assert_context_safe(child, path=f"{path}[{index}]")
+        elif not isinstance(value, (str, int, float, bool, type(None))):
+            raise ValueError(f"{path}: context value is not JSON-safe")
+        elif isinstance(value, float) and not math.isfinite(value):
+            raise ValueError(f"{path}: non-finite number is not allowed")
+        elif isinstance(value, str) and _DRIVE_RELATIVE_PATH.fullmatch(value):
+            raise ValueError(f"{path}: drive-relative path is semantically invalid")
+
+    def create_context_pack(self, payload: Mapping[str, object]) -> str:
+        """Persist one small content-addressed continuation context pack."""
+        body = dict(payload)
+        self._assert_context_safe(body)
+        encoded = self._canonical_json(body).encode("utf-8")
+        if len(encoded) > 32_768:
+            raise ValueError("context pack exceeds 32768 bytes")
+        digest = "sha256:" + hashlib.sha256(encoded).hexdigest()
+        context_pack_id = "ctx_" + digest.removeprefix("sha256:")
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT payload_digest,payload FROM continuation_context_packs WHERE context_pack_id=?",
+                (context_pack_id,),
+            ).fetchone()
+            if row:
+                if row["payload_digest"] != digest or row["payload"] != encoded.decode("utf-8"):
+                    raise ValueError("context pack identity collision")
+            else:
+                self.db.execute(
+                    "INSERT INTO continuation_context_packs(context_pack_id,payload,payload_digest,created_at) "
+                    "VALUES(?,?,?,?)",
+                    (context_pack_id, encoded.decode("utf-8"), digest, now),
+                )
+            self.db.execute("COMMIT")
+            return context_pack_id
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def register_continuation_owner(
+        self,
+        *,
+        owner_id: str,
+        thread_id: str,
+        binding_epoch: int = 1,
+    ) -> bool:
+        """Register an ATLAS-owned persistent thread without creating a task."""
+        if not owner_id.strip() or not thread_id.strip() or binding_epoch < 1:
+            raise ValueError("owner, thread, and positive binding epoch are required")
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT thread_id,binding_epoch FROM continuation_owners WHERE owner_id=?",
+                (owner_id,),
+            ).fetchone()
+            if row:
+                if row["thread_id"] != thread_id or row["binding_epoch"] != binding_epoch:
+                    raise ValueError("owner binding drift requires an explicit epoch transition")
+                self.db.execute("COMMIT")
+                return False
+            self.db.execute(
+                "INSERT INTO continuation_owners(owner_id,thread_id,binding_epoch,desired_state,"
+                "observed_state,revision,created_at,updated_at) "
+                "VALUES(?,?,?,'QUEUED','EXPECTED_IDLE',0,?,?)",
+                (owner_id, thread_id, binding_epoch, now, now),
+            )
+            self.db.execute("COMMIT")
+            return True
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def register_continuation_packet(
+        self,
+        *,
+        packet_id: str,
+        owner_id: str,
+        conflict_key: str,
+        context_pack_id: str,
+        after_packet_id: str | None = None,
+        priority: int = 0,
+        authorization_kind: str = "AUTO_AUTHORIZED_LOCAL_ONLY",
+        cost_kind: str = "LOCAL_ZERO",
+        logical_identity: str | None = None,
+        state: str = "READY",
+    ) -> bool:
+        """Register a content-bound packet; changed replay fails without caller help."""
+        if state not in CONTINUATION_PACKET_STATES:
+            raise ValueError("invalid continuation packet state")
+        if not packet_id.strip() or not owner_id.strip() or not conflict_key.strip():
+            raise ValueError("packet, owner, and conflict key are required")
+        identity = logical_identity or packet_id
+        definition = {
+            "packet_id": packet_id,
+            "owner_id": owner_id,
+            "conflict_key": conflict_key,
+            "context_pack_id": context_pack_id,
+            "after_packet_id": after_packet_id,
+            "priority": priority,
+            "authorization_kind": authorization_kind,
+            "cost_kind": cost_kind,
+            "logical_identity": identity,
+        }
+        digest = self.digest(definition)
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            owner = self.db.execute(
+                "SELECT owner_id FROM continuation_owners WHERE owner_id=?", (owner_id,)
+            ).fetchone()
+            pack = self.db.execute(
+                "SELECT context_pack_id FROM continuation_context_packs WHERE context_pack_id=?",
+                (context_pack_id,),
+            ).fetchone()
+            if not owner or not pack:
+                raise KeyError("owner or context pack is absent")
+            existing = self.db.execute(
+                "SELECT packet_id,content_digest FROM continuation_packets "
+                "WHERE packet_id=? OR logical_identity=?",
+                (packet_id, identity),
+            ).fetchone()
+            if existing:
+                if existing["packet_id"] != packet_id or existing["content_digest"] != digest:
+                    raise ValueError("logical continuation identity is already bound to different content")
+                self.db.execute("COMMIT")
+                return False
+            self.db.execute(
+                "INSERT INTO continuation_packets(packet_id,owner_id,state,priority,conflict_key,"
+                "after_packet_id,context_pack_id,authorization_kind,cost_kind,logical_identity,"
+                "content_digest,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (packet_id, owner_id, state, priority, conflict_key, after_packet_id,
+                 context_pack_id, authorization_kind, cost_kind, identity, digest, now, now),
+            )
+            self.db.execute("COMMIT")
+            return True
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def activate_continuation_packet(self, *, packet_id: str) -> bool:
+        """Claim one initial packet for an already-owned thread."""
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            packet = self.db.execute(
+                "SELECT p.*,o.binding_epoch FROM continuation_packets p "
+                "JOIN continuation_owners o ON o.owner_id=p.owner_id WHERE p.packet_id=?",
+                (packet_id,),
+            ).fetchone()
+            if not packet:
+                raise KeyError("continuation packet is absent")
+            if packet["state"] == "ACTIVE":
+                self.db.execute("COMMIT")
+                return False
+            if packet["state"] != "READY":
+                raise ValueError("only READY continuation packets may be activated")
+            self.db.execute(
+                "INSERT INTO continuation_claims(conflict_key,packet_id,owner_id,binding_epoch,claimed_at) "
+                "VALUES(?,?,?,?,?)",
+                (packet["conflict_key"], packet_id, packet["owner_id"], packet["binding_epoch"], now),
+            )
+            self.db.execute(
+                "UPDATE continuation_packets SET state='ACTIVE',updated_at=? WHERE packet_id=?",
+                (now, packet_id),
+            )
+            self.db.execute(
+                "UPDATE continuation_owners SET desired_state='ACTIVE_COMPUTE',"
+                "observed_state='ACTIVE_COMPUTE',revision=revision+1,updated_at=? WHERE owner_id=?",
+                (now, packet["owner_id"]),
+            )
+            self.db.execute("COMMIT")
+            return True
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    @staticmethod
+    def _trigger_key(*, owner_id: str, binding_epoch: int, packet_id: str,
+                     context_pack_id: str, owner_revision: int) -> str:
+        body = json.dumps(
+            [owner_id, binding_epoch, packet_id, context_pack_id, owner_revision],
+            separators=(",", ":"),
+        ).encode("utf-8")
+        return "trg_" + hashlib.sha256(body).hexdigest()
+
+    def _existing_continuation_commit(
+        self, *, event_id: str, digest: str, packet_id: str
+    ) -> ContinuationCommit | None:
+        event = self.db.execute(
+            "SELECT payload_digest,payload FROM events WHERE event_id=?", (event_id,)
+        ).fetchone()
+        if not event:
+            return None
+        if event["payload_digest"] != digest:
+            raise ValueError("terminal event identity is already bound to different content")
+        packet = self.db.execute(
+            "SELECT state,owner_id FROM continuation_packets WHERE packet_id=?", (packet_id,)
+        ).fetchone()
+        if not packet or packet["state"] != "SETTLED":
+            raise ValueError("terminal event exists without its settled packet postimage")
+        outbox = self.db.execute(
+            "SELECT x.trigger_key,x.packet_id FROM continuation_outbox x "
+            "JOIN continuation_packets p ON p.packet_id=x.packet_id "
+            "WHERE p.after_packet_id=? ORDER BY x.created_at DESC LIMIT 1",
+            (packet_id,),
+        ).fetchone()
+        owner = self.db.execute(
+            "SELECT revision FROM continuation_owners WHERE owner_id=?", (packet["owner_id"],)
+        ).fetchone()
+        return ContinuationCommit(
+            packet_id=packet_id,
+            successor_packet_id=(outbox["packet_id"] if outbox else None),
+            trigger_key=(outbox["trigger_key"] if outbox else None),
+            owner_revision=owner["revision"],
+            replayed=True,
+        )
+
+    def commit_continuation(
+        self,
+        *,
+        packet_id: str,
+        terminal_receipt: Mapping[str, object],
+        expected_owner_revision: int,
+        fail_after: str | None = None,
+    ) -> ContinuationCommit:
+        """Atomically settle, reserve a successor, and create its dispatch outbox row."""
+        receipt = dict(terminal_receipt)
+        event_id = str(receipt.get("event_id") or "")
+        if not event_id.strip():
+            raise ValueError("terminal receipt requires event_id")
+        receipt["packet_id"] = packet_id
+        digest = self.digest(receipt)
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            replay = self._existing_continuation_commit(
+                event_id=event_id, digest=digest, packet_id=packet_id
+            )
+            if replay:
+                self.db.execute("COMMIT")
+                return replay
+            packet = self.db.execute(
+                "SELECT p.*,o.binding_epoch,o.revision AS owner_revision "
+                "FROM continuation_packets p JOIN continuation_owners o ON o.owner_id=p.owner_id "
+                "WHERE p.packet_id=?",
+                (packet_id,),
+            ).fetchone()
+            if not packet or packet["state"] != "ACTIVE":
+                raise KeyError("active continuation packet is absent")
+            if packet["owner_revision"] != expected_owner_revision:
+                raise ValueError("owner revision drift")
+            claim = self.db.execute(
+                "SELECT packet_id FROM continuation_claims WHERE packet_id=?", (packet_id,)
+            ).fetchone()
+            if not claim:
+                raise KeyError("active packet has no conflict claim")
+            self._record_event(
+                event_id=event_id, digest=digest, task_id=packet_id,
+                kind="CONTINUATION_TERMINAL", payload=receipt, now=now,
+            )
+            self.db.execute(
+                "UPDATE continuation_packets SET state='SETTLED',terminal_digest=?,updated_at=? "
+                "WHERE packet_id=?",
+                (digest, now, packet_id),
+            )
+            self.db.execute("DELETE FROM continuation_claims WHERE packet_id=?", (packet_id,))
+            if fail_after == "settlement":
+                raise RuntimeError("fault injection after settlement")
+
+            successor = self.db.execute(
+                "SELECT * FROM continuation_packets WHERE owner_id=? AND after_packet_id=? "
+                "AND state IN ('READY','BLOCKED_DEPENDENCY') "
+                "ORDER BY priority DESC,packet_id LIMIT 1",
+                (packet["owner_id"], packet_id),
+            ).fetchone()
+            trigger_key: str | None = None
+            next_revision = packet["owner_revision"] + 1
+            desired = "TERMINAL"
+            observed = "TERMINAL"
+            successor_id: str | None = None
+            if successor:
+                successor_id = successor["packet_id"]
+                if successor["authorization_kind"] not in {
+                    "AUTO_AUTHORIZED_LOCAL_ONLY", "EXPLICIT_AUTHORIZED_LOCAL_ONLY"
+                }:
+                    self.db.execute(
+                        "UPDATE continuation_packets SET state='BLOCKED_AUTHORIZATION',updated_at=? "
+                        "WHERE packet_id=?", (now, successor_id),
+                    )
+                    desired, observed = "WAITING_AUTHORIZATION", "EXPECTED_IDLE"
+                elif successor["cost_kind"] not in {"LOCAL_ZERO", "NO_COST"}:
+                    self.db.execute(
+                        "UPDATE continuation_packets SET state='BLOCKED_COST',updated_at=? "
+                        "WHERE packet_id=?", (now, successor_id),
+                    )
+                    desired, observed = "WAITING_COST", "EXPECTED_IDLE"
+                elif self.db.execute(
+                    "SELECT 1 FROM continuation_claims WHERE conflict_key=?",
+                    (successor["conflict_key"],),
+                ).fetchone():
+                    self.db.execute(
+                        "UPDATE continuation_packets SET state='WAITING_CONFLICT',updated_at=? "
+                        "WHERE packet_id=?", (now, successor_id),
+                    )
+                    desired, observed = "QUEUED", "EXPECTED_IDLE"
+                else:
+                    self.db.execute(
+                        "INSERT INTO continuation_claims(conflict_key,packet_id,owner_id,binding_epoch,claimed_at) "
+                        "VALUES(?,?,?,?,?)",
+                        (successor["conflict_key"], successor_id, packet["owner_id"],
+                         packet["binding_epoch"], now),
+                    )
+                    trigger_key = self._trigger_key(
+                        owner_id=packet["owner_id"], binding_epoch=packet["binding_epoch"],
+                        packet_id=successor_id, context_pack_id=successor["context_pack_id"],
+                        owner_revision=next_revision,
+                    )
+                    payload = {
+                        "owner_id": packet["owner_id"], "binding_epoch": packet["binding_epoch"],
+                        "packet_id": successor_id, "context_pack_id": successor["context_pack_id"],
+                        "trigger_key": trigger_key,
+                    }
+                    payload_digest = self.digest(payload)
+                    self.db.execute(
+                        "UPDATE continuation_packets SET state='DISPATCH_PENDING',updated_at=? "
+                        "WHERE packet_id=?", (now, successor_id),
+                    )
+                    self.db.execute(
+                        "INSERT INTO continuation_outbox(trigger_key,owner_id,binding_epoch,packet_id,"
+                        "context_pack_id,payload_digest,state,created_at,updated_at) "
+                        "VALUES(?,?,?,?,?,?,'PENDING',?,?)",
+                        (trigger_key, packet["owner_id"], packet["binding_epoch"], successor_id,
+                         successor["context_pack_id"], payload_digest, now, now),
+                    )
+                    desired, observed = "DISPATCH_PENDING", "EXPECTED_IDLE"
+                    if fail_after == "outbox":
+                        raise RuntimeError("fault injection after outbox")
+            self.db.execute(
+                "UPDATE continuation_owners SET desired_state=?,observed_state=?,revision=?,"
+                "active_turn_id=NULL,evidence_at=?,updated_at=? WHERE owner_id=?",
+                (desired, observed, next_revision, now, now, packet["owner_id"]),
+            )
+            self.db.execute(
+                "INSERT INTO continuation_metrics(owner_id,packet_id,name,value,created_at) "
+                "VALUES(?,?,'terminal_commit',1,?)",
+                (packet["owner_id"], packet_id, now),
+            )
+            self.db.execute("COMMIT")
+            return ContinuationCommit(packet_id, successor_id, trigger_key, next_revision, False)
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def lease_continuation_trigger(
+        self, *, worker_id: str, lease_seconds: float = 60
+    ) -> ContinuationOutboxItem | None:
+        if not worker_id.strip() or not math.isfinite(lease_seconds) or lease_seconds <= 0:
+            raise ValueError("worker and positive finite lease are required")
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            self.db.execute(
+                "UPDATE continuation_outbox SET state='PENDING',lease_owner=NULL,leased_until=NULL,"
+                "updated_at=? WHERE state='LEASED' AND leased_until<=?",
+                (now, now),
+            )
+            row = self.db.execute(
+                "SELECT x.*,o.thread_id AS owner_thread_id FROM continuation_outbox x "
+                "JOIN continuation_owners o ON o.owner_id=x.owner_id "
+                "WHERE x.state='PENDING' ORDER BY x.created_at,x.trigger_key LIMIT 1"
+            ).fetchone()
+            if not row:
+                self.db.execute("COMMIT")
+                return None
+            until = now + lease_seconds
+            self.db.execute(
+                "UPDATE continuation_outbox SET state='LEASED',lease_owner=?,leased_until=?,"
+                "attempt_count=attempt_count+1,updated_at=? WHERE trigger_key=? AND state='PENDING'",
+                (worker_id, until, now, row["trigger_key"]),
+            )
+            self.db.execute("COMMIT")
+            return ContinuationOutboxItem(
+                row["trigger_key"], row["owner_id"], row["binding_epoch"], row["packet_id"],
+                row["owner_thread_id"], row["context_pack_id"], row["payload_digest"],
+                row["attempt_count"] + 1, until,
+            )
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def mark_continuation_trigger_dispatched(
+        self, *, trigger_key: str, worker_id: str, confirmation_seconds: float = 30
+    ) -> bool:
+        """Persist the sent-unconfirmed boundary before invoking the adapter."""
+        if not math.isfinite(confirmation_seconds) or confirmation_seconds <= 0:
+            raise ValueError("confirmation window must be positive")
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT state,lease_owner,leased_until FROM continuation_outbox WHERE trigger_key=?",
+                (trigger_key,),
+            ).fetchone()
+            if not row:
+                raise KeyError("trigger is absent")
+            if row["state"] == "DISPATCHED":
+                self.db.execute("COMMIT")
+                return False
+            if row["state"] != "LEASED" or row["lease_owner"] != worker_id or row["leased_until"] <= now:
+                raise KeyError("trigger lease is absent, expired, or mismatched")
+            self.db.execute(
+                "UPDATE continuation_outbox SET state='DISPATCHED',dispatched_at=?,"
+                "confirmation_deadline=?,lease_owner=NULL,leased_until=NULL,updated_at=? "
+                "WHERE trigger_key=?",
+                (now, now + confirmation_seconds, now, trigger_key),
+            )
+            self.db.execute(
+                "UPDATE continuation_outbox SET delivery_method='EXISTING_THREAD_ADAPTER' "
+                "WHERE trigger_key=?", (trigger_key,),
+            )
+            self.db.execute("COMMIT")
+            return True
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def mark_continuation_trigger_uncertain(self, *, trigger_key: str) -> bool:
+        """Record invocation uncertainty without making the trigger retryable."""
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT state,error_class FROM continuation_outbox WHERE trigger_key=?",
+                (trigger_key,),
+            ).fetchone()
+            if not row:
+                raise KeyError("trigger is absent")
+            if row["state"] != "DISPATCHED":
+                raise ValueError("only sent-unconfirmed triggers may become uncertain")
+            if row["error_class"] == "EXTERNAL_EFFECT_UNCONFIRMED":
+                self.db.execute("COMMIT")
+                return False
+            self.db.execute(
+                "UPDATE continuation_outbox SET error_class='EXTERNAL_EFFECT_UNCONFIRMED',"
+                "updated_at=? WHERE trigger_key=?", (now, trigger_key),
+            )
+            self.db.execute("COMMIT")
+            return True
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def confirm_continuation_trigger(
+        self, *, trigger_key: str, thread_id: str, turn_id: str
+    ) -> bool:
+        """Validate correlation before the irreversible state transition."""
+        if not thread_id.strip() or not turn_id.strip():
+            raise ValueError("thread_id and turn_id are required")
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT x.*,o.thread_id AS expected_thread FROM continuation_outbox x "
+                "JOIN continuation_owners o ON o.owner_id=x.owner_id WHERE x.trigger_key=?",
+                (trigger_key,),
+            ).fetchone()
+            if not row:
+                raise KeyError("trigger is absent")
+            if thread_id != row["expected_thread"]:
+                raise ValueError("turn readback thread identity mismatch")
+            if row["state"] == "CONFIRMED":
+                if row["thread_id"] != thread_id or row["turn_id"] != turn_id:
+                    raise ValueError("confirmed trigger cannot be rebound")
+                self.db.execute("COMMIT")
+                return False
+            if row["state"] != "DISPATCHED":
+                raise ValueError("only DISPATCHED triggers may be confirmed")
+            duplicate = self.db.execute(
+                "SELECT trigger_key FROM continuation_outbox WHERE thread_id=? AND turn_id=? "
+                "AND trigger_key<>?",
+                (thread_id, turn_id, trigger_key),
+            ).fetchone()
+            if duplicate:
+                raise ValueError("turn is already correlated to another trigger")
+            self.db.execute(
+                "UPDATE continuation_outbox SET state='CONFIRMED',thread_id=?,turn_id=?,updated_at=? "
+                "WHERE trigger_key=?",
+                (thread_id, turn_id, now, trigger_key),
+            )
+            self.db.execute(
+                "UPDATE continuation_packets SET state='ACTIVE',updated_at=? WHERE packet_id=?",
+                (now, row["packet_id"]),
+            )
+            self.db.execute(
+                "UPDATE continuation_owners SET desired_state='ACTIVE_COMPUTE',"
+                "observed_state='ACTIVE_COMPUTE',active_turn_id=?,evidence_at=?,updated_at=? "
+                "WHERE owner_id=?",
+                (turn_id, now, now, row["owner_id"]),
+            )
+            self.db.execute("COMMIT")
+            return True
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def fail_continuation_trigger(
+        self, *, trigger_key: str, worker_id: str, error_class: str
+    ) -> str:
+        """Capacity/token failures remain queued; deterministic ambiguity dead-letters."""
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT * FROM continuation_outbox WHERE trigger_key=?", (trigger_key,)
+            ).fetchone()
+            if not row:
+                raise KeyError("trigger is absent")
+            if row["state"] in {"CONFIRMED", "DEAD_LETTER"}:
+                if row["error_class"] == error_class or row["state"] == "CONFIRMED":
+                    self.db.execute("COMMIT")
+                    return row["state"]
+                raise ValueError("terminal trigger state cannot regress")
+            if row["state"] == "LEASED" and row["lease_owner"] != worker_id:
+                raise KeyError("trigger lease worker mismatch")
+            resumable = error_class in RESUMABLE_TRIGGER_FAILURES
+            state = "PENDING" if resumable else "DEAD_LETTER"
+            packet_state = "RESUMABLE_QUEUED" if resumable else "DEAD_LETTER"
+            desired = "QUEUED" if resumable else "WAITING_EXTERNAL"
+            self.db.execute(
+                "UPDATE continuation_outbox SET state=?,error_class=?,lease_owner=NULL,leased_until=NULL,"
+                "updated_at=? WHERE trigger_key=?",
+                (state, error_class, now, trigger_key),
+            )
+            self.db.execute(
+                "UPDATE continuation_packets SET state=?,updated_at=? WHERE packet_id=?",
+                (packet_state, now, row["packet_id"]),
+            )
+            self.db.execute(
+                "UPDATE continuation_owners SET desired_state=?,observed_state='EXPECTED_IDLE',"
+                "updated_at=? WHERE owner_id=?", (desired, now, row["owner_id"]),
+            )
+            self.db.execute("COMMIT")
+            return state
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def reconcile_continuation_startup(
+        self,
+        *,
+        observed_turns: Mapping[str, Mapping[str, str]] | None = None,
+        now: float | None = None,
+    ) -> tuple[dict[str, str], ...]:
+        """One event-driven startup pass; it never starts a timer or polling loop."""
+        observed_turns = observed_turns or {}
+        now = time.time() if now is None else now
+        actions: list[dict[str, str]] = []
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            expired = self.db.execute(
+                "SELECT trigger_key,packet_id FROM continuation_outbox "
+                "WHERE state='LEASED' AND leased_until<=?", (now,)
+            ).fetchall()
+            for row in expired:
+                self.db.execute(
+                    "UPDATE continuation_outbox SET state='PENDING',lease_owner=NULL,leased_until=NULL,"
+                    "error_class='LEASE_EXPIRED',updated_at=? WHERE trigger_key=?",
+                    (now, row["trigger_key"]),
+                )
+                actions.append({"trigger_key": row["trigger_key"], "action": "REQUEUED_UNSENT"})
+
+            dispatched = self.db.execute(
+                "SELECT x.*,o.thread_id AS expected_thread FROM continuation_outbox x "
+                "JOIN continuation_owners o ON o.owner_id=x.owner_id WHERE x.state='DISPATCHED'"
+            ).fetchall()
+            for row in dispatched:
+                observed = observed_turns.get(row["trigger_key"])
+                if observed:
+                    thread_id = str(observed.get("thread_id") or "")
+                    turn_id = str(observed.get("turn_id") or "")
+                    if thread_id != row["expected_thread"] or not turn_id:
+                        raise ValueError("startup readback identity is missing or mismatched")
+                    self.db.execute(
+                        "UPDATE continuation_outbox SET state='CONFIRMED',thread_id=?,turn_id=?,updated_at=? "
+                        "WHERE trigger_key=?", (thread_id, turn_id, now, row["trigger_key"]),
+                    )
+                    self.db.execute(
+                        "UPDATE continuation_packets SET state='ACTIVE',updated_at=? WHERE packet_id=?",
+                        (now, row["packet_id"]),
+                    )
+                    self.db.execute(
+                        "UPDATE continuation_owners SET desired_state='ACTIVE_COMPUTE',"
+                        "observed_state='ACTIVE_COMPUTE',active_turn_id=?,evidence_at=?,updated_at=? "
+                        "WHERE owner_id=?", (turn_id, now, now, row["owner_id"]),
+                    )
+                    actions.append({"trigger_key": row["trigger_key"], "action": "CONFIRMED_READBACK"})
+                elif row["confirmation_deadline"] is not None and row["confirmation_deadline"] <= now:
+                    self.db.execute(
+                        "UPDATE continuation_outbox SET state='DEAD_LETTER',"
+                        "error_class='SENT_UNCONFIRMED_AMBIGUITY',updated_at=? WHERE trigger_key=?",
+                        (now, row["trigger_key"]),
+                    )
+                    self.db.execute(
+                        "UPDATE continuation_packets SET state='DEAD_LETTER',updated_at=? WHERE packet_id=?",
+                        (now, row["packet_id"]),
+                    )
+                    self.db.execute(
+                        "UPDATE continuation_owners SET desired_state='WAITING_EXTERNAL',"
+                        "observed_state='UNKNOWN',updated_at=? WHERE owner_id=?",
+                        (now, row["owner_id"]),
+                    )
+                    actions.append({"trigger_key": row["trigger_key"], "action": "DEAD_LETTER_AMBIGUOUS"})
+
+            active_owners = self.db.execute(
+                "SELECT * FROM continuation_owners WHERE desired_state='ACTIVE_COMPUTE'"
+            ).fetchall()
+            observed_thread_ids = {
+                str(item.get("thread_id")) for item in observed_turns.values() if item.get("thread_id")
+            }
+            for owner in active_owners:
+                if owner["thread_id"] not in observed_thread_ids:
+                    active_packet = self.db.execute(
+                        "SELECT p.*,x.context_pack_id AS confirmed_context_pack_id "
+                        "FROM continuation_packets p LEFT JOIN continuation_outbox x "
+                        "ON x.packet_id=p.packet_id AND x.state='CONFIRMED' "
+                        "WHERE p.owner_id=? AND p.state='ACTIVE' ORDER BY p.updated_at DESC LIMIT 1",
+                        (owner["owner_id"],),
+                    ).fetchone()
+                    next_revision = owner["revision"] + 1
+                    self.db.execute(
+                        "UPDATE continuation_owners SET observed_state='UNEXPECTED_IDLE',"
+                        "desired_state='DISPATCH_PENDING',active_turn_id=NULL,revision=?,updated_at=? "
+                        "WHERE owner_id=?",
+                        (next_revision, now, owner["owner_id"]),
+                    )
+                    if active_packet:
+                        context_pack_id = (
+                            active_packet["confirmed_context_pack_id"]
+                            or active_packet["context_pack_id"]
+                        )
+                        trigger_key = self._trigger_key(
+                            owner_id=owner["owner_id"],
+                            binding_epoch=owner["binding_epoch"],
+                            packet_id=active_packet["packet_id"],
+                            context_pack_id=context_pack_id,
+                            owner_revision=next_revision,
+                        )
+                        payload = {
+                            "owner_id": owner["owner_id"],
+                            "binding_epoch": owner["binding_epoch"],
+                            "packet_id": active_packet["packet_id"],
+                            "context_pack_id": context_pack_id,
+                            "trigger_key": trigger_key,
+                        }
+                        self.db.execute(
+                            "UPDATE continuation_packets SET state='DISPATCH_PENDING',updated_at=? "
+                            "WHERE packet_id=?", (now, active_packet["packet_id"]),
+                        )
+                        self.db.execute(
+                            "INSERT INTO continuation_outbox(trigger_key,owner_id,binding_epoch,packet_id,"
+                            "context_pack_id,payload_digest,state,error_class,created_at,updated_at) "
+                            "VALUES(?,?,?,?,?,?,'PENDING','UNEXPECTED_IDLE_RECOVERY',?,?)",
+                            (trigger_key, owner["owner_id"], owner["binding_epoch"],
+                             active_packet["packet_id"], context_pack_id,
+                             self.digest(payload), now, now),
+                        )
+                        actions.append({"owner_id": owner["owner_id"], "action": "REDISPATCH_UNEXPECTED_IDLE"})
+                    else:
+                        self.db.execute(
+                            "UPDATE continuation_owners SET desired_state='WAITING_EXTERNAL',"
+                            "observed_state='UNKNOWN',updated_at=? WHERE owner_id=?",
+                            (now, owner["owner_id"]),
+                        )
+                        actions.append({"owner_id": owner["owner_id"], "action": "UNEXPECTED_IDLE_NO_PACKET"})
+            self.db.execute("COMMIT")
+            return tuple(actions)
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def continuation_context(self, context_pack_id: str) -> dict[str, object]:
+        row = self.db.execute(
+            "SELECT payload FROM continuation_context_packs WHERE context_pack_id=?",
+            (context_pack_id,),
+        ).fetchone()
+        if not row:
+            raise KeyError("context pack is absent")
+        return json.loads(row["payload"])
+
+    def continuation_status(self) -> dict[str, object]:
+        def counts(table: str, column: str) -> dict[str, int]:
+            rows = self.db.execute(
+                f"SELECT {column} AS value,COUNT(*) AS n FROM {table} GROUP BY {column} ORDER BY {column}"
+            ).fetchall()
+            return {row["value"]: row["n"] for row in rows}
+
+        owners = [dict(row) for row in self.db.execute(
+            "SELECT owner_id,thread_id,binding_epoch,desired_state,observed_state,revision,"
+            "active_turn_id FROM continuation_owners ORDER BY owner_id"
+        )]
+        return {
+            "schema": "atlas.durable-continuation-kernel.status.v1",
+            "owners": owners,
+            "packets_by_state": counts("continuation_packets", "state"),
+            "outbox_by_state": counts("continuation_outbox", "state"),
+            "active_claims": self.db.execute("SELECT COUNT(*) FROM continuation_claims").fetchone()[0],
+        }
+
+    def export_continuation_projection(self) -> bytes:
+        """Return a deterministic byte-for-byte projection of durable kernel state."""
+        tables = (
+            "continuation_owners", "continuation_context_packs", "continuation_packets",
+            "continuation_claims", "continuation_outbox", "continuation_metrics",
+        )
+        projection: dict[str, list[dict[str, Any]]] = {}
+        for table in tables:
+            columns = [row["name"] for row in self.db.execute(f"PRAGMA table_info({table})")]
+            order = ",".join(columns)
+            projection[table] = [
+                dict(row) for row in self.db.execute(f"SELECT * FROM {table} ORDER BY {order}")
+            ]
+        return (self._canonical_json({
+            "schema": "atlas.durable-continuation-kernel.projection.v1",
+            "tables": projection,
+        }) + "\n").encode("utf-8")
+
+    def inspect_json_scheduler(self, path: str | Path) -> dict[str, object]:
+        """Read-only current-scheduler evidence importer; it never mutates SQLite."""
+        source = Path(path)
+        raw = source.read_bytes()
+        try:
+            document = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise ValueError("scheduler evidence is not valid JSON") from None
+
+        def validate(value: object, at: str = "$") -> None:
+            if isinstance(value, dict):
+                for key, child in value.items():
+                    if not isinstance(key, str) or key.casefold() in _PROTOTYPE_POLLUTION_KEYS:
+                        raise ValueError(f"{at}: unsafe scheduler key")
+                    validate(child, f"{at}.{key}")
+            elif isinstance(value, list):
+                for index, child in enumerate(value):
+                    validate(child, f"{at}[{index}]")
+            elif isinstance(value, str) and _DRIVE_RELATIVE_PATH.fullmatch(value):
+                raise ValueError(f"{at}: drive-relative path is semantically invalid")
+
+        validate(document)
+        if not isinstance(document, dict):
+            raise ValueError("scheduler evidence root must be an object")
+        revision = document.get("revision")
+        return {
+            "schema": "atlas.scheduler.read-only-import.v1",
+            "source_sha256": hashlib.sha256(raw).hexdigest(),
+            "revision": revision,
+            "top_level_keys": sorted(document),
+            "mutated": False,
+        }
+
+    def record_continuation_process_event(
+        self, *, event_id: str, owner_id: str, packet_id: str,
+        process_state: str, process_id: int | None = None,
+    ) -> bool:
+        if process_state not in {"STARTING", "STARTED", "EXITED", "FAILED"}:
+            raise ValueError("unsupported child-process lifecycle state")
+        payload = {
+            "owner_id": owner_id,
+            "packet_id": packet_id,
+            "process_state": process_state,
+            "process_id_present": process_id is not None,
+        }
+        digest = self.digest(payload)
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            existing = self.db.execute(
+                "SELECT payload_digest FROM events WHERE event_id=?", (event_id,)
+            ).fetchone()
+            self._record_event(
+                event_id=event_id, digest=digest, task_id=packet_id,
+                kind="CONTINUATION_PROCESS", payload=payload, now=now,
+            )
+            self.db.execute("COMMIT")
+            return existing is None
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def stop_hook_decision(
+        self, *, owner_id: str, thread_id: str | None = None,
+        confirmation_seconds: float = 30,
+    ) -> dict[str, str]:
+        """Atomically consume one trigger for the Stop transport.
+
+        Moving PENDING to the sent-unconfirmed DISPATCHED state before returning
+        decision=block makes the Stop hook and external dispatcher mutually
+        exclusive. Startup/readback reconciliation owns later confirmation.
+        """
+        if not owner_id.strip() or not math.isfinite(confirmation_seconds) or confirmation_seconds <= 0:
+            raise ValueError("owner and positive confirmation window are required")
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            owner = self.db.execute(
+                "SELECT thread_id FROM continuation_owners WHERE owner_id=?", (owner_id,),
+            ).fetchone()
+            if not owner or (thread_id is not None and thread_id != owner["thread_id"]):
+                self.db.execute("COMMIT")
+                return {}
+            row = self.db.execute(
+                "SELECT trigger_key,packet_id,context_pack_id FROM continuation_outbox "
+                "WHERE owner_id=? AND state='PENDING' ORDER BY created_at LIMIT 1",
+                (owner_id,),
+            ).fetchone()
+            if not row:
+                self.db.execute("COMMIT")
+                return {}
+            reason = (
+                f"Continue ATLAS packet {row['packet_id']} using context pack "
+                f"{row['context_pack_id']} and trigger {row['trigger_key']}."
+            )
+            if len(reason) > 512:
+                raise ValueError("Stop-hook continuation reason exceeds bounded envelope")
+            changed = self.db.execute(
+                "UPDATE continuation_outbox SET state='DISPATCHED',attempt_count=attempt_count+1,"
+                "dispatched_at=?,confirmation_deadline=?,delivery_method='STOP_HOOK',"
+                "thread_id=?,updated_at=? WHERE trigger_key=? AND state='PENDING'",
+                (now, now + confirmation_seconds, owner["thread_id"], now, row["trigger_key"]),
+            ).rowcount
+            if changed != 1:
+                raise RuntimeError("Stop-hook trigger claim was lost")
+            self.db.execute("COMMIT")
+            return {"decision": "block", "reason": reason}
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
 
     def get(self, task_id: str) -> Task | None:
         row = self.db.execute("SELECT * FROM tasks WHERE task_id=?", (task_id,)).fetchone()

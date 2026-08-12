@@ -1,0 +1,18 @@
+{
+  "description": "Source-only ATLAS durable continuation Stop hook; requires explicit trust before use.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$(git rev-parse --show-toplevel)/ops/atlas/continuation_stop_hook.py\" --database \"$(git rev-parse --show-toplevel)/runtime/atlas/atlas-runtime.db\"",
+            "commandWindows": "powershell -NoProfile -Command \"$r = git rev-parse --show-toplevel; python (Join-Path $r 'ops/atlas/continuation_stop_hook.py') --database (Join-Path $r 'runtime/atlas/atlas-runtime.db')\"",
+            "timeout": 30,
+            "statusMessage": "Checking ATLAS continuation outbox"
+          }
+        ]
+      }
+    ]
+  }
+}
