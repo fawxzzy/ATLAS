@@ -12,6 +12,9 @@ on:
       - "ops/stack/generate_lockfile.py"
       - "ops/stack/export_repo_inventory.py"
       - "ops/validation/validate_stack.py"
+      - "ops/validation/atlas_topology_contract.py"
+      - "docs/LIFELINE_TOPOLOGY_MANIFEST.json"
+      - "docs/LIFELINE_TOPOLOGY_MANIFEST.schema.json"
       - "tests/test_stack_generate_lockfile_source_pins.py"
       - "tests/test_stack_generate_lockfile_main_resilience.py"
       - "tests/test_stack_remote_ref_alignment.py"
@@ -21,6 +24,8 @@ on:
       - "tests/validation/test_validate_stack_resume_contract.py"
       - "tests/validation/test_validate_stack_execution_receipt_repairs.py"
       - "tests/validation/test_validate_stack_mutable_state_rules.py"
+      - "tests/validation/test_validate_stack_initiative_provenance.py"
+      - "tests/validation/test_atlas_topology_contract.py"
   push:
     branches:
       - main
@@ -64,4 +69,6 @@ jobs:
             tests.validation.test_validate_stack_resume_contract \
             tests.validation.test_validate_stack_execution_receipt_repairs \
             tests.validation.test_validate_stack_mutable_state_rules \
+            tests.validation.test_validate_stack_initiative_provenance \
+            tests.validation.test_atlas_topology_contract \
             -v

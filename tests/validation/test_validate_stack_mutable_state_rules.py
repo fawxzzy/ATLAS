@@ -93,7 +93,14 @@ class ValidateStackMutableStateRulesTests(unittest.TestCase):
     def test_unmanaged_repo_is_not_a_text_scan_root(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
-        root = Path(temp_dir.name)
+        # Resolve immediately so this test's own `root`-derived paths use
+        # the same long-form path as `collect_text_scan_roots`, which
+        # resolves internally via `stack_file.parent.resolve()`. On some
+        # hosted CI runners (observed on GitHub Actions windows-latest)
+        # the raw tempfile path is a short (8.3-style) alias that differs
+        # from the resolved long form, breaking membership assertions
+        # below on path form alone.
+        root = Path(temp_dir.name).resolve()
         stack_file = root / "stack.yaml"
         stack_file.write_text("name: temp\n", encoding="utf-8")
         (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -330,7 +337,19 @@ class ValidateStackMutableStateRulesTests(unittest.TestCase):
     def test_generated_state_cleanup_report_suppresses_declared_active_lock_paths(self) -> None:
         temp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(temp_dir.cleanup)
-        root = Path(temp_dir.name)
+        # Mirror the real stack-root layout (`<root>/repos/<owner-repo>`)
+        # instead of treating the bare tempdir as the repo path directly.
+        # `report_path` below is declared "../../runtime/..." relative to
+        # the repo path by design (mirroring the real two-levels-deep
+        # `repos/<owner>-<name>` nesting under the stack root) — walking
+        # that from an un-nested tempdir root previously escaped outside
+        # the sandboxed temp directory entirely (e.g. to "/runtime" on
+        # Linux), which failed with a real PermissionError on hosted CI
+        # (observed on GitHub Actions ubuntu-latest) even though it
+        # happened to be silently tolerated on this dev machine.
+        sandbox = Path(temp_dir.name).resolve()
+        root = sandbox / "repos" / "fawxzzy-fitness"
+        root.mkdir(parents=True, exist_ok=True)
         (root / "node_modules").mkdir(parents=True, exist_ok=True)
         report_path = root / ".." / ".." / "runtime" / "state" / "repo-cleanup" / "fitness.validation.latest.json"
         report_path.parent.mkdir(parents=True, exist_ok=True)
