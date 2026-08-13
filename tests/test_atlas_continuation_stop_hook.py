@@ -556,6 +556,121 @@ class DurableContinuationKernelTests(unittest.TestCase):
                 thread_id="thread-existing", trigger_key="trg_x", continuation_input="{}"
             )
 
+    def test_codex_adapter_rejects_missing_duplicate_wrong_type_and_malformed_lifecycle(self):
+        invalid_stdout = [
+            # A legacy or forged combined record is not lifecycle evidence.
+            json.dumps({"thread_id": "thread-existing", "turn_id": "turn-1"}) + "\n",
+            # Both lifecycle records are mandatory.
+            json.dumps({"type": "thread.started", "thread_id": "thread-existing"}) + "\n",
+            json.dumps({"type": "turn.started", "turn_id": "turn-1"}) + "\n",
+            # Duplicate records remain ambiguous even when their identities match.
+            (
+                json.dumps({"type": "thread.started", "thread_id": "thread-existing"})
+                + "\n"
+                + json.dumps({"type": "thread.started", "thread_id": "thread-existing"})
+                + "\n"
+                + json.dumps({"type": "turn.started", "turn_id": "turn-1"})
+                + "\n"
+            ),
+            (
+                json.dumps({"type": "thread.started", "thread_id": "thread-existing"})
+                + "\n"
+                + json.dumps({"type": "turn.started", "turn_id": "turn-1"})
+                + "\n"
+                + json.dumps({"type": "turn.started", "turn_id": "turn-1"})
+                + "\n"
+            ),
+            # The lifecycle types must carry only their own required identity.
+            (
+                json.dumps(
+                    {
+                        "type": "thread.started",
+                        "thread_id": "thread-existing",
+                        "turn_id": "turn-forged",
+                    }
+                )
+                + "\n"
+                + json.dumps({"type": "turn.started", "turn_id": "turn-1"})
+                + "\n"
+            ),
+            (
+                json.dumps({"type": "thread.started", "thread_id": "thread-existing"})
+                + "\n"
+                + json.dumps(
+                    {
+                        "type": "turn.started",
+                        "thread_id": "thread-existing",
+                        "turn_id": "turn-1",
+                    }
+                )
+                + "\n"
+            ),
+            # Wrong ordering cannot establish correlation.
+            (
+                json.dumps({"type": "turn.started", "turn_id": "turn-1"})
+                + "\n"
+                + json.dumps({"type": "thread.started", "thread_id": "thread-existing"})
+                + "\n"
+            ),
+            # Malformed JSONL is rejected rather than ignored after an external effect.
+            (
+                json.dumps({"type": "thread.started", "thread_id": "thread-existing"})
+                + "\n{not-json}\n"
+                + json.dumps({"type": "turn.started", "turn_id": "turn-1"})
+                + "\n"
+            ),
+            (
+                json.dumps({"type": "thread.started", "thread_id": "thread-existing"})
+                + "\n"
+                + json.dumps({"type": "turn.started", "turn_id": ""})
+                + "\n"
+            ),
+        ]
+
+        def runner(command, **kwargs):
+            return subprocess.CompletedProcess(
+                args=command, returncode=0, stdout=invalid_stdout.pop(0), stderr=""
+            )
+
+        adapter = CodexPersistentThreadAdapter(runner=runner)
+        while invalid_stdout:
+            with self.assertRaises(ValueError):
+                adapter.start_existing_turn(
+                    thread_id="thread-existing",
+                    trigger_key="trg_x",
+                    continuation_input="{}",
+                )
+
+    def test_codex_adapter_rejects_wrong_thread_and_non_object_jsonl(self):
+        responses = [
+            (
+                json.dumps({"type": "thread.started", "thread_id": "thread-other"})
+                + "\n"
+                + json.dumps({"type": "turn.started", "turn_id": "turn-1"})
+                + "\n"
+            ),
+            (
+                json.dumps({"type": "thread.started", "thread_id": "thread-existing"})
+                + "\n[]\n"
+                + json.dumps({"type": "turn.started", "turn_id": "turn-1"})
+                + "\n"
+            ),
+        ]
+
+        def runner(command, **kwargs):
+            return subprocess.CompletedProcess(
+                args=command, returncode=0, stdout=responses.pop(0), stderr=""
+            )
+
+        adapter = CodexPersistentThreadAdapter(runner=runner)
+        for _ in range(2):
+            with self.assertRaises(ValueError):
+                adapter.start_existing_turn(
+                    thread_id="thread-existing",
+                    trigger_key="trg_x",
+                    continuation_input="{}",
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

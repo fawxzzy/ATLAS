@@ -123,28 +123,55 @@ class CodexPersistentThreadAdapter:
             raise ValueError("existing-thread trigger readback exceeds 65536 bytes")
         candidates: list[dict[str, object]] = []
         for line in result.stdout.splitlines():
+            if not line.strip():
+                continue
             try:
                 parsed = json.loads(line)
             except (TypeError, json.JSONDecodeError):
-                continue
-            if isinstance(parsed, dict):
-                candidates.append(parsed)
-                if len(candidates) > 64:
-                    raise ValueError("existing-thread trigger returned too many records")
-        thread_ids: set[str] = set()
-        turn_ids: set[str] = set()
-        for item in candidates:
-            candidate_thread = item.get("thread_id")
-            candidate_turn = item.get("turn_id")
-            if isinstance(candidate_thread, str) and candidate_thread.strip():
-                thread_ids.add(candidate_thread)
-            if isinstance(candidate_turn, str) and candidate_turn.strip():
-                turn_ids.add(candidate_turn)
-        if thread_ids != {thread_id} or len(turn_ids) != 1:
+                raise ValueError("existing-thread trigger returned malformed lifecycle records")
+            if not isinstance(parsed, dict):
+                raise ValueError("existing-thread trigger returned malformed lifecycle records")
+            candidates.append(parsed)
+            if len(candidates) > 64:
+                raise ValueError("existing-thread trigger returned too many records")
+
+        thread_started: list[tuple[int, str]] = []
+        turn_started: list[tuple[int, str]] = []
+        for index, item in enumerate(candidates):
+            event_type = item.get("type")
+            has_thread_id = "thread_id" in item
+            has_turn_id = "turn_id" in item
+            if event_type == "thread.started":
+                candidate_thread = item.get("thread_id")
+                if (
+                    not isinstance(candidate_thread, str)
+                    or not candidate_thread.strip()
+                    or has_turn_id
+                ):
+                    raise ValueError("existing-thread trigger returned malformed lifecycle records")
+                thread_started.append((index, candidate_thread))
+            elif event_type == "turn.started":
+                candidate_turn = item.get("turn_id")
+                if (
+                    not isinstance(candidate_turn, str)
+                    or not candidate_turn.strip()
+                    or has_thread_id
+                ):
+                    raise ValueError("existing-thread trigger returned malformed lifecycle records")
+                turn_started.append((index, candidate_turn))
+            elif has_thread_id or has_turn_id:
+                raise ValueError("existing-thread trigger returned wrong lifecycle record types")
+
+        if (
+            len(thread_started) != 1
+            or len(turn_started) != 1
+            or thread_started[0][0] >= turn_started[0][0]
+            or thread_started[0][1] != thread_id
+        ):
             raise ValueError("existing-thread trigger requires one correlated readback")
         normalized = {
             "thread_id": thread_id,
-            "turn_id": next(iter(turn_ids)),
+            "turn_id": turn_started[0][1],
             "status": "accepted",
         }
         return _closed_trigger_readback(normalized, expected_thread_id=thread_id)
