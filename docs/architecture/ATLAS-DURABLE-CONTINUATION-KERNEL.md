@@ -39,8 +39,10 @@ read-only no-op. A changed replay with the same logical identity fails closed.
 sent-unconfirmed, and only then calls a `TriggerAdapter`.
 The production-shaped adapter exposes only `start_existing_turn`; it has no
 thread-creation method. Its command surface is `codex exec resume <thread>` and
-its readback is reduced to `{thread_id, turn_id, status}` before persistence.
-Prompt/model output is never stored.
+it correlates the separate `thread.started` and `turn.started` JSONL lifecycle
+records before reducing readback to `{thread_id, turn_id, status}`. Missing,
+wrong, or multiple lifecycle identities remain sent-unconfirmed rather than
+being treated as retryable. Prompt/model output is never stored.
 
 The Stop hook is same-session acceleration and a mutually exclusive delivery
 transport. In one SQLite transaction it consumes one `PENDING` row into the
@@ -58,6 +60,11 @@ Startup recovery is an explicit one-shot call:
 - desired active compute without direct turn evidence becomes
   `UNEXPECTED_IDLE` / `RESUMABLE_QUEUED`.
 
+An absent turn inventory is not evidence of idleness. Active-owner liveness is
+reconciled only when the caller supplies an authoritative inventory, including
+an explicitly empty inventory. Event ingress without that inventory performs
+outbox recovery but cannot create a duplicate continuation turn.
+
 No background scanner is started. Process startup, a local event, or an
 explicit operator command invokes one reconciliation pass.
 
@@ -66,7 +73,12 @@ explicit operator command invokes one reconciliation pass.
 Successor dispatch is automatic only for `AUTO_AUTHORIZED_LOCAL_ONLY` or
 `EXPLICIT_AUTHORIZED_LOCAL_ONLY` and `LOCAL_ZERO` or `NO_COST`. Other classes
 remain blocked with no outbox row. Conflict claims are unique; one blocked lane
-does not prevent another owner/conflict group from advancing.
+does not prevent another owner/conflict group from advancing. Claim release and
+startup reconciliation deterministically promote one dependency-ready waiter
+per free conflict key, atomically creating its claim and unique outbox trigger.
+Exact settlement replay recovers blocked successor identity from durable packet
+state even when authorization, cost, or conflict intentionally produced no
+outbox row.
 
 Capacity and token exhaustion are resumable queued states. Identity mismatch,
 hostile readback, and sent-without-confirmation ambiguity fail closed.

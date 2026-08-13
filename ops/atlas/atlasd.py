@@ -131,16 +131,21 @@ class CodexPersistentThreadAdapter:
                 candidates.append(parsed)
                 if len(candidates) > 64:
                     raise ValueError("existing-thread trigger returned too many records")
-        matches = [
-            item for item in candidates
-            if item.get("thread_id") == thread_id and isinstance(item.get("turn_id"), str)
-        ]
-        if len(matches) != 1:
+        thread_ids: set[str] = set()
+        turn_ids: set[str] = set()
+        for item in candidates:
+            candidate_thread = item.get("thread_id")
+            candidate_turn = item.get("turn_id")
+            if isinstance(candidate_thread, str) and candidate_thread.strip():
+                thread_ids.add(candidate_thread)
+            if isinstance(candidate_turn, str) and candidate_turn.strip():
+                turn_ids.add(candidate_turn)
+        if thread_ids != {thread_id} or len(turn_ids) != 1:
             raise ValueError("existing-thread trigger requires one correlated readback")
         normalized = {
-            "thread_id": matches[0].get("thread_id"),
-            "turn_id": matches[0].get("turn_id"),
-            "status": matches[0].get("status", "accepted"),
+            "thread_id": thread_id,
+            "turn_id": next(iter(turn_ids)),
+            "status": "accepted",
         }
         return _closed_trigger_readback(normalized, expected_thread_id=thread_id)
 
@@ -286,6 +291,10 @@ class EventDrivenContinuationWorker:
 
     def handle_event(self, *, event_id: str, worker_id: str) -> dict[str, object]:
         with SingleInstanceGuard(self.guard_path):
+            # Ingress alone is not authoritative evidence that an active owner
+            # has become idle. A caller with a complete turn inventory may run
+            # reconciliation explicitly with observed_turns; this event seam
+            # deliberately performs recovery without inventing liveness.
             recovery = self.runtime.reconcile_continuation_startup()
             dispatch = ContinuationDispatcher(self.runtime, self.adapter).dispatch_one(
                 worker_id=worker_id

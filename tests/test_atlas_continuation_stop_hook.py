@@ -11,6 +11,7 @@ from ops.atlas.atlas_runtime import AtlasRuntime
 from ops.atlas.atlasd import (
     CodexPersistentThreadAdapter,
     ContinuationDispatcher,
+    EventDrivenContinuationWorker,
     FixtureTriggerAdapter,
     SingleInstanceGuard,
     _closed_trigger_readback,
@@ -96,6 +97,56 @@ class DurableContinuationKernelTests(unittest.TestCase):
                 terminal_receipt={"event_id": "terminal-1", "result": "CHANGED"},
                 expected_owner_revision=1,
             )
+
+    def test_blocked_successor_exact_replay_preserves_identity(self):
+        cases = (
+            ("authorization", {"authorization_kind": "REQUIRES_OPERATOR"},
+             "BLOCKED_AUTHORIZATION"),
+            ("cost", {"cost_kind": "UNKNOWN"}, "BLOCKED_COST"),
+        )
+        for label, overrides, expected_state in cases:
+            with self.subTest(label=label):
+                database = Path(self.tmp.name) / f"{label}.db"
+                runtime = AtlasRuntime(database)
+                try:
+                    runtime.register_continuation_owner(
+                        owner_id=f"owner.{label}", thread_id=f"thread-{label}"
+                    )
+                    pack = runtime.create_context_pack(
+                        {"summary": label, "source_refs": [f"fixture:{label}"]}
+                    )
+                    runtime.register_continuation_packet(
+                        packet_id=f"{label}-first", owner_id=f"owner.{label}",
+                        conflict_key=f"repo:{label}:first", context_pack_id=pack,
+                    )
+                    runtime.register_continuation_packet(
+                        packet_id=f"{label}-next", owner_id=f"owner.{label}",
+                        conflict_key=f"repo:{label}:next", context_pack_id=pack,
+                        after_packet_id=f"{label}-first", **overrides,
+                    )
+                    runtime.activate_continuation_packet(packet_id=f"{label}-first")
+                    kwargs = {
+                        "packet_id": f"{label}-first",
+                        "terminal_receipt": {
+                            "event_id": f"terminal-{label}", "result": "SEALED"
+                        },
+                        "expected_owner_revision": 1,
+                    }
+                    first = runtime.commit_continuation(**kwargs)
+                    replay = runtime.commit_continuation(**kwargs)
+                    self.assertEqual(first.successor_packet_id, f"{label}-next")
+                    self.assertEqual(replay.successor_packet_id, first.successor_packet_id)
+                    self.assertTrue(replay.replayed)
+                    self.assertIsNone(replay.trigger_key)
+                    self.assertEqual(
+                        runtime.db.execute(
+                            "SELECT state FROM continuation_packets WHERE packet_id=?",
+                            (f"{label}-next",),
+                        ).fetchone()["state"],
+                        expected_state,
+                    )
+                finally:
+                    runtime.close()
 
     def test_same_session_stop_hook_excludes_one_shot_dispatch(self):
         committed = self.commit()
@@ -258,6 +309,120 @@ class DurableContinuationKernelTests(unittest.TestCase):
             before,
         )
 
+    def test_ingress_without_liveness_inventory_does_not_duplicate_active_turn(self):
+        self.commit()
+        adapter = FixtureTriggerAdapter()
+        dispatcher = ContinuationDispatcher(self.runtime, adapter)
+        self.assertIsNotNone(dispatcher.dispatch_one(worker_id="first"))
+        worker = EventDrivenContinuationWorker(
+            self.runtime, adapter, guard_path=Path(self.tmp.name) / "event-worker.lock"
+        )
+        result = worker.handle_event(event_id="second-ingress", worker_id="second")
+        self.assertEqual(result["recovery"], ())
+        self.assertIsNone(result["dispatch"])
+        self.assertEqual(len(adapter.calls), 1)
+        owner = self.runtime.continuation_status()["owners"][0]
+        self.assertEqual(owner["desired_state"], "ACTIVE_COMPUTE")
+        self.assertEqual(owner["observed_state"], "ACTIVE_COMPUTE")
+
+    def test_released_conflict_promotes_one_waiter_once(self):
+        self.runtime.register_continuation_owner(
+            owner_id="owner.blocker", thread_id="thread-blocker"
+        )
+        shared = self.runtime.create_context_pack(
+            {"summary": "shared", "source_refs": ["fixture:shared"]}
+        )
+        self.runtime.register_continuation_packet(
+            packet_id="blocker", owner_id="owner.blocker", conflict_key="repo:shared",
+            context_pack_id=shared,
+        )
+        self.runtime.activate_continuation_packet(packet_id="blocker")
+        self.runtime.register_continuation_packet(
+            packet_id="packet-waiter", owner_id="owner.test", conflict_key="repo:shared",
+            context_pack_id=shared, after_packet_id="packet-1", priority=100,
+        )
+        self.runtime.register_continuation_owner(
+            owner_id="owner.second-waiter", thread_id="thread-second-waiter"
+        )
+        self.runtime.register_continuation_packet(
+            packet_id="packet-second-waiter", owner_id="owner.second-waiter",
+            conflict_key="repo:shared", context_pack_id=shared, priority=1,
+            state="WAITING_CONFLICT",
+        )
+        first = self.commit()
+        replay = self.commit()
+        self.assertEqual(first.successor_packet_id, "packet-waiter")
+        self.assertEqual(replay.successor_packet_id, "packet-waiter")
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT state FROM continuation_packets WHERE packet_id='packet-waiter'"
+            ).fetchone()["state"],
+            "WAITING_CONFLICT",
+        )
+        released = self.runtime.commit_continuation(
+            packet_id="blocker",
+            terminal_receipt={"event_id": "terminal-blocker", "result": "SEALED"},
+            expected_owner_revision=1,
+        )
+        self.assertIsNone(released.successor_packet_id)
+        waiter = self.runtime.db.execute(
+            "SELECT state FROM continuation_packets WHERE packet_id='packet-waiter'"
+        ).fetchone()
+        self.assertEqual(waiter["state"], "DISPATCH_PENDING")
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT COUNT(*) FROM continuation_claims WHERE packet_id='packet-waiter'"
+            ).fetchone()[0],
+            1,
+        )
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT COUNT(*) FROM continuation_outbox WHERE packet_id='packet-waiter'"
+            ).fetchone()[0],
+            1,
+        )
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT state FROM continuation_packets WHERE packet_id='packet-second-waiter'"
+            ).fetchone()["state"],
+            "WAITING_CONFLICT",
+        )
+        self.assertEqual(self.runtime.reconcile_continuation_startup(), ())
+        self.assertEqual(
+            self.runtime.db.execute(
+                "SELECT COUNT(*) FROM continuation_outbox WHERE packet_id='packet-waiter'"
+            ).fetchone()[0],
+            1,
+        )
+
+    def test_startup_reconciliation_promotes_stranded_conflict_waiter(self):
+        runtime = AtlasRuntime(Path(self.tmp.name) / "stranded.db")
+        try:
+            runtime.register_continuation_owner(
+                owner_id="owner.stranded", thread_id="thread-stranded"
+            )
+            pack = runtime.create_context_pack(
+                {"summary": "stranded", "source_refs": ["fixture:stranded"]}
+            )
+            runtime.register_continuation_packet(
+                packet_id="packet-stranded", owner_id="owner.stranded",
+                conflict_key="repo:stranded", context_pack_id=pack,
+                state="WAITING_CONFLICT",
+            )
+            actions = runtime.reconcile_continuation_startup()
+            self.assertEqual(len(actions), 1)
+            self.assertEqual(actions[0]["packet_id"], "packet-stranded")
+            self.assertEqual(actions[0]["action"], "PROMOTED_CONFLICT_WAITER")
+            self.assertEqual(
+                runtime.db.execute(
+                    "SELECT state FROM continuation_packets WHERE packet_id='packet-stranded'"
+                ).fetchone()["state"],
+                "DISPATCH_PENDING",
+            )
+            self.assertEqual(runtime.reconcile_continuation_startup(), ())
+        finally:
+            runtime.close()
+
     def test_deterministic_failure_is_not_retried(self):
         committed = self.commit()
         self.runtime.lease_continuation_trigger(worker_id="worker")
@@ -348,17 +513,28 @@ class DurableContinuationKernelTests(unittest.TestCase):
                 expected_thread_id="thread-existing",
             )
 
-    def test_codex_adapter_has_no_thread_start_and_requires_one_match(self):
+    def test_codex_adapter_correlates_split_jsonl_and_rejects_ambiguous_identity(self):
         responses = [
             subprocess.CompletedProcess(
                 args=[], returncode=0,
-                stdout=json.dumps({"thread_id": "thread-existing", "turn_id": "turn-1", "status": "accepted"}) + "\n",
+                stdout=(
+                    json.dumps({"type": "thread.started", "thread_id": "thread-existing"})
+                    + "\n"
+                    + json.dumps({"type": "turn.started", "turn_id": "turn-1"})
+                    + "\n"
+                ),
                 stderr="",
             ),
             subprocess.CompletedProcess(
                 args=[], returncode=0,
-                stdout=(json.dumps({"thread_id": "thread-existing", "turn_id": "turn-1"}) + "\n" +
-                        json.dumps({"thread_id": "thread-existing", "turn_id": "turn-2"}) + "\n"),
+                stdout=(
+                    json.dumps({"type": "thread.started", "thread_id": "thread-existing"})
+                    + "\n"
+                    + json.dumps({"type": "turn.started", "turn_id": "turn-1"})
+                    + "\n"
+                    + json.dumps({"type": "turn.started", "turn_id": "turn-2"})
+                    + "\n"
+                ),
                 stderr="",
             ),
         ]

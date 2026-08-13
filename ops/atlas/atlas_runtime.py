@@ -1022,6 +1022,110 @@ class AtlasRuntime:
         ).encode("utf-8")
         return "trg_" + hashlib.sha256(body).hexdigest()
 
+    def _promote_waiting_conflicts(
+        self, *, now: float, conflict_keys: Iterable[str] | None = None
+    ) -> tuple[dict[str, str], ...]:
+        """Promote one deterministic eligible waiter per free conflict key.
+
+        The caller owns an IMMEDIATE transaction. Claim, packet, outbox, owner,
+        and metric changes therefore commit or roll back as one effect.
+        """
+        keys = tuple(sorted(set(conflict_keys or ())))
+        key_filter = ""
+        parameters: list[object] = []
+        if keys:
+            key_filter = " AND p.conflict_key IN ({})".format(
+                ",".join("?" for _ in keys)
+            )
+            parameters.extend(keys)
+        waiters = self.db.execute(
+            "SELECT p.*,o.binding_epoch,o.revision AS owner_revision "
+            "FROM continuation_packets p "
+            "JOIN continuation_owners o ON o.owner_id=p.owner_id "
+            "LEFT JOIN continuation_packets predecessor ON predecessor.packet_id=p.after_packet_id "
+            "WHERE p.state='WAITING_CONFLICT' "
+            "AND o.desired_state='QUEUED' "
+            "AND (p.after_packet_id IS NULL OR predecessor.state='SETTLED')"
+            + key_filter
+            + " ORDER BY p.conflict_key,p.priority DESC,p.created_at,p.packet_id",
+            tuple(parameters),
+        ).fetchall()
+        promoted_keys: set[str] = set()
+        actions: list[dict[str, str]] = []
+        for packet in waiters:
+            conflict_key = packet["conflict_key"]
+            if conflict_key in promoted_keys:
+                continue
+            if packet["authorization_kind"] not in {
+                "AUTO_AUTHORIZED_LOCAL_ONLY", "EXPLICIT_AUTHORIZED_LOCAL_ONLY"
+            } or packet["cost_kind"] not in {"LOCAL_ZERO", "NO_COST"}:
+                continue
+            if self.db.execute(
+                "SELECT 1 FROM continuation_claims WHERE conflict_key=?", (conflict_key,)
+            ).fetchone():
+                continue
+            if self.db.execute(
+                "SELECT 1 FROM continuation_claims WHERE owner_id=?", (packet["owner_id"],)
+            ).fetchone():
+                continue
+            if self.db.execute(
+                "SELECT 1 FROM continuation_outbox WHERE owner_id=? "
+                "AND state IN ('PENDING','LEASED','DISPATCHED')",
+                (packet["owner_id"],),
+            ).fetchone():
+                continue
+            next_revision = packet["owner_revision"] + 1
+            trigger_key = self._trigger_key(
+                owner_id=packet["owner_id"],
+                binding_epoch=packet["binding_epoch"],
+                packet_id=packet["packet_id"],
+                context_pack_id=packet["context_pack_id"],
+                owner_revision=next_revision,
+            )
+            payload = {
+                "owner_id": packet["owner_id"],
+                "binding_epoch": packet["binding_epoch"],
+                "packet_id": packet["packet_id"],
+                "context_pack_id": packet["context_pack_id"],
+                "trigger_key": trigger_key,
+            }
+            self.db.execute(
+                "INSERT INTO continuation_claims(conflict_key,packet_id,owner_id,binding_epoch,claimed_at) "
+                "VALUES(?,?,?,?,?)",
+                (conflict_key, packet["packet_id"], packet["owner_id"],
+                 packet["binding_epoch"], now),
+            )
+            self.db.execute(
+                "UPDATE continuation_packets SET state='DISPATCH_PENDING',updated_at=? "
+                "WHERE packet_id=? AND state='WAITING_CONFLICT'",
+                (now, packet["packet_id"]),
+            )
+            self.db.execute(
+                "INSERT INTO continuation_outbox(trigger_key,owner_id,binding_epoch,packet_id,"
+                "context_pack_id,payload_digest,state,created_at,updated_at) "
+                "VALUES(?,?,?,?,?,?,'PENDING',?,?)",
+                (trigger_key, packet["owner_id"], packet["binding_epoch"],
+                 packet["packet_id"], packet["context_pack_id"], self.digest(payload), now, now),
+            )
+            self.db.execute(
+                "UPDATE continuation_owners SET desired_state='DISPATCH_PENDING',"
+                "observed_state='EXPECTED_IDLE',active_turn_id=NULL,revision=?,evidence_at=?,"
+                "updated_at=? WHERE owner_id=?",
+                (next_revision, now, now, packet["owner_id"]),
+            )
+            self.db.execute(
+                "INSERT INTO continuation_metrics(owner_id,packet_id,name,value,created_at) "
+                "VALUES(?,?,'conflict_waiter_promoted',1,?)",
+                (packet["owner_id"], packet["packet_id"], now),
+            )
+            promoted_keys.add(conflict_key)
+            actions.append({
+                "packet_id": packet["packet_id"],
+                "trigger_key": trigger_key,
+                "action": "PROMOTED_CONFLICT_WAITER",
+            })
+        return tuple(actions)
+
     def _existing_continuation_commit(
         self, *, event_id: str, digest: str, packet_id: str
     ) -> ContinuationCommit | None:
@@ -1043,12 +1147,25 @@ class AtlasRuntime:
             "WHERE p.after_packet_id=? ORDER BY x.created_at DESC LIMIT 1",
             (packet_id,),
         ).fetchone()
+        blocked_successors = self.db.execute(
+            "SELECT packet_id FROM continuation_packets WHERE after_packet_id=? "
+            "AND state IN ('BLOCKED_AUTHORIZATION','BLOCKED_COST','WAITING_CONFLICT') "
+            "ORDER BY packet_id",
+            (packet_id,),
+        ).fetchall()
+        if not outbox and len(blocked_successors) > 1:
+            raise ValueError("settled replay has ambiguous blocked successor identity")
+        successor_packet_id = (
+            outbox["packet_id"] if outbox
+            else blocked_successors[0]["packet_id"] if blocked_successors
+            else None
+        )
         owner = self.db.execute(
             "SELECT revision FROM continuation_owners WHERE owner_id=?", (packet["owner_id"],)
         ).fetchone()
         return ContinuationCommit(
             packet_id=packet_id,
-            successor_packet_id=(outbox["packet_id"] if outbox else None),
+            successor_packet_id=successor_packet_id,
             trigger_key=(outbox["trigger_key"] if outbox else None),
             owner_revision=owner["revision"],
             replayed=True,
@@ -1183,6 +1300,9 @@ class AtlasRuntime:
                 "INSERT INTO continuation_metrics(owner_id,packet_id,name,value,created_at) "
                 "VALUES(?,?,'terminal_commit',1,?)",
                 (packet["owner_id"], packet_id, now),
+            )
+            self._promote_waiting_conflicts(
+                now=now, conflict_keys=(packet["conflict_key"],)
             )
             self.db.execute("COMMIT")
             return ContinuationCommit(packet_id, successor_id, trigger_key, next_revision, False)
@@ -1391,6 +1511,7 @@ class AtlasRuntime:
         now: float | None = None,
     ) -> tuple[dict[str, str], ...]:
         """One event-driven startup pass; it never starts a timer or polling loop."""
+        liveness_collected = observed_turns is not None
         observed_turns = observed_turns or {}
         now = time.time() if now is None else now
         actions: list[dict[str, str]] = []
@@ -1450,9 +1571,14 @@ class AtlasRuntime:
                     )
                     actions.append({"trigger_key": row["trigger_key"], "action": "DEAD_LETTER_AMBIGUOUS"})
 
-            active_owners = self.db.execute(
-                "SELECT * FROM continuation_owners WHERE desired_state='ACTIVE_COMPUTE'"
-            ).fetchall()
+            actions.extend(self._promote_waiting_conflicts(now=now))
+
+            active_owners = (
+                self.db.execute(
+                    "SELECT * FROM continuation_owners WHERE desired_state='ACTIVE_COMPUTE'"
+                ).fetchall()
+                if liveness_collected else ()
+            )
             observed_thread_ids = {
                 str(item.get("thread_id")) for item in observed_turns.values() if item.get("thread_id")
             }
