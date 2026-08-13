@@ -1,0 +1,100 @@
+{
+  "schema": "atlas.durable-continuation-kernel.v1",
+  "contract_version": "1.0.1",
+  "lifecycle_state": "SOURCE_ONLY_UNINSTALLED",
+  "authority_store": "ops/atlas/atlas_runtime.py",
+  "database": {
+    "engine": "sqlite",
+    "journal_mode": "WAL",
+    "synchronous": "FULL",
+    "single_writer": true
+  },
+  "task_seam": {
+    "job_envelope": "atlas.job-envelope.v2",
+    "execution_receipt": "atlas.execution-receipt.v2",
+    "parallel_protocol_created": false
+  },
+  "owner_binding": {
+    "ownership": "ATLAS",
+    "persistent_thread_required": true,
+    "desktop_arbitrary_task_control_assumed": false,
+    "thread_creation_supported": false
+  },
+  "atomic_terminal_transition": [
+    "terminal_event",
+    "packet_settlement",
+    "claim_release",
+    "successor_selection",
+    "authorization_and_cost_evaluation",
+    "successor_claim",
+    "outbox_insert",
+    "owner_liveness_update",
+    "metric_insert"
+  ],
+  "trigger_delivery": {
+    "semantics": "AT_LEAST_ONCE_TRIGGER_EXACTLY_ONCE_STATE",
+    "same_session_accelerator": "CODEX_STOP_HOOK_DECISION_BLOCK",
+    "delivery_transports_mutually_exclusive": true,
+    "sent_unconfirmed_persisted_before_external_effect": true,
+    "jsonl_lifecycle_correlation": [
+      "thread.started",
+      "turn.started"
+    ],
+    "unbound_stop_hook_result": {},
+    "startup_reconciliation": "EVENT_DRIVEN_ONE_SHOT",
+    "polling": false,
+    "sent_unconfirmed": "DEAD_LETTER_AMBIGUITY"
+  },
+  "liveness": {
+    "desired": [
+      "ACTIVE_COMPUTE",
+      "DISPATCH_PENDING",
+      "QUEUED",
+      "TERMINAL",
+      "WAITING_AUTHORIZATION",
+      "WAITING_COST",
+      "WAITING_EXTERNAL"
+    ],
+    "observed": [
+      "ACTIVE_COMPUTE",
+      "EXPECTED_IDLE",
+      "TERMINAL",
+      "UNEXPECTED_IDLE",
+      "UNKNOWN"
+    ],
+    "active_requires_direct_turn_evidence": true,
+    "absent_inventory_is_idle_evidence": false
+  },
+  "automatic_boundary": {
+    "authorization_kinds": [
+      "AUTO_AUTHORIZED_LOCAL_ONLY",
+      "EXPLICIT_AUTHORIZED_LOCAL_ONLY"
+    ],
+    "cost_kinds": [
+      "LOCAL_ZERO",
+      "NO_COST"
+    ],
+    "resumable_failures": [
+      "CAPACITY_EXHAUSTED",
+      "TOKEN_EXHAUSTED"
+    ],
+    "conflict_waiter_promotion": "ONE_DEPENDENCY_READY_WAITER_PER_FREE_KEY",
+    "blocked_successor_replay_identity": "DURABLE_PACKET_STATE"
+  },
+  "privacy": {
+    "context_pack_max_bytes": 32768,
+    "raw_turn_persistence": false,
+    "prompt_or_model_output_persistence": false,
+    "readback_allowlist": [
+      "thread_id",
+      "turn_id",
+      "status"
+    ]
+  },
+  "installation": {
+    "hooks_globally_installed": false,
+    "hooks_trusted": false,
+    "runtime_active": false,
+    "restart_acceptance": false
+  }
+}
