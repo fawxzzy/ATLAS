@@ -1,0 +1,199 @@
+{
+  "canaries": {
+    "baseline_event_id": "onv1_f2c164eb892f46fa66ea834c6bba96206a3109a9e6817b765d1546690e900502",
+    "baseline_repeated_evidence_bytes": 3543,
+    "classes": [
+      {
+        "allowed_profiles": [
+          "FAST"
+        ],
+        "class": "STATUS_PROJECTION",
+        "evidence_tier": "E1"
+      },
+      {
+        "allowed_profiles": [
+          "STANDARD"
+        ],
+        "class": "ROUTINE_SOURCE_CORRECTION",
+        "evidence_tier": "E2"
+      },
+      {
+        "allowed_profiles": [
+          "STANDARD",
+          "DEEP"
+        ],
+        "class": "INDEPENDENT_REVIEW",
+        "evidence_tier": "E3"
+      },
+      {
+        "allowed_profiles": [
+          "DEEP"
+        ],
+        "class": "SCHEDULER_RECOVERY",
+        "evidence_tier": "E3"
+      },
+      {
+        "allowed_profiles": [
+          "DEEP"
+        ],
+        "class": "MIGRATION_PLANNING",
+        "evidence_tier": "E3"
+      }
+    ],
+    "compare": [
+      "QUALITY",
+      "COMPLETENESS",
+      "TOOL_CORRECTNESS",
+      "LATENCY",
+      "TURNS",
+      "TOKEN_PROXIES"
+    ],
+    "dropped_acceptance_criteria": 0,
+    "dropped_required_evidence_refs": 0,
+    "maximum_repeated_evidence_bytes": 2480,
+    "minimum_completed_canaries": 5,
+    "minimum_repeated_context_reduction_percent": 30,
+    "savings_success_rule": "RESOURCE_REDUCTION_COUNTS_ONLY_WHEN_ACCEPTANCE_AND_REQUIRED_EVIDENCE_DO_NOT_REGRESS"
+  },
+  "contract_version": "atlas.execution-profile.registry.v1",
+  "global_rules": [
+    "PACKET_SELECTS_PROFILE",
+    "STANDING_ROLE_DECLARES_DEFAULT_AND_FLOOR",
+    "PROFILE_BELOW_ROLE_FLOOR_FAILS_CLOSED_AND_REQUIRES_EXPLICIT_REISSUE",
+    "FAILED_ACCEPTANCE_MAY_ESCALATE_UPWARD",
+    "CRITICAL_OR_HIGH_RISK_NEVER_DOWNGRADES_FOR_COST_ALONE",
+    "MAX_REQUIRES_BENCHMARK_AND_EXPLICIT_EXCEPTION",
+    "ULTRA_NOT_IN_CANONICAL_MAPPING",
+    "UNPROVEN_EFFECTIVE_MODEL_OR_REASONING_FAILS_CLOSED",
+    "NO_SILENT_FALLBACK"
+  ],
+  "policy_ids": [
+    "ATLAS-MODEL-USAGE-MULTIWORKER-WAVE-1-AUDIT-20260727-001",
+    "ATLAS-WORKFLOW-STANDARDIZATION-20260721-001",
+    "FAWXZZY-PORTFOLIO-P0-MODEL-GOVERNANCE-DIRECTIVE-20260724-001"
+  ],
+  "profile_order": [
+    "FAST",
+    "STANDARD",
+    "DEEP",
+    "CRITICAL"
+  ],
+  "profile_version": "atlas.execution-profiles.v1",
+  "profiles": {
+    "CRITICAL": {
+      "model": "gpt-5.6-sol",
+      "provider": "openai",
+      "reasoning_allowed": [
+        "xhigh",
+        "max"
+      ],
+      "reasoning_default": "xhigh",
+      "reasoning_elevation_rule": "MAX_REQUIRES_EXPLICIT_BENCHMARKED_EXCEPTION",
+      "workload_classes": [
+        "HIGHEST_RISK_QUALITY_FIRST_WORK"
+      ]
+    },
+    "DEEP": {
+      "model": "gpt-5.6-sol",
+      "provider": "openai",
+      "reasoning_allowed": [
+        "high",
+        "xhigh"
+      ],
+      "reasoning_default": "high",
+      "reasoning_elevation_rule": "XHIGH_FOR_MIGRATION_SECURITY_ARCHITECTURE_OR_FAILED_HIGH_CANARY",
+      "workload_classes": [
+        "COMPLEX_ANALYSIS",
+        "SCHEDULER_RECOVERY",
+        "MIGRATION_PLANNING",
+        "SECURITY_REVIEW",
+        "ARCHITECTURE"
+      ]
+    },
+    "FAST": {
+      "model": "gpt-5.6-luna",
+      "provider": "openai",
+      "reasoning_allowed": [
+        "low",
+        "medium"
+      ],
+      "reasoning_default": "low",
+      "reasoning_elevation_rule": "MEDIUM_ONLY_FOR_CLEAR_REPEATABLE_WORK_REQUIRING_MODEST_SYNTHESIS",
+      "workload_classes": [
+        "EXTRACTION",
+        "CLASSIFICATION",
+        "TRANSFORMATION",
+        "STRUCTURED_SUMMARY",
+        "STATUS_PROJECTION",
+        "DEDUPE_RENDERING"
+      ]
+    },
+    "STANDARD": {
+      "model": "gpt-5.6-terra",
+      "provider": "openai",
+      "reasoning_allowed": [
+        "medium",
+        "high"
+      ],
+      "reasoning_default": "medium",
+      "reasoning_elevation_rule": "HIGH_FOR_BOUNDED_IMPLEMENTATION_CI_CORRECTION_OR_ORDINARY_REVIEW_WITH_EDGE_CASES",
+      "workload_classes": [
+        "ROUTINE_BOUNDED_IMPLEMENTATION",
+        "NONCRITICAL_REVIEW",
+        "EVERYDAY_TOOL_WORK"
+      ]
+    }
+  },
+  "reasoning_order": [
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max"
+  ],
+  "role_policies": {
+    "atlas.main": {
+      "default_profile": "DEEP",
+      "floor_profile": "DEEP",
+      "minimum_reasoning_effort": "high"
+    },
+    "atlas.release-control-plane": {
+      "default_profile": "STANDARD",
+      "floor_profile": "STANDARD",
+      "minimum_reasoning_effort": "high"
+    },
+    "atlas.workflow-architect": {
+      "default_profile": "DEEP",
+      "floor_profile": "DEEP",
+      "minimum_reasoning_effort": "high"
+    },
+    "owner.fitness": {
+      "default_profile": "DEEP",
+      "floor_profile": "STANDARD",
+      "minimum_reasoning_effort": "high"
+    },
+    "owner.mazer": {
+      "default_profile": "DEEP",
+      "floor_profile": "STANDARD",
+      "minimum_reasoning_effort": "high"
+    }
+  },
+  "source_evidence": {
+    "fetched_on": "2026-07-27",
+    "migration_guide_url": "https://developers.openai.com/api/docs/guides/upgrading-to-gpt-5p6-sol.md",
+    "model_guide_url": "https://developers.openai.com/api/docs/guides/latest-model?model=gpt-5.6",
+    "pricing_usage_url": "https://learn.chatgpt.com/docs/pricing#what-are-the-usage-limits-for-my-plan",
+    "prompting_guide_url": "https://developers.openai.com/api/docs/guides/prompt-guidance-gpt-5p6.md"
+  },
+  "worker_adapter_boundary": {
+    "adapter_authority": "APPLY_REQUESTED_PROFILE_AND_REPORT_EFFECTIVE_OBSERVATION",
+    "canonical_scheduler": "ATLAS_MAIN_ONLY",
+    "first_canary_adapter": "codex",
+    "held_adapters": [
+      "claude",
+      "litellm"
+    ],
+    "resolver_authority": "PURE_DETERMINISTIC_NO_DISPATCH",
+    "worker_authority": "EXECUTE_BOUND_PACKET_AND_RETURN_RECEIPT_NO_ROUTING"
+  }
+}
