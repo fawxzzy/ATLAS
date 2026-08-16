@@ -164,7 +164,14 @@ jobs:
 
       - name: Set up BrowserStack environment
         if: env.QA_PROVIDER == 'browserstack.playwright.v1'
-        uses: browserstack/github-actions/setup-env@master
+        # Pinned to browserstack/github-actions@master tip as of 2026-08-16
+        # (2026-06-19 commit "semgrep workflow: pin Docker image and actions
+        # to version tags", 12 commits ahead of the last tag v1.0.4). Pinned
+        # to a full commit SHA rather than @master because this action
+        # receives BROWSERSTACK_USERNAME/BROWSERSTACK_ACCESS_KEY secrets and
+        # a mutable branch ref can move after review (GitHub's own guidance
+        # for third-party actions handling secrets).
+        uses: browserstack/github-actions/setup-env@1ab56d9521ce20f4651bb5d9f3ef39c5ba54805a
         with:
           username: ${{ secrets.BROWSERSTACK_USERNAME }}
           access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
@@ -177,7 +184,11 @@ jobs:
       - name: Start BrowserStack Local
         id: browserstack-local
         if: env.QA_PROVIDER == 'browserstack.playwright.v1'
-        uses: browserstack/github-actions/setup-local@master
+        # Pinned to browserstack/github-actions@master tip as of 2026-08-16
+        # (2026-06-19 commit "semgrep workflow: pin Docker image and actions
+        # to version tags", 12 commits ahead of the last tag v1.0.4). See
+        # the "Set up BrowserStack environment" step above for rationale.
+        uses: browserstack/github-actions/setup-local@1ab56d9521ce20f4651bb5d9f3ef39c5ba54805a
         with:
           local-testing: start
           local-logging-level: all-logs
@@ -202,7 +213,11 @@ jobs:
 
       - name: Stop BrowserStack Local
         if: always() && env.QA_PROVIDER == 'browserstack.playwright.v1' && steps.browserstack-local.outcome == 'success'
-        uses: browserstack/github-actions/setup-local@master
+        # Pinned to browserstack/github-actions@master tip as of 2026-08-16
+        # (2026-06-19 commit "semgrep workflow: pin Docker image and actions
+        # to version tags", 12 commits ahead of the last tag v1.0.4). See
+        # the "Set up BrowserStack environment" step above for rationale.
+        uses: browserstack/github-actions/setup-local@1ab56d9521ce20f4651bb5d9f3ef39c5ba54805a
         with:
           local-testing: stop
           local-identifier: atlas-qa-${{ github.run_id }}-${{ github.run_attempt }}
