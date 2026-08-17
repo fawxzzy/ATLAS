@@ -668,6 +668,7 @@ def _validate_budget_fields(requested: Mapping[str, Any]) -> list[str]:
     if not isinstance(token, Mapping):
         findings.append("token_budget_invalid")
     else:
+        enforcement = token.get("enforcement")
         for field in ("max_total_tokens", "max_output_tokens"):
             value = token.get(field)
             _append(
@@ -675,9 +676,22 @@ def _validate_budget_fields(requested: Mapping[str, Any]) -> list[str]:
                 value is not None and (not isinstance(value, int) or value <= 0),
                 f"token_budget_field_invalid:{field}",
             )
+            if enforcement == "HARD_LIMIT":
+                # A HARD_LIMIT that leaves either ceiling null enforces
+                # nothing for that dimension -- fail-open. Both ceilings
+                # must be concrete positive integers whenever enforcement
+                # is HARD_LIMIT. Mirrored structurally in the token_budget
+                # anyOf in schemas/atlas.execution-observation.v1.json
+                # (OBSERVE_ONLY allows null ceilings, HARD_LIMIT does not),
+                # so this is enforced at both the schema and code layers.
+                _append(
+                    findings,
+                    not isinstance(value, int) or value <= 0,
+                    f"hard_limit_ceiling_missing:{field}",
+                )
         _append(
             findings,
-            token.get("enforcement") not in {"HARD_LIMIT", "OBSERVE_ONLY"},
+            enforcement not in {"HARD_LIMIT", "OBSERVE_ONLY"},
             "token_budget_enforcement_invalid",
         )
 
@@ -1097,9 +1111,19 @@ def resolve_execution(
 
     profile_id = requested.get("profile_id")
     profiles = registry_view.get("profiles")
-    profile = profiles.get(profile_id) if isinstance(profiles, Mapping) else None
-    if not isinstance(profile, Mapping):
-        profile = None
+    profile = None
+    if isinstance(profiles, Mapping):
+        if isinstance(profile_id, str):
+            candidate = profiles.get(profile_id)
+            if isinstance(candidate, Mapping):
+                profile = candidate
+        else:
+            # profile_id is an untrusted nested discriminator (may be a
+            # list, dict, number, etc.). Never use it as a dict key
+            # directly -- dict.get() raises TypeError on unhashable
+            # values, which would surface as a 500 instead of a
+            # structured fail-closed finding.
+            findings.append("requested_profile_id_type_invalid")
     _append(findings, profile is None, "requested_profile_unknown")
     _append(
         findings,
@@ -1126,13 +1150,19 @@ def resolve_execution(
         )
 
     role_policies = registry_view.get("role_policies")
-    role_policy = (
-        role_policies.get(logical_role_id)
-        if isinstance(role_policies, Mapping)
-        else None
-    )
-    if not isinstance(role_policy, Mapping):
-        role_policy = None
+    role_policy = None
+    if isinstance(role_policies, Mapping):
+        if isinstance(logical_role_id, str):
+            candidate = role_policies.get(logical_role_id)
+            if isinstance(candidate, Mapping):
+                role_policy = candidate
+        else:
+            # Same hashable-type hazard as profile_id above: logical_role_id
+            # can arrive as a malformed nested value (e.g. a list) rather
+            # than a string. _is_nonempty_string already flags this via
+            # logical_role_id_invalid above, but that check does not stop
+            # this lookup from running, so guard it independently too.
+            findings.append("logical_role_id_type_invalid")
     _append(findings, role_policy is None, "role_policy_missing")
     if role_policy is not None and profile_id in PROFILE_IDS:
         floor_profile = role_policy.get("floor_profile")
@@ -1232,7 +1262,15 @@ def resolve_execution(
         "silent_or_unapproved_fallback_detected",
     )
 
-    raw_usage = copy.deepcopy(dict(usage or _default_usage()))
+    # NOTE: deliberately `usage is not None`, not truthy `usage or ...`.
+    # An explicitly supplied empty usage object (`usage={}`) is falsy but
+    # is NOT the same thing as usage being omitted (`usage=None`): the
+    # caller is asserting a usage record, just an incomplete one, and an
+    # incomplete-but-present record must fail validate_usage's per-field
+    # checks below rather than being silently replaced with full defaults.
+    raw_usage = (
+        copy.deepcopy(dict(usage)) if usage is not None else _default_usage()
+    )
     findings.extend(validate_usage(raw_usage))
     findings.extend(_enforce_budget_limits(requested, raw_usage))
     usage_value = raw_usage
@@ -1281,7 +1319,15 @@ def validate_canary_result(
         item.get("class"): item for item in classes if isinstance(item, Mapping)
     }
     canary_class = result.get("canary_class")
-    definition = definitions.get(canary_class)
+    definition = None
+    if isinstance(canary_class, str):
+        candidate = definitions.get(canary_class)
+        if isinstance(candidate, Mapping):
+            definition = candidate
+    else:
+        # Same hashable-type hazard as profile_id/logical_role_id: never
+        # pass an untrusted nested discriminator straight into dict.get().
+        findings.append("canary_class_type_invalid")
     _append(findings, definition is None, "canary_class_unknown")
     if definition is not None:
         _append(
@@ -1294,12 +1340,17 @@ def validate_canary_result(
             result.get("evidence_tier") != definition.get("evidence_tier"),
             "canary_evidence_tier_mismatch",
         )
+    # NOTE: this set intentionally does not include a self-asserted
+    # "completed_canary_classes" field. A bare list of class names that a
+    # caller claims to have completed is not evidence that those canaries
+    # ran or passed -- see validate_canary_campaign() below, which binds
+    # five-canary completion to five independently re-validated, content-
+    # addressed result payloads instead.
     required_fields = {
         "accepted",
         "baseline_event_id",
         "baseline_repeated_evidence_bytes",
         "canary_class",
-        "completed_canary_classes",
         "comparison",
         "dropped_acceptance_criteria",
         "dropped_required_evidence_refs",
@@ -1335,20 +1386,6 @@ def validate_canary_result(
         findings,
         baseline != canaries.get("baseline_repeated_evidence_bytes"),
         "canary_result_baseline_bytes_mismatch",
-    )
-
-    completed = result.get("completed_canary_classes")
-    exact_classes = {item["class"] for item in CANONICAL_CANARY_CLASSES}
-    completed_valid = isinstance(completed, list) and all(
-        isinstance(item, str) for item in completed
-    )
-    _append(
-        findings,
-        not completed_valid
-        or len(completed) != canaries.get("minimum_completed_canaries")
-        or len(set(completed)) != len(completed)
-        or set(completed) != exact_classes,
-        "canary_completed_set_mismatch",
     )
 
     comparison = result.get("comparison")
@@ -1438,6 +1475,103 @@ def validate_canary_result(
         )
     else:
         findings.append("canary_reduction_evidence_invalid")
+    return sorted(set(findings))
+
+
+def _canary_result_digest(result: Mapping[str, Any]) -> str:
+    """Content-addressed digest for one canary result payload.
+
+    Used to bind campaign-level five-canary completion evidence to the
+    exact result content that earned it, rather than to a self-asserted
+    class-name list (which proves nothing about whether the other four
+    canaries actually ran or passed).
+    """
+
+    return "canres1_" + hashlib.sha256(canonical_bytes(result)).hexdigest()
+
+
+def validate_canary_campaign(
+    registry: Mapping[str, Any], campaign: Mapping[str, Any]
+) -> list[str]:
+    """Validate a canary campaign receipt.
+
+    A campaign is accepted only when it carries five distinct, fully
+    populated canary result payloads -- one per required canary class --
+    each of which independently re-validates under validate_canary_result,
+    and each of which is bound to a content-addressed digest computed over
+    its own canonical JSON bytes. This replaces the previous
+    "completed_canary_classes: [...]" self-assertion on a single result,
+    which was just a list of names with no evidence backing it: a caller
+    could claim all five classes were complete without any of the other
+    four results ever having existed or passed.
+    """
+
+    registry_findings = validate_registry(registry)
+    findings = list(registry_findings)
+    if not isinstance(campaign, Mapping):
+        findings.append("canary_campaign_root_invalid")
+        campaign = {}
+    if registry_findings and all(
+        finding.startswith("registry_schema_invalid:")
+        for finding in registry_findings
+    ):
+        return sorted(set(findings))
+    registry_view: Mapping[str, Any] = (
+        registry if isinstance(registry, Mapping) else {}
+    )
+
+    results = campaign.get("canary_results")
+    if (
+        not isinstance(results, list)
+        or not results
+        or any(not isinstance(item, Mapping) for item in results)
+    ):
+        findings.append("canary_campaign_results_invalid")
+        results = []
+
+    exact_classes = {item["class"] for item in CANONICAL_CANARY_CLASSES}
+    digests: list[str] = []
+    class_counts: dict[str, int] = {}
+    for index, result in enumerate(results):
+        result_findings = validate_canary_result(registry_view, result)
+        if result_findings:
+            findings.append(f"canary_campaign_result_invalid:{index}")
+        try:
+            digests.append(_canary_result_digest(result))
+        except (TypeError, ValueError, OverflowError):
+            # Malformed/non-canonical result content (e.g. NaN sneaked in
+            # through a non-standard JSON parser) must fail closed here,
+            # not raise out of a validator.
+            findings.append(f"canary_campaign_result_not_canonical:{index}")
+            continue
+        canary_class = result.get("canary_class")
+        if isinstance(canary_class, str):
+            class_counts[canary_class] = class_counts.get(canary_class, 0) + 1
+
+    _append(
+        findings,
+        len(results) != 5,
+        "canary_campaign_result_count_invalid",
+    )
+    _append(
+        findings,
+        len(set(digests)) != len(digests),
+        "canary_campaign_digests_not_unique",
+    )
+    _append(
+        findings,
+        set(class_counts) != exact_classes
+        or any(count != 1 for count in class_counts.values()),
+        "canary_campaign_classes_incomplete",
+    )
+
+    declared_digests = campaign.get("canary_result_digests")
+    _append(
+        findings,
+        not isinstance(declared_digests, list)
+        or sorted(declared_digests) != sorted(digests),
+        "canary_campaign_declared_digests_mismatch",
+    )
     return sorted(set(findings))
 
 

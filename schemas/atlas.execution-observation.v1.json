@@ -353,44 +353,68 @@
       "type": "object"
     },
     "token_budget": {
-      "additionalProperties": false,
-      "properties": {
-        "enforcement": {
-          "enum": [
-            "HARD_LIMIT",
-            "OBSERVE_ONLY"
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "enforcement": {
+              "const": "OBSERVE_ONLY",
+              "type": "string"
+            },
+            "max_output_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "max_total_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "enforcement",
+            "max_output_tokens",
+            "max_total_tokens"
           ],
-          "type": "string"
+          "type": "object"
         },
-        "max_output_tokens": {
-          "anyOf": [
-            {
+        {
+          "additionalProperties": false,
+          "properties": {
+            "enforcement": {
+              "const": "HARD_LIMIT",
+              "type": "string"
+            },
+            "max_output_tokens": {
               "minimum": 1,
               "type": "integer"
             },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "max_total_tokens": {
-          "anyOf": [
-            {
+            "max_total_tokens": {
               "minimum": 1,
               "type": "integer"
-            },
-            {
-              "type": "null"
             }
-          ]
+          },
+          "required": [
+            "enforcement",
+            "max_output_tokens",
+            "max_total_tokens"
+          ],
+          "type": "object"
         }
-      },
-      "required": [
-        "enforcement",
-        "max_output_tokens",
-        "max_total_tokens"
-      ],
-      "type": "object"
+      ]
     },
     "turn_budget": {
       "additionalProperties": false,

@@ -153,9 +153,6 @@ class AtlasModelGovernanceContractTests(unittest.TestCase):
             "baseline_event_id": canaries["baseline_event_id"],
             "baseline_repeated_evidence_bytes": baseline,
             "canary_class": definition["class"],
-            "completed_canary_classes": [
-                item["class"] for item in canaries["classes"]
-            ],
             "comparison": {
                 "QUALITY": {
                     "baseline": 100,
@@ -200,6 +197,17 @@ class AtlasModelGovernanceContractTests(unittest.TestCase):
             "repeated_evidence_bytes": repeated_evidence_bytes,
         }
 
+    def canary_campaign(self) -> dict:
+        results = [
+            self.canary_result(definition)
+            for definition in self.registry["canaries"]["classes"]
+        ]
+        digests = [RESOLVER._canary_result_digest(result) for result in results]
+        return {
+            "canary_result_digests": digests,
+            "canary_results": results,
+        }
+
     def resolve(
         self,
         role_id: str,
@@ -228,7 +236,7 @@ class AtlasModelGovernanceContractTests(unittest.TestCase):
                 requested["reasoning_effort"],
                 requested["execution_binding"],
             ),
-            usage=copy.deepcopy(usage or self.usage()),
+            usage=copy.deepcopy(usage) if usage is not None else self.usage(),
         )
 
     def test_registry_and_fixture_validate_against_closed_schema(self) -> None:
@@ -1184,7 +1192,7 @@ class AtlasModelGovernanceContractTests(unittest.TestCase):
             RESOLVER.validate_canary_result(self.registry, regressed),
         )
 
-    def test_canary_contract_requires_unique_complete_campaign_evidence(self) -> None:
+    def test_canary_result_field_and_regression_matrix_fails_closed(self) -> None:
         duplicate = copy.deepcopy(self.registry)
         duplicate["canaries"]["classes"] = [
             copy.deepcopy(self.registry["canaries"]["classes"][0])
@@ -1213,12 +1221,6 @@ class AtlasModelGovernanceContractTests(unittest.TestCase):
             "repeated_evidence_bytes": 2480,
         }
         cases.append((minimal, "canary_result_fields_mismatch"))
-
-        incomplete = copy.deepcopy(complete)
-        incomplete["completed_canary_classes"] = [
-            "STATUS_PROJECTION"
-        ] * 5
-        cases.append((incomplete, "canary_completed_set_mismatch"))
 
         missing_dimension = copy.deepcopy(complete)
         del missing_dimension["comparison"]["TOKEN_PROXIES"]
@@ -1250,6 +1252,231 @@ class AtlasModelGovernanceContractTests(unittest.TestCase):
                     self.registry, candidate
                 )
                 self.assertIn(expected, findings)
+
+    def test_five_canary_campaign_requires_five_unique_content_addressed_results(
+        self,
+    ) -> None:
+        campaign = self.canary_campaign()
+        self.assertEqual(
+            [], RESOLVER.validate_canary_campaign(self.registry, campaign)
+        )
+
+        # Too few results: a caller cannot claim completion evidence for
+        # canaries whose result payloads were never actually submitted.
+        too_few = copy.deepcopy(campaign)
+        too_few["canary_results"] = too_few["canary_results"][:4]
+        too_few["canary_result_digests"] = too_few["canary_result_digests"][:4]
+        findings = RESOLVER.validate_canary_campaign(self.registry, too_few)
+        self.assertIn("canary_campaign_result_count_invalid", findings)
+        self.assertIn("canary_campaign_classes_incomplete", findings)
+
+        # A result standing in twice for two different classes (instead of
+        # five distinct classes each appearing once) must fail closed, even
+        # though it is still five well-formed results.
+        duplicated_class = copy.deepcopy(campaign)
+        duplicated_class["canary_results"][1] = copy.deepcopy(
+            duplicated_class["canary_results"][0]
+        )
+        duplicated_class["canary_result_digests"] = [
+            RESOLVER._canary_result_digest(result)
+            for result in duplicated_class["canary_results"]
+        ]
+        findings = RESOLVER.validate_canary_campaign(
+            self.registry, duplicated_class
+        )
+        self.assertIn("canary_campaign_classes_incomplete", findings)
+        self.assertIn("canary_campaign_digests_not_unique", findings)
+
+        # A result that itself would not independently validate (e.g. not
+        # accepted) must not be laundered into campaign completion just
+        # because a name for its class appears somewhere in the campaign.
+        unaccepted = copy.deepcopy(campaign)
+        unaccepted["canary_results"][2]["accepted"] = False
+        findings = RESOLVER.validate_canary_campaign(self.registry, unaccepted)
+        self.assertIn("canary_campaign_result_invalid:2", findings)
+
+        # The declared digest list is evidence too: it must match what the
+        # actual result content hashes to, not an independently asserted
+        # value that could reference a result that was never submitted.
+        tampered_digests = copy.deepcopy(campaign)
+        tampered_digests["canary_result_digests"][0] = (
+            "canres1_" + ("0" * 64)
+        )
+        findings = RESOLVER.validate_canary_campaign(
+            self.registry, tampered_digests
+        )
+        self.assertIn("canary_campaign_declared_digests_mismatch", findings)
+
+        # A structurally malformed campaign (not a mapping, or missing/
+        # non-list canary_results) must fail closed without raising.
+        try:
+            findings = RESOLVER.validate_canary_campaign(self.registry, [])
+        except TypeError:
+            self.fail(
+                "validate_canary_campaign raised on a non-mapping campaign"
+            )
+        self.assertIn("canary_campaign_root_invalid", findings)
+
+        try:
+            findings = RESOLVER.validate_canary_campaign(
+                self.registry, {"canary_results": "not-a-list"}
+            )
+        except TypeError:
+            self.fail(
+                "validate_canary_campaign raised on malformed canary_results"
+            )
+        self.assertIn("canary_campaign_results_invalid", findings)
+
+    def test_malformed_nested_discriminators_fail_closed_without_raising(
+        self,
+    ) -> None:
+        # profile_id, logical_role_id, and canary_class are all untrusted
+        # nested discriminators that used to be passed straight into a
+        # dict.get() call. A malformed shape (e.g. a list where a string
+        # is expected) must produce a structured BLOCKED/failed-closed
+        # result, never an unhandled TypeError: unhashable type.
+        requested = self.requested("DEEP", "high", "ARCHITECTURE")
+
+        malformed_profile = copy.deepcopy(requested)
+        malformed_profile["profile_id"] = ["DEEP"]
+        try:
+            result = self.resolve(
+                "atlas.workflow-architect", malformed_profile
+            )
+        except TypeError:
+            self.fail(
+                "resolve_execution raised on a malformed nested profile_id"
+            )
+        self.assertEqual("BLOCKED", result["decision"]["state"])
+        self.assertIn(
+            "requested_profile_id_type_invalid", result["decision"]["findings"]
+        )
+
+        try:
+            result = RESOLVER.resolve_execution(
+                self.registry,
+                packet_id="packet-001",
+                logical_role_id=["atlas.workflow-architect"],
+                admitted_execution_binding={
+                    **copy.deepcopy(requested["execution_binding"]),
+                    "turn_id": "turn-001",
+                },
+                requested=requested,
+                effective=self.effective(
+                    requested["model"],
+                    requested["reasoning_effort"],
+                    requested["execution_binding"],
+                ),
+                usage=self.usage(),
+            )
+        except TypeError:
+            self.fail(
+                "resolve_execution raised on a malformed nested "
+                "logical_role_id"
+            )
+        self.assertEqual("BLOCKED", result["decision"]["state"])
+        self.assertIn(
+            "logical_role_id_type_invalid", result["decision"]["findings"]
+        )
+
+        definition = self.registry["canaries"]["classes"][0]
+        malformed_canary = self.canary_result(definition)
+        malformed_canary["canary_class"] = {"class": "STATUS_PROJECTION"}
+        try:
+            findings = RESOLVER.validate_canary_result(
+                self.registry, malformed_canary
+            )
+        except TypeError:
+            self.fail(
+                "validate_canary_result raised on a malformed nested "
+                "canary_class"
+            )
+        self.assertIn("canary_class_type_invalid", findings)
+        self.assertIn("canary_class_unknown", findings)
+
+    def test_explicit_empty_usage_is_rejected_not_defaulted(self) -> None:
+        requested = self.requested("DEEP", "high", "ARCHITECTURE")
+        result = self.resolve("atlas.workflow-architect", requested, usage={})
+        self.assertEqual("BLOCKED", result["decision"]["state"])
+        # An explicitly empty usage object must not be silently replaced by
+        # _default_usage(): it must instead fail per-field validation as an
+        # incomplete usage record, and the observation must keep recording
+        # what was actually sent ({}), not a backfilled default.
+        self.assertEqual({}, result["usage"])
+        findings = set(result["decision"]["findings"])
+        for field in RESOLVER.USAGE_PROXY_FIELDS:
+            self.assertIn(f"usage_proxy_invalid:{field}", findings)
+        self.assertIn("usage_escalation_checkpoint_invalid", findings)
+
+        # Confirm omission (None) still defaults, as before -- only an
+        # explicitly supplied usage object skips the default.
+        omitted = self.resolve(
+            "atlas.workflow-architect", requested, usage=None
+        )
+        self.assertNotEqual({}, omitted["usage"])
+
+    def test_hard_limit_token_budget_requires_concrete_positive_ceilings(
+        self,
+    ) -> None:
+        token_budget_schema = self.observation_schema["$defs"]["token_budget"]
+
+        valid_hard_limit = {
+            "enforcement": "HARD_LIMIT",
+            "max_output_tokens": 100,
+            "max_total_tokens": 300,
+        }
+        self.assertEqual(
+            [],
+            RESOLVER.schema_errors(
+                valid_hard_limit, token_budget_schema, self.observation_schema
+            ),
+        )
+        valid_observe_only = {
+            "enforcement": "OBSERVE_ONLY",
+            "max_output_tokens": None,
+            "max_total_tokens": None,
+        }
+        self.assertEqual(
+            [],
+            RESOLVER.schema_errors(
+                valid_observe_only,
+                token_budget_schema,
+                self.observation_schema,
+            ),
+        )
+
+        # Schema-level: HARD_LIMIT with either ceiling null must not match
+        # either anyOf branch (OBSERVE_ONLY requires the OBSERVE_ONLY
+        # const; HARD_LIMIT's own branch requires concrete integers).
+        for missing_field in ("max_output_tokens", "max_total_tokens"):
+            with self.subTest(schema_missing=missing_field):
+                invalid = copy.deepcopy(valid_hard_limit)
+                invalid[missing_field] = None
+                self.assertTrue(
+                    RESOLVER.schema_errors(
+                        invalid, token_budget_schema, self.observation_schema
+                    )
+                )
+
+        # Code-level: the same fail-open shape must independently be
+        # blocked by _validate_budget_fields inside resolve_execution, not
+        # only by the schema check above.
+        requested = self.requested("DEEP", "high", "ARCHITECTURE")
+        for missing_field in ("max_output_tokens", "max_total_tokens"):
+            with self.subTest(code_missing=missing_field):
+                requested_case = copy.deepcopy(requested)
+                requested_case["token_budget"] = copy.deepcopy(
+                    valid_hard_limit
+                )
+                requested_case["token_budget"][missing_field] = None
+                result = self.resolve(
+                    "atlas.workflow-architect", requested_case
+                )
+                self.assertIn(
+                    f"hard_limit_ceiling_missing:{missing_field}",
+                    result["decision"]["findings"],
+                )
+                self.assertEqual("BLOCKED", result["decision"]["state"])
 
     def test_provider_neutral_boundary_is_non_dispatching(self) -> None:
         boundary = self.registry["worker_adapter_boundary"]
