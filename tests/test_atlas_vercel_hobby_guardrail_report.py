@@ -151,10 +151,18 @@ class AtlasVercelHobbyGuardrailReportTests(unittest.TestCase):
         # environment instead of failing closed every time.
         root = self._temp_root()
         (root / "repos" / "fawxzzy-fitness" / ".vercel" / "project.json").unlink()
-        fallback_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        fallback_dir = root / "docs" / "registry" / "vercel-project-links"
         fallback_dir.mkdir(parents=True, exist_ok=True)
-        (fallback_dir / "fitness-project-link.json").write_text(
-            json.dumps({"projectId": "prj_fallback", "orgId": "team_fallback", "projectName": "fawxzzy-fitness"}),
+        (fallback_dir / "fitness.json").write_text(
+            json.dumps(
+                {
+                    "contract_version": "atlas.vercel-project-link.v1",
+                    "repo_id": "fitness",
+                    "project_id": "prj_fallback",
+                    "team_id": "team_fallback",
+                    "project_name": "fawxzzy-fitness",
+                }
+            ),
             encoding="utf-8",
         )
 
@@ -162,16 +170,18 @@ class AtlasVercelHobbyGuardrailReportTests(unittest.TestCase):
 
         self.assertEqual("prj_fallback", report["project_link"]["project_id"])
         self.assertEqual(
-            "data/atlas/qa/vercel-hobby-cost-governance/fitness-project-link.json",
+            "docs/registry/vercel-project-links/fitness.json",
             report["project_link"]["path"],
         )
 
-    def test_build_report_fallback_project_link_accepts_snake_case_keys(self) -> None:
+    def test_build_report_local_project_link_accepts_snake_case_keys(self) -> None:
+        # The committed fallback is strictly schema-governed (snake_case
+        # required, closed shape) -- but the LOCAL .vercel/project.json is
+        # provider-owned, Vercel's own file, and _parse_project_link_payload
+        # still tolerates either camelCase (Vercel's native shape) or
+        # snake_case for it.
         root = self._temp_root()
-        (root / "repos" / "fawxzzy-fitness" / ".vercel" / "project.json").unlink()
-        fallback_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
-        fallback_dir.mkdir(parents=True, exist_ok=True)
-        (fallback_dir / "fitness-project-link.json").write_text(
+        (root / "repos" / "fawxzzy-fitness" / ".vercel" / "project.json").write_text(
             json.dumps({"project_id": "prj_snake", "team_id": "team_snake", "project_name": "fawxzzy-fitness"}),
             encoding="utf-8",
         )
@@ -188,14 +198,22 @@ class AtlasVercelHobbyGuardrailReportTests(unittest.TestCase):
         with self.assertRaises(GuardrailReportError) as ctx:
             build_report(root=root, repo_id="fitness")
         self.assertIn(".vercel", str(ctx.exception))
-        self.assertIn("fitness-project-link.json", str(ctx.exception))
+        self.assertIn("fitness.json", str(ctx.exception))
 
     def test_build_report_local_and_fallback_matching_uses_local_and_records_match(self) -> None:
         root = self._temp_root()
-        fallback_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        fallback_dir = root / "docs" / "registry" / "vercel-project-links"
         fallback_dir.mkdir(parents=True, exist_ok=True)
-        (fallback_dir / "fitness-project-link.json").write_text(
-            json.dumps({"projectId": "prj_test", "orgId": "team_test", "projectName": "fawxzzy-fitness"}),
+        (fallback_dir / "fitness.json").write_text(
+            json.dumps(
+                {
+                    "contract_version": "atlas.vercel-project-link.v1",
+                    "repo_id": "fitness",
+                    "project_id": "prj_test",
+                    "team_id": "team_test",
+                    "project_name": "fawxzzy-fitness",
+                }
+            ),
             encoding="utf-8",
         )
 
@@ -208,7 +226,7 @@ class AtlasVercelHobbyGuardrailReportTests(unittest.TestCase):
             report["project_link"]["observed_project_link_ref"],
         )
         self.assertEqual(
-            "data/atlas/qa/vercel-hobby-cost-governance/fitness-project-link.json",
+            "docs/registry/vercel-project-links/fitness.json",
             report["project_link"]["expected_project_link_ref"],
         )
 
@@ -218,10 +236,18 @@ class AtlasVercelHobbyGuardrailReportTests(unittest.TestCase):
         # expectation must never be silently trusted just because it's
         # present on this machine.
         root = self._temp_root()
-        fallback_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        fallback_dir = root / "docs" / "registry" / "vercel-project-links"
         fallback_dir.mkdir(parents=True, exist_ok=True)
-        (fallback_dir / "fitness-project-link.json").write_text(
-            json.dumps({"projectId": "prj_DIFFERENT", "orgId": "team_test", "projectName": "fawxzzy-fitness"}),
+        (fallback_dir / "fitness.json").write_text(
+            json.dumps(
+                {
+                    "contract_version": "atlas.vercel-project-link.v1",
+                    "repo_id": "fitness",
+                    "project_id": "prj_DIFFERENT",
+                    "team_id": "team_test",
+                    "project_name": "fawxzzy-fitness",
+                }
+            ),
             encoding="utf-8",
         )
 
@@ -242,9 +268,9 @@ class AtlasVercelHobbyGuardrailReportTests(unittest.TestCase):
     def test_build_report_fails_closed_on_malformed_fallback_project_link(self) -> None:
         root = self._temp_root()
         (root / "repos" / "fawxzzy-fitness" / ".vercel" / "project.json").unlink()
-        fallback_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        fallback_dir = root / "docs" / "registry" / "vercel-project-links"
         fallback_dir.mkdir(parents=True, exist_ok=True)
-        (fallback_dir / "fitness-project-link.json").write_text(
+        (fallback_dir / "fitness.json").write_text(
             json.dumps({"projectId": "prj_test"}),  # missing orgId / projectName
             encoding="utf-8",
         )

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas.vercel-hobby-review.v1",
+  "title": "ATLAS Vercel Hobby-plan review-override record",
+  "description": "A committed record binding a human 'keep_hobby' decision to an exact guardrail-comparison signature digest and the exact set of currently-drifted fields it covers. This is Git-reviewed governance evidence, not independent cryptographic attestation -- nothing in this codebase requires the review commit to come from a different author than the drift-state commit; the control's strength is ordinary git-history auditability. Lives under docs/registry/vercel-hobby-reviews/<repo_id>.latest.json -- NOT under data/**, which is gitignored. No instance of this record should be committed speculatively: it must correspond to a real, current generated guardrail signature and an explicit human review, never manufactured merely to populate the path.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "repo_id",
+    "checkpoint_status",
+    "decision",
+    "accepted_signature_digest",
+    "accepted_drift_fields"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.vercel_hobby_review.v1"
+    },
+    "repo_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "checkpoint_status": {
+      "const": "ready",
+      "description": "Only 'ready' is meaningful; any other value is rejected by ops/atlas/vercel_hobby_decision_checkpoint.py's _load_matching_review()."
+    },
+    "decision": {
+      "const": "keep_hobby",
+      "description": "The only decision value this record type currently exists to encode."
+    },
+    "accepted_signature_digest": {
+      "type": "string",
+      "minLength": 1,
+      "description": "SHA-256 (or equivalent) digest of the guardrail comparison signature this review was performed against. Must exactly match the current signature or the review is treated as stale and rejected."
+    },
+    "accepted_drift_fields": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Every field name the review explicitly covers. Must be a superset of the currently-drifted fields or the review is rejected as not covering current drift."
+    },
+    "target_sha": {
+      "type": "string",
+      "description": "Optional, audit-only. Surfaced as review_target_sha / review_target_sha_authority=\"audit_only\" in the checkpoint output and never validated against anything -- there is no independently trustworthy source for \"the guardrail's current source commit\" to check it against."
+    },
+    "decision_reason": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional human-readable rationale for the decision, propagated through unchanged to the checkpoint output's decision_reason field. Not used in any authority/matching logic."
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional human-readable operator guidance, propagated through unchanged to the checkpoint output's next_action field. Not used in any authority/matching logic."
+    }
+  }
+}

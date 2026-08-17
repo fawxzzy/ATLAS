@@ -52,3 +52,7 @@ ops/atlas/workflow_recovery.py text eol=lf
 schemas/atlas.workflow.*.json text eol=lf
 tests/fixtures/atlas-workflow-recovery/*.json text eol=lf
 tests/test_atlas_workflow_recovery.py text eol=lf
+docs/registry/vercel-project-links/*.json text eol=lf
+docs/registry/vercel-hobby-reviews/*.json text eol=lf
+schemas/atlas.vercel-project-link.v1.json text eol=lf
+schemas/atlas.vercel-hobby-review.v1.json text eol=lf

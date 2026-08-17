@@ -128,7 +128,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
     def test_build_checkpoint_accepts_matching_hobby_review_for_latest_drift(self) -> None:
         root = self._temp_root()
         receipt_dir = root / "runtime" / "receipts" / "vercel-hobby-cost-governance"
-        review_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        review_dir = root / "docs" / "registry" / "vercel-hobby-reviews"
         review_dir.mkdir(parents=True, exist_ok=True)
         self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-17.json", self._guardrail_payload(generated_at="2026-06-18T03:51:55Z"))
         self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-18.json", self._guardrail_payload(generated_at="2026-06-18T04:45:01Z"))
@@ -140,13 +140,14 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
         blocked = build_checkpoint(root=root, repo_id="fitness")
         current_signature = blocked["comparison"]["current_signature"]
         self._write_json(
-            review_dir / "fitness-hobby-review.latest.json",
+            review_dir / "fitness.latest.json",
             {
                 "contract_version": "atlas.vercel_hobby_review.v1",
                 "repo_id": "fitness",
                 "checkpoint_status": "ready",
                 "decision": "keep_hobby",
                 "decision_reason": "bounded route drift reviewed",
+                "next_action": "stay on Hobby through the next quarterly review",
                 "accepted_signature_digest": self._signature_digest(current_signature),
                 "accepted_drift_fields": ["total_routes"],
             },
@@ -157,8 +158,9 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
         self.assertEqual("ready", checkpoint["checkpoint_status"])
         self.assertEqual("keep_hobby", checkpoint["decision"])
         self.assertEqual("bounded route drift reviewed", checkpoint["decision_reason"])
+        self.assertEqual("stay on Hobby through the next quarterly review", checkpoint["next_action"])
         self.assertEqual(
-            "data/atlas/qa/vercel-hobby-cost-governance/fitness-hobby-review.latest.json",
+            "docs/registry/vercel-hobby-reviews/fitness.latest.json",
             checkpoint["approved_review_ref"],
         )
 
@@ -169,7 +171,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
         # regardless of what actually changed afterward.
         root = self._temp_root()
         receipt_dir = root / "runtime" / "receipts" / "vercel-hobby-cost-governance"
-        review_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        review_dir = root / "docs" / "registry" / "vercel-hobby-reviews"
         review_dir.mkdir(parents=True, exist_ok=True)
         self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-17.json", self._guardrail_payload(generated_at="2026-06-18T03:51:55Z"))
         self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-18.json", self._guardrail_payload(generated_at="2026-06-18T04:45:01Z"))
@@ -178,7 +180,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
             self._guardrail_payload(generated_at="2026-07-01T19:00:00Z", total_routes=34),
         )
         self._write_json(
-            review_dir / "fitness-hobby-review.latest.json",
+            review_dir / "fitness.latest.json",
             {
                 "contract_version": "atlas.vercel_hobby_review.v1",
                 "repo_id": "fitness",
@@ -202,7 +204,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
         # to name every field it is actually accepting.
         root = self._temp_root()
         receipt_dir = root / "runtime" / "receipts" / "vercel-hobby-cost-governance"
-        review_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        review_dir = root / "docs" / "registry" / "vercel-hobby-reviews"
         review_dir.mkdir(parents=True, exist_ok=True)
         self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-17.json", self._guardrail_payload(generated_at="2026-06-18T03:51:55Z"))
         self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-18.json", self._guardrail_payload(generated_at="2026-06-18T04:45:01Z"))
@@ -213,7 +215,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
         blocked = build_checkpoint(root=root, repo_id="fitness")
         current_signature = blocked["comparison"]["current_signature"]
         self._write_json(
-            review_dir / "fitness-hobby-review.latest.json",
+            review_dir / "fitness.latest.json",
             {
                 "contract_version": "atlas.vercel_hobby_review.v1",
                 "repo_id": "fitness",
@@ -237,7 +239,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
         # silently implying it was validated.
         root = self._temp_root()
         receipt_dir = root / "runtime" / "receipts" / "vercel-hobby-cost-governance"
-        review_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        review_dir = root / "docs" / "registry" / "vercel-hobby-reviews"
         review_dir.mkdir(parents=True, exist_ok=True)
         self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-17.json", self._guardrail_payload(generated_at="2026-06-18T03:51:55Z"))
         self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-18.json", self._guardrail_payload(generated_at="2026-06-18T04:45:01Z"))
@@ -248,7 +250,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
         blocked = build_checkpoint(root=root, repo_id="fitness")
         current_signature = blocked["comparison"]["current_signature"]
         self._write_json(
-            review_dir / "fitness-hobby-review.latest.json",
+            review_dir / "fitness.latest.json",
             {
                 "contract_version": "atlas.vercel_hobby_review.v1",
                 "repo_id": "fitness",
@@ -269,7 +271,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
     def test_build_checkpoint_review_fails_closed_on_each_required_field(self) -> None:
         root = self._temp_root()
         receipt_dir = root / "runtime" / "receipts" / "vercel-hobby-cost-governance"
-        review_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        review_dir = root / "docs" / "registry" / "vercel-hobby-reviews"
         review_dir.mkdir(parents=True, exist_ok=True)
         self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-17.json", self._guardrail_payload(generated_at="2026-06-18T03:51:55Z"))
         self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-18.json", self._guardrail_payload(generated_at="2026-06-18T04:45:01Z"))
@@ -298,7 +300,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
             with self.subTest(field=field):
                 review = dict(base_review)
                 review[field] = bad_value
-                self._write_json(review_dir / "fitness-hobby-review.latest.json", review)
+                self._write_json(review_dir / "fitness.latest.json", review)
 
                 checkpoint = build_checkpoint(root=root, repo_id="fitness")
 
@@ -311,7 +313,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
         # signal and the review contract doesn't speak to them at all.
         root = self._temp_root()
         receipt_dir = root / "runtime" / "receipts" / "vercel-hobby-cost-governance"
-        review_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        review_dir = root / "docs" / "registry" / "vercel-hobby-reviews"
         review_dir.mkdir(parents=True, exist_ok=True)
         self._write_json(receipt_dir / "fitness-hobby-guardrail.2026-06-17.json", self._guardrail_payload(generated_at="2026-06-18T03:51:55Z", total_routes=31))
         self._write_json(
@@ -326,7 +328,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
         self.assertTrue(blocked["comparison"]["preserved_snapshot_drift"])
         current_signature = blocked["comparison"]["current_signature"]
         self._write_json(
-            review_dir / "fitness-hobby-review.latest.json",
+            review_dir / "fitness.latest.json",
             {
                 "contract_version": "atlas.vercel_hobby_review.v1",
                 "repo_id": "fitness",
@@ -346,7 +348,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
     def test_build_checkpoint_non_ok_deployment_posture_still_blocks_despite_matching_review(self) -> None:
         root = self._temp_root()
         receipt_dir = root / "runtime" / "receipts" / "vercel-hobby-cost-governance"
-        review_dir = root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance"
+        review_dir = root / "docs" / "registry" / "vercel-hobby-reviews"
         review_dir.mkdir(parents=True, exist_ok=True)
 
         def _payload_with_posture(generated_at: str, posture: str) -> dict:
@@ -361,7 +363,7 @@ class AtlasVercelHobbyDecisionCheckpointTests(unittest.TestCase):
         blocked = build_checkpoint(root=root, repo_id="fitness")
         current_signature = blocked["comparison"]["current_signature"]
         self._write_json(
-            review_dir / "fitness-hobby-review.latest.json",
+            review_dir / "fitness.latest.json",
             {
                 "contract_version": "atlas.vercel_hobby_review.v1",
                 "repo_id": "fitness",

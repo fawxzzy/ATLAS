@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas.vercel-project-link.v1",
+  "title": "ATLAS Vercel project-link registry entry",
+  "description": "Tracked, source-owned expected Vercel project identity for one repo_id. This is the *expected* identity a local .vercel/project.json (the *observed* machine binding, in Vercel's own camelCase projectId/orgId/projectName shape -- NOT this schema) must match before ops/atlas/vercel_hobby_guardrail_report.py will trust it. team_id must be the canonical Vercel team ID (the orgId field of a real linked .vercel/project.json), not the human-readable team slug -- the two are different values and only team_id participates in the observed/expected comparison. Lives under docs/registry/vercel-project-links/<repo_id>.json -- NOT under data/**, which is gitignored and would never survive a fresh clone or hosted CI checkout.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "repo_id", "project_id", "team_id", "project_name"],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.vercel-project-link.v1"
+    },
+    "repo_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Must match the filename stem, e.g. fitness.json has repo_id: \"fitness\"."
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^prj_[A-Za-z0-9]+$",
+      "description": "Vercel's own project ID."
+    },
+    "team_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^team_[A-Za-z0-9]+$",
+      "description": "The canonical Vercel team ID -- this is what a linked checkout's .vercel/project.json reports as orgId. A team slug (e.g. \"fawxzzy\") is NOT a valid value here and will never match a real orgId."
+    },
+    "team_slug": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional, audit-only human-readable team slug. Never compared against orgId; present only for readability."
+    },
+    "project_name": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

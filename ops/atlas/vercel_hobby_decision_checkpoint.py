@@ -14,10 +14,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_relative
+from ops.atlas.ui_standards.validate import validate_json_schema
 
 CONTRACT_VERSION = "atlas.vercel_hobby_decision.v1"
 GUARDRAIL_REPORT_VERSION = "atlas.vercel_hobby_guardrail.v1"
 REVIEW_CONTRACT_VERSION = "atlas.vercel_hobby_review.v1"
+REVIEW_SCHEMA_PATH = ROOT / "schemas" / "atlas.vercel-hobby-review.v1.json"
 SNAPSHOT_DATE_PATTERN = re.compile(r"\.(\d{4}-\d{2}-\d{2})\.json$")
 
 
@@ -46,7 +48,13 @@ def _default_output_ref(repo_id: str, fmt: str) -> str:
 
 
 def _default_review_ref(repo_id: str) -> str:
-    return f"data/atlas/qa/vercel-hobby-cost-governance/{repo_id}-hobby-review.latest.json"
+    # Must be a source-owned, tracked path -- data/** is gitignored (see
+    # .gitignore lines 35, 43-44), so a file placed there would never
+    # survive a fresh clone or hosted CI checkout without `git add -f`.
+    # docs/registry/ is the existing convention for tracked, source-owned
+    # registry data (see docs/registry/project-board-owner-exports,
+    # docs/registry/text-corpus).
+    return f"docs/registry/vercel-hobby-reviews/{repo_id}.latest.json"
 
 
 def _discover_preserved_refs(*, root: Path, repo_id: str) -> list[Path]:
@@ -184,6 +192,18 @@ def _load_matching_review(
         review = _load_json(review_path)
     except Exception as exc:
         return None, [f"Hobby review '{atlas_relative(review_path, root=root)}' could not be loaded: {exc}"]
+
+    # Closed-schema validation is a first-class runtime gate here, not just
+    # test coverage: it catches shapes the field-by-field checks below do
+    # not (an unexpected extra property, a non-string digest, a malformed
+    # accepted_drift_fields entry) before any of that data is trusted.
+    schema = json.loads(REVIEW_SCHEMA_PATH.read_text(encoding="utf-8"))
+    schema_errors = validate_json_schema(review, schema)
+    if schema_errors:
+        return None, [
+            f"Hobby review '{atlas_relative(review_path, root=root)}' failed schema validation: "
+            + "; ".join(schema_errors)
+        ]
 
     if str(review.get("contract_version") or "").strip() != REVIEW_CONTRACT_VERSION:
         findings.append(

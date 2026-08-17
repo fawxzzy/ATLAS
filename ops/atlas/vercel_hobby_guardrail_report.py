@@ -14,6 +14,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_relative, load_repo_registry
+from ops.atlas.ui_standards.validate import validate_json_schema
+
+PROJECT_LINK_SCHEMA_PATH = ROOT / "schemas" / "atlas.vercel-project-link.v1.json"
 
 REPORT_VERSION = "atlas.vercel_hobby_guardrail.v1"
 THRESHOLDS_REVALIDATED_ON = "2026-06-17"
@@ -199,7 +202,13 @@ def _collect_middleware_inventory(repo_root: Path) -> dict[str, Any]:
 
 
 def _project_link_fallback_path(root: Path, repo_id: str) -> Path:
-    return root / "data" / "atlas" / "qa" / "vercel-hobby-cost-governance" / f"{repo_id}-project-link.json"
+    # Must be a source-owned, tracked path -- data/** is gitignored (see
+    # .gitignore lines 35, 43-44), so a file placed there would need
+    # `git add -f` and would never survive a fresh clone or hosted CI
+    # checkout. docs/registry/ is the existing convention for tracked,
+    # source-owned registry data (see docs/registry/project-board-owner-exports,
+    # docs/registry/text-corpus).
+    return root / "docs" / "registry" / "vercel-project-links" / f"{repo_id}.json"
 
 
 def _parse_project_link_payload(path: Path) -> dict[str, str]:
@@ -222,6 +231,31 @@ def _parse_project_link_payload(path: Path) -> dict[str, str]:
     }
 
 
+def _parse_expected_project_link_payload(path: Path, *, repo_id: str) -> dict[str, str]:
+    # Unlike _parse_project_link_payload (which tolerates whatever shape
+    # `vercel link` happens to produce locally), the committed fallback
+    # file is source-owned and must obey the closed registry schema --
+    # runtime enforcement, not just test coverage, so an extra field,
+    # wrong contract_version, or a team slug mistakenly used as team_id
+    # fails closed before this identity is ever trusted.
+    payload = json.loads(_read_text(path))
+    schema = json.loads(PROJECT_LINK_SCHEMA_PATH.read_text(encoding="utf-8"))
+    errors = validate_json_schema(payload, schema)
+    if errors:
+        raise GuardrailReportError(
+            f"Expected Vercel link file '{atlas_relative(path)}' failed schema validation: {'; '.join(errors)}"
+        )
+    if payload.get("repo_id") != repo_id:
+        raise GuardrailReportError(
+            f"Expected Vercel link file '{atlas_relative(path)}' repo_id does not match requested repo '{repo_id}'."
+        )
+    return {
+        "project_id": payload["project_id"].strip(),
+        "team_id": payload["team_id"].strip(),
+        "project_name": payload["project_name"].strip(),
+    }
+
+
 def _load_project_link(root: Path, repo_id: str, repo_root: Path) -> dict[str, Any]:
     # The committed fallback file is the *expected* repository identity
     # (checked in, reviewed like any other source change). A local
@@ -237,7 +271,9 @@ def _load_project_link(root: Path, repo_id: str, repo_root: Path) -> dict[str, A
     fallback_ref = atlas_relative(fallback_path, root=root) if fallback_path.exists() else ""
 
     local_payload = _parse_project_link_payload(local_path) if local_path.exists() else None
-    fallback_payload = _parse_project_link_payload(fallback_path) if fallback_path.exists() else None
+    fallback_payload = (
+        _parse_expected_project_link_payload(fallback_path, repo_id=repo_id) if fallback_path.exists() else None
+    )
 
     if local_payload is None and fallback_payload is None:
         raise GuardrailReportError(
