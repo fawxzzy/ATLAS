@@ -144,6 +144,163 @@ class AtlasVercelHobbyGuardrailReportTests(unittest.TestCase):
         with self.assertRaises(GuardrailReportError):
             build_report(root=root, repo_id="fitness")
 
+    def test_build_report_uses_fallback_project_link_when_local_link_absent(self) -> None:
+        # Hosted CI / dry-run checkouts are never `vercel link`-ed, so
+        # .vercel/project.json never exists there. The repo-committed
+        # fallback lets the guardrail report still be generated in that
+        # environment instead of failing closed every time.
+        root = self._temp_root()
+        (root / "repos" / "fawxzzy-fitness" / ".vercel" / "project.json").unlink()
+        fallback_dir = root / "docs" / "registry" / "vercel-project-links"
+        fallback_dir.mkdir(parents=True, exist_ok=True)
+        (fallback_dir / "fitness.json").write_text(
+            json.dumps(
+                {
+                    "contract_version": "atlas.vercel-project-link.v1",
+                    "repo_id": "fitness",
+                    "project_id": "prj_fallback",
+                    "team_id": "team_fallback",
+                    "project_name": "fawxzzy-fitness",
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        report = build_report(root=root, repo_id="fitness")
+
+        self.assertEqual("prj_fallback", report["project_link"]["project_id"])
+        self.assertEqual(
+            "docs/registry/vercel-project-links/fitness.json",
+            report["project_link"]["path"],
+        )
+
+    def test_build_report_local_project_link_accepts_snake_case_keys(self) -> None:
+        # The committed fallback is strictly schema-governed (snake_case
+        # required, closed shape) -- but the LOCAL .vercel/project.json is
+        # provider-owned, Vercel's own file, and _parse_project_link_payload
+        # still tolerates either camelCase (Vercel's native shape) or
+        # snake_case for it.
+        root = self._temp_root()
+        (root / "repos" / "fawxzzy-fitness" / ".vercel" / "project.json").write_text(
+            json.dumps({"project_id": "prj_snake", "team_id": "team_snake", "project_name": "fawxzzy-fitness"}),
+            encoding="utf-8",
+        )
+
+        report = build_report(root=root, repo_id="fitness")
+
+        self.assertEqual("prj_snake", report["project_link"]["project_id"])
+        self.assertEqual("team_snake", report["project_link"]["team_id"])
+
+    def test_build_report_fails_closed_when_both_project_link_sources_missing(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "fawxzzy-fitness" / ".vercel" / "project.json").unlink()
+
+        with self.assertRaises(GuardrailReportError) as ctx:
+            build_report(root=root, repo_id="fitness")
+        self.assertIn(".vercel", str(ctx.exception))
+        self.assertIn("fitness.json", str(ctx.exception))
+
+    def test_build_report_local_and_fallback_matching_uses_local_and_records_match(self) -> None:
+        root = self._temp_root()
+        fallback_dir = root / "docs" / "registry" / "vercel-project-links"
+        fallback_dir.mkdir(parents=True, exist_ok=True)
+        (fallback_dir / "fitness.json").write_text(
+            json.dumps(
+                {
+                    "contract_version": "atlas.vercel-project-link.v1",
+                    "repo_id": "fitness",
+                    "project_id": "prj_test",
+                    "team_id": "team_test",
+                    "project_name": "fawxzzy-fitness",
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        report = build_report(root=root, repo_id="fitness")
+
+        self.assertEqual("prj_test", report["project_link"]["project_id"])
+        self.assertTrue(report["project_link"]["project_link_match"])
+        self.assertEqual(
+            "repos/fawxzzy-fitness/.vercel/project.json",
+            report["project_link"]["observed_project_link_ref"],
+        )
+        self.assertEqual(
+            "docs/registry/vercel-project-links/fitness.json",
+            report["project_link"]["expected_project_link_ref"],
+        )
+
+    def test_build_report_fails_closed_on_project_link_identity_mismatch(self) -> None:
+        # The whole point of the expected/observed split: a local link
+        # pointing at a DIFFERENT Vercel project than the committed
+        # expectation must never be silently trusted just because it's
+        # present on this machine.
+        root = self._temp_root()
+        fallback_dir = root / "docs" / "registry" / "vercel-project-links"
+        fallback_dir.mkdir(parents=True, exist_ok=True)
+        (fallback_dir / "fitness.json").write_text(
+            json.dumps(
+                {
+                    "contract_version": "atlas.vercel-project-link.v1",
+                    "repo_id": "fitness",
+                    "project_id": "prj_DIFFERENT",
+                    "team_id": "team_test",
+                    "project_name": "fawxzzy-fitness",
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        with self.assertRaises(GuardrailReportError) as ctx:
+            build_report(root=root, repo_id="fitness")
+        self.assertIn("mismatch", str(ctx.exception))
+
+    def test_build_report_fails_closed_on_malformed_local_project_link(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "fawxzzy-fitness" / ".vercel" / "project.json").write_text(
+            json.dumps({"projectId": "prj_test"}),  # missing orgId / projectName
+            encoding="utf-8",
+        )
+
+        with self.assertRaises(GuardrailReportError):
+            build_report(root=root, repo_id="fitness")
+
+    def test_build_report_fails_closed_on_malformed_fallback_project_link(self) -> None:
+        root = self._temp_root()
+        (root / "repos" / "fawxzzy-fitness" / ".vercel" / "project.json").unlink()
+        fallback_dir = root / "docs" / "registry" / "vercel-project-links"
+        fallback_dir.mkdir(parents=True, exist_ok=True)
+        (fallback_dir / "fitness.json").write_text(
+            json.dumps({"projectId": "prj_test"}),  # missing orgId / projectName
+            encoding="utf-8",
+        )
+
+        with self.assertRaises(GuardrailReportError):
+            build_report(root=root, repo_id="fitness")
+
+    def test_build_report_honors_repo_path_override(self) -> None:
+        # --repo-path lets an operator point the report at an exact local
+        # checkout (e.g. a specific SHA) instead of whatever stack.yaml's
+        # registry currently resolves to.
+        root = self._temp_root()
+        override_root = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: __import__("shutil").rmtree(override_root, ignore_errors=True))
+        for name in ("src/app/api/health", ".vercel"):
+            (override_root / name).mkdir(parents=True, exist_ok=True)
+        (override_root / "src" / "app" / "api" / "health" / "route.ts").write_text(
+            'export async function GET() { return Response.json({ ok: true }); }\n',
+            encoding="utf-8",
+        )
+        (override_root / ".vercel" / "project.json").write_text(
+            json.dumps({"projectId": "prj_override", "orgId": "team_override", "projectName": "fawxzzy-fitness"}),
+            encoding="utf-8",
+        )
+        (override_root / "vercel.json").write_text(json.dumps({"git": {"deploymentEnabled": False}}), encoding="utf-8")
+
+        report = build_report(root=root, repo_id="fitness", repo_root_override=override_root)
+
+        self.assertEqual("prj_override", report["project_link"]["project_id"])
+
 
 if __name__ == "__main__":
     unittest.main()

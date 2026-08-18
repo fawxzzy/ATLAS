@@ -14,6 +14,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops._atlas import atlas_relative, load_repo_registry
+from ops.atlas.ui_standards.validate import validate_json_schema
+
+PROJECT_LINK_SCHEMA_PATH = ROOT / "schemas" / "atlas.vercel-project-link.v1.json"
 
 REPORT_VERSION = "atlas.vercel_hobby_guardrail.v1"
 THRESHOLDS_REVALIDATED_ON = "2026-06-17"
@@ -198,21 +201,113 @@ def _collect_middleware_inventory(repo_root: Path) -> dict[str, Any]:
     }
 
 
-def _load_project_link(repo_root: Path) -> dict[str, str]:
-    project_path = repo_root / ".vercel" / "project.json"
-    if not project_path.exists():
-        raise GuardrailReportError(f"Missing Vercel link file: {atlas_relative(project_path)}")
-    payload = json.loads(_read_text(project_path))
+def _project_link_fallback_path(root: Path, repo_id: str) -> Path:
+    # Must be a source-owned, tracked path -- data/** is gitignored (see
+    # .gitignore lines 35, 43-44), so a file placed there would need
+    # `git add -f` and would never survive a fresh clone or hosted CI
+    # checkout. docs/registry/ is the existing convention for tracked,
+    # source-owned registry data (see docs/registry/project-board-owner-exports,
+    # docs/registry/text-corpus).
+    return root / "docs" / "registry" / "vercel-project-links" / f"{repo_id}.json"
+
+
+def _parse_project_link_payload(path: Path) -> dict[str, str]:
+    payload = json.loads(_read_text(path))
     project_id = payload.get("projectId")
     team_id = payload.get("orgId")
     project_name = payload.get("projectName")
+    if project_id is None:
+        project_id = payload.get("project_id")
+    if team_id is None:
+        team_id = payload.get("team_id")
+    if project_name is None:
+        project_name = payload.get("project_name")
     if not all(isinstance(value, str) and value.strip() for value in (project_id, team_id, project_name)):
-        raise GuardrailReportError(f"Malformed Vercel link file: {atlas_relative(project_path)}")
+        raise GuardrailReportError(f"Malformed Vercel link file: {atlas_relative(path)}")
     return {
         "project_id": project_id.strip(),
         "team_id": team_id.strip(),
         "project_name": project_name.strip(),
-        "path": atlas_relative(project_path),
+    }
+
+
+def _parse_expected_project_link_payload(path: Path, *, repo_id: str) -> dict[str, str]:
+    # Unlike _parse_project_link_payload (which tolerates whatever shape
+    # `vercel link` happens to produce locally), the committed fallback
+    # file is source-owned and must obey the closed registry schema --
+    # runtime enforcement, not just test coverage, so an extra field,
+    # wrong contract_version, or a team slug mistakenly used as team_id
+    # fails closed before this identity is ever trusted.
+    payload = json.loads(_read_text(path))
+    schema = json.loads(PROJECT_LINK_SCHEMA_PATH.read_text(encoding="utf-8"))
+    errors = validate_json_schema(payload, schema)
+    if errors:
+        raise GuardrailReportError(
+            f"Expected Vercel link file '{atlas_relative(path)}' failed schema validation: {'; '.join(errors)}"
+        )
+    if payload.get("repo_id") != repo_id:
+        raise GuardrailReportError(
+            f"Expected Vercel link file '{atlas_relative(path)}' repo_id does not match requested repo '{repo_id}'."
+        )
+    return {
+        "project_id": payload["project_id"].strip(),
+        "team_id": payload["team_id"].strip(),
+        "project_name": payload["project_name"].strip(),
+    }
+
+
+def _load_project_link(root: Path, repo_id: str, repo_root: Path) -> dict[str, Any]:
+    # The committed fallback file is the *expected* repository identity
+    # (checked in, reviewed like any other source change). A local
+    # .vercel/project.json is the *observed* machine binding -- whatever
+    # `vercel link` happened to produce on this particular checkout. When
+    # both exist they must agree, or the report fails closed rather than
+    # silently trusting whichever one happens to be present: a stale or
+    # misconfigured local link must never let the guardrail silently
+    # inspect the wrong Vercel project.
+    local_path = repo_root / ".vercel" / "project.json"
+    fallback_path = _project_link_fallback_path(root, repo_id)
+    local_ref = atlas_relative(local_path, root=root) if local_path.exists() else ""
+    fallback_ref = atlas_relative(fallback_path, root=root) if fallback_path.exists() else ""
+
+    local_payload = _parse_project_link_payload(local_path) if local_path.exists() else None
+    fallback_payload = (
+        _parse_expected_project_link_payload(fallback_path, repo_id=repo_id) if fallback_path.exists() else None
+    )
+
+    if local_payload is None and fallback_payload is None:
+        raise GuardrailReportError(
+            "Missing Vercel link file: "
+            f"{atlas_relative(local_path, root=root)} and fallback {atlas_relative(fallback_path, root=root)}"
+        )
+
+    if local_payload is not None and fallback_payload is not None:
+        mismatched = [
+            field
+            for field in ("project_id", "team_id", "project_name")
+            if local_payload[field] != fallback_payload[field]
+        ]
+        if mismatched:
+            raise GuardrailReportError(
+                "Vercel project-link identity mismatch between observed local link "
+                f"({atlas_relative(local_path, root=root)}) and expected committed link "
+                f"({atlas_relative(fallback_path, root=root)}): {', '.join(mismatched)}"
+            )
+        identity = local_payload
+        match = True
+    elif local_payload is not None:
+        identity = local_payload
+        match = None
+    else:
+        identity = fallback_payload
+        match = None
+
+    return {
+        **identity,
+        "path": local_ref or fallback_ref,
+        "expected_project_link_ref": fallback_ref,
+        "observed_project_link_ref": local_ref,
+        "project_link_match": match,
     }
 
 
@@ -234,13 +329,13 @@ def _load_vercel_config(repo_root: Path) -> dict[str, Any]:
     }
 
 
-def build_report(*, root: Path, repo_id: str) -> dict[str, Any]:
+def build_report(*, root: Path, repo_id: str, repo_root_override: Path | None = None) -> dict[str, Any]:
     registry = load_repo_registry(root=root)
     if repo_id not in registry:
         raise GuardrailReportError(f"Unknown repo id: {repo_id}")
     repo_entry = registry[repo_id]
-    repo_root = repo_entry.root
-    project_link = _load_project_link(repo_root)
+    repo_root = repo_root_override.resolve() if isinstance(repo_root_override, Path) else repo_entry.root
+    project_link = _load_project_link(root, repo_id, repo_root)
     vercel_config = _load_vercel_config(repo_root)
     route_records = _collect_route_records(repo_root)
     fetch_inventory = _collect_fetch_inventory(repo_root)
@@ -395,6 +490,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build a no-secret Vercel Hobby guardrail report from repo state.")
     parser.add_argument("--root", default=str(ROOT), help="ATLAS root path")
     parser.add_argument("--repo-id", default="fitness", help="Repo id from stack.yaml")
+    parser.add_argument("--repo-path", help="Optional repo root override for exact-SHA local verification")
     parser.add_argument("--format", choices=("json", "markdown"), default="markdown")
     parser.add_argument("--output", help="Optional ATLAS-relative or absolute output path")
     return parser.parse_args(argv)
@@ -403,7 +499,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     root = Path(args.root).resolve()
-    report = build_report(root=root, repo_id=args.repo_id)
+    repo_root_override = Path(args.repo_path).resolve() if args.repo_path else None
+    report = build_report(root=root, repo_id=args.repo_id, repo_root_override=repo_root_override)
     rendered = json.dumps(report, indent=2) + "\n" if args.format == "json" else render_markdown(report)
     if args.output:
         output_path = Path(args.output)

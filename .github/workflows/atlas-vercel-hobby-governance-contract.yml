@@ -1,0 +1,44 @@
+name: Atlas Vercel Hobby Governance Contract
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/atlas-vercel-hobby-governance-contract.yml"
+      - "docs/registry/vercel-project-links/**"
+      - "docs/registry/vercel-hobby-reviews/**"
+      - "ops/atlas/vercel_hobby_decision_checkpoint.py"
+      - "ops/atlas/vercel_hobby_guardrail_report.py"
+      - "schemas/atlas.vercel-project-link.v1.json"
+      - "schemas/atlas.vercel-hobby-review.v1.json"
+      - "tests/test_atlas_vercel_hobby_decision_checkpoint.py"
+      - "tests/test_atlas_vercel_hobby_guardrail_report.py"
+      - "tests/test_atlas_vercel_hobby_registry_contracts.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  vercel-hobby-governance-contract:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Vercel Hobby governance tests
+        shell: bash
+        run: |
+          python -m unittest \
+            tests.test_atlas_vercel_hobby_decision_checkpoint \
+            tests.test_atlas_vercel_hobby_guardrail_report \
+            tests.test_atlas_vercel_hobby_registry_contracts \
+            -v
