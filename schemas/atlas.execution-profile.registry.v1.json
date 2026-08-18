@@ -1,0 +1,529 @@
+{
+  "$id": "atlas://schemas/atlas.execution-profile.registry.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "canaries": {
+      "$ref": "#/$defs/canaries"
+    },
+    "contract_version": {
+      "const": "atlas.execution-profile.registry.v1",
+      "type": "string"
+    },
+    "global_rules": {
+      "items": {
+        "enum": [
+          "PACKET_SELECTS_PROFILE",
+          "STANDING_ROLE_DECLARES_DEFAULT_AND_FLOOR",
+          "PROFILE_BELOW_ROLE_FLOOR_FAILS_CLOSED_AND_REQUIRES_EXPLICIT_REISSUE",
+          "FAILED_ACCEPTANCE_MAY_ESCALATE_UPWARD",
+          "CRITICAL_OR_HIGH_RISK_NEVER_DOWNGRADES_FOR_COST_ALONE",
+          "MAX_REQUIRES_BENCHMARK_AND_EXPLICIT_EXCEPTION",
+          "ULTRA_NOT_IN_CANONICAL_MAPPING",
+          "UNPROVEN_EFFECTIVE_MODEL_OR_REASONING_FAILS_CLOSED",
+          "NO_SILENT_FALLBACK"
+        ],
+        "type": "string"
+      },
+      "minItems": 9,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "policy_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "profile_order": {
+      "const": [
+        "FAST",
+        "STANDARD",
+        "DEEP",
+        "CRITICAL"
+      ],
+      "type": "array"
+    },
+    "profile_version": {
+      "const": "atlas.execution-profiles.v1",
+      "type": "string"
+    },
+    "profiles": {
+      "additionalProperties": false,
+      "properties": {
+        "CRITICAL": {
+          "const": {
+            "model": "gpt-5.6-sol",
+            "provider": "openai",
+            "reasoning_allowed": [
+              "xhigh",
+              "max"
+            ],
+            "reasoning_default": "xhigh",
+            "reasoning_elevation_rule": "MAX_REQUIRES_EXPLICIT_BENCHMARKED_EXCEPTION",
+            "workload_classes": [
+              "HIGHEST_RISK_QUALITY_FIRST_WORK"
+            ]
+          },
+          "type": "object"
+        },
+        "DEEP": {
+          "const": {
+            "model": "gpt-5.6-sol",
+            "provider": "openai",
+            "reasoning_allowed": [
+              "high",
+              "xhigh"
+            ],
+            "reasoning_default": "high",
+            "reasoning_elevation_rule": "XHIGH_FOR_MIGRATION_SECURITY_ARCHITECTURE_OR_FAILED_HIGH_CANARY",
+            "workload_classes": [
+              "COMPLEX_ANALYSIS",
+              "SCHEDULER_RECOVERY",
+              "MIGRATION_PLANNING",
+              "SECURITY_REVIEW",
+              "ARCHITECTURE"
+            ]
+          },
+          "type": "object"
+        },
+        "FAST": {
+          "const": {
+            "model": "gpt-5.6-luna",
+            "provider": "openai",
+            "reasoning_allowed": [
+              "low",
+              "medium"
+            ],
+            "reasoning_default": "low",
+            "reasoning_elevation_rule": "MEDIUM_ONLY_FOR_CLEAR_REPEATABLE_WORK_REQUIRING_MODEST_SYNTHESIS",
+            "workload_classes": [
+              "EXTRACTION",
+              "CLASSIFICATION",
+              "TRANSFORMATION",
+              "STRUCTURED_SUMMARY",
+              "STATUS_PROJECTION",
+              "DEDUPE_RENDERING"
+            ]
+          },
+          "type": "object"
+        },
+        "STANDARD": {
+          "const": {
+            "model": "gpt-5.6-terra",
+            "provider": "openai",
+            "reasoning_allowed": [
+              "medium",
+              "high"
+            ],
+            "reasoning_default": "medium",
+            "reasoning_elevation_rule": "HIGH_FOR_BOUNDED_IMPLEMENTATION_CI_CORRECTION_OR_ORDINARY_REVIEW_WITH_EDGE_CASES",
+            "workload_classes": [
+              "ROUTINE_BOUNDED_IMPLEMENTATION",
+              "NONCRITICAL_REVIEW",
+              "EVERYDAY_TOOL_WORK"
+            ]
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "CRITICAL",
+        "DEEP",
+        "FAST",
+        "STANDARD"
+      ],
+      "type": "object"
+    },
+    "reasoning_order": {
+      "const": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "type": "array"
+    },
+    "role_policies": {
+      "additionalProperties": false,
+      "properties": {
+        "atlas.main": {
+          "const": {
+            "default_profile": "DEEP",
+            "floor_profile": "DEEP",
+            "minimum_reasoning_effort": "high"
+          },
+          "type": "object"
+        },
+        "atlas.release-control-plane": {
+          "const": {
+            "default_profile": "STANDARD",
+            "floor_profile": "STANDARD",
+            "minimum_reasoning_effort": "high"
+          },
+          "type": "object"
+        },
+        "atlas.workflow-architect": {
+          "const": {
+            "default_profile": "DEEP",
+            "floor_profile": "DEEP",
+            "minimum_reasoning_effort": "high"
+          },
+          "type": "object"
+        },
+        "owner.fitness": {
+          "const": {
+            "default_profile": "DEEP",
+            "floor_profile": "STANDARD",
+            "minimum_reasoning_effort": "high"
+          },
+          "type": "object"
+        },
+        "owner.mazer": {
+          "const": {
+            "default_profile": "DEEP",
+            "floor_profile": "STANDARD",
+            "minimum_reasoning_effort": "high"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "atlas.main",
+        "atlas.release-control-plane",
+        "atlas.workflow-architect",
+        "owner.fitness",
+        "owner.mazer"
+      ],
+      "type": "object"
+    },
+    "source_evidence": {
+      "$ref": "#/$defs/source_evidence"
+    },
+    "worker_adapter_boundary": {
+      "$ref": "#/$defs/worker_adapter_boundary"
+    }
+  },
+  "required": [
+    "canaries",
+    "contract_version",
+    "global_rules",
+    "policy_ids",
+    "profile_order",
+    "profile_version",
+    "profiles",
+    "reasoning_order",
+    "role_policies",
+    "source_evidence",
+    "worker_adapter_boundary"
+  ],
+  "title": "ATLAS execution profile registry",
+  "type": "object",
+  "$defs": {
+    "canaries": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline_event_id": {
+          "pattern": "^onv1_[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "baseline_repeated_evidence_bytes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "classes": {
+          "items": {
+            "$ref": "#/$defs/canary"
+          },
+          "maxItems": 5,
+          "minItems": 5,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "compare": {
+          "items": {
+            "enum": [
+              "QUALITY",
+              "COMPLETENESS",
+              "TOOL_CORRECTNESS",
+              "LATENCY",
+              "TURNS",
+              "TOKEN_PROXIES"
+            ],
+            "type": "string"
+          },
+          "minItems": 6,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "dropped_acceptance_criteria": {
+          "const": 0,
+          "type": "integer"
+        },
+        "dropped_required_evidence_refs": {
+          "const": 0,
+          "type": "integer"
+        },
+        "maximum_repeated_evidence_bytes": {
+          "const": 2480,
+          "type": "integer"
+        },
+        "minimum_completed_canaries": {
+          "const": 5,
+          "type": "integer"
+        },
+        "minimum_repeated_context_reduction_percent": {
+          "const": 30,
+          "type": "integer"
+        },
+        "savings_success_rule": {
+          "const": "RESOURCE_REDUCTION_COUNTS_ONLY_WHEN_ACCEPTANCE_AND_REQUIRED_EVIDENCE_DO_NOT_REGRESS",
+          "type": "string"
+        }
+      },
+      "required": [
+        "baseline_event_id",
+        "baseline_repeated_evidence_bytes",
+        "classes",
+        "compare",
+        "dropped_acceptance_criteria",
+        "dropped_required_evidence_refs",
+        "maximum_repeated_evidence_bytes",
+        "minimum_completed_canaries",
+        "minimum_repeated_context_reduction_percent",
+        "savings_success_rule"
+      ],
+      "type": "object"
+    },
+    "canary": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_profiles": {
+          "items": {
+            "enum": [
+              "FAST",
+              "STANDARD",
+              "DEEP",
+              "CRITICAL"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "class": {
+          "enum": [
+            "STATUS_PROJECTION",
+            "ROUTINE_SOURCE_CORRECTION",
+            "INDEPENDENT_REVIEW",
+            "SCHEDULER_RECOVERY",
+            "MIGRATION_PLANNING"
+          ],
+          "type": "string"
+        },
+        "evidence_tier": {
+          "enum": [
+            "E1",
+            "E2",
+            "E3",
+            "E4"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "allowed_profiles",
+        "class",
+        "evidence_tier"
+      ],
+      "type": "object"
+    },
+    "profile": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "pattern": "^gpt-5\\.6-(sol|terra|luna)$",
+          "type": "string"
+        },
+        "provider": {
+          "const": "openai",
+          "type": "string"
+        },
+        "reasoning_allowed": {
+          "items": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "xhigh",
+              "max"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "reasoning_default": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "type": "string"
+        },
+        "reasoning_elevation_rule": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "workload_classes": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "model",
+        "provider",
+        "reasoning_allowed",
+        "reasoning_default",
+        "reasoning_elevation_rule",
+        "workload_classes"
+      ],
+      "type": "object"
+    },
+    "role_policy": {
+      "additionalProperties": false,
+      "properties": {
+        "default_profile": {
+          "enum": [
+            "FAST",
+            "STANDARD",
+            "DEEP",
+            "CRITICAL"
+          ],
+          "type": "string"
+        },
+        "floor_profile": {
+          "enum": [
+            "FAST",
+            "STANDARD",
+            "DEEP",
+            "CRITICAL"
+          ],
+          "type": "string"
+        },
+        "minimum_reasoning_effort": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "default_profile",
+        "floor_profile",
+        "minimum_reasoning_effort"
+      ],
+      "type": "object"
+    },
+    "source_evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "fetched_on": {
+          "format": "date",
+          "type": "string"
+        },
+        "migration_guide_url": {
+          "format": "uri",
+          "type": "string"
+        },
+        "model_guide_url": {
+          "format": "uri",
+          "type": "string"
+        },
+        "pricing_usage_url": {
+          "format": "uri",
+          "type": "string"
+        },
+        "prompting_guide_url": {
+          "format": "uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fetched_on",
+        "migration_guide_url",
+        "model_guide_url",
+        "pricing_usage_url",
+        "prompting_guide_url"
+      ],
+      "type": "object"
+    },
+    "worker_adapter_boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_authority": {
+          "const": "APPLY_REQUESTED_PROFILE_AND_REPORT_EFFECTIVE_OBSERVATION",
+          "type": "string"
+        },
+        "canonical_scheduler": {
+          "const": "ATLAS_MAIN_ONLY",
+          "type": "string"
+        },
+        "first_canary_adapter": {
+          "const": "codex",
+          "type": "string"
+        },
+        "held_adapters": {
+          "contains": {
+            "const": "claude"
+          },
+          "items": {
+            "enum": [
+              "claude",
+              "litellm"
+            ],
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "resolver_authority": {
+          "const": "PURE_DETERMINISTIC_NO_DISPATCH",
+          "type": "string"
+        },
+        "worker_authority": {
+          "const": "EXECUTE_BOUND_PACKET_AND_RETURN_RECEIPT_NO_ROUTING",
+          "type": "string"
+        }
+      },
+      "required": [
+        "adapter_authority",
+        "canonical_scheduler",
+        "first_canary_adapter",
+        "held_adapters",
+        "resolver_authority",
+        "worker_authority"
+      ],
+      "type": "object"
+    }
+  }
+}

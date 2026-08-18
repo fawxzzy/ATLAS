@@ -1,0 +1,560 @@
+{
+  "$id": "atlas://schemas/atlas.execution-observation.v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "admitted_execution_binding": {
+      "$ref": "#/$defs/effective_execution_binding"
+    },
+    "contract_version": {
+      "const": "atlas.execution-observation.v1",
+      "type": "string"
+    },
+    "decision": {
+      "additionalProperties": false,
+      "properties": {
+        "canary_eligible": {
+          "type": "boolean"
+        },
+        "findings": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "state": {
+          "enum": [
+            "ADMITTED",
+            "BLOCKED"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "canary_eligible",
+        "findings",
+        "state"
+      ],
+      "type": "object"
+    },
+    "effective": {
+      "$ref": "#/$defs/effective"
+    },
+    "logical_role_id": {
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "type": "string"
+    },
+    "observation_id": {
+      "pattern": "^onv1_[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "packet_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "requested": {
+      "$ref": "#/$defs/requested"
+    },
+    "usage": {
+      "$ref": "#/$defs/usage"
+    }
+  },
+  "required": [
+    "admitted_execution_binding",
+    "contract_version",
+    "decision",
+    "effective",
+    "logical_role_id",
+    "observation_id",
+    "packet_id",
+    "requested",
+    "usage"
+  ],
+  "title": "ATLAS execution observation",
+  "type": "object",
+  "$defs": {
+    "context_budget": {
+      "additionalProperties": false,
+      "properties": {
+        "compaction_checkpoint_required": {
+          "type": "boolean"
+        },
+        "freshness_rule": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "immutable_ref_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_bundle_bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "maximum_repeated_evidence_bytes": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "compaction_checkpoint_required",
+        "freshness_rule",
+        "immutable_ref_count",
+        "max_bundle_bytes",
+        "maximum_repeated_evidence_bytes"
+      ],
+      "type": "object"
+    },
+    "effective": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "adapter_version": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "execution_binding": {
+          "$ref": "#/$defs/effective_execution_binding"
+        },
+        "fallback_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "model": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "provider": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "readback_source": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "reasoning_effort": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "runtime_version": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "adapter_id",
+        "adapter_version",
+        "execution_binding",
+        "fallback_reason",
+        "model",
+        "provider",
+        "readback_source",
+        "reasoning_effort",
+        "runtime_version"
+      ],
+      "type": "object"
+    },
+    "requested": {
+      "additionalProperties": false,
+      "properties": {
+        "benchmark_exception_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "context_budget": {
+          "$ref": "#/$defs/context_budget"
+        },
+        "escalation_policy": {
+          "const": "FAIL_CLOSED_AND_RETURN_CONTENT_ADDRESSED_HOLD",
+          "type": "string"
+        },
+        "evidence_tier": {
+          "enum": [
+            "E1",
+            "E2",
+            "E3",
+            "E4"
+          ],
+          "type": "string"
+        },
+        "execution_binding": {
+          "$ref": "#/$defs/requested_execution_binding"
+        },
+        "fallback_policy": {
+          "const": "NO_SILENT_FALLBACK",
+          "type": "string"
+        },
+        "model": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "profile_id": {
+          "enum": [
+            "FAST",
+            "STANDARD",
+            "DEEP",
+            "CRITICAL"
+          ],
+          "type": "string"
+        },
+        "profile_version": {
+          "const": "atlas.execution-profiles.v1",
+          "type": "string"
+        },
+        "reasoning_effort": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "type": "string"
+        },
+        "retry_budget": {
+          "$ref": "#/$defs/retry_budget"
+        },
+        "selection_reason": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "token_budget": {
+          "$ref": "#/$defs/token_budget"
+        },
+        "turn_budget": {
+          "$ref": "#/$defs/turn_budget"
+        },
+        "workload_class": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "benchmark_exception_id",
+        "context_budget",
+        "escalation_policy",
+        "evidence_tier",
+        "execution_binding",
+        "fallback_policy",
+        "model",
+        "profile_id",
+        "profile_version",
+        "reasoning_effort",
+        "retry_budget",
+        "selection_reason",
+        "token_budget",
+        "turn_budget",
+        "workload_class"
+      ],
+      "type": "object"
+    },
+    "effective_execution_binding": {
+      "additionalProperties": false,
+      "properties": {
+        "host_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "logical_role_id": {
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "type": "string"
+        },
+        "runtime_epoch_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "runtime_thread_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "turn_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "host_id",
+        "logical_role_id",
+        "runtime_epoch_id",
+        "runtime_thread_id",
+        "turn_id"
+      ],
+      "type": "object"
+    },
+    "retry_budget": {
+      "additionalProperties": false,
+      "properties": {
+        "max_attempts": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "retryable_classes": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "terminal_classes": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "max_attempts",
+        "retryable_classes",
+        "terminal_classes"
+      ],
+      "type": "object"
+    },
+    "requested_execution_binding": {
+      "additionalProperties": false,
+      "properties": {
+        "host_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "logical_role_id": {
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "type": "string"
+        },
+        "runtime_epoch_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "runtime_thread_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "host_id",
+        "logical_role_id",
+        "runtime_epoch_id",
+        "runtime_thread_id"
+      ],
+      "type": "object"
+    },
+    "token_budget": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "enforcement": {
+              "const": "OBSERVE_ONLY",
+              "type": "string"
+            },
+            "max_output_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "max_total_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "enforcement",
+            "max_output_tokens",
+            "max_total_tokens"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "enforcement": {
+              "const": "HARD_LIMIT",
+              "type": "string"
+            },
+            "max_output_tokens": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "max_total_tokens": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "enforcement",
+            "max_output_tokens",
+            "max_total_tokens"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "turn_budget": {
+      "additionalProperties": false,
+      "properties": {
+        "escalation_at_turn": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_turns": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "escalation_at_turn",
+        "max_turns"
+      ],
+      "type": "object"
+    },
+    "usage": {
+      "additionalProperties": false,
+      "properties": {
+        "cached_input_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "child_workers": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "correction_loops": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "elapsed_to_material_state_ms": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "escalation_checkpoint_observed": {
+          "type": "boolean"
+        },
+        "files_read": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "input_bundle_bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "input_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "output_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider_cost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasoning_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repeated_evidence_bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "retry_attempts": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "tool_calls": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "turns": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "unique_evidence_refs": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cached_input_tokens",
+        "child_workers",
+        "correction_loops",
+        "elapsed_to_material_state_ms",
+        "escalation_checkpoint_observed",
+        "files_read",
+        "input_bundle_bytes",
+        "input_tokens",
+        "output_tokens",
+        "provider_cost",
+        "reasoning_tokens",
+        "repeated_evidence_bytes",
+        "retry_attempts",
+        "tool_calls",
+        "turns",
+        "unique_evidence_refs"
+      ],
+      "type": "object"
+    }
+  }
+}
