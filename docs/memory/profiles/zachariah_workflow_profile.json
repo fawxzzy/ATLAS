@@ -5,8 +5,8 @@
   "owner": "Zachariah",
   "status": "active",
   "canonical": true,
-  "last_updated": "2026-05-25",
-  "source": "manual_context_restore",
+  "last_updated": "2026-08-18",
+  "source": "manual_context_restore_operator_confirmed_direction_sanitized_private_evidence_review_operator_confirmed_employment_posture_and_operator_requested_personal_strategy_persistence_plus_operator_forwarded_cross_ai_durable_preference_reconciliation",
   "tags": [
     "zac",
     "atlas",
@@ -14,8 +14,17 @@
     "playbook",
     "codex",
     "assistant-profile",
-    "memory-slot"
+    "memory-slot",
+    "electrical-engineering",
+    "second-degree",
+    "michigan-state-university-eligibility-inquiry",
+    "renewable-energy-r-and-d",
+    "laboratory-operating-system",
+    "personal-operating-assessment",
+    "fawxzzy-lab",
+    "physical-engineering-portfolio",
+    "external-reality"
   ],
-  "summary": "Canonical durable context profile for Zachariah's assistant behavior preferences, Playbook facts, Cortex roadmap, Atlas memory strategy, and future project/product bootstrap context.",
+  "summary": "Canonical durable context profile for Zachariah's assistant behavior preferences, personal operating assessment, Playbook and Cortex direction, Atlas memory strategy, conditional Electrical Engineering education inquiry, transition toward renewable-energy R&D, and the simulation-first Fawxzzy Lab physical-engineering evidence priority.",
   "canonical_markdown_path": "docs/memory/profiles/zachariah_workflow_profile.md"
 }
