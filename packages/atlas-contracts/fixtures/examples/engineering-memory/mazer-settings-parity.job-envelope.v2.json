@@ -1,0 +1,113 @@
+{
+  "contract_version": "atlas.job-envelope.v2",
+  "job_id": "mazer-settings-parity-dry-run-001",
+  "component_id": "mazer",
+  "project_id": "mazer",
+  "created_at": "2026-08-20T12:10:00Z",
+  "objective": "Make the gameplay settings control match the main-menu settings control.",
+  "scope": {
+    "owner_repository": "mazer",
+    "allowed_paths": ["src/scenes/MenuScene.ts", "tests/scenes/**", "tests/visual/**"],
+    "forbidden_paths": ["**"]
+  },
+  "runtime": {"model": "gpt-5.6-terra", "reasoning": "medium", "speed": "standard", "permissions": "full-access", "approval_policy": "never"},
+  "authority": {
+    "external_mutations": [],
+    "production_deploy": false,
+    "destructive_actions": false
+  },
+  "verification": {
+    "commands": ["read-only source search"],
+    "evidence_required": ["source identity", "menu and play visual reproduction"]
+  },
+  "correlations": {"card_id": "MAZER-PARITY-DRY-RUN-001", "parent_job_id": null},
+  "expected_receipt_version": "atlas.execution-receipt.v2",
+  "extensions": {
+    "engineering_memory": {
+      "contract_version": "atlas.engineering-memory-profile.v1",
+      "task_id": "mazer-settings-parity-dry-run-001",
+      "source_text": "The gameplay settings icon still does not match the main menu one.",
+      "normalized_title": "Reconcile menu and gameplay settings-control parity",
+      "task_type": "ui_parity",
+      "phase": "blocked",
+      "project": "mazer",
+      "repo": "mazer",
+      "route_states": [
+        {"route": "/", "state": "menu", "surface": "reported-main-menu-settings-control"},
+        {"route": "/", "state": "play", "surface": "reported-gameplay-settings-control"}
+      ],
+      "components": ["MenuScene"],
+      "acceptance_criteria": [
+        "The current source and rendered product prove both semantic controls exist at the bound revision.",
+        "If both controls exist, their color, shape, animation, container, spacing, and behavior use one shared source or a documented variant.",
+        "Menu and gameplay captures prove the result at the same viewport."
+      ],
+      "precedent_check": {
+        "status": "checked-matches",
+        "query_terms": ["Mazer settings control", "menu gameplay parity", "Options Pause"],
+        "searched_sources": [
+          {
+            "kind": "current_repo",
+            "ref": "repos/mazer",
+            "result": "match",
+            "evidence_refs": [
+              "repos/mazer/src/scenes/MenuScene.ts",
+              "repos/mazer/tests/scenes/demo-build.test.ts",
+              "repos/mazer/tests/visual/screen-contract.test.ts"
+            ]
+          },
+          {
+            "kind": "atlas_docs",
+            "ref": "docs/architecture",
+            "result": "match",
+            "evidence_refs": [
+              "docs/architecture/VISUAL-CHANGE-WORKFLOW.md",
+              "docs/registry/ATLAS-UI-STANDARDS-REGISTRY.v1.json"
+            ]
+          }
+        ],
+        "matches": [
+          {
+            "ref": "repos/mazer/src/scenes/MenuScene.ts",
+            "classification": "rejected",
+            "rationale": "Current source centralizes menu and play in MenuScene, exposes Options from the menu, and routes play controls through Pause; the reported pair of independent top-right settings icons is not established at the bound checkout."
+          }
+        ],
+        "decision": "reject",
+        "rationale": "Do not copy a stale historical UI description into current source. Reproduce both current states or bind the exact historical revision before implementation.",
+        "checked_at": "2026-08-20T12:10:00Z"
+      },
+      "verification": {
+        "requirements": [
+          "Capture the current menu state.",
+          "Capture the current gameplay or Pause state.",
+          "Bind the semantic-control identity before selecting a shared component or style contract."
+        ],
+        "evidence": [],
+        "unverified": ["Current rendered control pair", "Visual parity at a shared viewport"],
+        "visual": {
+          "required": true,
+          "source_surface": "menu:reported-main-menu-settings-control",
+          "target_surfaces": ["play:reported-gameplay-settings-control"],
+          "shared_properties": ["color", "shape", "animation", "container", "spacing", "behavior"],
+          "implementation_strategy": "pending"
+        }
+      },
+      "scope_lock": {
+        "acceptance_frozen": true,
+        "discovery_policy": "linked-child-task",
+        "parent_task_id": null,
+        "child_task_ids": []
+      },
+      "fast_lane": {
+        "lane": "normal",
+        "eligible": false,
+        "verification_route_known": false,
+        "disqualifiers": ["reported source and current source identity drift"],
+        "rationale": "The issue cannot enter implementation until the current control pair is reproduced."
+      },
+      "archive": {"status": "pending", "ref": null, "final_status": null},
+      "blockers": ["Current source does not establish the reported independent menu and gameplay settings icons."]
+    }
+  }
+}

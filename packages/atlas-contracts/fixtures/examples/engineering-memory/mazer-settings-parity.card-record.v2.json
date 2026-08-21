@@ -1,0 +1,16 @@
+{
+  "contract_version": "atlas.card-record.v2",
+  "card_id": "MAZER-PARITY-DRY-RUN-001",
+  "project_id": "mazer",
+  "board_id": "atlas:engineering-memory-dry-runs",
+  "title": "Reconcile reported menu and gameplay settings-control parity",
+  "description": "Read-only dry run; current source identity must be reconciled before any implementation.",
+  "card_type": "bug",
+  "lifecycle": "blocked",
+  "priority": "high",
+  "owner": "mazer",
+  "dependencies": [],
+  "board_version": 1,
+  "updated_at": "2026-08-20T12:10:00Z",
+  "source_ref": "operator-reported-historical-example"
+}

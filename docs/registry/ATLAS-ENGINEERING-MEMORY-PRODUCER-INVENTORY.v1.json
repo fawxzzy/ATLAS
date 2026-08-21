@@ -1,0 +1,72 @@
+{
+  "schema_version": "atlas.engineering-memory-producer-inventory.v1",
+  "recorded_at": "2026-08-21T06:00:00Z",
+  "execution_truth": "installed",
+  "scope": "Current ATLAS engineering source-mutation entrypoints and their exact delegation boundary.",
+  "admitted_mutating_executors": [
+    {
+      "producer_id": "stack.repo-task",
+      "path": "repos/_stack/ops/codex/Invoke-CodexRepoTask.ps1",
+      "producer_seam": "repos/_stack/ops/codex/AtlasContractsV2Producer.ps1",
+      "status": "installed",
+      "pre_mutation_gate": "mutation",
+      "terminal_gates": ["verify", "archive"]
+    },
+    {
+      "producer_id": "stack.canonical-workspace",
+      "path": "repos/_stack/ops/codex/Invoke-CodexCanonicalWorkspaceTask.ps1",
+      "producer_seam": "repos/_stack/ops/codex/AtlasContractsV2Producer.ps1",
+      "status": "installed",
+      "pre_mutation_gate": "mutation",
+      "terminal_gates": ["verify", "archive"]
+    }
+  ],
+  "delegating_entrypoints": [
+    {
+      "entrypoint_id": "stack.inbox",
+      "path": "repos/_stack/ops/codex/Start-CodexInboxRunner.ps1",
+      "delegates_to": "stack.repo-task",
+      "evidence": "Invoke-CodexRepoTask.ps1"
+    },
+    {
+      "entrypoint_id": "stack.inbox-sweep",
+      "path": "repos/_stack/ops/codex/StackInboxSweep.ps1",
+      "delegates_to": "stack.repo-task",
+      "evidence": "TaskScriptPath"
+    },
+    {
+      "entrypoint_id": "atlas.session-resume",
+      "path": "ops/atlas/resume_session.py",
+      "delegates_to": "stack.repo-task",
+      "evidence": "Invoke-CodexRepoTask.ps1"
+    },
+    {
+      "entrypoint_id": "cortex.stack-dispatch",
+      "path": "ops/cortex/primary_operator_stack_dispatch.py",
+      "delegates_to": "stack.repo-task",
+      "evidence": "codex:stack:task"
+    }
+  ],
+  "excluded_non_engineering_surfaces": [
+    {
+      "surface_id": "atlas.session-runner",
+      "path": "ops/atlas/run_session.py",
+      "classification": "privileged-execution-bridge",
+      "reason": "Invokes the existing Lifeline execution bridge and does not launch Codex implementation work."
+    },
+    {
+      "surface_id": "atlas.workflow-recovery",
+      "path": "ops/atlas/workflow_recovery.py",
+      "classification": "thread-lifecycle-control",
+      "reason": "Creates or resumes governed Codex tasks but is not a source-mutation executor; source work still requires an admitted executor."
+    },
+    {
+      "surface_id": "atlas.contract-canaries",
+      "path": "ops/atlas/owner_lane_end_to_end_canary.mjs",
+      "classification": "evidence-only",
+      "reason": "Reads and validates existing task evidence; it does not launch implementation work."
+    }
+  ],
+  "uninstalled_admitted_mutating_executors": [],
+  "future_direct_launcher_rule": "Any future source-mutation launcher is uninstalled and must fail classification until it uses the canonical JobEnvelope/CardRecord seam and proves mutation, verify, and archive gates in CI."
+}
