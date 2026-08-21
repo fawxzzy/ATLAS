@@ -1,0 +1,73 @@
+{
+  "contract_version": "atlas.board-authority-migration.v1",
+  "migration_id": "atlas-board-authority-v3",
+  "phase": "planned",
+  "v2_contract_baseline": {
+    "base_commit": "4617c67b367b04dbc287ab2b20b23469e3ec37b7",
+    "selection_rule": "All tracked paths containing v2 plus the frozen native board correlation pair and named historical marker snapshots.",
+    "file_count": 63,
+    "path_set_digest": "sha256:b7e427c102012241b71a296dba55c95ef64aa10f42cd9fdb75d75091bc9c77fe",
+    "tree_digest": "sha256:736271a2e95b5151b57bc6a34db732c49deee8e24ee3dedb4494575044528609",
+    "protected_path_groups": [
+      "**/*v2*",
+      "ops/atlas/native_board_correlation.mjs",
+      "tests/test_atlas_native_board_correlation.mjs",
+      "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md",
+      "docs/memory/initiatives/continuity-manifest-atlas-full-system-re-evaluation.json",
+      "docs/ops/ATLAS-MARKER-INTEGRITY-51-FAMILY-100-PERCENT-CLOSEOUT-2026-07-15.md"
+    ]
+  },
+  "v2_authority_snapshot": {
+    "status": "UNKNOWN",
+    "snapshot_id": null,
+    "digest": null,
+    "captured_at": null,
+    "unknown_reason": "ATLAS-BOARD-001 must capture and verify the exact source snapshot before one-time import."
+  },
+  "target_contracts": [
+    "atlas.card-record.v3",
+    "atlas.card-event.v3",
+    "atlas.board-commit-receipt.v1",
+    "atlas.projection-delivery.v1",
+    "atlas.projection-ack.v1",
+    "atlas.board-authority-migration.v1",
+    "atlas.control-board-read-model.v1",
+    "atlas.rollover-manifest.v1"
+  ],
+  "one_time_import": {
+    "mode": "one-time",
+    "status": "not-started",
+    "import_id": "atlas-board-v2-baseline-import",
+    "idempotency_key": "atlas-board-v2-baseline-import:v1",
+    "source_snapshot_digest": null,
+    "event_sequence_start": null,
+    "event_sequence_end": null,
+    "imported_at": null,
+    "verified_at": null,
+    "failure_reason": null,
+    "unknown_reason": null
+  },
+  "first_v3_acceptance": {
+    "status": "not-accepted",
+    "receipt_id": null,
+    "receipt_digest": null,
+    "accepted_at": null
+  },
+  "rollback": {
+    "before_first_v3_acceptance": "v2-authority-allowed",
+    "after_first_v3_acceptance": "v3-restore-replay-only",
+    "current_mode": "v2-authority-allowed"
+  },
+  "cutover": {
+    "status": "held",
+    "gate_ids": [
+      "ATLAS-BOARD-001",
+      "DOS-PROJ-001",
+      "ATLAS-CONTROL-001",
+      "ATLAS-CUTOVER-001"
+    ]
+  },
+  "full_system_audit_points": 0,
+  "historical_marker_effect": "none",
+  "created_at": "2026-07-17T12:00:00Z"
+}

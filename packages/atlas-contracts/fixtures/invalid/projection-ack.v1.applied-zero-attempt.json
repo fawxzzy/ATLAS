@@ -1,0 +1,31 @@
+{
+  "contract_version": "atlas.projection-ack.v1",
+  "ack_id": "projection-ack-atlas-board-000-applied-zero-attempt",
+  "delivery_id": "projection-atlas-board-000-1",
+  "adapter": "discordos",
+  "card_id": "ATLAS-BOARD-000",
+  "project_id": "atlas",
+  "board_id": "atlas-control",
+  "event_id": "event-atlas-board-000-1",
+  "event_sequence": 1,
+  "card_version": 1,
+  "idempotency_key": "projection:ATLAS-BOARD-000:1:discordos",
+  "payload_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+  "availability": "available",
+  "state": "applied",
+  "attempt_count": 0,
+  "retryable": false,
+  "next_attempt_at": null,
+  "touched_card_readback": {
+    "mode": "exact-touched-card",
+    "card_id": "ATLAS-BOARD-000",
+    "state": "applied",
+    "request_count": 1,
+    "full_scan": false,
+    "observed_at": "2026-07-17T12:01:00Z",
+    "response_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+  },
+  "error": null,
+  "acknowledged_at": "2026-07-17T12:01:00Z",
+  "local_acceptance_effect": "none"
+}

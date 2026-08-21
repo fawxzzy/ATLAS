@@ -55,12 +55,29 @@
     "./schemas/atlas.marker-evidence.v2": "./schemas/atlas.marker-evidence.v2.schema.json",
     "./schemas/atlas.marker-evidence.v2.schema.json": "./schemas/atlas.marker-evidence.v2.schema.json",
     "./schemas/atlas.knowledge-candidate.v2": "./schemas/atlas.knowledge-candidate.v2.schema.json",
-    "./schemas/atlas.knowledge-candidate.v2.schema.json": "./schemas/atlas.knowledge-candidate.v2.schema.json"
+    "./schemas/atlas.knowledge-candidate.v2.schema.json": "./schemas/atlas.knowledge-candidate.v2.schema.json",
+    "./schemas/atlas.card-record.v3": "./schemas/atlas.card-record.v3.schema.json",
+    "./schemas/atlas.card-record.v3.schema.json": "./schemas/atlas.card-record.v3.schema.json",
+    "./schemas/atlas.card-event.v3": "./schemas/atlas.card-event.v3.schema.json",
+    "./schemas/atlas.card-event.v3.schema.json": "./schemas/atlas.card-event.v3.schema.json",
+    "./schemas/atlas.board-commit-receipt.v1": "./schemas/atlas.board-commit-receipt.v1.schema.json",
+    "./schemas/atlas.board-commit-receipt.v1.schema.json": "./schemas/atlas.board-commit-receipt.v1.schema.json",
+    "./schemas/atlas.projection-delivery.v1": "./schemas/atlas.projection-delivery.v1.schema.json",
+    "./schemas/atlas.projection-delivery.v1.schema.json": "./schemas/atlas.projection-delivery.v1.schema.json",
+    "./schemas/atlas.projection-ack.v1": "./schemas/atlas.projection-ack.v1.schema.json",
+    "./schemas/atlas.projection-ack.v1.schema.json": "./schemas/atlas.projection-ack.v1.schema.json",
+    "./schemas/atlas.board-authority-migration.v1": "./schemas/atlas.board-authority-migration.v1.schema.json",
+    "./schemas/atlas.board-authority-migration.v1.schema.json": "./schemas/atlas.board-authority-migration.v1.schema.json",
+    "./schemas/atlas.control-board-read-model.v1": "./schemas/atlas.control-board-read-model.v1.schema.json",
+    "./schemas/atlas.control-board-read-model.v1.schema.json": "./schemas/atlas.control-board-read-model.v1.schema.json",
+    "./schemas/atlas.rollover-manifest.v1": "./schemas/atlas.rollover-manifest.v1.schema.json",
+    "./schemas/atlas.rollover-manifest.v1.schema.json": "./schemas/atlas.rollover-manifest.v1.schema.json"
   },
   "scripts": {
     "validate:fixtures": "node scripts/validate-contracts.mjs",
     "test:artifact-validator": "node scripts/test-validate-artifact.mjs",
-    "validate": "npm run validate:fixtures && npm run test:artifact-validator"
+    "test:board-authority": "node scripts/test-board-authority-contracts.mjs",
+    "validate": "npm run validate:fixtures && npm run test:artifact-validator && npm run test:board-authority"
   },
   "engines": {
     "node": ">=22"

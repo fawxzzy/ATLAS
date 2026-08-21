@@ -292,6 +292,7 @@ class AtlasMasterProgramTests(unittest.TestCase):
             "program-cortex-capability-conversion",
             "program-lifeline-foundation-platform-conversion",
             "program-shared-contracts-wiring",
+            "program-atlas-board-authority-v3",
             "program-cross-project-synergy-knowledge-promotion",
             "program-model-effort-speed-routing",
             "program-persistent-workspace-leases",
@@ -301,7 +302,7 @@ class AtlasMasterProgramTests(unittest.TestCase):
         self.assertTrue(required.issubset(program_ids))
         index = register["authority_indexes"]["clean_and_resync_lane_registry"]
         self.assertEqual(20, len(index["lane_ids"]))
-        self.assertEqual(48, len(index["backlog_ids"]))
+        self.assertEqual(49, len(index["backlog_ids"]))
 
 
 if __name__ == "__main__":

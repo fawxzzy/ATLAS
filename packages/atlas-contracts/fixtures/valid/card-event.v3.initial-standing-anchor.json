@@ -1,0 +1,65 @@
+{
+  "contract_version": "atlas.card-event.v3",
+  "authority": "atlas-local-ledger",
+  "event_id": "event-atlas-main-initial-standing-anchor",
+  "event_sequence": 1,
+  "card_id": "ATLAS-MAIN",
+  "project_id": "atlas",
+  "board_id": "atlas-control",
+  "epoch_id": "atlas-main-standing-epoch",
+  "card_version": 1,
+  "idempotency_key": "board-commit:ATLAS-MAIN:initial-standing-anchor",
+  "expected_version": 0,
+  "event_type": "create",
+  "occurred_at": "2026-07-17T12:20:00Z",
+  "actor": {"kind": "worker", "id": "stack-root"},
+  "job_id": "job-atlas-main",
+  "lease_id": "lease-atlas-root-writer",
+  "execution_receipt": {
+    "receipt_id": "execution-atlas-main-initial-standing-anchor",
+    "digest": "sha256:4141414141414141414141414141414141414141414141414141414141414141",
+    "status": "succeeded"
+  },
+  "previous_record_digest": null,
+  "resulting_record_digest": "sha256:4242424242424242424242424242424242424242424242424242424242424242",
+  "changes": {
+    "set": {
+      "epoch_id": "atlas-main-standing-epoch",
+      "title": "ATLAS MAIN standing anchor",
+      "description": "Stable unarchived continuity anchor.",
+      "card_type": "governance",
+      "lifecycle": "planning",
+      "priority": "high",
+      "owner": "stack-root",
+      "standing_anchor": true,
+      "archive_state": "active",
+      "work": {
+        "job_id": "job-atlas-main",
+        "lease_id": "lease-atlas-root-writer",
+        "branch_name": "codex/atlas-board-000-authority-contract",
+        "head_sha": "32927f475fe8a746887121e42212775895938568",
+        "worktree_ref": "worktrees/atlas-board-000",
+        "status": "active"
+      },
+      "next_action": "Preserve the standing anchor.",
+      "projection_state": "queued"
+    },
+    "transition": {"from": null, "to": "planning"},
+    "add_blockers": [],
+    "remove_blocker_ids": [],
+    "add_resources": [],
+    "remove_resource_ids": [],
+    "add_receipts": [
+      {
+        "receipt_id": "execution-atlas-main-initial-standing-anchor",
+        "digest": "sha256:4141414141414141414141414141414141414141414141414141414141414141"
+      },
+      {
+        "receipt_id": "continuity-atlas-main-initial-standing-anchor",
+        "digest": "sha256:4747474747474747474747474747474747474747474747474747474747474747"
+      }
+    ]
+  },
+  "projection_delivery_id": "projection-atlas-main-initial-standing-anchor",
+  "commit_receipt_id": "board-commit-atlas-main-initial-standing-anchor"
+}

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://packages/contracts/atlas.board-commit-receipt.v1.schema.json",
+  "title": "ATLAS local board commit receipt contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "receipt_id",
+    "acceptance",
+    "card_id",
+    "project_id",
+    "board_id",
+    "event_id",
+    "event_sequence",
+    "card_version",
+    "idempotency_key",
+    "expected_version",
+    "execution_receipt",
+    "card_record_digest",
+    "projection_delivery_id",
+    "projection_delivery_digest",
+    "transaction",
+    "closure_order",
+    "engineering_closed",
+    "projection_gates_engineering",
+    "committed_at"
+  ],
+  "properties": {
+    "contract_version": {"const": "atlas.board-commit-receipt.v1"},
+    "receipt_id": {"type": "string", "minLength": 1},
+    "acceptance": {"const": "accepted"},
+    "card_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "board_id": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "minLength": 1},
+    "event_sequence": {"type": "integer", "minimum": 1},
+    "card_version": {"type": "integer", "minimum": 1},
+    "idempotency_key": {"type": "string", "minLength": 1},
+    "expected_version": {"type": "integer", "minimum": 0},
+    "execution_receipt": {"$ref": "#/$defs/executionReceipt"},
+    "card_record_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "projection_delivery_id": {"type": "string", "minLength": 1},
+    "projection_delivery_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "transaction": {"$ref": "#/$defs/transaction"},
+    "closure_order": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "engineering_closed": {"const": true},
+    "projection_gates_engineering": {"const": false},
+    "committed_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "executionReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "digest", "status"],
+      "properties": {
+        "receipt_id": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "status": {"const": "succeeded"}
+      }
+    },
+    "transaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transaction_id", "engine", "journal_mode", "synchronous", "writer_model", "writer_lease_id"],
+      "properties": {
+        "transaction_id": {"type": "string", "minLength": 1},
+        "engine": {"const": "python-stdlib-sqlite3"},
+        "journal_mode": {"const": "WAL"},
+        "synchronous": {"const": "FULL"},
+        "writer_model": {"const": "one-writer"},
+        "writer_lease_id": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

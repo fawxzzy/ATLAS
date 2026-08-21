@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://packages/contracts/atlas.control-board-read-model.v1.schema.json",
+  "title": "ATLAS Control generated board read model contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "role",
+    "authority",
+    "availability",
+    "ledger_revision",
+    "card_count",
+    "cards",
+    "projection_summary",
+    "unknowns",
+    "generation",
+    "placement",
+    "generated_at"
+  ],
+  "properties": {
+    "contract_version": {"const": "atlas.control-board-read-model.v1"},
+    "role": {"const": "generated-read-model-not-authority"},
+    "authority": {"const": "atlas-local-ledger"},
+    "availability": {"type": "string", "enum": ["available", "partial", "unavailable"]},
+    "ledger_revision": {"$ref": "#/$defs/ledgerRevision"},
+    "card_count": {"type": ["integer", "null"], "minimum": 0},
+    "cards": {"type": "array", "items": {"$ref": "#/$defs/card"}},
+    "projection_summary": {"$ref": "#/$defs/summary"},
+    "unknowns": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "generation": {"$ref": "#/$defs/generation"},
+    "placement": {"$ref": "#/$defs/placement"},
+    "generated_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "ledgerRevision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["last_event_sequence", "digest"],
+      "properties": {
+        "last_event_sequence": {"type": "integer", "minimum": 0},
+        "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      }
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["card_id", "project_id", "board_id", "version", "lifecycle", "projection_state", "updated_at"],
+      "properties": {
+        "card_id": {"type": "string", "minLength": 1},
+        "project_id": {"type": "string", "minLength": 1},
+        "board_id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1},
+        "lifecycle": {"type": "string", "enum": ["intake", "planning", "ready", "in-progress", "review", "completed", "blocked", "archived"]},
+        "projection_state": {"type": "string", "enum": ["queued", "applied", "stale", "failed", "UNKNOWN"]},
+        "updated_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["queued", "applied", "stale", "failed", "UNKNOWN"],
+      "properties": {
+        "queued": {"type": ["integer", "null"], "minimum": 0},
+        "applied": {"type": ["integer", "null"], "minimum": 0},
+        "stale": {"type": ["integer", "null"], "minimum": 0},
+        "failed": {"type": ["integer", "null"], "minimum": 0},
+        "UNKNOWN": {"type": ["integer", "null"], "minimum": 0}
+      }
+    },
+    "generation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generator_id", "input_digest", "output_digest", "deterministic"],
+      "properties": {
+        "generator_id": {"type": "string", "minLength": 1},
+        "input_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "output_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "deterministic": {"const": true}
+      }
+    },
+    "placement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root", "observer_owner", "exposure"],
+      "properties": {
+        "root": {"const": "runtime/atlas/control"},
+        "observer_owner": {"const": "playbook-observer"},
+        "exposure": {"const": "loopback-read-only"}
+      }
+    }
+  }
+}

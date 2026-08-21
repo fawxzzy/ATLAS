@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://packages/contracts/atlas.rollover-manifest.v1.schema.json",
+  "title": "ATLAS bounded execution epoch rollover manifest contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "rollover_id",
+    "standing_anchor_id",
+    "card_id",
+    "event_sequence",
+    "predecessor_epoch",
+    "successor_epoch",
+    "blockers",
+    "owned_resources",
+    "receipt_digests",
+    "terminal_receipt",
+    "next_action",
+    "context_digest",
+    "successor_reconstruction",
+    "archive_gate",
+    "created_at"
+  ],
+  "properties": {
+    "contract_version": {"const": "atlas.rollover-manifest.v1"},
+    "rollover_id": {"type": "string", "minLength": 1},
+    "standing_anchor_id": {"type": "string", "minLength": 1},
+    "card_id": {"type": "string", "minLength": 1},
+    "event_sequence": {"type": "integer", "minimum": 1},
+    "predecessor_epoch": {"$ref": "#/$defs/epoch"},
+    "successor_epoch": {"$ref": "#/$defs/epoch"},
+    "blockers": {"type": "array", "items": {"$ref": "#/$defs/blocker"}},
+    "owned_resources": {"type": "array", "items": {"$ref": "#/$defs/resource"}},
+    "receipt_digests": {"type": "array", "items": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}},
+    "terminal_receipt": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/terminalReceipt"}]},
+    "next_action": {"type": "string", "minLength": 1},
+    "context_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "successor_reconstruction": {"$ref": "#/$defs/reconstruction"},
+    "archive_gate": {"$ref": "#/$defs/archiveGate"},
+    "created_at": {"type": "string", "format": "date-time"}
+  },
+  "$defs": {
+    "epoch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["epoch_id", "task_id", "card_id", "job_id", "lease_id", "branch_name", "head_sha", "worktree_ref", "status"],
+      "properties": {
+        "epoch_id": {"type": "string", "minLength": 1},
+        "task_id": {"type": "string", "minLength": 1},
+        "card_id": {"type": "string", "minLength": 1},
+        "job_id": {"type": "string", "minLength": 1},
+        "lease_id": {"type": "string", "minLength": 1},
+        "branch_name": {"type": "string", "minLength": 1},
+        "head_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "worktree_ref": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["active", "blocked", "terminal", "reconstructed", "UNKNOWN"]}
+      }
+    },
+    "blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blocker_id", "status", "reason"],
+      "properties": {
+        "blocker_id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["open", "cleared", "UNKNOWN"]},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resource_id", "kind", "owner", "status"],
+      "properties": {
+        "resource_id": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "minLength": 1},
+        "owner": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["claimed", "released", "UNKNOWN"]}
+      }
+    },
+    "terminalReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_id", "epoch_id", "digest", "status"],
+      "properties": {
+        "receipt_id": {"type": "string", "minLength": 1},
+        "epoch_id": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "status": {"const": "terminal"}
+      }
+    },
+    "reconstruction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "context_digest", "reconstructed_at", "evidence_digests", "exact_readback"],
+      "properties": {
+        "status": {"type": "string", "enum": ["verified", "pending", "failed", "UNKNOWN"]},
+        "context_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "reconstructed_at": {"type": ["string", "null"], "format": "date-time"},
+        "evidence_digests": {"type": "array", "items": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}},
+        "exact_readback": {"type": "string", "enum": ["verified", "pending", "failed", "UNKNOWN"]}
+      }
+    },
+    "archiveGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stable_standing_anchor_remains_unarchived", "predecessor_epoch_archive", "successor_continuity_verified", "exact_readback_verified"],
+      "properties": {
+        "stable_standing_anchor_remains_unarchived": {"const": true},
+        "predecessor_epoch_archive": {"type": "string", "enum": ["held", "eligible", "archived"]},
+        "successor_continuity_verified": {"type": "boolean"},
+        "exact_readback_verified": {"type": "boolean"}
+      }
+    }
+  }
+}

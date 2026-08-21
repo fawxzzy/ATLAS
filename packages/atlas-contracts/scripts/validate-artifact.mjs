@@ -15,6 +15,14 @@ const ATLAS_ROOT_SENTINELS = Object.freeze([
   "schemas/atlas.runtime-placement.registry.v1.json",
 ]);
 
+const ARGUMENT_NAMES = Object.freeze({
+  schema: "schema",
+  artifact: "artifact",
+  "projection-delivery": "projectionDelivery",
+  "card-event": "cardEvent",
+  "board-commit-receipt": "boardCommitReceipt",
+});
+
 export const exitCodes = Object.freeze({
   VALID: 0,
   INVALID_ARTIFACT: 1,
@@ -32,19 +40,20 @@ function parseArguments(argv) {
       continue;
     }
 
-    const equalsMatch = argument.match(/^--(schema|artifact)=(.*)$/);
+    const equalsMatch = argument.match(/^--(schema|artifact|projection-delivery|card-event|board-commit-receipt)=(.*)$/);
     if (equalsMatch) {
-      options[equalsMatch[1]] = equalsMatch[2];
+      options[ARGUMENT_NAMES[equalsMatch[1]]] = equalsMatch[2];
       continue;
     }
 
-    if (argument === "--schema" || argument === "--artifact") {
+    const argumentName = argument.startsWith("--") ? argument.slice(2) : null;
+    if (argumentName && ARGUMENT_NAMES[argumentName]) {
       const value = argv[index + 1];
       if (!value || value.startsWith("--")) {
         options.argumentError = `${argument} requires a value.`;
         continue;
       }
-      options[argument.slice(2)] = value;
+      options[ARGUMENT_NAMES[argumentName]] = value;
       index += 1;
       continue;
     }
@@ -180,6 +189,23 @@ async function loadRuntimeSourceContext(artifactPath, artifact) {
   }
 }
 
+async function loadValidatedContextArtifact(artifactPath, contractId, label, semanticContext = {}) {
+  try {
+    const artifact = await loadJson(artifactPath);
+    const loadedSchema = await loadKnownSchema(contractId);
+    const schemaErrors = validateJsonSchema(artifact, loadedSchema.schema);
+    const errors = schemaErrors.length > 0
+      ? schemaErrors
+      : validateContractSemantics(contractId, artifact, semanticContext);
+    if (errors.length > 0) {
+      return { error: `Referenced ${label} is invalid: ${errors.join(" ")}` };
+    }
+    return { artifact };
+  } catch (error) {
+    return { error: `Referenced ${label} could not be loaded: ${error.message}` };
+  }
+}
+
 export async function runArtifactValidator(argv) {
   const options = parseArguments(argv);
   if (options.argumentError || !options.schema || !options.artifact) {
@@ -244,11 +270,77 @@ export async function runArtifactValidator(argv) {
     throw error;
   }
 
+  const schemaErrors = validateJsonSchema(artifact, loadedSchema.schema);
+  if (schemaErrors.length > 0) {
+    return {
+      exitCode: exitCodes.INVALID_ARTIFACT,
+      result: makeResult({
+        ok: false,
+        code: "INVALID_ARTIFACT",
+        schema: schemaResult(loadedSchema.entry),
+        artifact: options.artifact,
+        errors: schemaErrors,
+      }),
+      json: options.json,
+    };
+  }
+
   const semanticContext = await loadRuntimeSourceContext(options.artifact, artifact);
-  const errors = [
-    ...validateJsonSchema(artifact, loadedSchema.schema),
-    ...validateContractSemantics(loadedSchema.entry.id, artifact, semanticContext),
-  ];
+  const requiresReceiptContext = loadedSchema.entry.id === "atlas.board-commit-receipt.v1"
+    || (loadedSchema.entry.id === "atlas.board-authority-migration.v1"
+      && artifact.first_v3_acceptance.status === "accepted");
+  const requiresDeliveryContext = loadedSchema.entry.id === "atlas.projection-ack.v1"
+    || requiresReceiptContext;
+
+  if (requiresReceiptContext) {
+    if (!options.cardEvent) {
+      semanticContext.cardEventError = `${loadedSchema.entry.id === "atlas.board-commit-receipt.v1" ? "BoardCommitReceipt" : "Accepted BoardAuthorityMigration"} artifact validation requires --card-event`;
+    } else {
+      const cardEvent = await loadValidatedContextArtifact(
+        options.cardEvent,
+        "atlas.card-event.v3",
+        "CardEvent",
+      );
+      if (cardEvent.error) semanticContext.cardEventError = cardEvent.error;
+      else semanticContext.cardEvent = cardEvent.artifact;
+    }
+  }
+
+  if (requiresDeliveryContext) {
+    if (!options.projectionDelivery) {
+      const consumer = loadedSchema.entry.id === "atlas.projection-ack.v1"
+        ? "ProjectionAck"
+        : loadedSchema.entry.id === "atlas.board-commit-receipt.v1"
+          ? "BoardCommitReceipt"
+          : "Accepted BoardAuthorityMigration";
+      semanticContext.projectionDeliveryError = `${consumer} artifact validation requires --projection-delivery`;
+    } else {
+      const projectionDelivery = await loadValidatedContextArtifact(
+        options.projectionDelivery,
+        "atlas.projection-delivery.v1",
+        "ProjectionDelivery",
+      );
+      if (projectionDelivery.error) semanticContext.projectionDeliveryError = projectionDelivery.error;
+      else semanticContext.projectionDelivery = projectionDelivery.artifact;
+    }
+  }
+
+  if (loadedSchema.entry.id === "atlas.board-authority-migration.v1"
+    && artifact.first_v3_acceptance.status === "accepted") {
+    if (!options.boardCommitReceipt) {
+      semanticContext.boardCommitReceiptError = "Accepted BoardAuthorityMigration artifact validation requires --board-commit-receipt";
+    } else {
+      const boardCommitReceipt = await loadValidatedContextArtifact(
+        options.boardCommitReceipt,
+        "atlas.board-commit-receipt.v1",
+        "BoardCommitReceipt",
+        semanticContext,
+      );
+      if (boardCommitReceipt.error) semanticContext.boardCommitReceiptError = boardCommitReceipt.error;
+      else semanticContext.boardCommitReceipt = boardCommitReceipt.artifact;
+    }
+  }
+  const errors = validateContractSemantics(loadedSchema.entry.id, artifact, semanticContext);
   if (errors.length > 0) {
     return {
       exitCode: exitCodes.INVALID_ARTIFACT,

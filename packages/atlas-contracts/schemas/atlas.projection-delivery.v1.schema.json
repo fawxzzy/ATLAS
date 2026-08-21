@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas://packages/contracts/atlas.projection-delivery.v1.schema.json",
+  "title": "ATLAS asynchronous projection delivery contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "delivery_id",
+    "adapter",
+    "card_id",
+    "project_id",
+    "board_id",
+    "event_id",
+    "event_sequence",
+    "card_version",
+    "idempotency_key",
+    "payload_digest",
+    "availability",
+    "state",
+    "retry",
+    "touched_card_readback",
+    "enqueued_at",
+    "projection_gates_engineering"
+  ],
+  "properties": {
+    "contract_version": {"const": "atlas.projection-delivery.v1"},
+    "delivery_id": {"type": "string", "minLength": 1},
+    "adapter": {"const": "discordos"},
+    "card_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "board_id": {"type": "string", "minLength": 1},
+    "event_id": {"type": "string", "minLength": 1},
+    "event_sequence": {"type": "integer", "minimum": 1},
+    "card_version": {"type": "integer", "minimum": 1},
+    "idempotency_key": {"type": "string", "minLength": 1},
+    "payload_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "availability": {"type": "string", "enum": ["available", "unavailable"]},
+    "state": {"type": "string", "enum": ["queued", "applied", "stale", "failed", "UNKNOWN"]},
+    "retry": {"$ref": "#/$defs/retry"},
+    "touched_card_readback": {"$ref": "#/$defs/readback"},
+    "last_error": {"type": ["object", "null"]},
+    "enqueued_at": {"type": "string", "format": "date-time"},
+    "projection_gates_engineering": {"const": false}
+  },
+  "$defs": {
+    "retry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attempt_count", "retryable", "next_attempt_at"],
+      "properties": {
+        "attempt_count": {"type": "integer", "minimum": 0},
+        "retryable": {"type": "boolean"},
+        "next_attempt_at": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "readback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "card_id", "state", "request_count", "full_scan", "observed_at", "response_digest"],
+      "properties": {
+        "mode": {"const": "exact-touched-card"},
+        "card_id": {"type": "string", "minLength": 1},
+        "state": {"type": "string", "enum": ["queued", "applied", "stale", "failed", "UNKNOWN"]},
+        "request_count": {"type": ["integer", "null"], "minimum": 0},
+        "full_scan": {"const": false},
+        "observed_at": {"type": ["string", "null"], "format": "date-time"},
+        "response_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"}
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "contract_version": "atlas.control-board-read-model.v1",
+  "role": "generated-read-model-not-authority",
+  "authority": "atlas-local-ledger",
+  "availability": "available",
+  "ledger_revision": {
+    "last_event_sequence": 1,
+    "digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+  },
+  "card_count": 1,
+  "cards": [
+    {
+      "card_id": "ATLAS-BOARD-000",
+      "project_id": "atlas",
+      "board_id": "atlas-control",
+      "version": 1,
+      "lifecycle": "review",
+      "projection_state": "queued",
+      "updated_at": "2026-07-17T12:00:00Z"
+    }
+  ],
+  "projection_summary": {
+    "queued": 1,
+    "applied": 0,
+    "stale": 0,
+    "failed": 0,
+    "UNKNOWN": 0
+  },
+  "unknowns": [],
+  "generation": {
+    "generator_id": "atlas-control-board-read-model-v1",
+    "input_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "output_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+    "deterministic": true
+  },
+  "placement": {
+    "root": "runtime/atlas/control",
+    "observer_owner": "playbook-observer",
+    "exposure": "loopback-read-only"
+  },
+  "generated_at": "2026-07-17T12:00:00Z"
+}

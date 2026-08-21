@@ -11,16 +11,23 @@ import { validateContractSemantics } from "./lib/validate-semantics.mjs";
 
 async function main() {
   const failures = [];
+  const cardEvent = await loadJson(path.join(fixturesDir, "valid/card-event.v3.json"));
+  const projectionDelivery = await loadJson(path.join(fixturesDir, "valid/projection-delivery.v1.json"));
 
   for (const plan of knownSchemaPlan) {
     const loadedSchema = await loadKnownSchema(plan.id);
     const validFixture = await loadJson(path.join(fixturesDir, plan.valid));
     const invalidFixture = await loadJson(path.join(fixturesDir, plan.invalid));
+    const semanticContext = plan.id === "atlas.board-commit-receipt.v1"
+      ? { cardEvent, projectionDelivery }
+      : plan.id === "atlas.projection-ack.v1"
+        ? { projectionDelivery }
+        : {};
 
-    const validErrors = [
-      ...validateJsonSchema(validFixture, loadedSchema.schema),
-      ...validateContractSemantics(plan.id, validFixture),
-    ];
+    const validSchemaErrors = validateJsonSchema(validFixture, loadedSchema.schema);
+    const validErrors = validSchemaErrors.length > 0
+      ? validSchemaErrors
+      : validateContractSemantics(plan.id, validFixture, semanticContext);
     if (validErrors.length > 0) {
       failures.push(
         `${plan.valid} should be valid for ${plan.file}\n${validErrors
@@ -29,10 +36,10 @@ async function main() {
       );
     }
 
-    const invalidErrors = [
-      ...validateJsonSchema(invalidFixture, loadedSchema.schema),
-      ...validateContractSemantics(plan.id, invalidFixture),
-    ];
+    const invalidSchemaErrors = validateJsonSchema(invalidFixture, loadedSchema.schema);
+    const invalidErrors = invalidSchemaErrors.length > 0
+      ? invalidSchemaErrors
+      : validateContractSemantics(plan.id, invalidFixture, semanticContext);
     if (invalidErrors.length === 0) {
       failures.push(`${plan.invalid} should fail validation for ${plan.file}`);
     }

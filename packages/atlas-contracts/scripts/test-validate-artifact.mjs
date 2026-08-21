@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { canonicalArtifactDigest } from "./lib/validate-board-authority.mjs";
 
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const packageRoot = path.resolve(scriptsDir, "..");
@@ -36,6 +37,13 @@ const temporaryDir = await fs.mkdtemp(path.join(os.tmpdir(), "atlas-contracts-va
 try {
   const malformedArtifact = path.join(temporaryDir, "malformed.json");
   await fs.writeFile(malformedArtifact, '{"contract_version":', "utf8");
+  const emptyArtifact = path.join(temporaryDir, "empty.json");
+  await fs.writeFile(emptyArtifact, "{}\n", "utf8");
+  const writeTemporaryJson = async (name, artifact) => {
+    const artifactPath = path.join(temporaryDir, name);
+    await fs.writeFile(artifactPath, `${JSON.stringify(artifact, null, 2)}\n`, "utf8");
+    return artifactPath;
+  };
 
   const validV1 = expectJson(
     ["--schema", "atlas.env.v1", "--artifact", fixture("valid", "env.json")],
@@ -77,6 +85,412 @@ try {
     0,
     "VALID",
   );
+  const projectionDeliveryFixture = fixture("valid", "projection-delivery.v1.json");
+  const cardEventFixture = fixture("valid", "card-event.v3.json");
+  const boardCommitReceiptFixture = fixture("valid", "board-commit-receipt.v1.json");
+  const migrationFixture = fixture("valid", "board-authority-migration.v1.json");
+  const emptyProjection = expectJson(
+    ["--schema", "atlas.projection-delivery.v1", "--artifact", emptyArtifact],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(emptyProjection.errors.some((error) => error.includes("is required")));
+  const emptyAck = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", emptyArtifact,
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(emptyAck.errors.some((error) => error.includes("is required")));
+  const shortCircuitedEmptyAck = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", emptyArtifact,
+      "--projection-delivery", path.join(temporaryDir, "must-not-be-read.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(shortCircuitedEmptyAck.errors.some((error) => error.includes("is required")));
+  assert(shortCircuitedEmptyAck.errors.every((error) => !error.includes("ProjectionDelivery")));
+  const missingDeliveryContext = expectJson(
+    ["--schema", "atlas.projection-ack.v1", "--artifact", fixture("valid", "projection-ack.v1.json")],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(missingDeliveryContext.errors.some((error) => error.includes("requires --projection-delivery")));
+  expectJson(
+    [
+      "--schema=atlas.projection-ack.v1",
+      `--artifact=${fixture("valid", "projection-ack.v1.json")}`,
+      `--projection-delivery=${projectionDeliveryFixture}`,
+    ],
+    0,
+    "VALID",
+  );
+  const mismatchedDeliveryContext = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("invalid", "projection-ack.v1.mismatched-delivery.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(mismatchedDeliveryContext.errors.some((error) => error.includes("payload_digest")));
+  expectJson(
+    [
+      "--schema", "atlas.card-event.v3",
+      "--artifact", fixture("invalid", "card-event.v3.invalid-transition-target.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  const nullTransitionFrom = expectJson(
+    [
+      "--schema", "atlas.card-event.v3",
+      "--artifact", fixture("invalid", "card-event.v3.null-transition-from.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(nullTransitionFrom.errors.some((error) => error.includes("Non-initial transitions require")));
+  const ambiguousOperations = expectJson(
+    [
+      "--schema", "atlas.card-event.v3",
+      "--artifact", fixture("invalid", "card-event.v3.ambiguous-operations.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(ambiguousOperations.errors.some((error) => error.includes("duplicate blocker_id")));
+  for (const [fixtureName, expectedError] of [
+    ["card-event.v3.invalid-initial-materialization.json", "Stable standing anchors"],
+    ["card-event.v3.invalid-update-materialization.json", "archive_state archived must move together"],
+    ["card-event.v3.archive-entry-missing-state.json", "crossing the archived boundary"],
+    ["card-event.v3.archive-entry-missing-standing-anchor.json", "explicit $.changes.set.standing_anchor false"],
+    ["card-event.v3.archive-exit-missing-state.json", "crossing the archived boundary"],
+    ["card-event.v3.execution-receipt-digest-mismatch.json", "identity and digest"],
+    ["card-event.v3.non-initial-zero-version.json", "expected_version >= 1"],
+    ["card-event.v3.sequence-before-version.json", "cannot precede $.card_version"],
+  ]) {
+    const invalidMaterialization = expectJson(
+      [
+        "--schema", "atlas.card-event.v3",
+        "--artifact", fixture("invalid", fixtureName),
+      ],
+      1,
+      "INVALID_ARTIFACT",
+    );
+    assert(invalidMaterialization.errors.some((error) => error.includes(expectedError)));
+  }
+  for (const fixtureName of [
+    "card-event.v3.initial-standing-anchor.json",
+    "card-event.v3.archive-materialization.json",
+    "card-event.v3.archive-exit-materialization.json",
+    "card-event.v3.partial-archive-state.json",
+  ]) {
+    expectJson(
+      ["--schema", "atlas.card-event.v3", "--artifact", fixture("valid", fixtureName)],
+      0,
+      "VALID",
+    );
+  }
+  const shortCircuitedEmptyReceipt = expectJson(
+    [
+      "--schema", "atlas.board-commit-receipt.v1",
+      "--artifact", emptyArtifact,
+      "--card-event", path.join(temporaryDir, "must-not-read-event.json"),
+      "--projection-delivery", path.join(temporaryDir, "must-not-read-delivery.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(shortCircuitedEmptyReceipt.errors.some((error) => error.includes("is required")));
+  assert(shortCircuitedEmptyReceipt.errors.every((error) => !error.includes("Referenced CardEvent")));
+  assert(shortCircuitedEmptyReceipt.errors.every((error) => !error.includes("Referenced ProjectionDelivery")));
+  const missingReceiptContext = expectJson(
+    ["--schema", "atlas.board-commit-receipt.v1", "--artifact", boardCommitReceiptFixture],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(missingReceiptContext.errors.some((error) => error.includes("requires --card-event")));
+  assert(missingReceiptContext.errors.some((error) => error.includes("requires --projection-delivery")));
+  expectJson(
+    [
+      "--schema=atlas.board-commit-receipt.v1",
+      `--artifact=${boardCommitReceiptFixture}`,
+      `--card-event=${cardEventFixture}`,
+      `--projection-delivery=${projectionDeliveryFixture}`,
+    ],
+    0,
+    "VALID",
+  );
+  const mismatchedReceipt = JSON.parse(await fs.readFile(boardCommitReceiptFixture, "utf8"));
+  mismatchedReceipt.event_sequence += 1;
+  mismatchedReceipt.card_record_digest = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  mismatchedReceipt.execution_receipt.receipt_id = "other-execution";
+  mismatchedReceipt.projection_delivery_id = "other-delivery";
+  mismatchedReceipt.projection_delivery_digest = "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+  const mismatchedReceiptPath = await writeTemporaryJson("board-commit-receipt.context-mismatch.json", mismatchedReceipt);
+  const mismatchedReceiptFailure = expectJson(
+    [
+      "--schema", "atlas.board-commit-receipt.v1",
+      "--artifact", mismatchedReceiptPath,
+      "--card-event", cardEventFixture,
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  for (const expectedError of [
+    "$.event_sequence must equal CardEvent",
+    "$.card_record_digest must equal CardEvent",
+    "$.execution_receipt must exactly equal CardEvent",
+    "projection_delivery_id must equal",
+    "canonical ProjectionDelivery digest",
+  ]) {
+    assert(mismatchedReceiptFailure.errors.some((error) => error.includes(expectedError)));
+  }
+  const receiptSequenceFailure = expectJson(
+    [
+      "--schema", "atlas.board-commit-receipt.v1",
+      "--artifact", fixture("invalid", "board-commit-receipt.v1.sequence-before-version.json"),
+      "--card-event", cardEventFixture,
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(receiptSequenceFailure.errors.some((error) => error.includes("cannot precede $.card_version")));
+  const boardCommitReceipt = JSON.parse(await fs.readFile(boardCommitReceiptFixture, "utf8"));
+  const activeMigration = JSON.parse(await fs.readFile(migrationFixture, "utf8"));
+  activeMigration.phase = "v3-active";
+  activeMigration.v2_authority_snapshot = {
+    status: "available",
+    snapshot_id: "snapshot-v2",
+    digest: "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    captured_at: "2026-07-17T12:01:00Z",
+    unknown_reason: null,
+  };
+  activeMigration.one_time_import = {
+    ...activeMigration.one_time_import,
+    status: "verified",
+    source_snapshot_digest: activeMigration.v2_authority_snapshot.digest,
+    event_sequence_start: 1,
+    event_sequence_end: 20,
+    imported_at: "2026-07-17T12:04:00Z",
+    verified_at: "2026-07-17T12:05:00Z",
+  };
+  activeMigration.first_v3_acceptance = {
+    status: "accepted",
+    receipt_id: boardCommitReceipt.receipt_id,
+    receipt_digest: canonicalArtifactDigest(boardCommitReceipt),
+    accepted_at: boardCommitReceipt.committed_at,
+  };
+  activeMigration.rollback.current_mode = "v3-restore-replay-only";
+  activeMigration.cutover.status = "active";
+  const activeMigrationPath = await writeTemporaryJson("board-authority-migration.active.json", activeMigration);
+  const activeMigrationArgs = [
+    "--schema", "atlas.board-authority-migration.v1",
+    "--artifact", activeMigrationPath,
+    "--board-commit-receipt", boardCommitReceiptFixture,
+    "--card-event", cardEventFixture,
+    "--projection-delivery", projectionDeliveryFixture,
+  ];
+  expectJson(activeMigrationArgs, 0, "VALID");
+  const missingMigrationReceipt = expectJson(
+    [
+      "--schema", "atlas.board-authority-migration.v1",
+      "--artifact", activeMigrationPath,
+      "--card-event", cardEventFixture,
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(missingMigrationReceipt.errors.some((error) => error.includes("requires --board-commit-receipt")));
+  const receiptDigestMismatchMigration = structuredClone(activeMigration);
+  receiptDigestMismatchMigration.first_v3_acceptance.receipt_digest = "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc";
+  const receiptDigestMismatchPath = await writeTemporaryJson(
+    "board-authority-migration.receipt-digest-mismatch.json",
+    receiptDigestMismatchMigration,
+  );
+  const receiptDigestMismatch = expectJson(
+    activeMigrationArgs.map((argument, index) => (
+      index > 0 && activeMigrationArgs[index - 1] === "--artifact" ? receiptDigestMismatchPath : argument
+    )),
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(receiptDigestMismatch.errors.some((error) => error.includes("receipt_digest must equal")));
+  const verificationAfterAcceptance = structuredClone(activeMigration);
+  verificationAfterAcceptance.one_time_import.verified_at = "2026-07-17T12:07:00Z";
+  const verificationAfterAcceptancePath = await writeTemporaryJson(
+    "board-authority-migration.verification-after-acceptance.json",
+    verificationAfterAcceptance,
+  );
+  const verificationAfterAcceptanceFailure = expectJson(
+    activeMigrationArgs.map((argument, index) => (
+      index > 0 && activeMigrationArgs[index - 1] === "--artifact" ? verificationAfterAcceptancePath : argument
+    )),
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(verificationAfterAcceptanceFailure.errors.some((error) => error.includes("acceptance cannot precede")));
+  const shortCircuitedEmptyMigration = expectJson(
+    [
+      "--schema", "atlas.board-authority-migration.v1",
+      "--artifact", emptyArtifact,
+      "--board-commit-receipt", path.join(temporaryDir, "must-not-read-receipt.json"),
+      "--card-event", path.join(temporaryDir, "must-not-read-event.json"),
+      "--projection-delivery", path.join(temporaryDir, "must-not-read-delivery.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(shortCircuitedEmptyMigration.errors.some((error) => error.includes("is required")));
+  assert(shortCircuitedEmptyMigration.errors.every((error) => !error.includes("Referenced")));
+  const migrationBaselineFailure = expectJson(
+    [
+      "--schema", "atlas.board-authority-migration.v1",
+      "--artifact", fixture("invalid", "board-authority-migration.v1.baseline-drift.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(migrationBaselineFailure.errors.some((error) => error.includes("frozen ATLAS-BOARD-000 baseline")));
+  const migrationChronologyFailure = expectJson(
+    [
+      "--schema", "atlas.board-authority-migration.v1",
+      "--artifact", fixture("invalid", "board-authority-migration.v1.chronology-conflict.json"),
+      "--board-commit-receipt", boardCommitReceiptFixture,
+      "--card-event", cardEventFixture,
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(migrationChronologyFailure.errors.some((error) => error.includes("import cannot precede")));
+  assert(migrationChronologyFailure.errors.some((error) => error.includes("acceptance cannot precede verified one-time baseline verification")));
+  const unknownProjectionConflict = expectJson(
+    [
+      "--schema", "atlas.projection-delivery.v1",
+      "--artifact", fixture("invalid", "projection-delivery.v1.available-unknown-conflict.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(unknownProjectionConflict.errors.some((error) => error.includes("Available UNKNOWN projection")));
+  const appliedDeliveryRetry = expectJson(
+    [
+      "--schema", "atlas.projection-delivery.v1",
+      "--artifact", fixture("invalid", "projection-delivery.v1.applied-retry.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(appliedDeliveryRetry.errors.some((error) => error.includes("must be non-retryable")));
+  for (const fixtureName of [
+    "projection-delivery.v1.applied-zero-attempt.json",
+    "projection-delivery.v1.stale-zero-attempt.json",
+    "projection-delivery.v1.failed-zero-attempt.json",
+    "projection-delivery.v1.available-unknown-zero-attempt.json",
+  ]) {
+    const zeroAttempt = expectJson(
+      ["--schema", "atlas.projection-delivery.v1", "--artifact", fixture("invalid", fixtureName)],
+      1,
+      "INVALID_ARTIFACT",
+    );
+    assert(zeroAttempt.errors.some((error) => error.includes("positive attempt_count")));
+  }
+  expectJson(
+    [
+      "--schema", "atlas.projection-delivery.v1",
+      "--artifact", fixture("valid", "projection-delivery.v1.unavailable-unknown-zero-attempt.json"),
+    ],
+    0,
+    "VALID",
+  );
+  const predatingAck = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("invalid", "projection-ack.v1.predates-delivery.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(predatingAck.errors.some((error) => error.includes("cannot precede ProjectionDelivery $.enqueued_at")));
+  const duplicateControlCard = expectJson(
+    [
+      "--schema", "atlas.control-board-read-model.v1",
+      "--artifact", fixture("invalid", "control-board-read-model.v1.duplicate-card.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(duplicateControlCard.errors.some((error) => error.includes("duplicate identity")));
+  const unavailableMissingError = expectJson(
+    [
+      "--schema", "atlas.projection-delivery.v1",
+      "--artifact", fixture("invalid", "projection-delivery.v1.unavailable-unknown-missing-error.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(unavailableMissingError.errors.some((error) => error.includes("availability error evidence")));
+  const appliedAckRetry = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("invalid", "projection-ack.v1.applied-retry.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(appliedAckRetry.errors.some((error) => error.includes("must be non-retryable")));
+  const appliedAckZeroAttempt = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("invalid", "projection-ack.v1.applied-zero-attempt.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(appliedAckZeroAttempt.errors.some((error) => error.includes("attempt_count")));
+  const unavailableAckMissingError = expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("invalid", "projection-ack.v1.unavailable-unknown-missing-error.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(unavailableAckMissingError.errors.some((error) => error.includes("availability error evidence")));
+  expectJson(
+    [
+      "--schema", "atlas.projection-ack.v1",
+      "--artifact", fixture("valid", "projection-ack.v1.unavailable-unknown.json"),
+      "--projection-delivery", projectionDeliveryFixture,
+    ],
+    0,
+    "VALID",
+  );
+  const malformedTerminalReceipt = expectJson(
+    [
+      "--schema", "atlas.rollover-manifest.v1",
+      "--artifact", fixture("invalid", "rollover-manifest.v1.malformed-terminal-receipt.json"),
+    ],
+    1,
+    "INVALID_ARTIFACT",
+  );
+  assert(malformedTerminalReceipt.errors.some((error) => error.includes("must satisfy exactly one allowed shape")));
   expectJson(
     ["--schema", "atlas.project-board.owner-export.v1", "--artifact", fixture("valid", "project-board.owner-export.v1.json")],
     0,
@@ -267,7 +681,7 @@ try {
     "INVALID_ARTIFACT",
   );
   expectJson(
-    ["--schema", "atlas.env.v3", "--artifact", fixture("valid", "env.json")],
+    ["--schema", "atlas.env.v4", "--artifact", fixture("valid", "env.json")],
     2,
     "UNSUPPORTED_CONTRACT_VERSION",
   );

@@ -1,0 +1,42 @@
+{
+  "contract_version": "atlas.board-commit-receipt.v1",
+  "receipt_id": "board-commit-atlas-board-000-sequence-before-version",
+  "acceptance": "accepted",
+  "card_id": "ATLAS-BOARD-000",
+  "project_id": "atlas",
+  "board_id": "atlas-control",
+  "event_id": "event-atlas-board-000-sequence-before-version",
+  "event_sequence": 1,
+  "card_version": 10,
+  "idempotency_key": "board-commit:ATLAS-BOARD-000:sequence-before-version",
+  "expected_version": 9,
+  "execution_receipt": {
+    "receipt_id": "execution-atlas-board-000-sequence-before-version",
+    "digest": "sha256:8181818181818181818181818181818181818181818181818181818181818181",
+    "status": "succeeded"
+  },
+  "card_record_digest": "sha256:8282828282828282828282828282828282828282828282828282828282828282",
+  "projection_delivery_id": "projection-atlas-board-000-sequence-before-version",
+  "projection_delivery_digest": "sha256:8383838383838383838383838383838383838383838383838383838383838383",
+  "transaction": {
+    "transaction_id": "sqlite-tx-atlas-board-000-sequence-before-version",
+    "engine": "python-stdlib-sqlite3",
+    "journal_mode": "WAL",
+    "synchronous": "FULL",
+    "writer_model": "one-writer",
+    "writer_lease_id": "lease-atlas-root-writer"
+  },
+  "closure_order": [
+    "validate-execution-receipt",
+    "idempotency-lookup",
+    "expected-version-cas",
+    "append-card-event",
+    "materialize-card-record",
+    "enqueue-projection-delivery",
+    "persist-board-commit-receipt",
+    "commit-transaction"
+  ],
+  "engineering_closed": true,
+  "projection_gates_engineering": false,
+  "committed_at": "2026-07-17T12:45:00Z"
+}

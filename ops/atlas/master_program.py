@@ -16,6 +16,7 @@ REGISTER = ROOT / "docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json"
 LANE_REGISTRY = ROOT / "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json"
 
 NEW_LANE_IDS = {
+    "lane-atlas-board-authority-v3",
     "lane-fawxzzy-platform-migration",
     "lane-external-model-sidecar-deepseek-evaluation",
     "lane-atlas-book-playbook-corpus-convergence",

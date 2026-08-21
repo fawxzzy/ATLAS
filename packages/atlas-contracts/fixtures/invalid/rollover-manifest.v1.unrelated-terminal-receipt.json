@@ -1,0 +1,58 @@
+{
+  "contract_version": "atlas.rollover-manifest.v1",
+  "rollover_id": "rollover-atlas-board-000-unrelated-receipt",
+  "standing_anchor_id": "ATLAS-MAIN",
+  "card_id": "ATLAS-BOARD-000",
+  "event_sequence": 12,
+  "predecessor_epoch": {
+    "epoch_id": "atlas-board-000-epoch-1",
+    "task_id": "task-atlas-board-000-1",
+    "card_id": "ATLAS-BOARD-000",
+    "job_id": "job-atlas-board-000-1",
+    "lease_id": "lease-atlas-root-writer-1",
+    "branch_name": "codex/atlas-board-000-authority-contract",
+    "head_sha": "4617c67b367b04dbc287ab2b20b23469e3ec37b7",
+    "worktree_ref": "worktrees/atlas-board-000-1",
+    "status": "terminal"
+  },
+  "successor_epoch": {
+    "epoch_id": "atlas-board-000-epoch-2",
+    "task_id": "task-atlas-board-000-2",
+    "card_id": "ATLAS-BOARD-000",
+    "job_id": "job-atlas-board-000-2",
+    "lease_id": "lease-atlas-root-writer-2",
+    "branch_name": "codex/atlas-board-000-authority-contract",
+    "head_sha": "4617c67b367b04dbc287ab2b20b23469e3ec37b7",
+    "worktree_ref": "worktrees/atlas-board-000-2",
+    "status": "reconstructed"
+  },
+  "blockers": [],
+  "owned_resources": [],
+  "receipt_digests": [
+    "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+  ],
+  "terminal_receipt": {
+    "receipt_id": "terminal-unrelated",
+    "epoch_id": "atlas-board-000-epoch-1",
+    "digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "status": "terminal"
+  },
+  "next_action": "Reject archive eligibility because terminal receipt evidence is unrelated.",
+  "context_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "successor_reconstruction": {
+    "status": "verified",
+    "context_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "reconstructed_at": "2026-07-17T12:05:00Z",
+    "evidence_digests": [
+      "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ],
+    "exact_readback": "verified"
+  },
+  "archive_gate": {
+    "stable_standing_anchor_remains_unarchived": true,
+    "predecessor_epoch_archive": "eligible",
+    "successor_continuity_verified": true,
+    "exact_readback_verified": true
+  },
+  "created_at": "2026-07-17T12:05:00Z"
+}

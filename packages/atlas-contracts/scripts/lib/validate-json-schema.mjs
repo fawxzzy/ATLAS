@@ -11,7 +11,7 @@ export const packageRoot = path.resolve(
 export const schemaDir = path.join(packageRoot, "schemas");
 export const fixturesDir = path.join(packageRoot, "fixtures");
 
-export const supportedContractMajorVersions = Object.freeze([1, 2]);
+export const supportedContractMajorVersions = Object.freeze([1, 2, 3]);
 
 export const knownSchemaPlan = Object.freeze([
   {
@@ -134,6 +134,54 @@ export const knownSchemaPlan = Object.freeze([
     valid: "valid/knowledge-candidate.v2.json",
     invalid: "invalid/knowledge-candidate.v2.bad-kind.json",
   },
+  {
+    id: "atlas.card-record.v3",
+    file: "atlas.card-record.v3.schema.json",
+    valid: "valid/card-record.v3.json",
+    invalid: "invalid/card-record.v3.archived-standing-anchor.json",
+  },
+  {
+    id: "atlas.card-event.v3",
+    file: "atlas.card-event.v3.schema.json",
+    valid: "valid/card-event.v3.json",
+    invalid: "invalid/card-event.v3.bad-cas-version.json",
+  },
+  {
+    id: "atlas.board-commit-receipt.v1",
+    file: "atlas.board-commit-receipt.v1.schema.json",
+    valid: "valid/board-commit-receipt.v1.json",
+    invalid: "invalid/board-commit-receipt.v1.bad-order.json",
+  },
+  {
+    id: "atlas.projection-delivery.v1",
+    file: "atlas.projection-delivery.v1.schema.json",
+    valid: "valid/projection-delivery.v1.json",
+    invalid: "invalid/projection-delivery.v1.unavailable-applied.json",
+  },
+  {
+    id: "atlas.projection-ack.v1",
+    file: "atlas.projection-ack.v1.schema.json",
+    valid: "valid/projection-ack.v1.json",
+    invalid: "invalid/projection-ack.v1.unavailable-applied.json",
+  },
+  {
+    id: "atlas.board-authority-migration.v1",
+    file: "atlas.board-authority-migration.v1.schema.json",
+    valid: "valid/board-authority-migration.v1.json",
+    invalid: "invalid/board-authority-migration.v1.silent-reversion.json",
+  },
+  {
+    id: "atlas.control-board-read-model.v1",
+    file: "atlas.control-board-read-model.v1.schema.json",
+    valid: "valid/control-board-read-model.v1.json",
+    invalid: "invalid/control-board-read-model.v1.unavailable-zero.json",
+  },
+  {
+    id: "atlas.rollover-manifest.v1",
+    file: "atlas.rollover-manifest.v1.schema.json",
+    valid: "valid/rollover-manifest.v1.json",
+    invalid: "invalid/rollover-manifest.v1.premature-archive.json",
+  },
 ]);
 
 const isoDateTimePattern =
@@ -198,6 +246,20 @@ export function validateJsonSchema(value, schema, rootSchema = schema, atPath = 
     return [
       `${atPath} must satisfy at least one allowed shape`,
       ...branchErrors.flat(),
+    ];
+  }
+
+  if (schema.oneOf) {
+    const branchErrors = schema.oneOf.map((branch) =>
+      validateJsonSchema(value, branch, rootSchema, atPath),
+    );
+    const matchingBranchCount = branchErrors.filter((errors) => errors.length === 0).length;
+    if (matchingBranchCount === 1) {
+      return [];
+    }
+    return [
+      `${atPath} must satisfy exactly one allowed shape; matched ${matchingBranchCount}`,
+      ...(matchingBranchCount === 0 ? branchErrors.flat() : []),
     ];
   }
 

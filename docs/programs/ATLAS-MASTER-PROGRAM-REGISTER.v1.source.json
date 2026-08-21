@@ -1,7 +1,7 @@
 {
   "schema": "atlas.master-program-register.v1",
   "version": 1,
-  "generated_at": "2026-07-16T23:26:40Z",
+  "generated_at": "2026-07-17T10:30:00Z",
   "title": "ATLAS Master Program and FawxzzyPlatform Wave 0",
   "register_scope": "Deterministic authority index and admission map. It does not replace lane, marker, owner, board, deployment, runtime, or receipt truth.",
   "producer": {
@@ -31,7 +31,9 @@
     "data/imports/fawxzzy-platform/2026-07-16/IMPORT-MANIFEST.json",
     "data/imports/deepseek-bridge/2026-07-13/IMPORT-MANIFEST.json",
     "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
-    "docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json"
+    "docs/registry/DEEPSEEK-BRIDGE-WAVE-0-ADMISSION.json",
+    "docs/architecture/ADR-ATLAS-BOARD-AUTHORITY-V3.md",
+    "docs/registry/ATLAS-BOARD-AUTHORITY-MIGRATION.v1.json"
   ],
   "authority_model": {
     "rule": "Index existing authority by reference; never copy a mutable status into a competing source of truth.",
@@ -305,6 +307,21 @@
       "status": "independent-standing-owner-lane",
       "next_packet": "Resolve from the FawxzzyWeb owner lane and board #14.",
       "measurement_status": "OWNER_AUTHORITY"
+    },
+    {
+      "id": "program-atlas-board-authority-v3",
+      "title": "Atlas Board Authority v3",
+      "owner": "stack-root-and-named-owner-repositories",
+      "authority": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json#lane-atlas-board-authority-v3 plus the board authority ADR and migration registry",
+      "scope": "Freeze and later activate the Atlas-local authoritative board ledger, asynchronous DiscordOS projection, generated Atlas Control read model, and bounded-epoch rollover without changing v2 or opening the held closing audit.",
+      "dependencies": ["ATLAS-BOARD-000 merge", "one writer per repository", "named packet proof gates"],
+      "serialization": ["Wave 1 begins after ATLAS-BOARD-000 merges.", "Wave 2 preserves named owner and predecessor dependencies.", "Wave 3 is serialized cutover, Discord debt, then final board reconciliation."],
+      "approval_gates": ["ATLAS-CUTOVER-001 explicit cutover receipt", "irreversible-action"],
+      "evidence": ["docs/architecture/ADR-ATLAS-BOARD-AUTHORITY-V3.md", "docs/registry/ATLAS-BOARD-AUTHORITY-MIGRATION.v1.json", "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json", "packages/atlas-contracts"],
+      "definition_of_done": ["Every fixed contract and proof gate is accepted with deterministic replay, migration, projection, rollover, cutover, and rollback evidence.", "No v2 or historical marker changes, ninth runtime activation step, or Full-System audit point are introduced."],
+      "status": "preparatory-contract-freeze-review",
+      "next_packet": "ATLAS-BOARD-001 after ATLAS-BOARD-000 merges; do not start it from this packet.",
+      "measurement_status": "UNMEASURED"
     },
     {
       "id": "program-shared-contracts-wiring",

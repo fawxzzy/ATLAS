@@ -1,0 +1,61 @@
+{
+  "contract_version": "atlas.card-event.v3",
+  "authority": "atlas-local-ledger",
+  "event_id": "event-atlas-board-000-execution-receipt-digest-mismatch",
+  "event_sequence": 1,
+  "card_id": "ATLAS-BOARD-000",
+  "project_id": "atlas",
+  "board_id": "atlas-control",
+  "epoch_id": "atlas-board-000-epoch-1",
+  "card_version": 1,
+  "idempotency_key": "board-commit:ATLAS-BOARD-000:execution-receipt-digest-mismatch",
+  "expected_version": 0,
+  "event_type": "create",
+  "occurred_at": "2026-07-17T12:34:00Z",
+  "actor": {"kind": "worker", "id": "stack-root"},
+  "job_id": "job-atlas-board-000",
+  "lease_id": "lease-atlas-root-writer",
+  "execution_receipt": {
+    "receipt_id": "execution-atlas-board-000-digest-mismatch",
+    "digest": "sha256:5959595959595959595959595959595959595959595959595959595959595959",
+    "status": "succeeded"
+  },
+  "previous_record_digest": null,
+  "resulting_record_digest": "sha256:6060606060606060606060606060606060606060606060606060606060606060",
+  "changes": {
+    "set": {
+      "epoch_id": "atlas-board-000-epoch-1",
+      "title": "Reject mismatched execution receipt provenance",
+      "description": "Schema-valid initial event with a conflicting digest for the execution receipt identity.",
+      "card_type": "governance",
+      "lifecycle": "review",
+      "priority": "high",
+      "owner": "stack-root",
+      "standing_anchor": false,
+      "archive_state": "active",
+      "work": {
+        "job_id": "job-atlas-board-000",
+        "lease_id": "lease-atlas-root-writer",
+        "branch_name": "codex/atlas-board-000-authority-contract",
+        "head_sha": "10c487457c4fd68a63d8376b85d9cee1f3e6395c",
+        "worktree_ref": "worktrees/atlas-board-000",
+        "status": "review"
+      },
+      "next_action": "Reject before append.",
+      "projection_state": "queued"
+    },
+    "transition": {"from": null, "to": "review"},
+    "add_blockers": [],
+    "remove_blocker_ids": [],
+    "add_resources": [],
+    "remove_resource_ids": [],
+    "add_receipts": [
+      {
+        "receipt_id": "execution-atlas-board-000-digest-mismatch",
+        "digest": "sha256:6161616161616161616161616161616161616161616161616161616161616161"
+      }
+    ]
+  },
+  "projection_delivery_id": "projection-atlas-board-000-execution-receipt-digest-mismatch",
+  "commit_receipt_id": "board-commit-atlas-board-000-execution-receipt-digest-mismatch"
+}

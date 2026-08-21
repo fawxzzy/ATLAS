@@ -1,0 +1,36 @@
+{
+  "contract_version": "atlas.card-event.v3",
+  "authority": "atlas-local-ledger",
+  "event_id": "event-atlas-board-000-null-from",
+  "event_sequence": 2,
+  "card_id": "ATLAS-BOARD-000",
+  "project_id": "atlas",
+  "board_id": "atlas-control",
+  "epoch_id": "atlas-board-000-epoch-1",
+  "card_version": 2,
+  "idempotency_key": "board-commit:ATLAS-BOARD-000:null-from",
+  "expected_version": 1,
+  "event_type": "transition",
+  "occurred_at": "2026-07-17T12:02:00Z",
+  "actor": {"kind": "worker", "id": "stack-root"},
+  "job_id": "job-atlas-board-000",
+  "lease_id": "lease-atlas-root-writer",
+  "execution_receipt": {
+    "receipt_id": "execution-atlas-board-000-null-from",
+    "digest": "sha256:1414141414141414141414141414141414141414141414141414141414141414",
+    "status": "succeeded"
+  },
+  "previous_record_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "resulting_record_digest": "sha256:2525252525252525252525252525252525252525252525252525252525252525",
+  "changes": {
+    "set": {},
+    "transition": {"from": null, "to": "completed"},
+    "add_blockers": [],
+    "remove_blocker_ids": [],
+    "add_resources": [],
+    "remove_resource_ids": [],
+    "add_receipts": []
+  },
+  "projection_delivery_id": "projection-atlas-board-000-null-from",
+  "commit_receipt_id": "board-commit-atlas-board-000-null-from"
+}
