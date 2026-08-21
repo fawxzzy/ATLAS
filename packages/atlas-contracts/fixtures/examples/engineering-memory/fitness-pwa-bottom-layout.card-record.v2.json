@@ -1,0 +1,16 @@
+{
+  "contract_version": "atlas.card-record.v2",
+  "card_id": "FITNESS-PWA-DRY-RUN-001",
+  "project_id": "fitness",
+  "board_id": "atlas:engineering-memory-dry-runs",
+  "title": "Reuse Fitness standalone bottom-screen layout precedent",
+  "description": "Read-only dry run proving the existing shared-shell precedent is discoverable.",
+  "card_type": "bug",
+  "lifecycle": "planning",
+  "priority": "high",
+  "owner": "fitness",
+  "dependencies": [],
+  "board_version": 1,
+  "updated_at": "2026-08-20T12:12:00Z",
+  "source_ref": "operator-reported-historical-example"
+}

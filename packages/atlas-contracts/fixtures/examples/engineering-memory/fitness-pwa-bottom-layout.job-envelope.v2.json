@@ -1,0 +1,120 @@
+{
+  "contract_version": "atlas.job-envelope.v2",
+  "job_id": "fitness-pwa-bottom-layout-dry-run-001",
+  "component_id": "fitness",
+  "project_id": "fitness",
+  "created_at": "2026-08-20T12:12:00Z",
+  "objective": "Reuse the solved Fitness standalone safe-area pattern for bottom-screen layout work.",
+  "scope": {
+    "owner_repository": "fawxzzy-fitness",
+    "allowed_paths": ["src/components/ui/app/**", "src/app/globals.css", "docs/mobile-shell-contract.md"],
+    "forbidden_paths": ["**"]
+  },
+  "runtime": {"model": "gpt-5.6-terra", "reasoning": "medium", "speed": "standard", "permissions": "full-access", "approval_policy": "never"},
+  "authority": {
+    "external_mutations": [],
+    "production_deploy": false,
+    "destructive_actions": false
+  },
+  "verification": {
+    "commands": ["read-only source search"],
+    "evidence_required": ["browser and standalone route-state proof"]
+  },
+  "correlations": {"card_id": "FITNESS-PWA-DRY-RUN-001", "parent_job_id": null},
+  "expected_receipt_version": "atlas.execution-receipt.v2",
+  "extensions": {
+    "engineering_memory": {
+      "contract_version": "atlas.engineering-memory-profile.v1",
+      "task_id": "fitness-pwa-bottom-layout-dry-run-001",
+      "source_text": "The installed Fitness app should reach the bottom of the screen without saving space for the missing browser toolbar.",
+      "normalized_title": "Reuse shared standalone safe-area and bottom-screen layout contract",
+      "task_type": "pwa_layout",
+      "phase": "planned",
+      "project": "fitness",
+      "repo": "fawxzzy-fitness",
+      "route_states": [
+        {"route": "/today", "state": "browser", "surface": "app-shell-bottom"},
+        {"route": "/today", "state": "standalone", "surface": "app-shell-bottom"}
+      ],
+      "components": ["AppShell", "PersistentAppChrome"],
+      "acceptance_criteria": [
+        "Standalone mode reaches the safe-area bottom without phantom browser-toolbar spacing.",
+        "Browser mode remains correct.",
+        "The shared app shell, not route-local padding, owns the behavior."
+      ],
+      "precedent_check": {
+        "status": "checked-matches",
+        "query_terms": ["standalone PWA", "safe area bottom", "phantom browser toolbar"],
+        "searched_sources": [
+          {
+            "kind": "current_repo",
+            "ref": "repos/fawxzzy-fitness",
+            "result": "match",
+            "evidence_refs": [
+              "repos/fawxzzy-fitness/src/components/ui/app/AppShell.tsx",
+              "repos/fawxzzy-fitness/src/components/ui/app/PersistentAppChrome.tsx",
+              "repos/fawxzzy-fitness/src/app/globals.css",
+              "repos/fawxzzy-fitness/docs/mobile-shell-contract.md"
+            ]
+          },
+          {
+            "kind": "atlas_docs",
+            "ref": "docs/architecture",
+            "result": "match",
+            "evidence_refs": [
+              "docs/architecture/VISUAL-CHANGE-WORKFLOW.md",
+              "docs/registry/ATLAS-UI-STANDARDS-REGISTRY.v1.json"
+            ]
+          }
+        ],
+        "matches": [
+          {
+            "ref": "repos/fawxzzy-fitness/src/components/ui/app/AppShell.tsx",
+            "classification": "direct",
+            "rationale": "AppShell already defines safe-area tokens and a standalone-specific top contract."
+          },
+          {
+            "ref": "repos/fawxzzy-fitness/src/app/globals.css",
+            "classification": "adaptable",
+            "rationale": "The standalone safe-area bleed already reaches the physical bottom only when display mode is standalone."
+          }
+        ],
+        "decision": "reuse",
+        "rationale": "Use the existing shared-shell tokens and display-mode contract; do not add a route-local spacer or copy the implementation into another app unchanged.",
+        "checked_at": "2026-08-20T12:12:00Z"
+      },
+      "verification": {
+        "requirements": [
+          "Capture /today in browser mode at a mobile viewport.",
+          "Capture /today in standalone mode at the same viewport.",
+          "Inspect the physical bottom edge and safe-area fill.",
+          "Run repo-local shell and visual checks before completion."
+        ],
+        "evidence": [],
+        "unverified": ["Route-aware browser capture", "Route-aware standalone capture", "Physical-device standalone confirmation"],
+        "visual": {
+          "required": true,
+          "source_surface": "browser:/today:app-shell-bottom",
+          "target_surfaces": ["standalone:/today:app-shell-bottom"],
+          "shared_properties": ["bottom edge coverage", "safe-area ownership", "no phantom toolbar spacing"],
+          "implementation_strategy": "shared-style-contract"
+        }
+      },
+      "scope_lock": {
+        "acceptance_frozen": true,
+        "discovery_policy": "linked-child-task",
+        "parent_task_id": null,
+        "child_task_ids": []
+      },
+      "fast_lane": {
+        "lane": "normal",
+        "eligible": false,
+        "verification_route_known": true,
+        "disqualifiers": ["multi-state mobile and physical-device-aware verification"],
+        "rationale": "The likely source change is small, but the evidence boundary is broader than the fast lane."
+      },
+      "archive": {"status": "pending", "ref": null, "final_status": null},
+      "blockers": []
+    }
+  }
+}

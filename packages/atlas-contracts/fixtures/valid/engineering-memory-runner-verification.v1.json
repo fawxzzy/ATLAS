@@ -1,0 +1,14 @@
+{
+  "contract_version": "atlas.engineering-memory-runner-verification.v1",
+  "job_id": "engineering-memory-fixture-job",
+  "recorded_at": "2026-08-21T18:00:00Z",
+  "records": [
+    {
+      "command": "pnpm test",
+      "exit_code": 0,
+      "stdout_ref": "runtime/test.stdout.log",
+      "stderr_ref": "runtime/test.stderr.log"
+    }
+  ],
+  "no_change_proof_ref": null
+}

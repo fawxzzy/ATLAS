@@ -1,0 +1,40 @@
+{
+  "contract_version": "atlas.engineering-memory-profile.v1",
+  "task_id": "missing-precedent-001",
+  "source_text": "Make this match the other screen.",
+  "normalized_title": "Match repeated control",
+  "task_type": "ui_parity",
+  "phase": "planned",
+  "project": "example",
+  "repo": "example",
+  "route_states": [],
+  "components": [],
+  "acceptance_criteria": ["The controls match."],
+  "verification": {
+    "requirements": ["Capture both screens."],
+    "evidence": [],
+    "unverified": ["Both screens"],
+    "visual": {
+      "required": true,
+      "source_surface": "source",
+      "target_surfaces": ["target"],
+      "shared_properties": ["appearance"],
+      "implementation_strategy": "pending"
+    }
+  },
+  "scope_lock": {
+    "acceptance_frozen": true,
+    "discovery_policy": "linked-child-task",
+    "parent_task_id": null,
+    "child_task_ids": []
+  },
+  "fast_lane": {
+    "lane": "normal",
+    "eligible": false,
+    "verification_route_known": false,
+    "disqualifiers": ["precedent not checked"],
+    "rationale": "Cannot classify the lane yet."
+  },
+  "archive": {"status": "pending", "ref": null, "final_status": null},
+  "blockers": []
+}

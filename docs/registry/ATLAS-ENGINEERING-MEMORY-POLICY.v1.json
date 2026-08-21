@@ -1,0 +1,198 @@
+{
+  "schema": "atlas.engineering-memory-policy.v1",
+  "version": 1,
+  "status": "accepted",
+  "adopted_at": "2026-08-20T12:15:00Z",
+  "purpose": "Make precedent lookup, task normalization, UI parity evidence, scope expansion, verification, and completion archival required engineering gates instead of optional assistant memory.",
+  "canonical_seams": {
+    "task": "atlas.job-envelope.v2",
+    "queue": "atlas.card-record.v2 and atlas.board-event.v2",
+    "result": "atlas.execution-receipt.v2",
+    "knowledge_candidate": "atlas.knowledge-candidate.v2",
+    "profile": "atlas.engineering-memory-profile.v1",
+    "profile_location": "atlas.job-envelope.v2.extensions.engineering_memory",
+    "policy": "The profile is additive. It does not authorize a parallel queue, task protocol, scheduler, board, or doctrine store."
+  },
+  "installation": {
+    "execution_truth": "installed",
+    "installed_producers": [
+      "stack.repo-task",
+      "stack.canonical-workspace"
+    ],
+    "pre_worker_gate": "mutation",
+    "terminal_gates": ["verify", "archive"],
+    "terminal_refs_required": [
+      "card_record",
+      "engineering_memory_source",
+      "engineering_memory_search",
+      "engineering_memory_mutation_gate",
+      "engineering_memory_closeout",
+      "engineering_memory_runner_verification",
+      "engineering_memory_verify_gate",
+      "engineering_memory_archive_gate"
+    ],
+    "producer_inventory_ref": "docs/registry/ATLAS-ENGINEERING-MEMORY-PRODUCER-INVENTORY.v1.json",
+    "uninstalled_boundary": "No additional admitted mutating executor exists in the current inventory. Any future direct source-mutation launcher remains uninstalled until it proves the same fail-closed artifact chain."
+  },
+  "required_order": [
+    "capture_source_text",
+    "normalize_task",
+    "bind_canonical_card",
+    "search_precedents",
+    "record_reuse_adapt_reject_or_first_pattern",
+    "freeze_acceptance_criteria",
+    "pass_mutation_gate",
+    "implement_smallest_coherent_change",
+    "collect_required_evidence",
+    "pass_verification_gate",
+    "create_completion_archive",
+    "pass_archive_gate",
+    "emit_execution_receipt_and_reconcile_card"
+  ],
+  "lifecycle": {
+    "engineering_phases": ["captured", "normalized", "precedent_checked", "planned", "in_progress", "implemented", "verified", "archived", "blocked", "reopened"],
+    "card_mapping": {
+      "captured": ["intake"],
+      "normalized": ["intake", "planning"],
+      "precedent_checked": ["planning", "ready"],
+      "planned": ["planning", "ready"],
+      "in_progress": ["in-progress"],
+      "implemented": ["in-progress", "review"],
+      "verified": ["review", "completed"],
+      "archived": ["completed", "archived"],
+      "blocked": ["blocked"],
+      "reopened": ["planning", "ready", "in-progress"]
+    },
+    "single_source_rule": "The canonical card is the queue projection. The correlated job envelope is the bounded execution identity. The engineering-memory profile is one additive gate profile inside that job, never a disconnected list."
+  },
+  "precedent_lookup": {
+    "mandatory_before_mutation": true,
+    "minimum_sources": ["current_repo", "atlas_docs"],
+    "conditional_sources": ["sibling_repo", "playbook", "task_archive", "design_system", "test_fixture", "visual_fixture"],
+    "allowed_decisions": ["reuse", "adapt", "reject", "first-durable-pattern"],
+    "no_match_phrase": "No matching precedent found. Creating first durable pattern.",
+    "evidence_rule": "Every searched source records a result and evidence refs. A reusable match that is not used requires an explicit rejection rationale."
+  },
+  "parity": {
+    "triggers": ["same as", "match", "carry over", "duplicate this", "make it like", "reuse", "already solved", "same component", "same style", "same behavior"],
+    "required_fields": ["source_surface", "target_surfaces", "shared_properties", "implementation_strategy"],
+    "allowed_strategies": ["shared-component", "shared-style-contract", "documented-variant"],
+    "verification": "Passed screenshot, DOM, or visual-diff evidence must cover the canonical source and every target surface."
+  },
+  "visual_work": {
+    "code_inspection_is_sufficient": false,
+    "required_contract_refs": [
+      "docs/architecture/VISUAL-CHANGE-WORKFLOW.md",
+      "docs/registry/ATLAS-UI-STANDARDS-REGISTRY.v1.json"
+    ],
+    "completion_rule": "Unavailable evidence remains explicit and keeps the task implemented, partial, or blocked; it cannot be relabeled verified."
+  },
+  "fast_lane": {
+    "label": "five-minute-patch-lane",
+    "timing_promise": false,
+    "maximum_components": 2,
+    "requires_known_verification_route": true,
+    "disallowed_boundaries": ["schema", "migration", "auth", "security", "production", "billing", "secret", "credential", "destructive"],
+    "output_sequence": ["Captured", "Precedent checked", "Changed", "Verified", "Archived"],
+    "promotion_rule": "If scope or verification expands, change lane to normal and preserve the original parent acceptance criteria."
+  },
+  "expansion_control": {
+    "parent_acceptance_frozen_before_mutation": true,
+    "new_issue_policy": "linked-child-task",
+    "silent_absorption_allowed": false,
+    "child_requirements": ["stable task id", "parent task id", "independent status", "independent acceptance criteria"]
+  },
+  "archive": {
+    "required_before_archived_phase": true,
+    "allowed_root": "docs/",
+    "no_change_runtime_exception": "A runner-generated closeout under the bound run log is allowed only with validated no-change proof and never substitutes for a mutated workspace completion archive.",
+    "required_final_statuses": ["complete", "partial", "blocked"],
+    "complete_requires_verification_gate": true,
+    "partial_requires_unverified_items": true,
+    "blocked_requires_blockers": true
+  },
+  "commands": {
+    "plan": "node ops/atlas/engineering_memory_gate.mjs --job-envelope <job.json> --card-record <card.json> --gate plan",
+    "before_mutation": "node ops/atlas/engineering_memory_gate.mjs --job-envelope <job.json> --card-record <card.json> --gate mutation",
+    "before_verified": "node ops/atlas/engineering_memory_gate.mjs --job-envelope <job.json> --card-record <card.json> --gate verify",
+    "before_archived": "node ops/atlas/engineering_memory_gate.mjs --job-envelope <job.json> --card-record <card.json> --gate archive",
+    "terminal_reconcile": "node ops/atlas/complete_engineering_memory_job.mjs --job-envelope <job.json> --card-record <card.json> --closeout-record <closeout.json> --runner-verification <runner-verification.json> --workspace-root <workspace> --verify-receipt <verify-gate.json> --archive-receipt <archive-gate.json>"
+  },
+  "knowledge_seeds": [
+    {
+      "id": "rule-precedent-lookup-before-implementation",
+      "kind": "rule",
+      "title": "Precedent Lookup Before Implementation",
+      "statement": "Before implementing a change, search the current repo and Atlas knowledge surfaces for the same or similar problem; reuse, adapt, reject with rationale, or declare the first durable pattern.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "candidate"
+    },
+    {
+      "id": "rule-visual-work-requires-visual-evidence",
+      "kind": "rule",
+      "title": "Visual Work Requires Visual Evidence",
+      "statement": "Code inspection cannot close UI work; required routes and states need browser, device, DOM, screenshot, or visual-diff evidence at the bound revision.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "candidate"
+    },
+    {
+      "id": "rule-do-not-fragment-task-state",
+      "kind": "rule",
+      "title": "Do Not Fragment Task State",
+      "statement": "Every active item maps to one stable canonical card and correlated job; incidental lists never become independent truth sources.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "candidate"
+    },
+    {
+      "id": "pattern-shared-semantic-control",
+      "kind": "pattern",
+      "title": "Shared Semantic Control",
+      "statement": "Repeated controls with the same product role use a shared component or shared style/token contract unless an intentional variant is documented and proven.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "candidate"
+    },
+    {
+      "id": "pattern-pwa-standalone-safe-area-layout",
+      "kind": "pattern",
+      "title": "PWA Standalone Safe-Area Layout",
+      "statement": "Browser and installed standalone modes share shell-owned viewport and safe-area contracts; standalone mode does not reserve phantom browser-toolbar space.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "candidate"
+    },
+    {
+      "id": "failure-claimed-carryover-without-parity",
+      "kind": "failure-mode",
+      "title": "Claimed Carryover Without Parity",
+      "statement": "An agent reports a visual pattern copied while source and target still differ; prevent closure until both surfaces have property-level, route-aware evidence.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "candidate"
+    },
+    {
+      "id": "failure-expanding-task-erases-queue",
+      "kind": "failure-mode",
+      "title": "Expanding Task Erases Queue",
+      "statement": "A parent task silently absorbs discoveries and other queued work disappears; freeze parent scope and create linked child tasks.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "candidate"
+    },
+    {
+      "id": "decision-atlas-is-enforcement-not-memory-alone",
+      "kind": "decision",
+      "title": "Atlas Is Enforcement, Not Memory Alone",
+      "statement": "Atlas does not rely on model recollection; it requires explicit lookup, application or rejection, proof, and archival at lifecycle boundaries.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "candidate"
+    }
+  ],
+  "source_refs": [
+    "docs/memory/profiles/zachariah_workflow_profile.md",
+    "docs/architecture/VISUAL-CHANGE-WORKFLOW.md",
+    "docs/registry/ATLAS-UI-STANDARDS-REGISTRY.v1.json",
+    "docs/registry/ATLAS-ENGINEERING-MEMORY-PRODUCER-INVENTORY.v1.json",
+    "packages/atlas-contracts/schemas/atlas.job-envelope.v2.schema.json",
+    "packages/atlas-contracts/schemas/atlas.card-record.v2.schema.json",
+    "packages/atlas-contracts/schemas/atlas.engineering-memory-closeout.v1.schema.json",
+    "packages/atlas-contracts/schemas/atlas.engineering-memory-runner-verification.v1.schema.json",
+    "packages/atlas-contracts/schemas/atlas.knowledge-candidate.v2.schema.json"
+  ]
+}

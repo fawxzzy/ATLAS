@@ -1,0 +1,83 @@
+{
+  "contract_version": "atlas.engineering-memory-profile.v1",
+  "task_id": "fitness-pwa-bottom-layout-001",
+  "source_text": "The installed Fitness app still leaves browser-toolbar spacing at the bottom.",
+  "normalized_title": "Remove phantom browser-toolbar spacing in Fitness standalone mode",
+  "task_type": "pwa_layout",
+  "phase": "planned",
+  "project": "fitness",
+  "repo": "fawxzzy-fitness",
+  "route_states": [
+    {"route": "/today", "state": "browser", "surface": "app-shell-bottom"},
+    {"route": "/today", "state": "standalone", "surface": "app-shell-bottom"}
+  ],
+  "components": ["AppShell", "PersistentAppChrome"],
+  "acceptance_criteria": [
+    "Standalone mode reaches the physical bottom safe area without phantom browser-toolbar spacing.",
+    "Browser mode retains its intended bottom layout.",
+    "The shared shell remains the single owner of safe-area behavior."
+  ],
+  "precedent_check": {
+    "status": "checked-matches",
+    "query_terms": ["standalone PWA", "safe area", "bottom toolbar spacing"],
+    "searched_sources": [
+      {
+        "kind": "current_repo",
+        "ref": "repos/fawxzzy-fitness",
+        "result": "match",
+        "evidence_refs": [
+          "repos/fawxzzy-fitness/src/components/ui/app/AppShell.tsx",
+          "repos/fawxzzy-fitness/src/app/globals.css",
+          "repos/fawxzzy-fitness/docs/mobile-shell-contract.md"
+        ]
+      },
+      {
+        "kind": "atlas_docs",
+        "ref": "docs/architecture",
+        "result": "match",
+        "evidence_refs": ["docs/architecture/VISUAL-CHANGE-WORKFLOW.md"]
+      }
+    ],
+    "matches": [
+      {
+        "ref": "repos/fawxzzy-fitness/src/components/ui/app/AppShell.tsx",
+        "classification": "direct",
+        "rationale": "The shared app shell already owns safe-area tokens for browser and standalone states."
+      }
+    ],
+    "decision": "reuse",
+    "rationale": "Repair the shared shell contract and reuse its existing display-mode and safe-area ownership rather than adding route-local padding.",
+    "checked_at": "2026-08-20T12:00:00Z"
+  },
+  "verification": {
+    "requirements": [
+      "Capture /today at a mobile browser viewport.",
+      "Capture /today at the same viewport with standalone display mode.",
+      "Run the repo-local shell and visual checks."
+    ],
+    "evidence": [],
+    "unverified": ["Physical-device standalone behavior"],
+    "visual": {
+      "required": true,
+      "source_surface": "browser:/today:app-shell-bottom",
+      "target_surfaces": ["standalone:/today:app-shell-bottom"],
+      "shared_properties": ["bottom edge coverage", "safe-area inset ownership", "absence of phantom toolbar gap"],
+      "implementation_strategy": "shared-style-contract"
+    }
+  },
+  "scope_lock": {
+    "acceptance_frozen": true,
+    "discovery_policy": "linked-child-task",
+    "parent_task_id": null,
+    "child_task_ids": []
+  },
+  "fast_lane": {
+    "lane": "normal",
+    "eligible": false,
+    "verification_route_known": true,
+    "disqualifiers": ["standalone PWA requires multi-state mobile and physical-device-aware proof"],
+    "rationale": "The source edit may be small, but the verification boundary is broader than the fast lane."
+  },
+  "archive": {"status": "pending", "ref": null, "final_status": null},
+  "blockers": []
+}

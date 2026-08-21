@@ -1,0 +1,10 @@
+{
+  "contract_version": "atlas.engineering-memory-closeout.v1",
+  "job_id": "engineering-memory-fixture-job",
+  "card_id": "ENGINEERING-MEMORY-FIXTURE-CARD",
+  "completed_at": "2026-08-21T18:00:00Z",
+  "final_status": "complete",
+  "archive_kind": "repository-docs",
+  "verification": {"evidence": [], "unverified": []},
+  "blockers": []
+}

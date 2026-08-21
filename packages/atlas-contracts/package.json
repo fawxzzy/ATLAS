@@ -55,7 +55,13 @@
     "./schemas/atlas.marker-evidence.v2": "./schemas/atlas.marker-evidence.v2.schema.json",
     "./schemas/atlas.marker-evidence.v2.schema.json": "./schemas/atlas.marker-evidence.v2.schema.json",
     "./schemas/atlas.knowledge-candidate.v2": "./schemas/atlas.knowledge-candidate.v2.schema.json",
-    "./schemas/atlas.knowledge-candidate.v2.schema.json": "./schemas/atlas.knowledge-candidate.v2.schema.json"
+    "./schemas/atlas.knowledge-candidate.v2.schema.json": "./schemas/atlas.knowledge-candidate.v2.schema.json",
+    "./schemas/atlas.engineering-memory-profile.v1": "./schemas/atlas.engineering-memory-profile.v1.schema.json",
+    "./schemas/atlas.engineering-memory-profile.v1.schema.json": "./schemas/atlas.engineering-memory-profile.v1.schema.json",
+    "./schemas/atlas.engineering-memory-closeout.v1": "./schemas/atlas.engineering-memory-closeout.v1.schema.json",
+    "./schemas/atlas.engineering-memory-closeout.v1.schema.json": "./schemas/atlas.engineering-memory-closeout.v1.schema.json",
+    "./schemas/atlas.engineering-memory-runner-verification.v1": "./schemas/atlas.engineering-memory-runner-verification.v1.schema.json",
+    "./schemas/atlas.engineering-memory-runner-verification.v1.schema.json": "./schemas/atlas.engineering-memory-runner-verification.v1.schema.json"
   },
   "scripts": {
     "validate:fixtures": "node scripts/validate-contracts.mjs",

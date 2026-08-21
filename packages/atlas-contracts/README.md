@@ -29,8 +29,17 @@ The first Contracts v2 implementation cluster also provides schema, export, and 
 - `atlas.board-event.v2`
 - `atlas.marker-evidence.v2`
 - `atlas.knowledge-candidate.v2`
+- `atlas.engineering-memory-profile.v1`
+- `atlas.engineering-memory-closeout.v1`
+- `atlas.engineering-memory-runner-verification.v1`
 
 These v2 families remain implementation foundations rather than completed mesh units until governed producer and consumer adoption proof exists.
+
+The Engineering Memory profile is additive at
+`atlas.job-envelope.v2.extensions.engineering_memory`; it does not create a
+second task protocol or queue. The closeout and runner-verification contracts
+join worker evidence to runner-owned technical proof before the existing job
+and card identities may advance through verify and archive gates.
 
 The package also carries the canonical GitHub projection seam contracts:
 
@@ -80,6 +89,9 @@ Schemas:
 - `atlas.board-event.v2`
 - `atlas.marker-evidence.v2`
 - `atlas.knowledge-candidate.v2`
+- `atlas.engineering-memory-profile.v1`
+- `atlas.engineering-memory-closeout.v1`
+- `atlas.engineering-memory-runner-verification.v1`
 
 Exports:
 

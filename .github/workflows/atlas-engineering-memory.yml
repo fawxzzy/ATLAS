@@ -1,0 +1,55 @@
+name: Atlas Engineering Memory
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/atlas-engineering-memory.yml"
+      - "docs/architecture/ATLAS-ENGINEERING-MEMORY-ENFORCEMENT.md"
+      - "docs/knowledge/patterns/engineering-memory-enforcement.md"
+      - "docs/prompts/atlas-workflow/atlas.engineering-memory.md"
+      - "docs/registry/ATLAS-ENGINEERING-MEMORY-*.json"
+      - "ops/atlas/*engineering_memory*.mjs"
+      - "packages/atlas-contracts/**"
+      - "tests/test_atlas_engineering_memory_*.mjs"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/atlas-engineering-memory.yml"
+      - "docs/architecture/ATLAS-ENGINEERING-MEMORY-ENFORCEMENT.md"
+      - "docs/knowledge/patterns/engineering-memory-enforcement.md"
+      - "docs/prompts/atlas-workflow/atlas.engineering-memory.md"
+      - "docs/registry/ATLAS-ENGINEERING-MEMORY-*.json"
+      - "ops/atlas/*engineering_memory*.mjs"
+      - "packages/atlas-contracts/**"
+      - "tests/test_atlas_engineering_memory_*.mjs"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: atlas-engineering-memory-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Contract and lifecycle verification
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact event head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+
+      - name: Validate Atlas contracts
+        run: npm --prefix packages/atlas-contracts run validate
+
+      - name: Verify Engineering Memory lifecycle
+        run: node --test tests/test_atlas_engineering_memory_gate.mjs tests/test_atlas_engineering_memory_intake.mjs tests/test_atlas_engineering_memory_closeout.mjs tests/test_atlas_engineering_memory_producer_inventory.mjs
