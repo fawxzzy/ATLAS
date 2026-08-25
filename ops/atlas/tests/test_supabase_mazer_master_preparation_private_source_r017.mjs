@@ -96,6 +96,9 @@ function acl(schema) {
 }
 
 const fixture = rawFixture();
+fixture.legacy.player[6].state = { legacySibling: 'preserved-missing-tracks' };
+fixture.legacy.player[7].state = { legacySibling: 'preserved-nonobject-tracks', tracks: 'legacy-nonobject-tracks' };
+fixture.master.player[0].state.masterRollbackSibling = 'preserved-master-preimage';
 const plan = buildIdentityPlan(fixture.legacy, fixture.master);
 assert.equal(plan.retained_edges.length, 2);
 assert.equal(plan.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length, 13);
@@ -105,6 +108,16 @@ assert.deepEqual(plan.imports.at(-1).identities, [fixture.legacy.auth_identities
 
 const source = producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
 const validated = validatePrivateSource(source);
+const missingTracksForward = source.fence_input.source_snapshot.player.find((row) => row.user_id === fixture.legacy.player[6].user_id).row;
+const nonobjectTracksForward = source.fence_input.source_snapshot.player.find((row) => row.user_id === fixture.legacy.player[7].user_id).row;
+assert.equal(missingTracksForward.state.legacySibling, 'preserved-missing-tracks');
+assert.deepEqual(missingTracksForward.state.tracks.player, { level: missingTracksForward.player_level, completedCycles: missingTracksForward.player_completed_cycles });
+assert.equal(nonobjectTracksForward.state.legacySibling, 'preserved-nonobject-tracks');
+assert.deepEqual(nonobjectTracksForward.state.tracks.player, { level: nonobjectTracksForward.player_level, completedCycles: nonobjectTracksForward.player_completed_cycles });
+assert.match(source.sql['postverify.sql'], /preserved-missing-tracks/);
+assert.match(source.sql['postverify.sql'], /preserved-nonobject-tracks/);
+assert.match(source.sql['rollback.sql'], /preserved-master-preimage/);
+assert.doesNotMatch(source.sql['rollback.sql'], /preserved-missing-tracks|preserved-nonobject-tracks/);
 assert.equal(validated.allEdges.length, 18);
 assert.deepEqual(validated.classified.desired_counts, { profiles: 10, player: 15, ai: 15, receipts: 1882 });
 assert.equal(source.reset_era_ai.canonical_projection, '7/6/32/D');
@@ -138,6 +151,8 @@ assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.ident
 assert.throws(() => buildIdentityPlan(importIdentityDrift((_item, legacy) => { legacy.auth_identities.pop(); }), fixture.master), /EMAIL_IDENTITY_MISSING/);
 assert.throws(() => buildIdentityPlan(importIdentityDrift((item, legacy) => { legacy.auth_identities.push({ ...structuredClone(item), id: uid(99998) }); }), fixture.master), /EMAIL_IDENTITY_MULTIPLE/);
 assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.user_id = uid(99997); }), fixture.master), /EMAIL_IDENTITY_MISSING/);
+const malformedPlayerState = structuredClone(fixture.legacy); malformedPlayerState.player[6].state = 'not-an-object';
+assert.throws(() => producePrivateSource({ legacy: malformedPlayerState, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /PLAYER_STATE_MALFORMED/);
 assert.throws(() => producePrivateSource({ legacy: { ...fixture.legacy, receipts: fixture.legacy.receipts.slice(1) }, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'short', qaPassword: 'R017-fixture-password!' }), /PRIVATE_SECRET_INPUT_WEAK/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: { ...fixture.master, catalog: { ...catalog(), columns: [...catalog().columns, { table: 'mazer_profiles', column: 'username' }] } }, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /CATALOG_PREIMAGE_ALREADY_MIGRATED/);
