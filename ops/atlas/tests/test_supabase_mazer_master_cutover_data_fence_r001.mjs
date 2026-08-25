@@ -359,6 +359,9 @@ assert.match(signupFenceSql, /lock table auth\.users in share row exclusive mode
 assert.match(signupFenceSql, /pg_catalog\.pg_locks/);
 assert.match(signupFenceSql, /ADMITTED_SIGNUP_WRITER_NOT_DRAINED/);
 assert.match(signupFenceSql, /AUTH_USERS_WRITER_BARRIER_INCOMPLETE/);
+assert.match(signupFenceSql, /PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT','PASS_SIGNUP_ADMISSION_FENCED/);
+assert.match(signupFenceSql, /RECONCILED_EXACT_FENCED/);
+assert.match(signupFenceSql, /INSTALLED_FROM_ABSENT/);
 assert.match(signupFenceSql, /security invoker/);
 assert.doesNotMatch(signupFenceSql, /security definer/);
 assert.ok(signupFenceSql.indexOf('atlas_admitted_signup_writers') < signupFenceSql.indexOf('lock table auth.users'));
@@ -487,6 +490,9 @@ assert.match(boundWriterCapture.lockBarrierSql, /LOCK_BARRIER_POST_ACL_OR_CATALO
 assert.match(boundWriterCapture.lockBarrierSql, /PASS_MUTATION_GATE_FENCED/);
 assert.match(boundWriterCapture.lockBarrierSql, /MAZER_CUTOVER_WRITES_FENCED/);
 assert.match(boundWriterCapture.lockBarrierSql, /mutation_gate_digest/);
+assert.match(boundWriterCapture.lockBarrierSql, /PASS_MUTATION_GATE_PREIMAGE_ABSENT','PASS_MUTATION_GATE_FENCED/);
+assert.match(boundWriterCapture.lockBarrierSql, /RECONCILED_EXACT_FENCED/);
+assert.match(boundWriterCapture.lockBarrierSql, /INSTALLED_FROM_ABSENT/);
 assert.match(boundWriterCapture.lockBarrierSql, /security invoker/);
 assert.doesNotMatch(boundWriterCapture.lockBarrierSql, /security definer/);
 for (const table of [...CONTRACT.tables].sort()) assert.match(boundWriterCapture.lockBarrierSql, new RegExp(`lock table "public"\\."${table}" in share row exclusive mode`));
@@ -705,6 +711,15 @@ for (const [phase, expected] of [
   ['LEGACY_LOCK_BARRIER_ACQUIRING', { result: 'RESUME_EXACT_WRITER_DRAIN_BEFORE_RESTORE', effect: 'ACL_REVOKED_HOLD_FENCED' }]
 ]) {
   assert.deepEqual(classifyRecoveryState({ direction: 'forward', phase, fault: 'CHILD_COMMIT_OR_OUTPUT_PERSISTENCE_LOST' }), expected);
+}
+for (const [direction, phase, expected] of [
+  ['forward', 'LEGACY_LOCK_BARRIER_ACQUIRING', { result: 'RESUME_EXACT_WRITER_DRAIN_BEFORE_RESTORE', effect: 'ACL_REVOKED_HOLD_FENCED' }],
+  ['reverse', 'MASTER_LOCK_BARRIER_ACQUIRING', { result: 'RESUME_EXACT_WRITER_DRAIN_BEFORE_RESTORE', effect: 'ACL_REVOKED_HOLD_FENCED' }],
+  ['reverse', 'MASTER_SIGNUP_FENCING', { result: 'OBSERVE_SIGNUP_ADMISSION_THEN_RESTORE', effect: 'SIGNUP_FENCE_COMMIT_UNKNOWN_HOOK_DISABLED' }]
+]) {
+  for (const fault of ['DATABASE_COMMIT_BEFORE_CHILD_OUTPUT', 'CHILD_OUTPUT_BEFORE_PHASE_PERSISTENCE']) {
+    assert.deepEqual(classifyRecoveryState({ direction, phase, fault }), expected);
+  }
 }
 assert.deepEqual(
   classifyRecoveryState({ direction: 'reverse', phase: 'MASTER_HOOK_DISABLED' }),
@@ -1193,8 +1208,24 @@ async function runDisposablePostgres17Concurrency() {
       create table fitness.profiles (id bigint primary key);
       create table auth.users (id uuid primary key, raw_user_meta_data jsonb not null default '{}'::jsonb);
       create table mazer.mazer_profiles (user_id uuid primary key, username text);
+      create table mazer.mazer_progression_states (id bigint primary key);
+      create table mazer.mazer_ai_progression_states (id bigint primary key);
+      create table mazer.mazer_cycle_receipts (id bigint primary key);
       create function mazer.mazer_claim_signup_username() returns trigger language plpgsql volatile security definer set search_path = '' as 'begin if coalesce(new.raw_user_meta_data, ''{}''::jsonb) ->> ''app_namespace'' = ''mazer'' then insert into mazer.mazer_profiles(user_id, username) values (new.id, new.raw_user_meta_data ->> ''username''); end if; return new; end';
       create trigger mazer_claim_signup_username_after_insert after insert on auth.users for each row execute function mazer.mazer_claim_signup_username();
+      create function mazer.mazer_initialize_progression(p1 uuid) returns void language plpgsql volatile security definer set search_path = pg_catalog, mazer as 'begin null; end';
+      create function mazer.mazer_complete_level(p_level bigint,p2 uuid,p3 text,p4 integer,p5 integer,p6 uuid,p7 text,p8 integer,p9 text,p10 timestamp with time zone,p11 jsonb) returns void language plpgsql volatile security definer set search_path = pg_catalog, mazer as 'begin insert into mazer.mazer_cycle_receipts(id) values (p_level); end';
+      create function mazer.mazer_complete_ai_level(p1 uuid,p2 text,p3 integer,p4 integer,p5 uuid,p6 text,p7 integer,p8 text,p9 timestamp with time zone,p10 jsonb) returns void language plpgsql volatile security definer set search_path = pg_catalog, mazer as 'begin null; end';
+      create function mazer.mazer_reset_progression(p1 bigint,p2 uuid) returns void language plpgsql volatile security definer set search_path = pg_catalog, mazer as 'begin null; end';
+      revoke all on function mazer.mazer_initialize_progression(uuid) from public;
+      revoke all on function mazer.mazer_complete_level(bigint,uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb) from public;
+      revoke all on function mazer.mazer_complete_ai_level(uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb) from public;
+      revoke all on function mazer.mazer_reset_progression(bigint,uuid) from public;
+      grant insert, update on table mazer.mazer_profiles to authenticated;
+      grant execute on function mazer.mazer_initialize_progression(uuid) to authenticated;
+      grant execute on function mazer.mazer_complete_level(bigint,uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb) to authenticated;
+      grant execute on function mazer.mazer_complete_ai_level(uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb) to authenticated;
+      grant execute on function mazer.mazer_reset_progression(bigint,uuid) to authenticated;
       create table public.rpc_gate (id integer primary key);
       insert into public.rpc_gate values (1);
       create table public.mazer_profiles (user_id uuid primary key);
@@ -1269,9 +1300,19 @@ async function runDisposablePostgres17Concurrency() {
     assert.equal(drainedReceipt.result, 'PASS_CAPTURED_WRITERS_DRAINED');
     assert.equal(drainedReceipt.remaining_writer_count, 0);
 
+    // Fault injection 1: the database commit succeeds, but the host loses the
+    // child output and therefore cannot persist *_WRITERS_FENCED.
+    const barrierCommitWithLostOutput = pgFile(barrierPath, { timeout: 160000 });
+    assert.equal(barrierCommitWithLostOutput.status, 0, barrierCommitWithLostOutput.stderr);
+    // Fault injection 2: the host receives the receipt but dies before phase
+    // persistence. A second exact resume must reconcile, never reinstall.
+    const barrierOutputBeforeLostPhase = JSON.parse(pgFileRequired(barrierPath, { timeout: 160000 }));
+    assert.equal(barrierOutputBeforeLostPhase.result, 'PASS_WRITER_LOCK_BARRIER');
+    assert.equal(barrierOutputBeforeLostPhase.install_disposition, 'RECONCILED_EXACT_FENCED');
     const barrierReceipt = JSON.parse(pgFileRequired(barrierPath, { timeout: 160000 }));
     assert.equal(barrierReceipt.result, 'PASS_WRITER_LOCK_BARRIER');
     assert.equal(barrierReceipt.mutation_gate_state, 'FENCED');
+    assert.equal(barrierReceipt.install_disposition, 'RECONCILED_EXACT_FENCED');
     assert.match(barrierReceipt.mutation_gate_digest, /^[a-f0-9]{64}$/);
     const delayedPreparedExit = waitForExitResult(rpc);
     gate.stdin.end('commit;\n\\q\n');
@@ -1299,6 +1340,15 @@ async function runDisposablePostgres17Concurrency() {
     const afterRejectedWrites = Number(pgSqlRequired('select (select count(*) from public.mazer_profiles) + (select count(*) from public.mazer_cycle_receipts);'));
     assert.equal(afterRejectedWrites, beforeRejectedWrites);
 
+    // An inexact/partial gate is never treated as a resumable committed gate.
+    pgSqlRequired(`drop trigger "${CONTRACT.mutationGate.triggerName}" on public.mazer_ai_progression_states;`);
+    const ambiguousGateResume = pgFile(barrierPath, { timeout: 160000 });
+    assert.notEqual(ambiguousGateResume.status, 0);
+    assert.match(ambiguousGateResume.stderr, /MUTATION_GATE_PREIMAGE_DRIFT/);
+    pgSqlRequired(`create trigger "${CONTRACT.mutationGate.triggerName}" before insert or update or delete on public.mazer_ai_progression_states for each row execute function public."${CONTRACT.mutationGate.functionName}"();`);
+    const exactGateResume = JSON.parse(pgFileRequired(barrierPath, { timeout: 160000 }));
+    assert.equal(exactGateResume.install_disposition, 'RECONCILED_EXACT_FENCED');
+
     const restorePath = path.join(pgTmp, 'restore.sql');
     fs.writeFileSync(restorePath, livePlan.restore_sql, 'utf8');
     pgFileRequired(restorePath);
@@ -1307,6 +1357,39 @@ async function runDisposablePostgres17Concurrency() {
     pgSqlRequired(`set role authenticated; insert into public.mazer_profiles(user_id) values ('${ids.legacyC}');`);
     pgSqlRequired(`set role authenticated; select public.mazer_complete_level(2,'${ids.legacyA}','x',1,1,'${ids.run2}','x',1,'x',now(),'{}'::jsonb);`);
     assert.equal(Number(pgSqlRequired('select (select count(*) from public.mazer_profiles) + (select count(*) from public.mazer_cycle_receipts);')), 3);
+
+    // Repeat the discarded-receipt recovery proof on the reverse/master side.
+    const masterObservationPath = path.join(pgTmp, 'master-acl-observation.sql');
+    fs.writeFileSync(masterObservationPath, renderAclObservationSql(CONTRACT.master.schema), 'utf8');
+    const liveMasterAclObservation = JSON.parse(pgFileRequired(masterObservationPath));
+    const liveMasterPreimage = structuredClone(liveMasterAclObservation);
+    delete liveMasterPreimage.observed_at;
+    const liveReverseInput = baseReverse();
+    liveReverseInput.fence.master.acl_preimage = liveMasterPreimage;
+    liveReverseInput.fence.master.acl_preimage_digest = sha256({ schema: liveMasterPreimage.schema, table_acl: liveMasterPreimage.table_acl, rpc_acl: liveMasterPreimage.rpc_acl });
+    liveReverseInput.fence.master.catalog_digest = sha256({ schema: liveMasterPreimage.schema, catalog: liveMasterPreimage.catalog });
+    const liveReversePlan = classifyCutover(liveReverseInput).privatePlan;
+    const masterRevokePath = path.join(pgTmp, 'master-writer-revoke.sql');
+    const masterCapturePath = path.join(pgTmp, 'master-writer-capture.sql');
+    fs.writeFileSync(masterRevokePath, liveReversePlan.fence_sql, 'utf8');
+    fs.writeFileSync(masterCapturePath, liveReversePlan.writer_capture_sql, 'utf8');
+    assert.equal(JSON.parse(pgFileRequired(masterRevokePath)).result, 'PASS_WRITER_REVOKE_COMMITTED');
+    const masterWriterCapture = JSON.parse(pgFileRequired(masterCapturePath));
+    assert.equal(masterWriterCapture.writers.length, 0);
+    const masterWriterPlan = classifyWriterCapture(liveReverseInput, masterWriterCapture, 'primary');
+    const masterBarrierPath = path.join(pgTmp, 'master-lock-barrier.sql');
+    const masterRestorePath = path.join(pgTmp, 'master-restore.sql');
+    fs.writeFileSync(masterBarrierPath, masterWriterPlan.lockBarrierSql, 'utf8');
+    fs.writeFileSync(masterRestorePath, liveReversePlan.restore_sql, 'utf8');
+    const masterCommitWithLostOutput = pgFile(masterBarrierPath, { timeout: 160000 });
+    assert.equal(masterCommitWithLostOutput.status, 0, masterCommitWithLostOutput.stderr);
+    const masterOutputBeforeLostPhase = JSON.parse(pgFileRequired(masterBarrierPath, { timeout: 160000 }));
+    assert.equal(masterOutputBeforeLostPhase.install_disposition, 'RECONCILED_EXACT_FENCED');
+    const masterResumedBarrier = JSON.parse(pgFileRequired(masterBarrierPath, { timeout: 160000 }));
+    assert.equal(masterResumedBarrier.install_disposition, 'RECONCILED_EXACT_FENCED');
+    pgFileRequired(masterRestorePath, { timeout: 160000 });
+    const restoredMasterObservation = JSON.parse(pgFileRequired(masterObservationPath));
+    assert.equal(classifyAclObservation(liveReverseInput, restoredMasterObservation, 'primary', liveMasterAclObservation).matched, true);
 
     const signupObservationPath = path.join(pgTmp, 'signup-admission-observation.sql');
     const signupFencePath = path.join(pgTmp, 'signup-admission-fence.sql');
@@ -1334,6 +1417,7 @@ async function runDisposablePostgres17Concurrency() {
     signupFenceProcess = null;
     const signupFenceReceipt = JSON.parse(signupFenceOutput.trim());
     assert.equal(signupFenceReceipt.result, 'PASS_SIGNUP_ADMISSION_FENCED');
+    assert.equal(signupFenceReceipt.install_disposition, 'INSTALLED_FROM_ABSENT');
     assert.ok(signupFenceReceipt.writer_count >= 1);
     assert.match(signupFenceReceipt.writer_set_digest, /^[a-f0-9]{64}$/);
     assert.equal(pgSqlRequired(`select (select count(*) from auth.users where id = '${ids.masterA}')::text || '|' || (select count(*) from mazer.mazer_profiles where user_id = '${ids.masterA}')::text;`), '1|1');
@@ -1353,6 +1437,17 @@ async function runDisposablePostgres17Concurrency() {
     assert.equal(signupRestoreReceipt.result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED');
     pgSqlRequired(`insert into auth.users(id, raw_user_meta_data) values ('${ids.masterC}', '{"app_namespace":"mazer","username":"restored"}'::jsonb);`);
     assert.equal(pgSqlRequired(`select (select count(*) from auth.users where id = '${ids.masterC}')::text || '|' || (select count(*) from mazer.mazer_profiles where user_id = '${ids.masterC}')::text;`), '1|1');
+
+    // Signup-gate commit/output and output/phase loss are also exactly
+    // resumable, and explicit rollback restores the ABSENT preimage.
+    const signupCommitWithLostOutput = pgFile(signupFencePath, { timeout: 160000 });
+    assert.equal(signupCommitWithLostOutput.status, 0, signupCommitWithLostOutput.stderr);
+    const signupOutputBeforeLostPhase = JSON.parse(pgFileRequired(signupFencePath, { timeout: 160000 }));
+    assert.equal(signupOutputBeforeLostPhase.install_disposition, 'RECONCILED_EXACT_FENCED');
+    const signupResumedFence = JSON.parse(pgFileRequired(signupFencePath, { timeout: 160000 }));
+    assert.equal(signupResumedFence.install_disposition, 'RECONCILED_EXACT_FENCED');
+    assert.equal(JSON.parse(pgFileRequired(signupRestorePath, { timeout: 160000 })).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED');
+    assert.equal(JSON.parse(pgFileRequired(signupObservationPath)).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT');
 
     admittedSignup = pgSpawn();
     admittedSignup.stdin.write(`begin; insert into auth.users(id, raw_user_meta_data) values ('${ids.masterD}', '{"app_namespace":"mazer","username":"orphaned"}'::jsonb); \\echo ORPHAN_INSTALL_BLOCKER_READY\n`);
@@ -1397,7 +1492,7 @@ const pg17Concurrency = await runDisposablePostgres17Concurrency();
 
 console.log(JSON.stringify({
   result: 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001',
-  scenarios: 110,
+  scenarios: 118,
   postgresql17_concurrency: pg17Concurrency,
   provider_calls: 0,
   provider_writes: 0,

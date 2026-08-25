@@ -740,9 +740,23 @@ function signupWriterCaptureSelect() {
   return `select distinct a.pid, a.backend_start, a.xact_start, a.query_start from pg_catalog.pg_locks l join pg_catalog.pg_stat_activity a on a.pid = l.pid where l.locktype = 'relation' and l.relation = pg_catalog.to_regclass('auth.users') and l.granted and l.mode in ('RowExclusiveLock','ShareRowExclusiveLock','ExclusiveLock','AccessExclusiveLock') and a.datid = (select oid from pg_catalog.pg_database where datname = pg_catalog.current_database()) and a.pid <> pg_catalog.pg_backend_pid() and a.xact_start is not null order by a.pid, a.backend_start, a.xact_start, a.query_start`;
 }
 
+function dynamicInstallBlock(tag, stateTable, absentResult, fencedResult, driftError, statements) {
+  const sqlTag = `$atlas_${tag}_sql$`;
+  const installs = statements.map((statement) => `execute ${sqlTag}${statement}${sqlTag};`).join(' ');
+  return `do $atlas_${tag}$ declare atlas_gate_result text := (select payload ->> 'result' from ${stateTable}); begin if atlas_gate_result = '${absentResult}' then ${installs} elsif atlas_gate_result = '${fencedResult}' then null; else raise exception '${driftError}'; end if; end $atlas_${tag}$;`;
+}
+
 export function renderSignupAdmissionFenceSql() {
   const qualifiedFunction = `${q(CONTRACT.master.schema)}.${q(CONTRACT.signupFence.functionName)}()`;
   const capturedWriters = signupWriterCaptureSelect();
+  const installStatements = [
+    `create function ${qualifiedFunction} returns trigger language plpgsql volatile security invoker set search_path = '' as $atlas_signup_fence$${SIGNUP_FENCE_BODY}$atlas_signup_fence$;`,
+    `alter function ${qualifiedFunction} owner to postgres;`,
+    `revoke all on function ${qualifiedFunction} from public;`,
+    `do $atlas_signup_roles$ begin if pg_catalog.to_regrole('anon') is not null then execute 'revoke all on function ${qualifiedFunction} from anon'; end if; if pg_catalog.to_regrole('authenticated') is not null then execute 'revoke all on function ${qualifiedFunction} from authenticated'; end if; if pg_catalog.to_regrole('service_role') is not null then execute 'revoke all on function ${qualifiedFunction} from service_role'; end if; end $atlas_signup_roles$;`,
+    `comment on function ${qualifiedFunction} is 'Temporary reverse-cutover admission fence. Rejects only explicit Mazer signups; non-Mazer Auth users pass through.';`,
+    `create trigger ${q(CONTRACT.signupFence.triggerName)} before insert on auth.users for each row execute function ${qualifiedFunction};`
+  ];
   return [
     '\\set ON_ERROR_STOP on',
     'begin;',
@@ -751,23 +765,18 @@ export function renderSignupAdmissionFenceSql() {
     `select pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('atlas:mazer-signup-admission-fence:${CONTRACT.master.schema}', 0));`,
     'create temporary table atlas_signup_preimage (payload jsonb not null) on commit drop;',
     `insert into atlas_signup_preimage (payload) ${signupAdmissionStateSelect()};`,
-    `do $atlas_signup_preimage$ begin if (select payload ->> 'result' from atlas_signup_preimage) is distinct from 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT' then raise exception 'SIGNUP_ADMISSION_PREIMAGE_DRIFT'; end if; end $atlas_signup_preimage$;`,
+    `do $atlas_signup_preimage$ begin if (select payload ->> 'result' from atlas_signup_preimage) not in ('PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT','PASS_SIGNUP_ADMISSION_FENCED') then raise exception 'SIGNUP_ADMISSION_PREIMAGE_DRIFT'; end if; end $atlas_signup_preimage$;`,
     `create temporary table atlas_admitted_signup_writers on commit drop as ${capturedWriters};`,
     `create temporary table atlas_admitted_signup_summary (payload jsonb not null) on commit drop;`,
     `insert into atlas_admitted_signup_summary (payload) select pg_catalog.jsonb_build_object('captured_at', pg_catalog.clock_timestamp(), 'writers', coalesce(pg_catalog.jsonb_agg(pg_catalog.jsonb_build_object('pid', pid, 'backend_start', backend_start, 'xact_start', xact_start, 'query_start', query_start) order by pid, backend_start, xact_start, query_start), '[]'::jsonb)) from atlas_admitted_signup_writers;`,
     'lock table auth.users in share row exclusive mode;',
     'select pg_catalog.pg_stat_clear_snapshot();',
     `do $atlas_signup_drain$ begin if exists (select 1 from atlas_admitted_signup_writers w join pg_catalog.pg_stat_activity a on a.pid = w.pid and a.backend_start = w.backend_start and a.xact_start = w.xact_start and a.query_start = w.query_start) then raise exception 'ADMITTED_SIGNUP_WRITER_NOT_DRAINED'; end if; if exists (${capturedWriters}) then raise exception 'AUTH_USERS_WRITER_BARRIER_INCOMPLETE'; end if; end $atlas_signup_drain$;`,
-    `create function ${qualifiedFunction} returns trigger language plpgsql volatile security invoker set search_path = '' as $atlas_signup_fence$${SIGNUP_FENCE_BODY}$atlas_signup_fence$;`,
-    `alter function ${qualifiedFunction} owner to postgres;`,
-    `revoke all on function ${qualifiedFunction} from public;`,
-    `do $atlas_signup_roles$ begin if pg_catalog.to_regrole('anon') is not null then execute 'revoke all on function ${qualifiedFunction} from anon'; end if; if pg_catalog.to_regrole('authenticated') is not null then execute 'revoke all on function ${qualifiedFunction} from authenticated'; end if; if pg_catalog.to_regrole('service_role') is not null then execute 'revoke all on function ${qualifiedFunction} from service_role'; end if; end $atlas_signup_roles$;`,
-    `comment on function ${qualifiedFunction} is 'Temporary reverse-cutover admission fence. Rejects only explicit Mazer signups; non-Mazer Auth users pass through.';`,
-    `create trigger ${q(CONTRACT.signupFence.triggerName)} before insert on auth.users for each row execute function ${qualifiedFunction};`,
+    dynamicInstallBlock('signup_admission_reconcile', 'atlas_signup_preimage', 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT', 'PASS_SIGNUP_ADMISSION_FENCED', 'SIGNUP_ADMISSION_PREIMAGE_DRIFT', installStatements),
     'create temporary table atlas_signup_postimage (payload jsonb not null) on commit drop;',
     `insert into atlas_signup_postimage (payload) ${signupAdmissionStateSelect()};`,
     `do $atlas_signup_postimage$ begin if (select payload ->> 'result' from atlas_signup_postimage) is distinct from 'PASS_SIGNUP_ADMISSION_FENCED' then raise exception 'SIGNUP_ADMISSION_POSTIMAGE_DRIFT'; end if; end $atlas_signup_postimage$;`,
-    `select pg_catalog.jsonb_build_object('schema', 'atlas.supabase.mazer-master-signup-admission-fence-receipt.v1', 'result', 'PASS_SIGNUP_ADMISSION_FENCED', 'state', 'FENCED', 'claim_path_verified', true, 'captured_at', payload ->> 'captured_at', 'writer_count', pg_catalog.jsonb_array_length(payload -> 'writers'), 'writer_set_digest', pg_catalog.encode(extensions.digest(pg_catalog.convert_to((payload -> 'writers')::text, 'UTF8'), 'sha256'), 'hex'), 'barrier_at', pg_catalog.clock_timestamp())::text from atlas_admitted_signup_summary;`,
+    `select pg_catalog.jsonb_build_object('schema', 'atlas.supabase.mazer-master-signup-admission-fence-receipt.v1', 'result', 'PASS_SIGNUP_ADMISSION_FENCED', 'state', 'FENCED', 'claim_path_verified', true, 'install_disposition', case when (select payload ->> 'result' from atlas_signup_preimage) = 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT' then 'INSTALLED_FROM_ABSENT' else 'RECONCILED_EXACT_FENCED' end, 'captured_at', payload ->> 'captured_at', 'writer_count', pg_catalog.jsonb_array_length(payload -> 'writers'), 'writer_set_digest', pg_catalog.encode(extensions.digest(pg_catalog.convert_to((payload -> 'writers')::text, 'UTF8'), 'sha256'), 'hex'), 'barrier_at', pg_catalog.clock_timestamp())::text from atlas_admitted_signup_summary;`,
     'commit;'
   ].join('\n') + '\n';
 }
@@ -950,15 +959,15 @@ export function renderLockBarrierSql(schema, journaledPreimage, writers, writerS
     `-- Relation-lock capture drains every transaction already mutating an exact Mazer table. The mutation-point gate below rejects delayed prepared or extended-protocol work that reaches DML only after this ordered barrier.`,
     'create temporary table atlas_mutation_gate_preimage (payload jsonb not null) on commit drop;',
     `insert into atlas_mutation_gate_preimage (payload) ${mutationGateStateSelect(schema)};`,
-    `do $atlas_mutation_gate_preimage$ begin if (select payload ->> 'result' from atlas_mutation_gate_preimage) is distinct from 'PASS_MUTATION_GATE_PREIMAGE_ABSENT' then raise exception 'MUTATION_GATE_PREIMAGE_DRIFT'; end if; end $atlas_mutation_gate_preimage$;`,
-    ...mutationGateInstallStatements(schema),
+    `do $atlas_mutation_gate_preimage$ begin if (select payload ->> 'result' from atlas_mutation_gate_preimage) not in ('PASS_MUTATION_GATE_PREIMAGE_ABSENT','PASS_MUTATION_GATE_FENCED') then raise exception 'MUTATION_GATE_PREIMAGE_DRIFT'; end if; end $atlas_mutation_gate_preimage$;`,
+    dynamicInstallBlock('mutation_gate_reconcile', 'atlas_mutation_gate_preimage', 'PASS_MUTATION_GATE_PREIMAGE_ABSENT', 'PASS_MUTATION_GATE_FENCED', 'MUTATION_GATE_PREIMAGE_DRIFT', mutationGateInstallStatements(schema)),
     'create temporary table atlas_mutation_gate_postimage (payload jsonb not null) on commit drop;',
     `insert into atlas_mutation_gate_postimage (payload) ${mutationGateStateSelect(schema)};`,
     `do $atlas_mutation_gate_postimage$ begin if (select payload ->> 'result' from atlas_mutation_gate_postimage) is distinct from 'PASS_MUTATION_GATE_FENCED' then raise exception 'MUTATION_GATE_POSTIMAGE_DRIFT'; end if; end $atlas_mutation_gate_postimage$;`,
     'create temporary table atlas_postbarrier_acl (payload jsonb not null) on commit drop;',
     `insert into atlas_postbarrier_acl (payload) ${aclObservationSelect(schema)};`,
     `do $atlas_postbarrier_acl$ begin if (select payload - 'observed_at' from atlas_postbarrier_acl) is distinct from ${encodedJson(expectedFencedPostimage)} then raise exception 'LOCK_BARRIER_POST_ACL_OR_CATALOG_DRIFT'; end if; if ${capturedWriterStillActiveSql(normalized)} then raise exception 'CAPTURED_WRITER_NOT_DRAINED'; end if; end $atlas_postbarrier_acl$;`,
-    `select pg_catalog.jsonb_build_object('result', 'PASS_WRITER_LOCK_BARRIER', 'schema', '${schema}', 'writer_count', ${normalized.length}, 'writer_set_digest', '${writerSetDigest}', 'mutation_gate_state', 'FENCED', 'mutation_gate_digest', '${mutationGateDigest(schema)}', 'barrier_at', pg_catalog.clock_timestamp())::text;`,
+    `select pg_catalog.jsonb_build_object('result', 'PASS_WRITER_LOCK_BARRIER', 'schema', '${schema}', 'writer_count', ${normalized.length}, 'writer_set_digest', '${writerSetDigest}', 'mutation_gate_state', 'FENCED', 'mutation_gate_digest', '${mutationGateDigest(schema)}', 'install_disposition', case when (select payload ->> 'result' from atlas_mutation_gate_preimage) = 'PASS_MUTATION_GATE_PREIMAGE_ABSENT' then 'INSTALLED_FROM_ABSENT' else 'RECONCILED_EXACT_FENCED' end, 'barrier_at', pg_catalog.clock_timestamp())::text;`,
     'commit;'
   ].join('\n') + '\n';
 }

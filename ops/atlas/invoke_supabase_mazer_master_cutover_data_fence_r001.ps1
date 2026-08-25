@@ -418,7 +418,7 @@ function Assert-WriterStepReceipt(
   if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw 'WRITER_STEP_RECEIPT_MISSING' }
   try { $receipt = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json } catch { throw 'WRITER_STEP_RECEIPT_JSON' }
   if ([string]$receipt.result -cne $ExpectedResult -or [string]$receipt.writer_set_digest -cne $ExpectedDigest -or [int]$receipt.writer_count -ne $ExpectedCount) { throw 'WRITER_STEP_RECEIPT_BINDING' }
-  if ($ExpectedResult -ceq 'PASS_WRITER_LOCK_BARRIER' -and ([string]$receipt.mutation_gate_state -cne 'FENCED' -or [string]$receipt.mutation_gate_digest -notmatch '^[a-f0-9]{64}$')) { throw 'MUTATION_GATE_BARRIER_BINDING' }
+  if ($ExpectedResult -ceq 'PASS_WRITER_LOCK_BARRIER' -and ([string]$receipt.mutation_gate_state -cne 'FENCED' -or [string]$receipt.mutation_gate_digest -notmatch '^[a-f0-9]{64}$' -or [string]$receipt.install_disposition -notin @('INSTALLED_FROM_ABSENT','RECONCILED_EXACT_FENCED'))) { throw 'MUTATION_GATE_BARRIER_BINDING' }
   try { $observedAt = [DateTimeOffset]::Parse([string]$receipt.$TimestampProperty, [Globalization.CultureInfo]::InvariantCulture) } catch { throw 'WRITER_STEP_RECEIPT_TIMESTAMP' }
   return [pscustomobject]@{ Receipt = $receipt; ObservedAt = $observedAt }
 }
@@ -445,7 +445,7 @@ function Assert-SignupAdmissionReceipt(
   $expectedSchema = if ($ExpectedResult -ceq 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT') { 'atlas.supabase.mazer-master-signup-admission-fence-observation.v1' } else { 'atlas.supabase.mazer-master-signup-admission-fence-receipt.v1' }
   if ([string]$receipt.schema -cne $expectedSchema -or [string]$receipt.result -cne $ExpectedResult -or $receipt.claim_path_verified -ne $true) { throw 'SIGNUP_ADMISSION_RECEIPT_BINDING' }
   if ($ExpectedResult -ceq 'PASS_SIGNUP_ADMISSION_FENCED') {
-    if ([string]$receipt.state -cne 'FENCED' -or [int]$receipt.writer_count -lt 0 -or [string]$receipt.writer_set_digest -notmatch '^[a-f0-9]{64}$') { throw 'SIGNUP_ADMISSION_FENCE_PROOF' }
+    if ([string]$receipt.state -cne 'FENCED' -or [int]$receipt.writer_count -lt 0 -or [string]$receipt.writer_set_digest -notmatch '^[a-f0-9]{64}$' -or [string]$receipt.install_disposition -notin @('INSTALLED_FROM_ABSENT','RECONCILED_EXACT_FENCED')) { throw 'SIGNUP_ADMISSION_FENCE_PROOF' }
     try { $timestamp = [DateTimeOffset]::Parse([string]$receipt.barrier_at, [Globalization.CultureInfo]::InvariantCulture) } catch { throw 'SIGNUP_ADMISSION_BARRIER_TIMESTAMP' }
   }
   elseif ($ExpectedResult -ceq 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT') {
@@ -534,9 +534,10 @@ function Invoke-ExactWriterDrainBarrier(
     $State.primary_lock_barrier_at = $barrier.ObservedAt.ToString('o')
     $State.primary_mutation_gate_fenced_at = $barrier.ObservedAt.ToString('o')
     $State.primary_mutation_gate_digest = [string]$barrier.Receipt.mutation_gate_digest
+    $State.primary_mutation_gate_install_disposition = [string]$barrier.Receipt.install_disposition
     Set-StatePhase $State ($PhasePrefix + '_WRITERS_FENCED') $ResolvedStatePath
   }
-  return [pscustomobject]@{ CaptureReads = 1; DrainReads = ($drainAttempt + 1); LockBarriers = 1; WriterCount = [int]$captureReceipt.writer_count; MutationGateDigest = [string]$barrier.Receipt.mutation_gate_digest }
+  return [pscustomobject]@{ CaptureReads = 1; DrainReads = ($drainAttempt + 1); LockBarriers = 1; WriterCount = [int]$captureReceipt.writer_count; MutationGateDigest = [string]$barrier.Receipt.mutation_gate_digest; InstallDisposition = [string]$barrier.Receipt.install_disposition }
 }
 
 function Invoke-ExactAclRecovery(
@@ -735,7 +736,8 @@ function Assert-SourceContract {
     'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED','app_namespace',
     'PASS_MUTATION_GATE_FENCED','MAZER_CUTOVER_WRITES_FENCED',
     'TARGET_RELATION_LOCKS_PLUS_MUTATION_POINT_GATE','pg_catalog.pg_locks',
-    'atlas.mazer_cutover_writer_bypass','MUTATION_GATE_RESTORE_POSTIMAGE_DRIFT'
+    'atlas.mazer_cutover_writer_bypass','MUTATION_GATE_RESTORE_POSTIMAGE_DRIFT',
+    'RECONCILED_EXACT_FENCED','INSTALLED_FROM_ABSENT'
   )) { if (-not $source.Contains($needle)) { throw 'CLASSIFIER_CONTRACT_DRIFT' } }
   foreach ($table in $ExpectedTables) { if (-not $source.Contains($table)) { throw 'CLASSIFIER_TABLE_DRIFT' } }
   foreach ($rpc in $ExpectedMutatingRpcs) { if (-not $source.Contains($rpc)) { throw 'CLASSIFIER_RPC_DRIFT' } }
@@ -874,12 +876,14 @@ try {
       primary_lock_barrier_at = $null
       primary_mutation_gate_fenced_at = $null
       primary_mutation_gate_digest = $null
+      primary_mutation_gate_install_disposition = $null
       legacy_disable_signup_preimage = $null
       master_hook_enabled_preimage = $null
       master_signup_admission_preobserved_at = $null
       master_signup_admission_fenced_at = $null
       master_signup_admission_writer_count = $null
       master_signup_admission_writer_set_digest = $null
+      master_signup_admission_install_disposition = $null
       source_observation_1_at = $null
       source_observation_2_at = $null
       updated_at = [DateTimeOffset]::UtcNow.ToString('o')
@@ -1047,6 +1051,7 @@ try {
     $state.master_signup_admission_fenced_at = $signupFenceReceipt.ObservedAt.ToString('o')
     $state.master_signup_admission_writer_count = [int]$signupFenceReceipt.Receipt.writer_count
     $state.master_signup_admission_writer_set_digest = [string]$signupFenceReceipt.Receipt.writer_set_digest
+    $state.master_signup_admission_install_disposition = [string]$signupFenceReceipt.Receipt.install_disposition
     Set-StatePhase $state 'MASTER_SIGNUP_FENCED' $resolvedState
     Set-StatePhase $state 'MASTER_WRITERS_PREOBSERVING' $resolvedState
     $primaryAclPreobserve = Join-Path $privateRoot 'primary-acl-preobserve.json'

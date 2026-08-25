@@ -240,6 +240,10 @@ for (const value of [
   'STATE_PRIMARY_CATALOG_DIGEST_DRIFT',
   'journaled_primary_acl_preimage',
   'journaled_primary_acl_binding_digest',
+  'primary_mutation_gate_install_disposition',
+  'master_signup_admission_install_disposition',
+  'RECONCILED_EXACT_FENCED',
+  'INSTALLED_FROM_ABSENT',
   'ROLLBACK_ACL_PREIMAGE_MISSING',
   'SourceObservationSql',
   'Invoke-PsqlObservation',
@@ -341,6 +345,9 @@ if (signupFence.includes('security definer')) findings.push('SIGNUP_FENCE_SECURI
 requireText(signupFence, 'pg_catalog.pg_locks', 'AUTH_WRITER_CAPTURE_MISSING');
 requireText(signupFence, 'ADMITTED_SIGNUP_WRITER_NOT_DRAINED', 'ADMITTED_SIGNUP_DRAIN_MISSING');
 requireText(signupFence, 'lock table auth.users in share row exclusive mode', 'AUTH_USERS_BARRIER_MISSING');
+requireText(signupFence, "not in ('PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT','PASS_SIGNUP_ADMISSION_FENCED')", 'SIGNUP_COMMITTED_GATE_RECONCILIATION_MISSING');
+requireText(signupFence, 'RECONCILED_EXACT_FENCED', 'SIGNUP_EXACT_FENCED_RESUME_MISSING');
+requireText(signupFence, 'INSTALLED_FROM_ABSENT', 'SIGNUP_ABSENT_INSTALL_DISPOSITION_MISSING');
 requireOrder(signupFence, ['atlas_admitted_signup_writers', 'lock table auth.users', 'create function', 'create trigger', 'PASS_SIGNUP_ADMISSION_FENCED', 'commit;'], 'SIGNUP_ADMISSION_BARRIER_ORDER_DRIFT');
 requireText(signupRestore, 'SIGNUP_ADMISSION_RESTORE_STATE_AMBIGUOUS', 'SIGNUP_RESTORE_AMBIGUOUS_HOLD_MISSING');
 requireText(signupFence, 'atlas:mazer-signup-admission-fence:mazer', 'SIGNUP_INSTALL_SERIALIZER_MISSING');
@@ -351,6 +358,10 @@ if (!signupFenceAdvisory || signupFenceAdvisory !== signupRestoreAdvisory) findi
 requireOrder(signupRestore, ['pg_advisory_xact_lock', 'lock table auth.users', 'atlas_signup_current', 'SIGNUP_ADMISSION_RESTORE_STATE_AMBIGUOUS', 'drop trigger', 'drop function', 'commit;', 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED'], 'SIGNUP_RESTORE_BARRIER_ORDER_DRIFT');
 requireText(focused, 'ORPHAN_INSTALL_BLOCKER_READY', 'ORPHAN_INSTALL_RESTORE_REGRESSION_MISSING');
 requireText(focused, "wait_event = 'advisory'", 'ORPHAN_INSTALL_SERIALIZER_PROOF_MISSING');
+requireText(focused, 'signupCommitWithLostOutput', 'SIGNUP_COMMIT_OUTPUT_LOSS_REGRESSION_MISSING');
+requireText(focused, 'signupOutputBeforeLostPhase', 'SIGNUP_OUTPUT_PHASE_LOSS_REGRESSION_MISSING');
+requireText(focused, 'masterCommitWithLostOutput', 'MASTER_MUTATION_COMMIT_OUTPUT_LOSS_REGRESSION_MISSING');
+requireText(focused, 'barrierCommitWithLostOutput', 'LEGACY_MUTATION_COMMIT_OUTPUT_LOSS_REGRESSION_MISSING');
 const legacyFence = renderFenceSql('public', reviewAclPreimage('public'));
 const masterFence = renderFenceSql('mazer', reviewAclPreimage('mazer'));
 for (const sql of [legacyFence, masterFence]) {
@@ -381,6 +392,10 @@ for (const sql of [legacyFence, masterFence]) {
   if (barrier.includes('security definer')) findings.push('MUTATION_GATE_SECURITY_DEFINER');
   requireText(barrier, "session_user = 'postgres'", 'MUTATION_GATE_PRIVILEGED_SESSION_BINDING_MISSING');
   requireText(barrier, "current_setting('atlas.mazer_cutover_writer_bypass', true) = 'r001'", 'MUTATION_GATE_LOCAL_BYPASS_BINDING_MISSING');
+  requireText(barrier, "not in ('PASS_MUTATION_GATE_PREIMAGE_ABSENT','PASS_MUTATION_GATE_FENCED')", 'COMMITTED_MUTATION_GATE_RECONCILIATION_MISSING');
+  requireText(barrier, 'RECONCILED_EXACT_FENCED', 'MUTATION_GATE_EXACT_FENCED_RESUME_MISSING');
+  requireText(barrier, 'INSTALLED_FROM_ABSENT', 'MUTATION_GATE_ABSENT_INSTALL_DISPOSITION_MISSING');
+  requireText(barrier, 'MUTATION_GATE_PREIMAGE_DRIFT', 'MUTATION_GATE_AMBIGUOUS_DRIFT_HOLD_MISSING');
   requireOrder(barrier, ['CAPTURED_WRITER_REAPPEARED', 'lock table', 'PASS_MUTATION_GATE_PREIMAGE_ABSENT', 'create function', 'create trigger', 'PASS_MUTATION_GATE_FENCED', 'LOCK_BARRIER_POST_ACL_OR_CATALOG_DRIFT', 'PASS_WRITER_LOCK_BARRIER', 'commit;'], 'LOCK_BARRIER_ORDER_DRIFT');
   for (const table of [...CONTRACT.tables].sort()) requireText(barrier, `lock table "${schema}"."${table}" in share row exclusive mode`, `ORDERED_TABLE_BARRIER_MISSING:${table}`);
   for (const table of [...CONTRACT.tables].sort()) requireText(barrier, `before insert or update or delete on "${schema}"."${table}"`, `MUTATION_TRIGGER_MISSING:${table}`);
@@ -433,7 +448,7 @@ if (focusedOne !== focusedTwo) findings.push('FOCUSED_TEST_NONDETERMINISTIC');
 if (focusedOne) {
   const value = JSON.parse(focusedOne);
   assert.equal(value.result, 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001');
-  assert.equal(value.scenarios, 110);
+  assert.equal(value.scenarios, 118);
   assert.equal(value.postgresql17_concurrency, 'SKIPPED_EXPLICIT_OPT_IN_REQUIRED');
   assert.equal(value.provider_calls, 0);
   assert.equal(value.live_data_writes, 0);
@@ -465,7 +480,7 @@ for (const output of shellOutputs.filter(Boolean)) {
 assert.deepEqual(findings, []);
 console.log(JSON.stringify({
   result: 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001_REVIEW_NO_FINDINGS',
-  assertions: 303,
+  assertions: 319,
   focused_runs: 2,
   source_validation_runs: shellRuns.length,
   findings: 0,
