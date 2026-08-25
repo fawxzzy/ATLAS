@@ -63,7 +63,7 @@ function catalog() {
       { table: 'mazer_progression_states', name: 'mazer_progression_states_player_target_complexity_check', type: 'c', definition: 'CHECK (player_target_complexity >= 8 AND player_target_complexity <= 240)' },
       { table: 'mazer_ai_progression_states', name: 'mazer_ai_progression_states_level_check', type: 'c', definition: 'CHECK (level >= 1 AND level <= 99)' },
       { table: 'mazer_ai_progression_states', name: 'mazer_ai_progression_states_target_complexity_check', type: 'c', definition: 'CHECK (target_complexity >= 8 AND target_complexity <= 240)' }
-    ], indexes: [], functions: [], policies: [], triggers: [],
+    ], indexes: [], functions: [], policies: [], triggers: [], username_secret_named_count: 0,
     schema_acl: [{ grantee: 'authenticated', privilege: 'USAGE', grantable: false }, { grantee: 'service_role', privilege: 'USAGE', grantable: false }],
     rls: ['mazer_ai_progression_states','mazer_cycle_receipts','mazer_profiles','mazer_progression_states'].map((table) => ({ table, enabled: true, forced: true }))
   };
@@ -92,7 +92,7 @@ function acl(schema) {
   const table_acl = [...FENCE_CONTRACT.tables].sort().map((name) => ({ name, grants: [] }));
   const rpc_acl = [...FENCE_CONTRACT.mutatingRpcs].sort().map((signature) => ({ signature, grants: [{ grantee: 'authenticated', is_grantable: false }] }));
   const catalog = { tables: [...FENCE_CONTRACT.tables].sort().map((name) => ({ name, relkind: 'r', rls_enabled: true, force_rls: schema === 'mazer' })), rpcs: [...FENCE_CONTRACT.mutatingRpcs].sort().map((signature) => ({ signature, kind: 'f', security_definer: true, volatility: 'v' })) };
-  return { schema, table_acl, rpc_acl, catalog };
+  return { schema, table_acl, rpc_acl, catalog, observed_at: iso(0) };
 }
 
 const fixture = rawFixture();
@@ -108,6 +108,8 @@ assert.deepEqual(plan.imports.at(-1).identities, [fixture.legacy.auth_identities
 
 const source = producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
 const validated = validatePrivateSource(source);
+assert.deepEqual(source.fence_input.fence.legacy.acl_preimage, (({ schema, table_acl, rpc_acl, catalog }) => ({ schema, table_acl, rpc_acl, catalog }))(acl('public')));
+assert.deepEqual(source.fence_input.fence.master.acl_preimage, (({ schema, table_acl, rpc_acl, catalog }) => ({ schema, table_acl, rpc_acl, catalog }))(acl('mazer')));
 const missingTracksForward = source.fence_input.source_snapshot.player.find((row) => row.user_id === fixture.legacy.player[6].user_id).row;
 const nonobjectTracksForward = source.fence_input.source_snapshot.player.find((row) => row.user_id === fixture.legacy.player[7].user_id).row;
 assert.equal(missingTracksForward.state.legacySibling, 'preserved-missing-tracks');
@@ -118,12 +120,25 @@ assert.match(source.sql['postverify.sql'], /preserved-missing-tracks/);
 assert.match(source.sql['postverify.sql'], /preserved-nonobject-tracks/);
 assert.match(source.sql['rollback.sql'], /preserved-master-preimage/);
 assert.doesNotMatch(source.sql['rollback.sql'], /preserved-missing-tracks|preserved-nonobject-tracks/);
+const preM2MasterAcl = acl('mazer'); preM2MasterAcl.rpc_acl = []; preM2MasterAcl.catalog.rpcs = [];
+const preM2Source = producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: preM2MasterAcl, quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
+assert.equal(preM2Source.fence_input.fence.master.acl_basis, 'FRESH_LIVE_TABLES_PLUS_EXACT_M2_PLANNED_RPCS');
+assert.equal(preM2Source.fence_input.fence.master.acl_preimage.rpc_acl.length, FENCE_CONTRACT.mutatingRpcs.length);
+assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.table_acl, preM2MasterAcl.table_acl);
+assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.catalog.tables, preM2MasterAcl.catalog.tables);
 assert.equal(validated.allEdges.length, 18);
 assert.deepEqual(validated.classified.desired_counts, { profiles: 10, player: 15, ai: 15, receipts: 1882 });
 assert.equal(source.reset_era_ai.canonical_projection, '7/6/32/D');
 assert.equal(source.reset_era_ai.legacy_receipts, 1714);
 assert.equal(source.reset_era_ai.master_receipts, 1239);
 assert.equal(source.qa.personas, 4);
+assert.equal(source.qa.rows.filter((row) => row.mode === 'generated').length, 1);
+assert.match(source.sql['postverify.sql'], /R017_EXPLICIT_USERNAMES_CHANGED/);
+assert.match(source.sql['postverify.sql'], /R017_GENERATED_USERNAME_REGENERATION_DRIFT/);
+assert.match(source.sql['postverify.sql'], /username_origin/);
+assert.match(source.sql['qa-apply.sql'], /R017_QA_GENERATED_USERNAME_DRIFT/);
+assert.match(source.sql['rollback.sql'], /delete from vault\.secrets where name='mazer_username_handle_key'/);
+assert.ok(source.sql['rollback.sql'].indexOf('drop column if exists username_origin') < source.sql['rollback.sql'].indexOf('insert into mazer.mazer_profiles'));
 assert.equal(Object.keys(source.sql).length, 9);
 for (const [name, sql] of Object.entries(source.sql)) {
   assert.match(sql, /^\\set ON_ERROR_STOP on\nbegin;/);
@@ -153,6 +168,14 @@ assert.throws(() => buildIdentityPlan(importIdentityDrift((item, legacy) => { le
 assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.user_id = uid(99997); }), fixture.master), /EMAIL_IDENTITY_MISSING/);
 const malformedPlayerState = structuredClone(fixture.legacy); malformedPlayerState.player[6].state = 'not-an-object';
 assert.throws(() => producePrivateSource({ legacy: malformedPlayerState, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /PLAYER_STATE_MALFORMED/);
+const aclExtra = { ...acl('public'), unexpected: true };
+assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: aclExtra, masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /ACL_OBSERVATION_KEYS/);
+const aclMissingTimestamp = acl('public'); delete aclMissingTimestamp.observed_at;
+assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: aclMissingTimestamp, masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /ACL_OBSERVATION_KEYS/);
+const aclMalformedTimestamp = { ...acl('public'), observed_at: 'not-a-timestamp' };
+assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: aclMalformedTimestamp, masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /ACL_OBSERVATION_TIMESTAMP_DRIFT/);
+const aclStaleTimestamp = { ...acl('public'), observed_at: iso(-360_000) };
+assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: aclStaleTimestamp, masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /ACL_OBSERVATION_TIMESTAMP_DRIFT/);
 assert.throws(() => producePrivateSource({ legacy: { ...fixture.legacy, receipts: fixture.legacy.receipts.slice(1) }, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'short', qaPassword: 'R017-fixture-password!' }), /PRIVATE_SECRET_INPUT_WEAK/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: { ...fixture.master, catalog: { ...catalog(), columns: [...catalog().columns, { table: 'mazer_profiles', column: 'username' }] } }, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /CATALOG_PREIMAGE_ALREADY_MIGRATED/);
@@ -179,8 +202,8 @@ try {
   const resultLines = child.stdout.trim().split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
   assert.equal(resultLines.length, 1, 'materializer main executed more than once');
   assert.equal(resultLines[0].result, 'PRIVATE_R017_PACKET_SEALED');
-  assert.equal(fs.readdirSync(out).length, 14);
-  for (const name of ['m1.sql','m2.sql','m3.sql']) {
+  assert.equal(fs.readdirSync(out).length, 15);
+  for (const name of ['m1.sql','m2.sql','m3.sql','m4.sql']) {
     const migration = fs.readFileSync(path.join(out, name), 'utf8');
     assert.match(migration, /^\\set ON_ERROR_STOP on\nbegin;/);
     assert.equal((migration.match(/\ncommit;/g) ?? []).length, 1);

@@ -130,7 +130,7 @@ export function verifyEvidence(atlasRoot) {
   return { current, topology, restore };
 }
 
-const MIGRATION_FUNCTIONS = Object.freeze(['mazer_is_username_available','mazer_initialize_progression','mazer_complete_level','mazer_complete_ai_level','mazer_reset_progression','mazer_leaderboard_page','mazer_leaderboard_self_rank','mazer_before_user_created','mazer_claim_signup_username']);
+const MIGRATION_FUNCTIONS = Object.freeze(['mazer_is_username_available','mazer_initialize_progression','mazer_complete_level','mazer_complete_ai_level','mazer_reset_progression','mazer_leaderboard_page','mazer_leaderboard_self_rank','mazer_before_user_created','mazer_claim_signup_username','mazer_generated_username','mazer_enforce_username_origin']);
 const MIGRATION_INDEXES = Object.freeze(['mazer_profiles_username_unique_idx','mazer_cycle_receipts_user_client_run_id_unique_idx','mazer_progression_states_leaderboard_order_idx']);
 
 export const SNAPSHOT_SQL = (schema) => String.raw`begin transaction isolation level serializable read only;
@@ -148,7 +148,8 @@ select jsonb_build_object(
     'indexes',coalesce((select jsonb_agg(jsonb_build_object('name',i.indexname,'definition',i.indexdef) order by i.indexname) from pg_indexes i where i.schemaname=${sqlLiteral(schema)}),'[]'::jsonb),
     'functions',coalesce((select jsonb_agg(jsonb_build_object('name',p.proname,'identity_args',pg_get_function_identity_arguments(p.oid),'result',pg_get_function_result(p.oid),'owner',pg_get_userbyid(p.proowner),'security_definer',p.prosecdef,'volatility',p.provolatile,'acl',coalesce(p.proacl::text,'NULL'),'definition',pg_get_functiondef(p.oid)) order by p.proname,pg_get_function_identity_arguments(p.oid)) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname=${sqlLiteral(schema)} and p.proname=any(array[${MIGRATION_FUNCTIONS.map(sqlLiteral).join(',')}])),'[]'::jsonb),
     'policies',coalesce((select jsonb_agg(to_jsonb(p) order by p.tablename,p.policyname) from pg_policies p where p.schemaname=${sqlLiteral(schema)}),'[]'::jsonb),
-    'triggers',coalesce((select jsonb_agg(jsonb_build_object('table_schema',event_object_schema,'table',event_object_table,'name',trigger_name,'timing',action_timing,'event',event_manipulation,'statement',action_statement) order by event_object_schema,event_object_table,trigger_name,event_manipulation) from information_schema.triggers where (event_object_schema=${sqlLiteral(schema)} or event_object_schema='auth') and trigger_name='mazer_claim_signup_username_after_insert'),'[]'::jsonb),
+    'triggers',coalesce((select jsonb_agg(jsonb_build_object('table_schema',event_object_schema,'table',event_object_table,'name',trigger_name,'timing',action_timing,'event',event_manipulation,'statement',action_statement) order by event_object_schema,event_object_table,trigger_name,event_manipulation) from information_schema.triggers where (event_object_schema=${sqlLiteral(schema)} or event_object_schema='auth') and trigger_name in ('mazer_claim_signup_username_after_insert','mazer_enforce_username_origin_before_update')),'[]'::jsonb),
+    'username_secret_named_count',case when to_regclass('vault.secrets') is null then null else (select count(*) from vault.secrets where name='mazer_username_handle_key') end,
     'schema_acl',coalesce((select jsonb_agg(jsonb_build_object('grantee',case when x.grantee=0 then 'public' else pg_get_userbyid(x.grantee) end,'privilege',x.privilege_type,'grantable',x.is_grantable) order by case when x.grantee=0 then 'public' else pg_get_userbyid(x.grantee) end,x.privilege_type) from pg_namespace n cross join lateral aclexplode(coalesce(n.nspacl,acldefault('n',n.nspowner))) x where n.nspname=${sqlLiteral(schema)}),'[]'::jsonb),
     'rls',coalesce((select jsonb_agg(jsonb_build_object('table',c.relname,'enabled',c.relrowsecurity,'forced',c.relforcerowsecurity) order by c.relname) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname=${sqlLiteral(schema)} and c.relname in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')),'[]'::jsonb)
   )
@@ -288,8 +289,15 @@ export function buildIdentityPlan(legacyRaw, masterRaw) {
   return { imports, new_edges, retained_edges };
 }
 
-function fenceSide(acl, schema, extra) {
-  const preimage = acl.acl_preimage ?? acl;
+function normalizeAclObservation(acl) {
+  if (!plain(acl) || canonical(Object.keys(acl).sort()) !== canonical(['catalog','observed_at','rpc_acl','schema','table_acl'])) throw new Error('ACL_OBSERVATION_KEYS');
+  const observedAt = Date.parse(acl.observed_at);
+  if (!Number.isFinite(observedAt) || observedAt < Date.now() - 300_000 || observedAt > Date.now() + 30_000) throw new Error('ACL_OBSERVATION_TIMESTAMP_DRIFT');
+  return { schema: acl.schema, table_acl: structuredClone(acl.table_acl), rpc_acl: structuredClone(acl.rpc_acl), catalog: structuredClone(acl.catalog) };
+}
+
+function fenceSide(preimage, schema, extra) {
+  if (!plain(preimage) || canonical(Object.keys(preimage).sort()) !== canonical(['catalog','rpc_acl','schema','table_acl'])) throw new Error('ACL_PREIMAGE_KEYS');
   if (preimage.schema !== schema) throw new Error(`ACL_SCHEMA_DRIFT:${schema}`);
   return {
     table_writers: Object.fromEntries(FENCE_CONTRACT.tables.map((table) => [table, 'FENCED'])),
@@ -314,17 +322,18 @@ function plannedMasterAclFromLive(masterAcl) {
 
 function buildFenceInput(legacyRaw, masterRaw, legacyAcl, masterAcl, auth) {
   const source = envelopeSnapshot(legacyRaw); const target = envelopeSnapshot(masterRaw);
+  const legacyPreimage = normalizeAclObservation(legacyAcl); const masterPreimage = normalizeAclObservation(masterAcl);
   const identity_map = [...auth.retained_edges, ...auth.new_edges].map((edge) => ({ legacy_user_id: edge.legacy_user_id, master_user_id: edge.master_user_id, disposition: 'BOUND' }));
   const app_contract = { migration_blobs: Object.fromEntries(R017_CONTRACT.migrations.map((item) => [item.phase, item.blob])), difficulty_bounds: [8, 400], receipt_identity: ['id', 'mapped_user_id+client_run_id'] };
   const first = new Date(Date.parse(source.observed_at) + 1).toISOString();
   const second = new Date(Date.parse(source.observed_at) + 2).toISOString();
-  const masterRpcCount = (masterAcl?.acl_preimage ?? masterAcl)?.catalog?.rpcs?.length;
-  const plannedMasterAcl = masterRpcCount === FENCE_CONTRACT.mutatingRpcs.length ? masterAcl : plannedMasterAclFromLive(masterAcl);
+  const masterRpcCount = masterPreimage.catalog?.rpcs?.length;
+  const plannedMasterAcl = masterRpcCount === FENCE_CONTRACT.mutatingRpcs.length ? masterPreimage : plannedMasterAclFromLive(masterPreimage);
   const input = {
     schema: FENCE_CONTRACT.inputSchema, direction: 'forward', packet_id: PRODUCER_CONTRACT.packet,
     bindings: { legacy: { project_ref: PRODUCER_CONTRACT.legacyProject, schema: 'public' }, master: { project_ref: PRODUCER_CONTRACT.masterProject, schema: 'mazer' } },
     identity_map, expected_identity_map_digest: sha256(sort(identity_map, (edge) => [edge.legacy_user_id, edge.master_user_id])), app_contract, expected_app_contract_digest: sha256(app_contract),
-    fence: { legacy: fenceSide(legacyAcl, 'public', { signup_disabled: true, fenced_at: new Date(Date.parse(source.observed_at) - 1).toISOString() }), master: fenceSide(plannedMasterAcl, 'mazer', { before_user_created_hook_enabled: false, acl_basis: masterRpcCount === FENCE_CONTRACT.mutatingRpcs.length ? 'FRESH_LIVE' : 'FRESH_LIVE_TABLES_PLUS_EXACT_M2_PLANNED_RPCS', fenced_at: new Date(Date.parse(target.observed_at) - 1).toISOString() }) },
+    fence: { legacy: fenceSide(legacyPreimage, 'public', { signup_disabled: true, fenced_at: new Date(Date.parse(source.observed_at) - 1).toISOString() }), master: fenceSide(plannedMasterAcl, 'mazer', { before_user_created_hook_enabled: false, acl_basis: masterRpcCount === FENCE_CONTRACT.mutatingRpcs.length ? 'FRESH_LIVE' : 'FRESH_LIVE_TABLES_PLUS_EXACT_M2_PLANNED_RPCS', fenced_at: new Date(Date.parse(target.observed_at) - 1).toISOString() }) },
     source_snapshot: source, target_snapshot: target, expected_source_high_water_digest: snapshotDigest(source),
     zero_delta_reads: [{ ...structuredClone(source), observed_at: first }, { ...structuredClone(source), observed_at: second }]
   };
@@ -335,14 +344,15 @@ function buildFenceInput(legacyRaw, masterRaw, legacyAcl, masterAcl, auth) {
 function deterministicQa(auth) {
   const seed = digest(auth.new_edges);
   const uuidFrom = (index) => `${seed.slice(index, index + 8)}-${seed.slice(index + 8, index + 12)}-4${seed.slice(index + 13, index + 16)}-8${seed.slice(index + 17, index + 20)}-${seed.slice(index + 20, index + 32)}`;
-  return Array.from({ length: 4 }, (_, index) => ({ id: uuidFrom(index * 3), email: `mazer-r017-qa-${index + 1}@example.invalid`, username: `r017qa${index + 1}` }));
+  return Array.from({ length: 4 }, (_, index) => ({ id: uuidFrom(index * 3), email: `mazer-r017-qa-${index + 1}@example.invalid`, username: index === 0 ? null : `r017qa${index + 1}`, mode: index === 0 ? 'generated' : 'claimed' }));
 }
 
 function validateCatalogPreimage(catalog) {
   for (const key of ['columns','constraints','indexes','functions','policies','triggers','schema_acl','rls']) if (!Array.isArray(catalog?.[key])) throw new Error('CATALOG_PREIMAGE_SHAPE');
-  const addedColumns = new Set(['mazer_profiles:revision','mazer_profiles:username','mazer_progression_states:revision','mazer_progression_states:level_reached_at','mazer_cycle_receipts:ruleset_id','mazer_cycle_receipts:recipe_version','mazer_cycle_receipts:recipe_hash','mazer_cycle_receipts:client_run_id']);
+  const addedColumns = new Set(['mazer_profiles:revision','mazer_profiles:username','mazer_profiles:username_origin','mazer_progression_states:revision','mazer_progression_states:level_reached_at','mazer_cycle_receipts:ruleset_id','mazer_cycle_receipts:recipe_version','mazer_cycle_receipts:recipe_hash','mazer_cycle_receipts:client_run_id']);
+  if (catalog.username_secret_named_count !== 0) throw new Error('USERNAME_SECRET_PREIMAGE_DRIFT');
   if (catalog.columns.some((item) => addedColumns.has(`${item.table}:${item.column}`))) throw new Error('CATALOG_PREIMAGE_ALREADY_MIGRATED');
-  if (catalog.indexes.some((item) => MIGRATION_INDEXES.includes(item.name)) || catalog.functions.some((item) => MIGRATION_FUNCTIONS.includes(item.name)) || catalog.triggers.some((item) => item.name === 'mazer_claim_signup_username_after_insert') || catalog.policies.some((item) => item.policyname === 'Mazer Auth hook can inspect usernames')) throw new Error('CATALOG_PREIMAGE_ALREADY_MIGRATED');
+  if (catalog.indexes.some((item) => MIGRATION_INDEXES.includes(item.name)) || catalog.functions.some((item) => MIGRATION_FUNCTIONS.includes(item.name)) || catalog.triggers.some((item) => ['mazer_claim_signup_username_after_insert','mazer_enforce_username_origin_before_update'].includes(item.name)) || catalog.policies.some((item) => item.policyname === 'Mazer Auth hook can inspect usernames')) throw new Error('CATALOG_PREIMAGE_ALREADY_MIGRATED');
   const requiredConstraints = ['mazer_progression_states_player_level_check','mazer_progression_states_player_target_complexity_check','mazer_ai_progression_states_level_check','mazer_ai_progression_states_target_complexity_check'];
   for (const name of requiredConstraints) if (!catalog.constraints.some((item) => item.name === name && typeof item.definition === 'string')) throw new Error(`CATALOG_PREIMAGE_CONSTRAINT_MISSING:${name}`);
   if (catalog.rls.length !== 4 || catalog.rls.some((item) => item.enabled !== true || item.forced !== true)) throw new Error('CATALOG_PREIMAGE_RLS_DRIFT');
@@ -363,9 +373,12 @@ function reverseCatalogSql(catalog) {
   const rls = catalog.rls.map((item) => `alter table mazer.${item.table} ${item.enabled ? 'enable' : 'disable'} row level security;\nalter table mazer.${item.table} ${item.forced ? 'force' : 'no force'} row level security;`).join('\n');
   return `
 drop trigger if exists mazer_claim_signup_username_after_insert on auth.users;
+drop trigger if exists mazer_enforce_username_origin_before_update on mazer.mazer_profiles;
 drop policy if exists "Mazer Auth hook can inspect usernames" on mazer.mazer_profiles;
 drop function if exists mazer.mazer_before_user_created(jsonb);
 drop function if exists mazer.mazer_claim_signup_username();
+drop function if exists mazer.mazer_enforce_username_origin();
+drop function if exists mazer.mazer_generated_username(uuid,integer);
 drop function if exists mazer.mazer_leaderboard_self_rank();
 drop function if exists mazer.mazer_leaderboard_page(integer,integer);
 drop function if exists mazer.mazer_reset_progression(bigint,uuid);
@@ -383,13 +396,15 @@ alter table mazer.mazer_ai_progression_states drop constraint if exists mazer_ai
 alter table mazer.mazer_progression_states alter column player_level type integer using player_level::integer,alter column player_completed_cycles type integer using player_completed_cycles::integer;
 alter table mazer.mazer_ai_progression_states alter column level type integer using level::integer,alter column completed_cycles type integer using completed_cycles::integer;
 ${constraints.map((item) => `alter table mazer.${item.table} add constraint ${item.name} ${item.definition};`).join('\n')}
-alter table mazer.mazer_profiles drop column if exists username,drop column if exists revision;
+alter table mazer.mazer_profiles drop constraint if exists mazer_profiles_username_origin_check;
+alter table mazer.mazer_profiles drop column if exists username_origin,drop column if exists username,drop column if exists revision;
 alter table mazer.mazer_progression_states drop column if exists level_reached_at,drop column if exists revision;
 alter table mazer.mazer_cycle_receipts drop column if exists client_run_id,drop column if exists recipe_hash,drop column if exists recipe_version,drop column if exists ruleset_id;
 ${priorClientRunIndex ? `${priorClientRunIndex.definition};` : ''}
 revoke usage on schema mazer from anon,authenticated,service_role,supabase_auth_admin;
 ${schemaGrants.join('\n')}
-${rls}`;
+${rls}
+delete from vault.secrets where name='mazer_username_handle_key';`;
 }
 
 function catalogEqualityAssertions(catalog) {
@@ -399,7 +414,8 @@ if (select coalesce(jsonb_agg(jsonb_build_object('table',cl.relname,'name',co.co
 if (select coalesce(jsonb_agg(jsonb_build_object('name',i.indexname,'definition',i.indexdef) order by i.indexname),'[]'::jsonb) from pg_indexes i where i.schemaname='mazer') <> ${jsonLiteral(catalog.indexes)} then raise exception 'R017_ROLLBACK_INDEXES_DRIFT'; end if;
 if (select coalesce(jsonb_agg(jsonb_build_object('name',p.proname,'identity_args',pg_get_function_identity_arguments(p.oid),'result',pg_get_function_result(p.oid),'owner',pg_get_userbyid(p.proowner),'security_definer',p.prosecdef,'volatility',p.provolatile,'acl',coalesce(p.proacl::text,'NULL'),'definition',pg_get_functiondef(p.oid)) order by p.proname,pg_get_function_identity_arguments(p.oid)),'[]'::jsonb) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='mazer' and p.proname=any(array[${MIGRATION_FUNCTIONS.map(sqlLiteral).join(',')}])) <> ${jsonLiteral(catalog.functions)} then raise exception 'R017_ROLLBACK_FUNCTIONS_DRIFT'; end if;
 if (select coalesce(jsonb_agg(to_jsonb(p) order by p.tablename,p.policyname),'[]'::jsonb) from pg_policies p where p.schemaname='mazer') <> ${jsonLiteral(catalog.policies)} then raise exception 'R017_ROLLBACK_POLICIES_DRIFT'; end if;
-if (select coalesce(jsonb_agg(jsonb_build_object('table_schema',event_object_schema,'table',event_object_table,'name',trigger_name,'timing',action_timing,'event',event_manipulation,'statement',action_statement) order by event_object_schema,event_object_table,trigger_name,event_manipulation),'[]'::jsonb) from information_schema.triggers where (event_object_schema='mazer' or event_object_schema='auth') and trigger_name='mazer_claim_signup_username_after_insert') <> ${jsonLiteral(catalog.triggers)} then raise exception 'R017_ROLLBACK_TRIGGERS_DRIFT'; end if;
+if (select coalesce(jsonb_agg(jsonb_build_object('table_schema',event_object_schema,'table',event_object_table,'name',trigger_name,'timing',action_timing,'event',event_manipulation,'statement',action_statement) order by event_object_schema,event_object_table,trigger_name,event_manipulation),'[]'::jsonb) from information_schema.triggers where (event_object_schema='mazer' or event_object_schema='auth') and trigger_name in ('mazer_claim_signup_username_after_insert','mazer_enforce_username_origin_before_update')) <> ${jsonLiteral(catalog.triggers)} then raise exception 'R017_ROLLBACK_TRIGGERS_DRIFT'; end if;
+if (select count(*) from vault.secrets where name='mazer_username_handle_key') <> ${Number(0)} then raise exception 'R017_ROLLBACK_USERNAME_SECRET_DRIFT'; end if;
 if (select coalesce(jsonb_agg(jsonb_build_object('grantee',case when x.grantee=0 then 'public' else pg_get_userbyid(x.grantee) end,'privilege',x.privilege_type,'grantable',x.is_grantable) order by case when x.grantee=0 then 'public' else pg_get_userbyid(x.grantee) end,x.privilege_type),'[]'::jsonb) from pg_namespace n cross join lateral aclexplode(coalesce(n.nspacl,acldefault('n',n.nspowner))) x where n.nspname='mazer') <> ${jsonLiteral(catalog.schema_acl)} then raise exception 'R017_ROLLBACK_SCHEMA_ACL_DRIFT'; end if;
 if (select coalesce(jsonb_agg(jsonb_build_object('table',c.relname,'enabled',c.relrowsecurity,'forced',c.relforcerowsecurity) order by c.relname),'[]'::jsonb) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='mazer' and c.relname in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) <> ${jsonLiteral(catalog.rls)} then raise exception 'R017_ROLLBACK_RLS_DRIFT'; end if;`;
 }
@@ -414,7 +430,10 @@ export function renderOperationalSql({ auth, fenceInput, actionFenceInput = fenc
   const importUsers = imports.map((item) => item.user); const importIdentities = imports.flatMap((item) => item.identities);
   const expectedMap = sort(edges.map((edge) => ({ legacy_user_id: edge.legacy_user_id, master_user_id: edge.master_user_id, evidence_digest: edge.evidence_digest })), (edge) => edge.legacy_user_id);
   const qaRows = qa.rows;
+  const usernameHandleKey = crypto.createHmac('sha256', Buffer.from(quarantineKey, 'utf8')).update('atlas:mazer:r017:username-handle:v1').digest('hex');
   const desiredRows = actionClassified.privatePlan.desired;
+  const profileCoreRows = sort(desiredRows.profiles.map((row) => { const value = structuredClone(row); delete value.username; delete value.username_origin; return value; }), (row) => row.user_id);
+  const explicitProfiles = sort(desiredRows.profiles.filter((row) => row.username != null && String(row.username).trim() !== '').map((row) => ({ user_id: row.user_id, username: row.username })), (row) => row.user_id);
   const targetRows = Object.fromEntries(['profiles','player','ai','receipts'].map((name) => [name, fenceInput.target_snapshot[name].map((item) => item.row)]));
   const aclRestore = fenceInput.fence.master.acl_preimage.table_acl.flatMap((table) => {
     const statements = [`revoke insert,update,delete on mazer.${table.name} from anon,authenticated,public;`];
@@ -426,6 +445,7 @@ export function renderOperationalSql({ auth, fenceInput, actionFenceInput = fenc
 do $r017$ begin
   if (select count(*) from auth.users) <> 114 then raise exception 'R017_AUTH_USERS_PREIMAGE_DRIFT'; end if;
   if (select count(*) from mazer.mazer_profiles) <> 5 or (select count(*) from mazer.mazer_progression_states) <> 7 or (select count(*) from mazer.mazer_ai_progression_states) <> 7 or (select count(*) from mazer.mazer_cycle_receipts) <> 1290 then raise exception 'R017_APP_PREIMAGE_DRIFT'; end if;
+  if to_regclass('vault.decrypted_secrets') is null or (select count(*) from vault.secrets where name='mazer_username_handle_key') <> 0 then raise exception 'R017_MAZER_USERNAME_HANDLE_KEY_PREIMAGE_DRIFT'; end if;
   if not exists (select 1 from pg_namespace where nspname='mazer') then raise exception 'R017_DATA_API_SCHEMA_DRIFT'; end if;
 end $r017$;`, ['data_api','rls','acl','auth.users','114','10','15','1882']);
   sql['master-fence.sql'] = sqlProgram(`
@@ -459,10 +479,21 @@ end $r017_auth_postcheck$;`, ['auth.users','auth.identities','create_and_bind','
   sql['reset-era-apply.sql'] = sqlProgram(`
 create extension if not exists pgcrypto with schema extensions;
 create table if not exists atlas_mazer_r017.reset_quarantine(id text primary key,ciphertext bytea not null);
-insert into atlas_mazer_r017.reset_quarantine(id,ciphertext) values('reset-era-ai',extensions.pgp_sym_encrypt(${sqlLiteral(canonical(reset.quarantined_row))},${sqlLiteral(quarantineKey)},'cipher-algo=aes256')) on conflict do nothing;`, ['whole_row_override','7/6/32/D','39/108/161/S','pgp_sym_encrypt','player_reset_disposition']);
+insert into atlas_mazer_r017.reset_quarantine(id,ciphertext) values('reset-era-ai',extensions.pgp_sym_encrypt(${sqlLiteral(canonical(reset.quarantined_row))},${sqlLiteral(quarantineKey)},'cipher-algo=aes256')) on conflict do nothing;
+do $username_key$ begin
+ if exists(select 1 from vault.secrets where name='mazer_username_handle_key') then raise exception 'R017_MAZER_USERNAME_HANDLE_KEY_PREEXISTS'; end if;
+ perform vault.create_secret(${sqlLiteral(usernameHandleKey)},'mazer_username_handle_key','R017 protected deterministic Mazer username key',null);
+ if (select count(*) from vault.secrets where name='mazer_username_handle_key') <> 1 then raise exception 'R017_MAZER_USERNAME_HANDLE_KEY_CREATE_FAILED'; end if;
+end $username_key$;`, ['whole_row_override','7/6/32/D','39/108/161/S','pgp_sym_encrypt','player_reset_disposition','vault.create_secret','rollback_bound_username_key']);
   sql['postverify.sql'] = sqlProgram(`
 do $r017$ begin
- if (select coalesce(jsonb_agg(to_jsonb(t) order by t.user_id),'[]'::jsonb) from mazer.mazer_profiles t) <> ${jsonLiteral(sort(desiredRows.profiles, (row) => row.user_id))} then raise exception 'R017_PROFILES_FULL_DIGEST_DRIFT'; end if;
+ if (select coalesce(jsonb_agg(to_jsonb(t)-'username'-'username_origin' order by t.user_id),'[]'::jsonb) from mazer.mazer_profiles t) <> ${jsonLiteral(profileCoreRows)} then raise exception 'R017_PROFILES_CORE_DIGEST_DRIFT'; end if;
+ if (select coalesce(jsonb_agg(jsonb_build_object('user_id',t.user_id,'username',t.username) order by t.user_id),'[]'::jsonb) from mazer.mazer_profiles t join jsonb_to_recordset(${jsonLiteral(explicitProfiles)}) x(user_id uuid,username text) on x.user_id=t.user_id where t.username=x.username and t.username_origin='claimed') <> ${jsonLiteral(explicitProfiles)} then raise exception 'R017_EXPLICIT_USERNAMES_CHANGED'; end if;
+ if (select count(*) from mazer.mazer_profiles where username_origin='generated') <> ${desiredRows.profiles.length - explicitProfiles.length} then raise exception 'R017_GENERATED_USERNAME_DENOMINATOR_DRIFT'; end if;
+ if exists(select 1 from mazer.mazer_profiles t where t.username_origin='generated' and (t.username !~ '^Mazer-[0-9]{6}$' or not exists(select 1 from generate_series(0,999999) attempt where mazer.mazer_generated_username(t.user_id,attempt)=t.username))) then raise exception 'R017_GENERATED_USERNAME_REGENERATION_DRIFT'; end if;
+ if exists(select 1 from mazer.mazer_profiles group by lower(username) having count(*)<>1) then raise exception 'R017_USERNAME_CASEFOLD_COLLISION'; end if;
+ if exists(select 1 from mazer.mazer_profiles where username_origin not in ('generated','claimed') or username is null) then raise exception 'R017_USERNAME_ORIGIN_DRIFT'; end if;
+ if (select count(*) from vault.secrets where name='mazer_username_handle_key') <> 1 then raise exception 'R017_MAZER_USERNAME_HANDLE_KEY_DRIFT'; end if;
  if (select coalesce(jsonb_agg(to_jsonb(t) order by t.user_id),'[]'::jsonb) from mazer.mazer_progression_states t) <> ${jsonLiteral(sort(desiredRows.player, (row) => row.user_id))} then raise exception 'R017_PLAYER_FULL_DIGEST_DRIFT'; end if;
  if (select coalesce(jsonb_agg(to_jsonb(t) order by t.user_id,t.runner_key),'[]'::jsonb) from mazer.mazer_ai_progression_states t) <> ${jsonLiteral(sort(desiredRows.ai, (row) => [row.user_id,row.runner_key]))} then raise exception 'R017_AI_FULL_DIGEST_DRIFT'; end if;
  if (select coalesce(jsonb_agg(to_jsonb(t) order by t.id),'[]'::jsonb) from mazer.mazer_cycle_receipts t) <> ${jsonLiteral(sort(desiredRows.receipts, (row) => row.id))} then raise exception 'R017_RECEIPT_CONSERVATION_FULL_DIGEST_DRIFT'; end if;
@@ -474,17 +505,21 @@ do $r017$ begin
  if (select jsonb_agg(jsonb_build_object('table',c.relname,'enabled',c.relrowsecurity,'forced',c.relforcerowsecurity) order by c.relname) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='mazer' and c.relname in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) <> '[{"table":"mazer_ai_progression_states","enabled":true,"forced":true},{"table":"mazer_cycle_receipts","enabled":true,"forced":true},{"table":"mazer_profiles","enabled":true,"forced":true},{"table":"mazer_progression_states","enabled":true,"forced":true}]'::jsonb then raise exception 'R017_RLS_FULL_CATALOG_DRIFT'; end if;
  if not has_schema_privilege('anon','mazer','USAGE') or not has_schema_privilege('authenticated','mazer','USAGE') or not has_schema_privilege('service_role','mazer','USAGE') then raise exception 'R017_DATA_API_SCHEMA_ACL_DRIFT'; end if;
  if exists(select 1 from information_schema.role_table_grants where table_schema='mazer' and grantee in ('anon','authenticated','public') and privilege_type in ('INSERT','UPDATE','DELETE') and table_name in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) then raise exception 'R017_TABLE_ACL_DRIFT'; end if;
- if (select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='mazer' and p.proname=any(array[${MIGRATION_FUNCTIONS.map(sqlLiteral).join(',')}])) <> 9 then raise exception 'R017_FUNCTION_CATALOG_DRIFT'; end if;
+ if (select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='mazer' and p.proname=any(array[${MIGRATION_FUNCTIONS.map(sqlLiteral).join(',')}])) <> 11 then raise exception 'R017_FUNCTION_CATALOG_DRIFT'; end if;
  if (select count(*) from pg_indexes where schemaname='mazer' and indexname=any(array[${MIGRATION_INDEXES.map(sqlLiteral).join(',')}])) <> 3 then raise exception 'R017_INDEX_CATALOG_DRIFT'; end if;
  if not exists(select 1 from pg_policies where schemaname='mazer' and tablename='mazer_profiles' and policyname='Mazer Auth hook can inspect usernames' and cmd='SELECT' and roles='{supabase_auth_admin}') then raise exception 'R017_POLICY_CATALOG_DRIFT'; end if;
- if not exists(select 1 from information_schema.triggers where event_object_schema='auth' and event_object_table='users' and trigger_name='mazer_claim_signup_username_after_insert' and action_timing='AFTER' and event_manipulation='INSERT') then raise exception 'R017_TRIGGER_CATALOG_DRIFT'; end if;
+ if not exists(select 1 from information_schema.triggers where event_object_schema='auth' and event_object_table='users' and trigger_name='mazer_claim_signup_username_after_insert' and action_timing='AFTER' and event_manipulation='INSERT') or not exists(select 1 from information_schema.triggers where event_object_schema='mazer' and event_object_table='mazer_profiles' and trigger_name='mazer_enforce_username_origin_before_update' and action_timing='BEFORE' and event_manipulation='UPDATE') then raise exception 'R017_TRIGGER_CATALOG_DRIFT'; end if;
 end $r017$;`, ['data_api','rls','acl','117','18','10','15','1882','receipt_conservation']);
   sql['qa-apply.sql'] = sqlProgram(`
-with q as (select * from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text))
+with q as (select * from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text,mode text))
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
-  select id,(select instance_id from auth.users limit 1),'authenticated','authenticated',email,extensions.crypt(${sqlLiteral(qaPassword)},extensions.gen_salt('bf')),clock_timestamp(),${jsonLiteral({ provider: 'email', providers: ['email'] })},jsonb_build_object('app_namespace','mazer','username',username,'display_name',username),clock_timestamp(),clock_timestamp() from q;
+  select id,(select instance_id from auth.users limit 1),'authenticated','authenticated',email,extensions.crypt(${sqlLiteral(qaPassword)},extensions.gen_salt('bf')),clock_timestamp(),${jsonLiteral({ provider: 'email', providers: ['email'] })},case when mode='generated' then jsonb_build_object('app_namespace','mazer') else jsonb_build_object('app_namespace','mazer','username',username,'display_name',username) end,clock_timestamp(),clock_timestamp() from q;
 insert into auth.identities(id,user_id,provider_id,identity_data,provider,created_at,updated_at,last_sign_in_at)
-select gen_random_uuid(),id,id::text,jsonb_build_object('sub',id::text,'email',email),'email',clock_timestamp(),clock_timestamp(),clock_timestamp() from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text);`, ['qa_ttl','before_user_created','rollback_on_error']);
+select gen_random_uuid(),id,id::text,jsonb_build_object('sub',id::text,'email',email),'email',clock_timestamp(),clock_timestamp(),clock_timestamp() from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text,mode text);
+do $qa$ begin
+ if (select count(*) from mazer.mazer_profiles p join jsonb_to_recordset(${jsonLiteral(qaRows)}) q(id uuid,email text,username text,mode text) on q.id=p.user_id where q.mode='generated' and p.username_origin='generated' and p.username ~ '^Mazer-[0-9]{6}$') <> 1 then raise exception 'R017_QA_GENERATED_USERNAME_DRIFT'; end if;
+ if (select count(*) from mazer.mazer_profiles p join jsonb_to_recordset(${jsonLiteral(qaRows)}) q(id uuid,email text,username text,mode text) on q.id=p.user_id where q.mode='claimed' and p.username_origin='claimed' and p.username=q.username) <> 3 then raise exception 'R017_QA_CLAIMED_USERNAME_DRIFT'; end if;
+end $qa$;`, ['qa_ttl','before_user_created','rollback_on_error']);
   sql['qa-cleanup.sql'] = sqlProgram(`
 delete from auth.identities where user_id in (select id from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text));
 delete from auth.users where id in (select id from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text));`, ['qa_ttl','delete','auth.identities','auth.users']);
@@ -495,14 +530,14 @@ delete from mazer.mazer_cycle_receipts;
 delete from mazer.mazer_ai_progression_states;
 delete from mazer.mazer_progression_states;
 delete from mazer.mazer_profiles;
-with rows as (select jsonb_array_elements(${jsonLiteral(targetRows.profiles)}) value) insert into mazer.mazer_profiles select (jsonb_populate_record(null::mazer.mazer_profiles,value)).* from rows;
-with rows as (select jsonb_array_elements(${jsonLiteral(targetRows.player)}) value) insert into mazer.mazer_progression_states select (jsonb_populate_record(null::mazer.mazer_progression_states,value)).* from rows;
-with rows as (select jsonb_array_elements(${jsonLiteral(targetRows.ai)}) value) insert into mazer.mazer_ai_progression_states select (jsonb_populate_record(null::mazer.mazer_ai_progression_states,value)).* from rows;
-with rows as (select jsonb_array_elements(${jsonLiteral(targetRows.receipts)}) value) insert into mazer.mazer_cycle_receipts select (jsonb_populate_record(null::mazer.mazer_cycle_receipts,value)).* from rows;
 delete from auth.identities where user_id in (select id from jsonb_to_recordset(${jsonLiteral(imports.map((item) => item.user))}) as x(id uuid));
 delete from auth.users where id in (select id from jsonb_to_recordset(${jsonLiteral(imports.map((item) => item.user))}) as x(id uuid));
 drop table if exists mazer.mazer_identity_map;
 ${reverseCatalogSql(catalogPreimage)}
+with rows as (select jsonb_array_elements(${jsonLiteral(targetRows.profiles)}) value) insert into mazer.mazer_profiles select (jsonb_populate_record(null::mazer.mazer_profiles,value)).* from rows;
+with rows as (select jsonb_array_elements(${jsonLiteral(targetRows.player)}) value) insert into mazer.mazer_progression_states select (jsonb_populate_record(null::mazer.mazer_progression_states,value)).* from rows;
+with rows as (select jsonb_array_elements(${jsonLiteral(targetRows.ai)}) value) insert into mazer.mazer_ai_progression_states select (jsonb_populate_record(null::mazer.mazer_ai_progression_states,value)).* from rows;
+with rows as (select jsonb_array_elements(${jsonLiteral(targetRows.receipts)}) value) insert into mazer.mazer_cycle_receipts select (jsonb_populate_record(null::mazer.mazer_cycle_receipts,value)).* from rows;
 ${aclRestore}
 do $r017$ begin
  if (select count(*) from mazer.mazer_profiles) <> 5 or (select count(*) from mazer.mazer_progression_states) <> 7 or (select count(*) from mazer.mazer_ai_progression_states) <> 7 or (select count(*) from mazer.mazer_cycle_receipts) <> 1290 then raise exception 'R017_MASTER_PREIMAGE_RESTORE_DRIFT'; end if;
