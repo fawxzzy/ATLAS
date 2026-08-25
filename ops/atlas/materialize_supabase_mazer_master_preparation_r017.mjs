@@ -84,18 +84,18 @@ function bindResetEraActionInput(raw, allEdges) {
   const edge = allEdges.find((item) => item.legacy_user_id.toLowerCase() === sourceUser && item.master_user_id.toLowerCase() === targetUser);
   if (!edge) throw new Error('RESET_AI_IDENTITY_EDGE_MISSING');
   const action = structuredClone(raw.fence_input);
-  const sourceAi = action.source?.ai?.find((item) => item.user_id.toLowerCase() === sourceUser && item.runner_key === 'menu-runner');
-  const targetIndex = action.target?.ai?.findIndex((item) => item.user_id.toLowerCase() === targetUser && item.runner_key === 'menu-runner');
+  const sourceAi = action.source_snapshot?.ai?.find((item) => item.user_id.toLowerCase() === sourceUser && item.runner_key === 'menu-runner');
+  const targetIndex = action.target_snapshot?.ai?.findIndex((item) => item.user_id.toLowerCase() === targetUser && item.runner_key === 'menu-runner');
   if (!sourceAi || targetIndex < 0) throw new Error('RESET_AI_ROW_MISSING');
   if (sha256(sourceAi) !== requiredDigest(raw.reset_era_ai.canonical_row_digest, 'RESET_AI_CANONICAL_DIGEST')
-    || sha256(action.target.ai[targetIndex]) !== requiredDigest(raw.reset_era_ai.quarantined_row_digest, 'RESET_AI_QUARANTINE_DIGEST')) throw new Error('RESET_AI_ROW_DIGEST_DRIFT');
+    || sha256(action.target_snapshot.ai[targetIndex]) !== requiredDigest(raw.reset_era_ai.quarantined_row_digest, 'RESET_AI_QUARANTINE_DIGEST')) throw new Error('RESET_AI_ROW_DIGEST_DRIFT');
   const mapped = structuredClone(sourceAi);
   mapped.user_id = targetUser;
   mapped.row.user_id = targetUser;
   mapped.payload_digest = sha256(mapped.row);
-  action.target.ai[targetIndex] = mapped;
-  const sourcePlayer = action.source?.player?.find((item) => item.user_id.toLowerCase() === sourceUser);
-  const targetPlayer = action.target?.player?.find((item) => item.user_id.toLowerCase() === targetUser);
+  action.target_snapshot.ai[targetIndex] = mapped;
+  const sourcePlayer = action.source_snapshot?.player?.find((item) => item.user_id.toLowerCase() === sourceUser);
+  const targetPlayer = action.target_snapshot?.player?.find((item) => item.user_id.toLowerCase() === targetUser);
   if (!sourcePlayer || !targetPlayer) throw new Error('PLAYER_RESET_ROW_MISSING');
   const mappedPlayer = structuredClone(sourcePlayer);
   mappedPlayer.user_id = targetUser;

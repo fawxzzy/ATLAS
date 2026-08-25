@@ -1,0 +1,131 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+import { CONTRACT as FENCE_CONTRACT, sha256 } from '../classify_supabase_mazer_master_cutover_data_fence_r001.mjs';
+import { validatePrivateSource } from '../materialize_supabase_mazer_master_preparation_r017.mjs';
+import {
+  PRODUCER_CONTRACT,
+  SNAPSHOT_SQL,
+  buildIdentityPlan,
+  producePrivateSource,
+  renderOperationalSql
+} from '../produce_supabase_mazer_master_preparation_private_source_r017.mjs';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+function findMazerRepository(start) {
+  let cursor = start;
+  while (true) {
+    const candidate = path.join(cursor, 'repos', 'mazer');
+    if (fs.existsSync(path.join(candidate, '.git'))) return candidate;
+    const parent = path.dirname(cursor); if (parent === cursor) throw new Error('MAZER_REPOSITORY_NOT_FOUND'); cursor = parent;
+  }
+}
+const mazerRepository = findMazerRepository(root);
+const uid = (value) => `00000000-0000-4000-8000-${String(value).padStart(12, '0')}`;
+const now = Date.now();
+const iso = (offset) => new Date(now + offset).toISOString();
+const verifier = `$2b$12$${'A'.repeat(53)}`;
+const sharedLegacy = Array.from({ length: 15 }, (_, index) => uid(index + 1));
+const sharedMaster = sharedLegacy.map((id, index) => index < 13 ? id : uid(100 + index));
+const legacyOnly = [uid(16), uid(17), uid(18)];
+const unrelatedMaster = Array.from({ length: 99 }, (_, index) => uid(1000 + index));
+
+function user(id, email, instance = uid(9000)) {
+  return { id, instance_id: instance, aud: 'authenticated', role: 'authenticated', email, encrypted_password: verifier, email_confirmed_at: iso(-10000), raw_app_meta_data: { provider: 'email', providers: ['email'] }, raw_user_meta_data: {}, created_at: iso(-20000), updated_at: iso(-10000) };
+}
+function identity(id, email, index) { return { id: uid(20000 + index), user_id: id, provider_id: email, identity_data: { sub: id, email }, provider: 'email', created_at: iso(-20000), updated_at: iso(-10000), last_sign_in_at: iso(-10000) }; }
+function profile(id, index) { return { user_id: id, display_name: null, selected_control_mode: 'stick', settings: { trailFade: true }, created_at: iso(-9000), updated_at: iso(-8000), revision: index, username: index % 2 ? null : `u${index + 10}` }; }
+function player(id, reset = false) {
+  const level = reset ? 5 : 2; const cycles = reset ? 4 : 1; const complexity = reset ? 24 : 12;
+  return { user_id: id, schema_version: 1, state: { tracks: { player: { level, completedCycles: cycles, targetComplexity: complexity } } }, last_completed_cycle_at: iso(-7000), created_at: iso(-9000), updated_at: iso(-7000), player_level: level, player_rank: 'E', player_target_complexity: complexity, player_completed_cycles: cycles, revision: 0, level_reached_at: iso(-7000) };
+}
+function ai(id, reset, target = false) {
+  const level = reset ? (target ? 39 : 5) : 2; const cycles = reset ? (target ? 108 : 4) : 1; const complexity = reset ? (target ? 161 : 24) : 12; const rank = reset && target ? 'S' : 'E';
+  return { user_id: id, runner_key: 'menu-runner', schema_version: 1, state: { level, completedCycles: cycles, targetComplexity: complexity }, summary: { level, completedCycles: cycles, targetComplexity: complexity }, level, rank, target_complexity: complexity, completed_cycles: cycles, last_completed_cycle_at: iso(target ? -9000 : -1000), created_at: iso(-20000), updated_at: iso(target ? -9000 : -1000) };
+}
+function receipt(id, owner, run, payload) { return { id, user_id: owner, surface: 'play', maze_seed: 7, maze_size: 37, route_quality: 'multi-route', start_cell: {}, goal_cell: {}, path_length: 20, wrong_turns: 1, backtracks: 0, completion_time_ms: 2000, reset_used: false, control_mode: 'stick', average_frame_ms: 16.667, receipt: { fixture: payload }, completed_at: iso(-5000), created_at: iso(-5000), ruleset_id: 'legacy-v1', recipe_version: null, recipe_hash: null, client_run_id: run };
+}
+function rawFixture() {
+  const legacyEmails = [...sharedLegacy, ...legacyOnly].map((id, index) => [`person-${index}@example.test`, id]);
+  const masterEmails = [...sharedMaster.map((id, index) => [`person-${index}@example.test`, id]), ...unrelatedMaster.map((id, index) => [`other-${index}@example.test`, id])];
+  const resetLegacy = sharedLegacy[13]; const resetMaster = sharedMaster[13];
+  const overlappingLegacyReceipts = Array.from({ length: 1281 }, (_, index) => receipt(uid(30000 + index), index < 1239 ? resetLegacy : sharedLegacy[0], uid(50000 + index), index));
+  const overlappingMasterReceipts = overlappingLegacyReceipts.map((row, index) => ({ ...structuredClone(row), user_id: index < 1239 ? resetMaster : sharedMaster[0] }));
+  const legacyOnlyReceipts = Array.from({ length: 590 }, (_, index) => receipt(uid(40000 + index), index < 473 ? resetLegacy : sharedLegacy[1], uid(60000 + index), 1281 + index));
+  const masterOnlyReceipts = Array.from({ length: 9 }, (_, index) => receipt(uid(45000 + index), sharedMaster[2], uid(65000 + index), 2000 + index));
+  const targetUsers = [0, 1, 2, 3, 4, 5, 13];
+  return {
+    legacy: {
+      observed_at: iso(0), auth_users: legacyEmails.map(([email, id]) => user(id, email)), auth_identities: legacyEmails.map(([email, id], index) => identity(id, email, index)),
+      profiles: sharedLegacy.slice(0, 10).map(profile), player: sharedLegacy.map((id, index) => player(id, index === 13)), ai: sharedLegacy.map((id, index) => ai(id, index === 13, false)), receipts: [...overlappingLegacyReceipts, ...legacyOnlyReceipts]
+    },
+    master: {
+      observed_at: iso(-1000), auth_users: masterEmails.map(([email, id]) => user(id, email)), auth_identities: masterEmails.map(([email, id], index) => identity(id, email, 100 + index)),
+      profiles: sharedMaster.slice(0, 5).map(profile), player: targetUsers.map((index) => player(sharedMaster[index], index === 13)), ai: targetUsers.map((index) => ai(sharedMaster[index], index === 13, index === 13)), receipts: [...overlappingMasterReceipts, ...masterOnlyReceipts]
+    }
+  };
+}
+function acl(schema) {
+  const table_acl = [...FENCE_CONTRACT.tables].sort().map((name) => ({ name, grants: [] }));
+  const rpc_acl = [...FENCE_CONTRACT.mutatingRpcs].sort().map((signature) => ({ signature, grants: [{ grantee: 'authenticated', is_grantable: false }] }));
+  const catalog = { tables: [...FENCE_CONTRACT.tables].sort().map((name) => ({ name, relkind: 'r', rls_enabled: true, force_rls: schema === 'mazer' })), rpcs: [...FENCE_CONTRACT.mutatingRpcs].sort().map((signature) => ({ signature, kind: 'f', security_definer: true, volatility: 'v' })) };
+  return { schema, table_acl, rpc_acl, catalog };
+}
+
+const fixture = rawFixture();
+const plan = buildIdentityPlan(fixture.legacy, fixture.master);
+assert.equal(plan.retained_edges.length, 13);
+assert.equal(plan.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length, 2);
+assert.equal(plan.imports.length, 3);
+assert.ok(plan.imports.every((item) => item.user.raw_user_meta_data.app_namespace === undefined));
+
+const source = producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
+const validated = validatePrivateSource(source);
+assert.equal(validated.allEdges.length, 18);
+assert.deepEqual(validated.classified.desired_counts, { profiles: 10, player: 15, ai: 15, receipts: 1880 });
+assert.equal(source.reset_era_ai.legacy_receipts, 1712);
+assert.equal(source.reset_era_ai.master_receipts, 1239);
+assert.equal(source.qa.personas, 4);
+assert.equal(Object.keys(source.sql).length, 9);
+for (const [name, sql] of Object.entries(source.sql)) {
+  assert.match(sql, /^\\set ON_ERROR_STOP on\nbegin;/);
+  assert.match(sql, /\ncommit;\n$/);
+  assert.equal(source.sql_sha256[name], sha256(Buffer.from(sql, 'utf8')));
+}
+
+assert.match(SNAPSHOT_SQL('public'), /transaction isolation level serializable read only/i);
+assert.match(SNAPSHOT_SQL('mazer'), /from mazer\.mazer_profiles/);
+assert.throws(() => buildIdentityPlan({ ...fixture.legacy, auth_users: [...fixture.legacy.auth_users, fixture.legacy.auth_users[0]] }, fixture.master), /NORMALIZED_EMAIL_DUPLICATE/);
+assert.throws(() => producePrivateSource({ legacy: { ...fixture.legacy, receipts: fixture.legacy.receipts.slice(1) }, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT/);
+assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'short', qaPassword: 'R017-fixture-password!' }), /PRIVATE_SECRET_INPUT_WEAK/);
+
+const producerPath = path.join(root, 'ops/atlas/produce_supabase_mazer_master_preparation_private_source_r017.mjs');
+const materializerPath = path.join(root, 'ops/atlas/materialize_supabase_mazer_master_preparation_r017.mjs');
+const producerText = fs.readFileSync(producerPath, 'utf8');
+for (const forbidden of ['execute_sql', 'apply_migration', 'supabase db push', 'vercel deploy', 'git push']) assert.ok(!producerText.toLowerCase().includes(forbidden));
+for (const token of ['PRIVATE_OUTPUT_MUST_BE_UNDER_SECRETS','EVIDENCE_DIGEST_DRIFT','IDENTITY_DENOMINATOR_DRIFT','RESET_RECEIPT_DENOMINATOR_DRIFT','transaction isolation level serializable read only']) assert.ok(producerText.includes(token));
+
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-producer-'));
+try {
+  const privateFile = path.join(tmp, 'private-source.json'); fs.writeFileSync(privateFile, `${JSON.stringify(source)}\n`, { mode: 0o600 });
+  const out = path.join(tmp, 'materialized');
+  const child = spawnSync(process.execPath, [materializerPath, '--input', privateFile, '--output', out, '--mazer-repository', mazerRepository], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 180_000 });
+  assert.equal(child.status, 0, child.stdout + child.stderr);
+  const resultLines = child.stdout.trim().split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
+  assert.equal(resultLines.length, 1, 'materializer main executed more than once');
+  assert.equal(resultLines[0].result, 'PRIVATE_R017_PACKET_SEALED');
+  assert.equal(fs.readdirSync(out).length, 14);
+} finally { fs.rmSync(tmp, { recursive: true, force: true }); }
+
+const sourceCheck = spawnSync(process.execPath, [producerPath, '--source-check', 'true'], { cwd: root, encoding: 'utf8', windowsHide: true });
+assert.equal(sourceCheck.status, 0, sourceCheck.stderr);
+assert.equal(JSON.parse(sourceCheck.stdout).result, 'PASS_R017_PRIVATE_SOURCE_PRODUCER_SOURCE');
+
+const rendered = renderOperationalSql({ auth: source.auth, fenceInput: source.fence_input, reset: { quarantined_row: source.reset_era_ai.quarantined_row }, qa: source.qa, quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
+assert.deepEqual(Object.keys(rendered.sql), [...Object.keys(source.sql)]);
+
+console.log(JSON.stringify({ result: 'PASS_MAZER_MASTER_PREPARATION_PRIVATE_SOURCE_R017', identity_edges: 18, imports: 3, binds: 2, app_counts: validated.classified.desired_counts, sql_programs: 9, provider_calls: 0, provider_writes: 0, auth_writes: 0, live_data_writes: 0, raw_private_output: 0 }));
