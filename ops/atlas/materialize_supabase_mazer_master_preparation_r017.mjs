@@ -18,7 +18,8 @@ export const CONTRACT = Object.freeze({
   migrations: Object.freeze([
     Object.freeze({ phase: 'M1', blob: '2b8495a95fca9a860571343174bfb93bcad8c5e9', name: 'm1.sql' }),
     Object.freeze({ phase: 'M2', blob: '1bbf69cf8f38aa1e2b053d0b70d82a315317b58a', name: 'm2.sql' }),
-    Object.freeze({ phase: 'M3', blob: '481ab55323afff53f5e841012684b7e26f689349', name: 'm3.sql' })
+    Object.freeze({ phase: 'M3', blob: '481ab55323afff53f5e841012684b7e26f689349', name: 'm3.sql' }),
+    Object.freeze({ phase: 'M4', blob: '673d33e36500baf5d8ed4d76f113400dc31572bb', name: 'm4.sql' })
   ]),
   sqlNames: Object.freeze(['preflight.sql', 'master-fence.sql', 'master-refence.sql', 'auth-apply.sql', 'reset-era-apply.sql', 'postverify.sql', 'qa-apply.sql', 'qa-cleanup.sql', 'rollback.sql'])
 });
@@ -36,12 +37,12 @@ const canonical = (value) => value === null || typeof value !== 'object'
     : `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`).join(',')}}`;
 
 const SQL_TOKENS = Object.freeze({
-  'preflight.sql': ['data_api', 'rls', 'acl', 'auth.users', '114', '10', '15', '1882'],
+  'preflight.sql': ['data_api', 'rls', 'acl', 'auth.users', '114', '10', '15', '1882', 'mazer_username_handle_key'],
   'master-fence.sql': ['begin;', 'mazer_profiles', 'mazer_progression_states', 'mazer_ai_progression_states', 'mazer_cycle_receipts', 'revoke'],
   'master-refence.sql': ['begin;', 'mazer_initialize_progression', 'mazer_complete_level', 'mazer_complete_ai_level', 'mazer_reset_progression', 'revoke'],
   'auth-apply.sql': ['auth.users', 'auth.identities', 'create_and_bind', 'bind_existing', '3_auth_imports', '13_existing_binds'],
-  'reset-era-apply.sql': ['whole_row_override', '7/6/32/d', '39/108/161/s', 'pgp_sym_encrypt', 'player_reset_disposition'],
-  'postverify.sql': ['data_api', 'rls', 'acl', '117', '18', '10', '15', '1882', 'receipt_conservation'],
+  'reset-era-apply.sql': ['whole_row_override', '7/6/32/d', '39/108/161/s', 'pgp_sym_encrypt', 'player_reset_disposition', 'vault.create_secret', 'rollback_bound_username_key'],
+  'postverify.sql': ['data_api', 'rls', 'acl', '117', '18', '10', '15', '1882', 'receipt_conservation', 'username_origin', 'mazer-'],
   'qa-apply.sql': ['qa_ttl', 'before_user_created', 'rollback_on_error'],
   'qa-cleanup.sql': ['qa_ttl', 'delete', 'auth.identities', 'auth.users'],
   'rollback.sql': ['disable_hook_first', 'master_preimage', 'receipt_conservation']
@@ -57,7 +58,7 @@ export function assertSql(name, sql) {
   for (const token of SQL_TOKENS[name] ?? []) if (!lower.includes(token)) throw new Error(`SQL_CONTRACT_TOKEN_MISSING:${name}:${token}`);
 }
 
-export const HOST_PHASES = Object.freeze(['PREFLIGHT','FENCE_APPLYING','FENCE_PAUSED','MASTER_FENCE_APPLYING','MASTER_FENCED','M1_APPLYING','M1_APPLIED','M2_APPLYING','M2_APPLIED','MASTER_REFENCE_APPLYING','MASTER_REFENCED','AUTH_APPLYING','AUTH_APPLIED','RESET_QUARANTINE_APPLYING','RESET_QUARANTINE_SEALED','DELTA_APPLYING','DELTA_APPLIED','M3_APPLYING','M3_APPLIED','POSTVERIFYING','POSTVERIFIED','HOOK_ACTIVATING','HOOK_ACTIVE','QA_APPLYING','QA_COMPLETE','QA_CLEANING','QA_CLEAN','LEGACY_RESTORING','LEGACY_RESTORED','PREPARATION_COMPLETE','ROLLBACK_DISABLING_HOOK','ROLLBACK_TARGET_RESTORING','ROLLBACK_LEGACY_RESTORING','ROLLED_BACK','AMBIGUOUS_HOLD']);
+export const HOST_PHASES = Object.freeze(['PREFLIGHT','FENCE_APPLYING','FENCE_PAUSED','MASTER_FENCE_APPLYING','MASTER_FENCED','M1_APPLYING','M1_APPLIED','M2_APPLYING','M2_APPLIED','MASTER_REFENCE_APPLYING','MASTER_REFENCED','AUTH_APPLYING','AUTH_APPLIED','RESET_QUARANTINE_APPLYING','RESET_QUARANTINE_SEALED','DELTA_APPLYING','DELTA_APPLIED','M3_APPLYING','M3_APPLIED','M4_APPLYING','M4_APPLIED','POSTVERIFYING','POSTVERIFIED','HOOK_ACTIVATING','HOOK_ACTIVE','QA_APPLYING','QA_COMPLETE','QA_CLEANING','QA_CLEAN','LEGACY_RESTORING','LEGACY_RESTORED','PREPARATION_COMPLETE','ROLLBACK_DISABLING_HOOK','ROLLBACK_TARGET_RESTORING','ROLLBACK_LEGACY_RESTORING','ROLLED_BACK','AMBIGUOUS_HOLD']);
 
 export function classifyHostRecovery(state) {
   if (state == null) return { action: 'START', effect: 'NONE' };
@@ -70,7 +71,7 @@ export function classifyHostRecovery(state) {
   if (state.phase.startsWith('ROLLBACK_') || state.phase === 'LEGACY_RESTORING') return { action: 'ROLLBACK_REQUIRED', effect: 'RESTORE_INCOMPLETE' };
   if (state.phase === 'FENCE_PAUSED' || state.phase === 'MASTER_FENCED' || state.phase === 'M1_APPLIED' || state.phase === 'M2_APPLIED' || state.phase === 'MASTER_REFENCED' || state.phase === 'AUTH_APPLIED') return { action: 'RESUME_EXACT', effect: 'LEGACY_FENCED' };
   if (state.phase === 'RESET_QUARANTINE_SEALED' || state.phase === 'DELTA_APPLIED' || state.phase === 'POSTVERIFIED' || state.phase === 'QA_COMPLETE') return { action: 'RESUME_EXACT', effect: 'MASTER_STAGED_LEGACY_FENCED' };
-  if (state.phase === 'M3_APPLIED' || state.phase === 'HOOK_ACTIVE' || state.phase === 'QA_CLEAN' || state.phase === 'LEGACY_RESTORED') return { action: 'RESUME_EXACT', effect: 'MASTER_STAGED_LEGACY_FENCED' };
+  if (state.phase === 'M3_APPLIED' || state.phase === 'M4_APPLIED' || state.phase === 'HOOK_ACTIVE' || state.phase === 'QA_CLEAN' || state.phase === 'LEGACY_RESTORED') return { action: 'RESUME_EXACT', effect: 'MASTER_STAGED_LEGACY_FENCED' };
   if (state.phase === 'PREFLIGHT') return { action: 'RESUME_EXACT', effect: 'NONE' };
   throw new Error('STATE_PHASE_DRIFT');
 }
@@ -176,7 +177,7 @@ function gitBlob(mazerRepository, blob) {
 
 export function wrapMigrationTransaction(bytes, phase) {
   const sql = bytes.toString('utf8');
-  if (!['M1', 'M2', 'M3'].includes(phase) || !sql.trim() || /(^|\n)\s*(begin|start\s+transaction|commit|rollback)\s*;/im.test(sql)) throw new Error(`MIGRATION_TRANSACTION_SHAPE:${phase}`);
+  if (!['M1', 'M2', 'M3', 'M4'].includes(phase) || !sql.trim() || /(^|\n)\s*(begin|start\s+transaction|commit|rollback)\s*;/im.test(sql)) throw new Error(`MIGRATION_TRANSACTION_SHAPE:${phase}`);
   return Buffer.from(`\\set ON_ERROR_STOP on\nbegin;\nset local lock_timeout = '120s';\nset local statement_timeout = '150s';\n-- ${phase}_SINGLE_TRANSACTION\n${sql.trim()}\ncommit;\n`, 'utf8');
 }
 
@@ -200,6 +201,8 @@ export function materialize(raw, outputRoot, mazerRepository) {
     app_counts: classified.desired_counts,
     receipt_conservation: classified.receipt_conservation,
     auth_counts: { imports: 3, binds: 13, retained_edges: 2, final_edges: 18, expected_target_users: 117 },
+    username_contract: { format: 'Mazer-######', origin: ['generated', 'claimed'], collision_attempts: 1000000, key_location: 'SUPABASE_VAULT', key_plaintext_emitted: false },
+    transfer_contract: { high_water_snapshots: 1, stabilization_reads: 2, bounded_delta_catchups: 1 },
     reset_era_ai: { canonical: '7/6/32/D', quarantined: '39/108/161/S', override: 'EXACT_WHOLE_ROW', quarantine: 'PGP_SYM_ENCRYPT_AES256' },
     reset_era_player: { disposition: 'MAPPED_ROWS_EQUAL_NO_OVERRIDE', digest: raw.reset_era_player.source_row_digest },
     qa: { personas: raw.qa.personas, auth_rows: raw.qa.auth_rows, ttl_minutes: raw.qa.ttl_minutes },

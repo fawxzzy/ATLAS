@@ -63,7 +63,7 @@ function catalog() {
       { table: 'mazer_progression_states', name: 'mazer_progression_states_player_target_complexity_check', type: 'c', definition: 'CHECK (player_target_complexity >= 8 AND player_target_complexity <= 240)' },
       { table: 'mazer_ai_progression_states', name: 'mazer_ai_progression_states_level_check', type: 'c', definition: 'CHECK (level >= 1 AND level <= 99)' },
       { table: 'mazer_ai_progression_states', name: 'mazer_ai_progression_states_target_complexity_check', type: 'c', definition: 'CHECK (target_complexity >= 8 AND target_complexity <= 240)' }
-    ], indexes: [], functions: [], policies: [], triggers: [],
+    ], indexes: [], functions: [], policies: [], triggers: [], username_secret_named_count: 0,
     schema_acl: [{ grantee: 'authenticated', privilege: 'USAGE', grantable: false }, { grantee: 'service_role', privilege: 'USAGE', grantable: false }],
     rls: ['mazer_ai_progression_states','mazer_cycle_receipts','mazer_profiles','mazer_progression_states'].map((table) => ({ table, enabled: true, forced: true }))
   };
@@ -120,12 +120,25 @@ assert.match(source.sql['postverify.sql'], /preserved-missing-tracks/);
 assert.match(source.sql['postverify.sql'], /preserved-nonobject-tracks/);
 assert.match(source.sql['rollback.sql'], /preserved-master-preimage/);
 assert.doesNotMatch(source.sql['rollback.sql'], /preserved-missing-tracks|preserved-nonobject-tracks/);
+const preM2MasterAcl = acl('mazer'); preM2MasterAcl.rpc_acl = []; preM2MasterAcl.catalog.rpcs = [];
+const preM2Source = producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: preM2MasterAcl, quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
+assert.equal(preM2Source.fence_input.fence.master.acl_basis, 'FRESH_LIVE_TABLES_PLUS_EXACT_M2_PLANNED_RPCS');
+assert.equal(preM2Source.fence_input.fence.master.acl_preimage.rpc_acl.length, FENCE_CONTRACT.mutatingRpcs.length);
+assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.table_acl, preM2MasterAcl.table_acl);
+assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.catalog.tables, preM2MasterAcl.catalog.tables);
 assert.equal(validated.allEdges.length, 18);
 assert.deepEqual(validated.classified.desired_counts, { profiles: 10, player: 15, ai: 15, receipts: 1882 });
 assert.equal(source.reset_era_ai.canonical_projection, '7/6/32/D');
 assert.equal(source.reset_era_ai.legacy_receipts, 1714);
 assert.equal(source.reset_era_ai.master_receipts, 1239);
 assert.equal(source.qa.personas, 4);
+assert.equal(source.qa.rows.filter((row) => row.mode === 'generated').length, 1);
+assert.match(source.sql['postverify.sql'], /R017_EXPLICIT_USERNAMES_CHANGED/);
+assert.match(source.sql['postverify.sql'], /R017_GENERATED_USERNAME_REGENERATION_DRIFT/);
+assert.match(source.sql['postverify.sql'], /username_origin/);
+assert.match(source.sql['qa-apply.sql'], /R017_QA_GENERATED_USERNAME_DRIFT/);
+assert.match(source.sql['rollback.sql'], /delete from vault\.secrets where name='mazer_username_handle_key'/);
+assert.ok(source.sql['rollback.sql'].indexOf('drop column if exists username_origin') < source.sql['rollback.sql'].indexOf('insert into mazer.mazer_profiles'));
 assert.equal(Object.keys(source.sql).length, 9);
 for (const [name, sql] of Object.entries(source.sql)) {
   assert.match(sql, /^\\set ON_ERROR_STOP on\nbegin;/);
@@ -189,8 +202,8 @@ try {
   const resultLines = child.stdout.trim().split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
   assert.equal(resultLines.length, 1, 'materializer main executed more than once');
   assert.equal(resultLines[0].result, 'PRIVATE_R017_PACKET_SEALED');
-  assert.equal(fs.readdirSync(out).length, 14);
-  for (const name of ['m1.sql','m2.sql','m3.sql']) {
+  assert.equal(fs.readdirSync(out).length, 15);
+  for (const name of ['m1.sql','m2.sql','m3.sql','m4.sql']) {
     const migration = fs.readFileSync(path.join(out, name), 'utf8');
     assert.match(migration, /^\\set ON_ERROR_STOP on\nbegin;/);
     assert.equal((migration.match(/\ncommit;/g) ?? []).length, 1);

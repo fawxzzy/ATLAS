@@ -354,7 +354,7 @@ try {
     [void](Invoke-Fence 'Continue' $input $inputSha $fenceState)
     Set-Phase $state 'DELTA_APPLIED' $statePath
   }
-  foreach ($step in @(@('M3_APPLYING','M3_APPLIED','m3.sql'), @('POSTVERIFYING','POSTVERIFIED','postverify.sql'))) {
+  foreach ($step in @(@('M3_APPLYING','M3_APPLIED','m3.sql'), @('M4_APPLYING','M4_APPLIED','m4.sql'), @('POSTVERIFYING','POSTVERIFIED','postverify.sql'))) {
     if ($Phases.IndexOf([string]$state.phase) -lt $Phases.IndexOf($step[1])) {
       Assert-Lease $state $statePath
       Set-Phase $state $step[0] $statePath
