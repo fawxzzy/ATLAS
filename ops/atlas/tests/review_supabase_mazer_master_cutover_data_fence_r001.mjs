@@ -341,7 +341,14 @@ requireText(signupFence, 'ADMITTED_SIGNUP_WRITER_NOT_DRAINED', 'ADMITTED_SIGNUP_
 requireText(signupFence, 'lock table auth.users in share row exclusive mode', 'AUTH_USERS_BARRIER_MISSING');
 requireOrder(signupFence, ['atlas_admitted_signup_writers', 'lock table auth.users', 'create function', 'create trigger', 'PASS_SIGNUP_ADMISSION_FENCED', 'commit;'], 'SIGNUP_ADMISSION_BARRIER_ORDER_DRIFT');
 requireText(signupRestore, 'SIGNUP_ADMISSION_RESTORE_STATE_AMBIGUOUS', 'SIGNUP_RESTORE_AMBIGUOUS_HOLD_MISSING');
-requireOrder(signupRestore, ['lock table auth.users', 'drop trigger', 'drop function', 'commit;', 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED'], 'SIGNUP_RESTORE_BARRIER_ORDER_DRIFT');
+requireText(signupFence, 'atlas:mazer-signup-admission-fence:mazer', 'SIGNUP_INSTALL_SERIALIZER_MISSING');
+requireText(signupRestore, 'atlas:mazer-signup-admission-fence:mazer', 'SIGNUP_RESTORE_SERIALIZER_MISSING');
+const signupFenceAdvisory = signupFence.match(/hashtextextended\('([^']+)'/)?.[1];
+const signupRestoreAdvisory = signupRestore.match(/hashtextextended\('([^']+)'/)?.[1];
+if (!signupFenceAdvisory || signupFenceAdvisory !== signupRestoreAdvisory) findings.push('SIGNUP_INSTALL_RESTORE_SERIALIZER_DRIFT');
+requireOrder(signupRestore, ['pg_advisory_xact_lock', 'lock table auth.users', 'atlas_signup_current', 'SIGNUP_ADMISSION_RESTORE_STATE_AMBIGUOUS', 'drop trigger', 'drop function', 'commit;', 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED'], 'SIGNUP_RESTORE_BARRIER_ORDER_DRIFT');
+requireText(focused, 'ORPHAN_INSTALL_BLOCKER_READY', 'ORPHAN_INSTALL_RESTORE_REGRESSION_MISSING');
+requireText(focused, "wait_event = 'advisory'", 'ORPHAN_INSTALL_SERIALIZER_PROOF_MISSING');
 const legacyFence = renderFenceSql('public', reviewAclPreimage('public'));
 const masterFence = renderFenceSql('mazer', reviewAclPreimage('mazer'));
 for (const sql of [legacyFence, masterFence]) {
@@ -399,7 +406,7 @@ if (focusedOne !== focusedTwo) findings.push('FOCUSED_TEST_NONDETERMINISTIC');
 if (focusedOne) {
   const value = JSON.parse(focusedOne);
   assert.equal(value.result, 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001');
-  assert.equal(value.scenarios, 84);
+  assert.equal(value.scenarios, 88);
   assert.equal(value.postgresql17_concurrency, 'SKIPPED_EXPLICIT_OPT_IN_REQUIRED');
   assert.equal(value.provider_calls, 0);
   assert.equal(value.live_data_writes, 0);
@@ -431,7 +438,7 @@ for (const output of shellOutputs.filter(Boolean)) {
 assert.deepEqual(findings, []);
 console.log(JSON.stringify({
   result: 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001_REVIEW_NO_FINDINGS',
-  assertions: 260,
+  assertions: 266,
   focused_runs: 2,
   source_validation_runs: shellRuns.length,
   findings: 0,

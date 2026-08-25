@@ -40,6 +40,7 @@ const ids = Object.freeze({
   masterA: uid(101),
   masterB: uid(102),
   masterC: uid(103),
+  masterD: uid(104),
   receipt1: uid(201),
   receipt2: uid(202),
   receipt3: uid(203),
@@ -346,6 +347,10 @@ assert.ok(signupFenceSql.indexOf('lock table auth.users') < signupFenceSql.index
 assert.ok(signupFenceSql.indexOf('create trigger') < signupFenceSql.indexOf('commit;'));
 assert.match(signupRestoreSql, /SIGNUP_ADMISSION_RESTORE_STATE_AMBIGUOUS/);
 assert.match(signupRestoreSql, /lock table auth\.users in share row exclusive mode/);
+const signupFenceAdvisory = signupFenceSql.match(/hashtextextended\('([^']+)'/)?.[1];
+const signupRestoreAdvisory = signupRestoreSql.match(/hashtextextended\('([^']+)'/)?.[1];
+assert.equal(signupRestoreAdvisory, signupFenceAdvisory);
+assert.ok(signupRestoreSql.indexOf('lock table auth.users') < signupRestoreSql.indexOf('atlas_signup_current'));
 assert.ok(signupRestoreSql.indexOf('lock table auth.users') < signupRestoreSql.indexOf('drop trigger'));
 assert.ok(signupRestoreSql.indexOf('drop trigger') < signupRestoreSql.indexOf('drop function'));
 assert.match(signupRestoreSql, /PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED/);
@@ -1110,6 +1115,7 @@ async function runDisposablePostgres17Concurrency() {
   let drain = null;
   let admittedSignup = null;
   let signupFenceProcess = null;
+  let signupRestoreProcess = null;
   try {
     const version = required('postgres', ['--version']).trim();
     assert.match(version, /PostgreSQL\) 17\./);
@@ -1272,15 +1278,36 @@ async function runDisposablePostgres17Concurrency() {
     pgSqlRequired(`insert into auth.users(id, raw_user_meta_data) values ('${ids.masterC}', '{"app_namespace":"mazer","username":"restored"}'::jsonb);`);
     assert.equal(pgSqlRequired(`select (select count(*) from auth.users where id = '${ids.masterC}')::text || '|' || (select count(*) from mazer.mazer_profiles where user_id = '${ids.masterC}')::text;`), '1|1');
 
-    const refenceReceipt = JSON.parse(pgFileRequired(signupFencePath, { timeout: 160000 }));
-    assert.equal(refenceReceipt.result, 'PASS_SIGNUP_ADMISSION_FENCED');
-    assert.equal(JSON.parse(pgFileRequired(signupObservationPath)).result, 'PASS_SIGNUP_ADMISSION_FENCED');
-    assert.equal(JSON.parse(pgFileRequired(signupRestorePath, { timeout: 160000 })).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED');
+    admittedSignup = pgSpawn();
+    admittedSignup.stdin.write(`begin; insert into auth.users(id, raw_user_meta_data) values ('${ids.masterD}', '{"app_namespace":"mazer","username":"orphaned"}'::jsonb); \\echo ORPHAN_INSTALL_BLOCKER_READY\n`);
+    await waitForMarker(admittedSignup, 'ORPHAN_INSTALL_BLOCKER_READY');
+    signupFenceProcess = pgFileSpawn(signupFencePath);
+    const orphanFenceExit = waitForExit(signupFenceProcess, 180000);
+    for (let attempt = 0; attempt < 100 && !signupBarrierWaiting(); attempt += 1) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 25);
+    assert.equal(signupBarrierWaiting(), true, 'orphaned signup fence installer did not reach the auth.users barrier');
+    signupRestoreProcess = pgFileSpawn(signupRestorePath);
+    const overlappedRestoreExit = waitForExit(signupRestoreProcess, 180000);
+    const restoreWaitingOnInstaller = () => Number(pgSqlRequired("select count(*) from pg_catalog.pg_stat_activity where pid <> pg_backend_pid() and wait_event_type = 'Lock' and wait_event = 'advisory' and query like '%atlas:mazer-signup-admission-fence:mazer%';")) === 1;
+    for (let attempt = 0; attempt < 100 && !restoreWaitingOnInstaller(); attempt += 1) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 25);
+    assert.equal(restoreWaitingOnInstaller(), true, 'signup restore did not serialize behind the orphaned installer');
+    assert.equal(signupRestoreProcess.exitCode, null, 'signup restore completed before the orphaned installer settled');
+    const orphanAdmittedExit = waitForExit(admittedSignup);
+    admittedSignup.stdin.end('commit;\n\\q\n');
+    await orphanAdmittedExit;
+    admittedSignup = null;
+    const orphanFenceReceipt = JSON.parse((await orphanFenceExit).trim());
+    signupFenceProcess = null;
+    assert.equal(orphanFenceReceipt.result, 'PASS_SIGNUP_ADMISSION_FENCED');
+    const overlappedRestoreReceipt = JSON.parse((await overlappedRestoreExit).trim());
+    signupRestoreProcess = null;
+    assert.equal(overlappedRestoreReceipt.result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED');
+    assert.equal(pgSqlRequired(`select (select count(*) from auth.users where id = '${ids.masterD}')::text || '|' || (select count(*) from mazer.mazer_profiles where user_id = '${ids.masterD}')::text;`), '1|1');
+    assert.equal(JSON.parse(pgFileRequired(signupObservationPath)).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT');
     assert.equal(JSON.parse(pgFileRequired(signupRestorePath, { timeout: 160000 })).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED');
     assert.equal(JSON.parse(pgFileRequired(signupObservationPath)).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT');
     return 'PASS_POSTGRESQL_17_REAL_CONCURRENCY_AND_SIGNUP_ADMISSION';
   } finally {
-    for (const child of [direct, gate, rpc, drain, admittedSignup, signupFenceProcess]) {
+    for (const child of [direct, gate, rpc, drain, admittedSignup, signupFenceProcess, signupRestoreProcess]) {
       if (child) { try { child.kill(); } catch {} }
     }
     if (started) run('pg_ctl', ['-D', data, '-m', 'immediate', '-w', 'stop'], { timeout: 60000 });
@@ -1294,7 +1321,7 @@ const pg17Concurrency = await runDisposablePostgres17Concurrency();
 
 console.log(JSON.stringify({
   result: 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001',
-  scenarios: 84,
+  scenarios: 88,
   postgresql17_concurrency: pg17Concurrency,
   provider_calls: 0,
   provider_writes: 0,
