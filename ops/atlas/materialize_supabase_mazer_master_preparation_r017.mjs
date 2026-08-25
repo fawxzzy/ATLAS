@@ -48,8 +48,15 @@ const SQL_TOKENS = Object.freeze({
   'rollback.sql': ['disable_hook_first', 'master_preimage', 'receipt_conservation']
 });
 
+export const SQL_BYTE_LIMITS = Object.freeze({
+  default: 2_000_000,
+  'postverify.sql': 8_000_000,
+  'rollback.sql': 8_000_000
+});
+
 export function assertSql(name, sql) {
-  if (typeof sql !== 'string' || sql.length < 16 || sql.length > 2_000_000) throw new Error(`SQL_SHAPE:${name}`);
+  const byteLimit = SQL_BYTE_LIMITS[name] ?? SQL_BYTE_LIMITS.default;
+  if (typeof sql !== 'string' || sql.length < 16 || Buffer.byteLength(sql, 'utf8') > byteLimit) throw new Error(`SQL_SHAPE:${name}`);
   const lower = sql.toLowerCase();
   for (const forbidden of ['vercel', 'github', 'billing', 'drop database', 'alter project', 'geknvnrmktchljnyddwp.supabase.co']) {
     if (lower.includes(forbidden)) throw new Error(`SQL_SCOPE_DRIFT:${name}`);
@@ -80,9 +87,10 @@ export function classifyHostRecovery(state, options = {}) {
 
 function bindResetEraActionInput(raw, allEdges) {
   if (!plain(raw.reset_era_player)
-    || raw.reset_era_player.disposition !== 'MAPPED_ROWS_EQUAL_NO_OVERRIDE'
-    || raw.reset_era_player.source_row_digest !== raw.reset_era_player.target_row_digest) throw new Error('PLAYER_RESET_DISPOSITION_DRIFT');
+    || raw.reset_era_player.disposition !== 'MASTER_DOMINATES_NO_OVERRIDE'
+    || raw.reset_era_player.source_row_digest === raw.reset_era_player.target_row_digest) throw new Error('PLAYER_RESET_DISPOSITION_DRIFT');
   requiredDigest(raw.reset_era_player.source_row_digest, 'PLAYER_RESET_SOURCE_DIGEST');
+  requiredDigest(raw.reset_era_player.target_row_digest, 'PLAYER_RESET_TARGET_DIGEST');
   const sourceUser = requiredUuid(raw.reset_era_ai.legacy_user_id, 'RESET_AI_LEGACY_UUID');
   const targetUser = requiredUuid(raw.reset_era_ai.master_user_id, 'RESET_AI_MASTER_UUID');
   const edge = allEdges.find((item) => item.legacy_user_id.toLowerCase() === sourceUser && item.master_user_id.toLowerCase() === targetUser);
@@ -105,8 +113,14 @@ function bindResetEraActionInput(raw, allEdges) {
   mappedPlayer.user_id = targetUser;
   mappedPlayer.row.user_id = targetUser;
   mappedPlayer.payload_digest = sha256(mappedPlayer.row);
-  if (mappedPlayer.payload_digest !== targetPlayer.payload_digest
-    || mappedPlayer.payload_digest !== raw.reset_era_player.source_row_digest) throw new Error('PLAYER_RESET_EQUALITY_DRIFT');
+  const rankOrder = new Map(['E','D','C','B','A','S'].map((rank, index) => [rank, index]));
+  const targetDominates = BigInt(targetPlayer.level) >= BigInt(mappedPlayer.level)
+    && BigInt(targetPlayer.completed_cycles) >= BigInt(mappedPlayer.completed_cycles)
+    && targetPlayer.target_complexity >= mappedPlayer.target_complexity
+    && rankOrder.get(targetPlayer.rank) >= rankOrder.get(mappedPlayer.rank);
+  if (mappedPlayer.payload_digest !== raw.reset_era_player.source_row_digest
+    || targetPlayer.payload_digest !== raw.reset_era_player.target_row_digest
+    || !targetDominates) throw new Error('PLAYER_RESET_DOMINANCE_DRIFT');
   return action;
 }
 
@@ -206,7 +220,7 @@ export function materialize(raw, outputRoot, mazerRepository) {
     username_contract: { format: 'Mazer-######', origin: ['generated', 'claimed'], collision_attempts: 1000000, key_location: 'SUPABASE_VAULT', key_plaintext_emitted: false },
     transfer_contract: { high_water_snapshots: 1, stabilization_reads: 2, bounded_delta_catchups: 1 },
     reset_era_ai: { canonical: '7/6/32/D', quarantined: '39/108/161/S', override: 'EXACT_WHOLE_ROW', quarantine: 'PGP_SYM_ENCRYPT_AES256' },
-    reset_era_player: { disposition: 'MAPPED_ROWS_EQUAL_NO_OVERRIDE', digest: raw.reset_era_player.source_row_digest },
+    reset_era_player: { disposition: 'MASTER_DOMINATES_NO_OVERRIDE', source_digest: raw.reset_era_player.source_row_digest, target_digest: raw.reset_era_player.target_row_digest },
     qa: { personas: raw.qa.personas, auth_rows: raw.qa.auth_rows, ttl_minutes: raw.qa.ttl_minutes },
     files
   };

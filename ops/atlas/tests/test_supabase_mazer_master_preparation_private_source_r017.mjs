@@ -40,8 +40,8 @@ function user(id, email, instance = uid(9000)) {
 }
 function identity(id, email, index) { return { id: uid(20000 + index), user_id: id, provider_id: id, identity_data: { sub: id, email }, provider: 'email', created_at: iso(-20000), updated_at: iso(-10000), last_sign_in_at: iso(-10000) }; }
 function profile(id, index) { return { user_id: id, display_name: null, selected_control_mode: 'stick', settings: { trailFade: true }, created_at: iso(-9000), updated_at: iso(-8000), revision: index, username: index % 2 ? null : `u${index + 10}` }; }
-function player(id, reset = false) {
-  const level = reset ? 5 : 2; const cycles = reset ? 4 : 1; const complexity = reset ? 24 : 12;
+function player(id, reset = false, target = false) {
+  const level = reset ? (target ? 6 : 5) : 2; const cycles = reset ? (target ? 5 : 4) : 1; const complexity = reset ? (target ? 25 : 24) : 12;
   return { user_id: id, schema_version: 1, state: { tracks: { player: { level, completedCycles: cycles, targetComplexity: complexity } } }, last_completed_cycle_at: iso(-7000), created_at: iso(-9000), updated_at: iso(-7000), player_level: level, player_rank: 'E', player_target_complexity: complexity, player_completed_cycles: cycles, revision: 0, level_reached_at: iso(-7000) };
 }
 function ai(id, reset, target = false) {
@@ -84,7 +84,7 @@ function rawFixture() {
     },
     master: {
       observed_at: iso(-1000), auth_users: masterEmails.map(([email, id]) => user(id, email)), auth_identities: masterEmails.map(([email, id], index) => identity(id, email, 100 + index)),
-      profiles: sharedMaster.slice(0, 5).map(profile), player: targetUsers.map((index) => player(sharedMaster[index], index === 13)), ai: targetUsers.map((index) => ai(sharedMaster[index], index === 13, index === 13)), receipts: [...overlappingMasterReceipts, ...masterOnlyReceipts], catalog: catalog()
+      profiles: sharedMaster.slice(0, 5).map(profile), player: targetUsers.map((index) => player(sharedMaster[index], index === 13, index === 13)), ai: targetUsers.map((index) => ai(sharedMaster[index], index === 13, index === 13)), receipts: [...overlappingMasterReceipts, ...masterOnlyReceipts], catalog: catalog()
     }
   };
 }
@@ -131,6 +131,7 @@ assert.deepEqual(validated.classified.desired_counts, { profiles: 11, player: 15
 assert.equal(source.reset_era_ai.canonical_projection, '7/6/32/D');
 assert.equal(source.reset_era_ai.legacy_receipts, 1714);
 assert.equal(source.reset_era_ai.master_receipts, 1239);
+assert.equal(source.reset_era_player.disposition, 'MASTER_DOMINATES_NO_OVERRIDE');
 assert.equal(source.qa.personas, 4);
 assert.equal(source.qa.rows.filter((row) => row.mode === 'generated').length, 1);
 assert.match(source.sql['postverify.sql'], /R017_EXPLICIT_USERNAMES_CHANGED/);
