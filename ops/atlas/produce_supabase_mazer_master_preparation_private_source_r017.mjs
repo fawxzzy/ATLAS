@@ -27,6 +27,11 @@ export const PRODUCER_CONTRACT = Object.freeze({
       sha256: R017_CONTRACT.currentPreimageSha256,
       result: 'PASS_EXACT_CURRENT_REBOUND_READY_FOR_ONE_PROTECTED_MASTER_PREPARATION_DECISION'
     }),
+    topology: Object.freeze({
+      relativePath: 'runtime/atlas/continuity/mazer-master-r017-auth-identity-topology-evidence-20260825.json',
+      sha256: R017_CONTRACT.topologyEvidenceSha256,
+      result: 'PASS_EXACT_AUTH_IDENTITY_TOPOLOGY_READY_FOR_R017_REBIND'
+    }),
     restoreProof: Object.freeze({
       relativePath: 'runtime/atlas/continuity/mazer-master-r014-canonical-cycle-receipt-private-local-restores-terminal-20260825.json',
       sha256: R017_CONTRACT.restoreProofSha256,
@@ -105,6 +110,7 @@ function readBoundEvidence(atlasRoot, contract) {
 
 export function verifyEvidence(atlasRoot) {
   const current = readBoundEvidence(atlasRoot, PRODUCER_CONTRACT.evidence.currentPreimage);
+  const topology = readBoundEvidence(atlasRoot, PRODUCER_CONTRACT.evidence.topology);
   const restore = readBoundEvidence(atlasRoot, PRODUCER_CONTRACT.evidence.restoreProof);
   const expected = current.current_preimage;
   const actual = {
@@ -115,7 +121,13 @@ export function verifyEvidence(atlasRoot) {
     if (expected?.[side]?.[name] !== count) throw new Error(`SEALED_PREIMAGE_DENOMINATOR_DRIFT:${side}:${name}`);
   }
   if (restore.legacy?.auth_users !== 18 || restore.master?.auth_users !== 114 || restore.cleanup?.legacy_plaintext_present !== false || restore.cleanup?.master_plaintext_present !== false) throw new Error('RESTORE_PROOF_DRIFT');
-  return { current, restore };
+  const aggregate = topology.aggregate_topology;
+  if (aggregate?.legacy_users !== 18 || aggregate?.master_users !== 114 || aggregate?.shared_normalized_emails !== 15
+    || aggregate?.retained_same_uuid !== 2 || aggregate?.bind_existing_different_uuid !== 13 || aggregate?.imports !== 3
+    || aggregate?.final_edges !== 18 || aggregate?.expected_target_users !== 117
+    || aggregate?.provider_id_conflicts !== 0 || aggregate?.identity_owner_conflicts !== 0
+    || aggregate?.identity_subject_conflicts !== 0 || aggregate?.identity_email_conflicts !== 0) throw new Error('TOPOLOGY_EVIDENCE_DRIFT');
+  return { current, topology, restore };
 }
 
 const MIGRATION_FUNCTIONS = Object.freeze(['mazer_is_username_available','mazer_initialize_progression','mazer_complete_level','mazer_complete_ai_level','mazer_reset_progression','mazer_leaderboard_page','mazer_leaderboard_self_rank','mazer_before_user_created','mazer_claim_signup_username']);
@@ -269,7 +281,7 @@ export function buildIdentityPlan(legacyRaw, masterRaw) {
     imports.push({ user, identities: [identity] });
     new_edges.push({ legacy_user_id: left.id, master_user_id: left.id, disposition: 'CREATE_AND_BIND', normalized_email: email, evidence_digest: digest({ normalized_email: email, legacy_user_id: left.id, master_user_id: left.id }) });
   }
-  if (retained_edges.length !== 13 || new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length !== 2 || imports.length !== 3) throw new Error('IDENTITY_DENOMINATOR_DRIFT');
+  if (retained_edges.length !== 2 || new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length !== 13 || imports.length !== 3) throw new Error('IDENTITY_DENOMINATOR_DRIFT');
   return { imports, new_edges, retained_edges };
 }
 
@@ -440,7 +452,7 @@ do $r017_auth_postcheck$ begin
  if (select coalesce(jsonb_agg(to_jsonb(u) order by u.id),'[]'::jsonb) from auth.users u where u.id in (select (e->>'id')::uuid from jsonb_array_elements(${jsonLiteral(importUsers)}) e)) <> ${jsonLiteral(sort(importUsers, (item) => item.id))} then raise exception 'R017_IMPORTED_AUTH_USERS_DIGEST_DRIFT'; end if;
  if (select coalesce(jsonb_agg(to_jsonb(i) order by i.id),'[]'::jsonb) from auth.identities i where i.id in (select (e->>'id')::uuid from jsonb_array_elements(${jsonLiteral(importIdentities)}) e)) <> ${jsonLiteral(sort(importIdentities, (item) => item.id))} then raise exception 'R017_IMPORTED_AUTH_IDENTITIES_DIGEST_DRIFT'; end if;
  if (select coalesce(jsonb_agg(jsonb_build_object('legacy_user_id',legacy_user_id,'master_user_id',master_user_id,'evidence_digest',evidence_digest) order by legacy_user_id),'[]'::jsonb) from mazer.mazer_identity_map) <> ${jsonLiteral(expectedMap)} then raise exception 'R017_IDENTITY_MAP_DIGEST_DRIFT'; end if;
-end $r017_auth_postcheck$;`, ['auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','2_existing_binds']);
+end $r017_auth_postcheck$;`, ['auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','13_existing_binds']);
   sql['reset-era-apply.sql'] = sqlProgram(`
 create extension if not exists pgcrypto with schema extensions;
 create table if not exists atlas_mazer_r017.reset_quarantine(id text primary key,ciphertext bytea not null);
@@ -531,7 +543,7 @@ export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, qua
   if (actionTargetIndex < 0) throw new Error('RESET_ACTION_TARGET_MISSING');
   actionFenceInput.target_snapshot.ai[actionTargetIndex] = mappedSourceAi;
   const rendered = renderOperationalSql({ auth, fenceInput: fence_input, actionFenceInput, catalogPreimage: catalog_preimage, reset: { quarantined_row: resetMaster }, qa, quarantineKey, qaPassword });
-  const raw = { schema: PRODUCER_CONTRACT.schema, packet: PRODUCER_CONTRACT.packet, evidence: { current_preimage_sha256: R017_CONTRACT.currentPreimageSha256, restore_proof_sha256: R017_CONTRACT.restoreProofSha256, predecessor_fence_manifest_sha256: R017_CONTRACT.predecessorFenceManifestSha256, master_acl_basis: fence_input.fence.master.acl_basis }, catalog_preimage, catalog_preimage_sha256: sha256(catalog_preimage), fence_input, auth, reset_era_ai, reset_era_player, qa, sql: rendered.sql, sql_sha256: rendered.sql_sha256 };
+  const raw = { schema: PRODUCER_CONTRACT.schema, packet: PRODUCER_CONTRACT.packet, evidence: { current_preimage_sha256: R017_CONTRACT.currentPreimageSha256, topology_evidence_sha256: R017_CONTRACT.topologyEvidenceSha256, restore_proof_sha256: R017_CONTRACT.restoreProofSha256, predecessor_fence_manifest_sha256: R017_CONTRACT.predecessorFenceManifestSha256, master_acl_basis: fence_input.fence.master.acl_basis }, catalog_preimage, catalog_preimage_sha256: sha256(catalog_preimage), fence_input, auth, reset_era_ai, reset_era_player, qa, sql: rendered.sql, sql_sha256: rendered.sql_sha256 };
   validatePrivateSource(raw);
   return raw;
 }

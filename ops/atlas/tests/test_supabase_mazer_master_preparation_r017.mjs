@@ -34,7 +34,7 @@ const sqlTokens = {
   'preflight.sql': ['data_api','rls','acl','auth.users','114','10','15','1882'],
   'master-fence.sql': ['begin;','mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts','revoke'],
   'master-refence.sql': ['begin;','mazer_initialize_progression','mazer_complete_level','mazer_complete_ai_level','mazer_reset_progression','revoke'],
-  'auth-apply.sql': ['begin;','auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','2_existing_binds'],
+  'auth-apply.sql': ['begin;','auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','13_existing_binds'],
   'reset-era-apply.sql': ['begin;','whole_row_override','7/6/32/d','39/108/161/s','pgp_sym_encrypt','player_reset_disposition'],
   'postverify.sql': ['begin;','data_api','rls','acl','117','18','10','15','1882','receipt_conservation'],
   'qa-apply.sql': ['begin;','qa_ttl','before_user_created','rollback_on_error'],
@@ -75,6 +75,10 @@ for (const token of [
   '18','117','1882','7/6/32/D','PGP_SYM_ENCRYPT_AES256','MAPPED_ROWS_EQUAL_NO_OVERRIDE','PLAYER_RESET_EQUALITY_DRIFT',
   'currentPreimageSha256','restoreProofSha256','predecessorFenceManifestSha256'
 ]) assert.ok(host.includes(token) || materializer.includes(token), `missing ${token}`);
+assert.ok(host.includes('AUTH_TOPOLOGY_MANIFEST_DRIFT'));
+assert.ok(host.includes('auth_counts.binds -ne 13'));
+assert.ok(host.includes('auth_counts.retained_edges -ne 2'));
+assert.ok(materializer.includes('topologyEvidenceSha256'));
 
 assert.ok(host.includes('Find-MazerRepository'));
 assert.ok(host.includes("'--mazer-repository',$mazerRepository"));
