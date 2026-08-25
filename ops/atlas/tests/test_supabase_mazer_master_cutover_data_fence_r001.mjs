@@ -743,7 +743,19 @@ assert.deepEqual(
 );
 assert.deepEqual(
   classifyRecoveryState({ direction: 'forward', phase: 'COMPLETE' }),
-  { result: 'EXACT_REPLAY_NOOP', effect: 'TERMINAL' }
+  { result: 'RELEASE_LEGACY_REQUIRED', effect: 'MASTER_PREPARED_LEGACY_FENCED' }
+);
+assert.deepEqual(
+  classifyRecoveryState({ direction: 'forward', phase: 'PAUSED_AFTER_SOURCE_HIGH_WATER' }),
+  { result: 'CONTINUE_OR_ROLLBACK', effect: 'LEGACY_FENCED_EXACT_CONTINUATION' }
+);
+assert.deepEqual(
+  classifyRecoveryState({ direction: 'forward', phase: 'LEGACY_RESTORING' }),
+  { result: 'RESUME_LEGACY_RESTORE', effect: 'LEGACY_RESTORE_INCOMPLETE' }
+);
+assert.deepEqual(
+  classifyRecoveryState({ direction: 'forward', phase: 'PREPARATION_COMPLETE' }),
+  { result: 'EXACT_REPLAY_NOOP', effect: 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' }
 );
 
 function baseReverse() {
@@ -1492,7 +1504,7 @@ const pg17Concurrency = await runDisposablePostgres17Concurrency();
 
 console.log(JSON.stringify({
   result: 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001',
-  scenarios: 118,
+  scenarios: 122,
   postgresql17_concurrency: pg17Concurrency,
   provider_calls: 0,
   provider_writes: 0,

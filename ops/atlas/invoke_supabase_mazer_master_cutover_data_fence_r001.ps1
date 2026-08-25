@@ -17,6 +17,10 @@ param(
   [ValidatePattern('^[a-f0-9]{64}$')]
   [string]$ExpectedInputSha256,
 
+  [Parameter(ParameterSetName = 'Execute')]
+  [ValidateSet('All', 'FenceOnly', 'Continue', 'ReleaseLegacy')]
+  [string]$ExecutionStep = 'All',
+
   [Parameter(Mandatory = $true, ParameterSetName = 'Execute')]
   [switch]$ExecuteProtected
 )
@@ -801,6 +805,7 @@ try {
   $inputDigest = [string]$classification.Receipt.packet_input_digest
   $existing = Read-State $resolvedState
   $direction = [string]$classification.Receipt.direction
+  if ($Mode -ne 'Forward' -and $ExecutionStep -ne 'All') { throw 'EXECUTION_STEP_DIRECTION_DRIFT' }
   if ($Mode -eq 'Rollback') {
     if ($null -eq $existing) { throw 'ROLLBACK_STATE_MISSING' }
     Assert-StateBinding $existing $classification.Receipt $inputDigest $inputFileDigest
@@ -816,7 +821,7 @@ try {
       })
       exit 0
     }
-    if ([string]$state.phase -ceq 'COMPLETE') { throw 'COMPLETED_STATE_REQUIRES_REVERSE_PACKET' }
+    if ([string]$state.phase -ceq 'PREPARATION_COMPLETE') { throw 'PREPARATION_COMPLETE_IS_TERMINAL' }
     if ([string]$state.phase -ceq 'PREFLIGHT') {
       Set-StatePhase $state 'ROLLED_BACK' $resolvedState
       Write-SafeResult 'NO_EFFECT_PREFLIGHT_ROLLED_BACK' ([ordered]@{
@@ -834,7 +839,7 @@ try {
     if ($Mode.ToLowerInvariant() -cne $direction) { throw 'MODE_DIRECTION_DRIFT' }
     if ($null -ne $existing) {
       Assert-StateBinding $existing $classification.Receipt $inputDigest $inputFileDigest
-      if ([string]$existing.phase -ceq 'COMPLETE') {
+      if ([string]$existing.phase -ceq 'PREPARATION_COMPLETE' -or ([string]$existing.phase -ceq 'COMPLETE' -and $ExecutionStep -eq 'All')) {
         Write-SafeResult 'PASS_EXACT_REPLAY_NOOP' ([ordered]@{
           direction = $direction
           packet_input_digest = $inputDigest
@@ -845,9 +850,17 @@ try {
         })
         exit 0
       }
-      throw 'INTERRUPTED_STATE_REQUIRES_EXPLICIT_ROLLBACK'
+      if ($ExecutionStep -ceq 'FenceOnly' -and [string]$existing.phase -ceq 'PAUSED_AFTER_SOURCE_HIGH_WATER') {
+        Write-SafeResult 'PASS_EXACT_REPLAY_NOOP' ([ordered]@{ direction = $direction; packet_input_digest = $inputDigest; phase = [string]$existing.phase; provider_reads = 0; provider_writes = 0; database_transactions = 0; rollback_actions = 0 })
+        exit 0
+      }
+      if ($ExecutionStep -ceq 'Continue' -and [string]$existing.phase -ceq 'PAUSED_AFTER_SOURCE_HIGH_WATER') { $state = $existing }
+      elseif ($ExecutionStep -ceq 'ReleaseLegacy' -and [string]$existing.phase -in @('COMPLETE','LEGACY_RESTORING','LEGACY_RESTORED')) { $state = $existing }
+      else { throw 'INTERRUPTED_STATE_REQUIRES_EXPLICIT_ROLLBACK' }
     }
-    $state = [ordered]@{
+    else {
+      if ($ExecutionStep -in @('Continue','ReleaseLegacy')) { throw 'EXECUTION_STEP_STATE_MISSING' }
+      $state = [ordered]@{
       schema = 'atlas.supabase.mazer-master-cutover-data-fence-host-state.v1'
       direction = $direction
       phase = 'PREFLIGHT'
@@ -887,8 +900,9 @@ try {
       source_observation_1_at = $null
       source_observation_2_at = $null
       updated_at = [DateTimeOffset]::UtcNow.ToString('o')
+      }
+      Write-State $resolvedState $state
     }
-    Write-State $resolvedState $state
   }
 
   $legacyDatabaseUrl = Assert-DatabaseUrl ([Environment]::GetEnvironmentVariable('ATLAS_MAZER_LEGACY_DATABASE_URL', 'Process')) $LegacyProjectRef
@@ -909,7 +923,7 @@ try {
       $rollbackRestoreSql = $recoveredRestore
     }
     if ($direction -ceq 'forward') {
-      $forwardFencePhases = @('LEGACY_WRITERS_FENCING','LEGACY_WRITER_REVOKE_COMMITTED','LEGACY_WRITER_SET_CAPTURING','LEGACY_WRITER_SET_CAPTURED','LEGACY_WRITERS_DRAINING','LEGACY_WRITERS_DRAINED','LEGACY_LOCK_BARRIER_ACQUIRING','LEGACY_WRITERS_FENCED','SOURCE_HIGH_WATER_READ_1','SOURCE_HIGH_WATER_READ_2','FORWARD_DELTA_APPLYING','FORWARD_DELTA_APPLIED')
+      $forwardFencePhases = @('LEGACY_WRITERS_FENCING','LEGACY_WRITER_REVOKE_COMMITTED','LEGACY_WRITER_SET_CAPTURING','LEGACY_WRITER_SET_CAPTURED','LEGACY_WRITERS_DRAINING','LEGACY_WRITERS_DRAINED','LEGACY_LOCK_BARRIER_ACQUIRING','LEGACY_WRITERS_FENCED','SOURCE_HIGH_WATER_READ_1','SOURCE_HIGH_WATER_READ_2','PAUSED_AFTER_SOURCE_HIGH_WATER','CONTINUE_REVALIDATING','CONTINUE_SOURCE_HIGH_WATER_READ_1','CONTINUE_SOURCE_HIGH_WATER_READ_2','FORWARD_DELTA_APPLYING','FORWARD_DELTA_APPLIED','COMPLETE','LEGACY_RESTORING','LEGACY_RESTORED')
       $forwardDrainRequired = @('LEGACY_WRITERS_FENCING','LEGACY_WRITER_REVOKE_COMMITTED','LEGACY_WRITER_SET_CAPTURING','LEGACY_WRITER_SET_CAPTURED','LEGACY_WRITERS_DRAINING','LEGACY_WRITERS_DRAINED','LEGACY_LOCK_BARRIER_ACQUIRING')
       if ($effectivePhase -notin (@('LEGACY_SIGNUP_FENCING','LEGACY_SIGNUP_FENCED','LEGACY_WRITERS_PREOBSERVING','LEGACY_WRITERS_PREOBSERVED') + $forwardFencePhases)) { throw 'ROLLBACK_PHASE_DRIFT' }
       if ($null -eq $state.legacy_disable_signup_preimage) { throw 'ROLLBACK_PREIMAGE_MISSING' }
@@ -977,47 +991,91 @@ try {
     exit 0
   }
 
-  if ($direction -ceq 'forward') {
-    $preimage = Invoke-AuthConfig $managementToken $LegacyProjectRef
-    $providerReads += 1
-    $state.legacy_disable_signup_preimage = [bool]$preimage.disable_signup
-    if ($state.legacy_disable_signup_preimage) { throw 'LEGACY_SIGNUP_ALREADY_DISABLED_PREIMAGE_DRIFT' }
-    Set-StatePhase $state 'LEGACY_SIGNUP_FENCING' $resolvedState
-    $fenced = Invoke-AuthConfig $managementToken $LegacyProjectRef @{ disable_signup = $true }
+  if ($direction -ceq 'forward' -and $ExecutionStep -ceq 'ReleaseLegacy') {
+    if ($null -eq $state.journaled_primary_acl_preimage -or $null -eq $state.legacy_disable_signup_preimage) { throw 'RELEASE_LEGACY_PREIMAGE_MISSING' }
+    $primaryAclPreobserve = Join-Path $privateRoot 'release-journaled-primary-acl.json'
+    [IO.File]::WriteAllText($primaryAclPreobserve, (($state.journaled_primary_acl_preimage | ConvertTo-Json -Depth 12 -Compress) + "`n"), (New-Object Text.UTF8Encoding($false)))
+    $releaseRestoreSql = Join-Path $privateRoot 'release-observed-restore.sql'
+    $releaseReceipt = Invoke-AclVerifier $privateInput $primaryAclPreobserve 'primary' $releaseRestoreSql $null $primaryAclPreobserve
+    if ([string]$releaseReceipt.actual_acl_preimage_digest -cne [string]$state.journaled_primary_acl_digest -or [string]$releaseReceipt.acl_observation_binding_digest -cne [string]$state.journaled_primary_acl_binding_digest) { throw 'RELEASE_LEGACY_JOURNAL_DRIFT' }
+    Set-StatePhase $state 'LEGACY_RESTORING' $resolvedState
+    $release = Invoke-ExactAclRecovery $legacyDatabaseUrl $privateInput $classification.AclObservationSql $primaryAclPreobserve $releaseRestoreSql $privateRoot 'release-primary' -WriterCaptureSql $classification.WriterCaptureSql -PhasePrefix 'LEGACY' -State $state -ResolvedStatePath $resolvedState
+    $databaseTransactions += [int]$release.DatabaseTransactions
+    $aclRestoreVerifications += [int]$release.RestoreVerifications
+    $writerCaptureReads += [int]$release.CaptureReads
+    $writerDrainReads += [int]$release.DrainReads
+    $writerLockBarriers += [int]$release.LockBarriers
+    $restored = Invoke-AuthConfig $managementToken $LegacyProjectRef @{ disable_signup = [bool]$state.legacy_disable_signup_preimage }
     $providerWrites += 1
-    if ([bool]$fenced.disable_signup -ne $true) { throw 'LEGACY_SIGNUP_FENCE_FAILED' }
-    Set-StatePhase $state 'LEGACY_SIGNUP_FENCED' $resolvedState
-    Set-StatePhase $state 'LEGACY_WRITERS_PREOBSERVING' $resolvedState
-    $primaryAclPreobserve = Join-Path $privateRoot 'primary-acl-preobserve.json'
-    Invoke-PsqlJsonPrivate $legacyDatabaseUrl $classification.AclObservationSql $primaryAclPreobserve 'LEGACY_ACL_PREOBSERVATION_FAILED'
-    $aclPreimageReads += 1
-    $primaryAclReceipt = Invoke-AclVerifier $privateInput $primaryAclPreobserve 'primary' $classification.ObservedRestoreSql $classification.ObservedFenceSql
-    $state.primary_acl_preobserved_at = [string]$primaryAclReceipt.observed_at
-    $state.journaled_primary_acl_preimage = Get-Content -LiteralPath $primaryAclPreobserve -Raw | ConvertFrom-Json
-    $state.journaled_primary_acl_digest = [string]$primaryAclReceipt.actual_acl_preimage_digest
-    $state.journaled_primary_catalog_digest = [string]$primaryAclReceipt.actual_catalog_digest
-    $state.journaled_primary_acl_binding_digest = [string]$primaryAclReceipt.acl_observation_binding_digest
-    Set-StatePhase $state 'LEGACY_WRITERS_PREOBSERVED' $resolvedState
-    Set-StatePhase $state 'LEGACY_WRITERS_FENCING' $resolvedState
-    $primaryFenceProof = Join-Path $privateRoot 'primary-writer-revoke-proof.json'
-    Invoke-PsqlJsonPrivate $legacyDatabaseUrl $classification.ObservedFenceSql $primaryFenceProof 'LEGACY_WRITER_REVOKE_FAILED'
-    $databaseTransactions += 1
-    $state.primary_writer_revoke_committed_at = (Assert-WriterRevokeReceipt $primaryFenceProof $LegacySchema ([string]$state.journaled_primary_acl_digest)).ToString('o')
-    Set-StatePhase $state 'LEGACY_WRITER_REVOKE_COMMITTED' $resolvedState
-    $writerFence = Invoke-ExactWriterDrainBarrier $legacyDatabaseUrl $privateInput $classification.WriterCaptureSql $privateRoot 'LEGACY' $state $resolvedState
-    $writerCaptureReads += [int]$writerFence.CaptureReads
-    $writerDrainReads += [int]$writerFence.DrainReads
-    $writerLockBarriers += [int]$writerFence.LockBarriers
-    $databaseTransactions += [int]$writerFence.LockBarriers
+    if ([bool]$restored.disable_signup -ne [bool]$state.legacy_disable_signup_preimage) { throw 'LEGACY_SIGNUP_RESTORE_FAILED' }
+    Set-StatePhase $state 'LEGACY_RESTORED' $resolvedState
+    Set-StatePhase $state 'PREPARATION_COMPLETE' $resolvedState
+    Write-SafeResult 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' ([ordered]@{ direction = $direction; packet_input_digest = $inputDigest; phase = [string]$state.phase; fresh_refence_and_catchup_required_for_cutover = $true; provider_reads = $providerReads; provider_writes = $providerWrites; database_transactions = $databaseTransactions; rollback_actions = $rollbackActions })
+    exit 0
+  }
+
+  if ($direction -ceq 'forward') {
+    if ($ExecutionStep -ceq 'Continue') {
+      Set-StatePhase $state 'CONTINUE_REVALIDATING' $resolvedState
+      if ($null -eq $state.journaled_primary_acl_preimage) { throw 'CONTINUE_ACL_JOURNAL_MISSING' }
+      $primaryAclPreobserve = Join-Path $privateRoot 'continue-journaled-primary-acl.json'
+      [IO.File]::WriteAllText($primaryAclPreobserve, (($state.journaled_primary_acl_preimage | ConvertTo-Json -Depth 12 -Compress) + "`n"), (New-Object Text.UTF8Encoding($false)))
+      $currentAcl = Join-Path $privateRoot 'continue-current-primary-acl.json'
+      Invoke-PsqlJsonPrivate $legacyDatabaseUrl $classification.AclObservationSql $currentAcl 'CONTINUE_ACL_OBSERVATION_FAILED'
+      $aclPreimageReads += 1
+      $aclState = Invoke-AclRecoveryClassifier $privateInput $primaryAclPreobserve $currentAcl 'primary'
+      if ([string]$aclState.result -cne 'PASS_ACL_FENCED_POSTIMAGE_RESTORE_REQUIRED') { throw 'CONTINUE_ACL_NOT_EXACT_FENCED_POSTIMAGE' }
+      $signup = Invoke-AuthConfig $managementToken $LegacyProjectRef
+      $providerReads += 1
+      if ([bool]$signup.disable_signup -ne $true) { throw 'CONTINUE_SIGNUP_FENCE_DRIFT' }
+    }
+    else {
+      $preimage = Invoke-AuthConfig $managementToken $LegacyProjectRef
+      $providerReads += 1
+      $state.legacy_disable_signup_preimage = [bool]$preimage.disable_signup
+      if ($state.legacy_disable_signup_preimage) { throw 'LEGACY_SIGNUP_ALREADY_DISABLED_PREIMAGE_DRIFT' }
+      Set-StatePhase $state 'LEGACY_SIGNUP_FENCING' $resolvedState
+      $fenced = Invoke-AuthConfig $managementToken $LegacyProjectRef @{ disable_signup = $true }
+      $providerWrites += 1
+      if ([bool]$fenced.disable_signup -ne $true) { throw 'LEGACY_SIGNUP_FENCE_FAILED' }
+      Set-StatePhase $state 'LEGACY_SIGNUP_FENCED' $resolvedState
+      Set-StatePhase $state 'LEGACY_WRITERS_PREOBSERVING' $resolvedState
+      $primaryAclPreobserve = Join-Path $privateRoot 'primary-acl-preobserve.json'
+      Invoke-PsqlJsonPrivate $legacyDatabaseUrl $classification.AclObservationSql $primaryAclPreobserve 'LEGACY_ACL_PREOBSERVATION_FAILED'
+      $aclPreimageReads += 1
+      $primaryAclReceipt = Invoke-AclVerifier $privateInput $primaryAclPreobserve 'primary' $classification.ObservedRestoreSql $classification.ObservedFenceSql
+      $state.primary_acl_preobserved_at = [string]$primaryAclReceipt.observed_at
+      $state.journaled_primary_acl_preimage = Get-Content -LiteralPath $primaryAclPreobserve -Raw | ConvertFrom-Json
+      $state.journaled_primary_acl_digest = [string]$primaryAclReceipt.actual_acl_preimage_digest
+      $state.journaled_primary_catalog_digest = [string]$primaryAclReceipt.actual_catalog_digest
+      $state.journaled_primary_acl_binding_digest = [string]$primaryAclReceipt.acl_observation_binding_digest
+      Set-StatePhase $state 'LEGACY_WRITERS_PREOBSERVED' $resolvedState
+      Set-StatePhase $state 'LEGACY_WRITERS_FENCING' $resolvedState
+      $primaryFenceProof = Join-Path $privateRoot 'primary-writer-revoke-proof.json'
+      Invoke-PsqlJsonPrivate $legacyDatabaseUrl $classification.ObservedFenceSql $primaryFenceProof 'LEGACY_WRITER_REVOKE_FAILED'
+      $databaseTransactions += 1
+      $state.primary_writer_revoke_committed_at = (Assert-WriterRevokeReceipt $primaryFenceProof $LegacySchema ([string]$state.journaled_primary_acl_digest)).ToString('o')
+      Set-StatePhase $state 'LEGACY_WRITER_REVOKE_COMMITTED' $resolvedState
+      $writerFence = Invoke-ExactWriterDrainBarrier $legacyDatabaseUrl $privateInput $classification.WriterCaptureSql $privateRoot 'LEGACY' $state $resolvedState
+      $writerCaptureReads += [int]$writerFence.CaptureReads
+      $writerDrainReads += [int]$writerFence.DrainReads
+      $writerLockBarriers += [int]$writerFence.LockBarriers
+      $databaseTransactions += [int]$writerFence.LockBarriers
+    }
     $observation1 = Invoke-PsqlObservation $legacyDatabaseUrl $classification.SourceObservationSql ([string]$classification.Receipt.source_high_water_digest)
     $sourceObservationReads += 1
     $state.source_observation_1_at = $observation1.ObservedAt.ToString('o')
-    Set-StatePhase $state 'SOURCE_HIGH_WATER_READ_1' $resolvedState
+    Set-StatePhase $state $(if ($ExecutionStep -ceq 'Continue') { 'CONTINUE_SOURCE_HIGH_WATER_READ_1' } else { 'SOURCE_HIGH_WATER_READ_1' }) $resolvedState
     $observation2 = Invoke-PsqlObservation $legacyDatabaseUrl $classification.SourceObservationSql ([string]$classification.Receipt.source_high_water_digest)
     $sourceObservationReads += 1
     if ($observation2.ObservedAt -le $observation1.ObservedAt) { throw 'SOURCE_HIGH_WATER_OBSERVATION_ORDER' }
     $state.source_observation_2_at = $observation2.ObservedAt.ToString('o')
-    Set-StatePhase $state 'SOURCE_HIGH_WATER_READ_2' $resolvedState
+    Set-StatePhase $state $(if ($ExecutionStep -ceq 'Continue') { 'CONTINUE_SOURCE_HIGH_WATER_READ_2' } else { 'SOURCE_HIGH_WATER_READ_2' }) $resolvedState
+    if ($ExecutionStep -ceq 'FenceOnly') {
+      Set-StatePhase $state 'PAUSED_AFTER_SOURCE_HIGH_WATER' $resolvedState
+      Write-SafeResult 'FENCE_PAUSED_EXACT_CONTINUATION_REQUIRED' ([ordered]@{ direction = $direction; packet_input_digest = $inputDigest; phase = [string]$state.phase; source_observation_reads = 2; provider_reads = $providerReads; provider_writes = $providerWrites; database_transactions = $databaseTransactions; rollback_actions = $rollbackActions })
+      exit 0
+    }
     Set-StatePhase $state 'FORWARD_DELTA_APPLYING' $resolvedState
     Invoke-PsqlPrivate $masterDatabaseUrl $classification.TransactionSql
     $databaseTransactions += 1
@@ -1202,7 +1260,7 @@ catch {
         $effect = 'MASTER_ACL_REVOKED_WRITER_DRAIN_INCOMPLETE_HOLD_FENCED'
         Set-StatePhase $state 'QUARANTINED_HOLD' $resolvedState
       }
-      elseif ([string]$state.direction -ceq 'forward' -and [string]$state.phase -in @('LEGACY_WRITERS_FENCING','LEGACY_WRITERS_FENCED','SOURCE_HIGH_WATER_READ_1','SOURCE_HIGH_WATER_READ_2','FORWARD_DELTA_APPLYING','FORWARD_DELTA_APPLIED')) {
+      elseif ([string]$state.direction -ceq 'forward' -and [string]$state.phase -in @('LEGACY_WRITERS_FENCING','LEGACY_WRITERS_FENCED','SOURCE_HIGH_WATER_READ_1','SOURCE_HIGH_WATER_READ_2','PAUSED_AFTER_SOURCE_HIGH_WATER','CONTINUE_REVALIDATING','CONTINUE_SOURCE_HIGH_WATER_READ_1','CONTINUE_SOURCE_HIGH_WATER_READ_2','FORWARD_DELTA_APPLYING','FORWARD_DELTA_APPLIED','COMPLETE','LEGACY_RESTORING','LEGACY_RESTORED')) {
         if (-not (Test-Path -LiteralPath $classification.ObservedRestoreSql -PathType Leaf)) { throw 'OBSERVED_ACL_RESTORE_MISSING' }
         $recovery = Invoke-ExactAclRecovery $legacyDatabaseUrl $privateInput $classification.AclObservationSql $primaryAclPreobserve $classification.ObservedRestoreSql $privateRoot 'catch-primary' -WriterCaptureSql $classification.WriterCaptureSql -PhasePrefix 'LEGACY' -State $state -ResolvedStatePath $resolvedState -DrainBeforeRestore:([string]$state.phase -ceq 'LEGACY_WRITERS_FENCING')
         $databaseTransactions += [int]$recovery.DatabaseTransactions
