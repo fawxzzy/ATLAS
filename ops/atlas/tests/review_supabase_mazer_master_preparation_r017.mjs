@@ -18,7 +18,7 @@ const requireText = (where, token, category) => { if (!where.includes(token)) fi
 
 for (const token of [
   '2b8495a95fca9a860571343174bfb93bcad8c5e9','1bbf69cf8f38aa1e2b053d0b70d82a315317b58a','481ab55323afff53f5e841012684b7e26f689349',
-  'ba95bab7064649cca1215bb5e77f110e288e678221fed613259368bb1b31bdb4','54dee535bac3e02b7058fe644cd44af115cc3746ff1e40390521992dccd14971',
+  'ba95bab7064649cca1215bb5e77f110e288e678221fed613259368bb1b31bdb4','dc81b217d2c1f2262cc2a66e07ce579ad97ffa50e32218068701e43723165632','54dee535bac3e02b7058fe644cd44af115cc3746ff1e40390521992dccd14971',
   '63f43d8c2f532b32e3453879e4ca49ffc2f5b382264a290ad9a3ea1225811ced','gitBlob','cat-file','SQL_DIGEST_DRIFT',
   'AMBIGUOUS_IDENTITY_MAP','UNSUPPORTED_PASSWORD_VERIFIER','IMPORT_WOULD_FIRE_SIGNUP_TRIGGER','PLAYER_RESET_EQUALITY_DRIFT',
   'PGP_SYM_ENCRYPT_AES256','EXACT_WHOLE_ROW','MAPPED_ROWS_EQUAL_NO_OVERRIDE','receipt_conservation','data_api','rls','acl'
@@ -29,6 +29,7 @@ for (const token of [
   'LEGACY_RESTORING','LEGACY_RESTORED','PREPARATION_COMPLETE','ROLLBACK_DISABLING_HOOK','rollback_initiated_at',
   'RollbackDeadlineSeconds = 600','HardFenceLeaseSeconds = 900','Start-RollbackWatchdog','WindowStyle Hidden'
 ]) requireText(source.host, token, `HOST_LIFECYCLE_MISSING:${token}`);
+for (const token of ['AUTH_TOPOLOGY_MANIFEST_DRIFT','auth_counts.binds -ne 13','auth_counts.retained_edges -ne 2']) requireText(source.host, token, `HOST_TOPOLOGY_VERIFICATION_MISSING:${token}`);
 for (const token of ['all live phase interruption','ambiguous drift','disable hook before SQL/fence','receipt conservation','Auth mapping','RLS/ACL/Data API','executor input hash binding']) requireText(source.focused, token, `ADVERSARY_LABEL_MISSING:${token}`);
 
 const sourceOnlyHost = source.host.slice(source.host.indexOf("if ($PSCmdlet.ParameterSetName -ceq 'Source')"), source.host.indexOf("if (-not $ExecuteProtected)"));

@@ -17,6 +17,7 @@ const requireToken = (source, token, finding) => { if (!source.includes(token)) 
 for (const token of [
   'transaction isolation level serializable read only','PGDATABASE: databaseUrl','PRIVATE_OUTPUT_MUST_BE_UNDER_SECRETS','O_NOFOLLOW','O_EXCL',
   'EVIDENCE_DIGEST_DRIFT','SEALED_PREIMAGE_DENOMINATOR_DRIFT','IDENTITY_DENOMINATOR_DRIFT','NORMALIZED_EMAIL_DUPLICATE',
+  'TOPOLOGY_EVIDENCE_DRIFT',
   'UNSUPPORTED_PASSWORD_VERIFIER','RESET_RECEIPT_DENOMINATOR_DRIFT','FRESH_LIVE_TABLES_PLUS_EXACT_M2_PLANNED_RPCS',
   'auth.users','auth.identities','mazer_identity_map','master_preimage','disable_hook_first','receipt_conservation',
   'CATALOG_PREIMAGE_ALREADY_MIGRATED','CATALOG_PREIMAGE_CONSTRAINT_MISSING','R017_EXISTING_AUTH_USER_DIGEST_DRIFT',
@@ -27,8 +28,9 @@ for (const token of [
   'EMAIL_IDENTITY_METADATA_EMAIL_DRIFT','EMAIL_IDENTITY_METADATA_MALFORMED','EMAIL_IDENTITY_MULTIPLE'
 ]) requireToken(producer, token, `PRODUCER_CONTRACT_MISSING:${token}`);
 for (const name of ['preflight.sql','master-fence.sql','master-refence.sql','auth-apply.sql','reset-era-apply.sql','postverify.sql','qa-apply.sql','qa-cleanup.sql','rollback.sql']) requireToken(producer, `sql['${name}']`, `SQL_RENDERER_MISSING:${name}`);
+requireToken(materializer, 'dc81b217d2c1f2262cc2a66e07ce579ad97ffa50e32218068701e43723165632', 'TOPOLOGY_EVIDENCE_HASH_MISSING');
 for (const token of ['source_snapshot?.ai','target_snapshot?.ai','source_snapshot?.player','target_snapshot?.player','wrapMigrationTransaction','MIGRATION_TRANSACTION_SHAPE']) requireToken(materializer, token, `MATERIALIZER_CONTRACT_MISSING:${token}`);
-for (const token of ['identity_edges: 18','sql_programs: 9','materializer main executed more than once','NORMALIZED_EMAIL_DUPLICATE','PRIVATE_SECRET_INPUT_WEAK','IMPORT_IDENTITY_COLLISION','CATALOG_PREIMAGE_ALREADY_MIGRATED','MIGRATION_TRANSACTION_SHAPE','junction','EMAIL_IDENTITY_PROVIDER_DRIFT','EMAIL_IDENTITY_PROVIDER_ID_MALFORMED','EMAIL_IDENTITY_PROVIDER_ID_DRIFT','EMAIL_IDENTITY_METADATA_SUB_DRIFT','EMAIL_IDENTITY_METADATA_EMAIL_DRIFT','EMAIL_IDENTITY_METADATA_MALFORMED','EMAIL_IDENTITY_MISSING','EMAIL_IDENTITY_MULTIPLE']) requireToken(focused, token, `ADVERSARY_MISSING:${token}`);
+for (const token of ['identity_edges: 18','binds: 13','retained: 2','sql_programs: 9','materializer main executed more than once','NORMALIZED_EMAIL_DUPLICATE','PRIVATE_SECRET_INPUT_WEAK','IMPORT_IDENTITY_COLLISION','CATALOG_PREIMAGE_ALREADY_MIGRATED','MIGRATION_TRANSACTION_SHAPE','junction','EMAIL_IDENTITY_PROVIDER_DRIFT','EMAIL_IDENTITY_PROVIDER_ID_MALFORMED','EMAIL_IDENTITY_PROVIDER_ID_DRIFT','EMAIL_IDENTITY_METADATA_SUB_DRIFT','EMAIL_IDENTITY_METADATA_EMAIL_DRIFT','EMAIL_IDENTITY_METADATA_MALFORMED','EMAIL_IDENTITY_MISSING','EMAIL_IDENTITY_MULTIPLE']) requireToken(focused, token, `ADVERSARY_MISSING:${token}`);
 for (const token of ["i.provider_id=e->'user'->>'id'", "select gen_random_uuid(),id,id::text,jsonb_build_object('sub',id::text,'email',email)"]) requireToken(producer, token, `OFFICIAL_EMAIL_IDENTITY_SEMANTICS_MISSING:${token}`);
 
 for (const forbidden of ['apply_migration','execute_sql','supabase db push','vercel deploy','vercel promote','git push']) {

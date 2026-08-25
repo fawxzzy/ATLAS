@@ -31,7 +31,7 @@ const now = Date.now();
 const iso = (offset) => new Date(now + offset).toISOString();
 const verifier = `$2b$12$${'A'.repeat(53)}`;
 const sharedLegacy = Array.from({ length: 15 }, (_, index) => uid(index + 1));
-const sharedMaster = sharedLegacy.map((id, index) => index < 13 ? id : uid(100 + index));
+const sharedMaster = sharedLegacy.map((id, index) => index < 2 ? id : uid(100 + index));
 const legacyOnly = [uid(16), uid(17), uid(18)];
 const unrelatedMaster = Array.from({ length: 99 }, (_, index) => uid(1000 + index));
 
@@ -97,8 +97,8 @@ function acl(schema) {
 
 const fixture = rawFixture();
 const plan = buildIdentityPlan(fixture.legacy, fixture.master);
-assert.equal(plan.retained_edges.length, 13);
-assert.equal(plan.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length, 2);
+assert.equal(plan.retained_edges.length, 2);
+assert.equal(plan.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length, 13);
 assert.equal(plan.imports.length, 3);
 assert.ok(plan.imports.every((item) => item.user.raw_user_meta_data.app_namespace === undefined));
 assert.deepEqual(plan.imports.at(-1).identities, [fixture.legacy.auth_identities.at(-1)]);
@@ -194,4 +194,4 @@ assert.equal(JSON.parse(sourceCheck.stdout).result, 'PASS_R017_PRIVATE_SOURCE_PR
 const rendered = renderOperationalSql({ auth: source.auth, fenceInput: source.fence_input, catalogPreimage: source.catalog_preimage, reset: { quarantined_row: source.reset_era_ai.quarantined_row }, qa: source.qa, quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
 assert.deepEqual(Object.keys(rendered.sql), [...Object.keys(source.sql)]);
 
-console.log(JSON.stringify({ result: 'PASS_MAZER_MASTER_PREPARATION_PRIVATE_SOURCE_R017', identity_edges: 18, imports: 3, binds: 2, app_counts: validated.classified.desired_counts, sql_programs: 9, provider_calls: 0, provider_writes: 0, auth_writes: 0, live_data_writes: 0, raw_private_output: 0 }));
+console.log(JSON.stringify({ result: 'PASS_MAZER_MASTER_PREPARATION_PRIVATE_SOURCE_R017', identity_edges: 18, imports: 3, binds: 13, retained: 2, app_counts: validated.classified.desired_counts, sql_programs: 9, provider_calls: 0, provider_writes: 0, auth_writes: 0, live_data_writes: 0, raw_private_output: 0 }));

@@ -12,6 +12,7 @@ export const CONTRACT = Object.freeze({
   legacy: 'geknvnrmktchljnyddwp',
   master: 'bxtcuhkotumitoqtrcej',
   currentPreimageSha256: 'ba95bab7064649cca1215bb5e77f110e288e678221fed613259368bb1b31bdb4',
+  topologyEvidenceSha256: 'dc81b217d2c1f2262cc2a66e07ce579ad97ffa50e32218068701e43723165632',
   restoreProofSha256: '54dee535bac3e02b7058fe644cd44af115cc3746ff1e40390521992dccd14971',
   predecessorFenceManifestSha256: '63f43d8c2f532b32e3453879e4ca49ffc2f5b382264a290ad9a3ea1225811ced',
   migrations: Object.freeze([
@@ -38,7 +39,7 @@ const SQL_TOKENS = Object.freeze({
   'preflight.sql': ['data_api', 'rls', 'acl', 'auth.users', '114', '10', '15', '1882'],
   'master-fence.sql': ['begin;', 'mazer_profiles', 'mazer_progression_states', 'mazer_ai_progression_states', 'mazer_cycle_receipts', 'revoke'],
   'master-refence.sql': ['begin;', 'mazer_initialize_progression', 'mazer_complete_level', 'mazer_complete_ai_level', 'mazer_reset_progression', 'revoke'],
-  'auth-apply.sql': ['auth.users', 'auth.identities', 'create_and_bind', 'bind_existing', '3_auth_imports', '2_existing_binds'],
+  'auth-apply.sql': ['auth.users', 'auth.identities', 'create_and_bind', 'bind_existing', '3_auth_imports', '13_existing_binds'],
   'reset-era-apply.sql': ['whole_row_override', '7/6/32/d', '39/108/161/s', 'pgp_sym_encrypt', 'player_reset_disposition'],
   'postverify.sql': ['data_api', 'rls', 'acl', '117', '18', '10', '15', '1882', 'receipt_conservation'],
   'qa-apply.sql': ['qa_ttl', 'before_user_created', 'rollback_on_error'],
@@ -110,6 +111,7 @@ export function validatePrivateSource(raw) {
   if (!plain(raw) || raw.schema !== CONTRACT.schema || raw.packet !== CONTRACT.packet) throw new Error('PRIVATE_SOURCE_SCHEMA');
   if (!plain(raw.evidence)
     || raw.evidence.current_preimage_sha256 !== CONTRACT.currentPreimageSha256
+    || raw.evidence.topology_evidence_sha256 !== CONTRACT.topologyEvidenceSha256
     || raw.evidence.restore_proof_sha256 !== CONTRACT.restoreProofSha256
     || raw.evidence.predecessor_fence_manifest_sha256 !== CONTRACT.predecessorFenceManifestSha256) throw new Error('EVIDENCE_BINDING_DRIFT');
   if (!plain(raw.fence_input)) throw new Error('FENCE_INPUT_MISSING');
@@ -123,7 +125,7 @@ export function validatePrivateSource(raw) {
   if (counts.profiles !== 10 || counts.player !== 15 || counts.ai !== 15 || counts.receipts !== 1882) throw new Error('APP_DENOMINATOR_DRIFT');
   if (classified.receipt_conservation.primary_conflicts !== 0 || classified.receipt_conservation.client_run_conflicts !== 0) throw new Error('RECEIPT_CONFLICT');
   if (!plain(raw.auth) || !Array.isArray(raw.auth.imports) || !Array.isArray(raw.auth.new_edges) || !Array.isArray(raw.auth.retained_edges)) throw new Error('AUTH_PLAN_SHAPE');
-  if (raw.auth.imports.length !== 3 || raw.auth.new_edges.length !== 5 || raw.auth.retained_edges.length !== 13) throw new Error('AUTH_DENOMINATOR_DRIFT');
+  if (raw.auth.imports.length !== 3 || raw.auth.new_edges.length !== 16 || raw.auth.retained_edges.length !== 2) throw new Error('AUTH_DENOMINATOR_DRIFT');
   const allEdges = [...raw.auth.retained_edges, ...raw.auth.new_edges];
   const legacyIds = new Set();
   const masterIds = new Set();
@@ -135,7 +137,7 @@ export function validatePrivateSource(raw) {
     legacyIds.add(legacy); masterIds.add(master);
   }
   if (legacyIds.size !== 18 || masterIds.size !== 18) throw new Error('IDENTITY_EDGE_DENOMINATOR_DRIFT');
-  if (raw.auth.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length !== 2
+  if (raw.auth.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length !== 13
     || raw.auth.new_edges.filter((edge) => edge.disposition === 'CREATE_AND_BIND').length !== 3) throw new Error('AUTH_DISPOSITION_DRIFT');
   for (const item of raw.auth.imports) {
     requiredUuid(item.user?.id, 'IMPORT_USER_UUID');
@@ -197,7 +199,7 @@ export function materialize(raw, outputRoot, mazerRepository) {
     predecessor_fence_manifest_sha256: CONTRACT.predecessorFenceManifestSha256,
     app_counts: classified.desired_counts,
     receipt_conservation: classified.receipt_conservation,
-    auth_counts: { imports: 3, binds: 2, retained_edges: 13, final_edges: 18, expected_target_users: 117 },
+    auth_counts: { imports: 3, binds: 13, retained_edges: 2, final_edges: 18, expected_target_users: 117 },
     reset_era_ai: { canonical: '7/6/32/D', quarantined: '39/108/161/S', override: 'EXACT_WHOLE_ROW', quarantine: 'PGP_SYM_ENCRYPT_AES256' },
     reset_era_player: { disposition: 'MAPPED_ROWS_EQUAL_NO_OVERRIDE', digest: raw.reset_era_player.source_row_digest },
     qa: { personas: raw.qa.personas, auth_rows: raw.qa.auth_rows, ttl_minutes: raw.qa.ttl_minutes },

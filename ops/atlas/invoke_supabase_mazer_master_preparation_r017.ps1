@@ -263,6 +263,7 @@ try {
   if ($materialized.ExitCode -ne 0) { throw 'PRIVATE_MATERIALIZATION_FAILED' }
   $manifestPath = Join-Path $privateRoot 'manifest.json'
   $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+  if ([int]$manifest.auth_counts.imports -ne 3 -or [int]$manifest.auth_counts.binds -ne 13 -or [int]$manifest.auth_counts.retained_edges -ne 2 -or [int]$manifest.auth_counts.final_edges -ne 18 -or [int]$manifest.auth_counts.expected_target_users -ne 117) { throw 'AUTH_TOPOLOGY_MANIFEST_DRIFT' }
   $input = Join-Path $privateRoot 'fence-input.json'
   $inputSha = Get-Sha256 $input
   $fenceState = $statePath + '.fence.json'
