@@ -23,14 +23,14 @@ export const PRODUCER_CONTRACT = Object.freeze({
   masterProject: R017_CONTRACT.master,
   evidence: Object.freeze({
     currentPreimage: Object.freeze({
-      relativePath: 'runtime/atlas/continuity/mazer-master-r017-current-profile-rebound-evidence-20260825.json',
+      relativePath: 'runtime/atlas/continuity/mazer-master-r017-postrollback-current-rebind-evidence-20260825.json',
       sha256: R017_CONTRACT.currentPreimageSha256,
-      result: 'PASS_EXACT_CURRENT_PROFILE_REBOUND_READY_FOR_R017_REBIND'
+      result: 'PASS_EXACT_POSTROLLBACK_CURRENT_REBIND_READY_FOR_R017_REPLAY'
     }),
     topology: Object.freeze({
-      relativePath: 'runtime/atlas/continuity/mazer-master-r017-auth-identity-topology-evidence-20260825.json',
+      relativePath: 'runtime/atlas/continuity/mazer-master-r017-postrollback-auth-identity-topology-evidence-20260825.json',
       sha256: R017_CONTRACT.topologyEvidenceSha256,
-      result: 'PASS_EXACT_AUTH_IDENTITY_TOPOLOGY_READY_FOR_R017_REBIND'
+      result: 'PASS_EXACT_POSTROLLBACK_AUTH_IDENTITY_TOPOLOGY_READY_FOR_R017_REPLAY'
     }),
     restoreProof: Object.freeze({
       relativePath: 'runtime/atlas/continuity/mazer-master-r014-canonical-cycle-receipt-private-local-restores-terminal-20260825.json',
@@ -114,7 +114,7 @@ export function verifyEvidence(atlasRoot) {
   const restore = readBoundEvidence(atlasRoot, PRODUCER_CONTRACT.evidence.restoreProof);
   const expected = current.current_preimage;
   const actual = {
-    legacy: { auth_users: 18, auth_identities: 18, profiles: 11, player: 15, ai: 15, receipts: 1873 },
+    legacy: { auth_users: 19, auth_identities: 19, profiles: 12, player: 16, ai: 16, receipts: 1874 },
     master: { auth_users: 114, auth_identities: 114, profiles: 5, player: 7, ai: 7, receipts: 1290 }
   };
   for (const side of ['legacy', 'master']) for (const [name, count] of Object.entries(actual[side])) {
@@ -122,9 +122,9 @@ export function verifyEvidence(atlasRoot) {
   }
   if (restore.legacy?.auth_users !== 18 || restore.master?.auth_users !== 114 || restore.cleanup?.legacy_plaintext_present !== false || restore.cleanup?.master_plaintext_present !== false) throw new Error('RESTORE_PROOF_DRIFT');
   const aggregate = topology.aggregate_topology;
-  if (aggregate?.legacy_users !== 18 || aggregate?.master_users !== 114 || aggregate?.shared_normalized_emails !== 15
-    || aggregate?.retained_same_uuid !== 2 || aggregate?.bind_existing_different_uuid !== 13 || aggregate?.imports !== 3
-    || aggregate?.final_edges !== 18 || aggregate?.expected_target_users !== 117
+  if (aggregate?.legacy_users !== 19 || aggregate?.master_users !== 114 || aggregate?.shared_normalized_emails !== 16
+    || aggregate?.retained_same_uuid !== 2 || aggregate?.bind_existing_different_uuid !== 14 || aggregate?.imports !== 3
+    || aggregate?.final_edges !== 19 || aggregate?.expected_target_users !== 117
     || aggregate?.provider_id_conflicts !== 0 || aggregate?.identity_owner_conflicts !== 0
     || aggregate?.identity_subject_conflicts !== 0 || aggregate?.identity_email_conflicts !== 0) throw new Error('TOPOLOGY_EVIDENCE_DRIFT');
   return { current, topology, restore };
@@ -258,7 +258,7 @@ function byEmail(raw) {
 
 export function buildIdentityPlan(legacyRaw, masterRaw) {
   const legacy = byEmail(legacyRaw); const master = byEmail(masterRaw);
-  if (legacyRaw.auth_users.length !== 18 || legacyRaw.auth_identities.length !== 18 || masterRaw.auth_users.length !== 114 || masterRaw.auth_identities.length !== 114) throw new Error('LIVE_AUTH_DENOMINATOR_DRIFT');
+  if (legacyRaw.auth_users.length !== 19 || legacyRaw.auth_identities.length !== 19 || masterRaw.auth_users.length !== 114 || masterRaw.auth_identities.length !== 114) throw new Error('LIVE_AUTH_DENOMINATOR_DRIFT');
   const masterIds = new Set(masterRaw.auth_users.map((user) => uuid(user.id, 'MASTER_AUTH_USER_UUID')));
   const masterIdentityIds = new Set(masterRaw.auth_identities.map((identity) => String(identity.id).toLowerCase()));
   const masterProviderIds = new Set(masterRaw.auth_identities.filter((identity) => identity.provider === 'email').map((identity) => uuid(identity.provider_id, 'MASTER_EMAIL_IDENTITY_PROVIDER_ID_MALFORMED')));
@@ -285,7 +285,7 @@ export function buildIdentityPlan(legacyRaw, masterRaw) {
     imports.push({ user, identities: [identity] });
     new_edges.push({ legacy_user_id: left.id, master_user_id: left.id, disposition: 'CREATE_AND_BIND', normalized_email: email, evidence_digest: digest({ normalized_email: email, legacy_user_id: left.id, master_user_id: left.id }) });
   }
-  if (retained_edges.length !== 2 || new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length !== 13 || imports.length !== 3) throw new Error('IDENTITY_DENOMINATOR_DRIFT');
+  if (retained_edges.length !== 2 || new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length !== 14 || imports.length !== 3) throw new Error('IDENTITY_DENOMINATOR_DRIFT');
   return { imports, new_edges, retained_edges };
 }
 
@@ -447,7 +447,7 @@ do $r017$ begin
   if (select count(*) from mazer.mazer_profiles) <> 5 or (select count(*) from mazer.mazer_progression_states) <> 7 or (select count(*) from mazer.mazer_ai_progression_states) <> 7 or (select count(*) from mazer.mazer_cycle_receipts) <> 1290 then raise exception 'R017_APP_PREIMAGE_DRIFT'; end if;
   if to_regclass('vault.decrypted_secrets') is null or (select count(*) from vault.secrets where name='mazer_username_handle_key') <> 0 then raise exception 'R017_MAZER_USERNAME_HANDLE_KEY_PREIMAGE_DRIFT'; end if;
   if not exists (select 1 from pg_namespace where nspname='mazer') then raise exception 'R017_DATA_API_SCHEMA_DRIFT'; end if;
-end $r017$;`, ['data_api','rls','acl','auth.users','114','11','15','1882']);
+end $r017$;`, ['data_api','rls','acl','auth.users','114','12','16','1883']);
   sql['master-fence.sql'] = sqlProgram(`
 select pg_advisory_xact_lock(hashtextextended('atlas:mazer:r017:master-fence',0));
 create schema if not exists atlas_mazer_r017;
@@ -475,7 +475,7 @@ do $r017_auth_postcheck$ begin
  if (select coalesce(jsonb_agg(to_jsonb(u) order by u.id),'[]'::jsonb) from auth.users u where u.id in (select (e->>'id')::uuid from jsonb_array_elements(${jsonLiteral(importUsers)}) e)) <> ${jsonLiteral(sort(importUsers, (item) => item.id))} then raise exception 'R017_IMPORTED_AUTH_USERS_DIGEST_DRIFT'; end if;
  if (select coalesce(jsonb_agg(to_jsonb(i) order by i.id),'[]'::jsonb) from auth.identities i where i.id in (select (e->>'id')::uuid from jsonb_array_elements(${jsonLiteral(importIdentities)}) e)) <> ${jsonLiteral(sort(importIdentities, (item) => item.id))} then raise exception 'R017_IMPORTED_AUTH_IDENTITIES_DIGEST_DRIFT'; end if;
  if (select coalesce(jsonb_agg(jsonb_build_object('legacy_user_id',legacy_user_id,'master_user_id',master_user_id,'evidence_digest',evidence_digest) order by legacy_user_id),'[]'::jsonb) from mazer.mazer_identity_map) <> ${jsonLiteral(expectedMap)} then raise exception 'R017_IDENTITY_MAP_DIGEST_DRIFT'; end if;
-end $r017_auth_postcheck$;`, ['auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','13_existing_binds']);
+end $r017_auth_postcheck$;`, ['auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','14_existing_binds']);
   sql['reset-era-apply.sql'] = sqlProgram(`
 create extension if not exists pgcrypto with schema extensions;
 create table if not exists atlas_mazer_r017.reset_quarantine(id text primary key,ciphertext bytea not null);
@@ -509,7 +509,7 @@ do $r017$ begin
  if (select count(*) from pg_indexes where schemaname='mazer' and indexname=any(array[${MIGRATION_INDEXES.map(sqlLiteral).join(',')}])) <> 3 then raise exception 'R017_INDEX_CATALOG_DRIFT'; end if;
  if not exists(select 1 from pg_policies where schemaname='mazer' and tablename='mazer_profiles' and policyname='Mazer Auth hook can inspect usernames' and cmd='SELECT' and roles='{supabase_auth_admin}') then raise exception 'R017_POLICY_CATALOG_DRIFT'; end if;
  if not exists(select 1 from information_schema.triggers where event_object_schema='auth' and event_object_table='users' and trigger_name='mazer_claim_signup_username_after_insert' and action_timing='AFTER' and event_manipulation='INSERT') or not exists(select 1 from information_schema.triggers where event_object_schema='mazer' and event_object_table='mazer_profiles' and trigger_name='mazer_enforce_username_origin_before_update' and action_timing='BEFORE' and event_manipulation='UPDATE') then raise exception 'R017_TRIGGER_CATALOG_DRIFT'; end if;
-end $r017$;`, ['data_api','rls','acl','117','18','11','15','1882','receipt_conservation']);
+end $r017$;`, ['data_api','rls','acl','117','19','12','16','1883','receipt_conservation']);
   sql['qa-apply.sql'] = sqlProgram(`
 with q as (select * from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text,mode text))
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)

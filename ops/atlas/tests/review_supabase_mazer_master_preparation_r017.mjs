@@ -18,7 +18,7 @@ const requireText = (where, token, category) => { if (!where.includes(token)) fi
 
 for (const token of [
   '2b8495a95fca9a860571343174bfb93bcad8c5e9','1bbf69cf8f38aa1e2b053d0b70d82a315317b58a','481ab55323afff53f5e841012684b7e26f689349',
-  '659b31e76aa61f54cc48d68bb10aaf3cf41b00a44682561cb638bd5d2cb5c3ff','dc81b217d2c1f2262cc2a66e07ce579ad97ffa50e32218068701e43723165632','54dee535bac3e02b7058fe644cd44af115cc3746ff1e40390521992dccd14971',
+  '5618f3050fb31b52d8241446b4cc4e477b07250c45dfaadffd7eb7ebd8d01806','9e39b18246699405fc1651f64995a8526d5750e5bebcc85e880f4f295b12a308','54dee535bac3e02b7058fe644cd44af115cc3746ff1e40390521992dccd14971',
   '63f43d8c2f532b32e3453879e4ca49ffc2f5b382264a290ad9a3ea1225811ced','gitBlob','cat-file','SQL_DIGEST_DRIFT',
   'AMBIGUOUS_IDENTITY_MAP','UNSUPPORTED_PASSWORD_VERIFIER','IMPORT_WOULD_FIRE_SIGNUP_TRIGGER','PLAYER_RESET_DOMINANCE_DRIFT',
   'PGP_SYM_ENCRYPT_AES256','EXACT_WHOLE_ROW','MASTER_DOMINATES_NO_OVERRIDE','receipt_conservation','data_api','rls','acl'
@@ -29,8 +29,11 @@ for (const token of [
   'LEGACY_RESTORING','LEGACY_RESTORED','PREPARATION_COMPLETE','ROLLBACK_DISABLING_HOOK','rollback_initiated_at',
   'RollbackDeadlineSeconds = 600','HardFenceLeaseSeconds = 900','Start-RollbackWatchdog','WindowStyle Hidden'
 ]) requireText(source.host, token, `HOST_LIFECYCLE_MISSING:${token}`);
-for (const token of ['AUTH_TOPOLOGY_MANIFEST_DRIFT','auth_counts.binds -ne 13','auth_counts.retained_edges -ne 2']) requireText(source.host, token, `HOST_TOPOLOGY_VERIFICATION_MISSING:${token}`);
-for (const token of ['all live phase interruption','ambiguous drift','disable hook before SQL/fence','receipt conservation','Auth mapping','RLS/ACL/Data API','executor input hash binding']) requireText(source.focused, token, `ADVERSARY_LABEL_MISSING:${token}`);
+for (const token of ['AUTH_TOPOLOGY_MANIFEST_DRIFT','auth_counts.binds -ne 14','auth_counts.final_edges -ne 19','auth_counts.retained_edges -ne 2','final_identity_edges = 19','profiles = 12','player = 16','ai = 16','receipts = 1883']) requireText(source.host, token, `HOST_TOPOLOGY_VERIFICATION_MISSING:${token}`);
+for (const stale of ['auth_counts.binds -ne 13','auth_counts.final_edges -ne 18','final_identity_edges = 18','profiles = 11','player = 15','ai = 15','receipts = 1882']) if (source.host.includes(stale)) findings.push(`HOST_STALE_REBOUND_DENOMINATOR:${stale}`);
+for (const token of ['all live phase interruption','ambiguous drift','disable hook before SQL/fence','receipt conservation','Auth mapping','RLS/ACL/Data API','executor input hash binding','fence child failure receipt','fence rollback failure receipt','fence prestate terminal receipt']) requireText(source.focused, token, `ADVERSARY_LABEL_MISSING:${token}`);
+for (const token of ['Write-FenceChildReceipt','stdout_sha256','stderr_sha256','terminal_category','FENCE_CHILD_FAILURE_RECEIPT_CONTRACT','FENCE_CHILD_ROLLBACK_RECEIPT_CONTRACT']) requireText(source.host, token, `FENCE_CHILD_RECEIPT_MISSING:${token}`);
+for (const token of ['NO_EFFECT_PRESTATE','OUTER_EXECUTION_HOLD']) requireText(source.fenceHost, token, `FENCE_PRESTATE_RECEIPT_MISSING:${token}`);
 
 const sourceOnlyHost = source.host.slice(source.host.indexOf("if ($PSCmdlet.ParameterSetName -ceq 'Source')"), source.host.indexOf("if (-not $ExecuteProtected)"));
 if (/Invoke-RestMethod|Invoke-Psql|Start-RollbackWatchdog/.test(sourceOnlyHost)) findings.push('SOURCE_ONLY_MUTATION_PATH');

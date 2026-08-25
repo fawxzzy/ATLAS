@@ -16,8 +16,8 @@ const materializer = fs.readFileSync(materializerPath, 'utf8');
 const fenceHost = fs.readFileSync(fenceHostPath, 'utf8');
 const fenceClassifier = fs.readFileSync(fenceClassifierPath, 'utf8');
 const state = (phase) => ({ schema: 'atlas.supabase.mazer-master-preparation-host-state.r017.v1', phase });
-const adversarialCoverage = ['all live phase interruption','ambiguous drift','disable hook before SQL/fence','receipt conservation','Auth mapping','RLS/ACL/Data API','executor input hash binding'];
-assert.equal(adversarialCoverage.length, 7);
+const adversarialCoverage = ['all live phase interruption','ambiguous drift','disable hook before SQL/fence','receipt conservation','Auth mapping','RLS/ACL/Data API','executor input hash binding','fence child failure receipt','fence rollback failure receipt','fence prestate terminal receipt'];
+assert.equal(adversarialCoverage.length, 10);
 
 assert.equal(classifyHostRecovery(null).action, 'START');
 assert.deepEqual(classifyHostRecovery(state('PREPARATION_COMPLETE')), { action: 'NOOP', effect: 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' });
@@ -32,12 +32,12 @@ assert.throws(() => classifyHostRecovery(state('UNKNOWN')), /STATE_PHASE_DRIFT/)
 assert.throws(() => classifyHostRecovery({ schema: 'wrong', phase: 'PREFLIGHT' }), /STATE_SCHEMA_DRIFT/);
 
 const sqlTokens = {
-  'preflight.sql': ['data_api','rls','acl','auth.users','114','11','15','1882','mazer_username_handle_key'],
+  'preflight.sql': ['data_api','rls','acl','auth.users','114','12','16','1883','mazer_username_handle_key'],
   'master-fence.sql': ['begin;','mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts','revoke'],
   'master-refence.sql': ['begin;','mazer_initialize_progression','mazer_complete_level','mazer_complete_ai_level','mazer_reset_progression','revoke'],
-  'auth-apply.sql': ['begin;','auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','13_existing_binds'],
+  'auth-apply.sql': ['begin;','auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','14_existing_binds'],
   'reset-era-apply.sql': ['begin;','whole_row_override','7/6/32/d','39/108/161/s','pgp_sym_encrypt','player_reset_disposition','vault.create_secret','rollback_bound_username_key'],
-  'postverify.sql': ['begin;','data_api','rls','acl','117','18','11','15','1882','receipt_conservation','username_origin','mazer-'],
+  'postverify.sql': ['begin;','data_api','rls','acl','117','19','12','16','1883','receipt_conservation','username_origin','mazer-'],
   'qa-apply.sql': ['begin;','qa_ttl','before_user_created','rollback_on_error'],
   'qa-cleanup.sql': ['begin;','qa_ttl','delete','auth.identities','auth.users'],
   'rollback.sql': ['begin;','disable_hook_first','master_preimage','receipt_conservation']
@@ -82,17 +82,22 @@ for (const token of [
   'RollbackDeadlineSeconds = 600','HardFenceLeaseSeconds = 900','Start-RollbackWatchdog','-WindowStyle Hidden',
   'rollback_initiated_at','Assert-Lease','ExpectedPrivateSourceSha256','PRIVATE_SOURCE_DIGEST_DRIFT','private_manifest_sha256',
   'fence_input_sha256','MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER','fresh_dual_refence_and_catchup_required_for_cutover',
-  '18','117','1882','7/6/32/D','PGP_SYM_ENCRYPT_AES256','MASTER_DOMINATES_NO_OVERRIDE','PLAYER_RESET_DOMINANCE_DRIFT',
+  '19','117','1883','7/6/32/D','PGP_SYM_ENCRYPT_AES256','MASTER_DOMINATES_NO_OVERRIDE','PLAYER_RESET_DOMINANCE_DRIFT',
   'Mazer-######','SUPABASE_VAULT','bounded_delta_catchups',
   'currentPreimageSha256','restoreProofSha256','predecessorFenceManifestSha256'
 ]) assert.ok(host.includes(token) || materializer.includes(token), `missing ${token}`);
 assert.ok(host.includes('AUTH_TOPOLOGY_MANIFEST_DRIFT'));
 for (const token of ['ReplayExactRolledBack','PASS_EXACT_ROLLBACK_TERMINAL','replay_requires_explicit_switch','fence.replay-','START_EXACT_REPLAY']) assert.ok(host.includes(token) || materializer.includes(token), `rollback replay seam missing ${token}`);
+for (const token of ['Write-FenceChildReceipt','New-FenceChildReceipt','stdout_sha256','stderr_sha256','terminal_category','FENCE_CHILD_FAILURE_RECEIPT_CONTRACT','FENCE_CHILD_ROLLBACK_RECEIPT_CONTRACT']) assert.ok(host.includes(token), `fence child receipt seam missing ${token}`);
+for (const token of ["trap {",'NO_EFFECT_PRESTATE','OUTER_EXECUTION_HOLD']) assert.ok(fenceHost.includes(token), `fence prestate receipt seam missing ${token}`);
 const replayReset = host.slice(host.indexOf("if ([string]$state.phase -ceq 'ROLLED_BACK')"), host.indexOf('$managementToken = Read-ManagementToken'));
 requireOrder(replayReset, ['ReplayExactRolledBack', "phase = 'PREFLIGHT'", 'Write-State', 'fence.replay-']);
 const producer = fs.readFileSync(path.join(root, 'ops/atlas/produce_supabase_mazer_master_preparation_private_source_r017.mjs'), 'utf8');
 for (const token of ["crypto.createHmac('sha256'", "vault.create_secret", "delete from vault.secrets where name='mazer_username_handle_key'"]) assert.ok(producer.includes(token), `deterministic replay contract missing ${token}`);
-assert.ok(host.includes('auth_counts.binds -ne 13'));
+assert.ok(host.includes('auth_counts.binds -ne 14'));
+assert.ok(host.includes('auth_counts.final_edges -ne 19'));
+assert.ok(!host.includes('auth_counts.binds -ne 13'));
+assert.ok(!host.includes('auth_counts.final_edges -ne 18'));
 assert.ok(host.includes('auth_counts.retained_edges -ne 2'));
 assert.ok(materializer.includes('topologyEvidenceSha256'));
 

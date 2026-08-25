@@ -763,6 +763,30 @@ if ($PSCmdlet.ParameterSetName -eq 'Source') {
   exit 0
 }
 
+trap {
+  $outerCategory = ([string]$_.Exception.Message -replace '[^A-Za-z0-9_]', '').ToUpperInvariant()
+  if ([string]::IsNullOrWhiteSpace($outerCategory)) { $outerCategory = 'OUTER_EXECUTION_HOLD' }
+  if ($outerCategory.Length -gt 96) { $outerCategory = $outerCategory.Substring(0, 96) }
+  Write-SafeResult 'HOLD_MAZER_MASTER_CUTOVER_DATA_FENCE' ([ordered]@{
+    category = $outerCategory
+    effect_status = 'NO_EFFECT_PRESTATE'
+    provider_reads = 0
+    provider_writes = 0
+    database_transactions = 0
+    rollback_actions = 0
+    acl_restore_verifications = 0
+    writer_capture_reads = 0
+    writer_drain_reads = 0
+    writer_lock_barriers = 0
+    signup_admission_reads = 0
+    signup_admission_barriers = 0
+    signup_admission_restores = 0
+    deployments = 0
+    production_changes = 0
+  })
+  exit 2
+}
+
 if (-not $ExecuteProtected) { throw 'PROTECTED_EXECUTION_SWITCH_REQUIRED' }
 $resolvedInput = Assert-PathUnder $InputPath @($RuntimeRoot,$SecretRoot)
 $resolvedState = Assert-PathUnder $StatePath @($RuntimeRoot)

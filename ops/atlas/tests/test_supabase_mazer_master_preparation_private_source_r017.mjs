@@ -30,10 +30,10 @@ const uid = (value) => `00000000-0000-4000-8000-${String(value).padStart(12, '0'
 const now = Date.now();
 const iso = (offset) => new Date(now + offset).toISOString();
 const verifier = `$2b$12$${'A'.repeat(53)}`;
-const sharedLegacy = Array.from({ length: 15 }, (_, index) => uid(index + 1));
+const sharedLegacy = Array.from({ length: 16 }, (_, index) => uid(index + 1));
 const sharedMaster = sharedLegacy.map((id, index) => index < 2 ? id : uid(100 + index));
-const legacyOnly = [uid(16), uid(17), uid(18)];
-const unrelatedMaster = Array.from({ length: 99 }, (_, index) => uid(1000 + index));
+const legacyOnly = [uid(17), uid(18), uid(19)];
+const unrelatedMaster = Array.from({ length: 98 }, (_, index) => uid(1000 + index));
 
 function user(id, email, instance = uid(9000)) {
   return { id, instance_id: instance, aud: 'authenticated', role: 'authenticated', email, encrypted_password: verifier, email_confirmed_at: iso(-10000), raw_app_meta_data: { provider: 'email', providers: ['email'] }, raw_user_meta_data: {}, created_at: iso(-20000), updated_at: iso(-10000) };
@@ -74,13 +74,13 @@ function rawFixture() {
   const resetLegacy = sharedLegacy[13]; const resetMaster = sharedMaster[13];
   const overlappingLegacyReceipts = Array.from({ length: 1281 }, (_, index) => receipt(uid(30000 + index), index < 1239 ? resetLegacy : sharedLegacy[0], uid(50000 + index), index));
   const overlappingMasterReceipts = overlappingLegacyReceipts.map((row, index) => ({ ...structuredClone(row), user_id: index < 1239 ? resetMaster : sharedMaster[0] }));
-  const legacyOnlyReceipts = Array.from({ length: 592 }, (_, index) => receipt(uid(40000 + index), index < 475 ? resetLegacy : sharedLegacy[1], uid(60000 + index), 1281 + index));
+  const legacyOnlyReceipts = Array.from({ length: 593 }, (_, index) => receipt(uid(40000 + index), index < 475 ? resetLegacy : sharedLegacy[1], uid(60000 + index), 1281 + index));
   const masterOnlyReceipts = Array.from({ length: 9 }, (_, index) => receipt(uid(45000 + index), sharedMaster[2], uid(65000 + index), 2000 + index));
   const targetUsers = [0, 1, 2, 3, 4, 5, 13];
   return {
     legacy: {
       observed_at: iso(0), auth_users: legacyEmails.map(([email, id]) => user(id, email)), auth_identities: legacyEmails.map(([email, id], index) => identity(id, email, index)),
-      profiles: sharedLegacy.slice(0, 11).map(profile), player: sharedLegacy.map((id, index) => player(id, index === 13)), ai: sharedLegacy.map((id, index) => ai(id, index === 13, false)), receipts: [...overlappingLegacyReceipts, ...legacyOnlyReceipts], catalog: catalog()
+      profiles: sharedLegacy.slice(0, 12).map(profile), player: sharedLegacy.map((id, index) => player(id, index === 13)), ai: sharedLegacy.map((id, index) => ai(id, index === 13, false)), receipts: [...overlappingLegacyReceipts, ...legacyOnlyReceipts], catalog: catalog()
     },
     master: {
       observed_at: iso(-1000), auth_users: masterEmails.map(([email, id]) => user(id, email)), auth_identities: masterEmails.map(([email, id], index) => identity(id, email, 100 + index)),
@@ -101,7 +101,7 @@ fixture.legacy.player[7].state = { legacySibling: 'preserved-nonobject-tracks', 
 fixture.master.player[0].state.masterRollbackSibling = 'preserved-master-preimage';
 const plan = buildIdentityPlan(fixture.legacy, fixture.master);
 assert.equal(plan.retained_edges.length, 2);
-assert.equal(plan.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length, 13);
+assert.equal(plan.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length, 14);
 assert.equal(plan.imports.length, 3);
 assert.ok(plan.imports.every((item) => item.user.raw_user_meta_data.app_namespace === undefined));
 assert.deepEqual(plan.imports.at(-1).identities, [fixture.legacy.auth_identities.at(-1)]);
@@ -126,8 +126,8 @@ assert.equal(preM2Source.fence_input.fence.master.acl_basis, 'FRESH_LIVE_TABLES_
 assert.equal(preM2Source.fence_input.fence.master.acl_preimage.rpc_acl.length, FENCE_CONTRACT.mutatingRpcs.length);
 assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.table_acl, preM2MasterAcl.table_acl);
 assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.catalog.tables, preM2MasterAcl.catalog.tables);
-assert.equal(validated.allEdges.length, 18);
-assert.deepEqual(validated.classified.desired_counts, { profiles: 11, player: 15, ai: 15, receipts: 1882 });
+assert.equal(validated.allEdges.length, 19);
+assert.deepEqual(validated.classified.desired_counts, { profiles: 12, player: 16, ai: 16, receipts: 1883 });
 assert.equal(source.reset_era_ai.canonical_projection, '7/6/32/D');
 assert.equal(source.reset_era_ai.legacy_receipts, 1714);
 assert.equal(source.reset_era_ai.master_receipts, 1239);
@@ -233,4 +233,4 @@ assert.equal(JSON.parse(sourceCheck.stdout).result, 'PASS_R017_PRIVATE_SOURCE_PR
 const rendered = renderOperationalSql({ auth: source.auth, fenceInput: source.fence_input, catalogPreimage: source.catalog_preimage, reset: { quarantined_row: source.reset_era_ai.quarantined_row }, qa: source.qa, quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
 assert.deepEqual(Object.keys(rendered.sql), [...Object.keys(source.sql)]);
 
-console.log(JSON.stringify({ result: 'PASS_MAZER_MASTER_PREPARATION_PRIVATE_SOURCE_R017', identity_edges: 18, imports: 3, binds: 13, retained: 2, app_counts: validated.classified.desired_counts, sql_programs: 9, provider_calls: 0, provider_writes: 0, auth_writes: 0, live_data_writes: 0, raw_private_output: 0 }));
+console.log(JSON.stringify({ result: 'PASS_MAZER_MASTER_PREPARATION_PRIVATE_SOURCE_R017', identity_edges: 19, imports: 3, binds: 14, retained: 2, app_counts: validated.classified.desired_counts, sql_programs: 9, provider_calls: 0, provider_writes: 0, auth_writes: 0, live_data_writes: 0, raw_private_output: 0 }));

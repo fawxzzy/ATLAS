@@ -11,8 +11,8 @@ export const CONTRACT = Object.freeze({
   packet: 'FP-MAZER-MASTER-R017-SUPABASE-PREPARATION-20260825-001',
   legacy: 'geknvnrmktchljnyddwp',
   master: 'bxtcuhkotumitoqtrcej',
-  currentPreimageSha256: '659b31e76aa61f54cc48d68bb10aaf3cf41b00a44682561cb638bd5d2cb5c3ff',
-  topologyEvidenceSha256: 'dc81b217d2c1f2262cc2a66e07ce579ad97ffa50e32218068701e43723165632',
+  currentPreimageSha256: '5618f3050fb31b52d8241446b4cc4e477b07250c45dfaadffd7eb7ebd8d01806',
+  topologyEvidenceSha256: '9e39b18246699405fc1651f64995a8526d5750e5bebcc85e880f4f295b12a308',
   restoreProofSha256: '54dee535bac3e02b7058fe644cd44af115cc3746ff1e40390521992dccd14971',
   predecessorFenceManifestSha256: '63f43d8c2f532b32e3453879e4ca49ffc2f5b382264a290ad9a3ea1225811ced',
   migrations: Object.freeze([
@@ -37,12 +37,12 @@ const canonical = (value) => value === null || typeof value !== 'object'
     : `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`).join(',')}}`;
 
 const SQL_TOKENS = Object.freeze({
-  'preflight.sql': ['data_api', 'rls', 'acl', 'auth.users', '114', '11', '15', '1882', 'mazer_username_handle_key'],
+  'preflight.sql': ['data_api', 'rls', 'acl', 'auth.users', '114', '12', '16', '1883', 'mazer_username_handle_key'],
   'master-fence.sql': ['begin;', 'mazer_profiles', 'mazer_progression_states', 'mazer_ai_progression_states', 'mazer_cycle_receipts', 'revoke'],
   'master-refence.sql': ['begin;', 'mazer_initialize_progression', 'mazer_complete_level', 'mazer_complete_ai_level', 'mazer_reset_progression', 'revoke'],
-  'auth-apply.sql': ['auth.users', 'auth.identities', 'create_and_bind', 'bind_existing', '3_auth_imports', '13_existing_binds'],
+  'auth-apply.sql': ['auth.users', 'auth.identities', 'create_and_bind', 'bind_existing', '3_auth_imports', '14_existing_binds'],
   'reset-era-apply.sql': ['whole_row_override', '7/6/32/d', '39/108/161/s', 'pgp_sym_encrypt', 'player_reset_disposition', 'vault.create_secret', 'rollback_bound_username_key'],
-  'postverify.sql': ['data_api', 'rls', 'acl', '117', '18', '11', '15', '1882', 'receipt_conservation', 'username_origin', 'mazer-'],
+  'postverify.sql': ['data_api', 'rls', 'acl', '117', '19', '12', '16', '1883', 'receipt_conservation', 'username_origin', 'mazer-'],
   'qa-apply.sql': ['qa_ttl', 'before_user_created', 'rollback_on_error'],
   'qa-cleanup.sql': ['qa_ttl', 'delete', 'auth.identities', 'auth.users'],
   'rollback.sql': ['disable_hook_first', 'master_preimage', 'receipt_conservation']
@@ -139,10 +139,10 @@ export function validatePrivateSource(raw) {
   const classified = classifyCutover(raw.fence_input).receipt;
   if (classified.direction !== 'forward') throw new Error('FENCE_DIRECTION_DRIFT');
   const counts = classified.desired_counts;
-  if (counts.profiles !== 11 || counts.player !== 15 || counts.ai !== 15 || counts.receipts !== 1882) throw new Error('APP_DENOMINATOR_DRIFT');
+  if (counts.profiles !== 12 || counts.player !== 16 || counts.ai !== 16 || counts.receipts !== 1883) throw new Error('APP_DENOMINATOR_DRIFT');
   if (classified.receipt_conservation.primary_conflicts !== 0 || classified.receipt_conservation.client_run_conflicts !== 0) throw new Error('RECEIPT_CONFLICT');
   if (!plain(raw.auth) || !Array.isArray(raw.auth.imports) || !Array.isArray(raw.auth.new_edges) || !Array.isArray(raw.auth.retained_edges)) throw new Error('AUTH_PLAN_SHAPE');
-  if (raw.auth.imports.length !== 3 || raw.auth.new_edges.length !== 16 || raw.auth.retained_edges.length !== 2) throw new Error('AUTH_DENOMINATOR_DRIFT');
+  if (raw.auth.imports.length !== 3 || raw.auth.new_edges.length !== 17 || raw.auth.retained_edges.length !== 2) throw new Error('AUTH_DENOMINATOR_DRIFT');
   const allEdges = [...raw.auth.retained_edges, ...raw.auth.new_edges];
   const legacyIds = new Set();
   const masterIds = new Set();
@@ -153,8 +153,8 @@ export function validatePrivateSource(raw) {
     if (legacyIds.has(legacy) || masterIds.has(master)) throw new Error('AMBIGUOUS_IDENTITY_MAP');
     legacyIds.add(legacy); masterIds.add(master);
   }
-  if (legacyIds.size !== 18 || masterIds.size !== 18) throw new Error('IDENTITY_EDGE_DENOMINATOR_DRIFT');
-  if (raw.auth.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length !== 13
+  if (legacyIds.size !== 19 || masterIds.size !== 19) throw new Error('IDENTITY_EDGE_DENOMINATOR_DRIFT');
+  if (raw.auth.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length !== 14
     || raw.auth.new_edges.filter((edge) => edge.disposition === 'CREATE_AND_BIND').length !== 3) throw new Error('AUTH_DISPOSITION_DRIFT');
   for (const item of raw.auth.imports) {
     requiredUuid(item.user?.id, 'IMPORT_USER_UUID');
@@ -180,7 +180,7 @@ export function validatePrivateSource(raw) {
   }
   const actionFenceInput = bindResetEraActionInput(raw, allEdges);
   const actionClassified = classifyCutover(actionFenceInput).receipt;
-  if (actionClassified.desired_counts.profiles !== 11 || actionClassified.desired_counts.player !== 15 || actionClassified.desired_counts.ai !== 15 || actionClassified.desired_counts.receipts !== 1882) throw new Error('ACTION_APP_DENOMINATOR_DRIFT');
+  if (actionClassified.desired_counts.profiles !== 12 || actionClassified.desired_counts.player !== 16 || actionClassified.desired_counts.ai !== 16 || actionClassified.desired_counts.receipts !== 1883) throw new Error('ACTION_APP_DENOMINATOR_DRIFT');
   const fenceInputSha256 = sha256(Buffer.from(canonical(actionFenceInput), 'utf8'));
   return { classified: actionClassified, fenceInputSha256, allEdges, actionFenceInput };
 }
@@ -216,7 +216,7 @@ export function materialize(raw, outputRoot, mazerRepository) {
     predecessor_fence_manifest_sha256: CONTRACT.predecessorFenceManifestSha256,
     app_counts: classified.desired_counts,
     receipt_conservation: classified.receipt_conservation,
-    auth_counts: { imports: 3, binds: 13, retained_edges: 2, final_edges: 18, expected_target_users: 117 },
+    auth_counts: { imports: 3, binds: 14, retained_edges: 2, final_edges: 19, expected_target_users: 117 },
     username_contract: { format: 'Mazer-######', origin: ['generated', 'claimed'], collision_attempts: 1000000, key_location: 'SUPABASE_VAULT', key_plaintext_emitted: false },
     transfer_contract: { high_water_snapshots: 1, stabilization_reads: 2, bounded_delta_catchups: 1 },
     reset_era_ai: { canonical: '7/6/32/D', quarantined: '39/108/161/S', override: 'EXACT_WHOLE_ROW', quarantine: 'PGP_SYM_ENCRYPT_AES256' },

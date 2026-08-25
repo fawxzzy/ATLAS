@@ -46,6 +46,16 @@ function Get-Sha256([string]$Path) {
   finally { $stream.Dispose() }
 }
 
+function Get-TextSha256([string]$Value) {
+  $bytes = [Text.Encoding]::UTF8.GetBytes($(if ($null -eq $Value) { '' } else { $Value }))
+  try {
+    $hasher = [Security.Cryptography.SHA256]::Create()
+    try { return ([BitConverter]::ToString($hasher.ComputeHash($bytes))).Replace('-', '').ToLowerInvariant() }
+    finally { $hasher.Dispose() }
+  }
+  finally { [Array]::Clear($bytes, 0, $bytes.Length) }
+}
+
 function Assert-Under([string]$Path, [string]$Boundary) {
   $candidate = [IO.Path]::GetFullPath($Path)
   $rootPath = [IO.Path]::GetFullPath($Boundary).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
@@ -114,8 +124,8 @@ function Invoke-Child([string]$FileName, [string[]]$Arguments, [Collections.IDic
     $stderrTask = $process.StandardError.ReadToEndAsync()
     if (-not $process.WaitForExit($TimeoutMs)) { try { $process.Kill() } catch {}; throw 'CHILD_TIMEOUT' }
     $stdout = $stdoutTask.GetAwaiter().GetResult()
-    [void]$stderrTask.GetAwaiter().GetResult()
-    return [pscustomobject]@{ ExitCode = $process.ExitCode; Stdout = $stdout }
+    $stderr = $stderrTask.GetAwaiter().GetResult()
+    return [pscustomobject]@{ ExitCode = $process.ExitCode; Stdout = $stdout; Stderr = $stderr }
   }
   finally { $process.Dispose() }
 }
@@ -182,9 +192,69 @@ function Invoke-MasterAuthConfig([string]$Token, [Collections.IDictionary]$Patch
   return Invoke-RestMethod -Method Patch -Uri $uri -Headers $headers -ContentType 'application/json' -Body ($Patch | ConvertTo-Json -Compress)
 }
 
+function New-FenceChildReceipt([string]$Step, [object]$Child, [string]$FenceState) {
+  $terminalResult = 'NO_CHILD_RECEIPT'
+  $terminalCategory = 'NO_CHILD_RECEIPT'
+  if (-not [string]::IsNullOrWhiteSpace([string]$Child.Stdout)) {
+    try {
+      $parsed = [string]$Child.Stdout | ConvertFrom-Json
+      $candidateResult = ([string]$parsed.result -replace '[^A-Za-z0-9_]', '').ToUpperInvariant()
+      $candidateCategory = ([string]$parsed.category -replace '[^A-Za-z0-9_]', '').ToUpperInvariant()
+      if (-not [string]::IsNullOrWhiteSpace($candidateResult)) { $terminalResult = $candidateResult }
+      if (-not [string]::IsNullOrWhiteSpace($candidateCategory)) { $terminalCategory = $candidateCategory }
+      elseif ([int]$Child.ExitCode -eq 0) { $terminalCategory = 'NONE' }
+    }
+    catch { $terminalCategory = 'CHILD_OUTPUT_UNPARSEABLE' }
+  }
+  $fenceStateExists = Test-Path -LiteralPath $FenceState -PathType Leaf
+  $fencePhase = $null
+  $fenceStateSha = $null
+  if ($fenceStateExists) {
+    try { $fencePhase = [string](Read-State $FenceState).phase } catch { $fencePhase = 'UNREADABLE' }
+    try { $fenceStateSha = Get-Sha256 $FenceState } catch { $fenceStateSha = $null }
+  }
+  return [ordered]@{
+    schema = 'atlas.supabase.mazer-master-preparation-fence-child-receipt.r017.v1'
+    step = $Step
+    exit_code = [int]$Child.ExitCode
+    terminal_result = $terminalResult
+    terminal_category = $terminalCategory
+    stdout_sha256 = Get-TextSha256 ([string]$Child.Stdout)
+    stderr_sha256 = Get-TextSha256 ([string]$Child.Stderr)
+    stdout_bytes = [Text.Encoding]::UTF8.GetByteCount([string]$Child.Stdout)
+    stderr_bytes = [Text.Encoding]::UTF8.GetByteCount([string]$Child.Stderr)
+    fence_state_exists = $fenceStateExists
+    fence_state_sha256 = $fenceStateSha
+    fence_phase = $fencePhase
+    raw_records_emitted = $false
+    pii_emitted = $false
+    secrets_emitted = $false
+    updated_at = $null
+  }
+}
+
+function Write-FenceChildReceipt([string]$Step, [object]$Child, [string]$FenceState) {
+  $safeStep = ($Step -replace '[^A-Za-z0-9_-]', '').ToLowerInvariant()
+  if ([string]::IsNullOrWhiteSpace($safeStep)) { throw 'FENCE_CHILD_STEP_SHAPE' }
+  $receiptPath = $FenceState + ".$safeStep.child-receipt.json"
+  Write-State (New-FenceChildReceipt $Step $Child $FenceState) $receiptPath
+  return $receiptPath
+}
+
+function Assert-FenceChildReceiptContract {
+  $missing = Join-Path $Runtime ('missing-fence-state-' + [Guid]::NewGuid().ToString('N') + '.json')
+  $forwardJson = '{"result":"HOLD_MAZER_MASTER_CUTOVER_DATA_FENCE","category":"ACL_PREIMAGE_DRIFT"}'
+  $forward = New-FenceChildReceipt 'FenceOnly' ([pscustomobject]@{ ExitCode = 2; Stdout = $forwardJson; Stderr = 'forward-safe-error' }) $missing
+  if ([string]$forward.terminal_category -cne 'ACL_PREIMAGE_DRIFT' -or [int]$forward.exit_code -ne 2 -or [string]$forward.stdout_sha256 -cne (Get-TextSha256 $forwardJson) -or [string]$forward.stderr_sha256 -cne (Get-TextSha256 'forward-safe-error') -or [bool]$forward.fence_state_exists) { throw 'FENCE_CHILD_FAILURE_RECEIPT_CONTRACT' }
+  $rollbackJson = '{"result":"HOLD_MAZER_MASTER_CUTOVER_DATA_FENCE","category":"ROLLBACK_ACL_PREIMAGE_MISSING"}'
+  $rollback = New-FenceChildReceipt 'Rollback' ([pscustomobject]@{ ExitCode = 3; Stdout = $rollbackJson; Stderr = 'rollback-safe-error' }) $missing
+  if ([string]$rollback.terminal_category -cne 'ROLLBACK_ACL_PREIMAGE_MISSING' -or [int]$rollback.exit_code -ne 3 -or [string]$rollback.stdout_sha256 -cne (Get-TextSha256 $rollbackJson) -or [string]$rollback.stderr_sha256 -cne (Get-TextSha256 'rollback-safe-error')) { throw 'FENCE_CHILD_ROLLBACK_RECEIPT_CONTRACT' }
+}
+
 function Invoke-Fence([string]$Step, [string]$Input, [string]$InputSha, [string]$FenceState) {
   $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-Mode','Forward','-InputPath',$Input,'-StatePath',$FenceState,'-ExpectedInputSha256',$InputSha,'-ExecutionStep',$Step,'-ExecuteProtected')
   $child = Invoke-Child (Get-ShellPath) $arguments @{} 900000
+  [void](Write-FenceChildReceipt $Step $child $FenceState)
   if ($child.ExitCode -ne 0) { throw ('FENCE_' + $Step.ToUpperInvariant() + '_FAILED') }
   try { return $child.Stdout | ConvertFrom-Json } catch { throw 'FENCE_OUTPUT_SHAPE' }
 }
@@ -192,6 +262,7 @@ function Invoke-Fence([string]$Step, [string]$Input, [string]$InputSha, [string]
 function Invoke-FenceRollback([string]$Input, [string]$InputSha, [string]$FenceState) {
   $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-Mode','Rollback','-InputPath',$Input,'-StatePath',$FenceState,'-ExpectedInputSha256',$InputSha,'-ExecuteProtected')
   $child = Invoke-Child (Get-ShellPath) $arguments @{} 900000
+  [void](Write-FenceChildReceipt 'Rollback' $child $FenceState)
   if ($child.ExitCode -ne 0) { throw 'FENCE_ROLLBACK_FAILED' }
 }
 
@@ -206,6 +277,7 @@ function Assert-SourceContract {
   foreach ($shell in @((Get-Command pwsh -ErrorAction SilentlyContinue), (Get-Command powershell -ErrorAction SilentlyContinue))) {
     if ($null -ne $shell -and (Invoke-Child $shell.Source @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-SourceOnlyValidate') @{} 120000).ExitCode -ne 0) { throw 'FENCE_SOURCE_VALIDATION' }
   }
+  Assert-FenceChildReceiptContract
 }
 
 function Start-RollbackWatchdog([string]$SourcePath, [string]$SourceSha, [string]$HostState) {
@@ -264,7 +336,7 @@ try {
   if ($materialized.ExitCode -ne 0) { throw 'PRIVATE_MATERIALIZATION_FAILED' }
   $manifestPath = Join-Path $privateRoot 'manifest.json'
   $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-  if ([int]$manifest.auth_counts.imports -ne 3 -or [int]$manifest.auth_counts.binds -ne 13 -or [int]$manifest.auth_counts.retained_edges -ne 2 -or [int]$manifest.auth_counts.final_edges -ne 18 -or [int]$manifest.auth_counts.expected_target_users -ne 117) { throw 'AUTH_TOPOLOGY_MANIFEST_DRIFT' }
+  if ([int]$manifest.auth_counts.imports -ne 3 -or [int]$manifest.auth_counts.binds -ne 14 -or [int]$manifest.auth_counts.retained_edges -ne 2 -or [int]$manifest.auth_counts.final_edges -ne 19 -or [int]$manifest.auth_counts.expected_target_users -ne 117) { throw 'AUTH_TOPOLOGY_MANIFEST_DRIFT' }
   $input = Join-Path $privateRoot 'fence-input.json'
   $inputSha = Get-Sha256 $input
   $manifestSha = Get-Sha256 $manifestPath
@@ -407,7 +479,7 @@ try {
   [void](Invoke-Fence 'ReleaseLegacy' $input $inputSha $fenceState)
   Set-Phase $state 'LEGACY_RESTORED' $statePath
   Set-Phase $state 'PREPARATION_COMPLETE' $statePath
-  Write-Result 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' ([ordered]@{ phase = [string]$state.phase; master_hook_enabled = $true; legacy_signup_and_acl_restored = $true; fresh_dual_refence_and_catchup_required_for_cutover = $true; fence_lease_seconds = $HardFenceLeaseSeconds; rollback_initiation_deadline_seconds = $RollbackDeadlineSeconds; provider_writes = $providerWrites; database_transactions = $databaseTransactions; final_identity_edges = 18; profiles = 11; player = 15; ai = 15; receipts = 1882 })
+  Write-Result 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' ([ordered]@{ phase = [string]$state.phase; master_hook_enabled = $true; legacy_signup_and_acl_restored = $true; fresh_dual_refence_and_catchup_required_for_cutover = $true; fence_lease_seconds = $HardFenceLeaseSeconds; rollback_initiation_deadline_seconds = $RollbackDeadlineSeconds; provider_writes = $providerWrites; database_transactions = $databaseTransactions; final_identity_edges = 19; profiles = 12; player = 16; ai = 16; receipts = 1883 })
 }
 catch {
   $category = ([string]$_.Exception.Message -replace '[^A-Za-z0-9_]', '').ToUpperInvariant()
