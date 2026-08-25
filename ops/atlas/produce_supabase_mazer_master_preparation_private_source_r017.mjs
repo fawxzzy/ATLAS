@@ -23,9 +23,9 @@ export const PRODUCER_CONTRACT = Object.freeze({
   masterProject: R017_CONTRACT.master,
   evidence: Object.freeze({
     currentPreimage: Object.freeze({
-      relativePath: 'runtime/atlas/continuity/mazer-master-r017-current-progress-rebound-evidence-20260825.json',
+      relativePath: 'runtime/atlas/continuity/mazer-master-r017-current-profile-rebound-evidence-20260825.json',
       sha256: R017_CONTRACT.currentPreimageSha256,
-      result: 'PASS_EXACT_CURRENT_REBOUND_READY_FOR_ONE_PROTECTED_MASTER_PREPARATION_DECISION'
+      result: 'PASS_EXACT_CURRENT_PROFILE_REBOUND_READY_FOR_R017_REBIND'
     }),
     topology: Object.freeze({
       relativePath: 'runtime/atlas/continuity/mazer-master-r017-auth-identity-topology-evidence-20260825.json',
@@ -114,7 +114,7 @@ export function verifyEvidence(atlasRoot) {
   const restore = readBoundEvidence(atlasRoot, PRODUCER_CONTRACT.evidence.restoreProof);
   const expected = current.current_preimage;
   const actual = {
-    legacy: { auth_users: 18, auth_identities: 18, profiles: 10, player: 15, ai: 15, receipts: 1873 },
+    legacy: { auth_users: 18, auth_identities: 18, profiles: 11, player: 15, ai: 15, receipts: 1873 },
     master: { auth_users: 114, auth_identities: 114, profiles: 5, player: 7, ai: 7, receipts: 1290 }
   };
   for (const side of ['legacy', 'master']) for (const [name, count] of Object.entries(actual[side])) {
@@ -447,7 +447,7 @@ do $r017$ begin
   if (select count(*) from mazer.mazer_profiles) <> 5 or (select count(*) from mazer.mazer_progression_states) <> 7 or (select count(*) from mazer.mazer_ai_progression_states) <> 7 or (select count(*) from mazer.mazer_cycle_receipts) <> 1290 then raise exception 'R017_APP_PREIMAGE_DRIFT'; end if;
   if to_regclass('vault.decrypted_secrets') is null or (select count(*) from vault.secrets where name='mazer_username_handle_key') <> 0 then raise exception 'R017_MAZER_USERNAME_HANDLE_KEY_PREIMAGE_DRIFT'; end if;
   if not exists (select 1 from pg_namespace where nspname='mazer') then raise exception 'R017_DATA_API_SCHEMA_DRIFT'; end if;
-end $r017$;`, ['data_api','rls','acl','auth.users','114','10','15','1882']);
+end $r017$;`, ['data_api','rls','acl','auth.users','114','11','15','1882']);
   sql['master-fence.sql'] = sqlProgram(`
 select pg_advisory_xact_lock(hashtextextended('atlas:mazer:r017:master-fence',0));
 create schema if not exists atlas_mazer_r017;
@@ -509,7 +509,7 @@ do $r017$ begin
  if (select count(*) from pg_indexes where schemaname='mazer' and indexname=any(array[${MIGRATION_INDEXES.map(sqlLiteral).join(',')}])) <> 3 then raise exception 'R017_INDEX_CATALOG_DRIFT'; end if;
  if not exists(select 1 from pg_policies where schemaname='mazer' and tablename='mazer_profiles' and policyname='Mazer Auth hook can inspect usernames' and cmd='SELECT' and roles='{supabase_auth_admin}') then raise exception 'R017_POLICY_CATALOG_DRIFT'; end if;
  if not exists(select 1 from information_schema.triggers where event_object_schema='auth' and event_object_table='users' and trigger_name='mazer_claim_signup_username_after_insert' and action_timing='AFTER' and event_manipulation='INSERT') or not exists(select 1 from information_schema.triggers where event_object_schema='mazer' and event_object_table='mazer_profiles' and trigger_name='mazer_enforce_username_origin_before_update' and action_timing='BEFORE' and event_manipulation='UPDATE') then raise exception 'R017_TRIGGER_CATALOG_DRIFT'; end if;
-end $r017$;`, ['data_api','rls','acl','117','18','10','15','1882','receipt_conservation']);
+end $r017$;`, ['data_api','rls','acl','117','18','11','15','1882','receipt_conservation']);
   sql['qa-apply.sql'] = sqlProgram(`
 with q as (select * from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text,mode text))
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
