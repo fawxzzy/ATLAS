@@ -101,6 +101,7 @@ assert.equal(plan.retained_edges.length, 13);
 assert.equal(plan.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length, 2);
 assert.equal(plan.imports.length, 3);
 assert.ok(plan.imports.every((item) => item.user.raw_user_meta_data.app_namespace === undefined));
+assert.deepEqual(plan.imports.at(-1).identities, [fixture.legacy.auth_identities.at(-1)]);
 
 const source = producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
 const validated = validatePrivateSource(source);
@@ -122,6 +123,18 @@ assert.throws(() => buildIdentityPlan({ ...fixture.legacy, auth_users: [...fixtu
 const identityCollision = { ...fixture.legacy, auth_identities: fixture.legacy.auth_identities.map((item) => structuredClone(item)) };
 identityCollision.auth_identities.at(-1).id = fixture.master.auth_identities[0].id;
 assert.throws(() => buildIdentityPlan(identityCollision, fixture.master), /IMPORT_IDENTITY_COLLISION/);
+function importIdentityDrift(mutator) {
+  const legacy = structuredClone(fixture.legacy);
+  mutator(legacy.auth_identities.at(-1), legacy);
+  return legacy;
+}
+assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.provider = 'github'; }), fixture.master), /EMAIL_IDENTITY_PROVIDER_DRIFT/);
+assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.provider_id = 'wrong@example.test'; }), fixture.master), /EMAIL_IDENTITY_PROVIDER_ID_DRIFT/);
+assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.identity_data.sub = uid(99999); }), fixture.master), /EMAIL_IDENTITY_METADATA_SUB_DRIFT/);
+assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.identity_data.email = 'wrong@example.test'; }), fixture.master), /EMAIL_IDENTITY_METADATA_EMAIL_DRIFT/);
+assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.identity_data = null; }), fixture.master), /EMAIL_IDENTITY_METADATA_MALFORMED/);
+assert.throws(() => buildIdentityPlan(importIdentityDrift((_item, legacy) => { legacy.auth_identities.pop(); }), fixture.master), /EMAIL_IDENTITY_MISSING/);
+assert.throws(() => buildIdentityPlan(importIdentityDrift((item, legacy) => { legacy.auth_identities.push({ ...structuredClone(item), id: uid(99998) }); }), fixture.master), /EMAIL_IDENTITY_MULTIPLE/);
 assert.throws(() => producePrivateSource({ legacy: { ...fixture.legacy, receipts: fixture.legacy.receipts.slice(1) }, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'short', qaPassword: 'R017-fixture-password!' }), /PRIVATE_SECRET_INPUT_WEAK/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: { ...fixture.master, catalog: { ...catalog(), columns: [...catalog().columns, { table: 'mazer_profiles', column: 'username' }] } }, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /CATALOG_PREIMAGE_ALREADY_MIGRATED/);

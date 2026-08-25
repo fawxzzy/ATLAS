@@ -216,17 +216,27 @@ function byEmail(raw) {
   const identities = new Map();
   for (const identity of raw.auth_identities) {
     const owner = uuid(identity.user_id, 'IDENTITY_OWNER_UUID');
-    if (identity.provider === 'email') identities.set(owner, identity);
+    const owned = identities.get(owner) ?? [];
+    owned.push(identity);
+    identities.set(owner, owned);
   }
   const result = new Map();
   for (const user of raw.auth_users) {
     const email = lowerEmail(user.email);
     if (!email || result.has(email)) throw new Error('NORMALIZED_EMAIL_DUPLICATE');
     const id = uuid(user.id, 'AUTH_USER_UUID');
-    const identity = identities.get(id);
-    if (!identity) throw new Error('EMAIL_IDENTITY_MISSING');
+    const owned = identities.get(id) ?? [];
+    if (owned.length === 0) throw new Error('EMAIL_IDENTITY_MISSING');
+    if (owned.length !== 1) throw new Error('EMAIL_IDENTITY_MULTIPLE');
+    const identity = owned[0];
+    if (identity.provider !== 'email') throw new Error('EMAIL_IDENTITY_PROVIDER_DRIFT');
+    if (lowerEmail(identity.provider_id) !== email) throw new Error('EMAIL_IDENTITY_PROVIDER_ID_DRIFT');
+    if (!plain(identity.identity_data)) throw new Error('EMAIL_IDENTITY_METADATA_MALFORMED');
+    if (uuid(identity.identity_data.sub, 'EMAIL_IDENTITY_METADATA_SUB_MALFORMED') !== id) throw new Error('EMAIL_IDENTITY_METADATA_SUB_DRIFT');
+    if (typeof identity.identity_data.email !== 'string' || lowerEmail(identity.identity_data.email) !== email) throw new Error('EMAIL_IDENTITY_METADATA_EMAIL_DRIFT');
     result.set(email, { user, identity, id });
   }
+  if ([...identities.keys()].some((owner) => !raw.auth_users.some((user) => String(user.id).toLowerCase() === owner))) throw new Error('EMAIL_IDENTITY_ORPHAN');
   return result;
 }
 

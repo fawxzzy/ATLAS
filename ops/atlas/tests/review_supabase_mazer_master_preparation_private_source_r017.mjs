@@ -22,11 +22,13 @@ for (const token of [
   'CATALOG_PREIMAGE_ALREADY_MIGRATED','CATALOG_PREIMAGE_CONSTRAINT_MISSING','R017_EXISTING_AUTH_USER_DIGEST_DRIFT',
   'R017_IMPORT_USER_COLLISION','R017_IMPORTED_AUTH_USERS_DIGEST_DRIFT','R017_PROFILES_FULL_DIGEST_DRIFT',
   'R017_RECEIPT_CONSERVATION_FULL_DIGEST_DRIFT','R017_ROLLBACK_COLUMNS_DRIFT','REPARSE_COMPONENT_REJECTED',
-  'PRIVATE_OUTPUT_FINAL_PATH_ESCAPE','drop function if exists mazer.mazer_before_user_created'
+  'PRIVATE_OUTPUT_FINAL_PATH_ESCAPE','drop function if exists mazer.mazer_before_user_created',
+  'EMAIL_IDENTITY_PROVIDER_DRIFT','EMAIL_IDENTITY_PROVIDER_ID_DRIFT','EMAIL_IDENTITY_METADATA_SUB_DRIFT',
+  'EMAIL_IDENTITY_METADATA_EMAIL_DRIFT','EMAIL_IDENTITY_METADATA_MALFORMED','EMAIL_IDENTITY_MULTIPLE'
 ]) requireToken(producer, token, `PRODUCER_CONTRACT_MISSING:${token}`);
 for (const name of ['preflight.sql','master-fence.sql','master-refence.sql','auth-apply.sql','reset-era-apply.sql','postverify.sql','qa-apply.sql','qa-cleanup.sql','rollback.sql']) requireToken(producer, `sql['${name}']`, `SQL_RENDERER_MISSING:${name}`);
 for (const token of ['source_snapshot?.ai','target_snapshot?.ai','source_snapshot?.player','target_snapshot?.player','wrapMigrationTransaction','MIGRATION_TRANSACTION_SHAPE']) requireToken(materializer, token, `MATERIALIZER_CONTRACT_MISSING:${token}`);
-for (const token of ['identity_edges: 18','sql_programs: 9','materializer main executed more than once','NORMALIZED_EMAIL_DUPLICATE','PRIVATE_SECRET_INPUT_WEAK','IMPORT_IDENTITY_COLLISION','CATALOG_PREIMAGE_ALREADY_MIGRATED','MIGRATION_TRANSACTION_SHAPE','junction']) requireToken(focused, token, `ADVERSARY_MISSING:${token}`);
+for (const token of ['identity_edges: 18','sql_programs: 9','materializer main executed more than once','NORMALIZED_EMAIL_DUPLICATE','PRIVATE_SECRET_INPUT_WEAK','IMPORT_IDENTITY_COLLISION','CATALOG_PREIMAGE_ALREADY_MIGRATED','MIGRATION_TRANSACTION_SHAPE','junction','EMAIL_IDENTITY_PROVIDER_DRIFT','EMAIL_IDENTITY_PROVIDER_ID_DRIFT','EMAIL_IDENTITY_METADATA_SUB_DRIFT','EMAIL_IDENTITY_METADATA_EMAIL_DRIFT','EMAIL_IDENTITY_METADATA_MALFORMED','EMAIL_IDENTITY_MISSING','EMAIL_IDENTITY_MULTIPLE']) requireToken(focused, token, `ADVERSARY_MISSING:${token}`);
 
 for (const forbidden of ['apply_migration','execute_sql','supabase db push','vercel deploy','vercel promote','git push']) {
   if (producer.toLowerCase().includes(forbidden)) findings.push(`OUT_OF_SCOPE_EFFECT:${forbidden}`);
