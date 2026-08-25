@@ -33,7 +33,8 @@ for (const token of ['AUTH_TOPOLOGY_MANIFEST_DRIFT','auth_counts.binds -ne 14','
 for (const stale of ['auth_counts.binds -ne 13','auth_counts.final_edges -ne 18','final_identity_edges = 18','profiles = 11','player = 15','ai = 15','receipts = 1882']) if (source.host.includes(stale)) findings.push(`HOST_STALE_REBOUND_DENOMINATOR:${stale}`);
 for (const token of ['all live phase interruption','ambiguous drift','disable hook before SQL/fence','receipt conservation','Auth mapping','RLS/ACL/Data API','executor input hash binding','fence child failure receipt','fence rollback failure receipt','fence prestate terminal receipt']) requireText(source.focused, token, `ADVERSARY_LABEL_MISSING:${token}`);
 for (const token of ['Write-FenceChildReceipt','stdout_sha256','stderr_sha256','terminal_category','FENCE_CHILD_FAILURE_RECEIPT_CONTRACT','FENCE_CHILD_ROLLBACK_RECEIPT_CONTRACT']) requireText(source.host, token, `FENCE_CHILD_RECEIPT_MISSING:${token}`);
-for (const token of ['NO_EFFECT_PRESTATE','OUTER_EXECUTION_HOLD']) requireText(source.fenceHost, token, `FENCE_PRESTATE_RECEIPT_MISSING:${token}`);
+for (const token of ['NO_EFFECT_PRESTATE','PRESTATE_EXECUTION_HOLD','Write-FailClosedPrestateResult','Get-SafeFailureCategory']) requireText(source.fenceHost, token, `FENCE_PRESTATE_RECEIPT_MISSING:${token}`);
+if (/trap \{[\s\S]{0,256}Write-SafeResult/.test(source.fenceHost)) findings.push('FENCE_PRESTATE_DISCLOSURE_RECURSION');
 
 const sourceOnlyHost = source.host.slice(source.host.indexOf("if ($PSCmdlet.ParameterSetName -ceq 'Source')"), source.host.indexOf("if (-not $ExecuteProtected)"));
 if (/Invoke-RestMethod|Invoke-Psql|Start-RollbackWatchdog/.test(sourceOnlyHost)) findings.push('SOURCE_ONLY_MUTATION_PATH');

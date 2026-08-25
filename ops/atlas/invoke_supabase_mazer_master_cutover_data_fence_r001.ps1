@@ -109,6 +109,20 @@ function ConvertTo-SafeJson([object]$Value) {
   return $text
 }
 
+function Get-SafeFailureCategory([object]$ErrorValue, [string]$Fallback = 'EXECUTION_HOLD') {
+  $category = ([string]$ErrorValue -replace '[^A-Za-z0-9_]', '').ToUpperInvariant()
+  if ([string]::IsNullOrWhiteSpace($category) -or $category.Length -gt 96 -or $category -match '(?i)ACCESS[_-]?TOKEN|REFRESH[_-]?TOKEN|SERVICE[_-]?ROLE|SB_SECRET_|AUTHORIZATION|PASSWORD|POSTGRES(?:QL)?') {
+    return $Fallback
+  }
+  return $category
+}
+
+function Write-FailClosedPrestateResult([string]$Category) {
+  $safeCategory = Get-SafeFailureCategory $Category 'PRESTATE_EXECUTION_HOLD'
+  $json = '{"schema":"atlas.supabase.mazer-master-cutover-data-fence-host-result.v1","result":"HOLD_MAZER_MASTER_CUTOVER_DATA_FENCE","legacy_project_ref":"geknvnrmktchljnyddwp","legacy_schema":"public","master_project_ref":"bxtcuhkotumitoqtrcej","master_schema":"mazer","retries":0,"raw_identifiers_emitted":false,"raw_records_emitted":false,"pii_emitted":false,"secrets_emitted":false,"category":"' + $safeCategory + '","effect_status":"NO_EFFECT_PRESTATE","provider_reads":0,"provider_writes":0,"database_transactions":0,"rollback_actions":0,"acl_restore_verifications":0,"writer_capture_reads":0,"writer_drain_reads":0,"writer_lock_barriers":0,"signup_admission_reads":0,"signup_admission_barriers":0,"signup_admission_restores":0,"deployments":0,"production_changes":0}'
+  [Console]::Out.WriteLine($json)
+}
+
 function Assert-PlatformPathContract {
   $probeBase = Get-CanonicalPath ([IO.Path]::Combine([IO.Path]::GetTempPath(), 'atlas-path-contract-r001'))
   $probeChild = [IO.Path]::Combine($probeBase, 'child', 'packet.json')
@@ -721,6 +735,20 @@ function Assert-SourceContract {
   if ($errors.Count -ne 0) { throw 'POWERSHELL_PARSE_FAILED' }
   $node = Invoke-ProcessSanitized -FileName (Get-Command node -ErrorAction Stop).Source -Arguments @('--check',$Classifier) -TimeoutMs 30000
   if ($node.ExitCode -ne 0) { throw 'CLASSIFIER_PARSE_FAILED' }
+  if ((Get-SafeFailureCategory 'ACL_PREIMAGE_DRIFT' 'PRESTATE_EXECUTION_HOLD') -cne 'ACL_PREIMAGE_DRIFT') { throw 'SAFE_CATEGORY_PRESERVATION_DRIFT' }
+  foreach ($unsafeCategory in @('', 'password=synthetic', 'Authorization: synthetic', 'postgresql://synthetic', ('A' * 97))) {
+    if ((Get-SafeFailureCategory $unsafeCategory 'PRESTATE_EXECUTION_HOLD') -cne 'PRESTATE_EXECUTION_HOLD') { throw 'SAFE_CATEGORY_FAIL_CLOSED_DRIFT' }
+  }
+  $null = ConvertTo-SafeJson ([ordered]@{ category = (Get-SafeFailureCategory 'password=synthetic' 'PRESTATE_EXECUTION_HOLD'); effect_status = 'NO_EFFECT_PRESTATE' })
+  $originalOut = [Console]::Out
+  $probeOut = New-Object IO.StringWriter ([Globalization.CultureInfo]::InvariantCulture)
+  try {
+    [Console]::SetOut($probeOut)
+    Write-FailClosedPrestateResult 'password=synthetic'
+  }
+  finally { [Console]::SetOut($originalOut) }
+  try { $probeReceipt = $probeOut.ToString() | ConvertFrom-Json } catch { throw 'PRESTATE_RECEIPT_JSON_DRIFT' }
+  if ([string]$probeReceipt.category -cne 'PRESTATE_EXECUTION_HOLD' -or [string]$probeReceipt.effect_status -cne 'NO_EFFECT_PRESTATE' -or [int]$probeReceipt.provider_writes -ne 0 -or [int]$probeReceipt.database_transactions -ne 0) { throw 'PRESTATE_RECEIPT_FAIL_CLOSED_DRIFT' }
   $source = [IO.File]::ReadAllText($Classifier)
   foreach ($needle in @(
     $LegacyProjectRef,$MasterProjectRef,$LegacySchema,$MasterSchema,
@@ -764,26 +792,7 @@ if ($PSCmdlet.ParameterSetName -eq 'Source') {
 }
 
 trap {
-  $outerCategory = ([string]$_.Exception.Message -replace '[^A-Za-z0-9_]', '').ToUpperInvariant()
-  if ([string]::IsNullOrWhiteSpace($outerCategory)) { $outerCategory = 'OUTER_EXECUTION_HOLD' }
-  if ($outerCategory.Length -gt 96) { $outerCategory = $outerCategory.Substring(0, 96) }
-  Write-SafeResult 'HOLD_MAZER_MASTER_CUTOVER_DATA_FENCE' ([ordered]@{
-    category = $outerCategory
-    effect_status = 'NO_EFFECT_PRESTATE'
-    provider_reads = 0
-    provider_writes = 0
-    database_transactions = 0
-    rollback_actions = 0
-    acl_restore_verifications = 0
-    writer_capture_reads = 0
-    writer_drain_reads = 0
-    writer_lock_barriers = 0
-    signup_admission_reads = 0
-    signup_admission_barriers = 0
-    signup_admission_restores = 0
-    deployments = 0
-    production_changes = 0
-  })
+  Write-FailClosedPrestateResult ([string]$_.Exception.Message)
   exit 2
 }
 
@@ -1217,8 +1226,7 @@ try {
   })
 }
 catch {
-  $category = ([string]$_.Exception.Message -replace '[^A-Za-z0-9_]', '').ToUpperInvariant()
-  if ($category.Length -gt 96) { $category = $category.Substring(0, 96) }
+  $category = Get-SafeFailureCategory ([string]$_.Exception.Message)
   $effect = 'NO_EFFECT_CONFIRMED'
   try {
     if ($null -ne $state -and $null -ne $classification -and $null -ne $managementToken) {
