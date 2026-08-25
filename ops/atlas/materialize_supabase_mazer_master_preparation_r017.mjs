@@ -113,6 +113,10 @@ export function validatePrivateSource(raw) {
     || raw.evidence.restore_proof_sha256 !== CONTRACT.restoreProofSha256
     || raw.evidence.predecessor_fence_manifest_sha256 !== CONTRACT.predecessorFenceManifestSha256) throw new Error('EVIDENCE_BINDING_DRIFT');
   if (!plain(raw.fence_input)) throw new Error('FENCE_INPUT_MISSING');
+  if (!plain(raw.catalog_preimage) || !Array.isArray(raw.catalog_preimage.columns) || !Array.isArray(raw.catalog_preimage.constraints)
+    || !Array.isArray(raw.catalog_preimage.indexes) || !Array.isArray(raw.catalog_preimage.functions) || !Array.isArray(raw.catalog_preimage.policies)
+    || !Array.isArray(raw.catalog_preimage.triggers) || !Array.isArray(raw.catalog_preimage.schema_acl) || !Array.isArray(raw.catalog_preimage.rls)) throw new Error('CATALOG_PREIMAGE_SHAPE');
+  if (requiredDigest(raw.catalog_preimage_sha256, 'CATALOG_PREIMAGE_DIGEST') !== sha256(raw.catalog_preimage)) throw new Error('CATALOG_PREIMAGE_DIGEST_DRIFT');
   const classified = classifyCutover(raw.fence_input).receipt;
   if (classified.direction !== 'forward') throw new Error('FENCE_DIRECTION_DRIFT');
   const counts = classified.desired_counts;
@@ -168,6 +172,12 @@ function gitBlob(mazerRepository, blob) {
   return child.stdout;
 }
 
+export function wrapMigrationTransaction(bytes, phase) {
+  const sql = bytes.toString('utf8');
+  if (!['M1', 'M2', 'M3'].includes(phase) || !sql.trim() || /(^|\n)\s*(begin|start\s+transaction|commit|rollback)\s*;/im.test(sql)) throw new Error(`MIGRATION_TRANSACTION_SHAPE:${phase}`);
+  return Buffer.from(`\\set ON_ERROR_STOP on\nbegin;\nset local lock_timeout = '120s';\nset local statement_timeout = '150s';\n-- ${phase}_SINGLE_TRANSACTION\n${sql.trim()}\ncommit;\n`, 'utf8');
+}
+
 function writeExclusive(file, bytes) {
   fs.writeFileSync(file, bytes, { flag: 'wx', mode: 0o600 });
 }
@@ -178,7 +188,7 @@ export function materialize(raw, outputRoot, mazerRepository) {
   const files = [];
   const add = (name, bytes) => { const file = path.join(outputRoot, name); writeExclusive(file, bytes); files.push({ name, sha256: sha256(bytes), bytes: bytes.length }); };
   add('fence-input.json', Buffer.from(`${canonical(actionFenceInput)}\n`, 'utf8'));
-  for (const migration of CONTRACT.migrations) add(migration.name, gitBlob(mazerRepository, migration.blob));
+  for (const migration of CONTRACT.migrations) add(migration.name, wrapMigrationTransaction(gitBlob(mazerRepository, migration.blob), migration.phase));
   for (const name of CONTRACT.sqlNames) add(name, Buffer.from(`${raw.sql[name].trim()}\n`, 'utf8'));
   const manifest = {
     schema: 'atlas.supabase.mazer-master-preparation-private-manifest.r017.v1',

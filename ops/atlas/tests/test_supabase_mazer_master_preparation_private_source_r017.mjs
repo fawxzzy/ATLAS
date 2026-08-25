@@ -6,13 +6,14 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { CONTRACT as FENCE_CONTRACT, sha256 } from '../classify_supabase_mazer_master_cutover_data_fence_r001.mjs';
-import { validatePrivateSource } from '../materialize_supabase_mazer_master_preparation_r017.mjs';
+import { validatePrivateSource, wrapMigrationTransaction } from '../materialize_supabase_mazer_master_preparation_r017.mjs';
 import {
   PRODUCER_CONTRACT,
   SNAPSHOT_SQL,
   buildIdentityPlan,
   producePrivateSource,
-  renderOperationalSql
+  renderOperationalSql,
+  writePrivateSource
 } from '../produce_supabase_mazer_master_preparation_private_source_r017.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -49,6 +50,24 @@ function ai(id, reset, target = false) {
 }
 function receipt(id, owner, run, payload) { return { id, user_id: owner, surface: 'play', maze_seed: 7, maze_size: 37, route_quality: 'multi-route', start_cell: {}, goal_cell: {}, path_length: 20, wrong_turns: 1, backtracks: 0, completion_time_ms: 2000, reset_used: false, control_mode: 'stick', average_frame_ms: 16.667, receipt: { fixture: payload }, completed_at: iso(-5000), created_at: iso(-5000), ruleset_id: 'legacy-v1', recipe_version: null, recipe_hash: null, client_run_id: run };
 }
+function catalog() {
+  return {
+    columns: [
+      { table: 'mazer_profiles', column: 'user_id', ordinal: 1, data_type: 'uuid', udt_name: 'uuid', nullable: 'NO', default: null },
+      { table: 'mazer_progression_states', column: 'user_id', ordinal: 1, data_type: 'uuid', udt_name: 'uuid', nullable: 'NO', default: null },
+      { table: 'mazer_ai_progression_states', column: 'user_id', ordinal: 1, data_type: 'uuid', udt_name: 'uuid', nullable: 'NO', default: null },
+      { table: 'mazer_cycle_receipts', column: 'id', ordinal: 1, data_type: 'uuid', udt_name: 'uuid', nullable: 'NO', default: null }
+    ],
+    constraints: [
+      { table: 'mazer_progression_states', name: 'mazer_progression_states_player_level_check', type: 'c', definition: 'CHECK (player_level >= 1 AND player_level <= 99)' },
+      { table: 'mazer_progression_states', name: 'mazer_progression_states_player_target_complexity_check', type: 'c', definition: 'CHECK (player_target_complexity >= 8 AND player_target_complexity <= 240)' },
+      { table: 'mazer_ai_progression_states', name: 'mazer_ai_progression_states_level_check', type: 'c', definition: 'CHECK (level >= 1 AND level <= 99)' },
+      { table: 'mazer_ai_progression_states', name: 'mazer_ai_progression_states_target_complexity_check', type: 'c', definition: 'CHECK (target_complexity >= 8 AND target_complexity <= 240)' }
+    ], indexes: [], functions: [], policies: [], triggers: [],
+    schema_acl: [{ grantee: 'authenticated', privilege: 'USAGE', grantable: false }, { grantee: 'service_role', privilege: 'USAGE', grantable: false }],
+    rls: ['mazer_ai_progression_states','mazer_cycle_receipts','mazer_profiles','mazer_progression_states'].map((table) => ({ table, enabled: true, forced: true }))
+  };
+}
 function rawFixture() {
   const legacyEmails = [...sharedLegacy, ...legacyOnly].map((id, index) => [`person-${index}@example.test`, id]);
   const masterEmails = [...sharedMaster.map((id, index) => [`person-${index}@example.test`, id]), ...unrelatedMaster.map((id, index) => [`other-${index}@example.test`, id])];
@@ -61,11 +80,11 @@ function rawFixture() {
   return {
     legacy: {
       observed_at: iso(0), auth_users: legacyEmails.map(([email, id]) => user(id, email)), auth_identities: legacyEmails.map(([email, id], index) => identity(id, email, index)),
-      profiles: sharedLegacy.slice(0, 10).map(profile), player: sharedLegacy.map((id, index) => player(id, index === 13)), ai: sharedLegacy.map((id, index) => ai(id, index === 13, false)), receipts: [...overlappingLegacyReceipts, ...legacyOnlyReceipts]
+      profiles: sharedLegacy.slice(0, 10).map(profile), player: sharedLegacy.map((id, index) => player(id, index === 13)), ai: sharedLegacy.map((id, index) => ai(id, index === 13, false)), receipts: [...overlappingLegacyReceipts, ...legacyOnlyReceipts], catalog: catalog()
     },
     master: {
       observed_at: iso(-1000), auth_users: masterEmails.map(([email, id]) => user(id, email)), auth_identities: masterEmails.map(([email, id], index) => identity(id, email, 100 + index)),
-      profiles: sharedMaster.slice(0, 5).map(profile), player: targetUsers.map((index) => player(sharedMaster[index], index === 13)), ai: targetUsers.map((index) => ai(sharedMaster[index], index === 13, index === 13)), receipts: [...overlappingMasterReceipts, ...masterOnlyReceipts]
+      profiles: sharedMaster.slice(0, 5).map(profile), player: targetUsers.map((index) => player(sharedMaster[index], index === 13)), ai: targetUsers.map((index) => ai(sharedMaster[index], index === 13, index === 13)), receipts: [...overlappingMasterReceipts, ...masterOnlyReceipts], catalog: catalog()
     }
   };
 }
@@ -100,8 +119,17 @@ for (const [name, sql] of Object.entries(source.sql)) {
 assert.match(SNAPSHOT_SQL('public'), /transaction isolation level serializable read only/i);
 assert.match(SNAPSHOT_SQL('mazer'), /from mazer\.mazer_profiles/);
 assert.throws(() => buildIdentityPlan({ ...fixture.legacy, auth_users: [...fixture.legacy.auth_users, fixture.legacy.auth_users[0]] }, fixture.master), /NORMALIZED_EMAIL_DUPLICATE/);
+const identityCollision = { ...fixture.legacy, auth_identities: fixture.legacy.auth_identities.map((item) => structuredClone(item)) };
+identityCollision.auth_identities.at(-1).id = fixture.master.auth_identities[0].id;
+assert.throws(() => buildIdentityPlan(identityCollision, fixture.master), /IMPORT_IDENTITY_COLLISION/);
 assert.throws(() => producePrivateSource({ legacy: { ...fixture.legacy, receipts: fixture.legacy.receipts.slice(1) }, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'short', qaPassword: 'R017-fixture-password!' }), /PRIVATE_SECRET_INPUT_WEAK/);
+assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: { ...fixture.master, catalog: { ...catalog(), columns: [...catalog().columns, { table: 'mazer_profiles', column: 'username' }] } }, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /CATALOG_PREIMAGE_ALREADY_MIGRATED/);
+const wrappedMigration = wrapMigrationTransaction(Buffer.from('select 1;\n'), 'M1').toString('utf8');
+assert.match(wrappedMigration, /^\\set ON_ERROR_STOP on\nbegin;/);
+assert.match(wrappedMigration, /M1_SINGLE_TRANSACTION/);
+assert.equal((wrappedMigration.match(/\ncommit;/g) ?? []).length, 1);
+assert.throws(() => wrapMigrationTransaction(Buffer.from('begin; select 1; commit;'), 'M2'), /MIGRATION_TRANSACTION_SHAPE/);
 
 const producerPath = path.join(root, 'ops/atlas/produce_supabase_mazer_master_preparation_private_source_r017.mjs');
 const materializerPath = path.join(root, 'ops/atlas/materialize_supabase_mazer_master_preparation_r017.mjs');
@@ -119,13 +147,33 @@ try {
   assert.equal(resultLines.length, 1, 'materializer main executed more than once');
   assert.equal(resultLines[0].result, 'PRIVATE_R017_PACKET_SEALED');
   assert.equal(fs.readdirSync(out).length, 14);
+  for (const name of ['m1.sql','m2.sql','m3.sql']) {
+    const migration = fs.readFileSync(path.join(out, name), 'utf8');
+    assert.match(migration, /^\\set ON_ERROR_STOP on\nbegin;/);
+    assert.equal((migration.match(/\ncommit;/g) ?? []).length, 1);
+  }
 } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
+
+const privateWriteRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-private-write-'));
+try {
+  fs.mkdirSync(path.join(privateWriteRoot, 'secrets'));
+  const result = writePrivateSource(privateWriteRoot, undefined, { fixture: true });
+  assert.ok(result.path.startsWith(path.join(privateWriteRoot, 'secrets')));
+  assert.equal(fs.readFileSync(result.path, 'utf8'), '{"fixture":true}\n');
+} finally { fs.rmSync(privateWriteRoot, { recursive: true, force: true }); }
+const junctionRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-private-junction-'));
+const junctionOutside = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-private-outside-'));
+try {
+  fs.mkdirSync(path.join(junctionRoot, 'secrets'));
+  fs.symlinkSync(junctionOutside, path.join(junctionRoot, 'secrets', 'packet'), process.platform === 'win32' ? 'junction' : 'dir');
+  assert.throws(() => writePrivateSource(junctionRoot, undefined, { fixture: true }), /REPARSE_COMPONENT_REJECTED/);
+} finally { fs.rmSync(junctionRoot, { recursive: true, force: true }); fs.rmSync(junctionOutside, { recursive: true, force: true }); }
 
 const sourceCheck = spawnSync(process.execPath, [producerPath, '--source-check', 'true'], { cwd: root, encoding: 'utf8', windowsHide: true });
 assert.equal(sourceCheck.status, 0, sourceCheck.stderr);
 assert.equal(JSON.parse(sourceCheck.stdout).result, 'PASS_R017_PRIVATE_SOURCE_PRODUCER_SOURCE');
 
-const rendered = renderOperationalSql({ auth: source.auth, fenceInput: source.fence_input, reset: { quarantined_row: source.reset_era_ai.quarantined_row }, qa: source.qa, quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
+const rendered = renderOperationalSql({ auth: source.auth, fenceInput: source.fence_input, catalogPreimage: source.catalog_preimage, reset: { quarantined_row: source.reset_era_ai.quarantined_row }, qa: source.qa, quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
 assert.deepEqual(Object.keys(rendered.sql), [...Object.keys(source.sql)]);
 
 console.log(JSON.stringify({ result: 'PASS_MAZER_MASTER_PREPARATION_PRIVATE_SOURCE_R017', identity_edges: 18, imports: 3, binds: 2, app_counts: validated.classified.desired_counts, sql_programs: 9, provider_calls: 0, provider_writes: 0, auth_writes: 0, live_data_writes: 0, raw_private_output: 0 }));

@@ -65,6 +65,35 @@ function assertInside(candidate, root, code) {
   return resolved;
 }
 
+export function assertNoReparseComponents(candidate, stopAt) {
+  const resolved = path.resolve(candidate); const stop = path.resolve(stopAt);
+  assertInside(resolved, path.dirname(stop), 'REPARSE_SCOPE_ESCAPE');
+  const relative = path.relative(path.dirname(stop), resolved);
+  let cursor = path.dirname(stop);
+  for (const component of relative.split(path.sep).filter(Boolean)) {
+    cursor = path.join(cursor, component);
+    if (!fs.existsSync(cursor)) continue;
+    const stat = fs.lstatSync(cursor, { bigint: false });
+    if (stat.isSymbolicLink()) throw new Error('REPARSE_COMPONENT_REJECTED');
+    const real = fs.realpathSync.native(cursor);
+    if (path.normalize(real) !== path.normalize(cursor)) throw new Error('REPARSE_COMPONENT_REJECTED');
+  }
+  return resolved;
+}
+
+function mkdirPrivateChain(directory, secretsRoot) {
+  const root = assertNoReparseComponents(secretsRoot, secretsRoot);
+  if (!fs.existsSync(root)) throw new Error('SECRETS_ROOT_MISSING');
+  const relative = path.relative(root, path.resolve(directory));
+  let cursor = root;
+  for (const component of relative.split(path.sep).filter(Boolean)) {
+    cursor = path.join(cursor, component);
+    if (!fs.existsSync(cursor)) fs.mkdirSync(cursor, { mode: 0o700 });
+    assertNoReparseComponents(cursor, root);
+    if (!fs.statSync(cursor).isDirectory()) throw new Error('PRIVATE_PARENT_NOT_DIRECTORY');
+  }
+}
+
 function readBoundEvidence(atlasRoot, contract) {
   const file = assertInside(path.join(atlasRoot, contract.relativePath), path.join(atlasRoot, 'runtime', 'atlas'), 'EVIDENCE_PATH_ESCAPE');
   const bytes = fs.readFileSync(file);
@@ -89,6 +118,9 @@ export function verifyEvidence(atlasRoot) {
   return { current, restore };
 }
 
+const MIGRATION_FUNCTIONS = Object.freeze(['mazer_is_username_available','mazer_initialize_progression','mazer_complete_level','mazer_complete_ai_level','mazer_reset_progression','mazer_leaderboard_page','mazer_leaderboard_self_rank','mazer_before_user_created','mazer_claim_signup_username']);
+const MIGRATION_INDEXES = Object.freeze(['mazer_profiles_username_unique_idx','mazer_cycle_receipts_user_client_run_id_unique_idx','mazer_progression_states_leaderboard_order_idx']);
+
 export const SNAPSHOT_SQL = (schema) => String.raw`begin transaction isolation level serializable read only;
 select jsonb_build_object(
   'observed_at', clock_timestamp(),
@@ -97,7 +129,17 @@ select jsonb_build_object(
   'profiles', coalesce((select jsonb_agg(to_jsonb(t) order by t.user_id) from ${schema}.mazer_profiles t),'[]'::jsonb),
   'player', coalesce((select jsonb_agg(to_jsonb(t) order by t.user_id) from ${schema}.mazer_progression_states t),'[]'::jsonb),
   'ai', coalesce((select jsonb_agg(to_jsonb(t) order by t.user_id,t.runner_key) from ${schema}.mazer_ai_progression_states t),'[]'::jsonb),
-  'receipts', coalesce((select jsonb_agg(to_jsonb(t) order by t.id) from ${schema}.mazer_cycle_receipts t),'[]'::jsonb)
+  'receipts', coalesce((select jsonb_agg(to_jsonb(t) order by t.id) from ${schema}.mazer_cycle_receipts t),'[]'::jsonb),
+  'catalog', jsonb_build_object(
+    'columns',coalesce((select jsonb_agg(jsonb_build_object('table',c.table_name,'column',c.column_name,'ordinal',c.ordinal_position,'data_type',c.data_type,'udt_name',c.udt_name,'nullable',c.is_nullable,'default',c.column_default) order by c.table_name,c.ordinal_position) from information_schema.columns c where c.table_schema=${sqlLiteral(schema)} and c.table_name in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')),'[]'::jsonb),
+    'constraints',coalesce((select jsonb_agg(jsonb_build_object('table',cl.relname,'name',co.conname,'type',co.contype,'definition',pg_get_constraintdef(co.oid,true)) order by cl.relname,co.conname) from pg_constraint co join pg_class cl on cl.oid=co.conrelid join pg_namespace n on n.oid=cl.relnamespace where n.nspname=${sqlLiteral(schema)} and cl.relname in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')),'[]'::jsonb),
+    'indexes',coalesce((select jsonb_agg(jsonb_build_object('name',i.indexname,'definition',i.indexdef) order by i.indexname) from pg_indexes i where i.schemaname=${sqlLiteral(schema)}),'[]'::jsonb),
+    'functions',coalesce((select jsonb_agg(jsonb_build_object('name',p.proname,'identity_args',pg_get_function_identity_arguments(p.oid),'result',pg_get_function_result(p.oid),'owner',pg_get_userbyid(p.proowner),'security_definer',p.prosecdef,'volatility',p.provolatile,'acl',coalesce(p.proacl::text,'NULL'),'definition',pg_get_functiondef(p.oid)) order by p.proname,pg_get_function_identity_arguments(p.oid)) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname=${sqlLiteral(schema)} and p.proname=any(array[${MIGRATION_FUNCTIONS.map(sqlLiteral).join(',')}])),'[]'::jsonb),
+    'policies',coalesce((select jsonb_agg(to_jsonb(p) order by p.tablename,p.policyname) from pg_policies p where p.schemaname=${sqlLiteral(schema)}),'[]'::jsonb),
+    'triggers',coalesce((select jsonb_agg(jsonb_build_object('table_schema',event_object_schema,'table',event_object_table,'name',trigger_name,'timing',action_timing,'event',event_manipulation,'statement',action_statement) order by event_object_schema,event_object_table,trigger_name,event_manipulation) from information_schema.triggers where (event_object_schema=${sqlLiteral(schema)} or event_object_schema='auth') and trigger_name='mazer_claim_signup_username_after_insert'),'[]'::jsonb),
+    'schema_acl',coalesce((select jsonb_agg(jsonb_build_object('grantee',case when x.grantee=0 then 'public' else pg_get_userbyid(x.grantee) end,'privilege',x.privilege_type,'grantable',x.is_grantable) order by case when x.grantee=0 then 'public' else pg_get_userbyid(x.grantee) end,x.privilege_type) from pg_namespace n cross join lateral aclexplode(coalesce(n.nspacl,acldefault('n',n.nspowner))) x where n.nspname=${sqlLiteral(schema)}),'[]'::jsonb),
+    'rls',coalesce((select jsonb_agg(jsonb_build_object('table',c.relname,'enabled',c.relrowsecurity,'forced',c.relforcerowsecurity) order by c.relname) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname=${sqlLiteral(schema)} and c.relname in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')),'[]'::jsonb)
+  )
 )::text;
 commit;`;
 
@@ -192,17 +234,21 @@ export function buildIdentityPlan(legacyRaw, masterRaw) {
   const legacy = byEmail(legacyRaw); const master = byEmail(masterRaw);
   if (legacyRaw.auth_users.length !== 18 || legacyRaw.auth_identities.length !== 18 || masterRaw.auth_users.length !== 114 || masterRaw.auth_identities.length !== 114) throw new Error('LIVE_AUTH_DENOMINATOR_DRIFT');
   const masterIds = new Set(masterRaw.auth_users.map((user) => uuid(user.id, 'MASTER_AUTH_USER_UUID')));
+  const masterIdentityIds = new Set(masterRaw.auth_identities.map((identity) => String(identity.id).toLowerCase()));
+  const masterProviderIds = new Set(masterRaw.auth_identities.filter((identity) => identity.provider === 'email').map((identity) => lowerEmail(identity.provider_id)));
   const retained_edges = []; const new_edges = []; const imports = [];
   for (const [email, left] of sort([...legacy.entries()], (entry) => entry[0])) {
     const right = master.get(email);
     if (right) {
       const same = left.id === right.id;
-      const edge = { legacy_user_id: left.id, master_user_id: right.id, disposition: same ? 'RETAINED' : 'BIND_EXISTING', evidence_digest: digest({ normalized_email: email, legacy_user_id: left.id, master_user_id: right.id }) };
+      if (lowerEmail(right.identity.provider_id) !== email || lowerEmail(right.user.email) !== email || uuid(right.identity.user_id, 'MASTER_IDENTITY_OWNER') !== right.id) throw new Error('EXISTING_AUTH_BINDING_DRIFT');
+      const edge = { legacy_user_id: left.id, master_user_id: right.id, disposition: same ? 'RETAINED' : 'BIND_EXISTING', normalized_email: email, master_user: structuredClone(right.user), master_identity: structuredClone(right.identity), evidence_digest: digest({ normalized_email: email, legacy_user_id: left.id, master_user_id: right.id }) };
       (same ? retained_edges : new_edges).push(edge);
       continue;
     }
     if (!BCRYPT.test(String(left.user.encrypted_password ?? ''))) throw new Error('UNSUPPORTED_PASSWORD_VERIFIER');
     if (masterIds.has(left.id)) throw new Error('IMPORT_UUID_COLLISION');
+    if (masterIdentityIds.has(String(left.identity.id).toLowerCase()) || masterProviderIds.has(email)) throw new Error('IMPORT_IDENTITY_COLLISION');
     const user = structuredClone(left.user);
     user.id = left.id;
     user.instance_id = masterRaw.auth_users[0]?.instance_id;
@@ -211,7 +257,7 @@ export function buildIdentityPlan(legacyRaw, masterRaw) {
     const identity = structuredClone(left.identity);
     identity.user_id = left.id;
     imports.push({ user, identities: [identity] });
-    new_edges.push({ legacy_user_id: left.id, master_user_id: left.id, disposition: 'CREATE_AND_BIND', evidence_digest: digest({ normalized_email: email, legacy_user_id: left.id, master_user_id: left.id }) });
+    new_edges.push({ legacy_user_id: left.id, master_user_id: left.id, disposition: 'CREATE_AND_BIND', normalized_email: email, evidence_digest: digest({ normalized_email: email, legacy_user_id: left.id, master_user_id: left.id }) });
   }
   if (retained_edges.length !== 13 || new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length !== 2 || imports.length !== 3) throw new Error('IDENTITY_DENOMINATOR_DRIFT');
   return { imports, new_edges, retained_edges };
@@ -267,13 +313,83 @@ function deterministicQa(auth) {
   return Array.from({ length: 4 }, (_, index) => ({ id: uuidFrom(index * 3), email: `mazer-r017-qa-${index + 1}@example.invalid`, username: `r017qa${index + 1}` }));
 }
 
+function validateCatalogPreimage(catalog) {
+  for (const key of ['columns','constraints','indexes','functions','policies','triggers','schema_acl','rls']) if (!Array.isArray(catalog?.[key])) throw new Error('CATALOG_PREIMAGE_SHAPE');
+  const addedColumns = new Set(['mazer_profiles:revision','mazer_profiles:username','mazer_progression_states:revision','mazer_progression_states:level_reached_at','mazer_cycle_receipts:ruleset_id','mazer_cycle_receipts:recipe_version','mazer_cycle_receipts:recipe_hash','mazer_cycle_receipts:client_run_id']);
+  if (catalog.columns.some((item) => addedColumns.has(`${item.table}:${item.column}`))) throw new Error('CATALOG_PREIMAGE_ALREADY_MIGRATED');
+  if (catalog.indexes.some((item) => MIGRATION_INDEXES.includes(item.name)) || catalog.functions.some((item) => MIGRATION_FUNCTIONS.includes(item.name)) || catalog.triggers.some((item) => item.name === 'mazer_claim_signup_username_after_insert') || catalog.policies.some((item) => item.policyname === 'Mazer Auth hook can inspect usernames')) throw new Error('CATALOG_PREIMAGE_ALREADY_MIGRATED');
+  const requiredConstraints = ['mazer_progression_states_player_level_check','mazer_progression_states_player_target_complexity_check','mazer_ai_progression_states_level_check','mazer_ai_progression_states_target_complexity_check'];
+  for (const name of requiredConstraints) if (!catalog.constraints.some((item) => item.name === name && typeof item.definition === 'string')) throw new Error(`CATALOG_PREIMAGE_CONSTRAINT_MISSING:${name}`);
+  if (catalog.rls.length !== 4 || catalog.rls.some((item) => item.enabled !== true || item.forced !== true)) throw new Error('CATALOG_PREIMAGE_RLS_DRIFT');
+  return catalog;
+}
+
 function sqlProgram(body, labels = []) { return `\\set ON_ERROR_STOP on\nbegin;\n${labels.map((label) => `-- ${label}`).join('\n')}\n${body.trim()}\ncommit;`; }
 
-export function renderOperationalSql({ auth, fenceInput, reset, qa, quarantineKey, qaPassword }) {
+function reverseCatalogSql(catalog) {
+  validateCatalogPreimage(catalog);
+  const constraintNames = new Set(['mazer_progression_states_player_level_check','mazer_progression_states_player_target_complexity_check','mazer_ai_progression_states_level_check','mazer_ai_progression_states_target_complexity_check']);
+  const constraints = catalog.constraints.filter((item) => constraintNames.has(item.name));
+  for (const item of constraints) if (!/^[A-Za-z0-9_]+$/.test(item.table) || !/^[A-Za-z0-9_]+$/.test(item.name) || !/^CHECK \(/.test(item.definition)) throw new Error('CATALOG_CONSTRAINT_UNSAFE');
+  const priorClientRunIndex = catalog.indexes.find((item) => item.name === 'mazer_cycle_receipts_client_run_id_unique_idx');
+  if (priorClientRunIndex && !/^CREATE UNIQUE INDEX mazer_cycle_receipts_client_run_id_unique_idx ON mazer\.mazer_cycle_receipts USING btree /.test(priorClientRunIndex.definition)) throw new Error('CATALOG_INDEX_UNSAFE');
+  const schemaRoles = ['anon','authenticated','service_role','supabase_auth_admin'];
+  const schemaGrants = catalog.schema_acl.filter((item) => schemaRoles.includes(item.grantee) && item.privilege === 'USAGE').map((item) => `grant usage on schema mazer to ${item.grantee}${item.grantable ? ' with grant option' : ''};`);
+  const rls = catalog.rls.map((item) => `alter table mazer.${item.table} ${item.enabled ? 'enable' : 'disable'} row level security;\nalter table mazer.${item.table} ${item.forced ? 'force' : 'no force'} row level security;`).join('\n');
+  return `
+drop trigger if exists mazer_claim_signup_username_after_insert on auth.users;
+drop policy if exists "Mazer Auth hook can inspect usernames" on mazer.mazer_profiles;
+drop function if exists mazer.mazer_before_user_created(jsonb);
+drop function if exists mazer.mazer_claim_signup_username();
+drop function if exists mazer.mazer_leaderboard_self_rank();
+drop function if exists mazer.mazer_leaderboard_page(integer,integer);
+drop function if exists mazer.mazer_reset_progression(bigint,uuid);
+drop function if exists mazer.mazer_complete_ai_level(uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb);
+drop function if exists mazer.mazer_complete_level(bigint,uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb);
+drop function if exists mazer.mazer_initialize_progression(uuid);
+drop function if exists mazer.mazer_is_username_available(text);
+drop index if exists mazer.mazer_progression_states_leaderboard_order_idx;
+drop index if exists mazer.mazer_profiles_username_unique_idx;
+drop index if exists mazer.mazer_cycle_receipts_user_client_run_id_unique_idx;
+alter table mazer.mazer_progression_states drop constraint if exists mazer_progression_states_player_level_check;
+alter table mazer.mazer_progression_states drop constraint if exists mazer_progression_states_player_target_complexity_check;
+alter table mazer.mazer_ai_progression_states drop constraint if exists mazer_ai_progression_states_level_check;
+alter table mazer.mazer_ai_progression_states drop constraint if exists mazer_ai_progression_states_target_complexity_check;
+alter table mazer.mazer_progression_states alter column player_level type integer using player_level::integer,alter column player_completed_cycles type integer using player_completed_cycles::integer;
+alter table mazer.mazer_ai_progression_states alter column level type integer using level::integer,alter column completed_cycles type integer using completed_cycles::integer;
+${constraints.map((item) => `alter table mazer.${item.table} add constraint ${item.name} ${item.definition};`).join('\n')}
+alter table mazer.mazer_profiles drop column if exists username,drop column if exists revision;
+alter table mazer.mazer_progression_states drop column if exists level_reached_at,drop column if exists revision;
+alter table mazer.mazer_cycle_receipts drop column if exists client_run_id,drop column if exists recipe_hash,drop column if exists recipe_version,drop column if exists ruleset_id;
+${priorClientRunIndex ? `${priorClientRunIndex.definition};` : ''}
+revoke usage on schema mazer from anon,authenticated,service_role,supabase_auth_admin;
+${schemaGrants.join('\n')}
+${rls}`;
+}
+
+function catalogEqualityAssertions(catalog) {
+  return `
+if (select coalesce(jsonb_agg(jsonb_build_object('table',c.table_name,'column',c.column_name,'ordinal',c.ordinal_position,'data_type',c.data_type,'udt_name',c.udt_name,'nullable',c.is_nullable,'default',c.column_default) order by c.table_name,c.ordinal_position),'[]'::jsonb) from information_schema.columns c where c.table_schema='mazer' and c.table_name in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) <> ${jsonLiteral(catalog.columns)} then raise exception 'R017_ROLLBACK_COLUMNS_DRIFT'; end if;
+if (select coalesce(jsonb_agg(jsonb_build_object('table',cl.relname,'name',co.conname,'type',co.contype,'definition',pg_get_constraintdef(co.oid,true)) order by cl.relname,co.conname),'[]'::jsonb) from pg_constraint co join pg_class cl on cl.oid=co.conrelid join pg_namespace n on n.oid=cl.relnamespace where n.nspname='mazer' and cl.relname in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) <> ${jsonLiteral(catalog.constraints)} then raise exception 'R017_ROLLBACK_CONSTRAINTS_DRIFT'; end if;
+if (select coalesce(jsonb_agg(jsonb_build_object('name',i.indexname,'definition',i.indexdef) order by i.indexname),'[]'::jsonb) from pg_indexes i where i.schemaname='mazer') <> ${jsonLiteral(catalog.indexes)} then raise exception 'R017_ROLLBACK_INDEXES_DRIFT'; end if;
+if (select coalesce(jsonb_agg(jsonb_build_object('name',p.proname,'identity_args',pg_get_function_identity_arguments(p.oid),'result',pg_get_function_result(p.oid),'owner',pg_get_userbyid(p.proowner),'security_definer',p.prosecdef,'volatility',p.provolatile,'acl',coalesce(p.proacl::text,'NULL'),'definition',pg_get_functiondef(p.oid)) order by p.proname,pg_get_function_identity_arguments(p.oid)),'[]'::jsonb) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='mazer' and p.proname=any(array[${MIGRATION_FUNCTIONS.map(sqlLiteral).join(',')}])) <> ${jsonLiteral(catalog.functions)} then raise exception 'R017_ROLLBACK_FUNCTIONS_DRIFT'; end if;
+if (select coalesce(jsonb_agg(to_jsonb(p) order by p.tablename,p.policyname),'[]'::jsonb) from pg_policies p where p.schemaname='mazer') <> ${jsonLiteral(catalog.policies)} then raise exception 'R017_ROLLBACK_POLICIES_DRIFT'; end if;
+if (select coalesce(jsonb_agg(jsonb_build_object('table_schema',event_object_schema,'table',event_object_table,'name',trigger_name,'timing',action_timing,'event',event_manipulation,'statement',action_statement) order by event_object_schema,event_object_table,trigger_name,event_manipulation),'[]'::jsonb) from information_schema.triggers where (event_object_schema='mazer' or event_object_schema='auth') and trigger_name='mazer_claim_signup_username_after_insert') <> ${jsonLiteral(catalog.triggers)} then raise exception 'R017_ROLLBACK_TRIGGERS_DRIFT'; end if;
+if (select coalesce(jsonb_agg(jsonb_build_object('grantee',case when x.grantee=0 then 'public' else pg_get_userbyid(x.grantee) end,'privilege',x.privilege_type,'grantable',x.is_grantable) order by case when x.grantee=0 then 'public' else pg_get_userbyid(x.grantee) end,x.privilege_type),'[]'::jsonb) from pg_namespace n cross join lateral aclexplode(coalesce(n.nspacl,acldefault('n',n.nspowner))) x where n.nspname='mazer') <> ${jsonLiteral(catalog.schema_acl)} then raise exception 'R017_ROLLBACK_SCHEMA_ACL_DRIFT'; end if;
+if (select coalesce(jsonb_agg(jsonb_build_object('table',c.relname,'enabled',c.relrowsecurity,'forced',c.relforcerowsecurity) order by c.relname),'[]'::jsonb) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='mazer' and c.relname in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) <> ${jsonLiteral(catalog.rls)} then raise exception 'R017_ROLLBACK_RLS_DRIFT'; end if;`;
+}
+
+export function renderOperationalSql({ auth, fenceInput, actionFenceInput = fenceInput, catalogPreimage, reset, qa, quarantineKey, qaPassword }) {
+  validateCatalogPreimage(catalogPreimage);
   const classified = classifyCutover(fenceInput);
+  const actionClassified = classifyCutover(actionFenceInput);
   const imports = auth.imports;
   const edges = [...auth.retained_edges, ...auth.new_edges];
+  const existingBindings = edges.filter((edge) => edge.disposition !== 'CREATE_AND_BIND').map((edge) => ({ normalized_email: edge.normalized_email, user: edge.master_user, identity: edge.master_identity }));
+  const importUsers = imports.map((item) => item.user); const importIdentities = imports.flatMap((item) => item.identities);
+  const expectedMap = sort(edges.map((edge) => ({ legacy_user_id: edge.legacy_user_id, master_user_id: edge.master_user_id, evidence_digest: edge.evidence_digest })), (edge) => edge.legacy_user_id);
   const qaRows = qa.rows;
+  const desiredRows = actionClassified.privatePlan.desired;
   const targetRows = Object.fromEntries(['profiles','player','ai','receipts'].map((name) => [name, fenceInput.target_snapshot[name].map((item) => item.row)]));
   const aclRestore = fenceInput.fence.master.acl_preimage.table_acl.flatMap((table) => {
     const statements = [`revoke insert,update,delete on mazer.${table.name} from anon,authenticated,public;`];
@@ -301,19 +417,42 @@ revoke insert,update,delete on mazer.mazer_profiles,mazer.mazer_progression_stat
 revoke all on function mazer.mazer_initialize_progression(uuid),mazer.mazer_complete_level(bigint,uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb),mazer.mazer_complete_ai_level(uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb),mazer.mazer_reset_progression(bigint,uuid) from anon,public;`, ['mazer_initialize_progression','mazer_complete_level','mazer_complete_ai_level','mazer_reset_progression','revoke']);
   sql['auth-apply.sql'] = sqlProgram(`
 create table if not exists mazer.mazer_identity_map(legacy_user_id uuid primary key,master_user_id uuid not null unique,evidence_digest text not null check(evidence_digest ~ '^[0-9a-f]{64}$'));
-with rows as (select jsonb_array_elements(${jsonLiteral(imports.map((item) => item.user))}) value) insert into auth.users select (jsonb_populate_record(null::auth.users,value)).* from rows on conflict(id) do nothing;
-with rows as (select jsonb_array_elements(${jsonLiteral(imports.flatMap((item) => item.identities))}) value) insert into auth.identities select (jsonb_populate_record(null::auth.identities,value)).* from rows on conflict(id) do nothing;
+do $r017_auth_precheck$ begin
+ if exists(select 1 from jsonb_array_elements(${jsonLiteral(existingBindings)}) e where not exists(select 1 from auth.users u where u.id=(e->'user'->>'id')::uuid and lower(u.email)=e->>'normalized_email' and to_jsonb(u)=e->'user')) then raise exception 'R017_EXISTING_AUTH_USER_DIGEST_DRIFT'; end if;
+ if exists(select 1 from jsonb_array_elements(${jsonLiteral(existingBindings)}) e where not exists(select 1 from auth.identities i where i.id=(e->'identity'->>'id')::uuid and i.user_id=(e->'user'->>'id')::uuid and i.provider='email' and lower(i.provider_id)=e->>'normalized_email' and to_jsonb(i)=e->'identity')) then raise exception 'R017_EXISTING_AUTH_IDENTITY_DIGEST_DRIFT'; end if;
+ if exists(select 1 from auth.users u join jsonb_array_elements(${jsonLiteral(importUsers)}) e on u.id=(e->>'id')::uuid or lower(u.email)=lower(e->>'email')) then raise exception 'R017_IMPORT_USER_COLLISION'; end if;
+ if exists(select 1 from auth.identities i join jsonb_array_elements(${jsonLiteral(importIdentities)}) e on i.id=(e->>'id')::uuid or (i.provider=e->>'provider' and lower(i.provider_id)=lower(e->>'provider_id'))) then raise exception 'R017_IMPORT_IDENTITY_COLLISION'; end if;
+end $r017_auth_precheck$;
+with rows as (select jsonb_array_elements(${jsonLiteral(importUsers)}) value) insert into auth.users select (jsonb_populate_record(null::auth.users,value)).* from rows;
+with rows as (select jsonb_array_elements(${jsonLiteral(importIdentities)}) value) insert into auth.identities select (jsonb_populate_record(null::auth.identities,value)).* from rows;
 insert into mazer.mazer_identity_map(legacy_user_id,master_user_id,evidence_digest) select legacy_user_id,master_user_id,evidence_digest from jsonb_to_recordset(${jsonLiteral(edges)}) as x(legacy_user_id uuid,master_user_id uuid,evidence_digest text,disposition text) on conflict(legacy_user_id) do update set master_user_id=excluded.master_user_id,evidence_digest=excluded.evidence_digest where mazer.mazer_identity_map.master_user_id=excluded.master_user_id;
-do $r017$ begin if (select count(*) from mazer.mazer_identity_map) <> 18 then raise exception 'R017_IDENTITY_EDGE_COUNT'; end if; end $r017$;`, ['auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','2_existing_binds']);
+do $r017_auth_postcheck$ begin
+ if (select coalesce(jsonb_agg(to_jsonb(u) order by u.id),'[]'::jsonb) from auth.users u where u.id in (select (e->>'id')::uuid from jsonb_array_elements(${jsonLiteral(importUsers)}) e)) <> ${jsonLiteral(sort(importUsers, (item) => item.id))} then raise exception 'R017_IMPORTED_AUTH_USERS_DIGEST_DRIFT'; end if;
+ if (select coalesce(jsonb_agg(to_jsonb(i) order by i.id),'[]'::jsonb) from auth.identities i where i.id in (select (e->>'id')::uuid from jsonb_array_elements(${jsonLiteral(importIdentities)}) e)) <> ${jsonLiteral(sort(importIdentities, (item) => item.id))} then raise exception 'R017_IMPORTED_AUTH_IDENTITIES_DIGEST_DRIFT'; end if;
+ if (select coalesce(jsonb_agg(jsonb_build_object('legacy_user_id',legacy_user_id,'master_user_id',master_user_id,'evidence_digest',evidence_digest) order by legacy_user_id),'[]'::jsonb) from mazer.mazer_identity_map) <> ${jsonLiteral(expectedMap)} then raise exception 'R017_IDENTITY_MAP_DIGEST_DRIFT'; end if;
+end $r017_auth_postcheck$;`, ['auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','2_existing_binds']);
   sql['reset-era-apply.sql'] = sqlProgram(`
 create extension if not exists pgcrypto with schema extensions;
 create table if not exists atlas_mazer_r017.reset_quarantine(id text primary key,ciphertext bytea not null);
 insert into atlas_mazer_r017.reset_quarantine(id,ciphertext) values('reset-era-ai',extensions.pgp_sym_encrypt(${sqlLiteral(canonical(reset.quarantined_row))},${sqlLiteral(quarantineKey)},'cipher-algo=aes256')) on conflict do nothing;`, ['whole_row_override','5/4/24/E','39/108/161/S','pgp_sym_encrypt','player_reset_disposition']);
   sql['postverify.sql'] = sqlProgram(`
 do $r017$ begin
- if (select count(*) from auth.users) <> 117 or (select count(*) from mazer.mazer_identity_map) <> 18 then raise exception 'R017_AUTH_POSTIMAGE_DRIFT'; end if;
- if (select count(*) from mazer.mazer_profiles) <> 10 or (select count(*) from mazer.mazer_progression_states) <> 15 or (select count(*) from mazer.mazer_ai_progression_states) <> 15 or (select count(*) from mazer.mazer_cycle_receipts) <> 1880 then raise exception 'R017_APP_POSTIMAGE_DRIFT'; end if;
- if exists(select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='mazer' and c.relname like 'mazer_%' and c.relkind='r' and not c.relrowsecurity) then raise exception 'R017_RLS_DRIFT'; end if;
+ if (select coalesce(jsonb_agg(to_jsonb(t) order by t.user_id),'[]'::jsonb) from mazer.mazer_profiles t) <> ${jsonLiteral(sort(desiredRows.profiles, (row) => row.user_id))} then raise exception 'R017_PROFILES_FULL_DIGEST_DRIFT'; end if;
+ if (select coalesce(jsonb_agg(to_jsonb(t) order by t.user_id),'[]'::jsonb) from mazer.mazer_progression_states t) <> ${jsonLiteral(sort(desiredRows.player, (row) => row.user_id))} then raise exception 'R017_PLAYER_FULL_DIGEST_DRIFT'; end if;
+ if (select coalesce(jsonb_agg(to_jsonb(t) order by t.user_id,t.runner_key),'[]'::jsonb) from mazer.mazer_ai_progression_states t) <> ${jsonLiteral(sort(desiredRows.ai, (row) => [row.user_id,row.runner_key]))} then raise exception 'R017_AI_FULL_DIGEST_DRIFT'; end if;
+ if (select coalesce(jsonb_agg(to_jsonb(t) order by t.id),'[]'::jsonb) from mazer.mazer_cycle_receipts t) <> ${jsonLiteral(sort(desiredRows.receipts, (row) => row.id))} then raise exception 'R017_RECEIPT_CONSERVATION_FULL_DIGEST_DRIFT'; end if;
+ if (select coalesce(jsonb_agg(jsonb_build_object('legacy_user_id',legacy_user_id,'master_user_id',master_user_id,'evidence_digest',evidence_digest) order by legacy_user_id),'[]'::jsonb) from mazer.mazer_identity_map) <> ${jsonLiteral(expectedMap)} then raise exception 'R017_MAP_FULL_DIGEST_DRIFT'; end if;
+ if (select coalesce(jsonb_agg(to_jsonb(u) order by u.id),'[]'::jsonb) from auth.users u where u.id in (select (e->>'id')::uuid from jsonb_array_elements(${jsonLiteral(importUsers)}) e)) <> ${jsonLiteral(sort(importUsers, (item) => item.id))} then raise exception 'R017_AUTH_USERS_FULL_DIGEST_DRIFT'; end if;
+ if (select coalesce(jsonb_agg(to_jsonb(i) order by i.id),'[]'::jsonb) from auth.identities i where i.id in (select (e->>'id')::uuid from jsonb_array_elements(${jsonLiteral(importIdentities)}) e)) <> ${jsonLiteral(sort(importIdentities, (item) => item.id))} then raise exception 'R017_AUTH_IDENTITIES_FULL_DIGEST_DRIFT'; end if;
+ if exists(select 1 from jsonb_array_elements(${jsonLiteral(existingBindings)}) e where not exists(select 1 from auth.users u where u.id=(e->'user'->>'id')::uuid and lower(u.email)=e->>'normalized_email' and to_jsonb(u)=e->'user')) then raise exception 'R017_BOUND_AUTH_USERS_FULL_DIGEST_DRIFT'; end if;
+ if exists(select 1 from jsonb_array_elements(${jsonLiteral(existingBindings)}) e where not exists(select 1 from auth.identities i where i.id=(e->'identity'->>'id')::uuid and i.user_id=(e->'user'->>'id')::uuid and i.provider='email' and lower(i.provider_id)=e->>'normalized_email' and to_jsonb(i)=e->'identity')) then raise exception 'R017_BOUND_AUTH_IDENTITIES_FULL_DIGEST_DRIFT'; end if;
+ if (select jsonb_agg(jsonb_build_object('table',c.relname,'enabled',c.relrowsecurity,'forced',c.relforcerowsecurity) order by c.relname) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='mazer' and c.relname in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) <> '[{"table":"mazer_ai_progression_states","enabled":true,"forced":true},{"table":"mazer_cycle_receipts","enabled":true,"forced":true},{"table":"mazer_profiles","enabled":true,"forced":true},{"table":"mazer_progression_states","enabled":true,"forced":true}]'::jsonb then raise exception 'R017_RLS_FULL_CATALOG_DRIFT'; end if;
+ if not has_schema_privilege('anon','mazer','USAGE') or not has_schema_privilege('authenticated','mazer','USAGE') or not has_schema_privilege('service_role','mazer','USAGE') then raise exception 'R017_DATA_API_SCHEMA_ACL_DRIFT'; end if;
+ if exists(select 1 from information_schema.role_table_grants where table_schema='mazer' and grantee in ('anon','authenticated','public') and privilege_type in ('INSERT','UPDATE','DELETE') and table_name in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) then raise exception 'R017_TABLE_ACL_DRIFT'; end if;
+ if (select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='mazer' and p.proname=any(array[${MIGRATION_FUNCTIONS.map(sqlLiteral).join(',')}])) <> 9 then raise exception 'R017_FUNCTION_CATALOG_DRIFT'; end if;
+ if (select count(*) from pg_indexes where schemaname='mazer' and indexname=any(array[${MIGRATION_INDEXES.map(sqlLiteral).join(',')}])) <> 3 then raise exception 'R017_INDEX_CATALOG_DRIFT'; end if;
+ if not exists(select 1 from pg_policies where schemaname='mazer' and tablename='mazer_profiles' and policyname='Mazer Auth hook can inspect usernames' and cmd='SELECT' and roles='{supabase_auth_admin}') then raise exception 'R017_POLICY_CATALOG_DRIFT'; end if;
+ if not exists(select 1 from information_schema.triggers where event_object_schema='auth' and event_object_table='users' and trigger_name='mazer_claim_signup_username_after_insert' and action_timing='AFTER' and event_manipulation='INSERT') then raise exception 'R017_TRIGGER_CATALOG_DRIFT'; end if;
 end $r017$;`, ['data_api','rls','acl','117','18','10','15','1880','receipt_conservation']);
   sql['qa-apply.sql'] = sqlProgram(`
 with q as (select * from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text))
@@ -338,10 +477,12 @@ with rows as (select jsonb_array_elements(${jsonLiteral(targetRows.receipts)}) v
 delete from auth.identities where user_id in (select id from jsonb_to_recordset(${jsonLiteral(imports.map((item) => item.user))}) as x(id uuid));
 delete from auth.users where id in (select id from jsonb_to_recordset(${jsonLiteral(imports.map((item) => item.user))}) as x(id uuid));
 drop table if exists mazer.mazer_identity_map;
+${reverseCatalogSql(catalogPreimage)}
 ${aclRestore}
 do $r017$ begin
  if (select count(*) from mazer.mazer_profiles) <> 5 or (select count(*) from mazer.mazer_progression_states) <> 7 or (select count(*) from mazer.mazer_ai_progression_states) <> 7 or (select count(*) from mazer.mazer_cycle_receipts) <> 1290 then raise exception 'R017_MASTER_PREIMAGE_RESTORE_DRIFT'; end if;
  if (select count(*) from auth.users) <> 114 then raise exception 'R017_AUTH_PREIMAGE_RESTORE_DRIFT'; end if;
+ ${catalogEqualityAssertions(catalogPreimage)}
 end $r017$;
 drop schema if exists atlas_mazer_r017 cascade;`, ['disable_hook_first','master_preimage','receipt_conservation']);
   for (const name of R017_CONTRACT.sqlNames) sql[name] = `${sql[name].trim()}\n`;
@@ -351,6 +492,7 @@ drop schema if exists atlas_mazer_r017 cascade;`, ['disable_hook_first','master_
 export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, quarantineKey, qaPassword }) {
   if (typeof quarantineKey !== 'string' || quarantineKey.length < 32 || typeof qaPassword !== 'string' || qaPassword.length < 16) throw new Error('PRIVATE_SECRET_INPUT_WEAK');
   const auth = buildIdentityPlan(legacy, master);
+  const catalog_preimage = validateCatalogPreimage(master.catalog);
   const fence_input = buildFenceInput(legacy, master, legacyAcl, masterAcl, auth);
   const allEdges = [...auth.retained_edges, ...auth.new_edges];
   const resetLegacy = legacy.ai.find((row) => String(row.level) === '5' && String(row.completed_cycles) === '4' && Number(row.target_complexity) === 24 && row.rank === 'E');
@@ -373,19 +515,38 @@ export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, qua
   const targetAiEnvelope = fence_input.target_snapshot.ai.find((row) => row.user_id === edge.master_user_id && row.runner_key === 'menu-runner');
   const reset_era_ai = { legacy_user_id: edge.legacy_user_id, master_user_id: edge.master_user_id, canonical_projection: '5/4/24/E', quarantined_projection: '39/108/161/S', legacy_receipts: legacyReceiptCount, master_receipts: masterReceiptCount, legacy_timestamps_newer: true, override_mode: 'EXACT_WHOLE_ROW', quarantine_encryption: 'PGP_SYM_ENCRYPT_AES256', canonical_row_digest: digest(sourceAiEnvelope), quarantined_row_digest: digest(targetAiEnvelope), quarantined_row: resetMaster };
   const qa = { personas: 4, auth_rows: 4, ttl_minutes: 30, rows: deterministicQa(auth) };
-  const rendered = renderOperationalSql({ auth, fenceInput: fence_input, reset: { quarantined_row: resetMaster }, qa, quarantineKey, qaPassword });
-  const raw = { schema: PRODUCER_CONTRACT.schema, packet: PRODUCER_CONTRACT.packet, evidence: { current_preimage_sha256: R017_CONTRACT.currentPreimageSha256, restore_proof_sha256: R017_CONTRACT.restoreProofSha256, predecessor_fence_manifest_sha256: R017_CONTRACT.predecessorFenceManifestSha256, master_acl_basis: fence_input.fence.master.acl_basis }, fence_input, auth, reset_era_ai, reset_era_player, qa, sql: rendered.sql, sql_sha256: rendered.sql_sha256 };
+  const actionFenceInput = structuredClone(fence_input);
+  const mappedSourceAi = structuredClone(sourceAiEnvelope); mappedSourceAi.user_id = edge.master_user_id; mappedSourceAi.row.user_id = edge.master_user_id; mappedSourceAi.payload_digest = digest(mappedSourceAi.row);
+  const actionTargetIndex = actionFenceInput.target_snapshot.ai.findIndex((row) => row.user_id === edge.master_user_id && row.runner_key === 'menu-runner');
+  if (actionTargetIndex < 0) throw new Error('RESET_ACTION_TARGET_MISSING');
+  actionFenceInput.target_snapshot.ai[actionTargetIndex] = mappedSourceAi;
+  const rendered = renderOperationalSql({ auth, fenceInput: fence_input, actionFenceInput, catalogPreimage: catalog_preimage, reset: { quarantined_row: resetMaster }, qa, quarantineKey, qaPassword });
+  const raw = { schema: PRODUCER_CONTRACT.schema, packet: PRODUCER_CONTRACT.packet, evidence: { current_preimage_sha256: R017_CONTRACT.currentPreimageSha256, restore_proof_sha256: R017_CONTRACT.restoreProofSha256, predecessor_fence_manifest_sha256: R017_CONTRACT.predecessorFenceManifestSha256, master_acl_basis: fence_input.fence.master.acl_basis }, catalog_preimage, catalog_preimage_sha256: sha256(catalog_preimage), fence_input, auth, reset_era_ai, reset_era_player, qa, sql: rendered.sql, sql_sha256: rendered.sql_sha256 };
   validatePrivateSource(raw);
   return raw;
 }
 
-function writePrivateSource(atlasRoot, output, value) {
+export function writePrivateSource(atlasRoot, output, value) {
   const expected = path.join(atlasRoot, PRODUCER_CONTRACT.outputRelativePath);
-  const resolved = assertInside(output ?? expected, path.join(atlasRoot, 'secrets'), 'PRIVATE_OUTPUT_MUST_BE_UNDER_SECRETS');
+  const secretsRoot = path.join(atlasRoot, 'secrets');
+  const resolved = assertInside(output ?? expected, secretsRoot, 'PRIVATE_OUTPUT_MUST_BE_UNDER_SECRETS');
   if (path.normalize(resolved) !== path.normalize(expected)) throw new Error('PRIVATE_OUTPUT_PATH_DRIFT');
-  fs.mkdirSync(path.dirname(resolved), { recursive: true, mode: 0o700 });
+  assertNoReparseComponents(secretsRoot, secretsRoot);
+  mkdirPrivateChain(path.dirname(resolved), secretsRoot);
+  assertNoReparseComponents(path.dirname(resolved), secretsRoot);
   const bytes = Buffer.from(`${canonical(value)}\n`, 'utf8');
-  fs.writeFileSync(resolved, bytes, { flag: 'wx', mode: 0o600 });
+  const flags = fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_WRONLY | (fs.constants.O_NOFOLLOW ?? 0);
+  const fd = fs.openSync(resolved, flags, 0o600);
+  try {
+    const opened = fs.fstatSync(fd); if (!opened.isFile()) throw new Error('PRIVATE_OUTPUT_HANDLE_NOT_FILE');
+    const finalPath = fs.realpathSync.native(resolved);
+    const realRoot = fs.realpathSync.native(secretsRoot);
+    assertInside(finalPath, realRoot, 'PRIVATE_OUTPUT_FINAL_PATH_ESCAPE');
+    if (path.normalize(finalPath) !== path.normalize(resolved)) throw new Error('PRIVATE_OUTPUT_FINAL_PATH_DRIFT');
+    fs.writeFileSync(fd, bytes); fs.fsyncSync(fd);
+    const finalAfterWrite = fs.realpathSync.native(resolved);
+    if (path.normalize(finalAfterWrite) !== path.normalize(finalPath)) throw new Error('PRIVATE_OUTPUT_FINAL_PATH_DRIFT');
+  } finally { fs.closeSync(fd); }
   return { path: resolved, sha256: sha256(bytes), bytes: bytes.length };
 }
 
