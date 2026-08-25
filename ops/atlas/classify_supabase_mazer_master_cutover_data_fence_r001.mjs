@@ -26,6 +26,12 @@ export const CONTRACT = Object.freeze({
     triggerName: 'mazer_cutover_signup_admission_fence_r001',
     claimFunction: 'mazer_claim_signup_username()',
     claimTrigger: 'mazer_claim_signup_username_after_insert'
+  }),
+  mutationGate: Object.freeze({
+    functionName: 'mazer_cutover_mutation_gate_r001',
+    triggerName: 'mazer_cutover_mutation_gate_r001',
+    bypassGuc: 'atlas.mazer_cutover_writer_bypass',
+    bypassValue: 'r001'
   })
 });
 
@@ -37,6 +43,22 @@ begin
       message = 'MAZER_SIGNUP_TEMPORARILY_UNAVAILABLE';
   end if;
   return new;
+end;
+`;
+
+const MUTATION_GATE_BODY = `
+begin
+  if session_user = 'postgres'
+    and pg_catalog.current_setting('atlas.mazer_cutover_writer_bypass', true) = 'r001'
+  then
+    if tg_op = 'DELETE' then
+      return old;
+    end if;
+    return new;
+  end if;
+  raise exception using
+    errcode = '55000',
+    message = 'MAZER_CUTOVER_WRITES_FENCED';
 end;
 `;
 
@@ -630,6 +652,8 @@ export function renderTransactionalSql(plan) {
     'begin;',
     "set local lock_timeout = '5s';",
     "set local statement_timeout = '120s';",
+    `set local ${CONTRACT.mutationGate.bypassGuc} = '${CONTRACT.mutationGate.bypassValue}';`,
+    `do $atlas_executor_role$ begin if session_user <> 'postgres' then raise exception 'EXECUTOR_SESSION_ROLE_DRIFT'; end if; end $atlas_executor_role$;`,
     `select pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('atlas:${plan.direction}:${plan.packet_input_digest}', 0));`
   ];
   for (const [table, rowsName] of [
@@ -791,27 +815,9 @@ export function renderFenceSql(schema, journaledPreimage) {
   ].join('\n') + '\n';
 }
 
-function mutatorActivityPredicate(schema, alias = 'a') {
-  const compact = `pg_catalog.lower(pg_catalog.regexp_replace(${alias}.query, '[[:space:]]+', '', 'g'))`;
-  const candidates = [];
-  for (const signature of CONTRACT.mutatingRpcs) {
-    const name = signature.slice(0, signature.indexOf('('));
-    for (const token of [`\"${schema}\".\"${name}\"(`, `${schema}.${name}(`, `\"${name}\"(`, `${name}(`]) {
-      candidates.push(`pg_catalog.strpos(${compact}, '${token.toLowerCase()}') > 0`);
-    }
-  }
-  for (const table of CONTRACT.tables) {
-    for (const verb of ['insertinto', 'update', 'deletefrom', 'mergeinto']) {
-      for (const token of [`${verb}\"${schema}\".\"${table}\"`, `${verb}${schema}.${table}`]) {
-        candidates.push(`pg_catalog.strpos(${compact}, '${token.toLowerCase()}') > 0`);
-      }
-    }
-  }
-  return `(${candidates.join(' or ')})`;
-}
-
 function activeWriterSelect(schema) {
-  return `select a.pid, a.backend_start, a.xact_start, a.query_start from pg_catalog.pg_stat_activity a where a.datid = (select oid from pg_catalog.pg_database where datname = pg_catalog.current_database()) and a.pid <> pg_catalog.pg_backend_pid() and a.xact_start is not null and a.state in ('active','idle in transaction','idle in transaction (aborted)') and ${mutatorActivityPredicate(schema)} order by a.pid, a.backend_start, a.xact_start, a.query_start`;
+  const relations = CONTRACT.tables.map((table) => `pg_catalog.to_regclass('${schema}.${table}')`).join(',');
+  return `select distinct a.pid, a.backend_start, a.xact_start, a.query_start from pg_catalog.pg_locks l join pg_catalog.pg_stat_activity a on a.pid = l.pid where l.locktype = 'relation' and l.relation in (${relations}) and l.granted and l.mode in ('RowExclusiveLock','ShareRowExclusiveLock','ExclusiveLock','AccessExclusiveLock') and a.datid = (select oid from pg_catalog.pg_database where datname = pg_catalog.current_database()) and a.pid <> pg_catalog.pg_backend_pid() and a.xact_start is not null and a.state in ('active','idle in transaction','idle in transaction (aborted)') order by a.pid, a.backend_start, a.xact_start, a.query_start`;
 }
 
 export function renderWriterCaptureSql(schema, journaledPreimage) {
@@ -881,6 +887,49 @@ export function renderWriterDrainSql(schema, writers, writerSetDigest) {
   ].join('\n') + '\n';
 }
 
+function mutationGateDigest(schema) {
+  return sha256({
+    schema,
+    function_name: CONTRACT.mutationGate.functionName,
+    trigger_name: CONTRACT.mutationGate.triggerName,
+    tables: [...CONTRACT.tables].sort(),
+    body: MUTATION_GATE_BODY,
+    bypass: {
+      session_user: 'postgres',
+      guc: CONTRACT.mutationGate.bypassGuc,
+      value: CONTRACT.mutationGate.bypassValue
+    }
+  });
+}
+
+function mutationGateStateSelect(schema) {
+  const signature = `${schema}.${CONTRACT.mutationGate.functionName}()`;
+  const body = `${encodedJson(MUTATION_GATE_BODY)} #>> '{}'`;
+  const triggerAbsent = CONTRACT.tables.map((table) => `(select pg_catalog.count(*) = 0 from pg_catalog.pg_trigger t where t.tgrelid = pg_catalog.to_regclass('${schema}.${table}') and t.tgname = '${CONTRACT.mutationGate.triggerName}' and not t.tgisinternal)`).join(' and ');
+  const triggerExact = CONTRACT.tables.map((table) => `(select pg_catalog.count(*) = 1 and pg_catalog.bool_and(t.tgenabled = 'O' and t.tgtype::integer = 31 and t.tgfoid = pg_catalog.to_regprocedure('${signature}')) from pg_catalog.pg_trigger t where t.tgrelid = pg_catalog.to_regclass('${schema}.${table}') and t.tgname = '${CONTRACT.mutationGate.triggerName}' and not t.tgisinternal)`).join(' and ');
+  return `with gate_function as (select p.oid, p.prosecdef, p.provolatile, p.proconfig, p.prosrc, l.lanname, pg_catalog.pg_get_userbyid(p.proowner) as owner_name from pg_catalog.pg_proc p join pg_catalog.pg_language l on l.oid = p.prolang where p.oid = pg_catalog.to_regprocedure('${signature}')), facts as (select ((select pg_catalog.count(*) = 0 from gate_function) and ${triggerAbsent}) as gate_absent, ((select pg_catalog.count(*) = 1 and pg_catalog.bool_and(not prosecdef and provolatile = 'v' and proconfig = array['search_path=""']::text[] and prosrc = ${body} and lanname = 'plpgsql' and owner_name = 'postgres') from gate_function) and ${triggerExact}) as gate_exact) select pg_catalog.jsonb_build_object('schema', '${schema}', 'result', case when gate_absent then 'PASS_MUTATION_GATE_PREIMAGE_ABSENT' when gate_exact then 'PASS_MUTATION_GATE_FENCED' else 'HOLD_MUTATION_GATE_STATE_AMBIGUOUS' end, 'state', case when gate_absent then 'ABSENT' when gate_exact then 'FENCED' else 'AMBIGUOUS' end, 'mutation_gate_digest', '${mutationGateDigest(schema)}', 'observed_at', pg_catalog.clock_timestamp()) from facts`;
+}
+
+function mutationGateInstallStatements(schema) {
+  const qualifiedFunction = `${q(schema)}.${q(CONTRACT.mutationGate.functionName)}()`;
+  return [
+    `create function ${qualifiedFunction} returns trigger language plpgsql volatile security invoker set search_path = '' as $atlas_mutation_gate$${MUTATION_GATE_BODY}$atlas_mutation_gate$;`,
+    `alter function ${qualifiedFunction} owner to postgres;`,
+    `revoke all on function ${qualifiedFunction} from public;`,
+    `do $atlas_mutation_gate_roles$ begin if pg_catalog.to_regrole('anon') is not null then execute 'revoke all on function ${qualifiedFunction} from anon'; end if; if pg_catalog.to_regrole('authenticated') is not null then execute 'revoke all on function ${qualifiedFunction} from authenticated'; end if; if pg_catalog.to_regrole('service_role') is not null then execute 'revoke all on function ${qualifiedFunction} from service_role'; end if; end $atlas_mutation_gate_roles$;`,
+    `comment on function ${qualifiedFunction} is 'Temporary cutover mutation gate. Rejects every non-executor INSERT, UPDATE, and DELETE on exact Mazer source tables regardless of SQL or protocol form.';`,
+    ...[...CONTRACT.tables].sort().map((table) => `create trigger ${q(CONTRACT.mutationGate.triggerName)} before insert or update or delete on ${q(schema)}.${q(table)} for each row execute function ${qualifiedFunction};`)
+  ];
+}
+
+function mutationGateRestoreStatements(schema) {
+  const qualifiedFunction = `${q(schema)}.${q(CONTRACT.mutationGate.functionName)}()`;
+  return [
+    ...[...CONTRACT.tables].sort().map((table) => `drop trigger if exists ${q(CONTRACT.mutationGate.triggerName)} on ${q(schema)}.${q(table)};`),
+    `drop function if exists ${qualifiedFunction};`
+  ];
+}
+
 export function renderLockBarrierSql(schema, journaledPreimage, writers, writerSetDigest) {
   if (![CONTRACT.legacy.schema, CONTRACT.master.schema].includes(schema)) hold('PROJECT_OR_SCHEMA_DRIFT');
   const expectedFencedPostimage = fencedAclPostimage(normalizeAclPreimage(journaledPreimage, schema));
@@ -892,16 +941,24 @@ export function renderLockBarrierSql(schema, journaledPreimage, writers, writerS
     'begin;',
     "set local lock_timeout = '120s';",
     "set local statement_timeout = '150s';",
-    `select pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('atlas:mazer-writer-fence:${schema}', 0));`,
+    `select pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('atlas:mazer-writer-mutation-gate:${schema}', 0));`,
+    `do $atlas_mutation_gate_executor$ begin if session_user <> 'postgres' then raise exception 'EXECUTOR_SESSION_ROLE_DRIFT'; end if; end $atlas_mutation_gate_executor$;`,
     'create temporary table atlas_prebarrier_acl (payload jsonb not null) on commit drop;',
     `insert into atlas_prebarrier_acl (payload) ${aclObservationSelect(schema)};`,
     `do $atlas_prebarrier_acl$ begin if (select payload - 'observed_at' from atlas_prebarrier_acl) is distinct from ${encodedJson(expectedFencedPostimage)} then raise exception 'LOCK_BARRIER_ACL_OR_CATALOG_DRIFT'; end if; if ${capturedWriterStillActiveSql(normalized)} then raise exception 'CAPTURED_WRITER_REAPPEARED'; end if; end $atlas_prebarrier_acl$;`,
     ...qualified.map((table) => `lock table ${table} in share row exclusive mode;`),
-    `-- The ordered relation barrier drains direct DML that already touched an exact Mazer table. The earlier identity-bound drain covers an old-ACL RPC admitted before revoke visibility but not yet touching a table.`,
+    `-- Relation-lock capture drains every transaction already mutating an exact Mazer table. The mutation-point gate below rejects delayed prepared or extended-protocol work that reaches DML only after this ordered barrier.`,
+    'create temporary table atlas_mutation_gate_preimage (payload jsonb not null) on commit drop;',
+    `insert into atlas_mutation_gate_preimage (payload) ${mutationGateStateSelect(schema)};`,
+    `do $atlas_mutation_gate_preimage$ begin if (select payload ->> 'result' from atlas_mutation_gate_preimage) is distinct from 'PASS_MUTATION_GATE_PREIMAGE_ABSENT' then raise exception 'MUTATION_GATE_PREIMAGE_DRIFT'; end if; end $atlas_mutation_gate_preimage$;`,
+    ...mutationGateInstallStatements(schema),
+    'create temporary table atlas_mutation_gate_postimage (payload jsonb not null) on commit drop;',
+    `insert into atlas_mutation_gate_postimage (payload) ${mutationGateStateSelect(schema)};`,
+    `do $atlas_mutation_gate_postimage$ begin if (select payload ->> 'result' from atlas_mutation_gate_postimage) is distinct from 'PASS_MUTATION_GATE_FENCED' then raise exception 'MUTATION_GATE_POSTIMAGE_DRIFT'; end if; end $atlas_mutation_gate_postimage$;`,
     'create temporary table atlas_postbarrier_acl (payload jsonb not null) on commit drop;',
     `insert into atlas_postbarrier_acl (payload) ${aclObservationSelect(schema)};`,
     `do $atlas_postbarrier_acl$ begin if (select payload - 'observed_at' from atlas_postbarrier_acl) is distinct from ${encodedJson(expectedFencedPostimage)} then raise exception 'LOCK_BARRIER_POST_ACL_OR_CATALOG_DRIFT'; end if; if ${capturedWriterStillActiveSql(normalized)} then raise exception 'CAPTURED_WRITER_NOT_DRAINED'; end if; end $atlas_postbarrier_acl$;`,
-    `select pg_catalog.jsonb_build_object('result', 'PASS_WRITER_LOCK_BARRIER', 'schema', '${schema}', 'writer_count', ${normalized.length}, 'writer_set_digest', '${writerSetDigest}', 'barrier_at', pg_catalog.clock_timestamp())::text;`,
+    `select pg_catalog.jsonb_build_object('result', 'PASS_WRITER_LOCK_BARRIER', 'schema', '${schema}', 'writer_count', ${normalized.length}, 'writer_set_digest', '${writerSetDigest}', 'mutation_gate_state', 'FENCED', 'mutation_gate_digest', '${mutationGateDigest(schema)}', 'barrier_at', pg_catalog.clock_timestamp())::text;`,
     'commit;'
   ].join('\n') + '\n';
 }
@@ -945,12 +1002,21 @@ export function renderRestoreSql(schema, capturedPreimage) {
   return [
     '\\set ON_ERROR_STOP on',
     'begin;',
-    "set local lock_timeout = '5s';",
-    "set local statement_timeout = '30s';",
-    `select pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('atlas:mazer-writer-restore:${schema}', 0));`,
+    "set local lock_timeout = '120s';",
+    "set local statement_timeout = '150s';",
+    `select pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('atlas:mazer-writer-mutation-gate:${schema}', 0));`,
+    `do $atlas_mutation_gate_restore_executor$ begin if session_user <> 'postgres' then raise exception 'EXECUTOR_SESSION_ROLE_DRIFT'; end if; end $atlas_mutation_gate_restore_executor$;`,
+    ...[...CONTRACT.tables].sort().map((table) => `lock table ${q(schema)}.${q(table)} in share row exclusive mode;`),
+    'create temporary table atlas_mutation_gate_current (payload jsonb not null) on commit drop;',
+    `insert into atlas_mutation_gate_current (payload) ${mutationGateStateSelect(schema)};`,
+    `do $atlas_mutation_gate_restore_precondition$ begin if (select payload ->> 'result' from atlas_mutation_gate_current) not in ('PASS_MUTATION_GATE_FENCED','PASS_MUTATION_GATE_PREIMAGE_ABSENT') then raise exception 'MUTATION_GATE_RESTORE_STATE_AMBIGUOUS'; end if; end $atlas_mutation_gate_restore_precondition$;`,
     ...CONTRACT.tables.map((table) => `revoke insert, update, delete on table ${q(schema)}.${q(table)} from authenticated, anon, public;`),
     ...CONTRACT.mutatingRpcs.map((rpc) => `revoke execute on function ${q(schema)}.${rpc} from authenticated, anon, public;`),
     ...grants,
+    ...mutationGateRestoreStatements(schema),
+    'create temporary table atlas_mutation_gate_restored (payload jsonb not null) on commit drop;',
+    `insert into atlas_mutation_gate_restored (payload) ${mutationGateStateSelect(schema)};`,
+    `do $atlas_mutation_gate_restore_postimage$ begin if (select payload ->> 'result' from atlas_mutation_gate_restored) is distinct from 'PASS_MUTATION_GATE_PREIMAGE_ABSENT' then raise exception 'MUTATION_GATE_RESTORE_POSTIMAGE_DRIFT'; end if; end $atlas_mutation_gate_restore_postimage$;`,
     'commit;'
   ].join('\n') + '\n';
 }
@@ -1049,6 +1115,9 @@ export function classifyCutover(rawInput) {
     hook_disabled_first: input.direction === 'forward' ? null : true,
     signup_admission_fence_required: input.direction === 'reverse',
     non_mazer_signup_passthrough_required: input.direction === 'reverse',
+    mutation_point_gate_required: true,
+    writer_capture_basis: 'TARGET_RELATION_LOCKS_PLUS_MUTATION_POINT_GATE',
+    executor_bypass_profile: 'SESSION_USER_POSTGRES_AND_TRANSACTION_LOCAL_GUC',
     zero_delta_reads: 2,
     source_counts: sourceCounts,
     target_counts: targetCounts,

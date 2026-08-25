@@ -25,8 +25,10 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $RunningOnWindows = [Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT
+$PathComparison = if ($RunningOnWindows) { [StringComparison]::OrdinalIgnoreCase } else { [StringComparison]::Ordinal }
+$DirectorySeparators = [char[]]@([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
 
-$AtlasRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
+$AtlasRoot = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, '..', '..'))
 $Classifier = Join-Path $PSScriptRoot 'classify_supabase_mazer_master_cutover_data_fence_r001.mjs'
 $LegacyProjectRef = 'geknvnrmktchljnyddwp'
 $LegacySchema = 'public'
@@ -34,9 +36,9 @@ $MasterProjectRef = 'bxtcuhkotumitoqtrcej'
 $MasterSchema = 'mazer'
 $CredentialTarget = 'Supabase CLI:supabase'
 $ApiBase = 'https://api.supabase.com'
-$SecretPacketRoot = Join-Path $AtlasRoot 'secrets\packet\mazer-master-cutover-data-fence-r001'
-$RuntimeRoot = Join-Path $AtlasRoot 'runtime\atlas'
-$SecretRoot = Join-Path $AtlasRoot 'secrets'
+$SecretPacketRoot = [IO.Path]::Combine($AtlasRoot, 'secrets', 'packet', 'mazer-master-cutover-data-fence-r001')
+$RuntimeRoot = [IO.Path]::Combine($AtlasRoot, 'runtime', 'atlas')
+$SecretRoot = [IO.Path]::Combine($AtlasRoot, 'secrets')
 $RequiredResultSchema = 'atlas.supabase.mazer-master-cutover-data-fence-classification.v1'
 $ExpectedTables = @('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')
 $ExpectedMutatingRpcs = @(
@@ -62,24 +64,33 @@ function Get-CanonicalPath([string]$Path) {
   return [IO.Path]::GetFullPath($Path)
 }
 
+function Remove-TrailingDirectorySeparators([string]$Path) {
+  return $Path.TrimEnd($DirectorySeparators)
+}
+
+function Test-CanonicalPathUnder([string]$Candidate, [string]$Root) {
+  $canonicalCandidate = Get-CanonicalPath $Candidate
+  $prefix = (Remove-TrailingDirectorySeparators (Get-CanonicalPath $Root)) + [IO.Path]::DirectorySeparatorChar
+  return $canonicalCandidate.StartsWith($prefix, $PathComparison)
+}
+
 function Assert-PathUnder([string]$Path, [string[]]$Roots) {
   $candidate = Get-CanonicalPath $Path
   foreach ($root in $Roots) {
-    $prefix = (Get-CanonicalPath $root).TrimEnd('\') + '\'
-    if ($candidate.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) { return $candidate }
+    if (Test-CanonicalPathUnder $candidate $root) { return $candidate }
   }
   throw 'LOCAL_PATH_OUTSIDE_ALLOWED_ROOT'
 }
 
 function Assert-NoReparseComponents([string]$Path, [string]$Boundary) {
   $candidate = Get-CanonicalPath $Path
-  $stop = (Get-CanonicalPath $Boundary).TrimEnd('\')
+  $stop = Remove-TrailingDirectorySeparators (Get-CanonicalPath $Boundary)
   while ($true) {
     if (Test-Path -LiteralPath $candidate) {
       $item = Get-Item -LiteralPath $candidate -Force
       if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'LOCAL_PATH_REPARSE_POINT' }
     }
-    if ($candidate.TrimEnd('\').Equals($stop, [StringComparison]::OrdinalIgnoreCase)) { return }
+    if ((Remove-TrailingDirectorySeparators $candidate).Equals($stop, $PathComparison)) { return }
     $parent = Split-Path -Parent $candidate
     if ([string]::IsNullOrWhiteSpace($parent) -or $parent -ceq $candidate) { throw 'LOCAL_PATH_BOUNDARY_DRIFT' }
     $candidate = $parent
@@ -92,6 +103,40 @@ function ConvertTo-SafeJson([object]$Value) {
     throw 'OUTPUT_DISCLOSURE'
   }
   return $text
+}
+
+function Assert-PlatformPathContract {
+  $probeBase = Get-CanonicalPath ([IO.Path]::Combine([IO.Path]::GetTempPath(), 'atlas-path-contract-r001'))
+  $probeChild = [IO.Path]::Combine($probeBase, 'child', 'packet.json')
+  $probeSibling = $probeBase + '-sibling' + [IO.Path]::DirectorySeparatorChar + 'packet.json'
+  if ((Assert-PathUnder $probeChild @($probeBase)) -cne (Get-CanonicalPath $probeChild)) { throw 'LOCAL_PATH_PLATFORM_CONTAINMENT' }
+  try { $null = Assert-PathUnder $probeSibling @($probeBase); throw 'LOCAL_PATH_SIBLING_ACCEPTED' } catch { if ($_.Exception.Message -cne 'LOCAL_PATH_OUTSIDE_ALLOWED_ROOT') { throw } }
+  $traversal = [IO.Path]::Combine($probeBase, 'child', '..', '..', 'escape.json')
+  try { $null = Assert-PathUnder $traversal @($probeBase); throw 'LOCAL_PATH_TRAVERSAL_ACCEPTED' } catch { if ($_.Exception.Message -cne 'LOCAL_PATH_OUTSIDE_ALLOWED_ROOT') { throw } }
+  if ($RunningOnWindows) {
+    if (-not (Test-CanonicalPathUnder $probeChild $probeBase.ToUpperInvariant())) { throw 'LOCAL_PATH_WINDOWS_CASE_BEHAVIOR' }
+  }
+  elseif (Test-CanonicalPathUnder $probeChild $probeBase.ToUpperInvariant()) {
+    throw 'LOCAL_PATH_POSIX_CASE_BEHAVIOR'
+  }
+  $tempBoundary = Get-CanonicalPath ([IO.Path]::GetTempPath())
+  $probeId = [Guid]::NewGuid().ToString('N')
+  $reparseRoot = [IO.Path]::Combine($tempBoundary, 'atlas-path-reparse-r001-' + $probeId)
+  $reparseOutside = [IO.Path]::Combine($tempBoundary, 'atlas-path-reparse-outside-r001-' + $probeId)
+  $reparseLink = [IO.Path]::Combine($reparseRoot, 'link')
+  if (-not (Test-CanonicalPathUnder $reparseRoot $tempBoundary) -or -not (Test-CanonicalPathUnder $reparseOutside $tempBoundary)) { throw 'LOCAL_PATH_TEST_SCOPE' }
+  try {
+    [IO.Directory]::CreateDirectory($reparseRoot) | Out-Null
+    [IO.Directory]::CreateDirectory($reparseOutside) | Out-Null
+    $linkType = if ($RunningOnWindows) { 'Junction' } else { 'SymbolicLink' }
+    New-Item -ItemType $linkType -Path $reparseLink -Target $reparseOutside -ErrorAction Stop | Out-Null
+    try { Assert-NoReparseComponents ([IO.Path]::Combine($reparseLink, 'packet.json')) $reparseRoot; throw 'LOCAL_PATH_REPARSE_ACCEPTED' } catch { if ($_.Exception.Message -cne 'LOCAL_PATH_REPARSE_POINT') { throw } }
+  }
+  finally {
+    if (Test-Path -LiteralPath $reparseLink) { Remove-Item -LiteralPath $reparseLink -Force }
+    if (Test-Path -LiteralPath $reparseRoot) { Remove-Item -LiteralPath $reparseRoot -Recurse -Force }
+    if (Test-Path -LiteralPath $reparseOutside) { Remove-Item -LiteralPath $reparseOutside -Recurse -Force }
+  }
 }
 
 function Write-SafeResult([string]$Result, [System.Collections.IDictionary]$Extra = @{}) {
@@ -373,6 +418,7 @@ function Assert-WriterStepReceipt(
   if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw 'WRITER_STEP_RECEIPT_MISSING' }
   try { $receipt = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json } catch { throw 'WRITER_STEP_RECEIPT_JSON' }
   if ([string]$receipt.result -cne $ExpectedResult -or [string]$receipt.writer_set_digest -cne $ExpectedDigest -or [int]$receipt.writer_count -ne $ExpectedCount) { throw 'WRITER_STEP_RECEIPT_BINDING' }
+  if ($ExpectedResult -ceq 'PASS_WRITER_LOCK_BARRIER' -and ([string]$receipt.mutation_gate_state -cne 'FENCED' -or [string]$receipt.mutation_gate_digest -notmatch '^[a-f0-9]{64}$')) { throw 'MUTATION_GATE_BARRIER_BINDING' }
   try { $observedAt = [DateTimeOffset]::Parse([string]$receipt.$TimestampProperty, [Globalization.CultureInfo]::InvariantCulture) } catch { throw 'WRITER_STEP_RECEIPT_TIMESTAMP' }
   return [pscustomobject]@{ Receipt = $receipt; ObservedAt = $observedAt }
 }
@@ -486,9 +532,11 @@ function Invoke-ExactWriterDrainBarrier(
   if ($barrier.ObservedAt -lt $drained.ObservedAt) { throw 'LOCK_BARRIER_BEFORE_WRITER_DRAIN' }
   if (-not $NoPhaseJournal) {
     $State.primary_lock_barrier_at = $barrier.ObservedAt.ToString('o')
+    $State.primary_mutation_gate_fenced_at = $barrier.ObservedAt.ToString('o')
+    $State.primary_mutation_gate_digest = [string]$barrier.Receipt.mutation_gate_digest
     Set-StatePhase $State ($PhasePrefix + '_WRITERS_FENCED') $ResolvedStatePath
   }
-  return [pscustomobject]@{ CaptureReads = 1; DrainReads = ($drainAttempt + 1); LockBarriers = 1; WriterCount = [int]$captureReceipt.writer_count }
+  return [pscustomobject]@{ CaptureReads = 1; DrainReads = ($drainAttempt + 1); LockBarriers = 1; WriterCount = [int]$captureReceipt.writer_count; MutationGateDigest = [string]$barrier.Receipt.mutation_gate_digest }
 }
 
 function Invoke-ExactAclRecovery(
@@ -510,7 +558,11 @@ function Invoke-ExactAclRecovery(
   Invoke-PsqlJsonPrivate $DatabaseUrl $ObservationSql $current 'ACL_RECOVERY_READ_FAILED'
   $receipt = Invoke-AclRecoveryClassifier $ResolvedInput $JournaledObservationPath $current 'primary'
   if ([string]$receipt.result -ceq 'PASS_ACL_PREIMAGE_ALREADY_PRESENT') {
-    return [pscustomobject]@{ DatabaseTransactions = 0; RestoreVerifications = 1; Restored = $false; CaptureReads = 0; DrainReads = 0; LockBarriers = 0 }
+    Invoke-PsqlPrivate $DatabaseUrl $RestoreSql
+    $postRestore = Join-Path $PrivateRoot ($Prefix + '-acl-post-restore.json')
+    Invoke-PsqlJsonPrivate $DatabaseUrl $ObservationSql $postRestore 'ACL_POST_RESTORE_READ_FAILED'
+    $null = Invoke-AclVerifier $ResolvedInput $postRestore 'primary' $null $null $JournaledObservationPath
+    return [pscustomobject]@{ DatabaseTransactions = 1; RestoreVerifications = 1; Restored = $true; CaptureReads = 0; DrainReads = 0; LockBarriers = 0 }
   }
   $writerFence = [pscustomobject]@{ CaptureReads = 0; DrainReads = 0; LockBarriers = 0 }
   if ($DrainBeforeRestore) {
@@ -653,6 +705,7 @@ function Assert-StateBinding([object]$State, [object]$Receipt, [string]$InputDig
   if ([string]$State.primary_catalog_digest -cne [string]$Receipt.primary_catalog_digest) { throw 'STATE_PRIMARY_CATALOG_DIGEST_DRIFT' }
   if ([string]$State.legacy_acl_preimage_digest -cne [string]$Receipt.legacy_acl_preimage_digest) { throw 'STATE_LEGACY_ACL_DIGEST_DRIFT' }
   if ([string]$State.legacy_catalog_digest -cne [string]$Receipt.legacy_catalog_digest) { throw 'STATE_LEGACY_CATALOG_DIGEST_DRIFT' }
+  if ([string]$State.executor_bypass_profile -cne [string]$Receipt.executor_bypass_profile) { throw 'STATE_EXECUTOR_BYPASS_PROFILE_DRIFT' }
 }
 
 function Assert-SourceContract {
@@ -679,7 +732,10 @@ function Assert-SourceContract {
     'PASS_WRITER_LOCK_BARRIER','pid, a.backend_start, a.xact_start, a.query_start',
     'MAZER_SIGNUP_TEMPORARILY_UNAVAILABLE','PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT',
     'PASS_SIGNUP_ADMISSION_FENCED','AUTH_USERS_WRITER_BARRIER_INCOMPLETE',
-    'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED','app_namespace'
+    'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED','app_namespace',
+    'PASS_MUTATION_GATE_FENCED','MAZER_CUTOVER_WRITES_FENCED',
+    'TARGET_RELATION_LOCKS_PLUS_MUTATION_POINT_GATE','pg_catalog.pg_locks',
+    'atlas.mazer_cutover_writer_bypass','MUTATION_GATE_RESTORE_POSTIMAGE_DRIFT'
   )) { if (-not $source.Contains($needle)) { throw 'CLASSIFIER_CONTRACT_DRIFT' } }
   foreach ($table in $ExpectedTables) { if (-not $source.Contains($table)) { throw 'CLASSIFIER_TABLE_DRIFT' } }
   foreach ($rpc in $ExpectedMutatingRpcs) { if (-not $source.Contains($rpc)) { throw 'CLASSIFIER_RPC_DRIFT' } }
@@ -687,6 +743,7 @@ function Assert-SourceContract {
 
 if ($PSCmdlet.ParameterSetName -eq 'Source') {
   Assert-SourceContract
+  Assert-PlatformPathContract
   Write-SafeResult 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_SOURCE' ([ordered]@{
     classifier_sha256 = Get-Sha256 $Classifier
     credential_reads = 0
@@ -704,7 +761,7 @@ if (-not $ExecuteProtected) { throw 'PROTECTED_EXECUTION_SWITCH_REQUIRED' }
 $resolvedInput = Assert-PathUnder $InputPath @($RuntimeRoot,$SecretRoot)
 $resolvedState = Assert-PathUnder $StatePath @($RuntimeRoot)
 if (-not (Test-Path -LiteralPath $resolvedInput -PathType Leaf)) { throw 'INPUT_MISSING' }
-Assert-NoReparseComponents $resolvedInput $(if ($resolvedInput.StartsWith((Get-CanonicalPath $RuntimeRoot), [StringComparison]::OrdinalIgnoreCase)) { $RuntimeRoot } else { $SecretRoot })
+Assert-NoReparseComponents $resolvedInput $(if (Test-CanonicalPathUnder $resolvedInput $RuntimeRoot) { $RuntimeRoot } else { $SecretRoot })
 Assert-NoReparseComponents (Split-Path -Parent $resolvedState) $RuntimeRoot
 $inputFileDigest = Get-Sha256 $resolvedInput
 if ($inputFileDigest -cne $ExpectedInputSha256) { throw 'INPUT_FILE_DIGEST_DRIFT' }
@@ -801,6 +858,7 @@ try {
       primary_catalog_digest = [string]$classification.Receipt.primary_catalog_digest
       legacy_acl_preimage_digest = [string]$classification.Receipt.legacy_acl_preimage_digest
       legacy_catalog_digest = [string]$classification.Receipt.legacy_catalog_digest
+      executor_bypass_profile = [string]$classification.Receipt.executor_bypass_profile
       primary_acl_preobserved_at = $null
       journaled_primary_acl_preimage = $null
       journaled_primary_acl_digest = $null
@@ -814,6 +872,8 @@ try {
       primary_writer_set_captured_at = $null
       primary_writers_drained_at = $null
       primary_lock_barrier_at = $null
+      primary_mutation_gate_fenced_at = $null
+      primary_mutation_gate_digest = $null
       legacy_disable_signup_preimage = $null
       master_hook_enabled_preimage = $null
       master_signup_admission_preobserved_at = $null

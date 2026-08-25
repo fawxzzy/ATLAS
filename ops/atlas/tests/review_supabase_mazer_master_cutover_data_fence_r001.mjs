@@ -322,6 +322,8 @@ const transactionRenderer = classifier.slice(
   classifier.indexOf('export function renderTransactionalSql'),
   classifier.indexOf('export function renderSignupAdmissionObservationSql')
 ).toLowerCase();
+requireText(transactionRenderer, 'set local ${contract.mutationgate.bypassguc}', 'TRANSACTION_LOCAL_MUTATION_GATE_BYPASS_MISSING');
+requireText(classifier, "bypassGuc: 'atlas.mazer_cutover_writer_bypass'", 'MUTATION_GATE_BYPASS_GUC_BINDING_MISSING');
 for (const forbidden of ['delete from', 'truncate ', 'drop table']) {
   if (transactionRenderer.includes(forbidden)) findings.push(`DESTRUCTIVE_DELTA_SQL:${forbidden}`);
 }
@@ -365,21 +367,31 @@ for (const sql of [legacyFence, masterFence]) {
   const capture = renderWriterCaptureSql(schema, reviewAclPreimage(schema));
   const drain = renderWriterDrainSql(schema, writers, writerDigest);
   const barrier = renderLockBarrierSql(schema, reviewAclPreimage(schema), writers, writerDigest);
+  const relationCapture = capture.slice(capture.indexOf('with writer_rows as'));
   requireText(capture, 'pg_catalog.pg_stat_activity', 'POST_COMMIT_WRITER_CAPTURE_MISSING');
   requireText(capture, 'a.pid, a.backend_start, a.xact_start, a.query_start', 'EXACT_WRITER_IDENTITY_MISSING');
-  requireText(capture, 'mazer_complete_level(', 'OLD_ACL_RPC_SCOPE_MISSING');
-  requireText(capture, `insertinto"${schema}"."mazer_profiles"`, 'DIRECT_DML_SCOPE_MISSING');
+  requireText(relationCapture, 'pg_catalog.pg_locks', 'MUTATION_RELATION_LOCK_CAPTURE_MISSING');
+  requireText(relationCapture, `pg_catalog.to_regclass('${schema}.mazer_profiles')`, 'MUTATION_RELATION_SCOPE_MISSING');
+  if (/regexp_replace|pg_catalog\.strpos|mazer_complete_level|insertinto/.test(relationCapture)) findings.push('QUERY_TEXT_WRITER_CAPTURE_RETAINED');
   requireText(drain, 'WAIT_CAPTURED_WRITERS', 'EXACT_WRITER_WAIT_MISSING');
   requireText(drain, 'PASS_CAPTURED_WRITERS_DRAINED', 'EXACT_WRITER_DRAIN_PASS_MISSING');
   requireText(drain, 'CAPTURED_WRITER_DRAIN_TIMEOUT_HOLD_FENCED', 'DRAIN_TIMEOUT_FENCED_HOLD_MISSING');
-  requireOrder(barrier, ['CAPTURED_WRITER_REAPPEARED', 'lock table', 'LOCK_BARRIER_POST_ACL_OR_CATALOG_DRIFT', 'PASS_WRITER_LOCK_BARRIER', 'commit;'], 'LOCK_BARRIER_ORDER_DRIFT');
+  requireText(barrier, 'MAZER_CUTOVER_WRITES_FENCED', 'MUTATION_POINT_GATE_MISSING');
+  requireText(barrier, 'security invoker', 'MUTATION_GATE_INVOKER_MISSING');
+  if (barrier.includes('security definer')) findings.push('MUTATION_GATE_SECURITY_DEFINER');
+  requireText(barrier, "session_user = 'postgres'", 'MUTATION_GATE_PRIVILEGED_SESSION_BINDING_MISSING');
+  requireText(barrier, "current_setting('atlas.mazer_cutover_writer_bypass', true) = 'r001'", 'MUTATION_GATE_LOCAL_BYPASS_BINDING_MISSING');
+  requireOrder(barrier, ['CAPTURED_WRITER_REAPPEARED', 'lock table', 'PASS_MUTATION_GATE_PREIMAGE_ABSENT', 'create function', 'create trigger', 'PASS_MUTATION_GATE_FENCED', 'LOCK_BARRIER_POST_ACL_OR_CATALOG_DRIFT', 'PASS_WRITER_LOCK_BARRIER', 'commit;'], 'LOCK_BARRIER_ORDER_DRIFT');
   for (const table of [...CONTRACT.tables].sort()) requireText(barrier, `lock table "${schema}"."${table}" in share row exclusive mode`, `ORDERED_TABLE_BARRIER_MISSING:${table}`);
+  for (const table of [...CONTRACT.tables].sort()) requireText(barrier, `before insert or update or delete on "${schema}"."${table}"`, `MUTATION_TRIGGER_MISSING:${table}`);
 }
 for (const schema of ['public', 'mazer']) {
   const sql = renderRestoreSql(schema, reviewAclPreimage(schema));
   requireText(sql, 'grant INSERT, UPDATE on table', 'PROFILE_WRITER_RESTORE_MISSING');
   requireText(sql, 'grant execute on function', 'RPC_WRITER_RESTORE_MISSING');
   requireText(sql, `grant DELETE on table "${schema}"."mazer_cycle_receipts" to "anon" with grant option`, 'CAPTURED_GRANT_OPTION_RESTORE_MISSING');
+  requireText(sql, `atlas:mazer-writer-mutation-gate:${schema}`, 'MUTATION_GATE_RESTORE_SERIALIZER_MISSING');
+  requireOrder(sql, ['pg_advisory_xact_lock', 'lock table', 'atlas_mutation_gate_current', 'MUTATION_GATE_RESTORE_STATE_AMBIGUOUS', 'grant ', 'drop trigger', 'drop function', 'PASS_MUTATION_GATE_PREIMAGE_ABSENT', 'commit;'], 'MUTATION_GATE_RESTORE_ORDER_DRIFT');
   if (/grant\s+(?:insert|update|delete)[^;]+mazer_(?:progression_states|ai_progression_states)/i.test(sql)) findings.push('UNCAPTURED_DIRECT_DURABLE_WRITER_RESTORED');
   requireText(renderAclObservationSql(schema), 'pg_catalog.aclexplode', 'CANONICAL_ACL_OBSERVATION_MISSING');
 }
@@ -398,6 +410,21 @@ for (const forbidden of [
 requireText(host, "Remove-Item -LiteralPath $resolvedPrivate -Recurse -Force", 'PRIVATE_PACKET_CLEANUP_MISSING');
 requireText(host, 'raw_identifiers_emitted = $false', 'SAFE_OUTPUT_IDENTIFIER_FLAG_MISSING');
 requireText(host, 'secrets_emitted = $false', 'SAFE_OUTPUT_SECRET_FLAG_MISSING');
+const pathContract = host.slice(host.indexOf('function Get-CanonicalPath'), host.indexOf('function ConvertTo-SafeJson'));
+requireText(pathContract, '[IO.Path]::DirectorySeparatorChar', 'NATIVE_DIRECTORY_SEPARATOR_MISSING');
+requireText(host, '[IO.Path]::AltDirectorySeparatorChar', 'ALT_DIRECTORY_SEPARATOR_MISSING');
+requireText(host, "[IO.Path]::Combine($PSScriptRoot, '..', '..')", 'PLATFORM_NEUTRAL_ATLAS_ROOT_MISSING');
+requireText(pathContract, '$PathComparison', 'PLATFORM_PATH_COMPARISON_MISSING');
+if (pathContract.includes("TrimEnd('\\')") || pathContract.includes("+ '\\'")) findings.push('HARDCODED_WINDOWS_PATH_CONTAINMENT');
+requireText(host, "if ($RunningOnWindows) { [StringComparison]::OrdinalIgnoreCase } else { [StringComparison]::Ordinal }", 'PLATFORM_CASE_CONTRACT_MISSING');
+requireText(host, "'Junction'", 'WINDOWS_REPARSE_ADVERSARY_MISSING');
+requireText(host, "'SymbolicLink'", 'POSIX_REPARSE_ADVERSARY_MISSING');
+requireText(host, 'LOCAL_PATH_TRAVERSAL_ACCEPTED', 'PATH_TRAVERSAL_ADVERSARY_MISSING');
+requireText(focused, 'prepare admitted_rpc', 'PREPARED_RPC_ADVERSARY_MISSING');
+requireText(focused, 'MAZER_CUTOVER_WRITES_FENCED', 'MUTATION_POINT_REJECTION_PROOF_MISSING');
+requireText(focused, 'fitness.profiles', 'UNRELATED_SCHEMA_PASSTHROUGH_PROOF_MISSING');
+requireText(focused, 'path.posix', 'POSIX_CONTAINMENT_MODEL_MISSING');
+requireText(focused, 'path.win32', 'WINDOWS_CONTAINMENT_MODEL_MISSING');
 requireText(classifier, "mode: 0o600, flag: 'wx'", 'PRIVATE_FILE_EXCLUSIVE_CREATE_MISSING');
 
 const focusedOne = run(process.execPath, [testPath]);
@@ -406,7 +433,7 @@ if (focusedOne !== focusedTwo) findings.push('FOCUSED_TEST_NONDETERMINISTIC');
 if (focusedOne) {
   const value = JSON.parse(focusedOne);
   assert.equal(value.result, 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001');
-  assert.equal(value.scenarios, 88);
+  assert.equal(value.scenarios, 110);
   assert.equal(value.postgresql17_concurrency, 'SKIPPED_EXPLICIT_OPT_IN_REQUIRED');
   assert.equal(value.provider_calls, 0);
   assert.equal(value.live_data_writes, 0);
@@ -438,7 +465,7 @@ for (const output of shellOutputs.filter(Boolean)) {
 assert.deepEqual(findings, []);
 console.log(JSON.stringify({
   result: 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001_REVIEW_NO_FINDINGS',
-  assertions: 266,
+  assertions: 303,
   focused_runs: 2,
   source_validation_runs: shellRuns.length,
   findings: 0,

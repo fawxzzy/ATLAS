@@ -51,6 +51,22 @@ const ids = Object.freeze({
   run4: uid(304)
 });
 
+function modeledCanonicalPathUnder(pathApi, candidate, rootPath, caseInsensitive) {
+  const canonicalCandidate = pathApi.resolve(candidate);
+  const canonicalRoot = pathApi.resolve(rootPath).replace(/[\\/]+$/, '');
+  const prefix = `${canonicalRoot}${pathApi.sep}`;
+  return caseInsensitive
+    ? canonicalCandidate.toLowerCase().startsWith(prefix.toLowerCase())
+    : canonicalCandidate.startsWith(prefix);
+}
+
+assert.equal(modeledCanonicalPathUnder(path.posix, '/srv/atlas/runtime/packet.json', '/srv/atlas/runtime', false), true);
+assert.equal(modeledCanonicalPathUnder(path.posix, '/srv/atlas/runtime-sibling/packet.json', '/srv/atlas/runtime', false), false);
+assert.equal(modeledCanonicalPathUnder(path.posix, '/srv/atlas/runtime/../escape.json', '/srv/atlas/runtime', false), false);
+assert.equal(modeledCanonicalPathUnder(path.posix, '/SRV/ATLAS/runtime/packet.json', '/srv/atlas/runtime', false), false);
+assert.equal(modeledCanonicalPathUnder(path.win32, 'c:\\atlas\\runtime\\packet.json', 'C:\\ATLAS\\RUNTIME', true), true);
+assert.equal(modeledCanonicalPathUnder(path.win32, 'C:\\ATLAS\\runtime-sibling\\packet.json', 'C:\\ATLAS\\runtime', true), false);
+
 function profile(userId, revision, username = null) {
   const row = {
     user_id: userId,
@@ -301,6 +317,9 @@ assert.equal(classified.receipt.auth_high_water_scope, 'LEGACY_DEDICATED_EXACT')
 assert.equal(classified.receipt.fence_plan_validated, true);
 assert.equal(classified.receipt.fence_complete, false);
 assert.equal(classified.receipt.signup_admission_fence_required, false);
+assert.equal(classified.receipt.mutation_point_gate_required, true);
+assert.equal(classified.receipt.writer_capture_basis, 'TARGET_RELATION_LOCKS_PLUS_MUTATION_POINT_GATE');
+assert.equal(classified.receipt.executor_bypass_profile, 'SESSION_USER_POSTGRES_AND_TRANSACTION_LOCAL_GUC');
 assert.equal(classified.receipt.non_mazer_signup_passthrough_required, false);
 assert.equal(classified.receipt.raw_identifiers_emitted, false);
 assert.equal(classified.receipt.pii_emitted, false);
@@ -465,9 +484,15 @@ assert.match(boundWriterCapture.drainSql, /a\.pid = w\.pid[\s\S]+a\.backend_star
 assert.match(boundWriterCapture.lockBarrierSql, /PASS_WRITER_LOCK_BARRIER/);
 assert.match(boundWriterCapture.lockBarrierSql, /CAPTURED_WRITER_REAPPEARED/);
 assert.match(boundWriterCapture.lockBarrierSql, /LOCK_BARRIER_POST_ACL_OR_CATALOG_DRIFT/);
+assert.match(boundWriterCapture.lockBarrierSql, /PASS_MUTATION_GATE_FENCED/);
+assert.match(boundWriterCapture.lockBarrierSql, /MAZER_CUTOVER_WRITES_FENCED/);
+assert.match(boundWriterCapture.lockBarrierSql, /mutation_gate_digest/);
+assert.match(boundWriterCapture.lockBarrierSql, /security invoker/);
+assert.doesNotMatch(boundWriterCapture.lockBarrierSql, /security definer/);
 for (const table of [...CONTRACT.tables].sort()) assert.match(boundWriterCapture.lockBarrierSql, new RegExp(`lock table "public"\\."${table}" in share row exclusive mode`));
 assert.ok(boundWriterCapture.lockBarrierSql.indexOf('CAPTURED_WRITER_REAPPEARED') < boundWriterCapture.lockBarrierSql.indexOf('lock table'));
-assert.ok(boundWriterCapture.lockBarrierSql.indexOf('lock table') < boundWriterCapture.lockBarrierSql.indexOf('LOCK_BARRIER_POST_ACL_OR_CATALOG_DRIFT'));
+assert.ok(boundWriterCapture.lockBarrierSql.indexOf('lock table') < boundWriterCapture.lockBarrierSql.indexOf('PASS_MUTATION_GATE_FENCED'));
+assert.ok(boundWriterCapture.lockBarrierSql.indexOf('PASS_MUTATION_GATE_FENCED') < boundWriterCapture.lockBarrierSql.indexOf('LOCK_BARRIER_POST_ACL_OR_CATALOG_DRIFT'));
 
 const emptyWriterCapture = classifyWriterCapture(observedPacket, { ...writerCapture, writers: [], captured_at: iso(17) }, 'primary');
 assert.equal(emptyWriterCapture.receipt.writer_count, 0);
@@ -490,8 +515,12 @@ assert.throws(
   () => renderWriterDrainSql(CONTRACT.legacy.schema, [{ ...writerCapture.writers[0], pid: 0 }], boundWriterCapture.receipt.writer_set_digest),
   (error) => error instanceof CutoverHold && error.code === 'WRITER_IDENTITY_PID'
 );
-assert.match(renderWriterCaptureSql(CONTRACT.master.schema, aclPreimage(CONTRACT.master.schema)), /mazer_complete_level\(/);
-assert.match(renderWriterCaptureSql(CONTRACT.master.schema, aclPreimage(CONTRACT.master.schema)), /insertinto"mazer"\."mazer_profiles"/);
+const relationWriterCaptureSql = renderWriterCaptureSql(CONTRACT.master.schema, aclPreimage(CONTRACT.master.schema));
+const relationWriterSelect = relationWriterCaptureSql.slice(relationWriterCaptureSql.indexOf('with writer_rows as'));
+assert.match(relationWriterSelect, /pg_catalog\.pg_locks/);
+assert.match(relationWriterSelect, /l\.relation in \(pg_catalog\.to_regclass\('mazer\.mazer_profiles'\)/);
+assert.match(relationWriterSelect, /RowExclusiveLock/);
+assert.doesNotMatch(relationWriterSelect, /regexp_replace|pg_catalog\.strpos|mazer_complete_level|insertinto/);
 
 // REVOKE must commit before the post-commit identity capture. The exact captured
 // transactions drain before an ordered table barrier, and only then may the two
@@ -502,14 +531,24 @@ const concurrentWriterSchedule = [
   'active-writer-identities-captured',
   'captured-writers-drained',
   'ordered-table-lock-barrier',
+  'mutation-point-gate-installed',
+  'delayed-prepared-rpc-rejected-at-dml',
   'fenced-acl-catalog-reproved',
   'source-read-1',
   'source-read-2'
 ];
 assert.ok(concurrentWriterSchedule.indexOf('revoke-commits') < concurrentWriterSchedule.indexOf('active-writer-identities-captured'));
 assert.ok(concurrentWriterSchedule.indexOf('captured-writers-drained') < concurrentWriterSchedule.indexOf('ordered-table-lock-barrier'));
+assert.ok(concurrentWriterSchedule.indexOf('ordered-table-lock-barrier') < concurrentWriterSchedule.indexOf('mutation-point-gate-installed'));
+assert.ok(concurrentWriterSchedule.indexOf('mutation-point-gate-installed') < concurrentWriterSchedule.indexOf('delayed-prepared-rpc-rejected-at-dml'));
 assert.doesNotMatch(renderFenceSql(CONTRACT.master.schema, aclPreimage(CONTRACT.master.schema)), /lock table/);
 assert.match(renderLockBarrierSql(CONTRACT.master.schema, aclPreimage(CONTRACT.master.schema), writerCapture.writers, boundWriterCapture.receipt.writer_set_digest), /lock table[\s\S]+share row exclusive mode/);
+assert.match(classified.privatePlan.transactional_sql, /set local atlas\.mazer_cutover_writer_bypass = 'r001'/);
+const masterRestoreWithGate = renderRestoreSql(CONTRACT.master.schema, aclPreimage(CONTRACT.master.schema));
+assert.match(masterRestoreWithGate, /atlas:mazer-writer-mutation-gate:mazer/);
+assert.ok(masterRestoreWithGate.indexOf('lock table') < masterRestoreWithGate.indexOf('atlas_mutation_gate_current'));
+assert.ok(masterRestoreWithGate.indexOf('grant ') < masterRestoreWithGate.indexOf('drop trigger'));
+assert.match(masterRestoreWithGate, /MUTATION_GATE_RESTORE_POSTIMAGE_DRIFT/);
 
 const staleMap = baseForward();
 staleMap.expected_identity_map_digest = digest('stale-map');
@@ -1066,6 +1105,23 @@ function waitForExit(child, timeoutMs = 30000) {
   });
 }
 
+function waitForExitResult(child, timeoutMs = 30000) {
+  return new Promise((resolve, reject) => {
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', (chunk) => { stdout += chunk.toString('utf8'); });
+    child.stderr.on('data', (chunk) => { stderr += chunk.toString('utf8'); });
+    const timer = setTimeout(() => {
+      try { child.kill(); } catch {}
+      reject(new Error(`PG17_PROCESS_TIMEOUT:${stderr}`));
+    }, timeoutMs);
+    child.once('exit', (code) => {
+      clearTimeout(timer);
+      resolve({ code, stdout, stderr });
+    });
+  });
+}
+
 async function runDisposablePostgres17Concurrency() {
   if (process.env.ATLAS_RUN_PG17_CONCURRENCY !== '1') return 'SKIPPED_EXPLICIT_OPT_IN_REQUIRED';
   if (process.platform !== 'win32') throw new Error('PG17_WSL_WINDOWS_REQUIRED');
@@ -1133,6 +1189,8 @@ async function runDisposablePostgres17Concurrency() {
       create extension pgcrypto with schema extensions;
       create schema auth;
       create schema mazer;
+      create schema fitness;
+      create table fitness.profiles (id bigint primary key);
       create table auth.users (id uuid primary key, raw_user_meta_data jsonb not null default '{}'::jsonb);
       create table mazer.mazer_profiles (user_id uuid primary key, username text);
       create function mazer.mazer_claim_signup_username() returns trigger language plpgsql volatile security definer set search_path = '' as 'begin if coalesce(new.raw_user_meta_data, ''{}''::jsonb) ->> ''app_namespace'' = ''mazer'' then insert into mazer.mazer_profiles(user_id, username) values (new.id, new.raw_user_meta_data ->> ''username''); end if; return new; end';
@@ -1156,6 +1214,8 @@ async function runDisposablePostgres17Concurrency() {
       grant execute on function public.mazer_complete_level(bigint,uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb) to authenticated;
       grant execute on function public.mazer_complete_ai_level(uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb) to authenticated;
       grant execute on function public.mazer_reset_progression(bigint,uuid) to authenticated;
+      grant usage on schema fitness to authenticated;
+      grant insert on table fitness.profiles to authenticated;
     `;
     pgSqlRequired(setupSql);
 
@@ -1175,8 +1235,8 @@ async function runDisposablePostgres17Concurrency() {
     await waitForMarker(gate, 'GATE_READY');
 
     rpc = pgSpawn();
-    rpc.stdin.end(`set role authenticated; select public.mazer_complete_level(1,'${ids.legacyA}','x',1,1,'${ids.run1}','x',1,'x',now(),'{}'::jsonb);\n\\q\n`);
-    const rpcSeen = () => Number(pgSqlRequired("select count(*) from pg_catalog.pg_stat_activity where pid <> pg_backend_pid() and state = 'active' and query like '%mazer_complete_level(1,%';")) === 1;
+    rpc.stdin.end(`set role authenticated; prepare admitted_rpc as select public.mazer_complete_level(1,'${ids.legacyA}','x',1,1,'${ids.run1}','x',1,'x',now(),'{}'::jsonb); execute admitted_rpc;\n\\q\n`);
+    const rpcSeen = () => Number(pgSqlRequired("select count(*) from pg_catalog.pg_stat_activity where pid <> pg_backend_pid() and state = 'active' and query like 'execute admitted_rpc%';")) === 1;
     for (let attempt = 0; attempt < 100 && !rpcSeen(); attempt += 1) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 25);
     assert.equal(rpcSeen(), true, 'old-ACL SECURITY DEFINER RPC was not active behind the relation lock');
 
@@ -1192,7 +1252,7 @@ async function runDisposablePostgres17Concurrency() {
     assert.equal(revokeReceipt.result, 'PASS_WRITER_REVOKE_COMMITTED');
     const liveWriterCapture = JSON.parse(pgFileRequired(capturePath));
     assert.equal(liveWriterCapture.result, 'PASS_WRITER_SET_CAPTURE');
-    assert.equal(liveWriterCapture.writers.length, 2);
+    assert.equal(liveWriterCapture.writers.length, 1);
     const liveWriterPlan = classifyWriterCapture(liveInput, liveWriterCapture, 'primary');
     const drainPath = path.join(pgTmp, 'writer-drain.sql');
     const barrierPath = path.join(pgTmp, 'lock-barrier.sql');
@@ -1201,25 +1261,41 @@ async function runDisposablePostgres17Concurrency() {
 
     const waitingDrainReceipt = JSON.parse(pgFileRequired(drainPath));
     assert.equal(waitingDrainReceipt.result, 'WAIT_CAPTURED_WRITERS');
-    assert.equal(waitingDrainReceipt.remaining_writer_count, 2);
+    assert.equal(waitingDrainReceipt.remaining_writer_count, 1);
     direct.stdin.end('commit;\n\\q\n');
-    gate.stdin.end('commit;\n\\q\n');
-    await Promise.all([waitForExit(direct), waitForExit(gate), waitForExit(rpc)]);
+    await waitForExit(direct);
     direct = null;
-    gate = null;
-    rpc = null;
     const drainedReceipt = JSON.parse(pgFileRequired(drainPath));
     assert.equal(drainedReceipt.result, 'PASS_CAPTURED_WRITERS_DRAINED');
     assert.equal(drainedReceipt.remaining_writer_count, 0);
 
     const barrierReceipt = JSON.parse(pgFileRequired(barrierPath, { timeout: 160000 }));
     assert.equal(barrierReceipt.result, 'PASS_WRITER_LOCK_BARRIER');
+    assert.equal(barrierReceipt.mutation_gate_state, 'FENCED');
+    assert.match(barrierReceipt.mutation_gate_digest, /^[a-f0-9]{64}$/);
+    const delayedPreparedExit = waitForExitResult(rpc);
+    gate.stdin.end('commit;\n\\q\n');
+    await waitForExit(gate);
+    gate = null;
+    const delayedPreparedResult = await delayedPreparedExit;
+    rpc = null;
+    assert.notEqual(delayedPreparedResult.code, 0);
+    assert.match(delayedPreparedResult.stderr, /MAZER_CUTOVER_WRITES_FENCED/);
     const beforeRejectedWrites = Number(pgSqlRequired('select (select count(*) from public.mazer_profiles) + (select count(*) from public.mazer_cycle_receipts);'));
-    assert.equal(beforeRejectedWrites, 2);
+    assert.equal(beforeRejectedWrites, 1);
     const rejectedDirect = pgSql(`set role authenticated; insert into public.mazer_profiles(user_id) values ('${ids.legacyC}');`);
     const rejectedRpc = pgSql(`set role authenticated; select public.mazer_complete_level(2,'${ids.legacyA}','x',1,1,'${ids.run2}','x',1,'x',now(),'{}'::jsonb);`);
+    const rejectedPreparedDirect = pgSql(`prepare fenced_direct as insert into public.mazer_profiles(user_id) values ('${ids.legacyC}'); execute fenced_direct;`);
+    const rejectedPrivilegedWithoutBypass = pgSql(`insert into public.mazer_profiles(user_id) values ('${ids.legacyC}');`);
     assert.notEqual(rejectedDirect.status, 0);
     assert.notEqual(rejectedRpc.status, 0);
+    assert.notEqual(rejectedPreparedDirect.status, 0);
+    assert.notEqual(rejectedPrivilegedWithoutBypass.status, 0);
+    assert.match(rejectedPreparedDirect.stderr, /MAZER_CUTOVER_WRITES_FENCED/);
+    assert.match(rejectedPrivilegedWithoutBypass.stderr, /MAZER_CUTOVER_WRITES_FENCED/);
+    pgSqlRequired(`begin; set local atlas.mazer_cutover_writer_bypass = 'r001'; insert into public.mazer_profiles(user_id) values ('${ids.legacyA}'); rollback;`);
+    pgSqlRequired(`set role authenticated; insert into fitness.profiles(id) values (1);`);
+    assert.equal(pgSqlRequired('select count(*) from fitness.profiles;'), '1');
     const afterRejectedWrites = Number(pgSqlRequired('select (select count(*) from public.mazer_profiles) + (select count(*) from public.mazer_cycle_receipts);'));
     assert.equal(afterRejectedWrites, beforeRejectedWrites);
 
@@ -1230,7 +1306,7 @@ async function runDisposablePostgres17Concurrency() {
     assert.equal(classifyAclObservation(liveInput, restoredObservation, 'primary', liveAclObservation).matched, true);
     pgSqlRequired(`set role authenticated; insert into public.mazer_profiles(user_id) values ('${ids.legacyC}');`);
     pgSqlRequired(`set role authenticated; select public.mazer_complete_level(2,'${ids.legacyA}','x',1,1,'${ids.run2}','x',1,'x',now(),'{}'::jsonb);`);
-    assert.equal(Number(pgSqlRequired('select (select count(*) from public.mazer_profiles) + (select count(*) from public.mazer_cycle_receipts);')), 4);
+    assert.equal(Number(pgSqlRequired('select (select count(*) from public.mazer_profiles) + (select count(*) from public.mazer_cycle_receipts);')), 3);
 
     const signupObservationPath = path.join(pgTmp, 'signup-admission-observation.sql');
     const signupFencePath = path.join(pgTmp, 'signup-admission-fence.sql');
@@ -1305,7 +1381,7 @@ async function runDisposablePostgres17Concurrency() {
     assert.equal(JSON.parse(pgFileRequired(signupObservationPath)).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT');
     assert.equal(JSON.parse(pgFileRequired(signupRestorePath, { timeout: 160000 })).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED');
     assert.equal(JSON.parse(pgFileRequired(signupObservationPath)).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT');
-    return 'PASS_POSTGRESQL_17_REAL_CONCURRENCY_AND_SIGNUP_ADMISSION';
+    return 'PASS_POSTGRESQL_17_REAL_CONCURRENCY_SIGNUP_AND_MUTATION_GATE';
   } finally {
     for (const child of [direct, gate, rpc, drain, admittedSignup, signupFenceProcess, signupRestoreProcess]) {
       if (child) { try { child.kill(); } catch {} }
@@ -1321,7 +1397,7 @@ const pg17Concurrency = await runDisposablePostgres17Concurrency();
 
 console.log(JSON.stringify({
   result: 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001',
-  scenarios: 88,
+  scenarios: 110,
   postgresql17_concurrency: pg17Concurrency,
   provider_calls: 0,
   provider_writes: 0,
