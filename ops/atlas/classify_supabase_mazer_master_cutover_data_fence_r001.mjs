@@ -20,8 +20,25 @@ export const CONTRACT = Object.freeze({
     'mazer_complete_level(bigint,uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb)',
     'mazer_complete_ai_level(uuid,text,integer,integer,uuid,text,integer,text,timestamp with time zone,jsonb)',
     'mazer_reset_progression(bigint,uuid)'
-  ])
+  ]),
+  signupFence: Object.freeze({
+    functionName: 'mazer_cutover_signup_admission_fence_r001',
+    triggerName: 'mazer_cutover_signup_admission_fence_r001',
+    claimFunction: 'mazer_claim_signup_username()',
+    claimTrigger: 'mazer_claim_signup_username_after_insert'
+  })
 });
+
+const SIGNUP_FENCE_BODY = `
+begin
+  if coalesce(new.raw_user_meta_data, '{}'::jsonb) ->> 'app_namespace' = 'mazer' then
+    raise exception using
+      errcode = '55000',
+      message = 'MAZER_SIGNUP_TEMPORARILY_UNAVAILABLE';
+  end if;
+  return new;
+end;
+`;
 
 const SHA256 = /^[a-f0-9]{64}$/;
 const UUID = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i;
@@ -33,7 +50,7 @@ const CLIENT_ROLES = new Set(['anon', 'authenticated', 'public']);
 const TABLE_WRITE_PRIVILEGES = new Set(['INSERT', 'UPDATE', 'DELETE']);
 const PHASES = Object.freeze({
   forward: ['PREFLIGHT', 'LEGACY_SIGNUP_FENCING', 'LEGACY_SIGNUP_FENCED', 'LEGACY_WRITERS_PREOBSERVING', 'LEGACY_WRITERS_PREOBSERVED', 'LEGACY_WRITERS_FENCING', 'LEGACY_WRITER_REVOKE_COMMITTED', 'LEGACY_WRITER_SET_CAPTURING', 'LEGACY_WRITER_SET_CAPTURED', 'LEGACY_WRITERS_DRAINING', 'LEGACY_WRITERS_DRAINED', 'LEGACY_LOCK_BARRIER_ACQUIRING', 'LEGACY_WRITERS_FENCED', 'SOURCE_HIGH_WATER_READ_1', 'SOURCE_HIGH_WATER_READ_2', 'FORWARD_DELTA_APPLYING', 'FORWARD_DELTA_APPLIED', 'ZERO_DELTA_READ_1', 'ZERO_DELTA_READ_2', 'COMPLETE'],
-  reverse: ['PREFLIGHT', 'MASTER_HOOK_DISABLING', 'MASTER_HOOK_DISABLED', 'MASTER_WRITERS_PREOBSERVING', 'MASTER_WRITERS_PREOBSERVED', 'MASTER_WRITERS_FENCING', 'MASTER_WRITER_REVOKE_COMMITTED', 'MASTER_WRITER_SET_CAPTURING', 'MASTER_WRITER_SET_CAPTURED', 'MASTER_WRITERS_DRAINING', 'MASTER_WRITERS_DRAINED', 'MASTER_LOCK_BARRIER_ACQUIRING', 'MASTER_WRITERS_FENCED', 'SOURCE_HIGH_WATER_READ_1', 'SOURCE_HIGH_WATER_READ_2', 'REVERSE_DELTA_APPLYING', 'REVERSE_DELTA_APPLIED', 'ZERO_DELTA_READ_1', 'ZERO_DELTA_READ_2', 'LEGACY_WRITERS_RESTORING', 'LEGACY_WRITERS_RESTORED', 'LEGACY_SIGNUP_RESTORING', 'COMPLETE']
+  reverse: ['PREFLIGHT', 'MASTER_HOOK_DISABLING', 'MASTER_HOOK_DISABLED', 'MASTER_SIGNUP_PREOBSERVING', 'MASTER_SIGNUP_PREOBSERVED', 'MASTER_SIGNUP_FENCING', 'MASTER_SIGNUP_FENCED', 'MASTER_WRITERS_PREOBSERVING', 'MASTER_WRITERS_PREOBSERVED', 'MASTER_WRITERS_FENCING', 'MASTER_WRITER_REVOKE_COMMITTED', 'MASTER_WRITER_SET_CAPTURING', 'MASTER_WRITER_SET_CAPTURED', 'MASTER_WRITERS_DRAINING', 'MASTER_WRITERS_DRAINED', 'MASTER_LOCK_BARRIER_ACQUIRING', 'MASTER_WRITERS_FENCED', 'SOURCE_HIGH_WATER_READ_1', 'SOURCE_HIGH_WATER_READ_2', 'REVERSE_DELTA_APPLYING', 'REVERSE_DELTA_APPLIED', 'ZERO_DELTA_READ_1', 'ZERO_DELTA_READ_2', 'LEGACY_WRITERS_RESTORING', 'LEGACY_WRITERS_RESTORED', 'LEGACY_SIGNUP_RESTORING', 'MASTER_HOOK_RESTORING', 'MASTER_HOOK_RESTORED', 'MASTER_SIGNUP_RESTORING', 'COMPLETE']
 });
 
 export class CutoverHold extends Error {
@@ -551,6 +568,18 @@ export function classifyRecoveryState(state) {
   if (journal.direction === 'reverse' && journal.phase.startsWith('LEGACY_')) {
     return { result: 'REFENCE_LEGACY_WRITERS', effect: 'DUAL_WRITER_RISK' };
   }
+  if (journal.direction === 'reverse' && ['MASTER_SIGNUP_PREOBSERVING', 'MASTER_SIGNUP_PREOBSERVED'].includes(journal.phase)) {
+    return { result: 'RESTORE_MASTER_HOOK_PREIMAGE', effect: 'AUTH_CONFIG_ONLY' };
+  }
+  if (journal.direction === 'reverse' && journal.phase === 'MASTER_SIGNUP_FENCING') {
+    return { result: 'OBSERVE_SIGNUP_ADMISSION_THEN_RESTORE', effect: 'SIGNUP_FENCE_COMMIT_UNKNOWN_HOOK_DISABLED' };
+  }
+  if (journal.direction === 'reverse' && ['MASTER_SIGNUP_FENCED', 'MASTER_WRITERS_PREOBSERVING', 'MASTER_WRITERS_PREOBSERVED'].includes(journal.phase)) {
+    return { result: 'RESTORE_MASTER_HOOK_THEN_SIGNUP_ADMISSION_PREIMAGE', effect: 'MAZER_SIGNUPS_FENCED' };
+  }
+  if (journal.direction === 'reverse' && ['MASTER_HOOK_RESTORING', 'MASTER_HOOK_RESTORED', 'MASTER_SIGNUP_RESTORING'].includes(journal.phase)) {
+    return { result: 'RESUME_OVERLAPPED_SIGNUP_PREIMAGE_RESTORE', effect: 'MAZER_SIGNUPS_FENCED_OR_HOOK_RESTORED' };
+  }
   if (journal.phase.endsWith('_WRITERS_PREOBSERVING') || journal.phase.endsWith('_WRITERS_PREOBSERVED')) {
     return {
       result: journal.direction === 'forward' ? 'RESTORE_LEGACY_SIGNUP_PREIMAGE' : 'RESTORE_MASTER_HOOK_PREIMAGE',
@@ -663,6 +692,79 @@ export function renderSourceObservationSql(plan) {
   blocks.push(`select pg_catalog.jsonb_build_object('result', 'PASS_SOURCE_HIGH_WATER', 'source_high_water_digest', '${plan.source_high_water_digest}', 'observed_at', pg_catalog.clock_timestamp())::text;`);
   blocks.push('commit;');
   return `${blocks.join('\n')}\n`;
+}
+
+function signupAdmissionStateSelect() {
+  const fenceFunction = `${CONTRACT.master.schema}.${CONTRACT.signupFence.functionName}()`;
+  const claimFunction = `${CONTRACT.master.schema}.${CONTRACT.signupFence.claimFunction}`;
+  const fenceBody = `${encodedJson(SIGNUP_FENCE_BODY)} #>> '{}'`;
+  return `with claim_function as (select p.oid, p.prosecdef, p.provolatile, p.proconfig, l.lanname, pg_catalog.pg_get_userbyid(p.proowner) as owner_name from pg_catalog.pg_proc p join pg_catalog.pg_language l on l.oid = p.prolang where p.oid = pg_catalog.to_regprocedure('${claimFunction}')), claim_trigger as (select t.oid from pg_catalog.pg_trigger t where t.tgrelid = pg_catalog.to_regclass('auth.users') and t.tgname = '${CONTRACT.signupFence.claimTrigger}' and not t.tgisinternal and t.tgenabled = 'O' and t.tgtype::integer = 5 and t.tgfoid = pg_catalog.to_regprocedure('${claimFunction}')), fence_function as (select p.oid, p.prosecdef, p.provolatile, p.proconfig, p.prosrc, l.lanname, pg_catalog.pg_get_userbyid(p.proowner) as owner_name from pg_catalog.pg_proc p join pg_catalog.pg_language l on l.oid = p.prolang where p.oid = pg_catalog.to_regprocedure('${fenceFunction}')), fence_trigger as (select t.oid from pg_catalog.pg_trigger t where t.tgrelid = pg_catalog.to_regclass('auth.users') and t.tgname = '${CONTRACT.signupFence.triggerName}' and not t.tgisinternal), facts as (select (select pg_catalog.count(*) = 1 and pg_catalog.bool_and(prosecdef and provolatile = 'v' and proconfig = array['search_path=""']::text[] and lanname = 'plpgsql' and owner_name = 'postgres') from claim_function) and (select pg_catalog.count(*) = 1 from claim_trigger) as claim_path_exact, (select pg_catalog.count(*) = 0 from fence_function) and (select pg_catalog.count(*) = 0 from fence_trigger) as fence_absent, (select pg_catalog.count(*) = 1 and pg_catalog.bool_and(not prosecdef and provolatile = 'v' and proconfig = array['search_path=""']::text[] and prosrc = ${fenceBody} and lanname = 'plpgsql' and owner_name = 'postgres') from fence_function) and (select pg_catalog.count(*) = 1 and pg_catalog.bool_and(tgenabled = 'O' and tgtype::integer = 7 and tgfoid = pg_catalog.to_regprocedure('${fenceFunction}')) from pg_catalog.pg_trigger where tgrelid = pg_catalog.to_regclass('auth.users') and tgname = '${CONTRACT.signupFence.triggerName}' and not tgisinternal) as fence_exact) select pg_catalog.jsonb_build_object('schema', 'atlas.supabase.mazer-master-signup-admission-fence-observation.v1', 'result', case when not claim_path_exact then 'HOLD_MAZER_SIGNUP_CLAIM_PATH_DRIFT' when fence_absent then 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT' when fence_exact then 'PASS_SIGNUP_ADMISSION_FENCED' else 'HOLD_SIGNUP_ADMISSION_STATE_AMBIGUOUS' end, 'state', case when fence_absent then 'ABSENT' when fence_exact then 'FENCED' else 'AMBIGUOUS' end, 'claim_path_verified', claim_path_exact, 'observed_at', pg_catalog.clock_timestamp()) from facts`;
+}
+
+export function renderSignupAdmissionObservationSql() {
+  return [
+    '\\set ON_ERROR_STOP on',
+    'begin transaction isolation level repeatable read read only;',
+    "set local lock_timeout = '5s';",
+    "set local statement_timeout = '30s';",
+    `select observation::text from (${signupAdmissionStateSelect()}) observed(observation);`,
+    'commit;'
+  ].join('\n') + '\n';
+}
+
+function signupWriterCaptureSelect() {
+  return `select distinct a.pid, a.backend_start, a.xact_start, a.query_start from pg_catalog.pg_locks l join pg_catalog.pg_stat_activity a on a.pid = l.pid where l.locktype = 'relation' and l.relation = pg_catalog.to_regclass('auth.users') and l.granted and l.mode in ('RowExclusiveLock','ShareRowExclusiveLock','ExclusiveLock','AccessExclusiveLock') and a.datid = (select oid from pg_catalog.pg_database where datname = pg_catalog.current_database()) and a.pid <> pg_catalog.pg_backend_pid() and a.xact_start is not null order by a.pid, a.backend_start, a.xact_start, a.query_start`;
+}
+
+export function renderSignupAdmissionFenceSql() {
+  const qualifiedFunction = `${q(CONTRACT.master.schema)}.${q(CONTRACT.signupFence.functionName)}()`;
+  const capturedWriters = signupWriterCaptureSelect();
+  return [
+    '\\set ON_ERROR_STOP on',
+    'begin;',
+    "set local lock_timeout = '120s';",
+    "set local statement_timeout = '150s';",
+    `select pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('atlas:mazer-signup-admission-fence:${CONTRACT.master.schema}', 0));`,
+    'create temporary table atlas_signup_preimage (payload jsonb not null) on commit drop;',
+    `insert into atlas_signup_preimage (payload) ${signupAdmissionStateSelect()};`,
+    `do $atlas_signup_preimage$ begin if (select payload ->> 'result' from atlas_signup_preimage) is distinct from 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT' then raise exception 'SIGNUP_ADMISSION_PREIMAGE_DRIFT'; end if; end $atlas_signup_preimage$;`,
+    `create temporary table atlas_admitted_signup_writers on commit drop as ${capturedWriters};`,
+    `create temporary table atlas_admitted_signup_summary (payload jsonb not null) on commit drop;`,
+    `insert into atlas_admitted_signup_summary (payload) select pg_catalog.jsonb_build_object('captured_at', pg_catalog.clock_timestamp(), 'writers', coalesce(pg_catalog.jsonb_agg(pg_catalog.jsonb_build_object('pid', pid, 'backend_start', backend_start, 'xact_start', xact_start, 'query_start', query_start) order by pid, backend_start, xact_start, query_start), '[]'::jsonb)) from atlas_admitted_signup_writers;`,
+    'lock table auth.users in share row exclusive mode;',
+    'select pg_catalog.pg_stat_clear_snapshot();',
+    `do $atlas_signup_drain$ begin if exists (select 1 from atlas_admitted_signup_writers w join pg_catalog.pg_stat_activity a on a.pid = w.pid and a.backend_start = w.backend_start and a.xact_start = w.xact_start and a.query_start = w.query_start) then raise exception 'ADMITTED_SIGNUP_WRITER_NOT_DRAINED'; end if; if exists (${capturedWriters}) then raise exception 'AUTH_USERS_WRITER_BARRIER_INCOMPLETE'; end if; end $atlas_signup_drain$;`,
+    `create function ${qualifiedFunction} returns trigger language plpgsql volatile security invoker set search_path = '' as $atlas_signup_fence$${SIGNUP_FENCE_BODY}$atlas_signup_fence$;`,
+    `alter function ${qualifiedFunction} owner to postgres;`,
+    `revoke all on function ${qualifiedFunction} from public;`,
+    `do $atlas_signup_roles$ begin if pg_catalog.to_regrole('anon') is not null then execute 'revoke all on function ${qualifiedFunction} from anon'; end if; if pg_catalog.to_regrole('authenticated') is not null then execute 'revoke all on function ${qualifiedFunction} from authenticated'; end if; if pg_catalog.to_regrole('service_role') is not null then execute 'revoke all on function ${qualifiedFunction} from service_role'; end if; end $atlas_signup_roles$;`,
+    `comment on function ${qualifiedFunction} is 'Temporary reverse-cutover admission fence. Rejects only explicit Mazer signups; non-Mazer Auth users pass through.';`,
+    `create trigger ${q(CONTRACT.signupFence.triggerName)} before insert on auth.users for each row execute function ${qualifiedFunction};`,
+    'create temporary table atlas_signup_postimage (payload jsonb not null) on commit drop;',
+    `insert into atlas_signup_postimage (payload) ${signupAdmissionStateSelect()};`,
+    `do $atlas_signup_postimage$ begin if (select payload ->> 'result' from atlas_signup_postimage) is distinct from 'PASS_SIGNUP_ADMISSION_FENCED' then raise exception 'SIGNUP_ADMISSION_POSTIMAGE_DRIFT'; end if; end $atlas_signup_postimage$;`,
+    `select pg_catalog.jsonb_build_object('schema', 'atlas.supabase.mazer-master-signup-admission-fence-receipt.v1', 'result', 'PASS_SIGNUP_ADMISSION_FENCED', 'state', 'FENCED', 'claim_path_verified', true, 'captured_at', payload ->> 'captured_at', 'writer_count', pg_catalog.jsonb_array_length(payload -> 'writers'), 'writer_set_digest', pg_catalog.encode(extensions.digest(pg_catalog.convert_to((payload -> 'writers')::text, 'UTF8'), 'sha256'), 'hex'), 'barrier_at', pg_catalog.clock_timestamp())::text from atlas_admitted_signup_summary;`,
+    'commit;'
+  ].join('\n') + '\n';
+}
+
+export function renderSignupAdmissionRestoreSql() {
+  const qualifiedFunction = `${q(CONTRACT.master.schema)}.${q(CONTRACT.signupFence.functionName)}()`;
+  return [
+    '\\set ON_ERROR_STOP on',
+    'begin;',
+    "set local lock_timeout = '120s';",
+    "set local statement_timeout = '150s';",
+    `select pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('atlas:mazer-signup-admission-restore:${CONTRACT.master.schema}', 0));`,
+    'create temporary table atlas_signup_current (payload jsonb not null) on commit drop;',
+    `insert into atlas_signup_current (payload) ${signupAdmissionStateSelect()};`,
+    `do $atlas_signup_restore_precondition$ begin if (select payload ->> 'result' from atlas_signup_current) not in ('PASS_SIGNUP_ADMISSION_FENCED','PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT') then raise exception 'SIGNUP_ADMISSION_RESTORE_STATE_AMBIGUOUS'; end if; end $atlas_signup_restore_precondition$;`,
+    'lock table auth.users in share row exclusive mode;',
+    `drop trigger if exists ${q(CONTRACT.signupFence.triggerName)} on auth.users;`,
+    `drop function if exists ${qualifiedFunction};`,
+    'commit;',
+    `select pg_catalog.jsonb_build_object('schema', 'atlas.supabase.mazer-master-signup-admission-fence-receipt.v1', 'result', case when observation ->> 'result' = 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT' then 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED' else 'HOLD_SIGNUP_ADMISSION_RESTORE_POSTIMAGE' end, 'state', observation ->> 'state', 'claim_path_verified', (observation ->> 'claim_path_verified')::boolean, 'restored_at', pg_catalog.clock_timestamp())::text from (${signupAdmissionStateSelect()}) observed(observation);`
+  ].join('\n') + '\n';
 }
 
 export function renderFenceSql(schema, journaledPreimage) {
@@ -915,7 +1017,10 @@ export function classifyCutover(rawInput) {
     legacy_fence_sql: renderFenceSql(CONTRACT.legacy.schema, legacyAclPreimage),
     legacy_writer_capture_sql: renderWriterCaptureSql(CONTRACT.legacy.schema, legacyAclPreimage),
     legacy_acl_observation_sql: renderAclObservationSql(CONTRACT.legacy.schema),
-    legacy_restore_sql: renderRestoreSql(CONTRACT.legacy.schema, legacyAclPreimage)
+    legacy_restore_sql: renderRestoreSql(CONTRACT.legacy.schema, legacyAclPreimage),
+    signup_admission_observation_sql: renderSignupAdmissionObservationSql(),
+    signup_admission_fence_sql: renderSignupAdmissionFenceSql(),
+    signup_admission_restore_sql: renderSignupAdmissionRestoreSql()
   };
   plan.transactional_sql = renderTransactionalSql(plan);
   plan.source_observation_sql = renderSourceObservationSql(plan);
@@ -942,6 +1047,8 @@ export function classifyCutover(rawInput) {
     fence_plan_validated: true,
     fence_complete: false,
     hook_disabled_first: input.direction === 'forward' ? null : true,
+    signup_admission_fence_required: input.direction === 'reverse',
+    non_mazer_signup_passthrough_required: input.direction === 'reverse',
     zero_delta_reads: 2,
     source_counts: sourceCounts,
     target_counts: targetCounts,
@@ -1209,7 +1316,7 @@ async function main() {
     if (!classified.matched) process.exitCode = 2;
     return;
   }
-  if (!args.input || !args['private-plan'] || !args['private-sql'] || !args['private-source-observation-sql'] || !args['private-fence-sql'] || !args['private-writer-capture-sql'] || !args['private-acl-observation-sql'] || !args['private-restore-sql'] || !args['private-legacy-fence-sql'] || !args['private-legacy-writer-capture-sql'] || !args['private-legacy-acl-observation-sql'] || !args['private-legacy-restore-sql']) hold('CLI_ARGUMENTS');
+  if (!args.input || !args['private-plan'] || !args['private-sql'] || !args['private-source-observation-sql'] || !args['private-fence-sql'] || !args['private-writer-capture-sql'] || !args['private-acl-observation-sql'] || !args['private-restore-sql'] || !args['private-legacy-fence-sql'] || !args['private-legacy-writer-capture-sql'] || !args['private-legacy-acl-observation-sql'] || !args['private-legacy-restore-sql'] || !args['private-signup-admission-observation-sql'] || !args['private-signup-admission-fence-sql'] || !args['private-signup-admission-restore-sql']) hold('CLI_ARGUMENTS');
   const { receipt, privatePlan } = classifyCutover(readJsonNoDuplicateKeys(path.resolve(args.input)));
   writePrivate(path.resolve(args['private-plan']), `${canonicalJson(privatePlan)}\n`);
   writePrivate(path.resolve(args['private-sql']), privatePlan.transactional_sql);
@@ -1222,6 +1329,9 @@ async function main() {
   writePrivate(path.resolve(args['private-legacy-writer-capture-sql']), privatePlan.legacy_writer_capture_sql);
   writePrivate(path.resolve(args['private-legacy-acl-observation-sql']), privatePlan.legacy_acl_observation_sql);
   writePrivate(path.resolve(args['private-legacy-restore-sql']), privatePlan.legacy_restore_sql);
+  writePrivate(path.resolve(args['private-signup-admission-observation-sql']), privatePlan.signup_admission_observation_sql);
+  writePrivate(path.resolve(args['private-signup-admission-fence-sql']), privatePlan.signup_admission_fence_sql);
+  writePrivate(path.resolve(args['private-signup-admission-restore-sql']), privatePlan.signup_admission_restore_sql);
   process.stdout.write(`${canonicalJson(receipt)}\n`);
 }
 

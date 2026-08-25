@@ -194,6 +194,9 @@ function Invoke-Classifier(
   $legacyWriterCapture = Join-Path $PrivateRoot 'legacy-writer-capture.sql'
   $legacyAclObservation = Join-Path $PrivateRoot 'legacy-acl-observation.sql'
   $legacyRestore = Join-Path $PrivateRoot 'legacy-restore.sql'
+  $signupAdmissionObservation = Join-Path $PrivateRoot 'signup-admission-observation.sql'
+  $signupAdmissionFence = Join-Path $PrivateRoot 'signup-admission-fence.sql'
+  $signupAdmissionRestore = Join-Path $PrivateRoot 'signup-admission-restore.sql'
   $arguments = @(
     $Classifier,
     '--input', $ResolvedInput,
@@ -207,7 +210,10 @@ function Invoke-Classifier(
     '--private-legacy-fence-sql', $legacyFence,
     '--private-legacy-writer-capture-sql', $legacyWriterCapture,
     '--private-legacy-acl-observation-sql', $legacyAclObservation,
-    '--private-legacy-restore-sql', $legacyRestore
+    '--private-legacy-restore-sql', $legacyRestore,
+    '--private-signup-admission-observation-sql', $signupAdmissionObservation,
+    '--private-signup-admission-fence-sql', $signupAdmissionFence,
+    '--private-signup-admission-restore-sql', $signupAdmissionRestore
   )
   $child = Invoke-ProcessSanitized -FileName (Get-Command node -ErrorAction Stop).Source -Arguments $arguments -TimeoutMs 30000
   if ([string]::IsNullOrWhiteSpace($child.Stdout) -or $child.Stdout.Length -gt 65536) { throw 'CLASSIFIER_OUTPUT_SHAPE' }
@@ -219,7 +225,7 @@ function Invoke-Classifier(
   if ($receipt.raw_identifiers_emitted -ne $false -or $receipt.raw_records_emitted -ne $false -or $receipt.pii_emitted -ne $false -or $receipt.secrets_emitted -ne $false) {
     throw 'CLASSIFIER_DISCLOSURE'
   }
-  foreach ($file in @($plan,$transaction,$sourceObservation,$fence,$writerCapture,$aclObservation,$restore,$legacyFence,$legacyWriterCapture,$legacyAclObservation,$legacyRestore)) {
+  foreach ($file in @($plan,$transaction,$sourceObservation,$fence,$writerCapture,$aclObservation,$restore,$legacyFence,$legacyWriterCapture,$legacyAclObservation,$legacyRestore,$signupAdmissionObservation,$signupAdmissionFence,$signupAdmissionRestore)) {
     if (-not (Test-Path -LiteralPath $file -PathType Leaf) -or (Get-Item -LiteralPath $file).Length -lt 16) { throw 'PRIVATE_PLAN_MISSING' }
   }
   return [pscustomobject]@{
@@ -237,6 +243,9 @@ function Invoke-Classifier(
     LegacyWriterCaptureSql = $legacyWriterCapture
     LegacyAclObservationSql = $legacyAclObservation
     LegacyRestoreSql = $legacyRestore
+    SignupAdmissionObservationSql = $signupAdmissionObservation
+    SignupAdmissionFenceSql = $signupAdmissionFence
+    SignupAdmissionRestoreSql = $signupAdmissionRestore
   }
 }
 
@@ -378,6 +387,30 @@ function Assert-WriterRevokeReceipt(
   if ([string]$receipt.result -cne 'PASS_WRITER_REVOKE_COMMITTED' -or [string]$receipt.schema -cne $ExpectedSchema -or [string]$receipt.acl_preimage_digest -cne $ExpectedAclDigest) { throw 'WRITER_REVOKE_RECEIPT_BINDING' }
   try { $revokedAt = [DateTimeOffset]::Parse([string]$receipt.revoked_at, [Globalization.CultureInfo]::InvariantCulture) } catch { throw 'WRITER_REVOKE_RECEIPT_TIMESTAMP' }
   return $revokedAt
+}
+
+function Assert-SignupAdmissionReceipt(
+  [string]$Path,
+  [ValidateSet('PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT','PASS_SIGNUP_ADMISSION_FENCED','PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED')]
+  [string]$ExpectedResult
+) {
+  if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw 'SIGNUP_ADMISSION_RECEIPT_MISSING' }
+  try { $receipt = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json } catch { throw 'SIGNUP_ADMISSION_RECEIPT_JSON' }
+  $expectedSchema = if ($ExpectedResult -ceq 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT') { 'atlas.supabase.mazer-master-signup-admission-fence-observation.v1' } else { 'atlas.supabase.mazer-master-signup-admission-fence-receipt.v1' }
+  if ([string]$receipt.schema -cne $expectedSchema -or [string]$receipt.result -cne $ExpectedResult -or $receipt.claim_path_verified -ne $true) { throw 'SIGNUP_ADMISSION_RECEIPT_BINDING' }
+  if ($ExpectedResult -ceq 'PASS_SIGNUP_ADMISSION_FENCED') {
+    if ([string]$receipt.state -cne 'FENCED' -or [int]$receipt.writer_count -lt 0 -or [string]$receipt.writer_set_digest -notmatch '^[a-f0-9]{64}$') { throw 'SIGNUP_ADMISSION_FENCE_PROOF' }
+    try { $timestamp = [DateTimeOffset]::Parse([string]$receipt.barrier_at, [Globalization.CultureInfo]::InvariantCulture) } catch { throw 'SIGNUP_ADMISSION_BARRIER_TIMESTAMP' }
+  }
+  elseif ($ExpectedResult -ceq 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT') {
+    if ([string]$receipt.state -cne 'ABSENT') { throw 'SIGNUP_ADMISSION_PREIMAGE_DRIFT' }
+    try { $timestamp = [DateTimeOffset]::Parse([string]$receipt.observed_at, [Globalization.CultureInfo]::InvariantCulture) } catch { throw 'SIGNUP_ADMISSION_OBSERVATION_TIMESTAMP' }
+  }
+  else {
+    if ([string]$receipt.state -cne 'ABSENT') { throw 'SIGNUP_ADMISSION_RESTORE_POSTIMAGE' }
+    try { $timestamp = [DateTimeOffset]::Parse([string]$receipt.restored_at, [Globalization.CultureInfo]::InvariantCulture) } catch { throw 'SIGNUP_ADMISSION_RESTORE_TIMESTAMP' }
+  }
+  return [pscustomobject]@{ Receipt = $receipt; ObservedAt = $timestamp }
 }
 
 function Read-WriterDrainReceipt(
@@ -643,7 +676,10 @@ function Assert-SourceContract {
     'PASS_ACL_PREIMAGE_ALREADY_PRESENT','PASS_ACL_FENCED_POSTIMAGE_RESTORE_REQUIRED',
     'HOLD_ACL_RECOVERY_STATE_AMBIGUOUS','PASS_WRITER_REVOKE_COMMITTED',
     'PASS_WRITER_SET_CAPTURE','CAPTURED_WRITER_DRAIN_TIMEOUT_HOLD_FENCED',
-    'PASS_WRITER_LOCK_BARRIER','pid, a.backend_start, a.xact_start, a.query_start'
+    'PASS_WRITER_LOCK_BARRIER','pid, a.backend_start, a.xact_start, a.query_start',
+    'MAZER_SIGNUP_TEMPORARILY_UNAVAILABLE','PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT',
+    'PASS_SIGNUP_ADMISSION_FENCED','AUTH_USERS_WRITER_BARRIER_INCOMPLETE',
+    'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED','app_namespace'
   )) { if (-not $source.Contains($needle)) { throw 'CLASSIFIER_CONTRACT_DRIFT' } }
   foreach ($table in $ExpectedTables) { if (-not $source.Contains($table)) { throw 'CLASSIFIER_TABLE_DRIFT' } }
   foreach ($rpc in $ExpectedMutatingRpcs) { if (-not $source.Contains($rpc)) { throw 'CLASSIFIER_RPC_DRIFT' } }
@@ -688,6 +724,9 @@ $aclRestoreVerifications = 0
 $writerCaptureReads = 0
 $writerDrainReads = 0
 $writerLockBarriers = 0
+$signupAdmissionReads = 0
+$signupAdmissionBarriers = 0
+$signupAdmissionRestores = 0
 $rollbackActions = 0
 $primaryAclPreobserve = $null
 try {
@@ -777,6 +816,10 @@ try {
       primary_lock_barrier_at = $null
       legacy_disable_signup_preimage = $null
       master_hook_enabled_preimage = $null
+      master_signup_admission_preobserved_at = $null
+      master_signup_admission_fenced_at = $null
+      master_signup_admission_writer_count = $null
+      master_signup_admission_writer_set_digest = $null
       source_observation_1_at = $null
       source_observation_2_at = $null
       updated_at = [DateTimeOffset]::UtcNow.ToString('o')
@@ -822,7 +865,8 @@ try {
     else {
       $reverseFencePhases = @('MASTER_WRITERS_FENCING','MASTER_WRITER_REVOKE_COMMITTED','MASTER_WRITER_SET_CAPTURING','MASTER_WRITER_SET_CAPTURED','MASTER_WRITERS_DRAINING','MASTER_WRITERS_DRAINED','MASTER_LOCK_BARRIER_ACQUIRING','MASTER_WRITERS_FENCED','SOURCE_HIGH_WATER_READ_1','SOURCE_HIGH_WATER_READ_2','REVERSE_DELTA_APPLYING','REVERSE_DELTA_APPLIED')
       $reverseDrainRequired = @('MASTER_WRITERS_FENCING','MASTER_WRITER_REVOKE_COMMITTED','MASTER_WRITER_SET_CAPTURING','MASTER_WRITER_SET_CAPTURED','MASTER_WRITERS_DRAINING','MASTER_WRITERS_DRAINED','MASTER_LOCK_BARRIER_ACQUIRING')
-      if ($effectivePhase -notin (@('MASTER_HOOK_DISABLING','MASTER_HOOK_DISABLED','MASTER_WRITERS_PREOBSERVING','MASTER_WRITERS_PREOBSERVED') + $reverseFencePhases)) { throw 'ROLLBACK_PHASE_DRIFT' }
+      $reverseSignupPhases = @('MASTER_SIGNUP_FENCING','MASTER_SIGNUP_FENCED','MASTER_HOOK_RESTORING','MASTER_HOOK_RESTORED','MASTER_SIGNUP_RESTORING')
+      if ($effectivePhase -notin (@('MASTER_HOOK_DISABLING','MASTER_HOOK_DISABLED','MASTER_SIGNUP_PREOBSERVING','MASTER_SIGNUP_PREOBSERVED','MASTER_WRITERS_PREOBSERVING','MASTER_WRITERS_PREOBSERVED') + $reverseSignupPhases + $reverseFencePhases)) { throw 'ROLLBACK_PHASE_DRIFT' }
       if ($null -eq $state.master_hook_enabled_preimage) { throw 'ROLLBACK_PREIMAGE_MISSING' }
       if ($effectivePhase -in $reverseFencePhases) {
         if ([string]::IsNullOrWhiteSpace($rollbackRestoreSql) -or $null -eq $rollbackExpectedAcl) { throw 'ROLLBACK_ACL_PREIMAGE_MISSING' }
@@ -833,9 +877,20 @@ try {
         $writerDrainReads += [int]$recovery.DrainReads
         $writerLockBarriers += [int]$recovery.LockBarriers
       }
+      Set-StatePhase $state 'MASTER_HOOK_RESTORING' $resolvedState
       $restored = Invoke-AuthConfig $managementToken $MasterProjectRef @{ hook_before_user_created_enabled = [bool]$state.master_hook_enabled_preimage }
       $providerWrites += 1
       if ([bool]$restored.hook_before_user_created_enabled -ne [bool]$state.master_hook_enabled_preimage) { throw 'MASTER_HOOK_RESTORE_FAILED' }
+      Set-StatePhase $state 'MASTER_HOOK_RESTORED' $resolvedState
+      $signupFenceMayExist = $effectivePhase -in ($reverseSignupPhases + $reverseFencePhases) -or $null -ne $state.master_signup_admission_fenced_at
+      if ($signupFenceMayExist) {
+        Set-StatePhase $state 'MASTER_SIGNUP_RESTORING' $resolvedState
+        $signupRestoreProof = Join-Path $privateRoot 'master-signup-admission-restored.json'
+        Invoke-PsqlJsonPrivate $masterDatabaseUrl $classification.SignupAdmissionRestoreSql $signupRestoreProof 'MASTER_SIGNUP_ADMISSION_RESTORE_FAILED'
+        $null = Assert-SignupAdmissionReceipt $signupRestoreProof 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED'
+        $databaseTransactions += 1
+        $signupAdmissionRestores += 1
+      }
     }
     $rollbackActions += 1
     Set-StatePhase $state 'ROLLED_BACK' $resolvedState
@@ -851,6 +906,9 @@ try {
       writer_capture_reads = $writerCaptureReads
       writer_drain_reads = $writerDrainReads
       writer_lock_barriers = $writerLockBarriers
+      signup_admission_reads = $signupAdmissionReads
+      signup_admission_barriers = $signupAdmissionBarriers
+      signup_admission_restores = $signupAdmissionRestores
     })
     exit 0
   }
@@ -913,6 +971,23 @@ try {
     $providerWrites += 1
     if ([bool]$disabled.hook_before_user_created_enabled -ne $false) { throw 'MASTER_HOOK_DISABLE_FAILED' }
     Set-StatePhase $state 'MASTER_HOOK_DISABLED' $resolvedState
+    Set-StatePhase $state 'MASTER_SIGNUP_PREOBSERVING' $resolvedState
+    $signupPreobserve = Join-Path $privateRoot 'master-signup-admission-preobserve.json'
+    Invoke-PsqlJsonPrivate $masterDatabaseUrl $classification.SignupAdmissionObservationSql $signupPreobserve 'MASTER_SIGNUP_ADMISSION_PREOBSERVATION_FAILED'
+    $signupPreimageReceipt = Assert-SignupAdmissionReceipt $signupPreobserve 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT'
+    $signupAdmissionReads += 1
+    $state.master_signup_admission_preobserved_at = $signupPreimageReceipt.ObservedAt.ToString('o')
+    Set-StatePhase $state 'MASTER_SIGNUP_PREOBSERVED' $resolvedState
+    Set-StatePhase $state 'MASTER_SIGNUP_FENCING' $resolvedState
+    $signupFenceProof = Join-Path $privateRoot 'master-signup-admission-fenced.json'
+    Invoke-PsqlJsonPrivate $masterDatabaseUrl $classification.SignupAdmissionFenceSql $signupFenceProof 'MASTER_SIGNUP_ADMISSION_FENCE_FAILED_HOLD_HOOK_DISABLED'
+    $signupFenceReceipt = Assert-SignupAdmissionReceipt $signupFenceProof 'PASS_SIGNUP_ADMISSION_FENCED'
+    $databaseTransactions += 1
+    $signupAdmissionBarriers += 1
+    $state.master_signup_admission_fenced_at = $signupFenceReceipt.ObservedAt.ToString('o')
+    $state.master_signup_admission_writer_count = [int]$signupFenceReceipt.Receipt.writer_count
+    $state.master_signup_admission_writer_set_digest = [string]$signupFenceReceipt.Receipt.writer_set_digest
+    Set-StatePhase $state 'MASTER_SIGNUP_FENCED' $resolvedState
     Set-StatePhase $state 'MASTER_WRITERS_PREOBSERVING' $resolvedState
     $primaryAclPreobserve = Join-Path $privateRoot 'primary-acl-preobserve.json'
     Invoke-PsqlJsonPrivate $masterDatabaseUrl $classification.AclObservationSql $primaryAclPreobserve 'MASTER_ACL_PREOBSERVATION_FAILED'
@@ -982,6 +1057,9 @@ try {
     writer_capture_reads = $writerCaptureReads
     writer_drain_reads = $writerDrainReads
     writer_lock_barriers = $writerLockBarriers
+    signup_admission_reads = $signupAdmissionReads
+    signup_admission_barriers = $signupAdmissionBarriers
+    signup_admission_restores = $signupAdmissionRestores
     provider_reads = $providerReads
     provider_writes = $providerWrites
     database_transactions = $databaseTransactions
@@ -1030,10 +1108,23 @@ catch {
         $effect = 'EXACT_PREIMAGE_RESTORED'
         Set-StatePhase $state 'ROLLED_BACK' $resolvedState
       }
-      elseif ([string]$state.direction -ceq 'reverse' -and [string]$state.phase -in @('MASTER_HOOK_DISABLING','MASTER_HOOK_DISABLED','MASTER_WRITERS_PREOBSERVING','MASTER_WRITERS_PREOBSERVED')) {
+      elseif ([string]$state.direction -ceq 'reverse' -and [string]$state.phase -in @('MASTER_HOOK_DISABLING','MASTER_HOOK_DISABLED','MASTER_SIGNUP_PREOBSERVING','MASTER_SIGNUP_PREOBSERVED')) {
         $restored = Invoke-AuthConfig $managementToken $MasterProjectRef @{ hook_before_user_created_enabled = [bool]$state.master_hook_enabled_preimage }
         $providerWrites += 1
         if ([bool]$restored.hook_before_user_created_enabled -ne [bool]$state.master_hook_enabled_preimage) { throw 'MASTER_PREIMAGE_RESTORE_FAILED' }
+        $rollbackActions += 1
+        $effect = 'EXACT_PREIMAGE_RESTORED'
+        Set-StatePhase $state 'ROLLED_BACK' $resolvedState
+      }
+      elseif ([string]$state.direction -ceq 'reverse' -and [string]$state.phase -in @('MASTER_SIGNUP_FENCING','MASTER_SIGNUP_FENCED','MASTER_WRITERS_PREOBSERVING','MASTER_WRITERS_PREOBSERVED','MASTER_HOOK_RESTORING','MASTER_HOOK_RESTORED','MASTER_SIGNUP_RESTORING')) {
+        $restored = Invoke-AuthConfig $managementToken $MasterProjectRef @{ hook_before_user_created_enabled = [bool]$state.master_hook_enabled_preimage }
+        $providerWrites += 1
+        if ([bool]$restored.hook_before_user_created_enabled -ne [bool]$state.master_hook_enabled_preimage) { throw 'MASTER_PREIMAGE_RESTORE_FAILED' }
+        $signupRestoreProof = Join-Path $privateRoot 'catch-master-signup-admission-restored.json'
+        Invoke-PsqlJsonPrivate $masterDatabaseUrl $classification.SignupAdmissionRestoreSql $signupRestoreProof 'MASTER_SIGNUP_ADMISSION_RESTORE_FAILED'
+        $null = Assert-SignupAdmissionReceipt $signupRestoreProof 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED'
+        $databaseTransactions += 1
+        $signupAdmissionRestores += 1
         $rollbackActions += 1
         $effect = 'EXACT_PREIMAGE_RESTORED'
         Set-StatePhase $state 'ROLLED_BACK' $resolvedState
@@ -1072,6 +1163,11 @@ catch {
         $restored = Invoke-AuthConfig $managementToken $MasterProjectRef @{ hook_before_user_created_enabled = [bool]$state.master_hook_enabled_preimage }
         $providerWrites += 1
         if ([bool]$restored.hook_before_user_created_enabled -ne [bool]$state.master_hook_enabled_preimage) { throw 'MASTER_PREIMAGE_RESTORE_FAILED' }
+        $signupRestoreProof = Join-Path $privateRoot 'catch-master-signup-admission-restored.json'
+        Invoke-PsqlJsonPrivate $masterDatabaseUrl $classification.SignupAdmissionRestoreSql $signupRestoreProof 'MASTER_SIGNUP_ADMISSION_RESTORE_FAILED'
+        $null = Assert-SignupAdmissionReceipt $signupRestoreProof 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED'
+        $databaseTransactions += 1
+        $signupAdmissionRestores += 1
         $rollbackActions += 1
         $effect = if ([string]$state.phase -in @('REVERSE_DELTA_APPLYING','REVERSE_DELTA_APPLIED')) { 'LEGACY_DELTA_QUARANTINED_MASTER_PREIMAGE_RESTORED' } else { 'EXACT_PREIMAGE_RESTORED' }
         Set-StatePhase $state 'ROLLED_BACK' $resolvedState
@@ -1093,6 +1189,9 @@ catch {
     writer_capture_reads = $writerCaptureReads
     writer_drain_reads = $writerDrainReads
     writer_lock_barriers = $writerLockBarriers
+    signup_admission_reads = $signupAdmissionReads
+    signup_admission_barriers = $signupAdmissionBarriers
+    signup_admission_restores = $signupAdmissionRestores
     deployments = 0
     production_changes = 0
   })

@@ -18,6 +18,9 @@ import {
   renderFenceSql,
   renderLockBarrierSql,
   renderRestoreSql,
+  renderSignupAdmissionFenceSql,
+  renderSignupAdmissionObservationSql,
+  renderSignupAdmissionRestoreSql,
   renderWriterCaptureSql,
   renderWriterDrainSql,
   sha256,
@@ -296,6 +299,8 @@ assert.equal(classified.receipt.zero_delta_reads, 2);
 assert.equal(classified.receipt.auth_high_water_scope, 'LEGACY_DEDICATED_EXACT');
 assert.equal(classified.receipt.fence_plan_validated, true);
 assert.equal(classified.receipt.fence_complete, false);
+assert.equal(classified.receipt.signup_admission_fence_required, false);
+assert.equal(classified.receipt.non_mazer_signup_passthrough_required, false);
 assert.equal(classified.receipt.raw_identifiers_emitted, false);
 assert.equal(classified.receipt.pii_emitted, false);
 assert.match(classified.privatePlan.transactional_sql, /pg_advisory_xact_lock/);
@@ -321,6 +326,29 @@ assert.match(classified.privatePlan.source_observation_sql, /LEGACY_DEDICATED_AU
 assert.match(classified.privatePlan.source_observation_sql, /atlas_observed_auth except select \* from atlas_expected_auth/);
 assert.match(classified.privatePlan.source_observation_sql, /atlas_expected_auth except select \* from atlas_observed_auth/);
 assert.doesNotMatch(classified.privatePlan.source_observation_sql, /MASTER_MAZER_NAMESPACE_OR_PROFILE_OWNERSHIP/);
+
+const signupObservationSql = renderSignupAdmissionObservationSql();
+const signupFenceSql = renderSignupAdmissionFenceSql();
+const signupRestoreSql = renderSignupAdmissionRestoreSql();
+assert.match(signupObservationSql, /mazer_claim_signup_username_after_insert/);
+assert.match(signupObservationSql, /PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT/);
+assert.match(signupObservationSql, /HOLD_SIGNUP_ADMISSION_STATE_AMBIGUOUS/);
+assert.match(signupFenceSql, /coalesce\(new\.raw_user_meta_data, '\{\}'::jsonb\) ->> 'app_namespace' = 'mazer'/);
+assert.match(signupFenceSql, /MAZER_SIGNUP_TEMPORARILY_UNAVAILABLE/);
+assert.match(signupFenceSql, /lock table auth\.users in share row exclusive mode/);
+assert.match(signupFenceSql, /pg_catalog\.pg_locks/);
+assert.match(signupFenceSql, /ADMITTED_SIGNUP_WRITER_NOT_DRAINED/);
+assert.match(signupFenceSql, /AUTH_USERS_WRITER_BARRIER_INCOMPLETE/);
+assert.match(signupFenceSql, /security invoker/);
+assert.doesNotMatch(signupFenceSql, /security definer/);
+assert.ok(signupFenceSql.indexOf('atlas_admitted_signup_writers') < signupFenceSql.indexOf('lock table auth.users'));
+assert.ok(signupFenceSql.indexOf('lock table auth.users') < signupFenceSql.indexOf('create function'));
+assert.ok(signupFenceSql.indexOf('create trigger') < signupFenceSql.indexOf('commit;'));
+assert.match(signupRestoreSql, /SIGNUP_ADMISSION_RESTORE_STATE_AMBIGUOUS/);
+assert.match(signupRestoreSql, /lock table auth\.users in share row exclusive mode/);
+assert.ok(signupRestoreSql.indexOf('lock table auth.users') < signupRestoreSql.indexOf('drop trigger'));
+assert.ok(signupRestoreSql.indexOf('drop trigger') < signupRestoreSql.indexOf('drop function'));
+assert.match(signupRestoreSql, /PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED/);
 
 const staleProfilePayload = baseForward();
 staleProfilePayload.source_snapshot.profiles[0].row.settings.trailFade = false;
@@ -721,6 +749,8 @@ function baseReverse() {
 const reverse = classifyCutover(baseReverse());
 assert.equal(reverse.receipt.result, 'PASS_REVERSE_DELTA');
 assert.equal(reverse.receipt.hook_disabled_first, true);
+assert.equal(reverse.receipt.signup_admission_fence_required, true);
+assert.equal(reverse.receipt.non_mazer_signup_passthrough_required, true);
 assert.equal(reverse.receipt.auth_high_water_scope, 'MASTER_MAZER_NAMESPACE_OR_PROFILE');
 assert.deepEqual(reverse.receipt.changed_rows, { profiles: 0, player: 1, ai: 1, receipts: 1 });
 assert.equal(reverse.receipt.desired_counts.receipts, 2);
@@ -728,6 +758,9 @@ assert.match(reverse.privatePlan.source_observation_sql, /MASTER_MAZER_NAMESPACE
 assert.match(reverse.privatePlan.source_observation_sql, /raw_user_meta_data ->> 'app_namespace'/);
 assert.match(reverse.privatePlan.source_observation_sql, /ownership_profile\.user_id = u\.id/);
 assert.match(reverse.privatePlan.source_observation_sql, /atlas_observed_auth except select \* from atlas_expected_auth/);
+assert.equal(reverse.privatePlan.signup_admission_observation_sql, signupObservationSql);
+assert.equal(reverse.privatePlan.signup_admission_fence_sql, signupFenceSql);
+assert.equal(reverse.privatePlan.signup_admission_restore_sql, signupRestoreSql);
 
 // The generated shared-project scope includes an auth-only explicit Mazer
 // marker and a profile owner, but excludes an unrelated application identity.
@@ -741,7 +774,19 @@ assert.equal(scopedMasterAuth.includes(ids.masterA), false);
 
 assert.deepEqual(
   classifyRecoveryState({ direction: 'reverse', phase: 'MASTER_WRITERS_PREOBSERVED' }),
-  { result: 'RESTORE_MASTER_HOOK_PREIMAGE', effect: 'AUTH_CONFIG_ONLY' }
+  { result: 'RESTORE_MASTER_HOOK_THEN_SIGNUP_ADMISSION_PREIMAGE', effect: 'MAZER_SIGNUPS_FENCED' }
+);
+assert.deepEqual(
+  classifyRecoveryState({ direction: 'reverse', phase: 'MASTER_SIGNUP_FENCING' }),
+  { result: 'OBSERVE_SIGNUP_ADMISSION_THEN_RESTORE', effect: 'SIGNUP_FENCE_COMMIT_UNKNOWN_HOOK_DISABLED' }
+);
+assert.deepEqual(
+  classifyRecoveryState({ direction: 'reverse', phase: 'MASTER_SIGNUP_FENCED' }),
+  { result: 'RESTORE_MASTER_HOOK_THEN_SIGNUP_ADMISSION_PREIMAGE', effect: 'MAZER_SIGNUPS_FENCED' }
+);
+assert.deepEqual(
+  classifyRecoveryState({ direction: 'reverse', phase: 'MASTER_SIGNUP_RESTORING' }),
+  { result: 'RESUME_OVERLAPPED_SIGNUP_PREIMAGE_RESTORE', effect: 'MAZER_SIGNUPS_FENCED_OR_HOOK_RESTORED' }
 );
 assert.deepEqual(
   classifyRecoveryState({ direction: 'reverse', phase: 'MASTER_WRITERS_FENCING' }),
@@ -824,6 +869,9 @@ try {
   const legacyWriterCaptureSqlPath = path.join(tmp, 'private-legacy-writer-capture.sql');
   const legacyAclObservationSqlPath = path.join(tmp, 'private-legacy-acl-observation.sql');
   const legacyRestoreSqlPath = path.join(tmp, 'private-legacy-restore.sql');
+  const signupAdmissionObservationSqlPath = path.join(tmp, 'private-signup-admission-observation.sql');
+  const signupAdmissionFenceSqlPath = path.join(tmp, 'private-signup-admission-fence.sql');
+  const signupAdmissionRestoreSqlPath = path.join(tmp, 'private-signup-admission-restore.sql');
   fs.writeFileSync(inputPath, JSON.stringify(baseForward()), { encoding: 'utf8', mode: 0o600 });
   const cli = spawnSync(process.execPath, [
     classifierPath,
@@ -838,7 +886,10 @@ try {
     '--private-legacy-fence-sql', legacyFenceSqlPath,
     '--private-legacy-writer-capture-sql', legacyWriterCaptureSqlPath,
     '--private-legacy-acl-observation-sql', legacyAclObservationSqlPath,
-    '--private-legacy-restore-sql', legacyRestoreSqlPath
+    '--private-legacy-restore-sql', legacyRestoreSqlPath,
+    '--private-signup-admission-observation-sql', signupAdmissionObservationSqlPath,
+    '--private-signup-admission-fence-sql', signupAdmissionFenceSqlPath,
+    '--private-signup-admission-restore-sql', signupAdmissionRestoreSqlPath
   ], {
     encoding: 'utf8',
     timeout: 30000,
@@ -860,6 +911,10 @@ try {
   assert.ok(fs.statSync(legacyWriterCaptureSqlPath).size > 0);
   assert.ok(fs.statSync(legacyAclObservationSqlPath).size > 0);
   assert.ok(fs.statSync(legacyRestoreSqlPath).size > 0);
+  assert.ok(fs.statSync(signupAdmissionObservationSqlPath).size > 0);
+  assert.ok(fs.statSync(signupAdmissionFenceSqlPath).size > 0);
+  assert.ok(fs.statSync(signupAdmissionRestoreSqlPath).size > 0);
+  assert.equal(fs.readFileSync(signupAdmissionFenceSqlPath, 'utf8'), signupFenceSql);
   const sourceObservationSql = fs.readFileSync(sourceObservationSqlPath, 'utf8');
   assert.match(sourceObservationSql, /begin transaction isolation level repeatable read;/);
   assert.match(sourceObservationSql, /create temporary table atlas_expected_auth/);
@@ -1031,7 +1086,7 @@ async function runDisposablePostgres17Concurrency() {
   const data = `${clusterRoot}/data`;
   const socket = `${clusterRoot}/socket`;
   const port = 60000 + (process.pid % 4000);
-  const pgCommon = ['-X', '-qAt', '-h', socket, '-p', String(port), '-d', 'postgres', '-v', 'ON_ERROR_STOP=1'];
+  const pgCommon = ['-X', '-qAt', '-h', socket, '-p', String(port), '-U', 'postgres', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1'];
   const pgSql = (sql, options = {}) => run('psql', [...pgCommon, '-c', sql], options);
   const pgSqlRequired = (sql, options = {}) => {
     const result = pgSql(sql, options);
@@ -1045,6 +1100,7 @@ async function runDisposablePostgres17Concurrency() {
     return result.stdout.trim();
   };
   const pgSpawn = () => spawn('wsl.exe', wslArgs('psql', pgCommon), { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+  const pgFileSpawn = (file) => spawn('wsl.exe', wslArgs('psql', [...pgCommon, '--file', toWslPath(file)]), { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
   const shell = (args) => spawnSync('wsl.exe', ['-d', distro, '--', ...args], { encoding: 'utf8', timeout: 30000, windowsHide: true });
   let started = false;
   const pgTmp = fs.mkdtempSync(path.join(root, 'tmp', 'atlas-mazer-pg17-concurrency-'));
@@ -1052,17 +1108,29 @@ async function runDisposablePostgres17Concurrency() {
   let direct = null;
   let rpc = null;
   let drain = null;
+  let admittedSignup = null;
+  let signupFenceProcess = null;
   try {
     const version = required('postgres', ['--version']).trim();
     assert.match(version, /PostgreSQL\) 17\./);
     assert.equal(shell(['mkdir', '-p', clusterRoot, socket]).status, 0);
-    required('initdb', ['-D', data, '--auth=trust', '--no-locale'], { timeout: 60000 });
+    required('initdb', ['-D', data, '--username=postgres', '--auth=trust', '--no-locale'], { timeout: 60000 });
     required('pg_ctl', ['-D', data, '-l', `${clusterRoot}/postgres.log`, '-o', `-F -k ${socket} -p ${port} -c listen_addresses=''`, '-w', 'start'], { timeout: 60000 });
     started = true;
 
     const setupSql = `
       create role authenticated nologin;
       create role anon nologin;
+      create role service_role nologin;
+      create role supabase_auth_admin nologin;
+      create schema extensions;
+      create extension pgcrypto with schema extensions;
+      create schema auth;
+      create schema mazer;
+      create table auth.users (id uuid primary key, raw_user_meta_data jsonb not null default '{}'::jsonb);
+      create table mazer.mazer_profiles (user_id uuid primary key, username text);
+      create function mazer.mazer_claim_signup_username() returns trigger language plpgsql volatile security definer set search_path = '' as 'begin if coalesce(new.raw_user_meta_data, ''{}''::jsonb) ->> ''app_namespace'' = ''mazer'' then insert into mazer.mazer_profiles(user_id, username) values (new.id, new.raw_user_meta_data ->> ''username''); end if; return new; end';
+      create trigger mazer_claim_signup_username_after_insert after insert on auth.users for each row execute function mazer.mazer_claim_signup_username();
       create table public.rpc_gate (id integer primary key);
       insert into public.rpc_gate values (1);
       create table public.mazer_profiles (user_id uuid primary key);
@@ -1157,9 +1225,62 @@ async function runDisposablePostgres17Concurrency() {
     pgSqlRequired(`set role authenticated; insert into public.mazer_profiles(user_id) values ('${ids.legacyC}');`);
     pgSqlRequired(`set role authenticated; select public.mazer_complete_level(2,'${ids.legacyA}','x',1,1,'${ids.run2}','x',1,'x',now(),'{}'::jsonb);`);
     assert.equal(Number(pgSqlRequired('select (select count(*) from public.mazer_profiles) + (select count(*) from public.mazer_cycle_receipts);')), 4);
-    return 'PASS_POSTGRESQL_17_REAL_CONCURRENCY';
+
+    const signupObservationPath = path.join(pgTmp, 'signup-admission-observation.sql');
+    const signupFencePath = path.join(pgTmp, 'signup-admission-fence.sql');
+    const signupRestorePath = path.join(pgTmp, 'signup-admission-restore.sql');
+    fs.writeFileSync(signupObservationPath, signupObservationSql, 'utf8');
+    fs.writeFileSync(signupFencePath, signupFenceSql, 'utf8');
+    fs.writeFileSync(signupRestorePath, signupRestoreSql, 'utf8');
+    const signupPreimage = JSON.parse(pgFileRequired(signupObservationPath));
+    assert.equal(signupPreimage.result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT');
+    assert.equal(signupPreimage.claim_path_verified, true);
+
+    admittedSignup = pgSpawn();
+    admittedSignup.stdin.write(`begin; insert into auth.users(id, raw_user_meta_data) values ('${ids.masterA}', '{"app_namespace":"mazer","username":"admitted"}'::jsonb); \\echo SIGNUP_READY\n`);
+    await waitForMarker(admittedSignup, 'SIGNUP_READY');
+    signupFenceProcess = pgFileSpawn(signupFencePath);
+    const signupFenceExit = waitForExit(signupFenceProcess, 180000);
+    const signupBarrierWaiting = () => Number(pgSqlRequired("select count(*) from pg_catalog.pg_stat_activity where pid <> pg_backend_pid() and wait_event_type = 'Lock' and query like 'lock table auth.users in share row exclusive mode%';")) === 1;
+    for (let attempt = 0; attempt < 100 && !signupBarrierWaiting(); attempt += 1) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 25);
+    assert.equal(signupBarrierWaiting(), true, 'signup admission barrier did not wait for the already-admitted Auth transaction');
+    const admittedExit = waitForExit(admittedSignup);
+    admittedSignup.stdin.end('commit;\n\\q\n');
+    await admittedExit;
+    admittedSignup = null;
+    const signupFenceOutput = await signupFenceExit;
+    signupFenceProcess = null;
+    const signupFenceReceipt = JSON.parse(signupFenceOutput.trim());
+    assert.equal(signupFenceReceipt.result, 'PASS_SIGNUP_ADMISSION_FENCED');
+    assert.ok(signupFenceReceipt.writer_count >= 1);
+    assert.match(signupFenceReceipt.writer_set_digest, /^[a-f0-9]{64}$/);
+    assert.equal(pgSqlRequired(`select (select count(*) from auth.users where id = '${ids.masterA}')::text || '|' || (select count(*) from mazer.mazer_profiles where user_id = '${ids.masterA}')::text;`), '1|1');
+
+    pgSqlRequired(`insert into auth.users(id, raw_user_meta_data) values ('${ids.masterB}', '{"app_namespace":"fitness","username":"unrelated"}'::jsonb);`);
+    assert.equal(pgSqlRequired(`select (select count(*) from auth.users where id = '${ids.masterB}')::text || '|' || (select count(*) from mazer.mazer_profiles where user_id = '${ids.masterB}')::text;`), '1|0');
+    const reverseHighWaterOne = pgSqlRequired("select (select count(*) from auth.users where coalesce(raw_user_meta_data ->> 'app_namespace','') = 'mazer')::text || '|' || (select count(*) from mazer.mazer_profiles)::text;");
+    const reverseHighWaterTwo = pgSqlRequired("select (select count(*) from auth.users where coalesce(raw_user_meta_data ->> 'app_namespace','') = 'mazer')::text || '|' || (select count(*) from mazer.mazer_profiles)::text;");
+    assert.equal(reverseHighWaterTwo, reverseHighWaterOne);
+    const rejectedLateMazer = pgSql(`insert into auth.users(id, raw_user_meta_data) values ('${ids.masterC}', '{"app_namespace":"mazer","username":"latevalid"}'::jsonb);`);
+    assert.notEqual(rejectedLateMazer.status, 0);
+    assert.match(rejectedLateMazer.stderr, /MAZER_SIGNUP_TEMPORARILY_UNAVAILABLE/);
+    assert.equal(pgSqlRequired(`select (select count(*) from auth.users where id = '${ids.masterC}')::text || '|' || (select count(*) from mazer.mazer_profiles where user_id = '${ids.masterC}')::text;`), '0|0');
+    assert.equal(pgSqlRequired("select (select count(*) from auth.users where coalesce(raw_user_meta_data ->> 'app_namespace','') = 'mazer')::text || '|' || (select count(*) from mazer.mazer_profiles)::text;"), reverseHighWaterTwo);
+
+    const signupRestoreReceipt = JSON.parse(pgFileRequired(signupRestorePath, { timeout: 160000 }));
+    assert.equal(signupRestoreReceipt.result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED');
+    pgSqlRequired(`insert into auth.users(id, raw_user_meta_data) values ('${ids.masterC}', '{"app_namespace":"mazer","username":"restored"}'::jsonb);`);
+    assert.equal(pgSqlRequired(`select (select count(*) from auth.users where id = '${ids.masterC}')::text || '|' || (select count(*) from mazer.mazer_profiles where user_id = '${ids.masterC}')::text;`), '1|1');
+
+    const refenceReceipt = JSON.parse(pgFileRequired(signupFencePath, { timeout: 160000 }));
+    assert.equal(refenceReceipt.result, 'PASS_SIGNUP_ADMISSION_FENCED');
+    assert.equal(JSON.parse(pgFileRequired(signupObservationPath)).result, 'PASS_SIGNUP_ADMISSION_FENCED');
+    assert.equal(JSON.parse(pgFileRequired(signupRestorePath, { timeout: 160000 })).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED');
+    assert.equal(JSON.parse(pgFileRequired(signupRestorePath, { timeout: 160000 })).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED');
+    assert.equal(JSON.parse(pgFileRequired(signupObservationPath)).result, 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT');
+    return 'PASS_POSTGRESQL_17_REAL_CONCURRENCY_AND_SIGNUP_ADMISSION';
   } finally {
-    for (const child of [direct, gate, rpc, drain]) {
+    for (const child of [direct, gate, rpc, drain, admittedSignup, signupFenceProcess]) {
       if (child) { try { child.kill(); } catch {} }
     }
     if (started) run('pg_ctl', ['-D', data, '-m', 'immediate', '-w', 'stop'], { timeout: 60000 });
@@ -1173,7 +1294,7 @@ const pg17Concurrency = await runDisposablePostgres17Concurrency();
 
 console.log(JSON.stringify({
   result: 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001',
-  scenarios: 76,
+  scenarios: 84,
   postgresql17_concurrency: pg17Concurrency,
   provider_calls: 0,
   provider_writes: 0,

@@ -10,6 +10,9 @@ import {
   renderFenceSql,
   renderLockBarrierSql,
   renderRestoreSql,
+  renderSignupAdmissionFenceSql,
+  renderSignupAdmissionObservationSql,
+  renderSignupAdmissionRestoreSql,
   renderWriterCaptureSql,
   renderWriterDrainSql,
   sha256
@@ -163,7 +166,13 @@ for (const value of [
   'PASS_WRITER_LOCK_BARRIER',
   'pg_catalog.pg_stat_activity',
   'a.pid, a.backend_start, a.xact_start, a.query_start',
-  'LOCK_BARRIER_POST_ACL_OR_CATALOG_DRIFT'
+  'LOCK_BARRIER_POST_ACL_OR_CATALOG_DRIFT',
+  'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT',
+  'PASS_SIGNUP_ADMISSION_FENCED',
+  'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED',
+  'MAZER_SIGNUP_TEMPORARILY_UNAVAILABLE',
+  'AUTH_USERS_WRITER_BARRIER_INCOMPLETE',
+  'HOLD_SIGNUP_ADMISSION_STATE_AMBIGUOUS'
 ]) requireText(classifier, value, `CLASSIFIER_CONTRACT_MISSING:${value}`);
 
 for (const value of [
@@ -188,6 +197,13 @@ for (const value of [
   'DELTA_QUARANTINED_PREIMAGE_RESTORED',
   'LEGACY_SIGNUP_FENCING',
   'MASTER_HOOK_DISABLING',
+  'MASTER_SIGNUP_PREOBSERVING',
+  'MASTER_SIGNUP_PREOBSERVED',
+  'MASTER_SIGNUP_FENCING',
+  'MASTER_SIGNUP_FENCED',
+  'MASTER_HOOK_RESTORING',
+  'MASTER_HOOK_RESTORED',
+  'MASTER_SIGNUP_RESTORING',
   'LEGACY_WRITERS_RESTORING',
   'LegacyFenceSql',
   'AclObservationSql',
@@ -251,6 +267,12 @@ requireOrder(host, [
 requireOrder(host, [
   "Set-StatePhase $state 'MASTER_HOOK_DISABLING'",
   '@{ hook_before_user_created_enabled = $false }',
+  "Set-StatePhase $state 'MASTER_SIGNUP_PREOBSERVING'",
+  'Invoke-PsqlJsonPrivate $masterDatabaseUrl $classification.SignupAdmissionObservationSql',
+  "Set-StatePhase $state 'MASTER_SIGNUP_PREOBSERVED'",
+  "Set-StatePhase $state 'MASTER_SIGNUP_FENCING'",
+  'Invoke-PsqlJsonPrivate $masterDatabaseUrl $classification.SignupAdmissionFenceSql',
+  "Set-StatePhase $state 'MASTER_SIGNUP_FENCED'",
   "Set-StatePhase $state 'MASTER_WRITERS_PREOBSERVING'",
   'Invoke-PsqlJsonPrivate $masterDatabaseUrl $classification.AclObservationSql',
   '$state.journaled_primary_acl_preimage',
@@ -269,6 +291,14 @@ requireOrder(host, [
   'Invoke-PsqlJsonPrivate $legacyDatabaseUrl $classification.LegacyAclObservationSql',
   '@{ disable_signup = $false }'
 ], 'DISABLE_HOOK_FIRST_REVERSE_ORDER_DRIFT');
+
+requireOrder(host, [
+  "Set-StatePhase $state 'MASTER_HOOK_RESTORING'",
+  '@{ hook_before_user_created_enabled = [bool]$state.master_hook_enabled_preimage }',
+  "Set-StatePhase $state 'MASTER_HOOK_RESTORED'",
+  "Set-StatePhase $state 'MASTER_SIGNUP_RESTORING'",
+  'Invoke-PsqlJsonPrivate $masterDatabaseUrl $classification.SignupAdmissionRestoreSql'
+], 'OVERLAPPED_SIGNUP_ROLLBACK_ORDER_DRIFT');
 
 const drainHelper = host.slice(
   host.indexOf('function Invoke-ExactWriterDrainBarrier'),
@@ -290,11 +320,28 @@ requireOrder(drainHelper, [
 
 const transactionRenderer = classifier.slice(
   classifier.indexOf('export function renderTransactionalSql'),
-  classifier.indexOf('export function renderFenceSql')
+  classifier.indexOf('export function renderSignupAdmissionObservationSql')
 ).toLowerCase();
 for (const forbidden of ['delete from', 'truncate ', 'drop table']) {
   if (transactionRenderer.includes(forbidden)) findings.push(`DESTRUCTIVE_DELTA_SQL:${forbidden}`);
 }
+
+const signupObservation = renderSignupAdmissionObservationSql();
+const signupFence = renderSignupAdmissionFenceSql();
+const signupRestore = renderSignupAdmissionRestoreSql();
+requireText(signupObservation, 'mazer_claim_signup_username_after_insert', 'M3_SIGNUP_CLAIM_BINDING_MISSING');
+requireText(signupObservation, 'PASS_SIGNUP_ADMISSION_PREIMAGE_ABSENT', 'SIGNUP_PREIMAGE_OBSERVATION_MISSING');
+requireText(signupObservation, 'HOLD_SIGNUP_ADMISSION_STATE_AMBIGUOUS', 'SIGNUP_AMBIGUOUS_HOLD_MISSING');
+requireText(signupFence, "->> 'app_namespace' = 'mazer'", 'MAZER_SIGNUP_ROUTING_FENCE_MISSING');
+requireText(signupFence, 'MAZER_SIGNUP_TEMPORARILY_UNAVAILABLE', 'MAZER_SIGNUP_REJECTION_MISSING');
+requireText(signupFence, 'security invoker', 'SIGNUP_FENCE_INVOKER_MISSING');
+if (signupFence.includes('security definer')) findings.push('SIGNUP_FENCE_SECURITY_DEFINER');
+requireText(signupFence, 'pg_catalog.pg_locks', 'AUTH_WRITER_CAPTURE_MISSING');
+requireText(signupFence, 'ADMITTED_SIGNUP_WRITER_NOT_DRAINED', 'ADMITTED_SIGNUP_DRAIN_MISSING');
+requireText(signupFence, 'lock table auth.users in share row exclusive mode', 'AUTH_USERS_BARRIER_MISSING');
+requireOrder(signupFence, ['atlas_admitted_signup_writers', 'lock table auth.users', 'create function', 'create trigger', 'PASS_SIGNUP_ADMISSION_FENCED', 'commit;'], 'SIGNUP_ADMISSION_BARRIER_ORDER_DRIFT');
+requireText(signupRestore, 'SIGNUP_ADMISSION_RESTORE_STATE_AMBIGUOUS', 'SIGNUP_RESTORE_AMBIGUOUS_HOLD_MISSING');
+requireOrder(signupRestore, ['lock table auth.users', 'drop trigger', 'drop function', 'commit;', 'PASS_SIGNUP_ADMISSION_PREIMAGE_RESTORED'], 'SIGNUP_RESTORE_BARRIER_ORDER_DRIFT');
 const legacyFence = renderFenceSql('public', reviewAclPreimage('public'));
 const masterFence = renderFenceSql('mazer', reviewAclPreimage('mazer'));
 for (const sql of [legacyFence, masterFence]) {
@@ -352,7 +399,7 @@ if (focusedOne !== focusedTwo) findings.push('FOCUSED_TEST_NONDETERMINISTIC');
 if (focusedOne) {
   const value = JSON.parse(focusedOne);
   assert.equal(value.result, 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001');
-  assert.equal(value.scenarios, 76);
+  assert.equal(value.scenarios, 84);
   assert.equal(value.postgresql17_concurrency, 'SKIPPED_EXPLICIT_OPT_IN_REQUIRED');
   assert.equal(value.provider_calls, 0);
   assert.equal(value.live_data_writes, 0);
@@ -384,7 +431,7 @@ for (const output of shellOutputs.filter(Boolean)) {
 assert.deepEqual(findings, []);
 console.log(JSON.stringify({
   result: 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001_REVIEW_NO_FINDINGS',
-  assertions: 220,
+  assertions: 260,
   focused_runs: 2,
   source_validation_runs: shellRuns.length,
   findings: 0,
