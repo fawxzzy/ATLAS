@@ -5,7 +5,8 @@ param(
   [Parameter(Mandatory = $true, ParameterSetName = 'Execute')][string]$PrivateSourcePath,
   [Parameter(Mandatory = $true, ParameterSetName = 'Execute')][ValidatePattern('^[a-f0-9]{64}$')][string]$ExpectedPrivateSourceSha256,
   [Parameter(Mandatory = $true, ParameterSetName = 'Execute')][string]$StatePath,
-  [Parameter(Mandatory = $true, ParameterSetName = 'Execute')][switch]$ExecuteProtected
+  [Parameter(Mandatory = $true, ParameterSetName = 'Execute')][switch]$ExecuteProtected,
+  [Parameter(ParameterSetName = 'Execute')][switch]$ReplayExactRolledBack
 )
 
 Set-StrictMode -Version Latest
@@ -28,7 +29,7 @@ $Phases = @(
   'PREFLIGHT','FENCE_APPLYING','FENCE_PAUSED','MASTER_FENCE_APPLYING','MASTER_FENCED',
   'M1_APPLYING','M1_APPLIED','M2_APPLYING','M2_APPLIED','MASTER_REFENCE_APPLYING','MASTER_REFENCED',
   'AUTH_APPLYING','AUTH_APPLIED','RESET_QUARANTINE_APPLYING','RESET_QUARANTINE_SEALED','DELTA_APPLYING','DELTA_APPLIED',
-  'M3_APPLYING','M3_APPLIED','POSTVERIFYING','POSTVERIFIED','HOOK_ACTIVATING','HOOK_ACTIVE',
+  'M3_APPLYING','M3_APPLIED','M4_APPLYING','M4_APPLIED','POSTVERIFYING','POSTVERIFIED','HOOK_ACTIVATING','HOOK_ACTIVE',
   'QA_APPLYING','QA_COMPLETE','QA_CLEANING','QA_CLEAN',
   'LEGACY_RESTORING','LEGACY_RESTORED','PREPARATION_COMPLETE','ROLLBACK_DISABLING_HOOK',
   'ROLLBACK_TARGET_RESTORING','ROLLBACK_LEGACY_RESTORING','ROLLED_BACK','AMBIGUOUS_HOLD'
@@ -266,16 +267,32 @@ try {
   if ([int]$manifest.auth_counts.imports -ne 3 -or [int]$manifest.auth_counts.binds -ne 13 -or [int]$manifest.auth_counts.retained_edges -ne 2 -or [int]$manifest.auth_counts.final_edges -ne 18 -or [int]$manifest.auth_counts.expected_target_users -ne 117) { throw 'AUTH_TOPOLOGY_MANIFEST_DRIFT' }
   $input = Join-Path $privateRoot 'fence-input.json'
   $inputSha = Get-Sha256 $input
-  $fenceState = $statePath + '.fence.json'
   $manifestSha = Get-Sha256 $manifestPath
   $state = Read-State $statePath
   if ($null -eq $state) {
     if ($Mode -ceq 'Rollback') { throw 'ROLLBACK_STATE_MISSING' }
-    $state = [ordered]@{ schema = 'atlas.supabase.mazer-master-preparation-host-state.r017.v1'; packet = [string]$manifest.packet; phase = 'PREFLIGHT'; private_source_sha256 = $ExpectedPrivateSourceSha256; private_manifest_sha256 = $manifestSha; fence_input_sha256 = $inputSha; master_hook_preimage = $null; fence_started_at = $null; rollback_deadline_at = $null; hard_fence_deadline_at = $null; rollback_initiated_at = $null; watchdog_pid = $null; updated_at = $null }
+    $state = [ordered]@{ schema = 'atlas.supabase.mazer-master-preparation-host-state.r017.v1'; packet = [string]$manifest.packet; phase = 'PREFLIGHT'; private_source_sha256 = $ExpectedPrivateSourceSha256; private_manifest_sha256 = $manifestSha; fence_input_sha256 = $inputSha; replay_generation = 0; master_hook_preimage = $null; fence_started_at = $null; rollback_deadline_at = $null; hard_fence_deadline_at = $null; rollback_initiated_at = $null; watchdog_pid = $null; updated_at = $null }
     Write-State $state $statePath
   }
   elseif ([string]$state.schema -cne 'atlas.supabase.mazer-master-preparation-host-state.r017.v1' -or [string]$state.private_source_sha256 -cne $ExpectedPrivateSourceSha256 -or [string]$state.private_manifest_sha256 -cne $manifestSha -or [string]$state.fence_input_sha256 -cne $inputSha) { throw 'STATE_BINDING_DRIFT' }
-  if ([string]$state.phase -in @('PREPARATION_COMPLETE','ROLLED_BACK')) { Write-Result 'PASS_EXACT_REPLAY_NOOP' ([ordered]@{ phase = [string]$state.phase; provider_writes = 0; database_transactions = 0 }); exit 0 }
+  $replayGeneration = if ($state.PSObject.Properties.Name -contains 'replay_generation') { [int]$state.replay_generation } else { 0 }
+  $fenceState = if ($replayGeneration -eq 0) { $statePath + '.fence.json' } else { $statePath + ".fence.replay-$replayGeneration.json" }
+  if ([string]$state.phase -ceq 'PREPARATION_COMPLETE') { Write-Result 'PASS_EXACT_REPLAY_NOOP' ([ordered]@{ phase = [string]$state.phase; provider_writes = 0; database_transactions = 0 }); exit 0 }
+  if ([string]$state.phase -ceq 'ROLLED_BACK') {
+    if (-not $ReplayExactRolledBack) { Write-Result 'PASS_EXACT_ROLLBACK_TERMINAL' ([ordered]@{ phase = [string]$state.phase; replay_requires_explicit_switch = $true; provider_writes = 0; database_transactions = 0 }); exit 0 }
+    if ($Mode -cne 'Prepare') { throw 'ROLLED_BACK_REPLAY_REQUIRES_PREPARE' }
+    $replayGeneration += 1
+    $state.replay_generation = $replayGeneration
+    $state.master_hook_preimage = $null
+    $state.fence_started_at = $null
+    $state.rollback_deadline_at = $null
+    $state.hard_fence_deadline_at = $null
+    $state.rollback_initiated_at = $null
+    $state.watchdog_pid = $null
+    $state.phase = 'PREFLIGHT'
+    Write-State $state $statePath
+    $fenceState = $statePath + ".fence.replay-$replayGeneration.json"
+  }
 
   $managementToken = Read-ManagementToken
   $masterDatabaseUrl = Get-MasterDatabaseUrl
