@@ -87,6 +87,9 @@ for (const token of [
   'currentPreimageSha256','restoreProofSha256','predecessorFenceManifestSha256'
 ]) assert.ok(host.includes(token) || materializer.includes(token), `missing ${token}`);
 assert.ok(host.includes('AUTH_TOPOLOGY_MANIFEST_DRIFT'));
+for (const token of ["PSObject.Properties['ArgumentList']",'ArgumentList.Add','ConvertTo-ProcessArgument']) assert.ok(host.includes(token), `structured child transport missing ${token}`);
+for (const token of ['Assert-StructuredFenceChildTransportContract','FENCE_CHILD_TRANSPORT_EXIT','FENCE_CHILD_TRANSPORT_STDERR','FENCE_CHILD_TRANSPORT_STDOUT','FENCE_CHILD_TRANSPORT_RECEIPT','FENCE_CHILD_TRANSPORT_EFFECT']) assert.ok(host.includes(token), `structured fence child adversary missing ${token}`);
+requireOrder(host.slice(host.indexOf('function Invoke-Child'), host.indexOf('function Get-ShellPath')), ["PSObject.Properties['ArgumentList']",'ArgumentList.Add','else {','ConvertTo-ProcessArgument']);
 for (const token of ['ReplayExactRolledBack','PASS_EXACT_ROLLBACK_TERMINAL','replay_requires_explicit_switch','fence.replay-','START_EXACT_REPLAY']) assert.ok(host.includes(token) || materializer.includes(token), `rollback replay seam missing ${token}`);
 for (const token of ['Write-FenceChildReceipt','New-FenceChildReceipt','stdout_sha256','stderr_sha256','terminal_category','FENCE_CHILD_FAILURE_RECEIPT_CONTRACT','FENCE_CHILD_ROLLBACK_RECEIPT_CONTRACT']) assert.ok(host.includes(token), `fence child receipt seam missing ${token}`);
 for (const token of ["trap {",'NO_EFFECT_PRESTATE','PRESTATE_EXECUTION_HOLD','Write-FailClosedPrestateResult','Get-SafeFailureCategory']) assert.ok(fenceHost.includes(token), `fence prestate receipt seam missing ${token}`);

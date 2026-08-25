@@ -110,11 +110,16 @@ function ConvertTo-ProcessArgument([string]$Argument) {
 function Invoke-Child([string]$FileName, [string[]]$Arguments, [Collections.IDictionary]$Environment = @{}, [int]$TimeoutMs = 120000) {
   $start = New-Object Diagnostics.ProcessStartInfo
   $start.FileName = $FileName
-  $start.Arguments = (($Arguments | ForEach-Object { ConvertTo-ProcessArgument ([string]$_) }) -join ' ')
   $start.UseShellExecute = $false
   $start.CreateNoWindow = $true
   $start.RedirectStandardOutput = $true
   $start.RedirectStandardError = $true
+  if ($null -ne $start.PSObject.Properties['ArgumentList']) {
+    foreach ($argument in $Arguments) { [void]$start.ArgumentList.Add([string]$argument) }
+  }
+  else {
+    $start.Arguments = (($Arguments | ForEach-Object { ConvertTo-ProcessArgument ([string]$_) }) -join ' ')
+  }
   foreach ($key in $Environment.Keys) { $start.EnvironmentVariables[[string]$key] = [string]$Environment[$key] }
   $process = New-Object Diagnostics.Process
   $process.StartInfo = $start
@@ -251,6 +256,19 @@ function Assert-FenceChildReceiptContract {
   if ([string]$rollback.terminal_category -cne 'ROLLBACK_ACL_PREIMAGE_MISSING' -or [int]$rollback.exit_code -ne 3 -or [string]$rollback.stdout_sha256 -cne (Get-TextSha256 $rollbackJson) -or [string]$rollback.stderr_sha256 -cne (Get-TextSha256 'rollback-safe-error')) { throw 'FENCE_CHILD_ROLLBACK_RECEIPT_CONTRACT' }
 }
 
+function Assert-StructuredFenceChildTransportContract([string]$ShellPath) {
+  $probeRoot = Join-Path $Runtime ('r017 transport probe ' + [Guid]::NewGuid().ToString('N'))
+  $missingInput = Join-Path $probeRoot 'missing private input.json'
+  $statePath = Join-Path $probeRoot 'fence state.json'
+  $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-Mode','Forward','-InputPath',$missingInput,'-StatePath',$statePath,'-ExpectedInputSha256',('0' * 64),'-ExecutionStep','FenceOnly','-ExecuteProtected')
+  $child = Invoke-Child $ShellPath $arguments @{} 120000
+  if ([int]$child.ExitCode -ne 2) { throw 'FENCE_CHILD_TRANSPORT_EXIT' }
+  if (-not [string]::IsNullOrEmpty([string]$child.Stderr)) { throw 'FENCE_CHILD_TRANSPORT_STDERR' }
+  try { $receipt = [string]$child.Stdout | ConvertFrom-Json } catch { throw 'FENCE_CHILD_TRANSPORT_STDOUT' }
+  if ([string]$receipt.result -cne 'HOLD_MAZER_MASTER_CUTOVER_DATA_FENCE' -or [string]$receipt.category -cne 'INPUT_MISSING' -or [string]$receipt.effect_status -cne 'NO_EFFECT_PRESTATE') { throw 'FENCE_CHILD_TRANSPORT_RECEIPT' }
+  if ([int]$receipt.provider_writes -ne 0 -or [int]$receipt.database_transactions -ne 0 -or (Test-Path -LiteralPath $statePath)) { throw 'FENCE_CHILD_TRANSPORT_EFFECT' }
+}
+
 function Invoke-Fence([string]$Step, [string]$Input, [string]$InputSha, [string]$FenceState) {
   $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-Mode','Forward','-InputPath',$Input,'-StatePath',$FenceState,'-ExpectedInputSha256',$InputSha,'-ExecutionStep',$Step,'-ExecuteProtected')
   $child = Invoke-Child (Get-ShellPath) $arguments @{} 900000
@@ -275,7 +293,10 @@ function Assert-SourceContract {
   if ((Invoke-Child $node @('--check', $Materializer) @{} 30000).ExitCode -ne 0) { throw 'MATERIALIZER_PARSE' }
   if ((Invoke-Child $node @($Materializer, '--source-check', 'true') @{} 30000).ExitCode -ne 0) { throw 'MATERIALIZER_SOURCE' }
   foreach ($shell in @((Get-Command pwsh -ErrorAction SilentlyContinue), (Get-Command powershell -ErrorAction SilentlyContinue))) {
-    if ($null -ne $shell -and (Invoke-Child $shell.Source @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-SourceOnlyValidate') @{} 120000).ExitCode -ne 0) { throw 'FENCE_SOURCE_VALIDATION' }
+    if ($null -ne $shell) {
+      if ((Invoke-Child $shell.Source @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-SourceOnlyValidate') @{} 120000).ExitCode -ne 0) { throw 'FENCE_SOURCE_VALIDATION' }
+      Assert-StructuredFenceChildTransportContract $shell.Source
+    }
   }
   Assert-FenceChildReceiptContract
 }
