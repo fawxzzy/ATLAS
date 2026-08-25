@@ -230,7 +230,7 @@ function byEmail(raw) {
     if (owned.length !== 1) throw new Error('EMAIL_IDENTITY_MULTIPLE');
     const identity = owned[0];
     if (identity.provider !== 'email') throw new Error('EMAIL_IDENTITY_PROVIDER_DRIFT');
-    if (lowerEmail(identity.provider_id) !== email) throw new Error('EMAIL_IDENTITY_PROVIDER_ID_DRIFT');
+    if (uuid(identity.provider_id, 'EMAIL_IDENTITY_PROVIDER_ID_MALFORMED') !== id) throw new Error('EMAIL_IDENTITY_PROVIDER_ID_DRIFT');
     if (!plain(identity.identity_data)) throw new Error('EMAIL_IDENTITY_METADATA_MALFORMED');
     if (uuid(identity.identity_data.sub, 'EMAIL_IDENTITY_METADATA_SUB_MALFORMED') !== id) throw new Error('EMAIL_IDENTITY_METADATA_SUB_DRIFT');
     if (typeof identity.identity_data.email !== 'string' || lowerEmail(identity.identity_data.email) !== email) throw new Error('EMAIL_IDENTITY_METADATA_EMAIL_DRIFT');
@@ -245,20 +245,20 @@ export function buildIdentityPlan(legacyRaw, masterRaw) {
   if (legacyRaw.auth_users.length !== 18 || legacyRaw.auth_identities.length !== 18 || masterRaw.auth_users.length !== 114 || masterRaw.auth_identities.length !== 114) throw new Error('LIVE_AUTH_DENOMINATOR_DRIFT');
   const masterIds = new Set(masterRaw.auth_users.map((user) => uuid(user.id, 'MASTER_AUTH_USER_UUID')));
   const masterIdentityIds = new Set(masterRaw.auth_identities.map((identity) => String(identity.id).toLowerCase()));
-  const masterProviderIds = new Set(masterRaw.auth_identities.filter((identity) => identity.provider === 'email').map((identity) => lowerEmail(identity.provider_id)));
+  const masterProviderIds = new Set(masterRaw.auth_identities.filter((identity) => identity.provider === 'email').map((identity) => uuid(identity.provider_id, 'MASTER_EMAIL_IDENTITY_PROVIDER_ID_MALFORMED')));
   const retained_edges = []; const new_edges = []; const imports = [];
   for (const [email, left] of sort([...legacy.entries()], (entry) => entry[0])) {
     const right = master.get(email);
     if (right) {
       const same = left.id === right.id;
-      if (lowerEmail(right.identity.provider_id) !== email || lowerEmail(right.user.email) !== email || uuid(right.identity.user_id, 'MASTER_IDENTITY_OWNER') !== right.id) throw new Error('EXISTING_AUTH_BINDING_DRIFT');
+      if (uuid(right.identity.provider_id, 'MASTER_EMAIL_IDENTITY_PROVIDER_ID_MALFORMED') !== right.id || lowerEmail(right.user.email) !== email || uuid(right.identity.user_id, 'MASTER_IDENTITY_OWNER') !== right.id) throw new Error('EXISTING_AUTH_BINDING_DRIFT');
       const edge = { legacy_user_id: left.id, master_user_id: right.id, disposition: same ? 'RETAINED' : 'BIND_EXISTING', normalized_email: email, master_user: structuredClone(right.user), master_identity: structuredClone(right.identity), evidence_digest: digest({ normalized_email: email, legacy_user_id: left.id, master_user_id: right.id }) };
       (same ? retained_edges : new_edges).push(edge);
       continue;
     }
     if (!BCRYPT.test(String(left.user.encrypted_password ?? ''))) throw new Error('UNSUPPORTED_PASSWORD_VERIFIER');
     if (masterIds.has(left.id)) throw new Error('IMPORT_UUID_COLLISION');
-    if (masterIdentityIds.has(String(left.identity.id).toLowerCase()) || masterProviderIds.has(email)) throw new Error('IMPORT_IDENTITY_COLLISION');
+    if (masterIdentityIds.has(String(left.identity.id).toLowerCase()) || masterProviderIds.has(left.id)) throw new Error('IMPORT_IDENTITY_COLLISION');
     const user = structuredClone(left.user);
     user.id = left.id;
     user.instance_id = masterRaw.auth_users[0]?.instance_id;
@@ -429,7 +429,7 @@ revoke all on function mazer.mazer_initialize_progression(uuid),mazer.mazer_comp
 create table if not exists mazer.mazer_identity_map(legacy_user_id uuid primary key,master_user_id uuid not null unique,evidence_digest text not null check(evidence_digest ~ '^[0-9a-f]{64}$'));
 do $r017_auth_precheck$ begin
  if exists(select 1 from jsonb_array_elements(${jsonLiteral(existingBindings)}) e where not exists(select 1 from auth.users u where u.id=(e->'user'->>'id')::uuid and lower(u.email)=e->>'normalized_email' and to_jsonb(u)=e->'user')) then raise exception 'R017_EXISTING_AUTH_USER_DIGEST_DRIFT'; end if;
- if exists(select 1 from jsonb_array_elements(${jsonLiteral(existingBindings)}) e where not exists(select 1 from auth.identities i where i.id=(e->'identity'->>'id')::uuid and i.user_id=(e->'user'->>'id')::uuid and i.provider='email' and lower(i.provider_id)=e->>'normalized_email' and to_jsonb(i)=e->'identity')) then raise exception 'R017_EXISTING_AUTH_IDENTITY_DIGEST_DRIFT'; end if;
+ if exists(select 1 from jsonb_array_elements(${jsonLiteral(existingBindings)}) e where not exists(select 1 from auth.identities i where i.id=(e->'identity'->>'id')::uuid and i.user_id=(e->'user'->>'id')::uuid and i.provider='email' and i.provider_id=e->'user'->>'id' and to_jsonb(i)=e->'identity')) then raise exception 'R017_EXISTING_AUTH_IDENTITY_DIGEST_DRIFT'; end if;
  if exists(select 1 from auth.users u join jsonb_array_elements(${jsonLiteral(importUsers)}) e on u.id=(e->>'id')::uuid or lower(u.email)=lower(e->>'email')) then raise exception 'R017_IMPORT_USER_COLLISION'; end if;
  if exists(select 1 from auth.identities i join jsonb_array_elements(${jsonLiteral(importIdentities)}) e on i.id=(e->>'id')::uuid or (i.provider=e->>'provider' and lower(i.provider_id)=lower(e->>'provider_id'))) then raise exception 'R017_IMPORT_IDENTITY_COLLISION'; end if;
 end $r017_auth_precheck$;
@@ -455,7 +455,7 @@ do $r017$ begin
  if (select coalesce(jsonb_agg(to_jsonb(u) order by u.id),'[]'::jsonb) from auth.users u where u.id in (select (e->>'id')::uuid from jsonb_array_elements(${jsonLiteral(importUsers)}) e)) <> ${jsonLiteral(sort(importUsers, (item) => item.id))} then raise exception 'R017_AUTH_USERS_FULL_DIGEST_DRIFT'; end if;
  if (select coalesce(jsonb_agg(to_jsonb(i) order by i.id),'[]'::jsonb) from auth.identities i where i.id in (select (e->>'id')::uuid from jsonb_array_elements(${jsonLiteral(importIdentities)}) e)) <> ${jsonLiteral(sort(importIdentities, (item) => item.id))} then raise exception 'R017_AUTH_IDENTITIES_FULL_DIGEST_DRIFT'; end if;
  if exists(select 1 from jsonb_array_elements(${jsonLiteral(existingBindings)}) e where not exists(select 1 from auth.users u where u.id=(e->'user'->>'id')::uuid and lower(u.email)=e->>'normalized_email' and to_jsonb(u)=e->'user')) then raise exception 'R017_BOUND_AUTH_USERS_FULL_DIGEST_DRIFT'; end if;
- if exists(select 1 from jsonb_array_elements(${jsonLiteral(existingBindings)}) e where not exists(select 1 from auth.identities i where i.id=(e->'identity'->>'id')::uuid and i.user_id=(e->'user'->>'id')::uuid and i.provider='email' and lower(i.provider_id)=e->>'normalized_email' and to_jsonb(i)=e->'identity')) then raise exception 'R017_BOUND_AUTH_IDENTITIES_FULL_DIGEST_DRIFT'; end if;
+ if exists(select 1 from jsonb_array_elements(${jsonLiteral(existingBindings)}) e where not exists(select 1 from auth.identities i where i.id=(e->'identity'->>'id')::uuid and i.user_id=(e->'user'->>'id')::uuid and i.provider='email' and i.provider_id=e->'user'->>'id' and to_jsonb(i)=e->'identity')) then raise exception 'R017_BOUND_AUTH_IDENTITIES_FULL_DIGEST_DRIFT'; end if;
  if (select jsonb_agg(jsonb_build_object('table',c.relname,'enabled',c.relrowsecurity,'forced',c.relforcerowsecurity) order by c.relname) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='mazer' and c.relname in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) <> '[{"table":"mazer_ai_progression_states","enabled":true,"forced":true},{"table":"mazer_cycle_receipts","enabled":true,"forced":true},{"table":"mazer_profiles","enabled":true,"forced":true},{"table":"mazer_progression_states","enabled":true,"forced":true}]'::jsonb then raise exception 'R017_RLS_FULL_CATALOG_DRIFT'; end if;
  if not has_schema_privilege('anon','mazer','USAGE') or not has_schema_privilege('authenticated','mazer','USAGE') or not has_schema_privilege('service_role','mazer','USAGE') then raise exception 'R017_DATA_API_SCHEMA_ACL_DRIFT'; end if;
  if exists(select 1 from information_schema.role_table_grants where table_schema='mazer' and grantee in ('anon','authenticated','public') and privilege_type in ('INSERT','UPDATE','DELETE') and table_name in ('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) then raise exception 'R017_TABLE_ACL_DRIFT'; end if;
@@ -469,7 +469,7 @@ with q as (select * from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
   select id,(select instance_id from auth.users limit 1),'authenticated','authenticated',email,extensions.crypt(${sqlLiteral(qaPassword)},extensions.gen_salt('bf')),clock_timestamp(),${jsonLiteral({ provider: 'email', providers: ['email'] })},jsonb_build_object('app_namespace','mazer','username',username,'display_name',username),clock_timestamp(),clock_timestamp() from q;
 insert into auth.identities(id,user_id,provider_id,identity_data,provider,created_at,updated_at,last_sign_in_at)
-select gen_random_uuid(),id,email,jsonb_build_object('sub',id::text,'email',email),'email',clock_timestamp(),clock_timestamp(),clock_timestamp() from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text);`, ['qa_ttl','before_user_created','rollback_on_error']);
+select gen_random_uuid(),id,id::text,jsonb_build_object('sub',id::text,'email',email),'email',clock_timestamp(),clock_timestamp(),clock_timestamp() from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text);`, ['qa_ttl','before_user_created','rollback_on_error']);
   sql['qa-cleanup.sql'] = sqlProgram(`
 delete from auth.identities where user_id in (select id from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text));
 delete from auth.users where id in (select id from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text));`, ['qa_ttl','delete','auth.identities','auth.users']);
