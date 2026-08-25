@@ -4,7 +4,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-import { CONTRACT, HOST_PHASES, assertSql, classifyHostRecovery } from '../materialize_supabase_mazer_master_preparation_r017.mjs';
+import { CONTRACT, HOST_PHASES, SQL_BYTE_LIMITS, assertSql, classifyHostRecovery } from '../materialize_supabase_mazer_master_preparation_r017.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const hostPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_r017.ps1');
@@ -32,12 +32,12 @@ assert.throws(() => classifyHostRecovery(state('UNKNOWN')), /STATE_PHASE_DRIFT/)
 assert.throws(() => classifyHostRecovery({ schema: 'wrong', phase: 'PREFLIGHT' }), /STATE_SCHEMA_DRIFT/);
 
 const sqlTokens = {
-  'preflight.sql': ['data_api','rls','acl','auth.users','114','10','15','1882','mazer_username_handle_key'],
+  'preflight.sql': ['data_api','rls','acl','auth.users','114','11','15','1882','mazer_username_handle_key'],
   'master-fence.sql': ['begin;','mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts','revoke'],
   'master-refence.sql': ['begin;','mazer_initialize_progression','mazer_complete_level','mazer_complete_ai_level','mazer_reset_progression','revoke'],
   'auth-apply.sql': ['begin;','auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','13_existing_binds'],
   'reset-era-apply.sql': ['begin;','whole_row_override','7/6/32/d','39/108/161/s','pgp_sym_encrypt','player_reset_disposition','vault.create_secret','rollback_bound_username_key'],
-  'postverify.sql': ['begin;','data_api','rls','acl','117','18','10','15','1882','receipt_conservation','username_origin','mazer-'],
+  'postverify.sql': ['begin;','data_api','rls','acl','117','18','11','15','1882','receipt_conservation','username_origin','mazer-'],
   'qa-apply.sql': ['begin;','qa_ttl','before_user_created','rollback_on_error'],
   'qa-cleanup.sql': ['begin;','qa_ttl','delete','auth.identities','auth.users'],
   'rollback.sql': ['begin;','disable_hook_first','master_preimage','receipt_conservation']
@@ -48,6 +48,11 @@ for (const name of CONTRACT.sqlNames) {
   assert.throws(() => assertSql(name, 'begin; select 1; select 2; commit;'), /SQL_CONTRACT_TOKEN_MISSING/);
 }
 assert.throws(() => assertSql('master-fence.sql', 'begin; mazer_profiles mazer_progression_states mazer_ai_progression_states mazer_cycle_receipts revoke; vercel; commit;'), /SQL_SCOPE_DRIFT/);
+assert.deepEqual(SQL_BYTE_LIMITS, { default: 2_000_000, 'postverify.sql': 8_000_000, 'rollback.sql': 8_000_000 });
+const largePostverify = `begin;\n${sqlTokens['postverify.sql'].join('\n')}\n${'x'.repeat(2_100_000)}\ncommit;`;
+assert.doesNotThrow(() => assertSql('postverify.sql', largePostverify));
+const largeOrdinary = `begin;\n${sqlTokens['master-fence.sql'].join('\n')}\n${'x'.repeat(2_100_000)}\ncommit;`;
+assert.throws(() => assertSql('master-fence.sql', largeOrdinary), /SQL_SHAPE/);
 
 function requireOrder(source, values) {
   let offset = -1;
@@ -77,7 +82,7 @@ for (const token of [
   'RollbackDeadlineSeconds = 600','HardFenceLeaseSeconds = 900','Start-RollbackWatchdog','-WindowStyle Hidden',
   'rollback_initiated_at','Assert-Lease','ExpectedPrivateSourceSha256','PRIVATE_SOURCE_DIGEST_DRIFT','private_manifest_sha256',
   'fence_input_sha256','MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER','fresh_dual_refence_and_catchup_required_for_cutover',
-  '18','117','1882','7/6/32/D','PGP_SYM_ENCRYPT_AES256','MAPPED_ROWS_EQUAL_NO_OVERRIDE','PLAYER_RESET_EQUALITY_DRIFT',
+  '18','117','1882','7/6/32/D','PGP_SYM_ENCRYPT_AES256','MASTER_DOMINATES_NO_OVERRIDE','PLAYER_RESET_DOMINANCE_DRIFT',
   'Mazer-######','SUPABASE_VAULT','bounded_delta_catchups',
   'currentPreimageSha256','restoreProofSha256','predecessorFenceManifestSha256'
 ]) assert.ok(host.includes(token) || materializer.includes(token), `missing ${token}`);

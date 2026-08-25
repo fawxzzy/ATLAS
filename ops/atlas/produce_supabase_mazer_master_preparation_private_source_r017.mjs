@@ -567,7 +567,7 @@ export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, qua
   const playerMaster = fence_input.target_snapshot.player.find((row) => row.user_id === edge.master_user_id);
   if (!playerLegacy || !playerMaster) throw new Error('RESET_PLAYER_ROW_NOT_FOUND');
   const mappedPlayerRow = { ...structuredClone(playerLegacy.row), user_id: edge.master_user_id };
-  const reset_era_player = { disposition: 'MAPPED_ROWS_EQUAL_NO_OVERRIDE', source_row_digest: digest(mappedPlayerRow), target_row_digest: playerMaster.payload_digest };
+  const reset_era_player = { disposition: 'MASTER_DOMINATES_NO_OVERRIDE', source_row_digest: digest(mappedPlayerRow), target_row_digest: playerMaster.payload_digest };
   const legacyReceiptCount = legacy.receipts.filter((row) => String(row.user_id).toLowerCase() === edge.legacy_user_id).length;
   const masterReceiptCount = master.receipts.filter((row) => String(row.user_id).toLowerCase() === edge.master_user_id).length;
   if (legacyReceiptCount !== 1714 || masterReceiptCount !== 1239) throw new Error('RESET_RECEIPT_DENOMINATOR_DRIFT');
