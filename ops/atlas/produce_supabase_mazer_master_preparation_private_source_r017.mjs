@@ -197,7 +197,10 @@ function envelopeSnapshot(raw) {
   const playerRows = raw.player.map((value) => {
     const row = { revision: 0, level_reached_at: null, ...structuredClone(value) };
     row.player_level = String(row.player_level); row.player_completed_cycles = String(row.player_completed_cycles);
-    row.state = structuredClone(row.state); row.state.tracks = structuredClone(row.state?.tracks); row.state.tracks.player = { ...structuredClone(row.state?.tracks?.player), level: row.player_level, completedCycles: row.player_completed_cycles };
+    if (!plain(row.state)) throw new Error('PLAYER_STATE_MALFORMED');
+    const tracks = plain(row.state.tracks) ? structuredClone(row.state.tracks) : {};
+    tracks.player = { ...(plain(tracks.player) ? structuredClone(tracks.player) : {}), level: row.player_level, completedCycles: row.player_completed_cycles };
+    row.state = { ...structuredClone(row.state), tracks };
     return row;
   });
   const aiRows = raw.ai.map((value) => {
