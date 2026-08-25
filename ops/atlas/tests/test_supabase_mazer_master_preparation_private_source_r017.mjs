@@ -38,7 +38,7 @@ const unrelatedMaster = Array.from({ length: 99 }, (_, index) => uid(1000 + inde
 function user(id, email, instance = uid(9000)) {
   return { id, instance_id: instance, aud: 'authenticated', role: 'authenticated', email, encrypted_password: verifier, email_confirmed_at: iso(-10000), raw_app_meta_data: { provider: 'email', providers: ['email'] }, raw_user_meta_data: {}, created_at: iso(-20000), updated_at: iso(-10000) };
 }
-function identity(id, email, index) { return { id: uid(20000 + index), user_id: id, provider_id: email, identity_data: { sub: id, email }, provider: 'email', created_at: iso(-20000), updated_at: iso(-10000), last_sign_in_at: iso(-10000) }; }
+function identity(id, email, index) { return { id: uid(20000 + index), user_id: id, provider_id: id, identity_data: { sub: id, email }, provider: 'email', created_at: iso(-20000), updated_at: iso(-10000), last_sign_in_at: iso(-10000) }; }
 function profile(id, index) { return { user_id: id, display_name: null, selected_control_mode: 'stick', settings: { trailFade: true }, created_at: iso(-9000), updated_at: iso(-8000), revision: index, username: index % 2 ? null : `u${index + 10}` }; }
 function player(id, reset = false) {
   const level = reset ? 5 : 2; const cycles = reset ? 4 : 1; const complexity = reset ? 24 : 12;
@@ -130,12 +130,14 @@ function importIdentityDrift(mutator) {
   return legacy;
 }
 assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.provider = 'github'; }), fixture.master), /EMAIL_IDENTITY_PROVIDER_DRIFT/);
-assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.provider_id = 'wrong@example.test'; }), fixture.master), /EMAIL_IDENTITY_PROVIDER_ID_DRIFT/);
+assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.provider_id = uid(99999); }), fixture.master), /EMAIL_IDENTITY_PROVIDER_ID_DRIFT/);
+assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.provider_id = 'wrong@example.test'; }), fixture.master), /EMAIL_IDENTITY_PROVIDER_ID_MALFORMED/);
 assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.identity_data.sub = uid(99999); }), fixture.master), /EMAIL_IDENTITY_METADATA_SUB_DRIFT/);
 assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.identity_data.email = 'wrong@example.test'; }), fixture.master), /EMAIL_IDENTITY_METADATA_EMAIL_DRIFT/);
 assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.identity_data = null; }), fixture.master), /EMAIL_IDENTITY_METADATA_MALFORMED/);
 assert.throws(() => buildIdentityPlan(importIdentityDrift((_item, legacy) => { legacy.auth_identities.pop(); }), fixture.master), /EMAIL_IDENTITY_MISSING/);
 assert.throws(() => buildIdentityPlan(importIdentityDrift((item, legacy) => { legacy.auth_identities.push({ ...structuredClone(item), id: uid(99998) }); }), fixture.master), /EMAIL_IDENTITY_MULTIPLE/);
+assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.user_id = uid(99997); }), fixture.master), /EMAIL_IDENTITY_MISSING/);
 assert.throws(() => producePrivateSource({ legacy: { ...fixture.legacy, receipts: fixture.legacy.receipts.slice(1) }, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'short', qaPassword: 'R017-fixture-password!' }), /PRIVATE_SECRET_INPUT_WEAK/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: { ...fixture.master, catalog: { ...catalog(), columns: [...catalog().columns, { table: 'mazer_profiles', column: 'username' }] } }, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /CATALOG_PREIMAGE_ALREADY_MIGRATED/);
@@ -150,6 +152,8 @@ const materializerPath = path.join(root, 'ops/atlas/materialize_supabase_mazer_m
 const producerText = fs.readFileSync(producerPath, 'utf8');
 for (const forbidden of ['execute_sql', 'apply_migration', 'supabase db push', 'vercel deploy', 'git push']) assert.ok(!producerText.toLowerCase().includes(forbidden));
 for (const token of ['PRIVATE_OUTPUT_MUST_BE_UNDER_SECRETS','EVIDENCE_DIGEST_DRIFT','IDENTITY_DENOMINATOR_DRIFT','RESET_RECEIPT_DENOMINATOR_DRIFT','transaction isolation level serializable read only']) assert.ok(producerText.includes(token));
+assert.match(source.sql['auth-apply.sql'], /i\.provider_id=e->'user'->>'id'/);
+assert.match(source.sql['qa-apply.sql'], /select gen_random_uuid\(\),id,id::text,jsonb_build_object\('sub',id::text,'email',email\)/);
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-producer-'));
 try {
