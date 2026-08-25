@@ -89,7 +89,8 @@ for (const token of [
 assert.ok(host.includes('AUTH_TOPOLOGY_MANIFEST_DRIFT'));
 for (const token of ['ReplayExactRolledBack','PASS_EXACT_ROLLBACK_TERMINAL','replay_requires_explicit_switch','fence.replay-','START_EXACT_REPLAY']) assert.ok(host.includes(token) || materializer.includes(token), `rollback replay seam missing ${token}`);
 for (const token of ['Write-FenceChildReceipt','New-FenceChildReceipt','stdout_sha256','stderr_sha256','terminal_category','FENCE_CHILD_FAILURE_RECEIPT_CONTRACT','FENCE_CHILD_ROLLBACK_RECEIPT_CONTRACT']) assert.ok(host.includes(token), `fence child receipt seam missing ${token}`);
-for (const token of ["trap {",'NO_EFFECT_PRESTATE','OUTER_EXECUTION_HOLD']) assert.ok(fenceHost.includes(token), `fence prestate receipt seam missing ${token}`);
+for (const token of ["trap {",'NO_EFFECT_PRESTATE','PRESTATE_EXECUTION_HOLD','Write-FailClosedPrestateResult','Get-SafeFailureCategory']) assert.ok(fenceHost.includes(token), `fence prestate receipt seam missing ${token}`);
+assert.ok(!/trap \{[\s\S]{0,256}Write-SafeResult/.test(fenceHost), 'prestate trap must not recurse through disclosure validation');
 const replayReset = host.slice(host.indexOf("if ([string]$state.phase -ceq 'ROLLED_BACK')"), host.indexOf('$managementToken = Read-ManagementToken'));
 requireOrder(replayReset, ['ReplayExactRolledBack', "phase = 'PREFLIGHT'", 'Write-State', 'fence.replay-']);
 const producer = fs.readFileSync(path.join(root, 'ops/atlas/produce_supabase_mazer_master_preparation_private_source_r017.mjs'), 'utf8');
