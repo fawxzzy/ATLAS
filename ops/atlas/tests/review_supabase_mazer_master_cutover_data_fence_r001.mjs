@@ -248,6 +248,14 @@ for (const value of [
   'SourceObservationSql',
   'Invoke-PsqlObservation',
   'REVERSE_ACTIVATION_FAILED_BOTH_SIDES_FENCED_DELTA_QUARANTINED'
+  ,'ExecutionStep'
+  ,'FenceOnly'
+  ,'Continue'
+  ,'ReleaseLegacy'
+  ,'PAUSED_AFTER_SOURCE_HIGH_WATER'
+  ,'CONTINUE_ACL_NOT_EXACT_FENCED_POSTIMAGE'
+  ,'PREPARATION_COMPLETE'
+  ,'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER'
 ]) requireText(host, value, `HOST_CONTRACT_MISSING:${value}`);
 
 requireOrder(host, [
@@ -262,9 +270,9 @@ requireOrder(host, [
   "Set-StatePhase $state 'LEGACY_WRITER_REVOKE_COMMITTED'",
   'Invoke-ExactWriterDrainBarrier $legacyDatabaseUrl',
   'Invoke-PsqlObservation $legacyDatabaseUrl $classification.SourceObservationSql',
-  "Set-StatePhase $state 'SOURCE_HIGH_WATER_READ_1'",
+  "'SOURCE_HIGH_WATER_READ_1'",
   'Invoke-PsqlObservation $legacyDatabaseUrl $classification.SourceObservationSql',
-  "Set-StatePhase $state 'SOURCE_HIGH_WATER_READ_2'",
+  "'SOURCE_HIGH_WATER_READ_2'",
   "Set-StatePhase $state 'FORWARD_DELTA_APPLYING'",
   'Invoke-PsqlPrivate $masterDatabaseUrl $classification.TransactionSql'
 ], 'FORWARD_FENCE_ORDER_DRIFT');
@@ -448,7 +456,7 @@ if (focusedOne !== focusedTwo) findings.push('FOCUSED_TEST_NONDETERMINISTIC');
 if (focusedOne) {
   const value = JSON.parse(focusedOne);
   assert.equal(value.result, 'PASS_MAZER_MASTER_CUTOVER_DATA_FENCE_R001');
-  assert.equal(value.scenarios, 118);
+  assert.equal(value.scenarios, 122);
   assert.equal(value.postgresql17_concurrency, 'SKIPPED_EXPLICIT_OPT_IN_REQUIRED');
   assert.equal(value.provider_calls, 0);
   assert.equal(value.live_data_writes, 0);
