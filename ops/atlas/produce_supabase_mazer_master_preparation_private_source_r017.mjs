@@ -23,9 +23,9 @@ export const PRODUCER_CONTRACT = Object.freeze({
   masterProject: R017_CONTRACT.master,
   evidence: Object.freeze({
     currentPreimage: Object.freeze({
-      relativePath: 'runtime/atlas/continuity/mazer-master-r016-data-api-reconciliation-terminal-20260825.json',
+      relativePath: 'runtime/atlas/continuity/mazer-master-r017-current-progress-rebound-evidence-20260825.json',
       sha256: R017_CONTRACT.currentPreimageSha256,
-      result: 'PASS_EXACT_CURRENT_PREIMAGE_READY_FOR_ONE_PROTECTED_MASTER_PREPARATION_DECISION'
+      result: 'PASS_EXACT_CURRENT_REBOUND_READY_FOR_ONE_PROTECTED_MASTER_PREPARATION_DECISION'
     }),
     restoreProof: Object.freeze({
       relativePath: 'runtime/atlas/continuity/mazer-master-r014-canonical-cycle-receipt-private-local-restores-terminal-20260825.json',
@@ -108,7 +108,7 @@ export function verifyEvidence(atlasRoot) {
   const restore = readBoundEvidence(atlasRoot, PRODUCER_CONTRACT.evidence.restoreProof);
   const expected = current.current_preimage;
   const actual = {
-    legacy: { auth_users: 18, auth_identities: 18, profiles: 10, player: 15, ai: 15, receipts: 1871 },
+    legacy: { auth_users: 18, auth_identities: 18, profiles: 10, player: 15, ai: 15, receipts: 1873 },
     master: { auth_users: 114, auth_identities: 114, profiles: 5, player: 7, ai: 7, receipts: 1290 }
   };
   for (const side of ['legacy', 'master']) for (const [name, count] of Object.entries(actual[side])) {
@@ -412,7 +412,7 @@ do $r017$ begin
   if (select count(*) from auth.users) <> 114 then raise exception 'R017_AUTH_USERS_PREIMAGE_DRIFT'; end if;
   if (select count(*) from mazer.mazer_profiles) <> 5 or (select count(*) from mazer.mazer_progression_states) <> 7 or (select count(*) from mazer.mazer_ai_progression_states) <> 7 or (select count(*) from mazer.mazer_cycle_receipts) <> 1290 then raise exception 'R017_APP_PREIMAGE_DRIFT'; end if;
   if not exists (select 1 from pg_namespace where nspname='mazer') then raise exception 'R017_DATA_API_SCHEMA_DRIFT'; end if;
-end $r017$;`, ['data_api','rls','acl','auth.users','114','10','15','1880']);
+end $r017$;`, ['data_api','rls','acl','auth.users','114','10','15','1882']);
   sql['master-fence.sql'] = sqlProgram(`
 select pg_advisory_xact_lock(hashtextextended('atlas:mazer:r017:master-fence',0));
 create schema if not exists atlas_mazer_r017;
@@ -444,7 +444,7 @@ end $r017_auth_postcheck$;`, ['auth.users','auth.identities','create_and_bind','
   sql['reset-era-apply.sql'] = sqlProgram(`
 create extension if not exists pgcrypto with schema extensions;
 create table if not exists atlas_mazer_r017.reset_quarantine(id text primary key,ciphertext bytea not null);
-insert into atlas_mazer_r017.reset_quarantine(id,ciphertext) values('reset-era-ai',extensions.pgp_sym_encrypt(${sqlLiteral(canonical(reset.quarantined_row))},${sqlLiteral(quarantineKey)},'cipher-algo=aes256')) on conflict do nothing;`, ['whole_row_override','5/4/24/E','39/108/161/S','pgp_sym_encrypt','player_reset_disposition']);
+insert into atlas_mazer_r017.reset_quarantine(id,ciphertext) values('reset-era-ai',extensions.pgp_sym_encrypt(${sqlLiteral(canonical(reset.quarantined_row))},${sqlLiteral(quarantineKey)},'cipher-algo=aes256')) on conflict do nothing;`, ['whole_row_override','7/6/32/D','39/108/161/S','pgp_sym_encrypt','player_reset_disposition']);
   sql['postverify.sql'] = sqlProgram(`
 do $r017$ begin
  if (select coalesce(jsonb_agg(to_jsonb(t) order by t.user_id),'[]'::jsonb) from mazer.mazer_profiles t) <> ${jsonLiteral(sort(desiredRows.profiles, (row) => row.user_id))} then raise exception 'R017_PROFILES_FULL_DIGEST_DRIFT'; end if;
@@ -463,7 +463,7 @@ do $r017$ begin
  if (select count(*) from pg_indexes where schemaname='mazer' and indexname=any(array[${MIGRATION_INDEXES.map(sqlLiteral).join(',')}])) <> 3 then raise exception 'R017_INDEX_CATALOG_DRIFT'; end if;
  if not exists(select 1 from pg_policies where schemaname='mazer' and tablename='mazer_profiles' and policyname='Mazer Auth hook can inspect usernames' and cmd='SELECT' and roles='{supabase_auth_admin}') then raise exception 'R017_POLICY_CATALOG_DRIFT'; end if;
  if not exists(select 1 from information_schema.triggers where event_object_schema='auth' and event_object_table='users' and trigger_name='mazer_claim_signup_username_after_insert' and action_timing='AFTER' and event_manipulation='INSERT') then raise exception 'R017_TRIGGER_CATALOG_DRIFT'; end if;
-end $r017$;`, ['data_api','rls','acl','117','18','10','15','1880','receipt_conservation']);
+end $r017$;`, ['data_api','rls','acl','117','18','10','15','1882','receipt_conservation']);
   sql['qa-apply.sql'] = sqlProgram(`
 with q as (select * from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text))
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)
@@ -505,7 +505,7 @@ export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, qua
   const catalog_preimage = validateCatalogPreimage(master.catalog);
   const fence_input = buildFenceInput(legacy, master, legacyAcl, masterAcl, auth);
   const allEdges = [...auth.retained_edges, ...auth.new_edges];
-  const resetLegacy = legacy.ai.find((row) => String(row.level) === '5' && String(row.completed_cycles) === '4' && Number(row.target_complexity) === 24 && row.rank === 'E');
+  const resetLegacy = legacy.ai.find((row) => String(row.level) === '7' && String(row.completed_cycles) === '6' && Number(row.target_complexity) === 32 && row.rank === 'D');
   if (!resetLegacy) throw new Error('RESET_LEGACY_ROW_NOT_FOUND');
   const edge = allEdges.find((item) => item.legacy_user_id === String(resetLegacy.user_id).toLowerCase());
   const resetMaster = edge && master.ai.find((row) => String(row.user_id).toLowerCase() === edge.master_user_id && String(row.level) === '39' && String(row.completed_cycles) === '108' && Number(row.target_complexity) === 161 && row.rank === 'S');
@@ -520,10 +520,10 @@ export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, qua
   const reset_era_player = { disposition: 'MAPPED_ROWS_EQUAL_NO_OVERRIDE', source_row_digest: digest(mappedPlayerRow), target_row_digest: playerMaster.payload_digest };
   const legacyReceiptCount = legacy.receipts.filter((row) => String(row.user_id).toLowerCase() === edge.legacy_user_id).length;
   const masterReceiptCount = master.receipts.filter((row) => String(row.user_id).toLowerCase() === edge.master_user_id).length;
-  if (legacyReceiptCount !== 1712 || masterReceiptCount !== 1239) throw new Error('RESET_RECEIPT_DENOMINATOR_DRIFT');
+  if (legacyReceiptCount !== 1714 || masterReceiptCount !== 1239) throw new Error('RESET_RECEIPT_DENOMINATOR_DRIFT');
   const sourceAiEnvelope = fence_input.source_snapshot.ai.find((row) => row.user_id === edge.legacy_user_id && row.runner_key === 'menu-runner');
   const targetAiEnvelope = fence_input.target_snapshot.ai.find((row) => row.user_id === edge.master_user_id && row.runner_key === 'menu-runner');
-  const reset_era_ai = { legacy_user_id: edge.legacy_user_id, master_user_id: edge.master_user_id, canonical_projection: '5/4/24/E', quarantined_projection: '39/108/161/S', legacy_receipts: legacyReceiptCount, master_receipts: masterReceiptCount, legacy_timestamps_newer: true, override_mode: 'EXACT_WHOLE_ROW', quarantine_encryption: 'PGP_SYM_ENCRYPT_AES256', canonical_row_digest: digest(sourceAiEnvelope), quarantined_row_digest: digest(targetAiEnvelope), quarantined_row: resetMaster };
+  const reset_era_ai = { legacy_user_id: edge.legacy_user_id, master_user_id: edge.master_user_id, canonical_projection: '7/6/32/D', quarantined_projection: '39/108/161/S', legacy_receipts: legacyReceiptCount, master_receipts: masterReceiptCount, legacy_timestamps_newer: true, override_mode: 'EXACT_WHOLE_ROW', quarantine_encryption: 'PGP_SYM_ENCRYPT_AES256', canonical_row_digest: digest(sourceAiEnvelope), quarantined_row_digest: digest(targetAiEnvelope), quarantined_row: resetMaster };
   const qa = { personas: 4, auth_rows: 4, ttl_minutes: 30, rows: deterministicQa(auth) };
   const actionFenceInput = structuredClone(fence_input);
   const mappedSourceAi = structuredClone(sourceAiEnvelope); mappedSourceAi.user_id = edge.master_user_id; mappedSourceAi.row.user_id = edge.master_user_id; mappedSourceAi.payload_digest = digest(mappedSourceAi.row);

@@ -11,7 +11,7 @@ export const CONTRACT = Object.freeze({
   packet: 'FP-MAZER-MASTER-R017-SUPABASE-PREPARATION-20260825-001',
   legacy: 'geknvnrmktchljnyddwp',
   master: 'bxtcuhkotumitoqtrcej',
-  currentPreimageSha256: 'ddaaaf9fc9f8a5da781287c2ae76c194af593484208fb3f4c480fc4603b798fe',
+  currentPreimageSha256: 'ba95bab7064649cca1215bb5e77f110e288e678221fed613259368bb1b31bdb4',
   restoreProofSha256: '54dee535bac3e02b7058fe644cd44af115cc3746ff1e40390521992dccd14971',
   predecessorFenceManifestSha256: '63f43d8c2f532b32e3453879e4ca49ffc2f5b382264a290ad9a3ea1225811ced',
   migrations: Object.freeze([
@@ -35,12 +35,12 @@ const canonical = (value) => value === null || typeof value !== 'object'
     : `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`).join(',')}}`;
 
 const SQL_TOKENS = Object.freeze({
-  'preflight.sql': ['data_api', 'rls', 'acl', 'auth.users', '114', '10', '15', '1880'],
+  'preflight.sql': ['data_api', 'rls', 'acl', 'auth.users', '114', '10', '15', '1882'],
   'master-fence.sql': ['begin;', 'mazer_profiles', 'mazer_progression_states', 'mazer_ai_progression_states', 'mazer_cycle_receipts', 'revoke'],
   'master-refence.sql': ['begin;', 'mazer_initialize_progression', 'mazer_complete_level', 'mazer_complete_ai_level', 'mazer_reset_progression', 'revoke'],
   'auth-apply.sql': ['auth.users', 'auth.identities', 'create_and_bind', 'bind_existing', '3_auth_imports', '2_existing_binds'],
-  'reset-era-apply.sql': ['whole_row_override', '5/4/24/e', '39/108/161/s', 'pgp_sym_encrypt', 'player_reset_disposition'],
-  'postverify.sql': ['data_api', 'rls', 'acl', '117', '18', '10', '15', '1880', 'receipt_conservation'],
+  'reset-era-apply.sql': ['whole_row_override', '7/6/32/d', '39/108/161/s', 'pgp_sym_encrypt', 'player_reset_disposition'],
+  'postverify.sql': ['data_api', 'rls', 'acl', '117', '18', '10', '15', '1882', 'receipt_conservation'],
   'qa-apply.sql': ['qa_ttl', 'before_user_created', 'rollback_on_error'],
   'qa-cleanup.sql': ['qa_ttl', 'delete', 'auth.identities', 'auth.users'],
   'rollback.sql': ['disable_hook_first', 'master_preimage', 'receipt_conservation']
@@ -120,7 +120,7 @@ export function validatePrivateSource(raw) {
   const classified = classifyCutover(raw.fence_input).receipt;
   if (classified.direction !== 'forward') throw new Error('FENCE_DIRECTION_DRIFT');
   const counts = classified.desired_counts;
-  if (counts.profiles !== 10 || counts.player !== 15 || counts.ai !== 15 || counts.receipts !== 1880) throw new Error('APP_DENOMINATOR_DRIFT');
+  if (counts.profiles !== 10 || counts.player !== 15 || counts.ai !== 15 || counts.receipts !== 1882) throw new Error('APP_DENOMINATOR_DRIFT');
   if (classified.receipt_conservation.primary_conflicts !== 0 || classified.receipt_conservation.client_run_conflicts !== 0) throw new Error('RECEIPT_CONFLICT');
   if (!plain(raw.auth) || !Array.isArray(raw.auth.imports) || !Array.isArray(raw.auth.new_edges) || !Array.isArray(raw.auth.retained_edges)) throw new Error('AUTH_PLAN_SHAPE');
   if (raw.auth.imports.length !== 3 || raw.auth.new_edges.length !== 5 || raw.auth.retained_edges.length !== 13) throw new Error('AUTH_DENOMINATOR_DRIFT');
@@ -145,9 +145,9 @@ export function validatePrivateSource(raw) {
     if (requiredUuid(item.identities[0].user_id, 'IMPORT_IDENTITY_OWNER') !== item.user.id.toLowerCase()) throw new Error('IMPORT_IDENTITY_OWNER_DRIFT');
   }
   if (!plain(raw.reset_era_ai)
-    || raw.reset_era_ai.canonical_projection !== '5/4/24/E'
+    || raw.reset_era_ai.canonical_projection !== '7/6/32/D'
     || raw.reset_era_ai.quarantined_projection !== '39/108/161/S'
-    || raw.reset_era_ai.legacy_receipts !== 1712
+    || raw.reset_era_ai.legacy_receipts !== 1714
     || raw.reset_era_ai.master_receipts !== 1239
     || raw.reset_era_ai.legacy_timestamps_newer !== true
     || raw.reset_era_ai.override_mode !== 'EXACT_WHOLE_ROW'
@@ -161,7 +161,7 @@ export function validatePrivateSource(raw) {
   }
   const actionFenceInput = bindResetEraActionInput(raw, allEdges);
   const actionClassified = classifyCutover(actionFenceInput).receipt;
-  if (actionClassified.desired_counts.profiles !== 10 || actionClassified.desired_counts.player !== 15 || actionClassified.desired_counts.ai !== 15 || actionClassified.desired_counts.receipts !== 1880) throw new Error('ACTION_APP_DENOMINATOR_DRIFT');
+  if (actionClassified.desired_counts.profiles !== 10 || actionClassified.desired_counts.player !== 15 || actionClassified.desired_counts.ai !== 15 || actionClassified.desired_counts.receipts !== 1882) throw new Error('ACTION_APP_DENOMINATOR_DRIFT');
   const fenceInputSha256 = sha256(Buffer.from(canonical(actionFenceInput), 'utf8'));
   return { classified: actionClassified, fenceInputSha256, allEdges, actionFenceInput };
 }
@@ -198,7 +198,7 @@ export function materialize(raw, outputRoot, mazerRepository) {
     app_counts: classified.desired_counts,
     receipt_conservation: classified.receipt_conservation,
     auth_counts: { imports: 3, binds: 2, retained_edges: 13, final_edges: 18, expected_target_users: 117 },
-    reset_era_ai: { canonical: '5/4/24/E', quarantined: '39/108/161/S', override: 'EXACT_WHOLE_ROW', quarantine: 'PGP_SYM_ENCRYPT_AES256' },
+    reset_era_ai: { canonical: '7/6/32/D', quarantined: '39/108/161/S', override: 'EXACT_WHOLE_ROW', quarantine: 'PGP_SYM_ENCRYPT_AES256' },
     reset_era_player: { disposition: 'MAPPED_ROWS_EQUAL_NO_OVERRIDE', digest: raw.reset_era_player.source_row_digest },
     qa: { personas: raw.qa.personas, auth_rows: raw.qa.auth_rows, ttl_minutes: raw.qa.ttl_minutes },
     files
