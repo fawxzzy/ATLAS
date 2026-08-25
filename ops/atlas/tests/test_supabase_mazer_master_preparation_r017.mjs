@@ -21,10 +21,11 @@ assert.equal(adversarialCoverage.length, 7);
 
 assert.equal(classifyHostRecovery(null).action, 'START');
 assert.deepEqual(classifyHostRecovery(state('PREPARATION_COMPLETE')), { action: 'NOOP', effect: 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' });
-assert.deepEqual(classifyHostRecovery(state('ROLLED_BACK')), { action: 'NOOP', effect: 'TERMINAL_ROLLBACK' });
+assert.deepEqual(classifyHostRecovery(state('ROLLED_BACK')), { action: 'REPLAY_REQUIRES_EXPLICIT_SWITCH', effect: 'TERMINAL_ROLLBACK' });
+assert.deepEqual(classifyHostRecovery(state('ROLLED_BACK'), { replayExactRolledBack: true }), { action: 'START_EXACT_REPLAY', effect: 'ROLLED_BACK_PREIMAGE' });
 for (const phase of HOST_PHASES) {
   const result = classifyHostRecovery(state(phase));
-  assert.ok(['NOOP', 'RESUME_EXACT', 'ROLLBACK_REQUIRED'].includes(result.action), `unclassified phase ${phase}`);
+  assert.ok(['NOOP', 'RESUME_EXACT', 'ROLLBACK_REQUIRED', 'REPLAY_REQUIRES_EXPLICIT_SWITCH'].includes(result.action), `unclassified phase ${phase}`);
   if (phase.endsWith('_APPLYING') || phase.endsWith('_ACTIVATING') || phase.endsWith('_CLEANING') || phase.endsWith('VERIFYING') || phase.startsWith('ROLLBACK_') || phase === 'AMBIGUOUS_HOLD') assert.equal(result.action, 'ROLLBACK_REQUIRED', phase);
 }
 assert.throws(() => classifyHostRecovery(state('UNKNOWN')), /STATE_PHASE_DRIFT/);
@@ -62,6 +63,10 @@ requireOrder(host, [
   "'auth-apply.sql'", "'reset-era-apply.sql'", "Invoke-Fence 'Continue'", "'m3.sql'", "'m4.sql'", "'postverify.sql'",
   "'HOOK_ACTIVATING'", "'qa-apply.sql'", "'qa-cleanup.sql'", "Invoke-Fence 'ReleaseLegacy'", "'PREPARATION_COMPLETE'"
 ]);
+const hostPhaseMatch = host.match(/\$Phases = @\(([\s\S]*?)\n\)/);
+assert.ok(hostPhaseMatch, 'PowerShell phase list missing');
+const hostPhases = [...hostPhaseMatch[1].matchAll(/'([A-Z0-9_]+)'/g)].map((match) => match[1]);
+assert.deepEqual(hostPhases, HOST_PHASES, 'PowerShell and JS phase lists drifted');
 const rollbackBlock = host.slice(host.indexOf("if ($Mode -ceq 'Rollback')"), host.indexOf('$stateJson'));
 requireOrder(rollbackBlock, ['ROLLBACK_DISABLING_HOOK', 'hook_before_user_created_enabled = $false', 'qa-cleanup.sql', 'rollback.sql', 'ROLLBACK_LEGACY_RESTORING']);
 const normalTail = host.slice(host.indexOf("Set-Phase $state 'HOOK_ACTIVATING'"), host.lastIndexOf('\ncatch {'));
@@ -77,6 +82,11 @@ for (const token of [
   'currentPreimageSha256','restoreProofSha256','predecessorFenceManifestSha256'
 ]) assert.ok(host.includes(token) || materializer.includes(token), `missing ${token}`);
 assert.ok(host.includes('AUTH_TOPOLOGY_MANIFEST_DRIFT'));
+for (const token of ['ReplayExactRolledBack','PASS_EXACT_ROLLBACK_TERMINAL','replay_requires_explicit_switch','fence.replay-','START_EXACT_REPLAY']) assert.ok(host.includes(token) || materializer.includes(token), `rollback replay seam missing ${token}`);
+const replayReset = host.slice(host.indexOf("if ([string]$state.phase -ceq 'ROLLED_BACK')"), host.indexOf('$managementToken = Read-ManagementToken'));
+requireOrder(replayReset, ['ReplayExactRolledBack', "phase = 'PREFLIGHT'", 'Write-State', 'fence.replay-']);
+const producer = fs.readFileSync(path.join(root, 'ops/atlas/produce_supabase_mazer_master_preparation_private_source_r017.mjs'), 'utf8');
+for (const token of ["crypto.createHmac('sha256'", "vault.create_secret", "delete from vault.secrets where name='mazer_username_handle_key'"]) assert.ok(producer.includes(token), `deterministic replay contract missing ${token}`);
 assert.ok(host.includes('auth_counts.binds -ne 13'));
 assert.ok(host.includes('auth_counts.retained_edges -ne 2'));
 assert.ok(materializer.includes('topologyEvidenceSha256'));

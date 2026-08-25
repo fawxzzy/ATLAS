@@ -60,11 +60,13 @@ export function assertSql(name, sql) {
 
 export const HOST_PHASES = Object.freeze(['PREFLIGHT','FENCE_APPLYING','FENCE_PAUSED','MASTER_FENCE_APPLYING','MASTER_FENCED','M1_APPLYING','M1_APPLIED','M2_APPLYING','M2_APPLIED','MASTER_REFENCE_APPLYING','MASTER_REFENCED','AUTH_APPLYING','AUTH_APPLIED','RESET_QUARANTINE_APPLYING','RESET_QUARANTINE_SEALED','DELTA_APPLYING','DELTA_APPLIED','M3_APPLYING','M3_APPLIED','M4_APPLYING','M4_APPLIED','POSTVERIFYING','POSTVERIFIED','HOOK_ACTIVATING','HOOK_ACTIVE','QA_APPLYING','QA_COMPLETE','QA_CLEANING','QA_CLEAN','LEGACY_RESTORING','LEGACY_RESTORED','PREPARATION_COMPLETE','ROLLBACK_DISABLING_HOOK','ROLLBACK_TARGET_RESTORING','ROLLBACK_LEGACY_RESTORING','ROLLED_BACK','AMBIGUOUS_HOLD']);
 
-export function classifyHostRecovery(state) {
+export function classifyHostRecovery(state, options = {}) {
   if (state == null) return { action: 'START', effect: 'NONE' };
   if (!plain(state) || state.schema !== 'atlas.supabase.mazer-master-preparation-host-state.r017.v1') throw new Error('STATE_SCHEMA_DRIFT');
   if (state.phase === 'PREPARATION_COMPLETE') return { action: 'NOOP', effect: 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' };
-  if (state.phase === 'ROLLED_BACK') return { action: 'NOOP', effect: 'TERMINAL_ROLLBACK' };
+  if (state.phase === 'ROLLED_BACK') return options.replayExactRolledBack === true
+    ? { action: 'START_EXACT_REPLAY', effect: 'ROLLED_BACK_PREIMAGE' }
+    : { action: 'REPLAY_REQUIRES_EXPLICIT_SWITCH', effect: 'TERMINAL_ROLLBACK' };
   if (!HOST_PHASES.includes(state.phase)) throw new Error('STATE_PHASE_DRIFT');
   if (state.phase === 'AMBIGUOUS_HOLD') return { action: 'ROLLBACK_REQUIRED', effect: 'AMBIGUOUS' };
   if (state.phase.endsWith('_APPLYING') || state.phase.endsWith('_ACTIVATING') || state.phase.endsWith('_CLEANING') || state.phase.endsWith('VERIFYING')) return { action: 'ROLLBACK_REQUIRED', effect: 'AMBIGUOUS' };
