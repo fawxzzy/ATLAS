@@ -92,7 +92,7 @@ function acl(schema) {
   const table_acl = [...FENCE_CONTRACT.tables].sort().map((name) => ({ name, grants: [] }));
   const rpc_acl = [...FENCE_CONTRACT.mutatingRpcs].sort().map((signature) => ({ signature, grants: [{ grantee: 'authenticated', is_grantable: false }] }));
   const catalog = { tables: [...FENCE_CONTRACT.tables].sort().map((name) => ({ name, relkind: 'r', rls_enabled: true, force_rls: schema === 'mazer' })), rpcs: [...FENCE_CONTRACT.mutatingRpcs].sort().map((signature) => ({ signature, kind: 'f', security_definer: true, volatility: 'v' })) };
-  return { schema, table_acl, rpc_acl, catalog };
+  return { schema, table_acl, rpc_acl, catalog, observed_at: iso(0) };
 }
 
 const fixture = rawFixture();
@@ -108,6 +108,8 @@ assert.deepEqual(plan.imports.at(-1).identities, [fixture.legacy.auth_identities
 
 const source = producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
 const validated = validatePrivateSource(source);
+assert.deepEqual(source.fence_input.fence.legacy.acl_preimage, (({ schema, table_acl, rpc_acl, catalog }) => ({ schema, table_acl, rpc_acl, catalog }))(acl('public')));
+assert.deepEqual(source.fence_input.fence.master.acl_preimage, (({ schema, table_acl, rpc_acl, catalog }) => ({ schema, table_acl, rpc_acl, catalog }))(acl('mazer')));
 const missingTracksForward = source.fence_input.source_snapshot.player.find((row) => row.user_id === fixture.legacy.player[6].user_id).row;
 const nonobjectTracksForward = source.fence_input.source_snapshot.player.find((row) => row.user_id === fixture.legacy.player[7].user_id).row;
 assert.equal(missingTracksForward.state.legacySibling, 'preserved-missing-tracks');
@@ -153,6 +155,14 @@ assert.throws(() => buildIdentityPlan(importIdentityDrift((item, legacy) => { le
 assert.throws(() => buildIdentityPlan(importIdentityDrift((item) => { item.user_id = uid(99997); }), fixture.master), /EMAIL_IDENTITY_MISSING/);
 const malformedPlayerState = structuredClone(fixture.legacy); malformedPlayerState.player[6].state = 'not-an-object';
 assert.throws(() => producePrivateSource({ legacy: malformedPlayerState, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /PLAYER_STATE_MALFORMED/);
+const aclExtra = { ...acl('public'), unexpected: true };
+assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: aclExtra, masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /ACL_OBSERVATION_KEYS/);
+const aclMissingTimestamp = acl('public'); delete aclMissingTimestamp.observed_at;
+assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: aclMissingTimestamp, masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /ACL_OBSERVATION_KEYS/);
+const aclMalformedTimestamp = { ...acl('public'), observed_at: 'not-a-timestamp' };
+assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: aclMalformedTimestamp, masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /ACL_OBSERVATION_TIMESTAMP_DRIFT/);
+const aclStaleTimestamp = { ...acl('public'), observed_at: iso(-360_000) };
+assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: aclStaleTimestamp, masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /ACL_OBSERVATION_TIMESTAMP_DRIFT/);
 assert.throws(() => producePrivateSource({ legacy: { ...fixture.legacy, receipts: fixture.legacy.receipts.slice(1) }, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'short', qaPassword: 'R017-fixture-password!' }), /PRIVATE_SECRET_INPUT_WEAK/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: { ...fixture.master, catalog: { ...catalog(), columns: [...catalog().columns, { table: 'mazer_profiles', column: 'username' }] } }, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /CATALOG_PREIMAGE_ALREADY_MIGRATED/);

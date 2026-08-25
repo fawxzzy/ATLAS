@@ -289,7 +289,10 @@ export function buildIdentityPlan(legacyRaw, masterRaw) {
 }
 
 function fenceSide(acl, schema, extra) {
-  const preimage = acl.acl_preimage ?? acl;
+  if (!plain(acl) || canonical(Object.keys(acl).sort()) !== canonical(['catalog','observed_at','rpc_acl','schema','table_acl'])) throw new Error('ACL_OBSERVATION_KEYS');
+  const observedAt = Date.parse(acl.observed_at);
+  if (!Number.isFinite(observedAt) || observedAt < Date.now() - 300_000 || observedAt > Date.now() + 30_000) throw new Error('ACL_OBSERVATION_TIMESTAMP_DRIFT');
+  const preimage = { schema: acl.schema, table_acl: structuredClone(acl.table_acl), rpc_acl: structuredClone(acl.rpc_acl), catalog: structuredClone(acl.catalog) };
   if (preimage.schema !== schema) throw new Error(`ACL_SCHEMA_DRIFT:${schema}`);
   return {
     table_writers: Object.fromEntries(FENCE_CONTRACT.tables.map((table) => [table, 'FENCED'])),
