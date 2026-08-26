@@ -617,7 +617,8 @@ function Invoke-PsqlObservation([string]$DatabaseUrl, [string]$SqlPath, [string]
   return [pscustomobject]@{ ObservedAt = $observedAt; Digest = $ExpectedDigest }
 }
 
-if (-not ('AtlasMazerMasterFenceCredentialR001' -as [type]) -and $RunningOnWindows) {
+function Initialize-WindowsCredentialInterop {
+  if (-not $RunningOnWindows -or ('AtlasMazerMasterFenceCredentialR001' -as [type])) { return }
   Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
@@ -642,6 +643,7 @@ function Read-ManagementToken {
     if ([string]::IsNullOrWhiteSpace($token)) { throw 'MANAGEMENT_CREDENTIAL_MISSING' }
     return $token
   }
+  Initialize-WindowsCredentialInterop
   $pointer = [IntPtr]::Zero
   try {
     if (-not [AtlasMazerMasterFenceNativeR001]::CredRead($CredentialTarget, 1, 0, [ref]$pointer) -or $pointer -eq [IntPtr]::Zero) { throw 'MANAGEMENT_CREDENTIAL_MISSING' }
