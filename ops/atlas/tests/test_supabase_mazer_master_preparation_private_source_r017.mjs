@@ -201,6 +201,10 @@ const producerText = fs.readFileSync(producerPath, 'utf8');
 for (const forbidden of ['execute_sql', 'apply_migration', 'supabase db push', 'vercel deploy', 'git push']) assert.ok(!producerText.toLowerCase().includes(forbidden));
 for (const token of ['PRIVATE_OUTPUT_MUST_BE_UNDER_SECRETS','EVIDENCE_DIGEST_DRIFT','IDENTITY_DENOMINATOR_DRIFT','RESET_RECEIPT_DENOMINATOR_DRIFT','transaction isolation level serializable read only']) assert.ok(producerText.includes(token));
 assert.match(source.sql['auth-apply.sql'], /i\.provider_id=e->'user'->>'id'/);
+assert.match(source.sql['auth-apply.sql'], /insert into auth\.identities\(id,user_id,provider_id,identity_data,provider,last_sign_in_at,created_at,updated_at\)/);
+assert.match(source.sql['auth-apply.sql'], /select \(r\)\.id,\(r\)\.user_id,\(r\)\.provider_id,\(r\)\.identity_data,\(r\)\.provider,\(r\)\.last_sign_in_at,\(r\)\.created_at,\(r\)\.updated_at from records/);
+assert.doesNotMatch(source.sql['auth-apply.sql'], /insert into auth\.identities select \(jsonb_populate_record\(null::auth\.identities,value\)\)\.\*/);
+assert.doesNotMatch(source.sql['auth-apply.sql'], /insert into auth\.identities\([^)]*email[^)]*\)/);
 assert.match(source.sql['qa-apply.sql'], /select gen_random_uuid\(\),id,id::text,jsonb_build_object\('sub',id::text,'email',email\)/);
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-producer-'));
