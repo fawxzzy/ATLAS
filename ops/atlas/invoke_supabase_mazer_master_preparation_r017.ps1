@@ -169,9 +169,21 @@ function Assert-Lease([object]$State, [string]$Path) {
   if ($now -ge [DateTimeOffset]::Parse([string]$State.rollback_deadline_at)) { throw 'FENCE_ROLLBACK_DEADLINE' }
 }
 
+function Get-SafePsqlStepFailureCategory([string]$Stderr) {
+  if ([string]::IsNullOrEmpty($Stderr) -or [Text.Encoding]::UTF8.GetByteCount($Stderr) -gt 4096) { return $null }
+  $allowed = 'R017_(?:BOUND_AUTH_USER_CARDINALITY_DRIFT|BOUND_AUTH_USER_EMAIL_DRIFT|BOUND_AUTH_IDENTITY_CARDINALITY_DRIFT|BOUND_AUTH_EMAIL_IDENTITY_MULTIPLE|BOUND_AUTH_IDENTITY_OWNER_DRIFT|BOUND_AUTH_IDENTITY_PROVIDER_DRIFT|BOUND_AUTH_IDENTITY_PROVIDER_ID_DRIFT|BOUND_AUTH_IDENTITY_SUBJECT_DRIFT|BOUND_AUTH_IDENTITY_EMAIL_DRIFT|IMPORT_USER_COLLISION|IMPORT_IDENTITY_COLLISION|AUTH_PREIMAGE_CARDINALITY_DRIFT|IMPORTED_AUTH_USERS_DIGEST_DRIFT|IMPORTED_AUTH_IDENTITIES_DIGEST_DRIFT|IDENTITY_MAP_DIGEST_DRIFT|BOUND_AUTH_USER_MUTATION_DRIFT|BOUND_AUTH_IDENTITY_MUTATION_DRIFT)'
+  $match = [regex]::Match($Stderr, ('\Apsql:[^\r\n]{1,1024}:[0-9]+:\s+ERROR:\s+(' + $allowed + ')\r?\nCONTEXT:\s+PL/pgSQL function inline_code_block line [0-9]+ at RAISE\r?\n?\z'))
+  if (-not $match.Success) { return $null }
+  return $match.Groups[1].Value
+}
+
 function Invoke-Psql([string]$DatabaseUrl, [string]$SqlPath) {
   $child = Invoke-Child (Get-Command psql -ErrorAction Stop).Source @('-X','--no-psqlrc','--set','ON_ERROR_STOP=1','--file',$SqlPath) @{ PGDATABASE = $DatabaseUrl; PGCONNECT_TIMEOUT = '15'; PGAPPNAME = 'atlas-mazer-master-preparation-r017' } 120000
-  if ($child.ExitCode -ne 0) { throw 'PSQL_STEP_FAILED' }
+  if ($child.ExitCode -ne 0) {
+    $safeCategory = Get-SafePsqlStepFailureCategory ([string]$child.Stderr)
+    if ($null -ne $safeCategory) { throw $safeCategory }
+    throw 'PSQL_STEP_FAILED'
+  }
 }
 
 function Get-MasterDatabaseUrl {
@@ -350,6 +362,11 @@ function Assert-SourceContract {
     }
   }
   Assert-FenceChildReceiptContract
+  $safeAuthFailure = "psql:C:\safe\auth-apply.sql:9: ERROR:  R017_BOUND_AUTH_USER_EMAIL_DRIFT`nCONTEXT:  PL/pgSQL function inline_code_block line 1 at RAISE`n"
+  if ((Get-SafePsqlStepFailureCategory $safeAuthFailure) -cne 'R017_BOUND_AUTH_USER_EMAIL_DRIFT') { throw 'PSQL_SAFE_CATEGORY_DRIFT' }
+  foreach ($unsafeAuthFailure in @('R017_BOUND_AUTH_USER_EMAIL_DRIFT', "${safeAuthFailure}DETAIL: password=synthetic`n", "psql:C:\safe\auth-apply.sql:9: ERROR: R017_UNKNOWN_DRIFT`nCONTEXT: PL/pgSQL function inline_code_block line 1 at RAISE`n", ('A' * 4097))) {
+    if ($null -ne (Get-SafePsqlStepFailureCategory $unsafeAuthFailure)) { throw 'PSQL_SAFE_CATEGORY_FAIL_CLOSED_DRIFT' }
+  }
 }
 
 function Start-RollbackWatchdog([string]$SourcePath, [string]$SourceSha, [string]$HostState) {
