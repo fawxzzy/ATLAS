@@ -11,12 +11,12 @@ const sealer = path.join(root, 'ops/atlas/seal_supabase_mazer_master_preparation
 const host = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_r017.ps1');
 const packetRoot = path.join(root, 'secrets/packet/mazer-master-preparation-r017');
 const runtime = path.join(root, 'runtime/atlas');
-const source = path.join(packetRoot, 'private-source-auth-action-preimage-v3-20260826.json');
-const manifest = path.join(packetRoot, 'materialized-auth-action-preimage-v3-20260826/manifest.json');
-const predecessor = path.join(runtime, 'mazer-master-r017-execution-a7db1fd5-a165-43e6-a9a8-c267233005b2.json');
-const sourceSha = '9326145071e2e067286e6460d06187d89d3bdc6b82c202b2cbea2f313f0b35ae';
-const manifestSha = 'b60539e13e7b838a0f36adc8333cfdccfc0ac55cccc57330240cacede2335879';
-const predecessorSha = '5e01271273a910d861c1fb0712ac7d48a8b565a971f6a270cf6fe8409138a0d9';
+const source = path.join(packetRoot, 'private-source-pr201-final-71884498-20260826.json');
+const manifest = path.join(packetRoot, 'materialized-pr201-final-20260826/manifest.json');
+const predecessor = path.join(runtime, 'mazer-master-r017-terminal-rollback-20260826-212608.json');
+const sourceSha = '71884498b45cf0ab04cb71d6533bf9ddef6426a06f92cf77e67242eaf9665e60';
+const manifestSha = 'dccfc0bb4e9cf0bc6904a7002ec8bc7acc8d2f392d76a62eb69b99872ad9d1de';
+const predecessorSha = '5a20532f9b5e772c52dfe3869f52ed227c56c8e808d945d35a3ae7577483aae3';
 const hostSha = 'd3ec9c210e031ebd887e5f643939ebd584efe218e0db2b346586392bc280453d';
 const sha = value => crypto.createHash('sha256').update(value).digest('hex');
 
@@ -85,7 +85,7 @@ if ([source, manifest, predecessor, host].every(file => fs.existsSync(file))) {
     const consumption=write(consumptionPath,{approval_code:'R017-TEST-TEST-TEST-TEST',authorization_sha256:auth.sha,consumed_at:o(consumed),consumption_digest:`sha256:${sha(Buffer.from(`consume:${name}`))}`,execution_correlation_id:correlation,intent_digest:intent,max_effect_count:20,packet,reusable:false,schema:'atlas.scoped-approval-consumption.v1',status:'CONSUMED'});
     const successor=path.join(runtime,`mazer-master-r017-execution-${correlation}.json`);
     if(successorExists){fs.writeFileSync(successor,'{}\n',{flag:'wx'});paths.push(successor);}
-    return { correlation, decision, alias, auth, consumption, successor, envelope:{schema:'atlas.supabase.mazer-master-preparation-launcher-invocation.r017.v2',packet,decision_request_path:decisionPath,decision_request_sha256:decision.sha,approval_alias_path:aliasPath,approval_alias_sha256:alias.sha,approval_authorization_path:authPath,approval_authorization_sha256:auth.sha,approval_consumption_path:consumptionPath,approval_consumption_sha256:consumption.sha,approval_expires_at:o(expires),predecessor_correlation_id:'a7db1fd5-a165-43e6-a9a8-c267233005b2',predecessor_state_path:predecessor,predecessor_state_sha256:predecessorSha,execution_correlation_id:correlation,private_source_path:source,private_source_sha256:sourceSha,private_manifest_path:manifest,private_manifest_sha256:manifestSha,successor_state_path:successor,host_path:host,host_sha256:hostSha,launcher_path:launcher,launcher_sha256:launcherSha,not_before:o(notBefore),issued_at:o(envelopeIssued),expires_at:o(expires)}};
+    return { correlation, decision, alias, auth, consumption, successor, envelope:{schema:'atlas.supabase.mazer-master-preparation-launcher-invocation.r017.v2',packet,decision_request_path:decisionPath,decision_request_sha256:decision.sha,approval_alias_path:aliasPath,approval_alias_sha256:alias.sha,approval_authorization_path:authPath,approval_authorization_sha256:auth.sha,approval_consumption_path:consumptionPath,approval_consumption_sha256:consumption.sha,approval_expires_at:o(expires),predecessor_correlation_id:'fde0a66f-a157-4258-a92f-e6af933ecc1c',predecessor_state_path:predecessor,predecessor_state_sha256:predecessorSha,execution_correlation_id:correlation,private_source_path:source,private_source_sha256:sourceSha,private_manifest_path:manifest,private_manifest_sha256:manifestSha,successor_state_path:successor,host_path:host,host_sha256:hostSha,launcher_path:launcher,launcher_sha256:launcherSha,not_before:o(notBefore),issued_at:o(envelopeIssued),expires_at:o(expires)}};
   };
   const validate = (shell, name, value, expectedStatus, expectedCategory) => {
     const file = path.join(packetRoot, `launcher-invocation-${value.execution_correlation_id}.json`);
@@ -107,7 +107,12 @@ if ([source, manifest, predecessor, host].every(file => fs.existsSync(file))) {
       for(const [kind,key] of [['alias','approval_alias_path'],['authorization','approval_authorization_path'],['consumption','approval_consumption_path']]){
         const wrong=lineage(`wrong-${kind}-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)}), original=wrong.envelope[key], copy=path.join(runtime,`.launcher-test-wrong-${kind}-${crypto.randomUUID()}.json`);fs.copyFileSync(original,copy,fs.constants.COPYFILE_EXCL);paths.push(copy);validate(shell,`wrong-${kind}`,{...wrong.envelope,[key]:copy},2,'APPROVAL_PATH_BINDING');
       }
-      productionAdversaries += 8;
+      const staleSourceHash=lineage(`stale-source-hash-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)});validate(shell,'stale-source-hash',{...staleSourceHash.envelope,private_source_sha256:'9326145071e2e067286e6460d06187d89d3bdc6b82c202b2cbea2f313f0b35ae'},2,'SEALED_HASH_BINDING');
+      const staleSourcePath=lineage(`stale-source-path-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)}), staleSourceCopy=path.join(packetRoot,`.launcher-test-stale-source-${crypto.randomUUID()}.json`);fs.linkSync(source,staleSourceCopy);paths.push(staleSourceCopy);validate(shell,'stale-source-path',{...staleSourcePath.envelope,private_source_path:staleSourceCopy},2,'SEALED_PATH_BINDING');
+      const staleCorrelation=lineage(`stale-predecessor-correlation-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)});validate(shell,'stale-predecessor-correlation',{...staleCorrelation.envelope,predecessor_correlation_id:'a7db1fd5-a165-43e6-a9a8-c267233005b2'},2,'PREDECESSOR_BINDING');
+      const stalePredecessorPath=lineage(`stale-predecessor-path-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)}), stalePredecessorCopy=path.join(runtime,`.launcher-test-stale-predecessor-${crypto.randomUUID()}.json`);fs.linkSync(predecessor,stalePredecessorCopy);paths.push(stalePredecessorCopy);validate(shell,'stale-predecessor-path',{...stalePredecessorPath.envelope,predecessor_state_path:stalePredecessorCopy},2,'PREDECESSOR_PATH_BINDING');
+      const stalePredecessorSha=lineage(`stale-predecessor-sha-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)});validate(shell,'stale-predecessor-sha',{...stalePredecessorSha.envelope,predecessor_state_sha256:'5e01271273a910d861c1fb0712ac7d48a8b565a971f6a270cf6fe8409138a0d9'},2,'PREDECESSOR_BINDING');
+      productionAdversaries += 13;
     }
     const now=new Date(), sealed=lineage('sealer-valid',{aliasIssued:new Date(now-2*3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)}), output=path.join(packetRoot,`launcher-invocation-${sealed.correlation}.json`);
     const sealRun=run('node',[sealer,sealed.decision.file,sealed.alias.file,sealed.auth.file,sealed.consumption.file,output]);assert.equal(sealRun.status,0,`${sealRun.stderr}\n${sealRun.stdout}`);paths.push(output);assert.equal(sealRun.receipt.result,'PASS_R017_INVOCATION_SEALED');assert.equal(sealRun.receipt.execution_correlation_id,sealed.correlation);assert.equal(sealRun.receipt.external_calls,0);

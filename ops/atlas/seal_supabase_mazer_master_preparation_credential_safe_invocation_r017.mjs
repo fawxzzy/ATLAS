@@ -7,15 +7,15 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const runtimeRoot = path.join(root, 'runtime/atlas');
 const packetRoot = path.join(root, 'secrets/packet/mazer-master-preparation-r017');
 const packet = 'FP-MAZER-MASTER-R017-SUPABASE-PREPARATION-20260825-001';
-const sourcePath = path.join(packetRoot, 'private-source-auth-action-preimage-v3-20260826.json');
-const manifestPath = path.join(packetRoot, 'materialized-auth-action-preimage-v3-20260826/manifest.json');
+const sourcePath = path.join(packetRoot, 'private-source-pr201-final-71884498-20260826.json');
+const manifestPath = path.join(packetRoot, 'materialized-pr201-final-20260826/manifest.json');
 const hostPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_r017.ps1');
 const launcherPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_credential_safe_r017.ps1');
-const predecessorPath = path.join(runtimeRoot, 'mazer-master-r017-execution-a7db1fd5-a165-43e6-a9a8-c267233005b2.json');
-const sourceSha = '9326145071e2e067286e6460d06187d89d3bdc6b82c202b2cbea2f313f0b35ae';
-const manifestSha = 'b60539e13e7b838a0f36adc8333cfdccfc0ac55cccc57330240cacede2335879';
+const predecessorPath = path.join(runtimeRoot, 'mazer-master-r017-terminal-rollback-20260826-212608.json');
+const sourceSha = '71884498b45cf0ab04cb71d6533bf9ddef6426a06f92cf77e67242eaf9665e60';
+const manifestSha = 'dccfc0bb4e9cf0bc6904a7002ec8bc7acc8d2f392d76a62eb69b99872ad9d1de';
 const hostSha = 'd3ec9c210e031ebd887e5f643939ebd584efe218e0db2b346586392bc280453d';
-const predecessorSha = '5e01271273a910d861c1fb0712ac7d48a8b565a971f6a270cf6fe8409138a0d9';
+const predecessorSha = '5a20532f9b5e772c52dfe3869f52ed227c56c8e808d945d35a3ae7577483aae3';
 const originatingTaskId = '019fa791-8d17-7c83-9c61-3e3c687e9dd7';
 const effectClass = 'supabase_protected_master_preparation';
 const effectTarget = 'supabase:geknvnrmktchljnyddwp/public+bxtcuhkotumitoqtrcej/mazer';
@@ -105,7 +105,7 @@ export function sealInvocation({ decisionRequestPath, aliasPath, authorizationPa
     approval_authorization_path: authorization.path, approval_authorization_sha256: authorization.sha256,
     approval_consumption_path: consumption.path, approval_consumption_sha256: consumption.sha256,
     approval_expires_at: a.expires_at,
-    predecessor_correlation_id: 'a7db1fd5-a165-43e6-a9a8-c267233005b2', predecessor_state_path: predecessorPath, predecessor_state_sha256: predecessorSha,
+    predecessor_correlation_id: 'fde0a66f-a157-4258-a92f-e6af933ecc1c', predecessor_state_path: predecessorPath, predecessor_state_sha256: predecessorSha,
     execution_correlation_id: correlation,
     private_source_path: sourcePath, private_source_sha256: sourceSha,
     private_manifest_path: manifestPath, private_manifest_sha256: manifestSha,
