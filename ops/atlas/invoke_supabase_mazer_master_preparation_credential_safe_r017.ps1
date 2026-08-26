@@ -19,14 +19,14 @@ $Secrets = Join-Path $Root 'secrets'
 $PacketRoot = Join-Path $Secrets 'packet\mazer-master-preparation-r017'
 $HostScript = Join-Path $PSScriptRoot 'invoke_supabase_mazer_master_preparation_r017.ps1'
 $Packet = 'FP-MAZER-MASTER-R017-SUPABASE-PREPARATION-20260825-001'
-$SourceRelative = 'private-source-auth-action-preimage-v3-20260826.json'
-$SourceSha = '9326145071e2e067286e6460d06187d89d3bdc6b82c202b2cbea2f313f0b35ae'
-$ManifestRelative = 'materialized-auth-action-preimage-v3-20260826\manifest.json'
-$ManifestSha = 'b60539e13e7b838a0f36adc8333cfdccfc0ac55cccc57330240cacede2335879'
+$SourceRelative = 'private-source-pr201-final-71884498-20260826.json'
+$SourceSha = '71884498b45cf0ab04cb71d6533bf9ddef6426a06f92cf77e67242eaf9665e60'
+$ManifestRelative = 'materialized-pr201-final-20260826\manifest.json'
+$ManifestSha = 'dccfc0bb4e9cf0bc6904a7002ec8bc7acc8d2f392d76a62eb69b99872ad9d1de'
 $HostSha = 'd3ec9c210e031ebd887e5f643939ebd584efe218e0db2b346586392bc280453d'
-$PredecessorCorrelation = 'a7db1fd5-a165-43e6-a9a8-c267233005b2'
-$PredecessorStateName = 'mazer-master-r017-execution-a7db1fd5-a165-43e6-a9a8-c267233005b2.json'
-$PredecessorStateSha = '5e01271273a910d861c1fb0712ac7d48a8b565a971f6a270cf6fe8409138a0d9'
+$PredecessorCorrelation = 'fde0a66f-a157-4258-a92f-e6af933ecc1c'
+$PredecessorStateName = 'mazer-master-r017-terminal-rollback-20260826-212608.json'
+$PredecessorStateSha = '5a20532f9b5e772c52dfe3869f52ed227c56c8e808d945d35a3ae7577483aae3'
 $OriginatingTaskId = '019fa791-8d17-7c83-9c61-3e3c687e9dd7'
 $EffectClass = 'supabase_protected_master_preparation'
 $EffectTarget = 'supabase:geknvnrmktchljnyddwp/public+bxtcuhkotumitoqtrcej/mazer'
@@ -163,7 +163,8 @@ function Read-Invocation([string]$Path, [string]$ExpectedSha) {
   Assert-NoReparse $source $PacketRoot; Assert-NoReparse $manifest $PacketRoot; Assert-NoReparse $predecessor $Runtime; Assert-NoReparse $hostPath $PSScriptRoot; Assert-NoReparse $launcherPath $PSScriptRoot
   if ((Get-Sha256 $source) -cne $SourceSha -or (Get-Sha256 $manifest) -cne $ManifestSha -or (Get-Sha256 $predecessor) -cne $PredecessorStateSha -or (Get-Sha256 $hostPath) -cne $HostSha -or (Get-Sha256 $launcherPath) -cne [string]$value.launcher_sha256) { throw 'SEALED_FILE_DIGEST_DRIFT' }
   try { $prior = Get-Content -LiteralPath $predecessor -Raw | ConvertFrom-Json } catch { throw 'PREDECESSOR_STATE_JSON' }
-  if ([string]$prior.phase -cne 'AMBIGUOUS_HOLD' -or [string]$prior.previous_phase -cne 'PREFLIGHT' -or $null -ne $prior.watchdog_pid -or $null -ne $prior.fence_started_at -or $null -ne $prior.rollback_deadline_at -or (Test-Path -LiteralPath ($predecessor + '.fence.json'))) { throw 'PREDECESSOR_EFFECT_STATE' }
+  if ([string]$prior.schema -cne 'atlas.supabase.mazer-master-preparation-terminal-receipt.r017.v1' -or [string]$prior.packet -cne $Packet -or [string]$prior.result -cne 'HOLD_MAZER_MASTER_PREPARATION_R017' -or [string]$prior.rollback_disposition -cne 'EXACT_ROLLBACK_COMPLETED' -or [string]$prior.execution_correlation_id -cne $PredecessorCorrelation -or [string]$prior.host_phase -cne 'ROLLED_BACK' -or [string]$prior.fence_phase -cne 'ROLLED_BACK' -or [bool]$prior.watchdog_running -or [int]$prior.provider_writes -ne 0 -or [int]$prior.environment_changes -ne 0 -or [int]$prior.deployments -ne 0 -or [int]$prior.production_changes -ne 0 -or [bool]$prior.raw_records_emitted -or [bool]$prior.pii_emitted -or [bool]$prior.secrets_emitted -or [string]$prior.replay_disposition -cne 'CONSUMED_NON_REPLAYABLE') { throw 'PREDECESSOR_EFFECT_STATE' }
+  if ([int]$prior.postrestore_read_only.legacy.auth_users -ne 19 -or [int]$prior.postrestore_read_only.legacy.auth_identities -ne 19 -or [int]$prior.postrestore_read_only.legacy.profiles -ne 13 -or [int]$prior.postrestore_read_only.legacy.player -ne 16 -or [int]$prior.postrestore_read_only.legacy.ai -ne 16 -or [int]$prior.postrestore_read_only.legacy.receipts -ne 1878 -or [int]$prior.postrestore_read_only.master.auth_users -ne 114 -or [int]$prior.postrestore_read_only.master.auth_identities -ne 114 -or [int]$prior.postrestore_read_only.master.profiles -ne 5 -or [int]$prior.postrestore_read_only.master.player -ne 7 -or [int]$prior.postrestore_read_only.master.ai -ne 7 -or [int]$prior.postrestore_read_only.master.receipts -ne 1290) { throw 'PREDECESSOR_POSTRESTORE_DRIFT' }
   $decision = Read-JsonSnapshot $decisionPath $Runtime ([string]$value.decision_request_sha256)
   $alias = Read-JsonSnapshot $aliasPath $Runtime ([string]$value.approval_alias_sha256)
   $authorization = Read-JsonSnapshot $authorizationPath $Runtime ([string]$value.approval_authorization_sha256)
