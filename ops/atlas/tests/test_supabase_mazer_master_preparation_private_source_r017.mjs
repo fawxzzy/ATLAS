@@ -13,10 +13,19 @@ import {
   buildIdentityPlan,
   producePrivateSource,
   renderOperationalSql,
+  verifyEvidence,
   writePrivateSource
 } from '../produce_supabase_mazer_master_preparation_private_source_r017.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+function findEvidenceRoot(start) {
+  let cursor = start;
+  while (true) {
+    if (fs.existsSync(path.join(cursor, PRODUCER_CONTRACT.evidence.topology.relativePath))) return cursor;
+    const parent = path.dirname(cursor); if (parent === cursor) throw new Error('ATLAS_EVIDENCE_ROOT_NOT_FOUND'); cursor = parent;
+  }
+}
+assert.doesNotThrow(() => verifyEvidence(findEvidenceRoot(root)));
 function findMazerRepository(start) {
   let cursor = start;
   while (true) {
@@ -74,13 +83,13 @@ function rawFixture() {
   const resetLegacy = sharedLegacy[13]; const resetMaster = sharedMaster[13];
   const overlappingLegacyReceipts = Array.from({ length: 1281 }, (_, index) => receipt(uid(30000 + index), index < 1239 ? resetLegacy : sharedLegacy[0], uid(50000 + index), index));
   const overlappingMasterReceipts = overlappingLegacyReceipts.map((row, index) => ({ ...structuredClone(row), user_id: index < 1239 ? resetMaster : sharedMaster[0] }));
-  const legacyOnlyReceipts = Array.from({ length: 593 }, (_, index) => receipt(uid(40000 + index), index < 475 ? resetLegacy : sharedLegacy[1], uid(60000 + index), 1281 + index));
+  const legacyOnlyReceipts = Array.from({ length: 594 }, (_, index) => receipt(uid(40000 + index), index < 475 ? resetLegacy : sharedLegacy[1], uid(60000 + index), 1281 + index));
   const masterOnlyReceipts = Array.from({ length: 9 }, (_, index) => receipt(uid(45000 + index), sharedMaster[2], uid(65000 + index), 2000 + index));
   const targetUsers = [0, 1, 2, 3, 4, 5, 13];
   return {
     legacy: {
       observed_at: iso(0), auth_users: legacyEmails.map(([email, id]) => user(id, email)), auth_identities: legacyEmails.map(([email, id], index) => identity(id, email, index)),
-      profiles: sharedLegacy.slice(0, 12).map(profile), player: sharedLegacy.map((id, index) => player(id, index === 13)), ai: sharedLegacy.map((id, index) => ai(id, index === 13, false)), receipts: [...overlappingLegacyReceipts, ...legacyOnlyReceipts], catalog: catalog()
+      profiles: sharedLegacy.slice(0, 13).map(profile), player: sharedLegacy.map((id, index) => player(id, index === 13)), ai: sharedLegacy.map((id, index) => ai(id, index === 13, false)), receipts: [...overlappingLegacyReceipts, ...legacyOnlyReceipts], catalog: catalog()
     },
     master: {
       observed_at: iso(-1000), auth_users: masterEmails.map(([email, id]) => user(id, email)), auth_identities: masterEmails.map(([email, id], index) => identity(id, email, 100 + index)),
@@ -127,7 +136,7 @@ assert.equal(preM2Source.fence_input.fence.master.acl_preimage.rpc_acl.length, F
 assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.table_acl, preM2MasterAcl.table_acl);
 assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.catalog.tables, preM2MasterAcl.catalog.tables);
 assert.equal(validated.allEdges.length, 19);
-assert.deepEqual(validated.classified.desired_counts, { profiles: 12, player: 16, ai: 16, receipts: 1883 });
+assert.deepEqual(validated.classified.desired_counts, { profiles: 13, player: 16, ai: 16, receipts: 1884 });
 assert.equal(source.reset_era_ai.canonical_projection, '7/6/32/D');
 assert.equal(source.reset_era_ai.legacy_receipts, 1714);
 assert.equal(source.reset_era_ai.master_receipts, 1239);
