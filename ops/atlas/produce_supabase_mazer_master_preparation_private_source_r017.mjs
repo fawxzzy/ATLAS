@@ -23,12 +23,12 @@ export const PRODUCER_CONTRACT = Object.freeze({
   masterProject: R017_CONTRACT.master,
   evidence: Object.freeze({
     currentPreimage: Object.freeze({
-      relativePath: 'runtime/atlas/continuity/mazer-master-r017-action-time-delta-evidence-20260826.json',
+      relativePath: 'runtime/atlas/continuity/mazer-master-r017-bounded-auth-progression-delta-evidence-20260826.json',
       sha256: R017_CONTRACT.currentPreimageSha256,
-      result: 'PASS_EXACT_ACTION_TIME_AI_AND_RECEIPT_DELTA_READY_FOR_R017_REPLAY'
+      result: 'PASS_EXACT_BOUNDED_AUTH_AND_PROGRESSION_DELTA_READY_FOR_R017_REPLAY'
     }),
     topology: Object.freeze({
-      relativePath: 'runtime/atlas/continuity/mazer-master-r017-postrollback-auth-identity-topology-evidence-20260825.json',
+      relativePath: 'runtime/atlas/continuity/mazer-master-r017-postrollback-auth-identity-topology-evidence-20260826.json',
       sha256: R017_CONTRACT.topologyEvidenceSha256,
       result: 'PASS_EXACT_POSTROLLBACK_AUTH_IDENTITY_TOPOLOGY_READY_FOR_R017_REPLAY'
     }),
@@ -114,7 +114,7 @@ export function verifyEvidence(atlasRoot) {
   const restore = readBoundEvidence(atlasRoot, PRODUCER_CONTRACT.evidence.restoreProof);
   const expected = current.live_high_water;
   const actual = {
-    legacy: { auth_users: 19, auth_identities: 19, profiles: 13, player: 16, ai: 16, receipts: 1878 },
+    legacy: { auth_users: 20, auth_identities: 20, profiles: 13, player: 17, ai: 17, receipts: 1878 },
     master: { auth_users: 114, auth_identities: 114, profiles: 5, player: 7, ai: 7, receipts: 1290 }
   };
   for (const side of ['legacy', 'master']) for (const [name, count] of Object.entries(actual[side])) {
@@ -122,9 +122,9 @@ export function verifyEvidence(atlasRoot) {
   }
   if (restore.legacy?.auth_users !== 18 || restore.master?.auth_users !== 114 || restore.cleanup?.legacy_plaintext_present !== false || restore.cleanup?.master_plaintext_present !== false) throw new Error('RESTORE_PROOF_DRIFT');
   const aggregate = topology.aggregate_topology;
-  if (aggregate?.legacy_users !== 19 || aggregate?.master_users !== 114 || aggregate?.shared_normalized_emails !== 16
-    || aggregate?.retained_same_uuid !== 2 || aggregate?.bind_existing_different_uuid !== 14 || aggregate?.imports !== 3
-    || aggregate?.final_edges !== 19 || aggregate?.expected_target_users !== 117
+  if (aggregate?.legacy_users !== 20 || aggregate?.master_users !== 114 || aggregate?.shared_normalized_emails !== 16
+    || aggregate?.retained_same_uuid !== 2 || aggregate?.bind_existing_different_uuid !== 14 || aggregate?.imports !== 4
+    || aggregate?.final_edges !== 20 || aggregate?.expected_target_users !== 118
     || aggregate?.provider_id_conflicts !== 0 || aggregate?.identity_owner_conflicts !== 0
     || aggregate?.identity_subject_conflicts !== 0 || aggregate?.identity_email_conflicts !== 0) throw new Error('TOPOLOGY_EVIDENCE_DRIFT');
   return { current, topology, restore };
@@ -270,7 +270,7 @@ function byEmail(raw) {
 
 export function buildIdentityPlan(legacyRaw, masterRaw) {
   const legacy = byEmail(legacyRaw); const master = byEmail(masterRaw);
-  if (legacyRaw.auth_users.length !== 19 || legacyRaw.auth_identities.length !== 19 || masterRaw.auth_users.length !== 114 || masterRaw.auth_identities.length !== 114) throw new Error('LIVE_AUTH_DENOMINATOR_DRIFT');
+  if (legacyRaw.auth_users.length !== 20 || legacyRaw.auth_identities.length !== 20 || masterRaw.auth_users.length !== 114 || masterRaw.auth_identities.length !== 114) throw new Error('LIVE_AUTH_DENOMINATOR_DRIFT');
   const masterIds = new Set(masterRaw.auth_users.map((user) => uuid(user.id, 'MASTER_AUTH_USER_UUID')));
   const masterIdentityIds = new Set(masterRaw.auth_identities.map((identity) => String(identity.id).toLowerCase()));
   const masterProviderIds = new Set(masterRaw.auth_identities.filter((identity) => identity.provider === 'email').map((identity) => uuid(identity.provider_id, 'MASTER_EMAIL_IDENTITY_PROVIDER_ID_MALFORMED')));
@@ -297,7 +297,7 @@ export function buildIdentityPlan(legacyRaw, masterRaw) {
     imports.push({ user, identities: [identity] });
     new_edges.push({ legacy_user_id: left.id, master_user_id: left.id, disposition: 'CREATE_AND_BIND', normalized_email: email, evidence_digest: digest({ normalized_email: email, legacy_user_id: left.id, master_user_id: left.id }) });
   }
-  if (retained_edges.length !== 2 || new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length !== 14 || imports.length !== 3) throw new Error('IDENTITY_DENOMINATOR_DRIFT');
+  if (retained_edges.length !== 2 || new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length !== 14 || imports.length !== 4) throw new Error('IDENTITY_DENOMINATOR_DRIFT');
   return { imports, new_edges, retained_edges };
 }
 
@@ -519,7 +519,7 @@ do $r017_auth_postcheck$ begin
  if (select coalesce(jsonb_agg(jsonb_build_object('legacy_user_id',legacy_user_id,'master_user_id',master_user_id,'evidence_digest',evidence_digest) order by legacy_user_id),'[]'::jsonb) from mazer.mazer_identity_map) <> ${jsonLiteral(expectedMap)} then raise exception 'R017_IDENTITY_MAP_DIGEST_DRIFT'; end if;
  if exists(select 1 from atlas_mazer_r017.auth_preimage p left join auth.users u on p.kind='user' and u.id=p.key::uuid where p.kind='user' and to_jsonb(u) is distinct from p.row) then raise exception 'R017_BOUND_AUTH_USER_MUTATION_DRIFT'; end if;
  if exists(select 1 from atlas_mazer_r017.auth_preimage p left join auth.identities i on p.kind='identity' and i.id=p.key::uuid where p.kind='identity' and to_jsonb(i) is distinct from p.row) then raise exception 'R017_BOUND_AUTH_IDENTITY_MUTATION_DRIFT'; end if;
-end $r017_auth_postcheck$;`, ['auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','14_existing_binds']);
+end $r017_auth_postcheck$;`, ['auth.users','auth.identities','create_and_bind','bind_existing','4_auth_imports','14_existing_binds']);
   sql['reset-era-apply.sql'] = sqlProgram(`
 create extension if not exists pgcrypto with schema extensions;
 create table if not exists atlas_mazer_r017.reset_quarantine(id text primary key,ciphertext bytea not null);
@@ -554,7 +554,7 @@ do $r017$ begin
  if (select count(*) from pg_indexes where schemaname='mazer' and indexname=any(array[${MIGRATION_INDEXES.map(sqlLiteral).join(',')}])) <> 3 then raise exception 'R017_INDEX_CATALOG_DRIFT'; end if;
  if not exists(select 1 from pg_policies where schemaname='mazer' and tablename='mazer_profiles' and policyname='Mazer Auth hook can inspect usernames' and cmd='SELECT' and roles='{supabase_auth_admin}') then raise exception 'R017_POLICY_CATALOG_DRIFT'; end if;
  if not exists(select 1 from information_schema.triggers where event_object_schema='auth' and event_object_table='users' and trigger_name='mazer_claim_signup_username_after_insert' and action_timing='AFTER' and event_manipulation='INSERT') or not exists(select 1 from information_schema.triggers where event_object_schema='mazer' and event_object_table='mazer_profiles' and trigger_name='mazer_enforce_username_origin_before_update' and action_timing='BEFORE' and event_manipulation='UPDATE') then raise exception 'R017_TRIGGER_CATALOG_DRIFT'; end if;
-end $r017$;`, ['data_api','rls','acl','117','19','13','16','1887','receipt_conservation']);
+end $r017$;`, ['data_api','rls','acl','118','20','13','17','1887','receipt_conservation']);
   sql['qa-apply.sql'] = sqlProgram(`
 with q as (select * from jsonb_to_recordset(${jsonLiteral(qaRows)}) as x(id uuid,email text,username text,mode text))
 insert into auth.users(id,instance_id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)

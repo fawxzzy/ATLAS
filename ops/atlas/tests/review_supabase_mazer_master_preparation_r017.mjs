@@ -18,7 +18,7 @@ const requireText = (where, token, category) => { if (!where.includes(token)) fi
 
 for (const token of [
   '2b8495a95fca9a860571343174bfb93bcad8c5e9','1bbf69cf8f38aa1e2b053d0b70d82a315317b58a','481ab55323afff53f5e841012684b7e26f689349',
-  'bfb9e238238afe78282692ae7670e74cdb2300aa5a0a60e26cd0ae7864b390d2','9e39b18246699405fc1651f64995a8526d5750e5bebcc85e880f4f295b12a308','54dee535bac3e02b7058fe644cd44af115cc3746ff1e40390521992dccd14971',
+  '4eac84f4760bafd258535e04a867b8b400b9b41846785d7881d79c0736fbd5f0','93e9bb87bac2d658d4f5e9f058f5b52f5a5bab32f109b4a67e617c3f93008a0a','54dee535bac3e02b7058fe644cd44af115cc3746ff1e40390521992dccd14971',
   '63f43d8c2f532b32e3453879e4ca49ffc2f5b382264a290ad9a3ea1225811ced','gitBlob','cat-file','SQL_DIGEST_DRIFT',
   'AMBIGUOUS_IDENTITY_MAP','UNSUPPORTED_PASSWORD_VERIFIER','IMPORT_WOULD_FIRE_SIGNUP_TRIGGER','PLAYER_RESET_DOMINANCE_DRIFT',
   'PGP_SYM_ENCRYPT_AES256','EXACT_WHOLE_ROW','MASTER_DOMINATES_NO_OVERRIDE','receipt_conservation','data_api','rls','acl'
@@ -29,8 +29,8 @@ for (const token of [
   'LEGACY_RESTORING','LEGACY_RESTORED','PREPARATION_COMPLETE','ROLLBACK_DISABLING_HOOK','rollback_initiated_at',
   'RollbackDeadlineSeconds = 600','HardFenceLeaseSeconds = 900','Start-RollbackWatchdog','WindowStyle Hidden'
 ]) requireText(source.host, token, `HOST_LIFECYCLE_MISSING:${token}`);
-for (const token of ['AUTH_TOPOLOGY_MANIFEST_DRIFT','auth_counts.binds -ne 14','auth_counts.final_edges -ne 19','auth_counts.retained_edges -ne 2','final_identity_edges = 19','profiles = 13','player = 16','ai = 16','receipts = 1887']) requireText(source.host, token, `HOST_TOPOLOGY_VERIFICATION_MISSING:${token}`);
-for (const stale of ['auth_counts.binds -ne 13','auth_counts.final_edges -ne 18','final_identity_edges = 18','profiles = 11','player = 15','ai = 15','receipts = 1882']) if (source.host.includes(stale)) findings.push(`HOST_STALE_REBOUND_DENOMINATOR:${stale}`);
+for (const token of ['AUTH_TOPOLOGY_MANIFEST_DRIFT','auth_counts.imports -ne 4','auth_counts.binds -ne 14','auth_counts.final_edges -ne 20','auth_counts.expected_target_users -ne 118','auth_counts.retained_edges -ne 2','final_identity_edges = 20','profiles = 13','player = 17','ai = 17','receipts = 1887']) requireText(source.host, token, `HOST_TOPOLOGY_VERIFICATION_MISSING:${token}`);
+for (const stale of ['auth_counts.binds -ne 13','auth_counts.final_edges -ne 18','auth_counts.final_edges -ne 19','final_identity_edges = 18','final_identity_edges = 19','profiles = 11','player = 15','player = 16','ai = 15','ai = 16','receipts = 1882']) if (source.host.includes(stale)) findings.push(`HOST_STALE_REBOUND_DENOMINATOR:${stale}`);
 for (const token of ['all live phase interruption','ambiguous drift','disable hook before SQL/fence','receipt conservation','Auth mapping','RLS/ACL/Data API','executor input hash binding','fence child failure receipt','fence rollback failure receipt','fence prestate terminal receipt']) requireText(source.focused, token, `ADVERSARY_LABEL_MISSING:${token}`);
 for (const token of ['Write-FenceChildReceipt','stdout_sha256','stderr_sha256','terminal_category','FENCE_CHILD_FAILURE_RECEIPT_CONTRACT','FENCE_CHILD_ROLLBACK_RECEIPT_CONTRACT']) requireText(source.host, token, `FENCE_CHILD_RECEIPT_MISSING:${token}`);
 for (const token of ["PSObject.Properties['ArgumentList']",'ArgumentList.Add','ConvertTo-ProcessArgument']) requireText(source.host, token, `STRUCTURED_CHILD_TRANSPORT_MISSING:${token}`);

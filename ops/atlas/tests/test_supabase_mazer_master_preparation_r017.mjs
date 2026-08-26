@@ -40,9 +40,9 @@ const sqlTokens = {
   'preflight.sql': ['data_api','rls','acl','auth.users','114','13','16','1887','mazer_username_handle_key'],
   'master-fence.sql': ['begin;','mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts','revoke'],
   'master-refence.sql': ['begin;','mazer_initialize_progression','mazer_complete_level','mazer_complete_ai_level','mazer_reset_progression','revoke'],
-  'auth-apply.sql': ['begin;','auth.users','auth.identities','create_and_bind','bind_existing','3_auth_imports','14_existing_binds'],
+  'auth-apply.sql': ['begin;','auth.users','auth.identities','create_and_bind','bind_existing','4_auth_imports','14_existing_binds'],
   'reset-era-apply.sql': ['begin;','whole_row_override','9/8/40/d','39/108/161/s','pgp_sym_encrypt','player_reset_disposition','vault.create_secret','rollback_bound_username_key'],
-  'postverify.sql': ['begin;','data_api','rls','acl','117','19','13','16','1887','receipt_conservation','username_origin','mazer-'],
+  'postverify.sql': ['begin;','data_api','rls','acl','118','20','13','17','1887','receipt_conservation','username_origin','mazer-'],
   'qa-apply.sql': ['begin;','qa_ttl','before_user_created','rollback_on_error'],
   'qa-cleanup.sql': ['begin;','qa_ttl','delete','auth.identities','auth.users'],
   'rollback.sql': ['begin;','disable_hook_first','master_preimage','receipt_conservation']
@@ -87,7 +87,7 @@ for (const token of [
   'RollbackDeadlineSeconds = 600','HardFenceLeaseSeconds = 900','Start-RollbackWatchdog','-WindowStyle Hidden',
   'rollback_initiated_at','Assert-Lease','ExpectedPrivateSourceSha256','PRIVATE_SOURCE_DIGEST_DRIFT','private_manifest_sha256',
   'fence_input_sha256','MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER','fresh_dual_refence_and_catchup_required_for_cutover',
-  '19','117','1887','9/8/40/D','PGP_SYM_ENCRYPT_AES256','MASTER_DOMINATES_NO_OVERRIDE','PLAYER_RESET_DOMINANCE_DRIFT',
+  '20','118','1887','9/8/40/D','PGP_SYM_ENCRYPT_AES256','MASTER_DOMINATES_NO_OVERRIDE','PLAYER_RESET_DOMINANCE_DRIFT',
   'Mazer-######','SUPABASE_VAULT','bounded_delta_catchups',
   'currentPreimageSha256','restoreProofSha256','predecessorFenceManifestSha256'
 ]) assert.ok(host.includes(token) || materializer.includes(token), `missing ${token}`);
@@ -204,9 +204,12 @@ requireOrder(replayReset, ['ReplayExactRolledBack', "phase = 'PREFLIGHT'", 'Writ
 const producer = fs.readFileSync(path.join(root, 'ops/atlas/produce_supabase_mazer_master_preparation_private_source_r017.mjs'), 'utf8');
 for (const token of ["crypto.createHmac('sha256'", "vault.create_secret", "delete from vault.secrets where name='mazer_username_handle_key'"]) assert.ok(producer.includes(token), `deterministic replay contract missing ${token}`);
 assert.ok(host.includes('auth_counts.binds -ne 14'));
-assert.ok(host.includes('auth_counts.final_edges -ne 19'));
+assert.ok(host.includes('auth_counts.imports -ne 4'));
+assert.ok(host.includes('auth_counts.final_edges -ne 20'));
+assert.ok(host.includes('auth_counts.expected_target_users -ne 118'));
 assert.ok(!host.includes('auth_counts.binds -ne 13'));
 assert.ok(!host.includes('auth_counts.final_edges -ne 18'));
+assert.ok(!host.includes('auth_counts.final_edges -ne 19'));
 assert.ok(host.includes('auth_counts.retained_edges -ne 2'));
 assert.ok(materializer.includes('topologyEvidenceSha256'));
 

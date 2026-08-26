@@ -1,0 +1,32 @@
+{
+  "schema": "atlas.mazer-master-r017-bounded-auth-progression-delta-evidence.v1",
+  "recorded_at": "2026-08-26T23:34:21.3485781Z",
+  "result": "PASS_EXACT_BOUNDED_AUTH_AND_PROGRESSION_DELTA_READY_FOR_R017_REPLAY",
+  "base_private_source_sha256": "71884498b45cf0ab04cb71d6533bf9ddef6426a06f92cf77e67242eaf9665e60",
+  "base_capture_sha256": "72b454a40b58c7decfd51eec08f8c825635455ed2a50021131d15d7cdade2128",
+  "bounded_capture_sha256": "01af5e359839ca25a57a986453295606543fbfc15845ce400000ac37e912e187",
+  "auth_capture_sha256": "c79a8e560d7bf9c31337b0ec423ee3562e3df0b93a6320e9fdddb3ea80e2974",
+  "remaining_app_proof_sha256": "75d67c7291e8d1d955730ecaa28ab4e5bd5f9719f18e5d673dc4af65bc9361e4",
+  "live_high_water": {
+    "legacy": {"auth_users":20,"auth_identities":20,"profiles":13,"player":17,"ai":17,"receipts":1878},
+    "master": {"auth_users":114,"auth_identities":114,"profiles":5,"player":7,"ai":7,"receipts":1290}
+  },
+  "delta": {
+    "auth_users_added": 1,
+    "auth_users_updated_at_only": 1,
+    "auth_identities_added": 1,
+    "profiles_added": 0,
+    "player_added": 1,
+    "ai_added": 1,
+    "receipts_added": 0,
+    "new_user_owns_player": true,
+    "new_user_owns_ai": true,
+    "identity_conflicts": 0,
+    "ownership_conflicts": 0
+  },
+  "conservation": {"legacy_receipts":1878,"master_receipts":1290,"overlap":1281,"union":1887},
+  "reset_era": {"canonical_projection":"9/8/40/D","legacy_receipts":1716,"quarantined_projection":"39/108/161/S","master_receipts":1239},
+  "unchanged": {"profiles":13,"receipts":1878,"master_rollback_preimage":"5_7_7_1290","catalog_and_acl":true},
+  "proof": {"query_mode":"REPEATABLE_READ_READ_ONLY","bounded_private_output":true,"remaining_app_exact":true,"raw_private_output":false},
+  "effect_truth": {"provider_reads":0,"database_reads":2,"provider_writes":0,"auth_or_live_data_writes":0,"migration_applies":0,"deployments":0}
+}
