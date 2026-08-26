@@ -96,6 +96,7 @@ function bindResetEraActionInput(raw, allEdges) {
   const edge = allEdges.find((item) => item.legacy_user_id.toLowerCase() === sourceUser && item.master_user_id.toLowerCase() === targetUser);
   if (!edge) throw new Error('RESET_AI_IDENTITY_EDGE_MISSING');
   const action = structuredClone(raw.fence_input);
+  if (action.desired_ai_overrides !== undefined) throw new Error('RESET_AI_OVERRIDE_PREEXISTS');
   const sourceAi = action.source_snapshot?.ai?.find((item) => item.user_id.toLowerCase() === sourceUser && item.runner_key === 'menu-runner');
   const targetIndex = action.target_snapshot?.ai?.findIndex((item) => item.user_id.toLowerCase() === targetUser && item.runner_key === 'menu-runner');
   if (!sourceAi || targetIndex < 0) throw new Error('RESET_AI_ROW_MISSING');
@@ -105,7 +106,7 @@ function bindResetEraActionInput(raw, allEdges) {
   mapped.user_id = targetUser;
   mapped.row.user_id = targetUser;
   mapped.payload_digest = sha256(mapped.row);
-  action.target_snapshot.ai[targetIndex] = mapped;
+  action.desired_ai_overrides = [mapped];
   const sourcePlayer = action.source_snapshot?.player?.find((item) => item.user_id.toLowerCase() === sourceUser);
   const targetPlayer = action.target_snapshot?.player?.find((item) => item.user_id.toLowerCase() === targetUser);
   if (!sourcePlayer || !targetPlayer) throw new Error('PLAYER_RESET_ROW_MISSING');

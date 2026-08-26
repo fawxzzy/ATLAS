@@ -527,6 +527,36 @@ function mergeSnapshots(source, target) {
   return { desired, changes, receiptOverlaps: receipts.overlaps };
 }
 
+function applyDesiredAiOverrides(input, merged, target, mappedSource) {
+  if (input.desired_ai_overrides === undefined) return;
+  if (input.direction !== 'forward') hold('DESIRED_AI_OVERRIDE_DIRECTION');
+  const overrides = uniqueRows(requireArray(input.desired_ai_overrides, 'DESIRED_AI_OVERRIDE_SHAPE').map(normalizeAi), (row) => [row.user_id, row.runner_key], 'DESIRED_AI_OVERRIDE_DUPLICATE');
+  if (overrides.length !== 1) hold('DESIRED_AI_OVERRIDE_DENOMINATOR');
+  for (const override of overrides) {
+    const sameKey = (row) => row.user_id === override.user_id && row.runner_key === override.runner_key;
+    const targetRow = target.ai.find(sameKey);
+    const sourceRow = mappedSource.ai.find(sameKey);
+    const desiredIndex = merged.desired.ai.findIndex(sameKey);
+    if (!targetRow || !sourceRow || desiredIndex < 0) hold('DESIRED_AI_OVERRIDE_KEY');
+    if (override.payload_digest !== sourceRow.payload_digest) hold('DESIRED_AI_OVERRIDE_NOT_MAPPED_SOURCE');
+    if (override.payload_digest === targetRow.payload_digest) hold('DESIRED_AI_OVERRIDE_NOOP');
+    merged.desired.ai[desiredIndex] = structuredClone(override);
+  }
+  merged.changes.ai = rowChanges(target.ai, merged.desired.ai, (row) => [row.user_id, row.runner_key]);
+}
+
+function isAiMergeMonotonic(targetRows, desiredRows) {
+  const desired = new Map(desiredRows.map((row) => [canonicalJson([row.user_id, row.runner_key]), row]));
+  return targetRows.every((target) => {
+    const next = desired.get(canonicalJson([target.user_id, target.runner_key]));
+    return next
+      && BigInt(next.level) >= BigInt(target.level)
+      && BigInt(next.completed_cycles) >= BigInt(target.completed_cycles)
+      && next.target_complexity >= target.target_complexity
+      && RANK_ORDER.get(next.rank) >= RANK_ORDER.get(target.rank);
+  });
+}
+
 function reverseDelta(source, baseline) {
   const changed = (rows, baselineRows, key, conflictCode = null) => {
     const prior = new Map(baselineRows.map((row) => [canonicalJson(key(row)), row]));
@@ -1092,6 +1122,7 @@ export function classifyCutover(rawInput) {
     : source;
   const mappedSource = mapSnapshot(classifiedSource, map.map);
   const merged = mergeSnapshots(mappedSource, target);
+  applyDesiredAiOverrides(input, merged, target, mappedSource);
   const targetCounts = countSnapshot(target);
   const sourceCounts = countSnapshot(source);
   const desiredCounts = {
@@ -1183,7 +1214,7 @@ export function classifyCutover(rawInput) {
       client_run_conflicts: 0
     },
     monotonic_player_merge: true,
-    monotonic_ai_merge: true,
+    monotonic_ai_merge: isAiMergeMonotonic(target.ai, merged.desired.ai),
     quarantined_accounts: 0,
     raw_identifiers_emitted: false,
     raw_records_emitted: false,
