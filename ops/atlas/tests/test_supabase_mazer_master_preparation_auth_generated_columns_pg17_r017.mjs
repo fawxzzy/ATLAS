@@ -8,88 +8,64 @@ import { spawnSync } from 'node:child_process';
 const pgBin = process.env.ATLAS_PG17_BIN || (process.platform === 'win32' ? 'C:\\Program Files\\PostgreSQL\\17\\bin' : '');
 const executable = (name) => path.join(pgBin, process.platform === 'win32' ? `${name}.exe` : name);
 if (!pgBin || !fs.existsSync(executable('initdb')) || !fs.existsSync(executable('pg_ctl')) || !fs.existsSync(executable('psql'))) {
-  console.log(JSON.stringify({ result: 'SKIP_R017_AUTH_GENERATED_COLUMNS_PG17', reason: 'PG17_BIN_UNAVAILABLE', external_writes: 0 }));
+  console.log(JSON.stringify({ result: 'SKIP_R017_AUTH_TRANSACTION_PG17', reason: 'PG17_BIN_UNAVAILABLE', external_writes: 0 }));
   process.exit(0);
 }
 
-const root = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-auth-users-pg17-'));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-auth-transaction-pg17-'));
 const data = path.join(root, 'data');
 const log = path.join(root, 'postgres.log');
 const port = 56000 + (process.pid % 7000);
 let started = false;
-const run = (file, args, options = {}) => spawnSync(file, args, {
-  encoding: 'utf8', windowsHide: true, timeout: options.timeout ?? 60_000,
-  env: { ...process.env, PGHOST: '127.0.0.1', PGPORT: String(port), PGUSER: 'postgres', PGDATABASE: 'postgres' },
-  maxBuffer: 4 * 1024 * 1024
+const run = (file, args) => spawnSync(file, args, {
+  encoding: 'utf8', windowsHide: true, timeout: 60_000, maxBuffer: 16 * 1024 * 1024,
+  env: { ...process.env, PGHOST: '127.0.0.1', PGPORT: String(port), PGUSER: 'postgres', PGDATABASE: 'postgres' }
 });
-const psql = (sql) => run(executable('psql'), ['-X', '--no-psqlrc', '--no-align', '--tuples-only', '--set', 'ON_ERROR_STOP=1', '--command', sql]);
-const stderrDigest = (value) => crypto.createHash('sha256').update(value, 'utf8').digest('hex');
-
-const schemaSql = String.raw`
-create schema auth;
-create table auth.users(
-  instance_id uuid,id uuid primary key,aud varchar(255),"role" varchar(255),email varchar(255),encrypted_password varchar(255),
-  email_confirmed_at timestamptz,invited_at timestamptz,confirmation_token varchar(255),confirmation_sent_at timestamptz,
-  recovery_token varchar(255),recovery_sent_at timestamptz,email_change_token_new varchar(255),email_change varchar(255),
-  email_change_sent_at timestamptz,last_sign_in_at timestamptz,raw_app_meta_data jsonb,raw_user_meta_data jsonb,
-  is_super_admin boolean,created_at timestamptz,updated_at timestamptz,phone text,phone_confirmed_at timestamptz,
-  phone_change text,phone_change_token varchar(255),phone_change_sent_at timestamptz,email_change_token_current varchar(255),
-  email_change_confirm_status smallint,banned_until timestamptz,reauthentication_token varchar(255),
-  reauthentication_sent_at timestamptz,is_sso_user boolean,deleted_at timestamptz,is_anonymous boolean,
-  confirmed_at timestamptz generated always as (least(email_confirmed_at,phone_confirmed_at)) stored
-);`;
-const row = {
-  instance_id: '00000000-0000-0000-0000-000000000000', id: '10000000-0000-0000-0000-000000000001', aud: 'authenticated', role: 'authenticated',
-  email: 'fixture@example.test', encrypted_password: '$2a$10$00000000000000000000000000000000000000000000000000000',
-  email_confirmed_at: '2026-08-26T00:00:00Z', invited_at: null, confirmation_token: '', confirmation_sent_at: null,
-  recovery_token: '', recovery_sent_at: null, email_change_token_new: '', email_change: '', email_change_sent_at: null,
-  last_sign_in_at: null, raw_app_meta_data: { provider: 'email', providers: ['email'] }, raw_user_meta_data: {},
-  is_super_admin: false, created_at: '2026-08-26T00:00:00Z', updated_at: '2026-08-26T00:00:00Z', phone: null,
-  phone_confirmed_at: null, phone_change: '', phone_change_token: '', phone_change_sent_at: null,
-  email_change_token_current: '', email_change_confirm_status: 0, banned_until: null, reauthentication_token: '',
-  reauthentication_sent_at: null, is_sso_user: false, deleted_at: null, is_anonymous: false,
-  confirmed_at: '2026-08-26T00:00:00Z'
-};
-const literal = `'${JSON.stringify([row]).replaceAll("'", "''")}'::jsonb`;
-const writable = [
-  'instance_id','id','aud','role','email','encrypted_password','email_confirmed_at','invited_at','confirmation_token',
-  'confirmation_sent_at','recovery_token','recovery_sent_at','email_change_token_new','email_change','email_change_sent_at',
-  'last_sign_in_at','raw_app_meta_data','raw_user_meta_data','is_super_admin','created_at','updated_at','phone','phone_confirmed_at',
-  'phone_change','phone_change_token','phone_change_sent_at','email_change_token_current','email_change_confirm_status','banned_until',
-  'reauthentication_token','reauthentication_sent_at','is_sso_user','deleted_at','is_anonymous'
-];
+const psql = (sql) => run(executable('psql'), ['-X','--no-psqlrc','--no-align','--tuples-only','--set','ON_ERROR_STOP=1','--command',sql]);
+const digest = (value) => crypto.createHash('sha256').update(value ?? '', 'utf8').digest('hex');
+const literal = (value) => `'${JSON.stringify(value).replaceAll("'", "''")}'::jsonb`;
 const ident = (value) => `"${value}"`;
+const userWritable = ['instance_id','id','aud','role','email','encrypted_password','email_confirmed_at','invited_at','confirmation_token','confirmation_sent_at','recovery_token','recovery_sent_at','email_change_token_new','email_change','email_change_sent_at','last_sign_in_at','raw_app_meta_data','raw_user_meta_data','is_super_admin','created_at','updated_at','phone','phone_confirmed_at','phone_change','phone_change_token','phone_change_sent_at','email_change_token_current','email_change_confirm_status','banned_until','reauthentication_token','reauthentication_sent_at','is_sso_user','deleted_at','is_anonymous'];
+const identityWritable = ['id','user_id','provider_id','identity_data','provider','last_sign_in_at','created_at','updated_at'];
+const created = '2026-08-26T00:00:00Z';
+const makeUser = (id,email) => ({ instance_id:'00000000-0000-0000-0000-000000000000',id,aud:'authenticated',role:'authenticated',email,encrypted_password:'$2a$10$00000000000000000000000000000000000000000000000000000',email_confirmed_at:created,invited_at:null,confirmation_token:'',confirmation_sent_at:null,recovery_token:'',recovery_sent_at:null,email_change_token_new:'',email_change:'',email_change_sent_at:null,last_sign_in_at:created,raw_app_meta_data:{provider:'email',providers:['email']},raw_user_meta_data:{},is_super_admin:false,created_at:created,updated_at:created,phone:null,phone_confirmed_at:null,phone_change:'',phone_change_token:'',phone_change_sent_at:null,email_change_token_current:'',email_change_confirm_status:0,banned_until:null,reauthentication_token:'',reauthentication_sent_at:null,is_sso_user:false,deleted_at:null,is_anonymous:false,confirmed_at:created });
+const makeIdentity = (id,user,email) => ({ id,user_id:user.id,provider_id:user.id,identity_data:{sub:user.id,email},provider:'email',last_sign_in_at:created,created_at:created,updated_at:created,email:email.toLowerCase() });
+const existingUser = makeUser('10000000-0000-4000-8000-000000000001','existing@example.test');
+const importedUser = makeUser('10000000-0000-4000-8000-000000000002','imported@example.test');
+const existingIdentity = makeIdentity('20000000-0000-4000-8000-000000000001',existingUser,existingUser.email);
+const importedIdentity = makeIdentity('20000000-0000-4000-8000-000000000002',importedUser,importedUser.email);
+const bindings = [{normalized_email:existingUser.email,user:existingUser,identity:existingIdentity}];
+const edges = [{legacy_user_id:existingUser.id,master_user_id:existingUser.id,evidence_digest:'a'.repeat(64),disposition:'RETAINED'},{legacy_user_id:importedUser.id,master_user_id:importedUser.id,evidence_digest:'b'.repeat(64),disposition:'CREATE_AND_BIND'}];
+const expectedMap = edges.map(({legacy_user_id,master_user_id,evidence_digest}) => ({evidence_digest,legacy_user_id,master_user_id}));
+const typedRows = (relation,rows) => `(select coalesce(jsonb_agg(to_jsonb(x.r) order by (x.r).id),'[]'::jsonb) from (select jsonb_populate_record(null::${relation},value) r from jsonb_array_elements(${literal(rows)}) value) x)`;
+const insertUsers = (rows) => `with rows as (select jsonb_array_elements(${literal(rows)}) value),records as (select jsonb_populate_record(null::auth.users,value) r from rows) insert into auth.users(${userWritable.map(ident).join(',')}) select ${userWritable.map((name)=>`(r).${ident(name)}`).join(',')} from records;`;
+const insertIdentities = (rows) => `with rows as (select jsonb_array_elements(${literal(rows)}) value),records as (select jsonb_populate_record(null::auth.identities,value) r from rows) insert into auth.identities(${identityWritable.map(ident).join(',')}) select ${identityWritable.map((name)=>`(r).${ident(name)}`).join(',')} from records;`;
+const schemaSql = `create schema auth;create schema mazer;
+create table auth.users(instance_id uuid,id uuid primary key,aud varchar(255),"role" varchar(255),email varchar(255),encrypted_password varchar(255),email_confirmed_at timestamptz,invited_at timestamptz,confirmation_token varchar(255),confirmation_sent_at timestamptz,recovery_token varchar(255),recovery_sent_at timestamptz,email_change_token_new varchar(255),email_change varchar(255),email_change_sent_at timestamptz,last_sign_in_at timestamptz,raw_app_meta_data jsonb,raw_user_meta_data jsonb,is_super_admin boolean,created_at timestamptz,updated_at timestamptz,phone text,phone_confirmed_at timestamptz,phone_change text,phone_change_token varchar(255),phone_change_sent_at timestamptz,email_change_token_current varchar(255),email_change_confirm_status smallint default 0 check(email_change_confirm_status between 0 and 2),banned_until timestamptz,reauthentication_token varchar(255) default '',reauthentication_sent_at timestamptz,is_sso_user boolean not null default false,deleted_at timestamptz,is_anonymous boolean not null default false,confirmed_at timestamptz generated always as (least(email_confirmed_at,phone_confirmed_at)) stored);
+create unique index users_email_partial_key on auth.users(email) where is_sso_user=false;
+create table auth.identities(id uuid primary key,user_id uuid not null references auth.users(id) on delete cascade,provider_id text not null,identity_data jsonb not null,provider text not null,last_sign_in_at timestamptz,created_at timestamptz,updated_at timestamptz,email text generated always as (lower(identity_data->>'email')) stored,constraint identities_provider_id_provider_unique unique(provider_id,provider));`;
 
 try {
-  const init = run(executable('initdb'), ['-D', data, '--username=postgres', '--auth=trust', '--no-locale']);
-  assert.equal(init.status, 0, `INITDB_FAILED:${stderrDigest(init.stderr ?? '')}`);
-  const start = run(executable('pg_ctl'), ['-D', data, '-l', log, '-o', `-F -h 127.0.0.1 -p ${port}`, '-w', 'start']);
-  assert.equal(start.status, 0, `PG_START_FAILED:${stderrDigest(start.stderr ?? '')}`);
-  started = true;
-  const schema = psql(schemaSql);
-  assert.equal(schema.status, 0, `SCHEMA_FAILED:${stderrDigest(schema.stderr ?? '')}`);
-
-  const old = psql(`with rows as (select jsonb_array_elements(${literal}) value) insert into auth.users select (jsonb_populate_record(null::auth.users,value)).* from rows;`);
-  assert.notEqual(old.status, 0, 'FULL_ROW_INSERT_UNEXPECTEDLY_PASSED');
-  assert.match(old.stderr, /generated column "confirmed_at"|cannot insert a non-DEFAULT value into column "confirmed_at"/i);
-
-  const corrected = psql(`with rows as (select jsonb_array_elements(${literal}) value),records as (select jsonb_populate_record(null::auth.users,value) r from rows) insert into auth.users(${writable.map(ident).join(',')}) select ${writable.map((name) => `(r).${ident(name)}`).join(',')} from records;`);
-  assert.equal(corrected.status, 0, `CORRECTED_INSERT_FAILED:${stderrDigest(corrected.stderr ?? '')}`);
-  const proof = psql("select count(*)::text||':'||bool_and(confirmed_at=email_confirmed_at)::text||':'||bool_and(confirmed_at='2026-08-26T00:00:00Z'::timestamptz)::text from auth.users;");
-  assert.equal(proof.status, 0, `POSTCHECK_FAILED:${stderrDigest(proof.stderr ?? '')}`);
-  assert.equal(proof.stdout.trim(), '1:true:true');
-
-  console.log(JSON.stringify({
-    result: 'PASS_R017_AUTH_USERS_GENERATED_COLUMN_PG17',
-    old_full_row_exit: old.status,
-    old_stderr_bytes: Buffer.byteLength(old.stderr ?? '', 'utf8'),
-    old_stderr_sha256: stderrDigest(old.stderr ?? ''),
-    corrected_exit: corrected.status,
-    imported_rows: 1,
-    confirmed_at_generated_exactly: true,
-    external_writes: 0
-  }));
-} finally {
-  if (started) run(executable('pg_ctl'), ['-D', data, '-m', 'immediate', '-w', 'stop']);
-  fs.rmSync(root, { recursive: true, force: true });
-}
+  const init = run(executable('initdb'),['-D',data,'--username=postgres','--auth=trust','--no-locale']); assert.equal(init.status,0,`INITDB:${digest(init.stderr)}`);
+  const start = run(executable('pg_ctl'),['-D',data,'-l',log,'-o',`-F -h 127.0.0.1 -p ${port}`,'-w','start']); assert.equal(start.status,0,`START:${digest(start.stderr)}`); started=true;
+  assert.equal(psql(schemaSql).status,0); assert.equal(psql(insertUsers([existingUser])).status,0); assert.equal(psql(insertIdentities([existingIdentity])).status,0);
+  const raw = psql(`do $x$ begin if exists(select 1 from jsonb_array_elements(${literal(bindings)}) e where not exists(select 1 from auth.users u where u.id=(e->'user'->>'id')::uuid and to_jsonb(u)=e->'user')) then raise exception 'R017_EXISTING_AUTH_USER_DIGEST_DRIFT'; end if; end $x$;`); assert.notEqual(raw.status,0); assert.match(raw.stderr,/R017_EXISTING_AUTH_USER_DIGEST_DRIFT/);
+  const oldUser = psql(`with rows as (select jsonb_array_elements(${literal([importedUser])}) value) insert into auth.users select (jsonb_populate_record(null::auth.users,value)).* from rows;`); assert.notEqual(oldUser.status,0); assert.match(oldUser.stderr,/confirmed_at/i);
+  const transaction = psql(`begin;
+create table mazer.mazer_identity_map(legacy_user_id uuid primary key,master_user_id uuid not null unique,evidence_digest text not null check(evidence_digest ~ '^[0-9a-f]{64}$'));
+do $pre$ begin if exists(select 1 from jsonb_array_elements(${literal(bindings)}) e where not exists(select 1 from auth.users u where u.id=(e->'user'->>'id')::uuid and lower(u.email)=e->>'normalized_email' and to_jsonb(u)=to_jsonb(jsonb_populate_record(null::auth.users,e->'user')))) then raise exception 'R017_EXISTING_AUTH_USER_DIGEST_DRIFT'; end if; if exists(select 1 from jsonb_array_elements(${literal(bindings)}) e where not exists(select 1 from auth.identities i where i.id=(e->'identity'->>'id')::uuid and i.user_id=(e->'user'->>'id')::uuid and i.provider='email' and i.provider_id=e->'user'->>'id' and to_jsonb(i)=to_jsonb(jsonb_populate_record(null::auth.identities,e->'identity')))) then raise exception 'R017_EXISTING_AUTH_IDENTITY_DIGEST_DRIFT'; end if; end $pre$;
+${insertUsers([importedUser])}${insertIdentities([importedIdentity])}
+insert into mazer.mazer_identity_map(legacy_user_id,master_user_id,evidence_digest) select legacy_user_id,master_user_id,evidence_digest from jsonb_to_recordset(${literal(edges)}) as x(legacy_user_id uuid,master_user_id uuid,evidence_digest text,disposition text);
+do $post$ begin if (select coalesce(jsonb_agg(to_jsonb(u) order by u.id),'[]'::jsonb) from auth.users u where u.id='${importedUser.id}') <> ${typedRows('auth.users',[importedUser])} then raise exception 'R017_IMPORTED_AUTH_USERS_DIGEST_DRIFT'; end if; if (select coalesce(jsonb_agg(to_jsonb(i) order by i.id),'[]'::jsonb) from auth.identities i where i.id='${importedIdentity.id}') <> ${typedRows('auth.identities',[importedIdentity])} then raise exception 'R017_IMPORTED_AUTH_IDENTITIES_DIGEST_DRIFT'; end if; if (select coalesce(jsonb_agg(jsonb_build_object('legacy_user_id',legacy_user_id,'master_user_id',master_user_id,'evidence_digest',evidence_digest) order by legacy_user_id),'[]'::jsonb) from mazer.mazer_identity_map) <> ${literal(expectedMap)} then raise exception 'R017_IDENTITY_MAP_DIGEST_DRIFT'; end if; end $post$;commit;`);
+  assert.equal(transaction.status,0,`AUTH_APPLY:${digest(transaction.stderr)}`);
+  const oldIdentityValue = makeIdentity('20000000-0000-4000-8000-000000000003',importedUser,'other@example.test'); const oldIdentity = psql(`with rows as (select jsonb_array_elements(${literal([oldIdentityValue])}) value) insert into auth.identities select (jsonb_populate_record(null::auth.identities,value)).* from rows;`); assert.notEqual(oldIdentity.status,0); assert.match(oldIdentity.stderr,/generated column "email"|column "email"/i);
+  const drifted = structuredClone(existingUser); drifted.updated_at='2026-08-27T00:00:00Z'; const semanticDrift = psql(`do $x$ begin if exists(select 1 from jsonb_array_elements(${literal([{...bindings[0],user:drifted}])}) e where not exists(select 1 from auth.users u where u.id=(e->'user'->>'id')::uuid and to_jsonb(u)=to_jsonb(jsonb_populate_record(null::auth.users,e->'user')))) then raise exception 'R017_EXISTING_AUTH_USER_DIGEST_DRIFT'; end if; end $x$;`); assert.notEqual(semanticDrift.status,0); assert.match(semanticDrift.stderr,/R017_EXISTING_AUTH_USER_DIGEST_DRIFT/);
+  const appRow = { user_id: existingUser.id, updated_at: created, payload: { stable: true } };
+  assert.equal(psql(`create table mazer.profile_timestamp_probe(user_id uuid primary key,updated_at timestamptz not null,payload jsonb not null);with rows as(select jsonb_array_elements(${literal([appRow])}) value) insert into mazer.profile_timestamp_probe select (jsonb_populate_record(null::mazer.profile_timestamp_probe,value)).* from rows;`).status,0);
+  const rawAppDigest = psql(`do $x$ begin if (select jsonb_agg(to_jsonb(t) order by user_id) from mazer.profile_timestamp_probe t) <> ${literal([appRow])} then raise exception 'R017_APP_RAW_TIMESTAMP_DRIFT'; end if; end $x$;`); assert.notEqual(rawAppDigest.status,0); assert.match(rawAppDigest.stderr,/R017_APP_RAW_TIMESTAMP_DRIFT/);
+  const typedAppDigest = psql(`do $x$ begin if (select jsonb_agg(to_jsonb(t) order by user_id) from mazer.profile_timestamp_probe t) <> (select jsonb_agg(to_jsonb(x.r) order by (x.r).user_id) from (select jsonb_populate_record(null::mazer.profile_timestamp_probe,value) r from jsonb_array_elements(${literal([appRow])}) value) x) then raise exception 'R017_APP_TYPED_TIMESTAMP_DRIFT'; end if; end $x$;`); assert.equal(typedAppDigest.status,0);
+  const appDrifted = { ...appRow, updated_at: '2026-08-27T00:00:00Z' };
+  const semanticAppDrift = psql(`do $x$ begin if (select jsonb_agg(to_jsonb(t) order by user_id) from mazer.profile_timestamp_probe t) <> (select jsonb_agg(to_jsonb(x.r) order by (x.r).user_id) from (select jsonb_populate_record(null::mazer.profile_timestamp_probe,value) r from jsonb_array_elements(${literal([appDrifted])}) value) x) then raise exception 'R017_APP_SEMANTIC_TIMESTAMP_DRIFT'; end if; end $x$;`); assert.notEqual(semanticAppDrift.status,0); assert.match(semanticAppDrift.stderr,/R017_APP_SEMANTIC_TIMESTAMP_DRIFT/);
+  const proof = psql(`select (select count(*) from auth.users)::text||':'||(select count(*) from auth.identities)::text||':'||(select count(*) from mazer.mazer_identity_map)::text||':'||(select bool_and(confirmed_at=email_confirmed_at) from auth.users)::text||':'||(select bool_and(email=lower(identity_data->>'email')) from auth.identities)::text;`); assert.equal(proof.status,0); assert.equal(proof.stdout.trim(),'2:2:2:true:true');
+  console.log(JSON.stringify({result:'PASS_R017_FULL_AUTH_APPLY_TRANSACTION_PG17',raw_timestamp_precheck_exit:raw.status,old_user_full_row_exit:oldUser.status,old_identity_full_row_exit:oldIdentity.status,full_auth_apply_exit:transaction.status,semantic_drift_exit:semanticDrift.status,app_raw_timestamp_exit:rawAppDigest.status,app_typed_timestamp_exit:typedAppDigest.status,app_semantic_drift_exit:semanticAppDrift.status,users:2,identities:2,identity_edges:2,generated_columns_exact:true,external_writes:0}));
+} finally { if(started) run(executable('pg_ctl'),['-D',data,'-m','immediate','-w','stop']); fs.rmSync(root,{recursive:true,force:true}); }

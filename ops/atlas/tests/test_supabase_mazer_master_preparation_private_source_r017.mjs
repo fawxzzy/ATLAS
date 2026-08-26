@@ -56,7 +56,7 @@ function user(id, email, instance = uid(9000)) {
     reauthentication_sent_at: null, is_sso_user: false, deleted_at: null, is_anonymous: false
   };
 }
-function identity(id, email, index) { return { id: uid(20000 + index), user_id: id, provider_id: id, identity_data: { sub: id, email }, provider: 'email', created_at: iso(-20000), updated_at: iso(-10000), last_sign_in_at: iso(-10000) }; }
+function identity(id, email, index) { return { id: uid(20000 + index), user_id: id, provider_id: id, identity_data: { sub: id, email }, provider: 'email', created_at: iso(-20000), updated_at: iso(-10000), last_sign_in_at: iso(-10000), email: email.toLowerCase() }; }
 function profile(id, index) { return { user_id: id, display_name: null, selected_control_mode: 'stick', settings: { trailFade: true }, created_at: iso(-9000), updated_at: iso(-8000), revision: index, username: index % 2 ? null : `u${index + 10}` }; }
 function player(id, reset = false, target = false) {
   const level = reset ? (target ? 6 : 5) : 2; const cycles = reset ? (target ? 5 : 4) : 1; const complexity = reset ? (target ? 25 : 24) : 12;
@@ -126,6 +126,15 @@ assert.deepEqual(plan.imports.at(-1).identities, [fixture.legacy.auth_identities
 
 const source = producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
 const validated = validatePrivateSource(source);
+const renderAuth = (auth) => renderOperationalSql({ auth, fenceInput: source.fence_input, catalogPreimage: source.catalog_preimage, reset: { quarantined_row: source.reset_era_ai.quarantined_row }, qa: source.qa, quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
+const importUserExtraKey = structuredClone(source.auth); importUserExtraKey.imports[0].user.unexpected = true;
+assert.throws(() => renderAuth(importUserExtraKey), /AUTH_USER_COLUMN_SHAPE_DRIFT/);
+const boundUserMissingKey = structuredClone(source.auth); delete boundUserMissingKey.new_edges.find((edge) => edge.disposition === 'BIND_EXISTING').master_user.confirmed_at;
+assert.throws(() => renderAuth(boundUserMissingKey), /AUTH_USER_COLUMN_SHAPE_DRIFT/);
+const importIdentityExtraKey = structuredClone(source.auth); importIdentityExtraKey.imports[0].identities[0].unexpected = true;
+assert.throws(() => renderAuth(importIdentityExtraKey), /AUTH_IDENTITY_COLUMN_SHAPE_DRIFT/);
+const boundIdentityMissingKey = structuredClone(source.auth); delete boundIdentityMissingKey.new_edges.find((edge) => edge.disposition === 'BIND_EXISTING').master_identity.email;
+assert.throws(() => renderAuth(boundIdentityMissingKey), /AUTH_IDENTITY_COLUMN_SHAPE_DRIFT/);
 assert.deepEqual(source.fence_input.fence.legacy.acl_preimage, (({ schema, table_acl, rpc_acl, catalog }) => ({ schema, table_acl, rpc_acl, catalog }))(acl('public')));
 assert.deepEqual(source.fence_input.fence.master.acl_preimage, (({ schema, table_acl, rpc_acl, catalog }) => ({ schema, table_acl, rpc_acl, catalog }))(acl('mazer')));
 const missingTracksForward = source.fence_input.source_snapshot.player.find((row) => row.user_id === fixture.legacy.player[6].user_id).row;
@@ -218,6 +227,17 @@ assert.match(source.sql['auth-apply.sql'], /insert into auth\.identities\(id,use
 assert.match(source.sql['auth-apply.sql'], /select \(r\)\.id,\(r\)\.user_id,\(r\)\.provider_id,\(r\)\.identity_data,\(r\)\.provider,\(r\)\.last_sign_in_at,\(r\)\.created_at,\(r\)\.updated_at from records/);
 assert.doesNotMatch(source.sql['auth-apply.sql'], /insert into auth\.identities select \(jsonb_populate_record\(null::auth\.identities,value\)\)\.\*/);
 assert.doesNotMatch(source.sql['auth-apply.sql'], /insert into auth\.identities\([^)]*email[^)]*\)/);
+assert.match(source.sql['auth-apply.sql'], /to_jsonb\(u\)=to_jsonb\(jsonb_populate_record\(null::auth\.users,e->'user'\)\)/);
+assert.match(source.sql['auth-apply.sql'], /to_jsonb\(i\)=to_jsonb\(jsonb_populate_record\(null::auth\.identities,e->'identity'\)\)/);
+assert.match(source.sql['auth-apply.sql'], /jsonb_agg\(to_jsonb\(x\.r\) order by \(x\.r\)\.id\)/);
+assert.doesNotMatch(source.sql['auth-apply.sql'], /to_jsonb\(u\)=e->'user'|to_jsonb\(i\)=e->'identity'/);
+assert.match(source.sql['postverify.sql'], /jsonb_agg\(to_jsonb\(x\.r\) order by \(x\.r\)\.id\)/);
+assert.match(source.sql['postverify.sql'], /jsonb_populate_record\(null::mazer\.mazer_profiles,value\)/);
+assert.match(source.sql['postverify.sql'], /jsonb_populate_record\(null::mazer\.mazer_progression_states,value\)/);
+assert.match(source.sql['postverify.sql'], /jsonb_populate_record\(null::mazer\.mazer_ai_progression_states,value\)/);
+assert.match(source.sql['postverify.sql'], /jsonb_populate_record\(null::mazer\.mazer_cycle_receipts,value\)/);
+assert.doesNotMatch(source.sql['postverify.sql'], /<> '\[[^']*T[^']*Z[^']*\]'::jsonb then raise exception 'R017_(PROFILES_CORE|PLAYER_FULL|AI_FULL|RECEIPT_CONSERVATION_FULL)_DIGEST_DRIFT'/);
+assert.doesNotMatch(source.sql['postverify.sql'], /to_jsonb\(u\)=e->'user'|to_jsonb\(i\)=e->'identity'/);
 assert.match(source.sql['qa-apply.sql'], /select gen_random_uuid\(\),id,id::text,jsonb_build_object\('sub',id::text,'email',email\)/);
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-producer-'));
