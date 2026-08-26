@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const launcher = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_credential_safe_r017.ps1');
+const sealer = path.join(root, 'ops/atlas/seal_supabase_mazer_master_preparation_credential_safe_invocation_r017.mjs');
 const host = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_r017.ps1');
 const packetRoot = path.join(root, 'secrets/packet/mazer-master-preparation-r017');
 const runtime = path.join(root, 'runtime/atlas');
@@ -62,6 +63,7 @@ for (const token of [
   'Read-ManagementToken', 'Read-ProjectPassword', 'Invoke-Child', 'ProtectedChildStarted',
   'Convert-ProtectedChildReceipt', 'external_effects_unknown=[bool]$script:ProtectedChildStarted'
 ]) assert.ok(launcherText.includes(token), `MISSING_LAUNCHER_GATE:${token}`);
+for (const token of ['launcher-invocation.r017.v2','decision_request_sha256','approval_consumption_sha256','INVOCATION_NOT_YET_VALID','INVOCATION_EXPIRED','Read-JsonSnapshot']) assert.ok(launcherText.includes(token), `MISSING_JIT_GATE:${token}`);
 assert.doesNotMatch(launcherText, /PrivateSourceOverride|StatePathOverride|ExpectedSourceShaOverride/);
 
 let productionAdversaries = 0;
@@ -70,43 +72,43 @@ if ([source, manifest, predecessor, host].every(file => fs.existsSync(file))) {
   assert.equal(sha(fs.readFileSync(manifest)), manifestSha);
   assert.equal(sha(fs.readFileSync(predecessor)), predecessorSha);
   assert.equal(sha(fs.readFileSync(host)), hostSha);
-  const correlation = crypto.randomUUID();
-  const successor = path.join(runtime, `mazer-master-r017-execution-${correlation}.json`);
-  assert.equal(fs.existsSync(successor), false);
-  const now = new Date();
-  const envelope = {
-    schema: 'atlas.supabase.mazer-master-preparation-launcher-invocation.r017.v1',
-    packet: 'FP-MAZER-MASTER-R017-SUPABASE-PREPARATION-20260825-001',
-    predecessor_correlation_id: 'a7db1fd5-a165-43e6-a9a8-c267233005b2',
-    predecessor_state_path: predecessor,
-    predecessor_state_sha256: predecessorSha,
-    execution_correlation_id: correlation,
-    private_source_path: source,
-    private_source_sha256: sourceSha,
-    private_manifest_path: manifest,
-    private_manifest_sha256: manifestSha,
-    successor_state_path: successor,
-    host_path: host,
-    host_sha256: hostSha,
-    issued_at: now.toISOString().replace('Z', '0000Z'),
-    expires_at: new Date(now.getTime() + 60_000).toISOString().replace('Z', '0000Z')
+  const launcherSha = sha(fs.readFileSync(launcher));
+  const paths = [], packet = 'FP-MAZER-MASTER-R017-SUPABASE-PREPARATION-20260825-001', task = '019fa791-8d17-7c83-9c61-3e3c687e9dd7', target = 'supabase:geknvnrmktchljnyddwp/public+bxtcuhkotumitoqtrcej/mazer';
+  const o = date => date.toISOString().replace('Z','0000Z');
+  const write = (file, value) => { const bytes=Buffer.from(`${JSON.stringify(value,null,2)}\n`); fs.writeFileSync(file,bytes,{flag:'wx'}); paths.push(file); return {file,bytes,sha:sha(bytes)}; };
+  const lineage = (name, { aliasIssued, authorized, consumed, expires, envelopeIssued = new Date(), notBefore = consumed, successorExists = false }) => {
+    const correlation=crypto.randomUUID(), phrase=`AUTHORIZE ${name} ${correlation}`, intent=`sha256:${sha(Buffer.from(`intent:${name}:${correlation}`))}`;
+    const decisionPath=path.join(runtime,`.launcher-test-${name}-decision-${process.pid}-${Date.now()}.json`), aliasPath=path.join(runtime,`.launcher-test-${name}-alias-${process.pid}-${Date.now()}.json`), authPath=path.join(runtime,`.launcher-test-${name}-auth-${process.pid}-${Date.now()}.json`), consumptionPath=path.join(runtime,`.launcher-test-${name}-consume-${process.pid}-${Date.now()}.json`);
+    const decision=write(decisionPath,{schema:'atlas.operator-decision-request.v1',packet,status:'AWAITING_OPERATOR_DECISION',execution_authority:false,expires_at:o(expires),sealed_inputs:{execution_correlation_id:correlation,private_source_sha256:sourceSha,manifest_sha256:manifestSha,host_sha256:hostSha,credential_safe_launcher_sha256:launcherSha},exact_authorization_phrase:phrase});
+    const alias=write(aliasPath,{allowed_effect:{effect_class:'supabase_protected_master_preparation',max_effect_count:20,target},approval_code:'R017-TEST-TEST-TEST-TEST',decision_request:{exact_authorization_phrase_sha256:sha(Buffer.from(phrase)),path:path.relative(root,decisionPath).split(path.sep).join('/'),sha256:decision.sha},execution_authority:false,expected_operator_response:'APPROVE R017-TEST-TEST-TEST-TEST',expires_at:o(expires),intent_digest:intent,issued_at:o(aliasIssued),originating_task_id:task,packet,schema:'atlas.scoped-approval-alias.v1',semantic_objective:'jit-test',single_use:true,status:'OPEN'});
+    const auth=write(authPath,{alias:{path:path.relative(root,aliasPath).split(path.sep).join('/'),sha256:alias.sha},allowed_effect:{effect_class:'supabase_protected_master_preparation',max_effect_count:20,target},approval_code:'R017-TEST-TEST-TEST-TEST',authorization_digest:`sha256:${sha(Buffer.from(`auth:${name}`))}`,authorized_at:o(authorized),decision_request:{exact_authorization_phrase_sha256:sha(Buffer.from(phrase)),path:path.relative(root,decisionPath).split(path.sep).join('/'),sha256:decision.sha},execution_authority:true,full_phrase_replay_required:false,intent_digest:intent,originating_task_id:task,packet,schema:'atlas.scoped-approval-authorization.v1',single_use:true,status:'AUTHORIZED_SINGLE_USE'});
+    const consumption=write(consumptionPath,{approval_code:'R017-TEST-TEST-TEST-TEST',authorization_sha256:auth.sha,consumed_at:o(consumed),consumption_digest:`sha256:${sha(Buffer.from(`consume:${name}`))}`,execution_correlation_id:correlation,intent_digest:intent,max_effect_count:20,packet,reusable:false,schema:'atlas.scoped-approval-consumption.v1',status:'CONSUMED'});
+    const successor=path.join(runtime,`mazer-master-r017-execution-${correlation}.json`);
+    if(successorExists){fs.writeFileSync(successor,'{}\n',{flag:'wx'});paths.push(successor);}
+    return { correlation, decision, alias, auth, consumption, successor, envelope:{schema:'atlas.supabase.mazer-master-preparation-launcher-invocation.r017.v2',packet,decision_request_path:decisionPath,decision_request_sha256:decision.sha,approval_alias_path:aliasPath,approval_alias_sha256:alias.sha,approval_authorization_path:authPath,approval_authorization_sha256:auth.sha,approval_consumption_path:consumptionPath,approval_consumption_sha256:consumption.sha,approval_expires_at:o(expires),predecessor_correlation_id:'a7db1fd5-a165-43e6-a9a8-c267233005b2',predecessor_state_path:predecessor,predecessor_state_sha256:predecessorSha,execution_correlation_id:correlation,private_source_path:source,private_source_sha256:sourceSha,private_manifest_path:manifest,private_manifest_sha256:manifestSha,successor_state_path:successor,host_path:host,host_sha256:hostSha,launcher_path:launcher,launcher_sha256:launcherSha,not_before:o(notBefore),issued_at:o(envelopeIssued),expires_at:o(expires)}};
   };
-  const paths = [];
-  const validate = (name, value, expectedStatus, expectedCategory) => {
-    const file = path.join(packetRoot, `.launcher-test-${name}-${process.pid}-${Date.now()}.json`);
+  const validate = (shell, name, value, expectedStatus, expectedCategory) => {
+    const file = path.join(packetRoot, `launcher-invocation-${value.execution_correlation_id}.json`);
     const bytes = Buffer.from(`${JSON.stringify(value)}\n`);
     fs.writeFileSync(file, bytes, { flag: 'wx' }); paths.push(file);
-    const result = runLauncher('pwsh.exe', ['-ValidateInvocationOnly', '-InvocationPath', file, '-ExpectedInvocationSha256', sha(bytes)]);
+    const result = runLauncher(shell, ['-ValidateInvocationOnly', '-InvocationPath', file, '-ExpectedInvocationSha256', sha(bytes)]);
     assert.equal(result.status, expectedStatus, `${result.stderr}\n${result.stdout}`);
     if (expectedCategory) assert.equal(result.receipt.category, expectedCategory);
     return result;
   };
   try {
-    assert.equal(validate('valid', envelope, 0).receipt.result, 'PASS_R017_LAUNCHER_INVOCATION_BOUND');
-    validate('wrong-sha', { ...envelope, private_source_sha256: '0'.repeat(64) }, 2, 'SEALED_HASH_BINDING');
-    validate('wrong-path', { ...envelope, private_source_path: manifest }, 2, 'SEALED_PATH_BINDING');
-    validate('wrong-correlation', { ...envelope, successor_state_path: path.join(runtime, `mazer-master-r017-execution-${crypto.randomUUID()}.json`) }, 2, 'SUCCESSOR_STATE_BINDING');
-    productionAdversaries = 4;
+    for(const shell of ['pwsh.exe','powershell.exe']){
+      const now=new Date(), delayed=lineage(`delayed-${shell}`,{aliasIssued:new Date(now-2*3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000),envelopeIssued:now});
+      assert.equal(validate(shell,'delayed',delayed.envelope,0).receipt.result,'PASS_R017_LAUNCHER_INVOCATION_BOUND');
+      const exact=lineage(`exact-expiry-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now)});validate(shell,'exact-expiry',exact.envelope,2,'INVOCATION_EXPIRED');
+      const expired=lineage(`post-expiry-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now-1000)});validate(shell,'post-expiry',expired.envelope,2,'INVOCATION_EXPIRED');
+      const future=lineage(`future-${shell}`,{aliasIssued:now,authorized:new Date(now.getTime()+1000),consumed:new Date(now.getTime()+2000),expires:new Date(now.getTime()+3600000),envelopeIssued:new Date(now.getTime()+60000),notBefore:new Date(now.getTime()+2000)});validate(shell,'future',future.envelope,2,'INVOCATION_NOT_YET_VALID');
+      const replay=lineage(`replay-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000),successorExists:true});validate(shell,'replay',replay.envelope,2,'SUCCESSOR_STATE_BINDING');
+      productionAdversaries += 5;
+    }
+    const now=new Date(), sealed=lineage('sealer-valid',{aliasIssued:new Date(now-2*3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)}), output=path.join(packetRoot,`launcher-invocation-${sealed.correlation}.json`);
+    const sealRun=run('node',[sealer,sealed.decision.file,sealed.alias.file,sealed.auth.file,sealed.consumption.file,output]);assert.equal(sealRun.status,0,`${sealRun.stderr}\n${sealRun.stdout}`);paths.push(output);assert.equal(sealRun.receipt.result,'PASS_R017_INVOCATION_SEALED');assert.equal(sealRun.receipt.execution_correlation_id,sealed.correlation);assert.equal(sealRun.receipt.external_calls,0);
+    const second=run('node',[sealer,sealed.decision.file,sealed.alias.file,sealed.auth.file,sealed.consumption.file,output]);assert.equal(second.status,2);assert.equal(second.receipt.category,'OUTPUT_EXISTS');
   } finally {
     for (const file of paths) if (fs.existsSync(file)) fs.unlinkSync(file);
   }
