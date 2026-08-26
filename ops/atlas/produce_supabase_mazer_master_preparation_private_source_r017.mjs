@@ -132,6 +132,16 @@ export function verifyEvidence(atlasRoot) {
 
 const MIGRATION_FUNCTIONS = Object.freeze(['mazer_is_username_available','mazer_initialize_progression','mazer_complete_level','mazer_complete_ai_level','mazer_reset_progression','mazer_leaderboard_page','mazer_leaderboard_self_rank','mazer_before_user_created','mazer_claim_signup_username','mazer_generated_username','mazer_enforce_username_origin']);
 const MIGRATION_INDEXES = Object.freeze(['mazer_profiles_username_unique_idx','mazer_cycle_receipts_user_client_run_id_unique_idx','mazer_progression_states_leaderboard_order_idx']);
+const AUTH_USER_WRITABLE_COLUMNS = Object.freeze([
+  'instance_id','id','aud','role','email','encrypted_password','email_confirmed_at','invited_at',
+  'confirmation_token','confirmation_sent_at','recovery_token','recovery_sent_at','email_change_token_new',
+  'email_change','email_change_sent_at','last_sign_in_at','raw_app_meta_data','raw_user_meta_data',
+  'is_super_admin','created_at','updated_at','phone','phone_confirmed_at','phone_change','phone_change_token',
+  'phone_change_sent_at','email_change_token_current','email_change_confirm_status','banned_until',
+  'reauthentication_token','reauthentication_sent_at','is_sso_user','deleted_at','is_anonymous'
+]);
+const AUTH_USER_COLUMNS = Object.freeze([...AUTH_USER_WRITABLE_COLUMNS, 'confirmed_at']);
+const sqlIdentifier = (value) => `"${String(value).replaceAll('"', '""')}"`;
 
 export const SNAPSHOT_SQL = (schema) => String.raw`begin transaction isolation level serializable read only;
 select jsonb_build_object(
@@ -428,6 +438,10 @@ export function renderOperationalSql({ auth, fenceInput, actionFenceInput = fenc
   const edges = [...auth.retained_edges, ...auth.new_edges];
   const existingBindings = edges.filter((edge) => edge.disposition !== 'CREATE_AND_BIND').map((edge) => ({ normalized_email: edge.normalized_email, user: edge.master_user, identity: edge.master_identity }));
   const importUsers = imports.map((item) => item.user); const importIdentities = imports.flatMap((item) => item.identities);
+  const expectedAuthUserKeys = canonical([...AUTH_USER_COLUMNS].sort());
+  if (importUsers.some((item) => canonical(Object.keys(item).sort()) !== expectedAuthUserKeys)) throw new Error('AUTH_USER_COLUMN_SHAPE_DRIFT');
+  const authUserInsertColumns = AUTH_USER_WRITABLE_COLUMNS.map(sqlIdentifier).join(',');
+  const authUserInsertProjection = AUTH_USER_WRITABLE_COLUMNS.map((name) => `(r).${sqlIdentifier(name)}`).join(',');
   const expectedMap = sort(edges.map((edge) => ({ legacy_user_id: edge.legacy_user_id, master_user_id: edge.master_user_id, evidence_digest: edge.evidence_digest })), (edge) => edge.legacy_user_id);
   const qaRows = qa.rows;
   const usernameHandleKey = crypto.createHmac('sha256', Buffer.from(quarantineKey, 'utf8')).update('atlas:mazer:r017:username-handle:v1').digest('hex');
@@ -468,7 +482,9 @@ do $r017_auth_precheck$ begin
  if exists(select 1 from auth.users u join jsonb_array_elements(${jsonLiteral(importUsers)}) e on u.id=(e->>'id')::uuid or lower(u.email)=lower(e->>'email')) then raise exception 'R017_IMPORT_USER_COLLISION'; end if;
  if exists(select 1 from auth.identities i join jsonb_array_elements(${jsonLiteral(importIdentities)}) e on i.id=(e->>'id')::uuid or (i.provider=e->>'provider' and lower(i.provider_id)=lower(e->>'provider_id'))) then raise exception 'R017_IMPORT_IDENTITY_COLLISION'; end if;
 end $r017_auth_precheck$;
-with rows as (select jsonb_array_elements(${jsonLiteral(importUsers)}) value) insert into auth.users select (jsonb_populate_record(null::auth.users,value)).* from rows;
+ with rows as (select jsonb_array_elements(${jsonLiteral(importUsers)}) value), records as (select jsonb_populate_record(null::auth.users,value) r from rows)
+ insert into auth.users(${authUserInsertColumns})
+ select ${authUserInsertProjection} from records;
 with rows as (select jsonb_array_elements(${jsonLiteral(importIdentities)}) value), records as (select jsonb_populate_record(null::auth.identities,value) r from rows)
 insert into auth.identities(id,user_id,provider_id,identity_data,provider,last_sign_in_at,created_at,updated_at)
 select (r).id,(r).user_id,(r).provider_id,(r).identity_data,(r).provider,(r).last_sign_in_at,(r).created_at,(r).updated_at from records;
