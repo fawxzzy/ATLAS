@@ -621,10 +621,11 @@ export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, qua
   const reset_era_ai = { legacy_user_id: edge.legacy_user_id, master_user_id: edge.master_user_id, canonical_projection: '9/8/40/D', quarantined_projection: '39/108/161/S', legacy_receipts: legacyReceiptCount, master_receipts: masterReceiptCount, legacy_timestamps_newer: true, override_mode: 'EXACT_WHOLE_ROW', quarantine_encryption: 'PGP_SYM_ENCRYPT_AES256', canonical_row_digest: digest(sourceAiEnvelope), quarantined_row_digest: digest(targetAiEnvelope), quarantined_row: resetMaster };
   const qa = { personas: 4, auth_rows: 4, ttl_minutes: 30, rows: deterministicQa(auth) };
   const actionFenceInput = structuredClone(fence_input);
+  if (actionFenceInput.desired_ai_overrides !== undefined) throw new Error('RESET_AI_OVERRIDE_PREEXISTS');
   const mappedSourceAi = structuredClone(sourceAiEnvelope); mappedSourceAi.user_id = edge.master_user_id; mappedSourceAi.row.user_id = edge.master_user_id; mappedSourceAi.payload_digest = digest(mappedSourceAi.row);
   const actionTargetIndex = actionFenceInput.target_snapshot.ai.findIndex((row) => row.user_id === edge.master_user_id && row.runner_key === 'menu-runner');
   if (actionTargetIndex < 0) throw new Error('RESET_ACTION_TARGET_MISSING');
-  actionFenceInput.target_snapshot.ai[actionTargetIndex] = mappedSourceAi;
+  actionFenceInput.desired_ai_overrides = [mappedSourceAi];
   const rendered = renderOperationalSql({ auth, fenceInput: fence_input, actionFenceInput, catalogPreimage: catalog_preimage, reset: { quarantined_row: resetMaster }, qa, quarantineKey, qaPassword });
   const raw = { schema: PRODUCER_CONTRACT.schema, packet: PRODUCER_CONTRACT.packet, evidence: { current_preimage_sha256: R017_CONTRACT.currentPreimageSha256, topology_evidence_sha256: R017_CONTRACT.topologyEvidenceSha256, restore_proof_sha256: R017_CONTRACT.restoreProofSha256, predecessor_fence_manifest_sha256: R017_CONTRACT.predecessorFenceManifestSha256, master_acl_basis: fence_input.fence.master.acl_basis }, catalog_preimage, catalog_preimage_sha256: sha256(catalog_preimage), fence_input, auth, reset_era_ai, reset_era_player, qa, sql: rendered.sql, sql_sha256: rendered.sql_sha256 };
   validatePrivateSource(raw);

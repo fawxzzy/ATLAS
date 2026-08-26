@@ -5,7 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-import { CONTRACT as FENCE_CONTRACT, sha256 } from '../classify_supabase_mazer_master_cutover_data_fence_r001.mjs';
+import { CONTRACT as FENCE_CONTRACT, classifyCutover, sha256 } from '../classify_supabase_mazer_master_cutover_data_fence_r001.mjs';
 import { validatePrivateSource, wrapMigrationTransaction } from '../materialize_supabase_mazer_master_preparation_r017.mjs';
 import {
   PRODUCER_CONTRACT,
@@ -126,6 +126,27 @@ assert.deepEqual(plan.imports.at(-1).identities, [fixture.legacy.auth_identities
 
 const source = producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
 const validated = validatePrivateSource(source);
+const actionClassified = classifyCutover(validated.actionFenceInput);
+const resetTargetUser = source.reset_era_ai.master_user_id;
+const originalResetTarget = source.fence_input.target_snapshot.ai.find((row) => row.user_id === resetTargetUser && row.runner_key === 'menu-runner');
+const actionResetTarget = validated.actionFenceInput.target_snapshot.ai.find((row) => row.user_id === resetTargetUser && row.runner_key === 'menu-runner');
+const actionOverride = validated.actionFenceInput.desired_ai_overrides?.[0];
+const expectedResetTarget = actionClassified.privatePlan.expected.ai.find((row) => row.user_id === resetTargetUser && row.runner_key === 'menu-runner');
+const desiredResetTarget = actionClassified.privatePlan.desired.ai.find((row) => row.user_id === resetTargetUser && row.runner_key === 'menu-runner');
+assert.deepEqual(actionResetTarget, originalResetTarget, 'action input changed the live target preimage');
+assert.equal(actionOverride.payload_digest, sha256(actionOverride.row));
+assert.notEqual(actionOverride.payload_digest, originalResetTarget.payload_digest);
+assert.equal(expectedResetTarget.level, '39');
+assert.equal(expectedResetTarget.completed_cycles, '108');
+assert.equal(desiredResetTarget.level, '9');
+assert.equal(desiredResetTarget.completed_cycles, '8');
+assert.equal(actionClassified.receipt.monotonic_ai_merge, false, 'non-monotonic desired AI override was reported as monotonic');
+assert.equal(classifyCutover(source.fence_input).receipt.monotonic_ai_merge, true, 'ordinary merged AI progression lost its monotonic receipt');
+assert.equal(actionClassified.receipt.target_app_high_water_digest, classifyCutover(source.fence_input).receipt.target_app_high_water_digest);
+const wrongOverride = structuredClone(validated.actionFenceInput); wrongOverride.desired_ai_overrides[0].row.updated_at = iso(1); wrongOverride.desired_ai_overrides[0].payload_digest = sha256(wrongOverride.desired_ai_overrides[0].row);
+assert.throws(() => classifyCutover(wrongOverride), /DESIRED_AI_OVERRIDE_NOT_MAPPED_SOURCE/);
+const duplicateOverride = structuredClone(validated.actionFenceInput); duplicateOverride.desired_ai_overrides.push(structuredClone(duplicateOverride.desired_ai_overrides[0]));
+assert.throws(() => classifyCutover(duplicateOverride), /DESIRED_AI_OVERRIDE_DUPLICATE/);
 const renderAuth = (auth) => renderOperationalSql({ auth, fenceInput: source.fence_input, catalogPreimage: source.catalog_preimage, reset: { quarantined_row: source.reset_era_ai.quarantined_row }, qa: source.qa, quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
 const importUserExtraKey = structuredClone(source.auth); importUserExtraKey.imports[0].user.unexpected = true;
 assert.throws(() => renderAuth(importUserExtraKey), /AUTH_USER_COLUMN_SHAPE_DRIFT/);
