@@ -257,8 +257,12 @@ function Invoke-ProcessSanitized(
       throw 'CHILD_TIMEOUT'
     }
     $stdout = $stdoutTask.GetAwaiter().GetResult()
-    [void]$stderrTask.GetAwaiter().GetResult()
-    return [pscustomobject]@{ ExitCode = $process.ExitCode; Stdout = $stdout }
+    $stderr = $stderrTask.GetAwaiter().GetResult()
+    $stderrBytes = [Text.Encoding]::UTF8.GetByteCount($stderr)
+    $stderrSha256 = Get-TextSha256 $stderr
+    $safeStderrCategory = Get-SafePsqlFailureCategory $stderr
+    $stderr = $null
+    return [pscustomobject]@{ ExitCode = $process.ExitCode; Stdout = $stdout; SafeStderrCategory = $safeStderrCategory; StderrBytes = $stderrBytes; StderrSha256 = $stderrSha256 }
   }
   finally {
     foreach ($key in $Environment.Keys) { [void]$processEnvironment.Remove([string]$key) }
@@ -629,7 +633,10 @@ function Invoke-PsqlObservation([string]$DatabaseUrl, [string]$SqlPath, [string]
     PGAPPNAME = 'atlas-mazer-master-cutover-high-water-r001'
   }
   $child = Invoke-ProcessSanitized -FileName $psql -Arguments @('-X','--no-psqlrc','--quiet','--no-align','--tuples-only','--set','ON_ERROR_STOP=1','--file',$SqlPath) -Environment $environment -TimeoutMs 180000
-  if ($child.ExitCode -ne 0) { throw 'SOURCE_HIGH_WATER_READ_FAILED' }
+  if ($child.ExitCode -ne 0) {
+    if ([string]$child.SafeStderrCategory -cin @('SOURCE_HIGH_WATER_DRIFT_AUTH','SOURCE_HIGH_WATER_DRIFT_MAZER_PROFILES','SOURCE_HIGH_WATER_DRIFT_MAZER_PROGRESSION_STATES','SOURCE_HIGH_WATER_DRIFT_MAZER_AI_PROGRESSION_STATES','SOURCE_HIGH_WATER_DRIFT_MAZER_CYCLE_RECEIPTS')) { throw ([string]$child.SafeStderrCategory) }
+    throw 'SOURCE_HIGH_WATER_READ_FAILED'
+  }
   if ([string]::IsNullOrWhiteSpace($child.Stdout) -or $child.Stdout.Length -gt 4096) { throw 'SOURCE_HIGH_WATER_OUTPUT_SHAPE' }
   $lines = @($child.Stdout -split "`r?`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
   if ($lines.Count -ne 1) { throw 'SOURCE_HIGH_WATER_OUTPUT_CARDINALITY' }
@@ -661,6 +668,13 @@ public static class AtlasMazerMasterFenceNativeR001 {
   [DllImport("advapi32.dll", SetLastError=true)] public static extern void CredFree(IntPtr credential);
 }
 '@
+}
+
+function Get-SafePsqlFailureCategory([string]$Stderr) {
+  if ([string]::IsNullOrWhiteSpace($Stderr) -or [Text.Encoding]::UTF8.GetByteCount($Stderr) -gt 65536) { return $null }
+  $match = [regex]::Match($Stderr, '\Apsql:[^\r\n]{1,1024}source-observation\.sql:[0-9]+:\s+ERROR:\s+SOURCE_HIGH_WATER_DRIFT:(auth|mazer_profiles|mazer_progression_states|mazer_ai_progression_states|mazer_cycle_receipts)\r?\nCONTEXT:\s+PL/pgSQL function inline_code_block line [0-9]+ at RAISE\r?\n?\z')
+  if (-not $match.Success) { return $null }
+  return 'SOURCE_HIGH_WATER_DRIFT_' + $match.Groups[1].Value.ToUpperInvariant()
 }
 
 function Read-ManagementToken {
@@ -828,6 +842,13 @@ function Assert-SourceContract {
   $node = Invoke-ProcessSanitized -FileName (Get-Command node -ErrorAction Stop).Source -Arguments @('--check',$Classifier) -TimeoutMs 30000
   if ($node.ExitCode -ne 0) { throw 'CLASSIFIER_PARSE_FAILED' }
   if ((Get-SafeFailureCategory 'ACL_PREIMAGE_DRIFT' 'PRESTATE_EXECUTION_HOLD') -cne 'ACL_PREIMAGE_DRIFT') { throw 'SAFE_CATEGORY_PRESERVATION_DRIFT' }
+  foreach ($table in @('auth','mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) {
+    $expected = 'SOURCE_HIGH_WATER_DRIFT_' + $table.ToUpperInvariant()
+    if ((Get-SafePsqlFailureCategory ("psql:C:\safe\source-observation.sql:9: ERROR:  SOURCE_HIGH_WATER_DRIFT:$table`nCONTEXT:  PL/pgSQL function inline_code_block line 1 at RAISE`n")) -cne $expected) { throw 'SOURCE_HIGH_WATER_SAFE_CATEGORY_DRIFT' }
+  }
+  foreach ($unsafeStderr in @('ERROR: SOURCE_HIGH_WATER_DRIFT:unknown_table','password=synthetic','ERROR: password=synthetic','SOURCE_HIGH_WATER_DRIFT:mazer_progression_states',"psql:C:\safe\source-observation.sql:9: ERROR: SOURCE_HIGH_WATER_DRIFT:auth`nCONTEXT: PL/pgSQL function inline_code_block line 1 at RAISE`nDETAIL: password=synthetic`n",('A' * 65537))) {
+    if ($null -ne (Get-SafePsqlFailureCategory $unsafeStderr)) { throw 'SOURCE_HIGH_WATER_SAFE_CATEGORY_FAIL_CLOSED_DRIFT' }
+  }
   foreach ($unsafeCategory in @('', 'password=synthetic', 'Authorization: synthetic', 'postgresql://synthetic', ('A' * 97))) {
     if ((Get-SafeFailureCategory $unsafeCategory 'PRESTATE_EXECUTION_HOLD') -cne 'PRESTATE_EXECUTION_HOLD') { throw 'SAFE_CATEGORY_FAIL_CLOSED_DRIFT' }
   }
