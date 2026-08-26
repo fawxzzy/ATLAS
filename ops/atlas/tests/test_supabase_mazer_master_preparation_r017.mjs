@@ -14,6 +14,8 @@ const fenceClassifierPath = path.join(root, 'ops/atlas/classify_supabase_mazer_m
 const host = fs.readFileSync(hostPath, 'utf8');
 const materializer = fs.readFileSync(materializerPath, 'utf8');
 const fenceHost = fs.readFileSync(fenceHostPath, 'utf8');
+const localFenceProbePath = path.join(root, 'ops/atlas/probe_supabase_mazer_master_fence_production_shape_local_r017.mjs');
+const localFenceProbe = fs.readFileSync(localFenceProbePath, 'utf8');
 const fenceClassifier = fs.readFileSync(fenceClassifierPath, 'utf8');
 const state = (phase) => ({ schema: 'atlas.supabase.mazer-master-preparation-host-state.r017.v1', phase });
 const adversarialCoverage = ['all live phase interruption','ambiguous drift','disable hook before SQL/fence','receipt conservation','Auth mapping','RLS/ACL/Data API','executor input hash binding','fence child failure receipt','fence rollback failure receipt','fence prestate terminal receipt'];
@@ -93,6 +95,17 @@ requireOrder(host.slice(host.indexOf('function Invoke-Child'), host.indexOf('fun
 for (const token of ['ReplayExactRolledBack','PASS_EXACT_ROLLBACK_TERMINAL','replay_requires_explicit_switch','fence.replay-','START_EXACT_REPLAY']) assert.ok(host.includes(token) || materializer.includes(token), `rollback replay seam missing ${token}`);
 for (const token of ['Write-FenceChildReceipt','New-FenceChildReceipt','stdout_sha256','stderr_sha256','terminal_category','FENCE_CHILD_FAILURE_RECEIPT_CONTRACT','FENCE_CHILD_ROLLBACK_RECEIPT_CONTRACT']) assert.ok(host.includes(token), `fence child receipt seam missing ${token}`);
 for (const token of ["trap {",'NO_EFFECT_PRESTATE','PRESTATE_EXECUTION_HOLD','Write-FailClosedPrestateResult','Get-SafeFailureCategory']) assert.ok(fenceHost.includes(token), `fence prestate receipt seam missing ${token}`);
+requireOrder(fenceHost, ['function Initialize-WindowsCredentialInterop','function Read-ManagementToken','Initialize-WindowsCredentialInterop','function Invoke-AuthConfig','\ntrap {','$managementToken = Read-ManagementToken']);
+for (const token of ['CREDENTIAL_LOOKUP_REMAINS_REACHABLE','ATLAS_R017_CREDENTIAL_MOCK_SENTINEL','ATLAS_R017_CONNECTOR_SENTINEL','credential_lookup_count: 0','external_connector_calls: 0']) assert.ok(localFenceProbe.includes(token), `local fence isolation seam missing ${token}`);
+{
+  const localProbeRun = spawnSync(process.execPath, [localFenceProbePath, '--source-check'], { cwd: root, encoding: 'utf8', timeout: 30000, windowsHide: true });
+  assert.equal(localProbeRun.status, 0, localProbeRun.stderr);
+  const localProbeReceipt = JSON.parse(localProbeRun.stdout.trim());
+  assert.equal(localProbeReceipt.result, 'PASS_R017_LOCAL_PRODUCTION_SHAPE_SOURCE');
+  assert.equal(localProbeReceipt.credential_reads, 0);
+  assert.equal(localProbeReceipt.external_calls, 0);
+  assert.equal(localProbeReceipt.writes, 0);
+}
 assert.ok(!/trap \{[\s\S]{0,256}Write-SafeResult/.test(fenceHost), 'prestate trap must not recurse through disclosure validation');
 const replayReset = host.slice(host.indexOf("if ([string]$state.phase -ceq 'ROLLED_BACK')"), host.indexOf('$managementToken = Read-ManagementToken'));
 requireOrder(replayReset, ['ReplayExactRolledBack', "phase = 'PREFLIGHT'", 'Write-State', 'fence.replay-']);

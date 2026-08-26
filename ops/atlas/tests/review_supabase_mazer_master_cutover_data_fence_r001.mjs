@@ -23,10 +23,12 @@ const hostPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_cutover
 const classifierPath = path.join(root, 'ops/atlas/classify_supabase_mazer_master_cutover_data_fence_r001.mjs');
 const testPath = path.join(root, 'ops/atlas/tests/test_supabase_mazer_master_cutover_data_fence_r001.mjs');
 const reviewPath = fileURLToPath(import.meta.url);
+const localProbePath = path.join(root, 'ops/atlas/probe_supabase_mazer_master_fence_production_shape_local_r017.mjs');
 const host = fs.readFileSync(hostPath, 'utf8');
 const classifier = fs.readFileSync(classifierPath, 'utf8');
 const focused = fs.readFileSync(testPath, 'utf8');
 const review = fs.readFileSync(reviewPath, 'utf8');
+const localProbe = fs.readFileSync(localProbePath, 'utf8');
 const findings = [];
 
 function requireText(source, value, category) {
@@ -59,6 +61,14 @@ function run(command, args) {
   }
   if (child.stderr.trim() !== '') findings.push(`CHILD_STDERR:${path.basename(command)}`);
   return child.stdout.trim();
+}
+
+requireOrder(host, ['function Initialize-WindowsCredentialInterop','function Read-ManagementToken','Initialize-WindowsCredentialInterop','function Invoke-AuthConfig','\ntrap {','$managementToken = Read-ManagementToken'], 'CREDENTIAL_INTEROP_NOT_BEHIND_TRAP');
+for (const token of ['CREDENTIAL_LOOKUP_REMAINS_REACHABLE','ATLAS_R017_CREDENTIAL_MOCK_SENTINEL','ATLAS_R017_CONNECTOR_SENTINEL','external_connector_calls: 0','credential_lookup_count: 0','HTTP_PROXY','HTTPS_PROXY']) requireText(localProbe, token, `LOCAL_PRODUCTION_SHAPE_ISOLATION_MISSING:${token}`);
+const localProbeSource = run(process.execPath, [localProbePath, '--source-check']);
+if (localProbeSource) {
+  const parsed = JSON.parse(localProbeSource);
+  if (parsed.result !== 'PASS_R017_LOCAL_PRODUCTION_SHAPE_SOURCE' || parsed.credential_reads !== 0 || parsed.external_calls !== 0 || parsed.writes !== 0) findings.push('LOCAL_PRODUCTION_SHAPE_SOURCE_RESULT');
 }
 
 function reviewAclPreimage(schema) {
