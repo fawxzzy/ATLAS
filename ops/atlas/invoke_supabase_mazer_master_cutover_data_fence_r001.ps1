@@ -277,6 +277,7 @@ function Invoke-Classifier(
   $plan = Join-Path $PrivateRoot 'private-plan.json'
   $transaction = Join-Path $PrivateRoot 'transaction.sql'
   $sourceObservation = Join-Path $PrivateRoot 'source-observation.sql'
+  $targetObservation = Join-Path $PrivateRoot 'target-observation.sql'
   $fence = Join-Path $PrivateRoot 'fence.sql'
   $writerCapture = Join-Path $PrivateRoot 'writer-capture.sql'
   $aclObservation = Join-Path $PrivateRoot 'acl-observation.sql'
@@ -296,6 +297,7 @@ function Invoke-Classifier(
     '--private-plan', $plan,
     '--private-sql', $transaction,
     '--private-source-observation-sql', $sourceObservation,
+    '--private-target-observation-sql', $targetObservation,
     '--private-fence-sql', $fence,
     '--private-writer-capture-sql', $writerCapture,
     '--private-acl-observation-sql', $aclObservation,
@@ -318,7 +320,7 @@ function Invoke-Classifier(
   if ($receipt.raw_identifiers_emitted -ne $false -or $receipt.raw_records_emitted -ne $false -or $receipt.pii_emitted -ne $false -or $receipt.secrets_emitted -ne $false) {
     throw 'CLASSIFIER_DISCLOSURE'
   }
-  foreach ($file in @($plan,$transaction,$sourceObservation,$fence,$writerCapture,$aclObservation,$restore,$legacyFence,$legacyWriterCapture,$legacyAclObservation,$legacyRestore,$signupAdmissionObservation,$signupAdmissionFence,$signupAdmissionRestore)) {
+  foreach ($file in @($plan,$transaction,$sourceObservation,$targetObservation,$fence,$writerCapture,$aclObservation,$restore,$legacyFence,$legacyWriterCapture,$legacyAclObservation,$legacyRestore,$signupAdmissionObservation,$signupAdmissionFence,$signupAdmissionRestore)) {
     if (-not (Test-Path -LiteralPath $file -PathType Leaf) -or (Get-Item -LiteralPath $file).Length -lt 16) { throw 'PRIVATE_PLAN_MISSING' }
   }
   return [pscustomobject]@{
@@ -326,6 +328,7 @@ function Invoke-Classifier(
     Plan = $plan
     TransactionSql = $transaction
     SourceObservationSql = $sourceObservation
+    TargetObservationSql = $targetObservation
     FenceSql = $fence
     WriterCaptureSql = $writerCapture
     AclObservationSql = $aclObservation
@@ -364,7 +367,10 @@ function Invoke-PsqlPrivate([string]$DatabaseUrl, [string]$SqlPath) {
     PGAPPNAME = 'atlas-mazer-master-cutover-data-fence-r001'
   }
   $child = Invoke-ProcessSanitized -FileName $psql -Arguments @('-X','--no-psqlrc','--set','ON_ERROR_STOP=1','--file',$SqlPath) -Environment $environment -TimeoutMs 180000
-  if ($child.ExitCode -ne 0) { throw 'PSQL_TRANSACTION_FAILED' }
+  if ($child.ExitCode -ne 0) {
+    if ([string]$child.SafeStderrCategory -cin @('TARGET_PREIMAGE_DRIFT_MAZER_PROFILES','TARGET_PREIMAGE_DRIFT_MAZER_PROGRESSION_STATES','TARGET_PREIMAGE_DRIFT_MAZER_AI_PROGRESSION_STATES','TARGET_PREIMAGE_DRIFT_MAZER_CYCLE_RECEIPTS','TARGET_POSTIMAGE_DRIFT_MAZER_PROFILES','TARGET_POSTIMAGE_DRIFT_MAZER_PROGRESSION_STATES','TARGET_POSTIMAGE_DRIFT_MAZER_AI_PROGRESSION_STATES','TARGET_POSTIMAGE_DRIFT_MAZER_CYCLE_RECEIPTS')) { throw ([string]$child.SafeStderrCategory) }
+    throw 'PSQL_TRANSACTION_FAILED'
+  }
 }
 
 function Invoke-PsqlJsonPrivate([string]$DatabaseUrl, [string]$SqlPath, [string]$OutputPath, [string]$FailureCategory) {
@@ -670,11 +676,42 @@ public static class AtlasMazerMasterFenceNativeR001 {
 '@
 }
 
+function Invoke-PsqlTargetObservation([string]$DatabaseUrl, [string]$SqlPath, [string]$ExpectedDigest) {
+  $psql = (Get-Command psql -ErrorAction Stop).Source
+  $environment = @{ PGDATABASE = $DatabaseUrl; PGCONNECT_TIMEOUT = '15'; PGAPPNAME = 'atlas-mazer-master-cutover-target-high-water-r001' }
+  $child = Invoke-ProcessSanitized -FileName $psql -Arguments @('-X','--no-psqlrc','--quiet','--no-align','--tuples-only','--set','ON_ERROR_STOP=1','--file',$SqlPath) -Environment $environment -TimeoutMs 180000
+  if ($child.ExitCode -ne 0) {
+    if ([string]$child.SafeStderrCategory -cin @('TARGET_HIGH_WATER_DRIFT_MAZER_PROFILES','TARGET_HIGH_WATER_DRIFT_MAZER_PROGRESSION_STATES','TARGET_HIGH_WATER_DRIFT_MAZER_AI_PROGRESSION_STATES','TARGET_HIGH_WATER_DRIFT_MAZER_CYCLE_RECEIPTS')) { throw ([string]$child.SafeStderrCategory) }
+    throw 'TARGET_HIGH_WATER_READ_FAILED'
+  }
+  if ([string]::IsNullOrWhiteSpace($child.Stdout) -or $child.Stdout.Length -gt 4096) { throw 'TARGET_HIGH_WATER_OUTPUT_SHAPE' }
+  $lines = @($child.Stdout -split "`r?`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+  if ($lines.Count -ne 1) { throw 'TARGET_HIGH_WATER_OUTPUT_CARDINALITY' }
+  try { $observation = $lines[0] | ConvertFrom-Json } catch { throw 'TARGET_HIGH_WATER_OUTPUT_JSON' }
+  if ([string]$observation.result -cne 'PASS_TARGET_HIGH_WATER' -or [string]$observation.target_app_high_water_digest -cne $ExpectedDigest) { throw 'TARGET_HIGH_WATER_DRIFT' }
+}
+
 function Get-SafePsqlFailureCategory([string]$Stderr) {
   if ([string]::IsNullOrWhiteSpace($Stderr) -or [Text.Encoding]::UTF8.GetByteCount($Stderr) -gt 65536) { return $null }
-  $match = [regex]::Match($Stderr, '\Apsql:[^\r\n]{1,1024}source-observation\.sql:[0-9]+:\s+ERROR:\s+SOURCE_HIGH_WATER_DRIFT:(auth|mazer_profiles|mazer_progression_states|mazer_ai_progression_states|mazer_cycle_receipts)\r?\nCONTEXT:\s+PL/pgSQL function inline_code_block line [0-9]+ at RAISE\r?\n?\z')
-  if (-not $match.Success) { return $null }
-  return 'SOURCE_HIGH_WATER_DRIFT_' + $match.Groups[1].Value.ToUpperInvariant()
+  $source = [regex]::Match($Stderr, '\Apsql:[^\r\n]{1,1024}source-observation\.sql:[0-9]+:\s+ERROR:\s+SOURCE_HIGH_WATER_DRIFT:(auth|mazer_profiles|mazer_progression_states|mazer_ai_progression_states|mazer_cycle_receipts)\r?\nCONTEXT:\s+PL/pgSQL function inline_code_block line [0-9]+ at RAISE\r?\n?\z')
+  if ($source.Success) { return 'SOURCE_HIGH_WATER_DRIFT_' + $source.Groups[1].Value.ToUpperInvariant() }
+  $target = [regex]::Match($Stderr, '\Apsql:[^\r\n]{1,1024}target-observation\.sql:[0-9]+:\s+ERROR:\s+TARGET_HIGH_WATER_DRIFT:(mazer_profiles|mazer_progression_states|mazer_ai_progression_states|mazer_cycle_receipts)\r?\nCONTEXT:\s+PL/pgSQL function inline_code_block line [0-9]+ at RAISE\r?\n?\z')
+  if ($target.Success) { return 'TARGET_HIGH_WATER_DRIFT_' + $target.Groups[1].Value.ToUpperInvariant() }
+  $transaction = [regex]::Match($Stderr, '\Apsql:[^\r\n]{1,1024}transaction\.sql:[0-9]+:\s+ERROR:\s+(TARGET_PREIMAGE_DRIFT|TARGET_POSTIMAGE_DRIFT):(mazer_profiles|mazer_progression_states|mazer_ai_progression_states|mazer_cycle_receipts)\r?\nCONTEXT:\s+PL/pgSQL function inline_code_block line [0-9]+ at RAISE\r?\n?\z')
+  if ($transaction.Success) { return $transaction.Groups[1].Value + '_' + $transaction.Groups[2].Value.ToUpperInvariant() }
+  return $null
+}
+
+function Get-InheritedPreCredentialEffect($State) {
+  if ($null -eq $State) { return 'NO_EFFECT_CONFIRMED' }
+  $phase = if ([string]$State.phase -in @('AMBIGUOUS_HOLD','QUARANTINED_HOLD')) { [string]$State.previous_phase } else { [string]$State.phase }
+  if ([string]$State.direction -ceq 'forward' -and $phase -in @('PAUSED_AFTER_SOURCE_HIGH_WATER','CONTINUE_REVALIDATING','CONTINUE_SOURCE_HIGH_WATER_READ_1','CONTINUE_SOURCE_HIGH_WATER_READ_2','FORWARD_DELTA_APPLYING','FORWARD_DELTA_APPLIED','COMPLETE','LEGACY_RESTORING','LEGACY_RESTORED')) {
+    return 'LEGACY_SIGNUP_AND_WRITER_FENCE_INHERITED_HOLD'
+  }
+  if ([string]$State.direction -ceq 'reverse' -and $phase -in @('MASTER_SIGNUP_FENCED','MASTER_WRITERS_PREOBSERVING','MASTER_WRITERS_PREOBSERVED','MASTER_WRITERS_FENCING','MASTER_WRITER_REVOKE_COMMITTED','MASTER_WRITER_SET_CAPTURING','MASTER_WRITER_SET_CAPTURED','MASTER_WRITERS_DRAINING','MASTER_WRITERS_DRAINED','MASTER_LOCK_BARRIER_ACQUIRING','MASTER_WRITERS_FENCED','SOURCE_HIGH_WATER_READ_1','SOURCE_HIGH_WATER_READ_2','REVERSE_DELTA_APPLYING','REVERSE_DELTA_APPLIED')) {
+    return 'MASTER_HOOK_SIGNUP_AND_WRITER_FENCE_INHERITED_HOLD'
+  }
+  return 'NO_EFFECT_CONFIRMED'
 }
 
 function Read-ManagementToken {
@@ -846,12 +883,27 @@ function Assert-SourceContract {
     $expected = 'SOURCE_HIGH_WATER_DRIFT_' + $table.ToUpperInvariant()
     if ((Get-SafePsqlFailureCategory ("psql:C:\safe\source-observation.sql:9: ERROR:  SOURCE_HIGH_WATER_DRIFT:$table`nCONTEXT:  PL/pgSQL function inline_code_block line 1 at RAISE`n")) -cne $expected) { throw 'SOURCE_HIGH_WATER_SAFE_CATEGORY_DRIFT' }
   }
+  foreach ($table in @('mazer_profiles','mazer_progression_states','mazer_ai_progression_states','mazer_cycle_receipts')) {
+    $suffix = $table.ToUpperInvariant()
+    if ((Get-SafePsqlFailureCategory ("psql:C:\safe\target-observation.sql:9: ERROR:  TARGET_HIGH_WATER_DRIFT:$table`nCONTEXT:  PL/pgSQL function inline_code_block line 1 at RAISE`n")) -cne ('TARGET_HIGH_WATER_DRIFT_' + $suffix)) { throw 'TARGET_HIGH_WATER_SAFE_CATEGORY_DRIFT' }
+    foreach ($phase in @('PREIMAGE','POSTIMAGE')) {
+      if ((Get-SafePsqlFailureCategory ("psql:C:\safe\transaction.sql:9: ERROR:  TARGET_${phase}_DRIFT:$table`nCONTEXT:  PL/pgSQL function inline_code_block line 1 at RAISE`n")) -cne ("TARGET_${phase}_DRIFT_" + $suffix)) { throw 'TARGET_TRANSACTION_SAFE_CATEGORY_DRIFT' }
+    }
+  }
   foreach ($unsafeStderr in @('ERROR: SOURCE_HIGH_WATER_DRIFT:unknown_table','password=synthetic','ERROR: password=synthetic','SOURCE_HIGH_WATER_DRIFT:mazer_progression_states',"psql:C:\safe\source-observation.sql:9: ERROR: SOURCE_HIGH_WATER_DRIFT:auth`nCONTEXT: PL/pgSQL function inline_code_block line 1 at RAISE`nDETAIL: password=synthetic`n",('A' * 65537))) {
     if ($null -ne (Get-SafePsqlFailureCategory $unsafeStderr)) { throw 'SOURCE_HIGH_WATER_SAFE_CATEGORY_FAIL_CLOSED_DRIFT' }
+  }
+  foreach ($unsafeStderr in @('TARGET_HIGH_WATER_DRIFT:mazer_profiles',"psql:C:\safe\target-observation.sql:9: ERROR: TARGET_HIGH_WATER_DRIFT:mazer_profiles`nCONTEXT: PL/pgSQL function inline_code_block line 1 at RAISE`nDETAIL: password=synthetic`n","psql:C:\safe\transaction.sql:9: ERROR: TARGET_PREIMAGE_DRIFT:mazer_profiles`nCONTEXT: PL/pgSQL function inline_code_block line 1 at RAISE`nDETAIL: arbitrary`n")) {
+    if ($null -ne (Get-SafePsqlFailureCategory $unsafeStderr)) { throw 'TARGET_SAFE_CATEGORY_FAIL_CLOSED_DRIFT' }
   }
   foreach ($unsafeCategory in @('', 'password=synthetic', 'Authorization: synthetic', 'postgresql://synthetic', ('A' * 97))) {
     if ((Get-SafeFailureCategory $unsafeCategory 'PRESTATE_EXECUTION_HOLD') -cne 'PRESTATE_EXECUTION_HOLD') { throw 'SAFE_CATEGORY_FAIL_CLOSED_DRIFT' }
   }
+  if ((Get-InheritedPreCredentialEffect ([pscustomobject]@{ direction='forward'; phase='PAUSED_AFTER_SOURCE_HIGH_WATER' })) -cne 'LEGACY_SIGNUP_AND_WRITER_FENCE_INHERITED_HOLD') { throw 'FORWARD_CONTINUE_INHERITED_EFFECT_DRIFT' }
+  if ((Get-InheritedPreCredentialEffect ([pscustomobject]@{ direction='forward'; phase='QUARANTINED_HOLD'; previous_phase='PAUSED_AFTER_SOURCE_HIGH_WATER' })) -cne 'LEGACY_SIGNUP_AND_WRITER_FENCE_INHERITED_HOLD') { throw 'FORWARD_CONTINUE_QUARANTINE_EFFECT_DRIFT' }
+  if ((Get-InheritedPreCredentialEffect ([pscustomobject]@{ direction='reverse'; phase='MASTER_WRITERS_FENCED' })) -cne 'MASTER_HOOK_SIGNUP_AND_WRITER_FENCE_INHERITED_HOLD') { throw 'REVERSE_CONTINUE_INHERITED_EFFECT_DRIFT' }
+  if ((Get-InheritedPreCredentialEffect ([pscustomobject]@{ direction='reverse'; phase='QUARANTINED_HOLD'; previous_phase='MASTER_WRITERS_FENCED' })) -cne 'MASTER_HOOK_SIGNUP_AND_WRITER_FENCE_INHERITED_HOLD') { throw 'REVERSE_CONTINUE_QUARANTINE_EFFECT_DRIFT' }
+  if ((Get-InheritedPreCredentialEffect ([pscustomobject]@{ direction='forward'; phase='PREFLIGHT' })) -cne 'NO_EFFECT_CONFIRMED') { throw 'FRESH_PREFLIGHT_EFFECT_DRIFT' }
   $null = ConvertTo-SafeJson ([ordered]@{ category = (Get-SafeFailureCategory 'password=synthetic' 'PRESTATE_EXECUTION_HOLD'); effect_status = 'NO_EFFECT_PRESTATE' })
   $originalOut = [Console]::Out
   $probeOut = New-Object IO.StringWriter ([Globalization.CultureInfo]::InvariantCulture)
@@ -1058,6 +1110,10 @@ try {
 
   $legacyDatabaseUrl = Assert-DatabaseUrl ([Environment]::GetEnvironmentVariable('ATLAS_MAZER_LEGACY_DATABASE_URL', 'Process')) $LegacyProjectRef
   $masterDatabaseUrl = Assert-DatabaseUrl ([Environment]::GetEnvironmentVariable('ATLAS_MAZER_MASTER_DATABASE_URL', 'Process')) $MasterProjectRef
+  if ($Mode -ne 'Rollback' -and $ExecutionStep -ne 'ReleaseLegacy') {
+    $targetDatabaseUrl = if ($direction -ceq 'forward') { $masterDatabaseUrl } else { $legacyDatabaseUrl }
+    Invoke-PsqlTargetObservation $targetDatabaseUrl $classification.TargetObservationSql ([string]$classification.Receipt.target_app_high_water_digest)
+  }
   $managementToken = Read-ManagementToken
 
   if ($Mode -eq 'Rollback') {
@@ -1345,7 +1401,10 @@ try {
 }
 catch {
   $category = Get-SafeFailureCategory ([string]$_.Exception.Message)
-  $effect = 'NO_EFFECT_CONFIRMED'
+  $effect = Get-InheritedPreCredentialEffect $state
+  if ($effect -cne 'NO_EFFECT_CONFIRMED' -and $null -eq $managementToken) {
+    try { Set-StatePhase $state 'QUARANTINED_HOLD' $resolvedState } catch { $effect = 'AMBIGUOUS_HOLD' }
+  }
   try {
     if ($null -ne $state -and $null -ne $classification -and $null -ne $managementToken) {
       if ([string]$state.direction -ceq 'reverse' -and [string]$state.phase -in @('LEGACY_WRITERS_RESTORING','LEGACY_WRITERS_RESTORED','LEGACY_SIGNUP_RESTORING')) {

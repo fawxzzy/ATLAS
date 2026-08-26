@@ -726,6 +726,36 @@ export function renderSourceObservationSql(plan) {
   return `${blocks.join('\n')}\n`;
 }
 
+export function renderTargetObservationSql(plan) {
+  requirePlain(plan, 'PRIVATE_PLAN_SHAPE');
+  const schema = plan.target.schema;
+  if (![CONTRACT.legacy.schema, CONTRACT.master.schema].includes(schema)) hold('PROJECT_OR_SCHEMA_DRIFT');
+  const blocks = [
+    '\\set ON_ERROR_STOP on',
+    'begin transaction isolation level repeatable read;',
+    "set local lock_timeout = '5s';",
+    "set local statement_timeout = '120s';",
+    `select pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('atlas:target-high-water:${plan.direction}:${plan.packet_input_digest}', 0));`
+  ];
+  for (const [table, rowsName] of [
+    ['mazer_profiles', 'profiles'],
+    ['mazer_progression_states', 'player'],
+    ['mazer_ai_progression_states', 'ai'],
+    ['mazer_cycle_receipts', 'receipts']
+  ]) {
+    const expectedName = `atlas_target_${rowsName}`;
+    blocks.push(`create temporary table ${expectedName} on commit drop as select * from ${q(schema)}.${q(table)} with no data;`);
+    // jsonb_populate_recordset intentionally projects the sealed future-shape
+    // row through the live composite. Before M1, future additive keys are
+    // ignored; after M1/M2 the same exact source validates the expanded row.
+    blocks.push(`insert into ${expectedName} select * from pg_catalog.jsonb_populate_recordset(null::${q(schema)}.${q(table)}, ${encodedJson(plan.expected[rowsName])});`);
+    blocks.push(`do $atlas_target_preimage$ begin if exists ((select pg_catalog.to_jsonb(t) from ${q(schema)}.${q(table)} t except select pg_catalog.to_jsonb(e) from ${expectedName} e) union all (select pg_catalog.to_jsonb(e) from ${expectedName} e except select pg_catalog.to_jsonb(t) from ${q(schema)}.${q(table)} t)) then raise exception 'TARGET_HIGH_WATER_DRIFT:${table}'; end if; end $atlas_target_preimage$;`);
+  }
+  blocks.push(`select pg_catalog.jsonb_build_object('result', 'PASS_TARGET_HIGH_WATER', 'target_app_high_water_digest', '${plan.target_app_high_water_digest}', 'observed_at', pg_catalog.clock_timestamp())::text;`);
+  blocks.push('commit;');
+  return `${blocks.join('\n')}\n`;
+}
+
 function signupAdmissionStateSelect() {
   const fenceFunction = `${CONTRACT.master.schema}.${CONTRACT.signupFence.functionName}()`;
   const claimFunction = `${CONTRACT.master.schema}.${CONTRACT.signupFence.claimFunction}`;
@@ -1054,6 +1084,7 @@ export function classifyCutover(rawInput) {
   const source = normalizeSnapshot(input.source_snapshot);
   const target = normalizeSnapshot(input.target_snapshot);
   const highWaterDigest = snapshotDigest(source);
+  const targetAppHighWaterDigest = sha256(sanitizePlanRows(target));
   if (requireDigest(input.expected_source_high_water_digest, 'SOURCE_HIGH_WATER_DIGEST') !== highWaterDigest) hold('SOURCE_HIGH_WATER_DRIFT');
   assertObservationConvergence(input, source);
   const classifiedSource = input.direction === 'reverse'
@@ -1083,6 +1114,7 @@ export function classifyCutover(rawInput) {
     identity_map_digest: computedMapDigest,
     app_contract_digest: computedAppDigest,
     source_high_water_digest: highWaterDigest,
+    target_app_high_water_digest: targetAppHighWaterDigest,
     source_binding: input.direction === 'forward' ? CONTRACT.legacy : CONTRACT.master,
     source_auth: structuredClone(source.auth),
     source: sanitizePlanRows(source),
@@ -1107,6 +1139,7 @@ export function classifyCutover(rawInput) {
   };
   plan.transactional_sql = renderTransactionalSql(plan);
   plan.source_observation_sql = renderSourceObservationSql(plan);
+  plan.target_observation_sql = renderTargetObservationSql(plan);
   const privatePlanDigest = sha256(plan);
   const result = changeTotal === 0 ? 'PASS_EXACT_REPLAY_NOOP' : input.direction === 'forward' ? 'PASS_FORWARD_DELTA' : 'PASS_REVERSE_DELTA';
   const receipt = {
@@ -1121,6 +1154,7 @@ export function classifyCutover(rawInput) {
     identity_map_digest: computedMapDigest,
     app_contract_digest: computedAppDigest,
     source_high_water_digest: highWaterDigest,
+    target_app_high_water_digest: targetAppHighWaterDigest,
     auth_high_water_scope: plan.auth_high_water_scope,
     primary_acl_preimage_digest: aclDigest(primaryAclPreimage),
     primary_catalog_digest: catalogDigest(primaryAclPreimage),
@@ -1402,11 +1436,12 @@ async function main() {
     if (!classified.matched) process.exitCode = 2;
     return;
   }
-  if (!args.input || !args['private-plan'] || !args['private-sql'] || !args['private-source-observation-sql'] || !args['private-fence-sql'] || !args['private-writer-capture-sql'] || !args['private-acl-observation-sql'] || !args['private-restore-sql'] || !args['private-legacy-fence-sql'] || !args['private-legacy-writer-capture-sql'] || !args['private-legacy-acl-observation-sql'] || !args['private-legacy-restore-sql'] || !args['private-signup-admission-observation-sql'] || !args['private-signup-admission-fence-sql'] || !args['private-signup-admission-restore-sql']) hold('CLI_ARGUMENTS');
+  if (!args.input || !args['private-plan'] || !args['private-sql'] || !args['private-source-observation-sql'] || !args['private-target-observation-sql'] || !args['private-fence-sql'] || !args['private-writer-capture-sql'] || !args['private-acl-observation-sql'] || !args['private-restore-sql'] || !args['private-legacy-fence-sql'] || !args['private-legacy-writer-capture-sql'] || !args['private-legacy-acl-observation-sql'] || !args['private-legacy-restore-sql'] || !args['private-signup-admission-observation-sql'] || !args['private-signup-admission-fence-sql'] || !args['private-signup-admission-restore-sql']) hold('CLI_ARGUMENTS');
   const { receipt, privatePlan } = classifyCutover(readJsonNoDuplicateKeys(path.resolve(args.input)));
   writePrivate(path.resolve(args['private-plan']), `${canonicalJson(privatePlan)}\n`);
   writePrivate(path.resolve(args['private-sql']), privatePlan.transactional_sql);
   writePrivate(path.resolve(args['private-source-observation-sql']), privatePlan.source_observation_sql);
+  writePrivate(path.resolve(args['private-target-observation-sql']), privatePlan.target_observation_sql);
   writePrivate(path.resolve(args['private-fence-sql']), privatePlan.fence_sql);
   writePrivate(path.resolve(args['private-writer-capture-sql']), privatePlan.writer_capture_sql);
   writePrivate(path.resolve(args['private-acl-observation-sql']), privatePlan.acl_observation_sql);
