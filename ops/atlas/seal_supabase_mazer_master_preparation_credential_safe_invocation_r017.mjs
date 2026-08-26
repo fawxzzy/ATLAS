@@ -48,6 +48,13 @@ function readJson(file, boundary, maxBytes = 262144) {
   return { path: resolved, bytes, sha256: sha256(bytes), value };
 }
 function atlasRelative(file) { return path.relative(root, file).split(path.sep).join('/'); }
+function canonicalAliasPath(decisionPath) {
+  let stem=path.parse(decisionPath).name;
+  for(const suffix of ['-operator-decision-request','-decision-request'])if(stem.endsWith(suffix)){stem=stem.slice(0,-suffix.length);break;}
+  return path.join(path.dirname(decisionPath),`${stem}-scoped-approval-alias.json`);
+}
+const canonicalAuthorizationPath = aliasPath => path.join(path.dirname(aliasPath),`${path.parse(aliasPath).name}-authorization.json`);
+const canonicalConsumptionPath = aliasPath => path.join(path.dirname(aliasPath),`${path.parse(aliasPath).name}-consumption.json`);
 function timestamp(value, code) { const ms = Date.parse(value); if (!Number.isFinite(ms)) throw new Error(code); return ms; }
 function safeWrite(outputPath, bytes) {
   const output = inside(outputPath, packetRoot, 'OUTPUT_SCOPE');
@@ -71,6 +78,9 @@ function safeWrite(outputPath, bytes) {
 
 export function sealInvocation({ decisionRequestPath, aliasPath, authorizationPath, consumptionPath, outputPath, now = new Date() }) {
   const decision = readJson(decisionRequestPath, runtimeRoot), alias = readJson(aliasPath, runtimeRoot), authorization = readJson(authorizationPath, runtimeRoot), consumption = readJson(consumptionPath, runtimeRoot);
+  if (alias.path.toLowerCase() !== canonicalAliasPath(decision.path).toLowerCase()) throw new Error('ALIAS_PATH');
+  if (authorization.path.toLowerCase() !== canonicalAuthorizationPath(alias.path).toLowerCase()) throw new Error('AUTHORIZATION_PATH');
+  if (consumption.path.toLowerCase() !== canonicalConsumptionPath(alias.path).toLowerCase()) throw new Error('CONSUMPTION_PATH');
   const d = decision.value, a = alias.value, z = authorization.value, c = consumption.value;
   if (d.schema !== 'atlas.operator-decision-request.v1' || d.packet !== packet || d.status !== 'AWAITING_OPERATOR_DECISION' || d.execution_authority !== false) throw new Error('DECISION_CONTRACT');
   if (!exactKeys(a, ['allowed_effect','approval_code','decision_request','execution_authority','expected_operator_response','expires_at','intent_digest','issued_at','originating_task_id','packet','schema','semantic_objective','single_use','status'])) throw new Error('ALIAS_KEYS');

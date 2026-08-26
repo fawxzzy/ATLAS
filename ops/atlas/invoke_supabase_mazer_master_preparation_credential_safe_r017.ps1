@@ -84,6 +84,14 @@ function Get-RawJsonString([string]$Text, [string]$Key, [string]$Code) {
   return [string]$match.Groups[1].Value
 }
 
+function Get-CanonicalAliasPath([string]$DecisionPath) {
+  $stem=[IO.Path]::GetFileNameWithoutExtension($DecisionPath)
+  foreach($suffix in @('-operator-decision-request','-decision-request')){if($stem.EndsWith($suffix,[StringComparison]::Ordinal)){$stem=$stem.Substring(0,$stem.Length-$suffix.Length);break}}
+  return [IO.Path]::GetFullPath((Join-Path ([IO.Path]::GetDirectoryName($DecisionPath)) ($stem+'-scoped-approval-alias.json')))
+}
+function Get-CanonicalAuthorizationPath([string]$AliasPath) { return [IO.Path]::GetFullPath((Join-Path ([IO.Path]::GetDirectoryName($AliasPath)) ([IO.Path]::GetFileNameWithoutExtension($AliasPath)+'-authorization.json'))) }
+function Get-CanonicalConsumptionPath([string]$AliasPath) { return [IO.Path]::GetFullPath((Join-Path ([IO.Path]::GetDirectoryName($AliasPath)) ([IO.Path]::GetFileNameWithoutExtension($AliasPath)+'-consumption.json'))) }
+
 function Assert-Under([string]$Path, [string]$Boundary) {
   $candidate = [IO.Path]::GetFullPath($Path)
   $root = [IO.Path]::GetFullPath($Boundary).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
@@ -145,6 +153,7 @@ function Read-Invocation([string]$Path, [string]$ExpectedSha) {
   $aliasPath = Assert-Under ([string]$value.approval_alias_path) $Runtime
   $authorizationPath = Assert-Under ([string]$value.approval_authorization_path) $Runtime
   $consumptionPath = Assert-Under ([string]$value.approval_consumption_path) $Runtime
+  if ($aliasPath-cne(Get-CanonicalAliasPath $decisionPath)-or$authorizationPath-cne(Get-CanonicalAuthorizationPath $aliasPath)-or$consumptionPath-cne(Get-CanonicalConsumptionPath $aliasPath)) { throw 'APPROVAL_PATH_BINDING' }
   if ($source -cne [IO.Path]::GetFullPath((Join-Path $PacketRoot $SourceRelative)) -or $manifest -cne [IO.Path]::GetFullPath((Join-Path $PacketRoot $ManifestRelative))) { throw 'SEALED_PATH_BINDING' }
   if ($predecessor -cne [IO.Path]::GetFullPath((Join-Path $Runtime $PredecessorStateName))) { throw 'PREDECESSOR_PATH_BINDING' }
   $expectedSuccessor = [IO.Path]::GetFullPath((Join-Path $Runtime ('mazer-master-r017-execution-' + [string]$value.execution_correlation_id + '.json')))
