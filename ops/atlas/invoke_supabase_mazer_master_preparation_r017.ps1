@@ -12,6 +12,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
+$script:HostScriptPath = $PSCommandPath
 $Root = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, '..', '..'))
 $Runtime = Join-Path $Root 'runtime\atlas'
 $Secrets = Join-Path $Root 'secrets'
@@ -256,29 +257,79 @@ function Assert-FenceChildReceiptContract {
   if ([string]$rollback.terminal_category -cne 'ROLLBACK_ACL_PREIMAGE_MISSING' -or [int]$rollback.exit_code -ne 3 -or [string]$rollback.stdout_sha256 -cne (Get-TextSha256 $rollbackJson) -or [string]$rollback.stderr_sha256 -cne (Get-TextSha256 'rollback-safe-error')) { throw 'FENCE_CHILD_ROLLBACK_RECEIPT_CONTRACT' }
 }
 
+function New-FenceInvocationEnvelope([string]$ModeValue, [string]$Step, [string]$FenceInputPath, [string]$InputSha, [string]$FenceState, [string]$Packet) {
+  $issued = [DateTimeOffset]::UtcNow
+  if ([string]::IsNullOrWhiteSpace($FenceInputPath)) { throw 'FENCE_INVOCATION_INPUT_MISSING' }
+  if ([string]::IsNullOrWhiteSpace($FenceState)) { throw 'FENCE_INVOCATION_STATE_MISSING' }
+  if ([string]::IsNullOrWhiteSpace($script:HostScriptPath)) { throw 'FENCE_INVOCATION_PARENT_MISSING' }
+  if ([string]::IsNullOrWhiteSpace($script:Fence)) { throw 'FENCE_INVOCATION_CHILD_MISSING' }
+  $resolvedInput = [IO.Path]::GetFullPath($FenceInputPath)
+  $resolvedState = Assert-Under $FenceState $Runtime
+  $inputBoundary = $null
+  foreach ($boundary in @($Runtime, $Secrets)) {
+    $prefix = [IO.Path]::GetFullPath($boundary).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+    if ($resolvedInput.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) { $inputBoundary = [IO.Path]::GetFullPath($boundary); break }
+  }
+  if ($null -eq $inputBoundary) { throw 'FENCE_INVOCATION_INPUT_SCOPE' }
+  Assert-NoReparse (Split-Path -Parent $resolvedInput) $inputBoundary
+  Assert-NoReparse (Split-Path -Parent $resolvedState) $Runtime
+  $correlation = 'r017-' + (Get-TextSha256 $resolvedState.ToLowerInvariant()).Substring(0, 32)
+  $value = [ordered]@{
+    schema = 'atlas.supabase.mazer-master-fence-invocation.r017.v1'
+    packet = $Packet
+    correlation_id = $correlation
+    mode = $ModeValue
+    input_path = $resolvedInput
+    state_path = $resolvedState
+    expected_input_sha256 = $InputSha
+    execution_step = $Step
+    execute_protected = $true
+    parent_host_path = [IO.Path]::GetFullPath($script:HostScriptPath)
+    parent_host_sha256 = Get-Sha256 $script:HostScriptPath
+    child_host_sha256 = Get-Sha256 $script:Fence
+    issued_at = $issued.ToString('o')
+    expires_at = $issued.AddMinutes(5).ToString('o')
+  }
+  $json = $value | ConvertTo-Json -Compress
+  if ($json -match '[^\x00-\x7f]') { throw 'FENCE_INVOCATION_ASCII' }
+  $directory = Split-Path -Parent $resolvedInput
+  $path = Join-Path $directory ('.fence-invocation-' + $correlation + '-' + [Guid]::NewGuid().ToString('N') + '.json')
+  $bytes = (New-Object Text.UTF8Encoding($false)).GetBytes($json + "`n")
+  $stream = New-Object IO.FileStream($path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+  try { $stream.Write($bytes, 0, $bytes.Length); $stream.Flush($true) }
+  finally { $stream.Dispose(); [Array]::Clear($bytes, 0, $bytes.Length) }
+  return [pscustomobject]@{ Path = $path; Sha256 = Get-Sha256 $path; CorrelationId = $correlation }
+}
+
 function Assert-StructuredFenceChildTransportContract([string]$ShellPath) {
   $probeRoot = Join-Path $Runtime ('r017 transport probe ' + [Guid]::NewGuid().ToString('N'))
+  [IO.Directory]::CreateDirectory($probeRoot) | Out-Null
   $missingInput = Join-Path $probeRoot 'missing private input.json'
   $statePath = Join-Path $probeRoot 'fence state.json'
-  $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-Mode','Forward','-InputPath',$missingInput,'-StatePath',$statePath,'-ExpectedInputSha256',('0' * 64),'-ExecutionStep','FenceOnly','-ExecuteProtected')
+  $envelope = New-FenceInvocationEnvelope 'Forward' 'FenceOnly' $missingInput ('0' * 64) $statePath 'FP-MAZER-MASTER-R017-SOURCE-VALIDATION-001'
+  $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-InvocationPath',$envelope.Path,'-ExpectedInvocationSha256',$envelope.Sha256,'-ExecuteProtected')
   $child = Invoke-Child $ShellPath $arguments @{} 120000
   if ([int]$child.ExitCode -ne 2) { throw 'FENCE_CHILD_TRANSPORT_EXIT' }
   if (-not [string]::IsNullOrEmpty([string]$child.Stderr)) { throw 'FENCE_CHILD_TRANSPORT_STDERR' }
   try { $receipt = [string]$child.Stdout | ConvertFrom-Json } catch { throw 'FENCE_CHILD_TRANSPORT_STDOUT' }
   if ([string]$receipt.result -cne 'HOLD_MAZER_MASTER_CUTOVER_DATA_FENCE' -or [string]$receipt.category -cne 'INPUT_MISSING' -or [string]$receipt.effect_status -cne 'NO_EFFECT_PRESTATE') { throw 'FENCE_CHILD_TRANSPORT_RECEIPT' }
   if ([int]$receipt.provider_writes -ne 0 -or [int]$receipt.database_transactions -ne 0 -or (Test-Path -LiteralPath $statePath)) { throw 'FENCE_CHILD_TRANSPORT_EFFECT' }
+  Remove-Item -LiteralPath $envelope.Path -Force
+  Remove-Item -LiteralPath $probeRoot -Force
 }
 
-function Invoke-Fence([string]$Step, [string]$Input, [string]$InputSha, [string]$FenceState) {
-  $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-Mode','Forward','-InputPath',$Input,'-StatePath',$FenceState,'-ExpectedInputSha256',$InputSha,'-ExecutionStep',$Step,'-ExecuteProtected')
+function Invoke-Fence([string]$Step, [string]$FenceInputPath, [string]$InputSha, [string]$FenceState, [string]$Packet) {
+  $envelope = New-FenceInvocationEnvelope 'Forward' $Step $FenceInputPath $InputSha $FenceState $Packet
+  $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-InvocationPath',$envelope.Path,'-ExpectedInvocationSha256',$envelope.Sha256,'-ExecuteProtected')
   $child = Invoke-Child (Get-ShellPath) $arguments @{} 900000
   [void](Write-FenceChildReceipt $Step $child $FenceState)
   if ($child.ExitCode -ne 0) { throw ('FENCE_' + $Step.ToUpperInvariant() + '_FAILED') }
   try { return $child.Stdout | ConvertFrom-Json } catch { throw 'FENCE_OUTPUT_SHAPE' }
 }
 
-function Invoke-FenceRollback([string]$Input, [string]$InputSha, [string]$FenceState) {
-  $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-Mode','Rollback','-InputPath',$Input,'-StatePath',$FenceState,'-ExpectedInputSha256',$InputSha,'-ExecuteProtected')
+function Invoke-FenceRollback([string]$FenceInputPath, [string]$InputSha, [string]$FenceState, [string]$Packet) {
+  $envelope = New-FenceInvocationEnvelope 'Rollback' 'All' $FenceInputPath $InputSha $FenceState $Packet
+  $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-InvocationPath',$envelope.Path,'-ExpectedInvocationSha256',$envelope.Sha256,'-ExecuteProtected')
   $child = Invoke-Child (Get-ShellPath) $arguments @{} 900000
   [void](Write-FenceChildReceipt 'Rollback' $child $FenceState)
   if ($child.ExitCode -ne 0) { throw 'FENCE_ROLLBACK_FAILED' }
@@ -402,8 +453,8 @@ try {
     Set-Phase $state 'ROLLBACK_LEGACY_RESTORING' $statePath
     if (Test-Path -LiteralPath $fenceState -PathType Leaf) {
       $currentFence = Read-State $fenceState
-      if ([string]$currentFence.phase -ceq 'COMPLETE') { [void](Invoke-Fence 'ReleaseLegacy' $input $inputSha $fenceState) }
-      elseif ([string]$currentFence.phase -notin @('PREPARATION_COMPLETE','ROLLED_BACK','PREFLIGHT')) { Invoke-FenceRollback $input $inputSha $fenceState }
+      if ([string]$currentFence.phase -ceq 'COMPLETE') { [void](Invoke-Fence 'ReleaseLegacy' $input $inputSha $fenceState ([string]$state.packet)) }
+      elseif ([string]$currentFence.phase -notin @('PREPARATION_COMPLETE','ROLLED_BACK','PREFLIGHT')) { Invoke-FenceRollback $input $inputSha $fenceState ([string]$state.packet) }
     }
     Set-Phase $state 'ROLLED_BACK' $statePath
     Write-Result 'EXACT_R017_ROLLBACK_COMPLETE' ([ordered]@{ phase = [string]$state.phase; hook_disabled_first = $true; provider_writes = $providerWrites; database_transactions = $databaseTransactions })
@@ -431,7 +482,7 @@ try {
     $state.watchdog_pid = Start-RollbackWatchdog $sourcePath $ExpectedPrivateSourceSha256 $statePath
     Write-State $state $statePath
     $fenceHasEffects = $true
-    [void](Invoke-Fence 'FenceOnly' $input $inputSha $fenceState)
+    [void](Invoke-Fence 'FenceOnly' $input $inputSha $fenceState ([string]$state.packet))
     Set-Phase $state 'FENCE_PAUSED' $statePath
     Write-State $state $statePath
   }
@@ -461,7 +512,7 @@ try {
   if ($Phases.IndexOf([string]$state.phase) -lt $Phases.IndexOf('DELTA_APPLIED')) {
     Assert-Lease $state $statePath
     Set-Phase $state 'DELTA_APPLYING' $statePath
-    [void](Invoke-Fence 'Continue' $input $inputSha $fenceState)
+    [void](Invoke-Fence 'Continue' $input $inputSha $fenceState ([string]$state.packet))
     Set-Phase $state 'DELTA_APPLIED' $statePath
   }
   foreach ($step in @(@('M3_APPLYING','M3_APPLIED','m3.sql'), @('M4_APPLYING','M4_APPLIED','m4.sql'), @('POSTVERIFYING','POSTVERIFIED','postverify.sql'))) {
@@ -497,7 +548,7 @@ try {
   }
   Assert-Lease $state $statePath
   Set-Phase $state 'LEGACY_RESTORING' $statePath
-  [void](Invoke-Fence 'ReleaseLegacy' $input $inputSha $fenceState)
+  [void](Invoke-Fence 'ReleaseLegacy' $input $inputSha $fenceState ([string]$state.packet))
   Set-Phase $state 'LEGACY_RESTORED' $statePath
   Set-Phase $state 'PREPARATION_COMPLETE' $statePath
   Write-Result 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' ([ordered]@{ phase = [string]$state.phase; master_hook_enabled = $true; legacy_signup_and_acl_restored = $true; fresh_dual_refence_and_catchup_required_for_cutover = $true; fence_lease_seconds = $HardFenceLeaseSeconds; rollback_initiation_deadline_seconds = $RollbackDeadlineSeconds; provider_writes = $providerWrites; database_transactions = $databaseTransactions; final_identity_edges = 19; profiles = 12; player = 16; ai = 16; receipts = 1883 })

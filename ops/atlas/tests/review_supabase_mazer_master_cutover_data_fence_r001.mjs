@@ -63,7 +63,7 @@ function run(command, args) {
   return child.stdout.trim();
 }
 
-requireOrder(host, ['function Initialize-WindowsCredentialInterop','function Read-ManagementToken','Initialize-WindowsCredentialInterop','function Invoke-AuthConfig','\ntrap {','$managementToken = Read-ManagementToken'], 'CREDENTIAL_INTEROP_NOT_BEHIND_TRAP');
+requireOrder(host, ['\ntrap {','function Initialize-WindowsCredentialInterop','function Read-ManagementToken','Initialize-WindowsCredentialInterop','function Invoke-AuthConfig','function Read-ProtectedInvocationEnvelope','$invocation = Read-ProtectedInvocationEnvelope','$managementToken = Read-ManagementToken'], 'CREDENTIAL_INTEROP_NOT_BEHIND_TRAP');
 for (const token of ['CREDENTIAL_LOOKUP_REMAINS_REACHABLE','ATLAS_R017_CREDENTIAL_MOCK_SENTINEL','ATLAS_R017_CONNECTOR_SENTINEL','external_connector_calls: 0','credential_lookup_count: 0','HTTP_PROXY','HTTPS_PROXY']) requireText(localProbe, token, `LOCAL_PRODUCTION_SHAPE_ISOLATION_MISSING:${token}`);
 const localProbeSource = run(process.execPath, [localProbePath, '--source-check']);
 if (localProbeSource) {

@@ -22,12 +22,28 @@ param(
   [string]$ExecutionStep = 'All',
 
   [Parameter(Mandatory = $true, ParameterSetName = 'Execute')]
-  [switch]$ExecuteProtected
+  [Parameter(ParameterSetName = 'Envelope')]
+  [switch]$ExecuteProtected,
+
+  [Parameter(ParameterSetName = 'Envelope')]
+  [string]$InvocationPath,
+
+  [Parameter(ParameterSetName = 'Envelope')]
+  [string]$ExpectedInvocationSha256
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
+$script:ChildHostScriptPath = $PSCommandPath
+
+trap {
+  $category = ([string]$_.Exception.Message -replace '[^A-Za-z0-9_]', '').ToUpperInvariant()
+  if ([string]::IsNullOrWhiteSpace($category) -or $category.Length -gt 96 -or $category -match '(?i)ACCESS[_-]?TOKEN|REFRESH[_-]?TOKEN|SERVICE[_-]?ROLE|SB_SECRET_|AUTHORIZATION|PASSWORD|POSTGRES(?:QL)?') { $category = 'PRESTATE_EXECUTION_HOLD' }
+  [Console]::Out.WriteLine('{"schema":"atlas.supabase.mazer-master-cutover-data-fence-host-result.v1","result":"HOLD_MAZER_MASTER_CUTOVER_DATA_FENCE","legacy_project_ref":"geknvnrmktchljnyddwp","legacy_schema":"public","master_project_ref":"bxtcuhkotumitoqtrcej","master_schema":"mazer","retries":0,"raw_identifiers_emitted":false,"raw_records_emitted":false,"pii_emitted":false,"secrets_emitted":false,"category":"' + $category + '","effect_status":"NO_EFFECT_PRESTATE","provider_reads":0,"provider_writes":0,"database_transactions":0,"rollback_actions":0,"acl_restore_verifications":0,"writer_capture_reads":0,"writer_drain_reads":0,"writer_lock_barriers":0,"signup_admission_reads":0,"signup_admission_barriers":0,"signup_admission_restores":0,"deployments":0,"production_changes":0}')
+  exit 2
+}
+
 $RunningOnWindows = [Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT
 $PathComparison = if ($RunningOnWindows) { [StringComparison]::OrdinalIgnoreCase } else { [StringComparison]::Ordinal }
 $DirectorySeparators = [char[]]@([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
@@ -107,6 +123,16 @@ function ConvertTo-SafeJson([object]$Value) {
     throw 'OUTPUT_DISCLOSURE'
   }
   return $text
+}
+
+function Get-TextSha256([string]$Value) {
+  $bytes = (New-Object Text.UTF8Encoding($false)).GetBytes($Value)
+  try {
+    $hasher = [Security.Cryptography.SHA256]::Create()
+    try { return ([BitConverter]::ToString($hasher.ComputeHash($bytes))).Replace('-', '').ToLowerInvariant() }
+    finally { $hasher.Dispose() }
+  }
+  finally { [Array]::Clear($bytes, 0, $bytes.Length) }
 }
 
 function Get-SafeFailureCategory([object]$ErrorValue, [string]$Fallback = 'EXECUTION_HOLD') {
@@ -729,6 +755,70 @@ function Assert-StateBinding([object]$State, [object]$Receipt, [string]$InputDig
   if ([string]$State.executor_bypass_profile -cne [string]$Receipt.executor_bypass_profile) { throw 'STATE_EXECUTOR_BYPASS_PROFILE_DRIFT' }
 }
 
+function Read-ProtectedInvocationEnvelope([string]$Path, [string]$ExpectedSha256) {
+  if ([string]::IsNullOrWhiteSpace($Path)) { throw 'INVOCATION_PATH_MISSING' }
+  if ([string]::IsNullOrWhiteSpace($ExpectedSha256) -or $ExpectedSha256 -cnotmatch '^[a-f0-9]{64}$') { throw 'INVOCATION_DIGEST_SHAPE' }
+  $resolved = Assert-PathUnder $Path @($RuntimeRoot,$SecretRoot)
+  if (-not (Test-Path -LiteralPath $resolved -PathType Leaf)) { throw 'INVOCATION_MISSING' }
+  Assert-NoReparseComponents $resolved $(if (Test-CanonicalPathUnder $resolved $RuntimeRoot) { $RuntimeRoot } else { $SecretRoot })
+  $bytes = $null
+  $stream = New-Object IO.FileStream($resolved, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
+  try {
+    if ($stream.Length -lt 2 -or $stream.Length -gt 65536) { throw 'INVOCATION_SIZE' }
+    $bytes = New-Object byte[] ([int]$stream.Length)
+    $offset = 0
+    while ($offset -lt $bytes.Length) {
+      $read = $stream.Read($bytes, $offset, $bytes.Length - $offset)
+      if ($read -le 0) { throw 'INVOCATION_READ_TRUNCATED' }
+      $offset += $read
+    }
+  }
+  finally { $stream.Dispose() }
+  try {
+    $hasher = [Security.Cryptography.SHA256]::Create()
+    try { $actualSha256 = ([BitConverter]::ToString($hasher.ComputeHash($bytes))).Replace('-', '').ToLowerInvariant() }
+    finally { $hasher.Dispose() }
+    if ($actualSha256 -cne $ExpectedSha256) { throw 'INVOCATION_DIGEST_DRIFT' }
+    $text = (New-Object Text.UTF8Encoding($false, $true)).GetString($bytes)
+  }
+  finally { if ($null -ne $bytes) { [Array]::Clear($bytes, 0, $bytes.Length) } }
+  if ($text.Length -ne (@($text.ToCharArray() | Where-Object { [int]$_ -le 127 }).Count) -or $text -match '[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]') { throw 'INVOCATION_ASCII' }
+  $trimmed = $text.Trim()
+  if (-not $trimmed.StartsWith('{', [StringComparison]::Ordinal) -or -not $trimmed.EndsWith('}', [StringComparison]::Ordinal)) { throw 'INVOCATION_ROOT_OBJECT' }
+  $expectedKeys = @('schema','packet','correlation_id','mode','input_path','state_path','expected_input_sha256','execution_step','execute_protected','parent_host_path','parent_host_sha256','child_host_sha256','issued_at','expires_at')
+  $keys = @([regex]::Matches($text, '"((?:\\["\\/bfnrt]|\\u[0-9A-Fa-f]{4}|[^"\\\x00-\x1f])*)"\s*:') | ForEach-Object {
+    try { [string](('"' + $_.Groups[1].Value + '"') | ConvertFrom-Json) }
+    catch { throw 'INVOCATION_KEY_ENCODING' }
+  })
+  if ($keys.Count -ne $expectedKeys.Count -or (@($keys | Sort-Object -Unique).Count -ne $keys.Count) -or (($keys | Sort-Object) -join "`n") -cne (($expectedKeys | Sort-Object) -join "`n")) { throw 'INVOCATION_KEYS' }
+  try { $value = $text | ConvertFrom-Json } catch { throw 'INVOCATION_JSON' }
+  if ($null -eq $value -or $value -is [Array] -or $value -isnot [pscustomobject]) { throw 'INVOCATION_ROOT_OBJECT' }
+  foreach ($stringKey in @('schema','packet','correlation_id','mode','input_path','state_path','expected_input_sha256','execution_step','parent_host_path','parent_host_sha256','child_host_sha256')) {
+    if ($value.$stringKey -isnot [string]) { throw 'INVOCATION_VALUE_TYPES' }
+  }
+  if ($value.execute_protected -isnot [bool]) { throw 'INVOCATION_VALUE_TYPES' }
+  if ([string]$value.schema -cne 'atlas.supabase.mazer-master-fence-invocation.r017.v1') { throw 'INVOCATION_SCHEMA' }
+  if ([string]$value.packet -cnotmatch '^FP-MAZER-MASTER-R017-[A-Z0-9-]{8,160}$' -or [string]$value.correlation_id -cnotmatch '^r017-[a-z0-9-]{8,160}$') { throw 'INVOCATION_CORRELATION' }
+  if ([string]$value.mode -notin @('Forward','Reverse','Rollback') -or [string]$value.execution_step -notin @('All','FenceOnly','Continue','ReleaseLegacy') -or [bool]$value.execute_protected -ne $true) { throw 'INVOCATION_EFFECT_SHAPE' }
+  if ([string]$value.expected_input_sha256 -cnotmatch '^[a-f0-9]{64}$' -or [string]$value.parent_host_sha256 -cnotmatch '^[a-f0-9]{64}$' -or [string]$value.child_host_sha256 -cnotmatch '^[a-f0-9]{64}$') { throw 'INVOCATION_HASH_SHAPE' }
+  $parentHost = Assert-PathUnder ([string]$value.parent_host_path) @($PSScriptRoot)
+  if ([IO.Path]::GetFileName($parentHost) -cne 'invoke_supabase_mazer_master_preparation_r017.ps1' -or (Get-Sha256 $parentHost) -cne [string]$value.parent_host_sha256) { throw 'INVOCATION_PARENT_HOST_DRIFT' }
+  if ((Get-Sha256 $script:ChildHostScriptPath) -cne [string]$value.child_host_sha256) { throw 'INVOCATION_CHILD_HOST_DRIFT' }
+  $resolvedInput = Assert-PathUnder ([string]$value.input_path) @($RuntimeRoot,$SecretRoot)
+  $resolvedState = Assert-PathUnder ([string]$value.state_path) @($RuntimeRoot)
+  $expectedCorrelation = 'r017-' + (Get-TextSha256 $resolvedState.ToLowerInvariant()).Substring(0, 32)
+  if ([string]$value.correlation_id -cne $expectedCorrelation) { throw 'INVOCATION_STATE_CORRELATION' }
+  $issuedMatch = [regex]::Match($text, '"issued_at"\s*:\s*"([^"]+)"')
+  $expiresMatch = [regex]::Match($text, '"expires_at"\s*:\s*"([^"]+)"')
+  if (-not $issuedMatch.Success) { throw 'INVOCATION_ISSUED_AT' }
+  if (-not $expiresMatch.Success) { throw 'INVOCATION_EXPIRES_AT' }
+  try { $issued = [DateTimeOffset]::ParseExact($issuedMatch.Groups[1].Value, 'o', [Globalization.CultureInfo]::InvariantCulture) } catch { throw 'INVOCATION_ISSUED_AT' }
+  try { $expires = [DateTimeOffset]::ParseExact($expiresMatch.Groups[1].Value, 'o', [Globalization.CultureInfo]::InvariantCulture) } catch { throw 'INVOCATION_EXPIRES_AT' }
+  $now = [DateTimeOffset]::UtcNow
+  if ($issued -gt $now.AddSeconds(5) -or $issued -lt $now.AddMinutes(-10) -or $expires -le $now -or $expires -gt $issued.AddMinutes(10)) { throw 'INVOCATION_STALE' }
+  return [pscustomobject]@{ Mode=[string]$value.mode; InputPath=$resolvedInput; StatePath=$resolvedState; ExpectedInputSha256=[string]$value.expected_input_sha256; ExecutionStep=[string]$value.execution_step }
+}
+
 function Assert-SourceContract {
   if (-not (Test-Path -LiteralPath $Classifier -PathType Leaf)) { throw 'CLASSIFIER_MISSING' }
   $tokens = $null
@@ -793,9 +883,14 @@ if ($PSCmdlet.ParameterSetName -eq 'Source') {
   exit 0
 }
 
-trap {
-  Write-FailClosedPrestateResult ([string]$_.Exception.Message)
-  exit 2
+if ($PSCmdlet.ParameterSetName -eq 'Envelope') {
+  if (-not $ExecuteProtected) { throw 'PROTECTED_EXECUTION_SWITCH_REQUIRED' }
+  $invocation = Read-ProtectedInvocationEnvelope $InvocationPath $ExpectedInvocationSha256
+  $Mode = $invocation.Mode
+  $InputPath = $invocation.InputPath
+  $StatePath = $invocation.StatePath
+  $ExpectedInputSha256 = $invocation.ExpectedInputSha256
+  $ExecutionStep = $invocation.ExecutionStep
 }
 
 if (-not $ExecuteProtected) { throw 'PROTECTED_EXECUTION_SWITCH_REQUIRED' }

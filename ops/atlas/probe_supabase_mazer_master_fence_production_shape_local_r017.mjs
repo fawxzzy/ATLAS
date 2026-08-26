@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const host = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_cutover_data_fence_r001.ps1');
+const parentHost = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_r017.ps1');
 const input = path.join(root, 'secrets/packet/mazer-master-preparation-r017/launcher-preflight-materialized/fence-input.json');
 const packetRoot = path.join(root, 'secrets/packet/mazer-master-preparation-r017/local-production-shape-probes');
 const runtimeRoot = path.join(root, 'runtime/atlas');
@@ -16,11 +17,12 @@ const state = path.join(runtimeRoot, `.r017-local-production-shape-${id}.json`);
 const credentialMockSentinel = path.join(captureRoot, 'credential-provider-mock-invoked');
 const connectorSentinel = path.join(captureRoot, 'external-connector-invoked');
 const sha = (value) => crypto.createHash('sha256').update(value).digest('hex');
+const roundtrip = (value) => value.toISOString().replace(/(\.\d{3})Z$/, '$10000+00:00');
 
 if (!fs.existsSync(host)) throw new Error('LOCAL_PROBE_HOST_MISSING');
 if (process.argv.includes('--source-check')) {
   const checked = fs.readFileSync(host, 'utf8');
-  const order = ['function Initialize-WindowsCredentialInterop','function Read-ManagementToken','Initialize-WindowsCredentialInterop','function Invoke-AuthConfig','\ntrap {','$managementToken = Read-ManagementToken'];
+  const order = ['\ntrap {','function Initialize-WindowsCredentialInterop','function Read-ManagementToken','Initialize-WindowsCredentialInterop','function Invoke-AuthConfig','function Read-ProtectedInvocationEnvelope','$invocation = Read-ProtectedInvocationEnvelope','$managementToken = Read-ManagementToken'];
   let cursor = -1;
   for (const token of order) {
     const next = checked.indexOf(token, cursor + 1);
@@ -51,7 +53,27 @@ fs.writeFileSync(effectiveHost, source, { encoding: 'utf8', flag: 'wx' });
 
 const engine = spawnSync('where.exe', ['pwsh.exe'], { encoding: 'utf8' }).stdout.split(/\r?\n/).find(Boolean);
 if (!engine || !path.isAbsolute(engine)) throw new Error('PWSH_ENGINE_MISSING');
-const arguments_ = ['-NoLogo','-NoProfile','-NonInteractive','-File',effectiveHost,'-Mode','Forward','-InputPath',input,'-StatePath',state,'-ExpectedInputSha256',sha(fs.readFileSync(input)),'-ExecutionStep','FenceOnly','-ExecuteProtected'];
+const issued = new Date();
+const correlation = `r017-${sha(Buffer.from(path.resolve(state).toLowerCase())).slice(0, 32)}`;
+const invocation = path.join(captureRoot, `.fence-invocation-${correlation}-${id}.json`);
+const envelope = {
+  schema: 'atlas.supabase.mazer-master-fence-invocation.r017.v1',
+  packet: 'FP-MAZER-MASTER-R017-LOCAL-PRODUCTION-SHAPE-001',
+  correlation_id: correlation,
+  mode: 'Forward',
+  input_path: path.resolve(input),
+  state_path: path.resolve(state),
+  expected_input_sha256: sha(fs.readFileSync(input)),
+  execution_step: 'FenceOnly',
+  execute_protected: true,
+  parent_host_path: path.resolve(parentHost),
+  parent_host_sha256: sha(fs.readFileSync(parentHost)),
+  child_host_sha256: sha(fs.readFileSync(effectiveHost)),
+  issued_at: roundtrip(issued),
+  expires_at: roundtrip(new Date(issued.getTime() + 300_000))
+};
+fs.writeFileSync(invocation, `${JSON.stringify(envelope)}\n`, { encoding: 'ascii', flag: 'wx' });
+const arguments_ = ['-NoLogo','-NoProfile','-NonInteractive','-File',effectiveHost,'-InvocationPath',invocation,'-ExpectedInvocationSha256',sha(fs.readFileSync(invocation)),'-ExecuteProtected'];
 const environment = {
   ...process.env,
   ATLAS_MAZER_LEGACY_DATABASE_URL: 'postgresql://postgres.geknvnrmktchljnyddwp:local-only@aws-0-us-west-2.pooler.supabase.com:5432/postgres',
@@ -76,7 +98,7 @@ try {
   if (!fs.existsSync(credentialMockSentinel) || fs.existsSync(connectorSentinel)) throw new Error('LOCAL_PROBE_ISOLATION');
   console.log(JSON.stringify({
     result: 'PASS_R017_LOCAL_PRODUCTION_SHAPE',
-    root_cause: 'CREDENTIAL_INTEROP_INITIALIZED_BEFORE_TERMINAL_TRAP',
+    root_cause: 'POWERSHELL_AUTOMATIC_INPUT_VARIABLE_COLLISION_REMOVED_CHILD_INPUT_PATH',
     original_host_sha256: sha(fs.readFileSync(host)),
     effective_host_sha256: sha(fs.readFileSync(effectiveHost)),
     engine_sha256: sha(fs.readFileSync(engine)),

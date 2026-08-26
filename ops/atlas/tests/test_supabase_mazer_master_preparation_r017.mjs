@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -95,8 +96,11 @@ requireOrder(host.slice(host.indexOf('function Invoke-Child'), host.indexOf('fun
 for (const token of ['ReplayExactRolledBack','PASS_EXACT_ROLLBACK_TERMINAL','replay_requires_explicit_switch','fence.replay-','START_EXACT_REPLAY']) assert.ok(host.includes(token) || materializer.includes(token), `rollback replay seam missing ${token}`);
 for (const token of ['Write-FenceChildReceipt','New-FenceChildReceipt','stdout_sha256','stderr_sha256','terminal_category','FENCE_CHILD_FAILURE_RECEIPT_CONTRACT','FENCE_CHILD_ROLLBACK_RECEIPT_CONTRACT']) assert.ok(host.includes(token), `fence child receipt seam missing ${token}`);
 for (const token of ["trap {",'NO_EFFECT_PRESTATE','PRESTATE_EXECUTION_HOLD','Write-FailClosedPrestateResult','Get-SafeFailureCategory']) assert.ok(fenceHost.includes(token), `fence prestate receipt seam missing ${token}`);
-requireOrder(fenceHost, ['function Initialize-WindowsCredentialInterop','function Read-ManagementToken','Initialize-WindowsCredentialInterop','function Invoke-AuthConfig','\ntrap {','$managementToken = Read-ManagementToken']);
+requireOrder(fenceHost, ['\ntrap {','function Initialize-WindowsCredentialInterop','function Read-ManagementToken','Initialize-WindowsCredentialInterop','function Invoke-AuthConfig','function Read-ProtectedInvocationEnvelope','$invocation = Read-ProtectedInvocationEnvelope','$managementToken = Read-ManagementToken']);
 for (const token of ['CREDENTIAL_LOOKUP_REMAINS_REACHABLE','ATLAS_R017_CREDENTIAL_MOCK_SENTINEL','ATLAS_R017_CONNECTOR_SENTINEL','credential_lookup_count: 0','external_connector_calls: 0']) assert.ok(localFenceProbe.includes(token), `local fence isolation seam missing ${token}`);
+for (const token of ['New-FenceInvocationEnvelope','ExpectedInvocationSha256','FENCE_INVOCATION_INPUT_SCOPE','Assert-NoReparse (Split-Path -Parent $resolvedInput)','INVOCATION_STATE_CORRELATION','INVOCATION_PARENT_HOST_DRIFT','INVOCATION_CHILD_HOST_DRIFT','INVOCATION_STALE']) assert.ok(host.includes(token) || fenceHost.includes(token), `protected invocation envelope seam missing ${token}`);
+assert.ok(!/function\s+[A-Za-z0-9_-]+\([^)]*\[string\]\$Input(?:[,)]|\s)/i.test(host), 'PowerShell automatic $input collision may erase a protected child argument');
+assert.ok(!host.includes("'-Mode',$ModeValue") && !host.includes("'-InputPath',$FenceInputPath") && !host.includes("'-StatePath',$FenceState"), 'protected child argv must carry only the sealed invocation envelope');
 {
   const localProbeRun = spawnSync(process.execPath, [localFenceProbePath, '--source-check'], { cwd: root, encoding: 'utf8', timeout: 30000, windowsHide: true });
   assert.equal(localProbeRun.status, 0, localProbeRun.stderr);
@@ -105,6 +109,91 @@ for (const token of ['CREDENTIAL_LOOKUP_REMAINS_REACHABLE','ATLAS_R017_CREDENTIA
   assert.equal(localProbeReceipt.credential_reads, 0);
   assert.equal(localProbeReceipt.external_calls, 0);
   assert.equal(localProbeReceipt.writes, 0);
+}
+
+if (process.platform === 'win32') {
+  const envelopeRoot = path.join(root, 'runtime/atlas', `r017 envelope adversary ${crypto.randomUUID().replaceAll('-', '')}`);
+  fs.mkdirSync(envelopeRoot, { recursive: true });
+  const digest = (value) => crypto.createHash('sha256').update(value).digest('hex');
+  const roundtrip = (value) => value.toISOString().replace(/(\.\d{3})Z$/, '$10000+00:00');
+  const statePath = path.join(envelopeRoot, 'fence state.json');
+  const missingInputPath = path.join(envelopeRoot, 'missing private input.json');
+  const correlation = `r017-${digest(Buffer.from(path.resolve(statePath).toLowerCase())).slice(0, 32)}`;
+  const issued = new Date();
+  const baseEnvelope = {
+    schema: 'atlas.supabase.mazer-master-fence-invocation.r017.v1',
+    packet: 'FP-MAZER-MASTER-R017-ENVELOPE-ADVERSARY-001',
+    correlation_id: correlation,
+    mode: 'Forward',
+    input_path: path.resolve(missingInputPath),
+    state_path: path.resolve(statePath),
+    expected_input_sha256: '0'.repeat(64),
+    execution_step: 'FenceOnly',
+    execute_protected: true,
+    parent_host_path: path.resolve(hostPath),
+    parent_host_sha256: digest(fs.readFileSync(hostPath)),
+    child_host_sha256: digest(fs.readFileSync(fenceHostPath)),
+    issued_at: roundtrip(issued),
+    expires_at: roundtrip(new Date(issued.getTime() + 300_000))
+  };
+
+  function runEnvelope(name, expectedCategory, options = {}) {
+    const invocationPath = options.invocationPath ?? path.join(envelopeRoot, `.invocation-${name}.json`);
+    const text = options.text ?? `${JSON.stringify(options.value ?? baseEnvelope)}\n`;
+    if (!options.missing) fs.writeFileSync(invocationPath, text, { encoding: 'utf8', flag: 'wx' });
+    const expectedSha = options.expectedSha ?? digest(Buffer.from(text));
+    const shell = options.shell ?? 'pwsh.exe';
+    const shellArgs = ['-NoLogo','-NoProfile','-NonInteractive',...(shell === 'powershell.exe' ? ['-ExecutionPolicy','Bypass'] : []),'-File',fenceHostPath,'-InvocationPath',invocationPath,'-ExpectedInvocationSha256',expectedSha,'-ExecuteProtected'];
+    const child = spawnSync(shell, shellArgs, { cwd: root, encoding: 'utf8', timeout: 30_000, windowsHide: true });
+    assert.equal(child.status, 2, `${name}: ${child.stderr}`);
+    assert.equal(child.stderr, '', `${name}: unexpected stderr`);
+    const receipt = JSON.parse(child.stdout.trim());
+    assert.equal(receipt.result, 'HOLD_MAZER_MASTER_CUTOVER_DATA_FENCE', name);
+    assert.equal(receipt.category, expectedCategory, name);
+    assert.equal(receipt.effect_status, 'NO_EFFECT_PRESTATE', name);
+    assert.equal(receipt.provider_reads, 0, name);
+    assert.equal(receipt.provider_writes, 0, name);
+    assert.equal(receipt.database_transactions, 0, name);
+    assert.equal(fs.existsSync(statePath), false, name);
+  }
+
+  try {
+    runEnvelope('spaces', 'INPUT_MISSING');
+    runEnvelope('rollback', 'INPUT_MISSING', { value: { ...baseEnvelope, mode: 'Rollback', execution_step: 'All' } });
+    runEnvelope('digest-drift', 'INVOCATION_DIGEST_DRIFT', { expectedSha: 'f'.repeat(64) });
+    runEnvelope('extra-key', 'INVOCATION_KEYS', { value: { ...baseEnvelope, extra: 'reject' } });
+    runEnvelope('duplicate-key', 'INVOCATION_KEYS', { text: `${JSON.stringify(baseEnvelope).replace('"packet":', '"packet":"FP-MAZER-MASTER-R017-DUPLICATE-001","packet":')}\n` });
+    const escapedUnknown = `${JSON.stringify(baseEnvelope).slice(0, -1)},"\\u0065xtra":"reject"}\n`;
+    const escapedDuplicate = `${JSON.stringify(baseEnvelope).slice(0, -1)},"\\u0070acket":"FP-MAZER-MASTER-R017-ESCAPED-DUPLICATE-001"}\n`;
+    runEnvelope('escaped-unknown-ps7', 'INVOCATION_KEYS', { text: escapedUnknown });
+    runEnvelope('escaped-duplicate-ps7', 'INVOCATION_KEYS', { text: escapedDuplicate });
+    runEnvelope('escaped-unknown-ps51', 'INVOCATION_KEYS', { text: escapedUnknown, shell: 'powershell.exe' });
+    runEnvelope('escaped-duplicate-ps51', 'INVOCATION_KEYS', { text: escapedDuplicate, shell: 'powershell.exe' });
+    const arrayRoot = `[${JSON.stringify(baseEnvelope)}]\n`;
+    runEnvelope('array-root-ps7', 'INVOCATION_ROOT_OBJECT', { text: arrayRoot });
+    runEnvelope('array-root-ps51', 'INVOCATION_ROOT_OBJECT', { text: arrayRoot, shell: 'powershell.exe' });
+    runEnvelope('null-root', 'INVOCATION_ROOT_OBJECT', { text: 'null\n' });
+    runEnvelope('scalar-root', 'INVOCATION_ROOT_OBJECT', { text: '42\n' });
+    runEnvelope('null-packet', 'INVOCATION_VALUE_TYPES', { value: { ...baseEnvelope, packet: null } });
+    runEnvelope('string-switch', 'INVOCATION_VALUE_TYPES', { value: { ...baseEnvelope, execute_protected: 'true' } });
+    runEnvelope('unicode', 'INVOCATION_ASCII', { value: { ...baseEnvelope, packet: 'FP-MAZER-MASTER-R017-UNICODE-é' } });
+    runEnvelope('wrong-correlation', 'INVOCATION_STATE_CORRELATION', { value: { ...baseEnvelope, correlation_id: 'r017-wrongcorrelation0000000000000000' } });
+    runEnvelope('wrong-parent-hash', 'INVOCATION_PARENT_HOST_DRIFT', { value: { ...baseEnvelope, parent_host_sha256: '1'.repeat(64) } });
+    runEnvelope('wrong-child-hash', 'INVOCATION_CHILD_HOST_DRIFT', { value: { ...baseEnvelope, child_host_sha256: '2'.repeat(64) } });
+    const stale = new Date(issued.getTime() - 20 * 60_000);
+    runEnvelope('stale', 'INVOCATION_STALE', { value: { ...baseEnvelope, issued_at: roundtrip(stale), expires_at: roundtrip(new Date(stale.getTime() + 300_000)) } });
+    const absentPath = path.join(envelopeRoot, 'missing invocation.json');
+    runEnvelope('missing', 'INVOCATION_MISSING', { invocationPath: absentPath, missing: true, expectedSha: '0'.repeat(64), text: '' });
+
+    const realRoot = path.join(envelopeRoot, 'real');
+    const junctionRoot = path.join(envelopeRoot, 'junction');
+    fs.mkdirSync(realRoot);
+    fs.symlinkSync(realRoot, junctionRoot, 'junction');
+    const reparsePath = path.join(junctionRoot, 'invocation.json');
+    runEnvelope('reparse', 'LOCAL_PATH_REPARSE_POINT', { invocationPath: reparsePath });
+  } finally {
+    fs.rmSync(envelopeRoot, { recursive: true, force: true });
+  }
 }
 assert.ok(!/trap \{[\s\S]{0,256}Write-SafeResult/.test(fenceHost), 'prestate trap must not recurse through disclosure validation');
 const replayReset = host.slice(host.indexOf("if ([string]$state.phase -ceq 'ROLLED_BACK')"), host.indexOf('$managementToken = Read-ManagementToken'));
