@@ -1,0 +1,31 @@
+{
+  "schema": "atlas.mazer-master-r017-action-time-delta-evidence.v1",
+  "recorded_at": "2026-08-26T17:54:50.291291Z",
+  "result": "PASS_EXACT_ACTION_TIME_AI_AND_RECEIPT_DELTA_READY_FOR_R017_REPLAY",
+  "base_private_source_sha256": "754dca84d02d7e3c67064bc4a67ddcfffea196d5990d757afd4e86bbbdea7c33",
+  "private_delta_sha256": "a75b481781a195cc3878a32e404f59962ac71797974acc0776451551c20e964f",
+  "live_high_water": {
+    "legacy": {"auth_users":19,"auth_identities":19,"profiles":13,"player":16,"ai":16,"receipts":1878},
+    "master": {"auth_users":114,"auth_identities":114,"profiles":5,"player":7,"ai":7,"receipts":1290}
+  },
+  "delta": {
+    "profiles": 0,
+    "player_raw_changed": 12,
+    "player_effective_changed": 0,
+    "ai_raw_changed": 14,
+    "ai_effective_changed": 1,
+    "receipts_added": 1,
+    "owner_orphans": 0,
+    "monotonic_violations": 0,
+    "timestamp_violations": 0,
+    "state_shape_violations": 0,
+    "receipt_client_run_missing": 0,
+    "receipt_client_run_duplicates": 0,
+    "global_duplicate_client_run_keys": 0
+  },
+  "conservation": {"legacy_receipts":1878,"master_receipts":1290,"overlap":1281,"union":1887},
+  "reset_era": {"canonical_projection":"9/8/40/D","legacy_receipts":1716,"quarantined_projection":"39/108/161/S","master_receipts":1239},
+  "unchanged": {"auth_topology":"3_IMPORTS_14_BINDS_2_RETAINED_19_EDGES","profiles":13,"player_count":16,"ai_count":16,"master_rollback_preimage":"5_7_7_1290"},
+  "proof": {"query_mode":"REPEATABLE_READ_READ_ONLY","raw_player_changes":12,"effective_player_changes":0,"raw_ai_changes":14,"effective_ai_changes":1,"new_receipts":1,"receipt_after_ai":0,"raw_private_output":false},
+  "effect_truth": {"provider_reads":0,"database_reads":2,"provider_writes":0,"auth_or_live_data_writes":0,"migration_applies":0,"deployments":0}
+}
