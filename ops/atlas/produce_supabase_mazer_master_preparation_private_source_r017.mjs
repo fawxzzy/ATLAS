@@ -469,7 +469,9 @@ do $r017_auth_precheck$ begin
  if exists(select 1 from auth.identities i join jsonb_array_elements(${jsonLiteral(importIdentities)}) e on i.id=(e->>'id')::uuid or (i.provider=e->>'provider' and lower(i.provider_id)=lower(e->>'provider_id'))) then raise exception 'R017_IMPORT_IDENTITY_COLLISION'; end if;
 end $r017_auth_precheck$;
 with rows as (select jsonb_array_elements(${jsonLiteral(importUsers)}) value) insert into auth.users select (jsonb_populate_record(null::auth.users,value)).* from rows;
-with rows as (select jsonb_array_elements(${jsonLiteral(importIdentities)}) value) insert into auth.identities select (jsonb_populate_record(null::auth.identities,value)).* from rows;
+with rows as (select jsonb_array_elements(${jsonLiteral(importIdentities)}) value), records as (select jsonb_populate_record(null::auth.identities,value) r from rows)
+insert into auth.identities(id,user_id,provider_id,identity_data,provider,last_sign_in_at,created_at,updated_at)
+select (r).id,(r).user_id,(r).provider_id,(r).identity_data,(r).provider,(r).last_sign_in_at,(r).created_at,(r).updated_at from records;
 insert into mazer.mazer_identity_map(legacy_user_id,master_user_id,evidence_digest) select legacy_user_id,master_user_id,evidence_digest from jsonb_to_recordset(${jsonLiteral(edges)}) as x(legacy_user_id uuid,master_user_id uuid,evidence_digest text,disposition text) on conflict(legacy_user_id) do update set master_user_id=excluded.master_user_id,evidence_digest=excluded.evidence_digest where mazer.mazer_identity_map.master_user_id=excluded.master_user_id;
 do $r017_auth_postcheck$ begin
  if (select coalesce(jsonb_agg(to_jsonb(u) order by u.id),'[]'::jsonb) from auth.users u where u.id in (select (e->>'id')::uuid from jsonb_array_elements(${jsonLiteral(importUsers)}) e)) <> ${jsonLiteral(sort(importUsers, (item) => item.id))} then raise exception 'R017_IMPORTED_AUTH_USERS_DIGEST_DRIFT'; end if;
