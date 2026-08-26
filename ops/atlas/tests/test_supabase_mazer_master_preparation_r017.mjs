@@ -10,6 +10,7 @@ import { CONTRACT, HOST_PHASES, SQL_BYTE_LIMITS, assertSql, classifyHostRecovery
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const hostPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_r017.ps1');
 const credentialSafeLauncherPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_credential_safe_r017.ps1');
+const credentialSafeInvocationSealerPath = path.join(root, 'ops/atlas/seal_supabase_mazer_master_preparation_credential_safe_invocation_r017.mjs');
 const materializerPath = path.join(root, 'ops/atlas/materialize_supabase_mazer_master_preparation_r017.mjs');
 const fenceHostPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_cutover_data_fence_r001.ps1');
 const fenceClassifierPath = path.join(root, 'ops/atlas/classify_supabase_mazer_master_cutover_data_fence_r001.mjs');
@@ -221,6 +222,9 @@ assert.ok(!materializer.includes("path.join(root, 'repos', 'mazer')"));
 for (const token of ['ExecutionStep', 'FenceOnly', 'Continue', 'ReleaseLegacy', 'PAUSED_AFTER_SOURCE_HIGH_WATER', 'CONTINUE_ACL_NOT_EXACT_FENCED_POSTIMAGE', 'INPUT_FILE_DIGEST_DRIFT', 'STATE_INPUT_FILE_DIGEST_DRIFT']) assert.ok(fenceHost.includes(token), `fence seam missing ${token}`);
 for (const token of ['CONTINUE_OR_ROLLBACK', 'RELEASE_LEGACY_REQUIRED', 'PREPARATION_COMPLETE']) assert.ok(fenceClassifier.includes(token), `classifier seam missing ${token}`);
 for (const forbidden of ['vercel deploy', 'vercel promote', 'git push', 'supabase db push']) assert.ok(!host.toLowerCase().includes(forbidden) && !materializer.toLowerCase().includes(forbidden));
+const credentialSafeInvocationSealer = fs.readFileSync(credentialSafeInvocationSealerPath, 'utf8');
+for (const token of ['AUTHORIZED_SINGLE_USE','CONSUMED','approval_expires_at','credential_safe_launcher_sha256','SUCCESSOR_EXISTS','OUTPUT_EXISTS']) assert.ok(credentialSafeInvocationSealer.includes(token), `credential-safe invocation sealer missing ${token}`);
+assert.equal(spawnSync('node',['--check',credentialSafeInvocationSealerPath],{cwd:root,encoding:'utf8',windowsHide:true}).status,0);
 
 function sourceRun(command, args) {
   const child = spawnSync(command, args, { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 180_000 });
