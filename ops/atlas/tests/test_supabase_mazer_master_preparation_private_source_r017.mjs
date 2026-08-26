@@ -45,7 +45,16 @@ const legacyOnly = [uid(17), uid(18), uid(19)];
 const unrelatedMaster = Array.from({ length: 98 }, (_, index) => uid(1000 + index));
 
 function user(id, email, instance = uid(9000)) {
-  return { id, instance_id: instance, aud: 'authenticated', role: 'authenticated', email, encrypted_password: verifier, email_confirmed_at: iso(-10000), raw_app_meta_data: { provider: 'email', providers: ['email'] }, raw_user_meta_data: {}, created_at: iso(-20000), updated_at: iso(-10000) };
+  return {
+    id, instance_id: instance, aud: 'authenticated', role: 'authenticated', email, encrypted_password: verifier,
+    email_confirmed_at: iso(-10000), invited_at: null, confirmation_token: '', confirmation_sent_at: null,
+    recovery_token: '', recovery_sent_at: null, email_change_token_new: '', email_change: '', email_change_sent_at: null,
+    last_sign_in_at: null, raw_app_meta_data: { provider: 'email', providers: ['email'] }, raw_user_meta_data: {},
+    is_super_admin: false, created_at: iso(-20000), updated_at: iso(-10000), phone: null, phone_confirmed_at: null,
+    phone_change: '', phone_change_token: '', phone_change_sent_at: null, confirmed_at: iso(-10000),
+    email_change_token_current: '', email_change_confirm_status: 0, banned_until: null, reauthentication_token: '',
+    reauthentication_sent_at: null, is_sso_user: false, deleted_at: null, is_anonymous: false
+  };
 }
 function identity(id, email, index) { return { id: uid(20000 + index), user_id: id, provider_id: id, identity_data: { sub: id, email }, provider: 'email', created_at: iso(-20000), updated_at: iso(-10000), last_sign_in_at: iso(-10000) }; }
 function profile(id, index) { return { user_id: id, display_name: null, selected_control_mode: 'stick', settings: { trailFade: true }, created_at: iso(-9000), updated_at: iso(-8000), revision: index, username: index % 2 ? null : `u${index + 10}` }; }
@@ -201,6 +210,10 @@ const producerText = fs.readFileSync(producerPath, 'utf8');
 for (const forbidden of ['execute_sql', 'apply_migration', 'supabase db push', 'vercel deploy', 'git push']) assert.ok(!producerText.toLowerCase().includes(forbidden));
 for (const token of ['PRIVATE_OUTPUT_MUST_BE_UNDER_SECRETS','EVIDENCE_DIGEST_DRIFT','IDENTITY_DENOMINATOR_DRIFT','RESET_RECEIPT_DENOMINATOR_DRIFT','transaction isolation level serializable read only']) assert.ok(producerText.includes(token));
 assert.match(source.sql['auth-apply.sql'], /i\.provider_id=e->'user'->>'id'/);
+assert.match(source.sql['auth-apply.sql'], /insert into auth\.users\("instance_id","id","aud","role","email","encrypted_password","email_confirmed_at"/);
+assert.match(source.sql['auth-apply.sql'], /select \(r\)\."instance_id",\(r\)\."id",\(r\)\."aud",\(r\)\."role",\(r\)\."email"/);
+assert.doesNotMatch(source.sql['auth-apply.sql'], /insert into auth\.users\([^)]*"confirmed_at"[^)]*\)/);
+assert.doesNotMatch(source.sql['auth-apply.sql'], /insert into auth\.users select \(jsonb_populate_record\(null::auth\.users,value\)\)\.\*/);
 assert.match(source.sql['auth-apply.sql'], /insert into auth\.identities\(id,user_id,provider_id,identity_data,provider,last_sign_in_at,created_at,updated_at\)/);
 assert.match(source.sql['auth-apply.sql'], /select \(r\)\.id,\(r\)\.user_id,\(r\)\.provider_id,\(r\)\.identity_data,\(r\)\.provider,\(r\)\.last_sign_in_at,\(r\)\.created_at,\(r\)\.updated_at from records/);
 assert.doesNotMatch(source.sql['auth-apply.sql'], /insert into auth\.identities select \(jsonb_populate_record\(null::auth\.identities,value\)\)\.\*/);
