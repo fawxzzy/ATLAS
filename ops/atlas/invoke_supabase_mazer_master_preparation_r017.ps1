@@ -551,7 +551,7 @@ try {
   [void](Invoke-Fence 'ReleaseLegacy' $input $inputSha $fenceState ([string]$state.packet))
   Set-Phase $state 'LEGACY_RESTORED' $statePath
   Set-Phase $state 'PREPARATION_COMPLETE' $statePath
-  Write-Result 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' ([ordered]@{ phase = [string]$state.phase; master_hook_enabled = $true; legacy_signup_and_acl_restored = $true; fresh_dual_refence_and_catchup_required_for_cutover = $true; fence_lease_seconds = $HardFenceLeaseSeconds; rollback_initiation_deadline_seconds = $RollbackDeadlineSeconds; provider_writes = $providerWrites; database_transactions = $databaseTransactions; final_identity_edges = 19; profiles = 13; player = 16; ai = 16; receipts = 1884 })
+  Write-Result 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' ([ordered]@{ phase = [string]$state.phase; master_hook_enabled = $true; legacy_signup_and_acl_restored = $true; fresh_dual_refence_and_catchup_required_for_cutover = $true; fence_lease_seconds = $HardFenceLeaseSeconds; rollback_initiation_deadline_seconds = $RollbackDeadlineSeconds; provider_writes = $providerWrites; database_transactions = $databaseTransactions; final_identity_edges = 19; profiles = 13; player = 16; ai = 16; receipts = 1885 })
 }
 catch {
   $category = ([string]$_.Exception.Message -replace '[^A-Za-z0-9_]', '').ToUpperInvariant()
