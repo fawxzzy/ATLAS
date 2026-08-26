@@ -29,6 +29,19 @@ import {
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const classifierPath = path.join(root, 'ops/atlas/classify_supabase_mazer_master_cutover_data_fence_r001.mjs');
+const protectedHostPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_cutover_data_fence_r001.ps1');
+const protectedHostSource = fs.readFileSync(protectedHostPath, 'utf8');
+
+for (const category of ['RECOVERED_ACL_JOURNAL_DIGEST_DRIFT', 'RELEASE_LEGACY_JOURNAL_DRIFT']) {
+  const line = protectedHostSource.split(/\r?\n/).find((candidate) => candidate.includes(`throw '${category}'`));
+  assert.ok(line, `missing protected lifecycle gate for ${category}`);
+  assert.match(line, /actual_acl_preimage_digest/);
+  assert.match(line, /actual_catalog_digest/);
+  assert.match(line, /packet_input_digest/);
+  assert.match(line, /side -cne 'primary'/);
+  assert.doesNotMatch(line, /acl_observation_binding_digest/);
+}
+
 const uid = (value) => `00000000-0000-4000-8000-${String(value).padStart(12, '0')}`;
 const digest = (value) => sha256(`fixture:${value}`);
 const iso = (minute) => `2026-08-24T19:${String(minute).padStart(2, '0')}:00.000Z`;

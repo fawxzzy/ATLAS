@@ -1070,7 +1070,7 @@ try {
       [IO.File]::WriteAllText($rollbackExpectedAcl, (($state.journaled_primary_acl_preimage | ConvertTo-Json -Depth 12 -Compress) + "`n"), (New-Object Text.UTF8Encoding($false)))
       $recoveredRestore = Join-Path $privateRoot 'recovered-observed-restore.sql'
       $recoveredReceipt = Invoke-AclVerifier $privateInput $rollbackExpectedAcl 'primary' $recoveredRestore $null $rollbackExpectedAcl
-      if ([string]$recoveredReceipt.actual_acl_preimage_digest -cne [string]$state.journaled_primary_acl_digest -or [string]$recoveredReceipt.actual_catalog_digest -cne [string]$state.journaled_primary_catalog_digest -or [string]$recoveredReceipt.acl_observation_binding_digest -cne [string]$state.journaled_primary_acl_binding_digest) { throw 'RECOVERED_ACL_JOURNAL_DIGEST_DRIFT' }
+      if ([string]$recoveredReceipt.actual_acl_preimage_digest -cne [string]$state.journaled_primary_acl_digest -or [string]$recoveredReceipt.actual_catalog_digest -cne [string]$state.journaled_primary_catalog_digest -or [string]$recoveredReceipt.packet_input_digest -cne [string]$state.packet_input_digest -or [string]$recoveredReceipt.side -cne 'primary') { throw 'RECOVERED_ACL_JOURNAL_DIGEST_DRIFT' }
       $rollbackRestoreSql = $recoveredRestore
     }
     if ($direction -ceq 'forward') {
@@ -1148,7 +1148,7 @@ try {
     [IO.File]::WriteAllText($primaryAclPreobserve, (($state.journaled_primary_acl_preimage | ConvertTo-Json -Depth 12 -Compress) + "`n"), (New-Object Text.UTF8Encoding($false)))
     $releaseRestoreSql = Join-Path $privateRoot 'release-observed-restore.sql'
     $releaseReceipt = Invoke-AclVerifier $privateInput $primaryAclPreobserve 'primary' $releaseRestoreSql $null $primaryAclPreobserve
-    if ([string]$releaseReceipt.actual_acl_preimage_digest -cne [string]$state.journaled_primary_acl_digest -or [string]$releaseReceipt.acl_observation_binding_digest -cne [string]$state.journaled_primary_acl_binding_digest) { throw 'RELEASE_LEGACY_JOURNAL_DRIFT' }
+    if ([string]$releaseReceipt.actual_acl_preimage_digest -cne [string]$state.journaled_primary_acl_digest -or [string]$releaseReceipt.actual_catalog_digest -cne [string]$state.journaled_primary_catalog_digest -or [string]$releaseReceipt.packet_input_digest -cne [string]$state.packet_input_digest -or [string]$releaseReceipt.side -cne 'primary') { throw 'RELEASE_LEGACY_JOURNAL_DRIFT' }
     Set-StatePhase $state 'LEGACY_RESTORING' $resolvedState
     $release = Invoke-ExactAclRecovery $legacyDatabaseUrl $privateInput $classification.AclObservationSql $primaryAclPreobserve $releaseRestoreSql $privateRoot 'release-primary' -WriterCaptureSql $classification.WriterCaptureSql -PhasePrefix 'LEGACY' -State $state -ResolvedStatePath $resolvedState
     $databaseTransactions += [int]$release.DatabaseTransactions
