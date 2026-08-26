@@ -1,13 +1,13 @@
 {
-  "schema": "atlas.mazer-master-r017-combined-delta-evidence.v1",
-  "recorded_at": "2026-08-26T02:00:56.791816Z",
-  "result": "PASS_EXACT_PROFILE_AND_RECEIPT_DELTA_READY_FOR_R017_REPLAY",
-  "base_private_source_sha256": "f83141951ae342e1c9802ec291348b363dce9033d80b15b254889ca207919034",
-  "private_delta_sha256": "1dfece38eea810733d82f4539db88898fbb0c98262368af7b807c51f69a47599",
-  "live_high_water": { "legacy": { "auth_users": 19, "auth_identities": 19, "profiles": 13, "player": 16, "ai": 16, "receipts": 1875 }, "master": { "auth_users": 114, "auth_identities": 114, "profiles": 5, "player": 7, "ai": 7, "receipts": 1290 } },
-  "delta": { "profiles": 1, "receipts": 1, "player_denominator": 0, "ai_denominator": 0, "player_progression_updates_after_base": 1, "ai_progression_updates_after_base": 0, "receipt_lane": "player", "profile_owner_count": 1, "identity_owner_count": 1, "email_identity_count": 1, "provider_id_matches": 1, "subject_matches": 1, "email_matches": 1, "username_casefold_collisions": 0, "global_duplicate_client_run_keys": 0, "new_client_run_key_count": 1, "new_master_overlap_count": 0, "payload_conflicts": 0, "owner_mapping_conflicts": 0, "timestamp_ordering": "PLAYER_RECEIPT_COMPLETED_BEFORE_OR_AT_PLAYER_UPDATED" },
-  "conservation": { "legacy_receipts": 1875, "master_receipts": 1290, "overlap": 1281, "union": 1884 },
-  "unchanged": { "auth_topology": "3_IMPORTS_14_BINDS_2_RETAINED_19_EDGES", "player_count": 16, "ai_count": 16, "master_rollback_preimage": "5_7_7_1290" },
-  "transport_incident": { "category": "LOCAL_PTY_ECHOED_PRIVATE_DELTA_LINE", "raw_private_output_occurred": true, "provider_writes": 0, "auth_writes": 0, "live_data_writes": 0, "remediation": "DIRECT_FILE_ONLY_NO_PTY_STDIN_OR_CHUNKS" },
+  "schema": "atlas.mazer-master-r017-combined-delta-evidence.v2",
+  "recorded_at": "2026-08-26T06:59:09.883603Z",
+  "result": "PASS_EXACT_PROGRESSION_AND_RECEIPT_DELTA_READY_FOR_R017_REPLAY",
+  "base_private_source_sha256": "5a5847bf8c5cd6375c48a1b59d47f54a0bb7026ac79ad3fdafc75813d1f180ee",
+  "private_delta_sha256": "adb91090c243fa48d7e34dcf78290b6d784961753e181feb46b541aa342cc102",
+  "live_high_water": { "legacy": { "auth_users": 19, "auth_identities": 19, "profiles": 13, "player": 16, "ai": 16, "receipts": 1876 }, "master": { "auth_users": 114, "auth_identities": 114, "profiles": 5, "player": 7, "ai": 7, "receipts": 1290 } },
+  "delta": { "profiles": 0, "receipts": 1, "player_denominator": 0, "ai_denominator": 0, "raw_player_rows_observed_different": 13, "raw_ai_rows_observed_different": 13, "player_progression_updates_after_normalization": 1, "ai_progression_updates_after_normalization": 0, "player_added": 0, "player_deleted": 0, "ai_added": 0, "ai_deleted": 0, "profile_added": 0, "profile_deleted": 0, "profile_changed": 0, "owner_orphans": 0, "monotonic_violations": 0, "timestamp_violations": 0, "state_shape_violations": 0, "receipt_client_run_missing": 0, "receipt_client_run_duplicates": 0, "global_duplicate_client_run_keys": 0 },
+  "conservation": { "legacy_receipts": 1876, "master_receipts": 1290, "overlap": 1281, "union": 1885 },
+  "unchanged": { "auth_topology": "3_IMPORTS_14_BINDS_2_RETAINED_19_EDGES", "profiles": 13, "player_count": 16, "ai_count": 16, "master_rollback_preimage": "5_7_7_1290" },
+  "proof": { "aggregate_sql_sha256": "e88cdaa7b2429ae578440849ccc73e939a095fc0276dade36363af8ffc0f0bd5", "private_capture_sha256": "adb91090c243fa48d7e34dcf78290b6d784961753e181feb46b541aa342cc102", "full_source_high_water_before_delta": "SOURCE_HIGH_WATER_DRIFT_MAZER_PROGRESSION_STATES", "raw_private_output": false },
   "effect_truth": { "provider_reads": 4, "provider_writes": 0, "auth_or_live_data_writes": 0, "migration_applies": 0, "deployments": 0 }
 }
