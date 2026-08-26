@@ -9,6 +9,7 @@ import { CONTRACT, HOST_PHASES, SQL_BYTE_LIMITS, assertSql, classifyHostRecovery
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const hostPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_r017.ps1');
+const credentialSafeLauncherPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_credential_safe_r017.ps1');
 const materializerPath = path.join(root, 'ops/atlas/materialize_supabase_mazer_master_preparation_r017.mjs');
 const fenceHostPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_cutover_data_fence_r001.ps1');
 const fenceClassifierPath = path.join(root, 'ops/atlas/classify_supabase_mazer_master_cutover_data_fence_r001.mjs');
@@ -232,6 +233,14 @@ function sourceRun(command, args) {
 if (process.platform === 'win32') {
   sourceRun('pwsh.exe', ['-NoLogo','-NoProfile','-NonInteractive','-File',hostPath,'-SourceOnlyValidate']);
   sourceRun('powershell.exe', ['-NoLogo','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',hostPath,'-SourceOnlyValidate']);
+  for (const [shell, prefix] of [['pwsh.exe', []], ['powershell.exe', ['-ExecutionPolicy','Bypass']]]) {
+    const child = spawnSync(shell, ['-NoLogo','-NoProfile','-NonInteractive',...prefix,'-File',credentialSafeLauncherPath,'-SourceOnlyValidate'], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 60_000 });
+    assert.equal(child.status, 0, child.stderr);
+    const receipt = JSON.parse(child.stdout.trim());
+    assert.equal(receipt.result, 'PASS_R017_CREDENTIAL_SAFE_LAUNCHER_SOURCE');
+    assert.equal(receipt.external_calls, 0);
+    assert.equal(receipt.credential_reads, 0);
+  }
 }
 
 console.log(JSON.stringify({ result: 'PASS_MAZER_MASTER_PREPARATION_R017', phases: HOST_PHASES.length, sql_contracts: CONTRACT.sqlNames.length, pg17_concurrency: 'COVERED_BY_INHERITED_FENCE_SUITE_EXPLICIT_OPT_IN', provider_calls: 0, provider_writes: 0, auth_writes: 0, live_data_writes: 0, deployments: 0 }));
