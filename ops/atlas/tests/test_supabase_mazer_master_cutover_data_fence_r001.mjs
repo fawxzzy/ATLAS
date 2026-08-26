@@ -945,6 +945,7 @@ try {
   const planPath = path.join(tmp, 'private-plan.json');
   const sqlPath = path.join(tmp, 'private-plan.sql');
   const sourceObservationSqlPath = path.join(tmp, 'private-source-observation.sql');
+  const targetObservationSqlPath = path.join(tmp, 'private-target-observation.sql');
   const fenceSqlPath = path.join(tmp, 'private-fence.sql');
   const writerCaptureSqlPath = path.join(tmp, 'private-writer-capture.sql');
   const aclObservationSqlPath = path.join(tmp, 'private-acl-observation.sql');
@@ -963,6 +964,7 @@ try {
     '--private-plan', planPath,
     '--private-sql', sqlPath,
     '--private-source-observation-sql', sourceObservationSqlPath,
+    '--private-target-observation-sql', targetObservationSqlPath,
     '--private-fence-sql', fenceSqlPath,
     '--private-writer-capture-sql', writerCaptureSqlPath,
     '--private-acl-observation-sql', aclObservationSqlPath,
@@ -987,6 +989,7 @@ try {
   assert.ok(fs.statSync(planPath).size > 0);
   assert.ok(fs.statSync(sqlPath).size > 0);
   assert.ok(fs.statSync(sourceObservationSqlPath).size > 0);
+  assert.ok(fs.statSync(targetObservationSqlPath).size > 0);
   assert.ok(fs.statSync(fenceSqlPath).size > 0);
   assert.ok(fs.statSync(writerCaptureSqlPath).size > 0);
   assert.ok(fs.statSync(aclObservationSqlPath).size > 0);
@@ -1000,6 +1003,12 @@ try {
   assert.ok(fs.statSync(signupAdmissionRestoreSqlPath).size > 0);
   assert.equal(fs.readFileSync(signupAdmissionFenceSqlPath, 'utf8'), signupFenceSql);
   const sourceObservationSql = fs.readFileSync(sourceObservationSqlPath, 'utf8');
+  const targetObservationSql = fs.readFileSync(targetObservationSqlPath, 'utf8');
+  assert.match(targetObservationSql, /PASS_TARGET_HIGH_WATER/);
+  assert.match(targetObservationSql, /TARGET_HIGH_WATER_DRIFT:mazer_profiles/);
+  assert.match(targetObservationSql, /TARGET_HIGH_WATER_DRIFT:mazer_progression_states/);
+  assert.match(targetObservationSql, /TARGET_HIGH_WATER_DRIFT:mazer_ai_progression_states/);
+  assert.match(targetObservationSql, /TARGET_HIGH_WATER_DRIFT:mazer_cycle_receipts/);
   assert.match(sourceObservationSql, /begin transaction isolation level repeatable read;/);
   assert.match(sourceObservationSql, /create temporary table atlas_expected_auth/);
   assert.match(sourceObservationSql, /SOURCE_AUTH_HIGH_WATER_DRIFT/);
