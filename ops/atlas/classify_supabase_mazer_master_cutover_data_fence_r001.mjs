@@ -712,9 +712,14 @@ export function renderSourceObservationSql(plan) {
     ['mazer_cycle_receipts', 'receipts']
   ]) {
     const expectedName = `atlas_source_${rowsName}`;
+    const liveProjection = table === 'mazer_progression_states'
+      ? `pg_catalog.jsonb_set(pg_catalog.to_jsonb(t), '{state}', (t.state - 'tracks') || pg_catalog.jsonb_build_object('tracks', ((case when pg_catalog.jsonb_typeof(t.state -> 'tracks') = 'object' then t.state -> 'tracks' else '{}'::jsonb end) - 'player') || pg_catalog.jsonb_build_object('player', (case when pg_catalog.jsonb_typeof(t.state -> 'tracks' -> 'player') = 'object' then t.state -> 'tracks' -> 'player' else '{}'::jsonb end) || pg_catalog.jsonb_build_object('level', t.player_level::text, 'completedCycles', t.player_completed_cycles::text))), true)`
+      : table === 'mazer_ai_progression_states'
+        ? `pg_catalog.jsonb_set(pg_catalog.jsonb_set(pg_catalog.to_jsonb(t), '{state}', (case when pg_catalog.jsonb_typeof(t.state) = 'object' then t.state else '{}'::jsonb end) || pg_catalog.jsonb_build_object('level', t.level::text, 'completedCycles', t.completed_cycles::text), true), '{summary}', (case when pg_catalog.jsonb_typeof(t.summary) = 'object' then t.summary else '{}'::jsonb end) || pg_catalog.jsonb_build_object('level', t.level::text, 'completedCycles', t.completed_cycles::text), true)`
+        : 'pg_catalog.to_jsonb(t)';
     blocks.push(`create temporary table ${expectedName} on commit drop as select * from ${q(schema)}.${q(table)} with no data;`);
     blocks.push(`insert into ${expectedName} select * from pg_catalog.jsonb_populate_recordset(null::${q(schema)}.${q(table)}, ${encodedJson(plan.source[rowsName])});`);
-    blocks.push(`do $atlas_source_preimage$ begin if exists ((select pg_catalog.to_jsonb(t) from ${q(schema)}.${q(table)} t except select pg_catalog.to_jsonb(e) from ${expectedName} e) union all (select pg_catalog.to_jsonb(e) from ${expectedName} e except select pg_catalog.to_jsonb(t) from ${q(schema)}.${q(table)} t)) then raise exception 'SOURCE_HIGH_WATER_DRIFT:${table}'; end if; end $atlas_source_preimage$;`);
+    blocks.push(`do $atlas_source_preimage$ begin if exists ((select ${liveProjection} from ${q(schema)}.${q(table)} t except select pg_catalog.to_jsonb(e) from ${expectedName} e) union all (select pg_catalog.to_jsonb(e) from ${expectedName} e except select ${liveProjection} from ${q(schema)}.${q(table)} t)) then raise exception 'SOURCE_HIGH_WATER_DRIFT:${table}'; end if; end $atlas_source_preimage$;`);
   }
   blocks.push(`select pg_catalog.jsonb_build_object('result', 'PASS_SOURCE_HIGH_WATER', 'source_high_water_digest', '${plan.source_high_water_digest}', 'observed_at', pg_catalog.clock_timestamp())::text;`);
   blocks.push('commit;');

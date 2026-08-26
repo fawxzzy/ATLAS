@@ -991,6 +991,13 @@ try {
   assert.match(sourceObservationSql, /create temporary table atlas_expected_auth/);
   assert.match(sourceObservationSql, /SOURCE_AUTH_HIGH_WATER_DRIFT/);
   assert.match(sourceObservationSql, /SOURCE_HIGH_WATER_DRIFT:mazer_cycle_receipts/);
+  assert.match(sourceObservationSql, /jsonb_typeof\(t\.state -> 'tracks'\) = 'object'/);
+  assert.match(sourceObservationSql, /jsonb_typeof\(t\.state -> 'tracks' -> 'player'\) = 'object'/);
+  assert.match(sourceObservationSql, /jsonb_build_object\('level', t\.player_level::text, 'completedCycles', t\.player_completed_cycles::text\)/);
+  assert.equal((sourceObservationSql.match(/jsonb_typeof\(t\.state -> 'tracks'\)/g) ?? []).length, 2);
+  assert.match(sourceObservationSql, /jsonb_typeof\(t\.state\) = 'object'/);
+  assert.match(sourceObservationSql, /jsonb_typeof\(t\.summary\) = 'object'/);
+  assert.match(sourceObservationSql, /jsonb_build_object\('level', t\.level::text, 'completedCycles', t\.completed_cycles::text\)/);
   assert.match(sourceObservationSql, /PASS_SOURCE_HIGH_WATER/);
   assert.doesNotMatch(sourceObservationSql, /fixture-a|\$atlas_desired_profiles\$/);
   assert.doesNotMatch(cli.stdout, /fixture-a|@|password|service_role|authorization/i);
