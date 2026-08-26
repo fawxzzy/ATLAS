@@ -41,7 +41,7 @@ const iso = (offset) => new Date(now + offset).toISOString();
 const verifier = `$2b$12$${'A'.repeat(53)}`;
 const sharedLegacy = Array.from({ length: 16 }, (_, index) => uid(index + 1));
 const sharedMaster = sharedLegacy.map((id, index) => index < 2 ? id : uid(100 + index));
-const legacyOnly = [uid(17), uid(18), uid(19)];
+const legacyOnly = [uid(17), uid(18), uid(19), uid(20)];
 const unrelatedMaster = Array.from({ length: 98 }, (_, index) => uid(1000 + index));
 
 function user(id, email, instance = uid(9000)) {
@@ -98,7 +98,7 @@ function rawFixture() {
   return {
     legacy: {
       observed_at: iso(0), auth_users: legacyEmails.map(([email, id]) => user(id, email)), auth_identities: legacyEmails.map(([email, id], index) => identity(id, email, index)),
-      profiles: sharedLegacy.slice(0, 13).map(profile), player: sharedLegacy.map((id, index) => player(id, index === 13)), ai: sharedLegacy.map((id, index) => ai(id, index === 13, false)), receipts: [...overlappingLegacyReceipts, ...legacyOnlyReceipts], catalog: catalog()
+      profiles: sharedLegacy.slice(0, 13).map(profile), player: [...sharedLegacy.map((id, index) => player(id, index === 13)), player(legacyOnly[3])], ai: [...sharedLegacy.map((id, index) => ai(id, index === 13, false)), ai(legacyOnly[3], false)], receipts: [...overlappingLegacyReceipts, ...legacyOnlyReceipts], catalog: catalog()
     },
     master: {
       observed_at: iso(-1000), auth_users: masterEmails.map(([email, id]) => user(id, email)), auth_identities: masterEmails.map(([email, id], index) => identity(id, email, 100 + index)),
@@ -120,7 +120,7 @@ fixture.master.player[0].state.masterRollbackSibling = 'preserved-master-preimag
 const plan = buildIdentityPlan(fixture.legacy, fixture.master);
 assert.equal(plan.retained_edges.length, 2);
 assert.equal(plan.new_edges.filter((edge) => edge.disposition === 'BIND_EXISTING').length, 14);
-assert.equal(plan.imports.length, 3);
+assert.equal(plan.imports.length, 4);
 assert.ok(plan.imports.every((item) => item.user.raw_user_meta_data.app_namespace === undefined));
 assert.deepEqual(plan.imports.at(-1).identities, [fixture.legacy.auth_identities.at(-1)]);
 
@@ -174,8 +174,8 @@ assert.equal(preM2Source.fence_input.fence.master.acl_basis, 'FRESH_LIVE_TABLES_
 assert.equal(preM2Source.fence_input.fence.master.acl_preimage.rpc_acl.length, FENCE_CONTRACT.mutatingRpcs.length);
 assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.table_acl, preM2MasterAcl.table_acl);
 assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.catalog.tables, preM2MasterAcl.catalog.tables);
-assert.equal(validated.allEdges.length, 19);
-assert.deepEqual(validated.classified.desired_counts, { profiles: 13, player: 16, ai: 16, receipts: 1887 });
+assert.equal(validated.allEdges.length, 20);
+assert.deepEqual(validated.classified.desired_counts, { profiles: 13, player: 17, ai: 17, receipts: 1887 });
 assert.equal(source.reset_era_ai.canonical_projection, '9/8/40/D');
 assert.equal(source.reset_era_ai.legacy_receipts, 1716);
 assert.equal(source.reset_era_ai.master_receipts, 1239);
@@ -314,4 +314,4 @@ assert.equal(JSON.parse(sourceCheck.stdout).result, 'PASS_R017_PRIVATE_SOURCE_PR
 const rendered = renderOperationalSql({ auth: source.auth, fenceInput: source.fence_input, catalogPreimage: source.catalog_preimage, reset: { quarantined_row: source.reset_era_ai.quarantined_row }, qa: source.qa, quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
 assert.deepEqual(Object.keys(rendered.sql), [...Object.keys(source.sql)]);
 
-console.log(JSON.stringify({ result: 'PASS_MAZER_MASTER_PREPARATION_PRIVATE_SOURCE_R017', identity_edges: 19, imports: 3, binds: 14, retained: 2, app_counts: validated.classified.desired_counts, sql_programs: 9, provider_calls: 0, provider_writes: 0, auth_writes: 0, live_data_writes: 0, raw_private_output: 0 }));
+console.log(JSON.stringify({ result: 'PASS_MAZER_MASTER_PREPARATION_PRIVATE_SOURCE_R017', identity_edges: 20, imports: 4, binds: 14, retained: 2, app_counts: validated.classified.desired_counts, sql_programs: 9, provider_calls: 0, provider_writes: 0, auth_writes: 0, live_data_writes: 0, raw_private_output: 0 }));

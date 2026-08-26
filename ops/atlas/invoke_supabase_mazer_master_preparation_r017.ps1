@@ -425,7 +425,7 @@ try {
   if ($materialized.ExitCode -ne 0) { throw 'PRIVATE_MATERIALIZATION_FAILED' }
   $manifestPath = Join-Path $privateRoot 'manifest.json'
   $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-  if ([int]$manifest.auth_counts.imports -ne 3 -or [int]$manifest.auth_counts.binds -ne 14 -or [int]$manifest.auth_counts.retained_edges -ne 2 -or [int]$manifest.auth_counts.final_edges -ne 19 -or [int]$manifest.auth_counts.expected_target_users -ne 117) { throw 'AUTH_TOPOLOGY_MANIFEST_DRIFT' }
+  if ([int]$manifest.auth_counts.imports -ne 4 -or [int]$manifest.auth_counts.binds -ne 14 -or [int]$manifest.auth_counts.retained_edges -ne 2 -or [int]$manifest.auth_counts.final_edges -ne 20 -or [int]$manifest.auth_counts.expected_target_users -ne 118) { throw 'AUTH_TOPOLOGY_MANIFEST_DRIFT' }
   $input = Join-Path $privateRoot 'fence-input.json'
   $inputSha = Get-Sha256 $input
   $manifestSha = Get-Sha256 $manifestPath
@@ -568,7 +568,7 @@ try {
   [void](Invoke-Fence 'ReleaseLegacy' $input $inputSha $fenceState ([string]$state.packet))
   Set-Phase $state 'LEGACY_RESTORED' $statePath
   Set-Phase $state 'PREPARATION_COMPLETE' $statePath
-  Write-Result 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' ([ordered]@{ phase = [string]$state.phase; master_hook_enabled = $true; legacy_signup_and_acl_restored = $true; fresh_dual_refence_and_catchup_required_for_cutover = $true; fence_lease_seconds = $HardFenceLeaseSeconds; rollback_initiation_deadline_seconds = $RollbackDeadlineSeconds; provider_writes = $providerWrites; database_transactions = $databaseTransactions; final_identity_edges = 19; profiles = 13; player = 16; ai = 16; receipts = 1887 })
+  Write-Result 'MASTER_PREPARED_LEGACY_RESTORED_NOT_CUTOVER' ([ordered]@{ phase = [string]$state.phase; master_hook_enabled = $true; legacy_signup_and_acl_restored = $true; fresh_dual_refence_and_catchup_required_for_cutover = $true; fence_lease_seconds = $HardFenceLeaseSeconds; rollback_initiation_deadline_seconds = $RollbackDeadlineSeconds; provider_writes = $providerWrites; database_transactions = $databaseTransactions; final_identity_edges = 20; profiles = 13; player = 17; ai = 17; receipts = 1887 })
 }
 catch {
   $category = ([string]$_.Exception.Message -replace '[^A-Za-z0-9_]', '').ToUpperInvariant()

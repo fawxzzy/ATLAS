@@ -1,0 +1,30 @@
+{
+  "schema": "atlas.mazer-master-r017-postrollback-auth-identity-topology-evidence.v2",
+  "recorded_at": "2026-08-26T23:34:21.3485781Z",
+  "result": "PASS_EXACT_POSTROLLBACK_AUTH_IDENTITY_TOPOLOGY_READY_FOR_R017_REPLAY",
+  "source": "BOUNDED_REPEATABLE_READ_PRIVATE_AUTH_CAPTURE",
+  "aggregate_topology": {
+    "legacy_users": 20,
+    "master_users": 114,
+    "shared_normalized_emails": 16,
+    "retained_same_uuid": 2,
+    "bind_existing_different_uuid": 14,
+    "imports": 4,
+    "final_edges": 20,
+    "expected_target_users": 118,
+    "provider_id_conflicts": 0,
+    "identity_owner_conflicts": 0,
+    "identity_subject_conflicts": 0,
+    "identity_email_conflicts": 0
+  },
+  "bounded_delta": {
+    "legacy_users_added": 1,
+    "legacy_identities_added": 1,
+    "existing_user_updated_at_only": 1,
+    "new_imports": 1,
+    "binds_unchanged": 14,
+    "retained_unchanged": 2
+  },
+  "private_capture_sha256": "c79a8e560d7bf9c31337b0ec423ee3562e3df0b93a6320e9fdddb3ea80e2974",
+  "effect_truth": {"provider_writes":0,"auth_or_live_data_writes":0,"deployments":0,"raw_records_emitted":false}
+}
