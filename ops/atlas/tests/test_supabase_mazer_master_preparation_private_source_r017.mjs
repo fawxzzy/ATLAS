@@ -63,7 +63,7 @@ function player(id, reset = false, target = false) {
   return { user_id: id, schema_version: 1, state: { tracks: { player: { level, completedCycles: cycles, targetComplexity: complexity } } }, last_completed_cycle_at: iso(-7000), created_at: iso(-9000), updated_at: iso(-7000), player_level: level, player_rank: 'E', player_target_complexity: complexity, player_completed_cycles: cycles, revision: 0, level_reached_at: iso(-7000) };
 }
 function ai(id, reset, target = false) {
-  const level = reset ? (target ? 39 : 7) : 2; const cycles = reset ? (target ? 108 : 6) : 1; const complexity = reset ? (target ? 161 : 32) : 12; const rank = reset ? (target ? 'S' : 'D') : 'E';
+  const level = reset ? (target ? 39 : 8) : 2; const cycles = reset ? (target ? 108 : 7) : 1; const complexity = reset ? (target ? 161 : 36) : 12; const rank = reset ? (target ? 'S' : 'D') : 'E';
   return { user_id: id, runner_key: 'menu-runner', schema_version: 1, state: { level, completedCycles: cycles, targetComplexity: complexity }, summary: { level, completedCycles: cycles, targetComplexity: complexity }, level, rank, target_complexity: complexity, completed_cycles: cycles, last_completed_cycle_at: iso(target ? -9000 : -1000), created_at: iso(-20000), updated_at: iso(target ? -9000 : -1000) };
 }
 function receipt(id, owner, run, payload) { return { id, user_id: owner, surface: 'play', maze_seed: 7, maze_size: 37, route_quality: 'multi-route', start_cell: {}, goal_cell: {}, path_length: 20, wrong_turns: 1, backtracks: 0, completion_time_ms: 2000, reset_used: false, control_mode: 'stick', average_frame_ms: 16.667, receipt: { fixture: payload }, completed_at: iso(-5000), created_at: iso(-5000), ruleset_id: 'legacy-v1', recipe_version: null, recipe_hash: null, client_run_id: run };
@@ -92,7 +92,7 @@ function rawFixture() {
   const resetLegacy = sharedLegacy[13]; const resetMaster = sharedMaster[13];
   const overlappingLegacyReceipts = Array.from({ length: 1281 }, (_, index) => receipt(uid(30000 + index), index < 1239 ? resetLegacy : sharedLegacy[0], uid(50000 + index), index));
   const overlappingMasterReceipts = overlappingLegacyReceipts.map((row, index) => ({ ...structuredClone(row), user_id: index < 1239 ? resetMaster : sharedMaster[0] }));
-  const legacyOnlyReceipts = Array.from({ length: 595 }, (_, index) => receipt(uid(40000 + index), index < 475 ? resetLegacy : sharedLegacy[1], uid(60000 + index), 1281 + index));
+  const legacyOnlyReceipts = Array.from({ length: 596 }, (_, index) => receipt(uid(40000 + index), index < 476 ? resetLegacy : sharedLegacy[1], uid(60000 + index), 1281 + index));
   const masterOnlyReceipts = Array.from({ length: 9 }, (_, index) => receipt(uid(45000 + index), sharedMaster[2], uid(65000 + index), 2000 + index));
   const targetUsers = [0, 1, 2, 3, 4, 5, 13];
   return {
@@ -154,9 +154,9 @@ assert.equal(preM2Source.fence_input.fence.master.acl_preimage.rpc_acl.length, F
 assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.table_acl, preM2MasterAcl.table_acl);
 assert.deepEqual(preM2Source.fence_input.fence.master.acl_preimage.catalog.tables, preM2MasterAcl.catalog.tables);
 assert.equal(validated.allEdges.length, 19);
-assert.deepEqual(validated.classified.desired_counts, { profiles: 13, player: 16, ai: 16, receipts: 1885 });
-assert.equal(source.reset_era_ai.canonical_projection, '7/6/32/D');
-assert.equal(source.reset_era_ai.legacy_receipts, 1714);
+assert.deepEqual(validated.classified.desired_counts, { profiles: 13, player: 16, ai: 16, receipts: 1886 });
+assert.equal(source.reset_era_ai.canonical_projection, '8/7/36/D');
+assert.equal(source.reset_era_ai.legacy_receipts, 1715);
 assert.equal(source.reset_era_ai.master_receipts, 1239);
 assert.equal(source.reset_era_player.disposition, 'MASTER_DOMINATES_NO_OVERRIDE');
 assert.equal(source.qa.personas, 4);
