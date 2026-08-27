@@ -91,6 +91,11 @@ function Resolve-DecisionRelative([string]$Value,[string]$Code) {
   return [IO.Path]::GetFullPath((Join-Path $Root $Value))
 }
 
+function Get-CanonicalApprovalInstant([string]$Value,[string]$Code) {
+  $parsed=Parse-Rfc3339 $Value $Code
+  return $parsed.UtcDateTime.Ticks-($parsed.UtcDateTime.Ticks%10)
+}
+
 function Read-SealedJsonSnapshot([string]$Path,[string]$Boundary,[string]$ExpectedSha,[int]$MaxBytes) {
   $resolved=Assert-Under $Path $Boundary;Assert-NoReparse $resolved $Boundary
   $stream=New-Object IO.FileStream($resolved,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read);$bytes=$null
@@ -195,7 +200,8 @@ function Read-Invocation([string]$Path, [string]$ExpectedSha) {
   if([int]$d.effect_ceiling.execution_clusters-ne1-or-not[bool]$d.effect_ceiling.legacy_writer_fence_and_restore-or(@($d.effect_ceiling.master_migrations)-join',')-cne'M1,M2,M3,M4'-or-not[bool]$d.effect_ceiling.username_backfill_and_origin_contract-or-not[bool]$d.effect_ceiling.vault_key_create_and_rollback_delete-or-not[bool]$d.effect_ceiling.before_user_created_hook_activation-or-not[bool]$d.effect_ceiling.bounded_qa_and_cleanup-or-not[bool]$d.effect_ceiling.rollback_on_any_failed_gate-or[bool]$d.effect_ceiling.cutover-or[bool]$d.effect_ceiling.vercel_or_app_deployment-or[bool]$d.effect_ceiling.production_alias_change){throw 'DECISION_EFFECT_CONTRACT'}
   if ([string]$d.sealed_inputs.execution_correlation_id-cne[string]$value.execution_correlation_id-or(Resolve-DecisionRelative ([string]$d.sealed_inputs.private_source_path) 'DECISION_SOURCE_PATH')-cne$source-or[string]$d.sealed_inputs.private_source_sha256-cne[string]$value.private_source_sha256-or(Resolve-DecisionRelative ([string]$d.sealed_inputs.manifest_path) 'DECISION_MANIFEST_PATH')-cne$manifest-or[string]$d.sealed_inputs.manifest_sha256-cne[string]$value.private_manifest_sha256-or(Resolve-DecisionRelative ([string]$d.sealed_inputs.host_path) 'DECISION_HOST_PATH')-cne$hostPath-or[string]$d.sealed_inputs.host_sha256-cne[string]$value.host_sha256-or(Resolve-DecisionRelative ([string]$d.sealed_inputs.credential_safe_launcher_path) 'DECISION_LAUNCHER_PATH')-cne$launcherPath-or[string]$d.sealed_inputs.credential_safe_launcher_sha256-cne[string]$value.launcher_sha256-or(Resolve-DecisionRelative ([string]$d.sealed_inputs.prior_rollback_state_path) 'DECISION_PREDECESSOR_PATH')-cne$predecessor-or[string]$d.sealed_inputs.prior_rollback_receipt_sha256-cne[string]$value.predecessor_state_sha256) { throw 'DECISION_EXECUTION_BINDING' }
   if([int]$d.effect_ceiling.auth_identity_edges-ne[int]$value.terminal_final_identity_edges-or[int]$d.effect_ceiling.profiles-ne[int]$value.terminal_profiles-or[int]$d.effect_ceiling.player_rows-ne[int]$value.terminal_player-or[int]$d.effect_ceiling.ai_rows-ne[int]$value.terminal_ai-or[int]$d.effect_ceiling.receipts-ne[int]$value.terminal_receipts-or[int]$d.effect_ceiling.auth_identity_edges-ne([int]$d.effect_ceiling.auth_user_imports+[int]$d.effect_ceiling.auth_existing_user_binds+[int]$d.effect_ceiling.auth_same_uuid_retained)){throw 'TERMINAL_DENOMINATORS'}
-  if ($envelopeApprovalExpires-cne$aliasExpires-or$envelopeExpires-cne$aliasExpires-or$decisionExpires-cne$aliasExpires-or$envelopeNotBefore-cne$consumedRaw) { throw 'INVOCATION_APPROVAL_TIME_BINDING' }
+  $aliasExpiryInstant=Get-CanonicalApprovalInstant $aliasExpires 'APPROVAL_TIMESTAMP'
+  if ((Get-CanonicalApprovalInstant $envelopeApprovalExpires 'INVOCATION_TIMESTAMP')-ne$aliasExpiryInstant-or(Get-CanonicalApprovalInstant $envelopeExpires 'INVOCATION_TIMESTAMP')-ne$aliasExpiryInstant-or(Get-CanonicalApprovalInstant $decisionExpires 'APPROVAL_TIMESTAMP')-ne$aliasExpiryInstant-or$envelopeNotBefore-cne$consumedRaw) { throw 'INVOCATION_APPROVAL_TIME_BINDING' }
   $issued=Parse-Rfc3339 $envelopeIssued 'INVOCATION_TIMESTAMP';$notBefore=Parse-Rfc3339 $envelopeNotBefore 'INVOCATION_TIMESTAMP';$expires=Parse-Rfc3339 $envelopeExpires 'INVOCATION_TIMESTAMP';$aliasIssued=Parse-Rfc3339 $aliasIssuedRaw 'APPROVAL_TIMESTAMP';$authorized=Parse-Rfc3339 $authorizedRaw 'APPROVAL_TIMESTAMP';$consumed=Parse-Rfc3339 $consumedRaw 'APPROVAL_TIMESTAMP'
   $now=[DateTimeOffset]::UtcNow
   if ($aliasIssued -gt $authorized -or $authorized -gt $consumed -or $consumed -gt $issued -or $issued -gt $now.AddSeconds(5) -or $notBefore -gt $now.AddSeconds(5)) { throw 'INVOCATION_NOT_YET_VALID' }

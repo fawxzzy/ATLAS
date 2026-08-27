@@ -19,7 +19,22 @@ const uuid4 = value => typeof value === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-4[
 const digest = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 const commit = value => typeof value === 'string' && /^[a-f0-9]{40}$/.test(value);
 const positiveInteger = value => Number.isInteger(value) && value > 0;
-const formatO = date => date.toISOString().replace('Z', '0000Z');
+const formatO = date => date.toISOString().replace('Z', '000Z');
+const canonicalInstant = (value, code) => {
+  const match = typeof value === 'string' && /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,7}))?Z$/.exec(value);
+  if (!match) throw new Error(code);
+  const [, year, month, day, hour, minute, second, fraction] = match;
+  const seconds = Date.parse(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`);
+  if (!Number.isFinite(seconds)) throw new Error(code);
+  const parsed = new Date(seconds);
+  if (
+    parsed.getUTCFullYear() !== Number(year) || parsed.getUTCMonth() + 1 !== Number(month) ||
+    parsed.getUTCDate() !== Number(day) || parsed.getUTCHours() !== Number(hour) ||
+    parsed.getUTCMinutes() !== Number(minute) || parsed.getUTCSeconds() !== Number(second)
+  ) throw new Error(code);
+  const micros = (fraction ?? '').padEnd(7, '0').slice(0, 6);
+  return `${Math.trunc(seconds / 1000)}:${micros}`;
+};
 
 function inside(candidate, boundary, code) {
   const value = path.resolve(candidate), rootPath = path.resolve(boundary).replace(/[\\/]+$/, '');
@@ -56,7 +71,7 @@ function canonicalAliasPath(decisionPath) {
 }
 const canonicalAuthorizationPath = aliasPath => path.join(path.dirname(aliasPath),`${path.parse(aliasPath).name}-authorization.json`);
 const canonicalConsumptionPath = aliasPath => path.join(path.dirname(aliasPath),`${path.parse(aliasPath).name}-consumption.json`);
-function timestamp(value, code) { const ms = Date.parse(value); if (!Number.isFinite(ms)) throw new Error(code); return ms; }
+function timestamp(value, code) { canonicalInstant(value, code); const ms = Date.parse(value); if (!Number.isFinite(ms)) throw new Error(code); return ms; }
 function safeWrite(outputPath, bytes) {
   const output = inside(outputPath, packetRoot, 'OUTPUT_SCOPE');
   if (path.dirname(output).toLowerCase() !== packetRoot.toLowerCase()) throw new Error('OUTPUT_PARENT');
@@ -93,7 +108,7 @@ export function sealInvocation({ decisionRequestPath, aliasPath, authorizationPa
   if (c.schema !== 'atlas.scoped-approval-consumption.v1' || c.packet !== packet || c.status !== 'CONSUMED' || c.reusable !== false || c.max_effect_count !== maxEffectCount || c.authorization_sha256 !== authorization.sha256 || c.intent_digest !== a.intent_digest || !uuid4(c.execution_correlation_id)) throw new Error('CONSUMPTION_BINDING');
   const nowMs = now.getTime(), aliasIssued = timestamp(a.issued_at, 'ALIAS_TIME'), authorized = timestamp(z.authorized_at, 'AUTHORIZATION_TIME'), consumed = timestamp(c.consumed_at, 'CONSUMPTION_TIME'), expires = timestamp(a.expires_at, 'ALIAS_TIME');
   if (aliasIssued > authorized || authorized > consumed || consumed > nowMs + 5000 || expires <= nowMs || expires > aliasIssued + 86400000) throw new Error('APPROVAL_TIME');
-  if (d.expires_at !== a.expires_at || d.sealed_inputs?.execution_correlation_id !== c.execution_correlation_id) throw new Error('DECISION_EXECUTION_BINDING');
+  if (canonicalInstant(d.expires_at, 'DECISION_TIME') !== canonicalInstant(a.expires_at, 'ALIAS_TIME') || d.sealed_inputs?.execution_correlation_id !== c.execution_correlation_id) throw new Error('DECISION_EXECUTION_BINDING');
   const sealedKeys = ['execution_correlation_id','private_source_path','private_source_sha256','manifest_path','manifest_sha256','auth_apply_sha256','postverify_sha256','host_path','host_sha256','credential_safe_launcher_path','credential_safe_launcher_sha256','packet_merge_commit','jit_invocation_merge_commit','independent_review_checkpoint','prior_rollback_state_path','prior_rollback_receipt_sha256'];
   const effectKeys = ['execution_clusters','legacy_writer_fence_and_restore','master_migrations','auth_identity_edges','auth_user_imports','auth_existing_user_binds','auth_same_uuid_retained','profiles','player_rows','ai_rows','receipts','username_backfill_and_origin_contract','vault_key_create_and_rollback_delete','before_user_created_hook_activation','bounded_qa_and_cleanup','rollback_on_any_failed_gate','cutover','vercel_or_app_deployment','production_alias_change'];
   if (!exactKeys(d.sealed_inputs, sealedKeys) || !exactKeys(d.effect_ceiling, effectKeys)) throw new Error('DECISION_TUPLE_KEYS');
