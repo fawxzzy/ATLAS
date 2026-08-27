@@ -506,6 +506,14 @@ class AtlasAuthorizationPolicyTests(unittest.TestCase):
         with self.assertRaisesRegex(AuthorizationPolicyError, "not consumable"):
             consume_operator_authorization(request, updated, self.policy)
 
+        renamed_request = self.verified_release_request("verified-release-renamed-replay")
+        renamed_replay = evaluate_authorization(renamed_request, updated, self.policy)
+        self.assertEqual("HOLD", renamed_replay["decision"])
+        self.assertEqual(
+            replay["operator_authorization_key"],
+            renamed_replay["operator_authorization_key"],
+        )
+
     def test_verified_release_single_use_cli_consumption_is_atomic_under_concurrency(self) -> None:
         root = Path(__file__).resolve().parents[1]
         script = root / "ops" / "atlas" / "authorization_policy.py"
@@ -533,6 +541,36 @@ class AtlasAuthorizationPolicyTests(unittest.TestCase):
             self.assertEqual([0, 1], sorted(process.returncode for process in processes), results)
             registry = json.loads(registry_path.read_text(encoding="utf-8"))
             self.assertEqual(1, len(registry["operator_authorization_consumptions"]))
+
+    def test_registry_record_and_consumption_writers_are_serialized(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        script = root / "ops" / "atlas" / "authorization_policy.py"
+        request = self.verified_release_request("verified-release-cross-writer")
+        decision = self.decision("cross-writer-event-1")
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            request_path = temporary / "request.json"
+            decision_path = temporary / "decision.json"
+            registry_path = temporary / "registry.json"
+            request_path.write_text(json.dumps(request), encoding="utf-8")
+            decision_path.write_text(json.dumps(decision), encoding="utf-8")
+            consume_command = [
+                sys.executable, "-B", str(script), "--registry", str(registry_path),
+                "consume", "--request", str(request_path),
+            ]
+            record_command = [
+                sys.executable, "-B", str(script), "--registry", str(registry_path),
+                "record", "--decision", str(decision_path),
+            ]
+            processes = [
+                subprocess.Popen(command, cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                for command in (consume_command, record_command)
+            ]
+            results = [process.communicate(timeout=10) for process in processes]
+            self.assertEqual([0, 0], [process.returncode for process in processes], results)
+            registry = json.loads(registry_path.read_text(encoding="utf-8"))
+            self.assertEqual(1, len(registry["operator_authorization_consumptions"]))
+            self.assertIn("cross-writer-event-1", registry["applied_event_ids"])
 
 
 if __name__ == "__main__":

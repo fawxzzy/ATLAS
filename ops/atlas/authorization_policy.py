@@ -107,19 +107,28 @@ def load_registry(path: Path | None = None) -> dict[str, Any]:
 def _exclusive_registry_lock(path: Path):
     path.parent.mkdir(parents=True, exist_ok=True)
     lock_path = path.with_name(f".{path.name}.lock")
-    try:
-        descriptor = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-    except FileExistsError as error:
-        raise AuthorizationPolicyError("authorization registry writer lock is already held") from error
-    try:
-        os.write(descriptor, str(os.getpid()).encode("ascii"))
-        yield
-    finally:
-        os.close(descriptor)
+    with lock_path.open("a+b") as lock_file:
+        lock_file.seek(0, os.SEEK_END)
+        if lock_file.tell() == 0:
+            lock_file.write(b"0")
+            lock_file.flush()
+        lock_file.seek(0)
+        if os.name == "nt":
+            import msvcrt
+
+            msvcrt.locking(lock_file.fileno(), msvcrt.LK_LOCK, 1)
+        else:
+            import fcntl
+
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
         try:
-            lock_path.unlink()
-        except FileNotFoundError:
-            pass
+            yield
+        finally:
+            lock_file.seek(0)
+            if os.name == "nt":
+                msvcrt.locking(lock_file.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
 
 def _require_token(payload: dict[str, Any], field: str) -> str:
@@ -258,7 +267,6 @@ def record_operator_decision(
 def _operator_authorization_key(request: dict[str, Any], operator_rule: dict[str, Any]) -> str:
     return _digest(
         {
-            "request_id": request.get("request_id"),
             "action_class": request.get("action_class"),
             "authority_profile": request.get("authority_profile"),
             "scope_key": request.get("scope_key"),
@@ -498,10 +506,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     policy = load_policy(args.policy)
-    registry = load_registry(args.registry)
     if args.command == "record":
-        updated = record_operator_decision(registry, _load_json(args.decision), policy)
-        _atomic_write_json(args.registry, updated)
+        with _exclusive_registry_lock(args.registry):
+            current_registry = load_registry(args.registry)
+            updated = record_operator_decision(
+                current_registry, _load_json(args.decision), policy
+            )
+            _atomic_write_json(args.registry, updated)
         print(json.dumps(updated, indent=2, sort_keys=True))
         return 0
     if args.command == "consume":
@@ -513,6 +524,7 @@ def main(argv: list[str] | None = None) -> int:
             _atomic_write_json(args.registry, updated)
         print(json.dumps(receipt, indent=2, sort_keys=True))
         return 0
+    registry = load_registry(args.registry)
     result = evaluate_authorization(_load_json(args.request), registry, policy)
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
