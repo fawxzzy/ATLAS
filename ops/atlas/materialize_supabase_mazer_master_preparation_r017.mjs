@@ -202,9 +202,11 @@ function writeExclusive(file, bytes) {
   fs.writeFileSync(file, bytes, { flag: 'wx', mode: 0o600 });
 }
 
-export function materialize(raw, outputRoot, mazerRepository) {
+export function materialize(raw, outputRoot, mazerRepository, ownerToken) {
   const { classified, fenceInputSha256, actionFenceInput } = validatePrivateSource(raw);
+  if (typeof ownerToken !== 'string' || !/^[a-f0-9]{32}$/.test(ownerToken)) throw new Error('OWNER_TOKEN');
   fs.mkdirSync(outputRoot, { recursive: false, mode: 0o700 });
+  writeExclusive(path.join(outputRoot, '.atlas-r017-owner'), Buffer.from(`${ownerToken}\n`, 'ascii'));
   const files = [];
   const add = (name, bytes) => { const file = path.join(outputRoot, name); writeExclusive(file, bytes); files.push({ name, sha256: sha256(bytes), bytes: bytes.length }); };
   add('fence-input.json', Buffer.from(`${canonical(actionFenceInput)}\n`, 'utf8'));
@@ -235,11 +237,12 @@ async function main() {
     process.stdout.write(`${JSON.stringify({ result: 'PASS_R017_MATERIALIZER_SOURCE', provider_calls: 0, provider_writes: 0, auth_writes: 0, live_data_writes: 0, raw_records_emitted: false })}\n`);
     return;
   }
-  if (!args['--input'] || !args['--output'] || !args['--mazer-repository']) throw new Error('USAGE');
+  if (!args['--input'] || !args['--output'] || !args['--mazer-repository'] || !args['--owner-token']) throw new Error('USAGE');
   const result = materialize(
     JSON.parse(fs.readFileSync(path.resolve(args['--input']), 'utf8')),
     path.resolve(args['--output']),
-    path.resolve(args['--mazer-repository'])
+    path.resolve(args['--mazer-repository']),
+    args['--owner-token']
   );
   process.stdout.write(`${JSON.stringify({ result: 'PRIVATE_R017_PACKET_SEALED', manifest_sha256: result.manifestSha256, files: result.manifest.files.length + 1, private_values_emitted: false })}\n`);
 }

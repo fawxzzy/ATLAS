@@ -1,6 +1,7 @@
 [CmdletBinding(DefaultParameterSetName = 'Source')]
 param(
   [Parameter(Mandatory = $true, ParameterSetName = 'Source')][switch]$SourceOnlyValidate,
+  [Parameter(Mandatory = $true, ParameterSetName = 'MaterializerProbe')][switch]$LocalMaterializerPortabilityProbe,
   [Parameter(Mandatory = $true, ParameterSetName = 'Execute')][ValidateSet('Prepare', 'Rollback', 'Watchdog')][string]$Mode,
   [Parameter(Mandatory = $true, ParameterSetName = 'Execute')][string]$PrivateSourcePath,
   [Parameter(Mandatory = $true, ParameterSetName = 'Execute')][ValidatePattern('^[a-f0-9]{64}$')][string]$ExpectedPrivateSourceSha256,
@@ -136,6 +137,40 @@ function Invoke-Child([string]$FileName, [string[]]$Arguments, [Collections.IDic
     return [pscustomobject]@{ ExitCode = $process.ExitCode; Stdout = $stdout; Stderr = $stderr }
   }
   finally { $process.Dispose() }
+}
+
+function Get-LockedStreamSha256([IO.FileStream]$Stream) {
+  $Stream.Position = 0
+  $hasher = [Security.Cryptography.SHA256]::Create()
+  try { return ([BitConverter]::ToString($hasher.ComputeHash($Stream))).Replace('-', '').ToLowerInvariant() }
+  finally { $hasher.Dispose(); $Stream.Position = 0 }
+}
+
+function Invoke-VerifiedMaterializerNode([string]$NodePath,[string]$ExpectedNodeSha,[string]$MaterializerPath,[string]$ExpectedMaterializerSha,[string]$ClassifierPath,[string]$ExpectedClassifierSha,[string[]]$Arguments,[Collections.IDictionary]$Environment=@{},[int]$TimeoutMs=120000,[scriptblock]$BeforeInvoke=$null,[string]$CanonicalMaterializerPath=$Materializer,[string]$CanonicalClassifierPath=$FenceClassifier) {
+  $resolvedNode=[IO.Path]::GetFullPath($NodePath);$resolvedMaterializer=[IO.Path]::GetFullPath($MaterializerPath);$resolvedClassifier=[IO.Path]::GetFullPath($ClassifierPath)
+  if($resolvedMaterializer-cne[IO.Path]::GetFullPath($CanonicalMaterializerPath)-or$resolvedClassifier-cne[IO.Path]::GetFullPath($CanonicalClassifierPath)-or$ExpectedNodeSha-cnotmatch'^[a-f0-9]{64}$'-or$ExpectedMaterializerSha-cnotmatch'^[a-f0-9]{64}$'-or$ExpectedClassifierSha-cnotmatch'^[a-f0-9]{64}$'){throw 'MATERIALIZER_BINDING'}
+  $nodeStream=New-Object IO.FileStream($resolvedNode,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+  $materializerStream=New-Object IO.FileStream($resolvedMaterializer,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+  $classifierStream=New-Object IO.FileStream($resolvedClassifier,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+  try {
+    if((Get-LockedStreamSha256 $nodeStream)-cne$ExpectedNodeSha){throw 'NODE_DIGEST_DRIFT'}
+    if((Get-LockedStreamSha256 $materializerStream)-cne$ExpectedMaterializerSha){throw 'MATERIALIZER_DIGEST_DRIFT'}
+    if((Get-LockedStreamSha256 $classifierStream)-cne$ExpectedClassifierSha){throw 'CLASSIFIER_DIGEST_DRIFT'}
+    if($null-ne$BeforeInvoke){&$BeforeInvoke}
+    return Invoke-Child $resolvedNode $Arguments $Environment $TimeoutMs
+  }
+  finally{$classifierStream.Dispose();$materializerStream.Dispose();$nodeStream.Dispose()}
+}
+
+function Remove-OwnedPrivateRoot([string]$Path,[string]$OwnerToken) {
+  if([string]::IsNullOrWhiteSpace($Path)-or$OwnerToken-cnotmatch'^[a-f0-9]{32}$'-or-not(Test-Path -LiteralPath $Path -PathType Container)){return $false}
+  $safe=Assert-Under $Path $PacketRoot;Assert-NoReparse $safe $Secrets
+  $marker=Join-Path $safe '.atlas-r017-owner'
+  if(-not(Test-Path -LiteralPath $marker -PathType Leaf)){return $false}
+  Assert-NoReparse $marker $Secrets
+  if(([IO.File]::ReadAllText($marker,(New-Object Text.UTF8Encoding($false,$true))).Trim())-cne$OwnerToken){return $false}
+  Remove-Item -LiteralPath $safe -Recurse -Force
+  return $true
 }
 
 function Get-ShellPath {
@@ -382,7 +417,7 @@ $global:ATLAS_R017_VERIFIED_HOST_SOURCE_TEXT=$t;$sb=[ScriptBlock]::Create($t);. 
 
 function Get-VerifiedSelfEnvironment([string]$ChildMode,[string]$SourcePath,[string]$SourceSha,[string]$HostState) {
   if($null-eq$script:VerifiedHostSourceText){return $null}
-  return @{ATLAS_R017_VERIFIED_HOST_PATH=$script:HostScriptPath;ATLAS_R017_VERIFIED_HOST_SHA256=$env:ATLAS_R017_VERIFIED_HOST_SHA256;ATLAS_R017_VERIFIED_HOST_DIR=$HostDirectory;ATLAS_R017_VERIFIED_MODE='Execute';ATLAS_R017_CHILD_MODE=$ChildMode;ATLAS_R017_CHILD_SOURCE=$SourcePath;ATLAS_R017_CHILD_SOURCE_SHA=$SourceSha;ATLAS_R017_CHILD_STATE=$HostState;ATLAS_R017_VERIFIED_TEST_REPLACEMENT_PATH=''}
+  return @{ATLAS_R017_VERIFIED_HOST_PATH=$script:HostScriptPath;ATLAS_R017_VERIFIED_HOST_SHA256=$env:ATLAS_R017_VERIFIED_HOST_SHA256;ATLAS_R017_VERIFIED_HOST_DIR=$HostDirectory;ATLAS_R017_VERIFIED_MODE='Execute';ATLAS_R017_CHILD_MODE=$ChildMode;ATLAS_R017_CHILD_SOURCE=$SourcePath;ATLAS_R017_CHILD_SOURCE_SHA=$SourceSha;ATLAS_R017_CHILD_STATE=$HostState;ATLAS_R017_VERIFIED_MATERIALIZER_PATH=$env:ATLAS_R017_VERIFIED_MATERIALIZER_PATH;ATLAS_R017_VERIFIED_MATERIALIZER_SHA256=$env:ATLAS_R017_VERIFIED_MATERIALIZER_SHA256;ATLAS_R017_VERIFIED_CLASSIFIER_PATH=$env:ATLAS_R017_VERIFIED_CLASSIFIER_PATH;ATLAS_R017_VERIFIED_CLASSIFIER_SHA256=$env:ATLAS_R017_VERIFIED_CLASSIFIER_SHA256;ATLAS_R017_VERIFIED_NODE_PATH=$env:ATLAS_R017_VERIFIED_NODE_PATH;ATLAS_R017_VERIFIED_NODE_SHA256=$env:ATLAS_R017_VERIFIED_NODE_SHA256;ATLAS_R017_VERIFIED_TEST_REPLACEMENT_PATH=''}
 }
 
 function Start-RollbackWatchdog([string]$SourcePath, [string]$SourceSha, [string]$HostState) {
@@ -403,6 +438,24 @@ if ($PSCmdlet.ParameterSetName -ceq 'Source') {
   Assert-SourceContract
   Write-Result 'PASS_MAZER_MASTER_PREPARATION_R017_SOURCE' ([ordered]@{ materializer_sha256 = Get-Sha256 $Materializer; fence_host_sha256 = Get-Sha256 $Fence; credential_reads = 0; provider_reads = 0; provider_writes = 0; auth_writes = 0; live_data_writes = 0; state_writes = 0; private_files = 0 })
   exit 0
+}
+
+if($PSCmdlet.ParameterSetName-ceq'MaterializerProbe'){
+  $probeRoot=Join-Path $Root ('tmp\r017 moved worktree with spaces '+[Guid]::NewGuid().ToString('N'));[IO.Directory]::CreateDirectory($probeRoot)|Out-Null
+  $probeScript=Join-Path $probeRoot 'materializer probe.mjs';$probeClassifier=Join-Path $probeRoot 'classifier dependency.mjs';$replacement=Join-Path $probeRoot 'replacement.mjs';$probeState=[pscustomobject]@{ReplacementBlocked=$false;ClassifierReplacementBlocked=$false}
+  try{
+    [IO.File]::WriteAllText($probeScript,"console.log(JSON.stringify({result:'PASS_ORIGINAL_MATERIALIZER_BUFFER'}));`n",(New-Object Text.UTF8Encoding($false)))
+    [IO.File]::WriteAllText($probeClassifier,"export const marker='PASS_ORIGINAL_CLASSIFIER_BUFFER';`n",(New-Object Text.UTF8Encoding($false)))
+    [IO.File]::WriteAllText($replacement,"console.log(JSON.stringify({result:'REPLACEMENT_EXECUTED'}));`n",(New-Object Text.UTF8Encoding($false)))
+    $node=(Get-Command node -ErrorAction Stop).Source;$nodeSha=Get-Sha256 $node;$probeSha=Get-Sha256 $probeScript;$classifierSha=Get-Sha256 $probeClassifier
+    $before={try{[IO.File]::Copy($replacement,$probeScript,$true)}catch{$probeState.ReplacementBlocked=$true};try{[IO.File]::Copy($replacement,$probeClassifier,$true)}catch{$probeState.ClassifierReplacementBlocked=$true}}
+    $child=Invoke-VerifiedMaterializerNode $node $nodeSha $probeScript $probeSha $probeClassifier $classifierSha @($probeScript) @{} 30000 $before $probeScript $probeClassifier
+    if(-not$probeState.ReplacementBlocked-or-not$probeState.ClassifierReplacementBlocked-or$child.ExitCode-ne0-or-not[string]::IsNullOrEmpty($child.Stderr)-or$child.Stdout-notmatch'PASS_ORIGINAL_MATERIALIZER_BUFFER'-or$child.Stdout-match'REPLACEMENT_EXECUTED'){throw 'MATERIALIZER_REPLACEMENT_ADVERSARY'}
+    $foreign=Join-Path $PacketRoot ([Guid]::NewGuid().ToString('N'));[IO.Directory]::CreateDirectory($foreign)|Out-Null;$sentinel=Join-Path $foreign 'foreign-owner-sentinel';[IO.File]::WriteAllText($sentinel,'preserve',(New-Object Text.UTF8Encoding($false)))
+    if((Remove-OwnedPrivateRoot $foreign ([Guid]::NewGuid().ToString('N')))-or-not(Test-Path -LiteralPath $sentinel -PathType Leaf)){throw 'FOREIGN_OUTPUT_REMOVED'}
+    Remove-Item -LiteralPath $foreign -Recurse -Force
+    [Console]::Out.WriteLine('{"result":"PASS_R017_PORTABLE_MATERIALIZER_LOCK_PROBE","moved_worktree":true,"spaces":true,"replacement_blocked":true,"classifier_replacement_blocked":true,"replacement_executed":false,"foreign_output_preserved":true,"external_calls":0,"credential_reads":0,"live_data_writes":0}');exit 0
+  }finally{if(Test-Path -LiteralPath $probeRoot){Remove-Item -LiteralPath $probeRoot -Recurse -Force}}
 }
 
 if (-not $ExecuteProtected) { throw 'PROTECTED_EXECUTION_SWITCH_REQUIRED' }
@@ -427,22 +480,35 @@ if ($Mode -ceq 'Watchdog') {
 }
 
 $privateRoot = $null
+$privateRootOwnerToken = $null
 $managementToken = $null
 $masterDatabaseUrl = $null
+$verifiedMaterializerPath = $null
+$verifiedMaterializerSha = $null
+$verifiedClassifierPath = $null
+$verifiedClassifierSha = $null
+$verifiedNodePath = $null
+$verifiedNodeSha = $null
 $state = $null
 $providerWrites = 0
 $databaseTransactions = 0
 $fenceHasEffects = $false
 try {
   Assert-SourceContract
+  $verifiedMaterializerPath=[IO.Path]::GetFullPath([string]$env:ATLAS_R017_VERIFIED_MATERIALIZER_PATH);$verifiedMaterializerSha=[string]$env:ATLAS_R017_VERIFIED_MATERIALIZER_SHA256
+  $verifiedClassifierPath=[IO.Path]::GetFullPath([string]$env:ATLAS_R017_VERIFIED_CLASSIFIER_PATH);$verifiedClassifierSha=[string]$env:ATLAS_R017_VERIFIED_CLASSIFIER_SHA256
+  $verifiedNodePath=[IO.Path]::GetFullPath([string]$env:ATLAS_R017_VERIFIED_NODE_PATH);$verifiedNodeSha=[string]$env:ATLAS_R017_VERIFIED_NODE_SHA256
+  if($verifiedMaterializerPath-cne[IO.Path]::GetFullPath($Materializer)-or$verifiedClassifierPath-cne[IO.Path]::GetFullPath($FenceClassifier)-or$verifiedMaterializerSha-cnotmatch'^[a-f0-9]{64}$'-or$verifiedClassifierSha-cnotmatch'^[a-f0-9]{64}$'-or$verifiedNodeSha-cnotmatch'^[a-f0-9]{64}$'){throw 'MATERIALIZER_BINDING'}
   if (-not (Test-Path -LiteralPath $PacketRoot)) { [IO.Directory]::CreateDirectory($PacketRoot) | Out-Null }
   Assert-NoReparse $PacketRoot $Secrets
   $privateRoot = Join-Path $PacketRoot ([Guid]::NewGuid().ToString('N'))
-  [IO.Directory]::CreateDirectory($privateRoot) | Out-Null
-  Assert-NoReparse $privateRoot $Secrets
+  $privateRootOwnerToken = [Guid]::NewGuid().ToString('N')
+  if(Test-Path -LiteralPath $privateRoot){throw 'PRIVATE_OUTPUT_PREEXISTS'}
   $mazerRepository = Find-MazerRepository
-  $materialized = Invoke-Child (Get-Command node -ErrorAction Stop).Source @($Materializer,'--input',$sourcePath,'--output',$privateRoot,'--mazer-repository',$mazerRepository) @{} 120000
+  $materialized = Invoke-VerifiedMaterializerNode $verifiedNodePath $verifiedNodeSha $verifiedMaterializerPath $verifiedMaterializerSha $verifiedClassifierPath $verifiedClassifierSha @($verifiedMaterializerPath,'--input',$sourcePath,'--output',$privateRoot,'--mazer-repository',$mazerRepository,'--owner-token',$privateRootOwnerToken) @{} 120000
   if ($materialized.ExitCode -ne 0) { throw 'PRIVATE_MATERIALIZATION_FAILED' }
+  if(-not(Test-Path -LiteralPath $privateRoot -PathType Container)){throw 'PRIVATE_MATERIALIZATION_MISSING'}
+  Assert-NoReparse $privateRoot $Secrets
   $manifestPath = Join-Path $privateRoot 'manifest.json'
   $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
   if ([int]$manifest.auth_counts.imports -ne 4 -or [int]$manifest.auth_counts.binds -ne 14 -or [int]$manifest.auth_counts.retained_edges -ne 2 -or [int]$manifest.auth_counts.final_edges -ne 20 -or [int]$manifest.auth_counts.expected_target_users -ne 118) { throw 'AUTH_TOPOLOGY_MANIFEST_DRIFT' }
@@ -499,8 +565,8 @@ try {
   }
 
   $stateJson = $state | ConvertTo-Json -Compress -Depth 12
-  $materializerUri = ([Uri]$Materializer).AbsoluteUri
-  $recovery = Invoke-Child (Get-Command node -ErrorAction Stop).Source @('-e', "import(process.argv[1]).then(m=>console.log(JSON.stringify(m.classifyHostRecovery(JSON.parse(process.argv[2])))))", $materializerUri, $stateJson) @{} 30000
+  $materializerUri = ([Uri]$verifiedMaterializerPath).AbsoluteUri
+  $recovery = Invoke-VerifiedMaterializerNode $verifiedNodePath $verifiedNodeSha $verifiedMaterializerPath $verifiedMaterializerSha $verifiedClassifierPath $verifiedClassifierSha @('-e', "import(process.argv[1]).then(m=>console.log(JSON.stringify(m.classifyHostRecovery(JSON.parse(process.argv[2])))))", $materializerUri, $stateJson) @{} 30000
   if ($recovery.ExitCode -ne 0) { throw 'STATE_RECOVERY_CLASSIFICATION_FAILED' }
   $disposition = $recovery.Stdout | ConvertFrom-Json
   if ([string]$disposition.action -ceq 'ROLLBACK_REQUIRED') { throw 'AMBIGUOUS_STATE_REQUIRES_ROLLBACK' }
@@ -611,8 +677,5 @@ catch {
 finally {
   $managementToken = $null
   $masterDatabaseUrl = $null
-  if ($null -ne $privateRoot -and (Test-Path -LiteralPath $privateRoot -PathType Container)) {
-    $safePrivateRoot = Assert-Under $privateRoot $PacketRoot
-    Remove-Item -LiteralPath $safePrivateRoot -Recurse -Force
-  }
+  [void](Remove-OwnedPrivateRoot $privateRoot $privateRootOwnerToken)
 }
