@@ -356,7 +356,7 @@ function Get-VerifiedFenceBootstrapEncoded {
 $ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';$p=[IO.Path]::GetFullPath($env:ATLAS_R017_VERIFIED_FENCE_PATH);$s=New-Object IO.FileStream($p,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read);$b=$null
 try{if($s.Length-lt2-or$s.Length-gt2097152){exit 81};$b=New-Object byte[] ([int]$s.Length);$o=0;while($o-lt$b.Length){$r=$s.Read($b,$o,$b.Length-$o);if($r-le0){exit 82};$o+=$r};$h=[Security.Cryptography.SHA256]::Create();try{$a=([BitConverter]::ToString($h.ComputeHash($b))).Replace('-','').ToLowerInvariant()}finally{$h.Dispose()};if($a-cne$env:ATLAS_R017_VERIFIED_FENCE_SHA256){exit 83};$t=(New-Object Text.UTF8Encoding($false,$true)).GetString($b)}finally{$s.Dispose();if($null-ne$b){[Array]::Clear($b,0,$b.Length)}}
 $global:ATLAS_R017_VERIFIED_FENCE_SOURCE_TEXT=$t;if($env:ATLAS_R017_VERIFIED_FENCE_MODE-ceq'Synthetic'-and-not[string]::IsNullOrWhiteSpace($env:ATLAS_R017_VERIFIED_FENCE_TEST_REPLACEMENT_PATH)){[IO.File]::Copy($env:ATLAS_R017_VERIFIED_FENCE_TEST_REPLACEMENT_PATH,$p,$true)};$sb=[ScriptBlock]::Create($t)
-if($env:ATLAS_R017_VERIFIED_FENCE_MODE-ceq'Source'){. $sb -SourceOnlyValidate}elseif($env:ATLAS_R017_VERIFIED_FENCE_MODE-ceq'Execute'){. $sb -InvocationPath $env:ATLAS_R017_FENCE_INVOCATION_PATH -ExpectedInvocationSha256 $env:ATLAS_R017_FENCE_INVOCATION_SHA256 -ExecuteProtected}else{. $sb};exit $LASTEXITCODE
+if($env:ATLAS_R017_VERIFIED_FENCE_MODE-ceq'Source'){. $sb -SourceOnlyValidate}elseif($env:ATLAS_R017_VERIFIED_FENCE_MODE-ceq'Execute'){. $sb -InvocationPath $env:ATLAS_R017_FENCE_INVOCATION_PATH -ExpectedInvocationSha256 $env:ATLAS_R017_FENCE_INVOCATION_SHA256 -ExecuteProtected}else{. $sb};exit 0
 '@
   return [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($bootstrap))
 }
@@ -392,6 +392,23 @@ function Assert-StructuredFenceChildTransportContract([string]$ShellPath) {
   Remove-Item -LiteralPath $probeRoot -Force
 }
 
+function Assert-StructuredFenceChildSuccessReturnContract([string]$ShellPath) {
+  $probeRoot = Join-Path $Runtime ('r017 fence success return probe ' + [Guid]::NewGuid().ToString('N'))
+  [IO.Directory]::CreateDirectory($probeRoot) | Out-Null
+  $source = Join-Path $probeRoot 'strict-mode success child.ps1'
+  try {
+    $receipt = '{"result":"PASS_R017_FENCE_CHILD_SUCCESS_RETURN","raw_records_emitted":false,"pii_emitted":false,"secrets_emitted":false}'
+    $sourceText = "Set-StrictMode -Version Latest`r`n[Console]::Out.WriteLine('$receipt')`r`n"
+    [IO.File]::WriteAllText($source, $sourceText, (New-Object Text.UTF8Encoding($false)))
+    $child = Invoke-VerifiedFenceChild $ShellPath 'Synthetic' '' '' 30000 $source (Get-Sha256 $source) ''
+    if ([int]$child.ExitCode -ne 0) { throw 'FENCE_CHILD_SUCCESS_RETURN_EXIT' }
+    if (-not [string]::IsNullOrEmpty([string]$child.Stderr)) { throw 'FENCE_CHILD_SUCCESS_RETURN_STDERR' }
+    try { $parsed = [string]$child.Stdout | ConvertFrom-Json } catch { throw 'FENCE_CHILD_SUCCESS_RETURN_STDOUT' }
+    if ([string]$parsed.result -cne 'PASS_R017_FENCE_CHILD_SUCCESS_RETURN' -or [bool]$parsed.raw_records_emitted -ne $false -or [bool]$parsed.pii_emitted -ne $false -or [bool]$parsed.secrets_emitted -ne $false) { throw 'FENCE_CHILD_SUCCESS_RETURN_RECEIPT' }
+  }
+  finally { if (Test-Path -LiteralPath $probeRoot) { Remove-Item -LiteralPath $probeRoot -Recurse -Force } }
+}
+
 function Invoke-Fence([string]$Step, [string]$FenceInputPath, [string]$InputSha, [string]$FenceState, [string]$Packet) {
   $envelope = New-FenceInvocationEnvelope 'Forward' $Step $FenceInputPath $InputSha $FenceState $Packet
   $child = Invoke-VerifiedFenceChild (Get-ShellPath) 'Execute' $envelope.Path $envelope.Sha256 900000 $script:VerifiedFencePath $script:VerifiedFenceSha ''
@@ -419,6 +436,7 @@ function Assert-SourceContract {
     if ($null -ne $shell) {
       if ((Invoke-VerifiedFenceChild $shell.Source 'Source' '' '' 120000 $script:VerifiedFencePath $script:VerifiedFenceSha '').ExitCode -ne 0) { throw 'FENCE_SOURCE_VALIDATION' }
       Assert-StructuredFenceChildTransportContract $shell.Source
+      Assert-StructuredFenceChildSuccessReturnContract $shell.Source
     }
   }
   Assert-FenceChildReceiptContract
