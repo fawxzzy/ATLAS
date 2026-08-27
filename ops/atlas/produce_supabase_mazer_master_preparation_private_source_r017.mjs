@@ -79,7 +79,11 @@ export function readRuntimeSecretsFromBase(atlasRoot, file, expectedSha256) {
   if (!plain(raw.sql) || typeof raw.sql['reset-era-apply.sql'] !== 'string' || typeof raw.sql['qa-apply.sql'] !== 'string') throw new Error('SECRET_BASE_SHAPE');
   return {
     quarantineKey: sqlStringValue(raw.sql['reset-era-apply.sql'], /pgp_sym_encrypt\('(?:''|[^'])*','((?:''|[^'])*)','cipher-algo=aes256'\)/, 'QUARANTINE_KEY_PARSE'),
-    qaPassword: sqlStringValue(raw.sql['qa-apply.sql'], /extensions\.crypt\('((?:''|[^'])*)',extensions\.gen_salt\('bf'\)\)/, 'QA_PASSWORD_PARSE')
+    qaPassword: sqlStringValue(raw.sql['qa-apply.sql'], /extensions\.crypt\('((?:''|[^'])*)',extensions\.gen_salt\('bf'\)\)/, 'QA_PASSWORD_PARSE'),
+    resetBinding: {
+      legacy_user_id: uuid(raw.reset_era_ai?.legacy_user_id, 'SECRET_BASE_RESET_LEGACY_UUID'),
+      master_user_id: uuid(raw.reset_era_ai?.master_user_id, 'SECRET_BASE_RESET_MASTER_UUID')
+    }
   };
 }
 
@@ -620,16 +624,21 @@ drop schema if exists atlas_mazer_r017 cascade;`, ['disable_hook_first','master_
   return { sql, sql_sha256: Object.fromEntries(Object.entries(sql).map(([name, value]) => [name, sha256(Buffer.from(value, 'utf8'))])), classified };
 }
 
-export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, quarantineKey, qaPassword }) {
+export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, quarantineKey, qaPassword, resetBinding = null }) {
   if (typeof quarantineKey !== 'string' || quarantineKey.length < 32 || typeof qaPassword !== 'string' || qaPassword.length < 16) throw new Error('PRIVATE_SECRET_INPUT_WEAK');
   const auth = buildIdentityPlan(legacy, master);
   const catalog_preimage = validateCatalogPreimage(master.catalog);
   const fence_input = buildFenceInput(legacy, master, legacyAcl, masterAcl, auth);
   const allEdges = [...auth.retained_edges, ...auth.new_edges];
-  const resetMasterRows = master.ai.filter((row) => String(row.level) === '39' && String(row.completed_cycles) === '108' && Number(row.target_complexity) === 161 && row.rank === 'S');
-  if (resetMasterRows.length !== 1) throw new Error('RESET_MASTER_ROW_NOT_FOUND');
-  const [resetMaster] = resetMasterRows;
-  const edge = allEdges.find((item) => item.master_user_id === String(resetMaster.user_id).toLowerCase());
+  const receiptBoundEdges = allEdges.filter((item) => master.receipts.filter((row) => String(row.user_id).toLowerCase() === item.master_user_id).length === RECEIPT_CATCHUP_CONTRACT.resetMasterExact
+    && legacy.receipts.filter((row) => String(row.user_id).toLowerCase() === item.legacy_user_id).length >= RECEIPT_CATCHUP_CONTRACT.resetLegacyBaseline);
+  const boundLegacy = resetBinding == null ? null : uuid(resetBinding.legacy_user_id, 'RESET_BINDING_LEGACY_UUID');
+  const boundMaster = resetBinding == null ? null : uuid(resetBinding.master_user_id, 'RESET_BINDING_MASTER_UUID');
+  const candidates = resetBinding == null ? receiptBoundEdges : receiptBoundEdges.filter((item) => item.legacy_user_id === boundLegacy && item.master_user_id === boundMaster);
+  if (candidates.length !== 1) throw new Error('RESET_IDENTITY_RECEIPT_BINDING_DRIFT');
+  const [edge] = candidates;
+  const resetMaster = master.ai.find((row) => String(row.user_id).toLowerCase() === edge.master_user_id && row.runner_key === 'menu-runner');
+  if (!resetMaster || String(resetMaster.level) !== '39' || String(resetMaster.completed_cycles) !== '108' || Number(resetMaster.target_complexity) !== 161 || resetMaster.rank !== 'S') throw new Error('RESET_MASTER_ROW_DRIFT');
   const resetLegacy = edge && legacy.ai.find((row) => String(row.user_id).toLowerCase() === edge.legacy_user_id && row.runner_key === 'menu-runner');
   if (!edge || !resetLegacy) throw new Error('RESET_LEGACY_ROW_NOT_FOUND');
   const legacyTimestamp = Math.max(Date.parse(resetLegacy.updated_at ?? ''), Date.parse(resetLegacy.last_completed_cycle_at ?? ''));
@@ -697,15 +706,15 @@ async function main() {
   const atlasRoot = path.resolve(args['--atlas-root'] ?? path.dirname(path.dirname(path.dirname(fileURLToPath(import.meta.url)))));
   verifyEvidence(atlasRoot);
   const legacyUrl = process.env[PRODUCER_CONTRACT.legacyDatabaseUrlEnv]; const masterUrl = process.env[PRODUCER_CONTRACT.masterDatabaseUrlEnv];
-  let quarantineKey = process.env[PRODUCER_CONTRACT.quarantineKeyEnv]; let qaPassword = process.env[PRODUCER_CONTRACT.qaPasswordEnv];
+  let quarantineKey = process.env[PRODUCER_CONTRACT.quarantineKeyEnv]; let qaPassword = process.env[PRODUCER_CONTRACT.qaPasswordEnv]; let resetBinding = null;
   if ((!quarantineKey || !qaPassword) && args['--secret-base']) {
     const retained = readRuntimeSecretsFromBase(atlasRoot, args['--secret-base'], args['--secret-base-sha256']);
-    quarantineKey ||= retained.quarantineKey; qaPassword ||= retained.qaPassword;
+    quarantineKey ||= retained.quarantineKey; qaPassword ||= retained.qaPassword; resetBinding = retained.resetBinding;
   }
   if (!legacyUrl || !masterUrl || !quarantineKey || !qaPassword) throw new Error('PRIVATE_RUNTIME_INPUT_MISSING');
   const psql = args['--psql'] ?? 'psql';
   const legacyRead = capturePrivateRead(legacyUrl, 'public', psql); const masterRead = capturePrivateRead(masterUrl, 'mazer', psql);
-  const value = producePrivateSource({ legacy: legacyRead.snapshot, master: masterRead.snapshot, legacyAcl: legacyRead.acl, masterAcl: masterRead.acl, quarantineKey, qaPassword });
+  const value = producePrivateSource({ legacy: legacyRead.snapshot, master: masterRead.snapshot, legacyAcl: legacyRead.acl, masterAcl: masterRead.acl, quarantineKey, qaPassword, resetBinding });
   const written = writePrivateSource(atlasRoot, args['--output'], value);
   process.stdout.write(`${JSON.stringify({ result: 'PASS_R017_PRIVATE_SOURCE_SEALED', private_source_sha256: written.sha256, private_source_bytes: written.bytes, private_path: path.relative(atlasRoot, written.path).split(path.sep).join('/'), provider_reads: 2, provider_writes: 0, auth_writes: 0, live_data_writes: 0, raw_records_emitted: false })}\n`);
 }
