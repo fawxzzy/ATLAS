@@ -5,12 +5,13 @@ import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-import { CONTRACT as FENCE_CONTRACT, classifyCutover, sha256 } from '../classify_supabase_mazer_master_cutover_data_fence_r001.mjs';
+import { CONTRACT as FENCE_CONTRACT, classifyCutover, renderAclObservationSql, sha256 } from '../classify_supabase_mazer_master_cutover_data_fence_r001.mjs';
 import { validatePrivateSource, wrapMigrationTransaction } from '../materialize_supabase_mazer_master_preparation_r017.mjs';
 import {
   PRODUCER_CONTRACT,
   SNAPSHOT_SQL,
   buildIdentityPlan,
+  normalizePsqlCommandSql,
   producePrivateSource,
   readRuntimeSecretsFromBase,
   renderOperationalSql,
@@ -202,12 +203,36 @@ const catchupSource = producePrivateSource({ legacy: catchupFixture.legacy, mast
 const catchupValidated = validatePrivateSource(catchupSource);
 assert.deepEqual(catchupValidated.classified.desired_counts, { profiles: 13, player: 17, ai: 17, receipts: 1888 });
 assert.equal(catchupSource.reset_era_ai.legacy_receipts, 1717);
+const advancedProgressionFixture = structuredClone(fixture);
+const advancedReset = advancedProgressionFixture.legacy.ai.find((row) => row.user_id === sharedLegacy[13]);
+advancedReset.level = 10; advancedReset.completed_cycles = 9; advancedReset.target_complexity = 44; advancedReset.rank = 'D';
+advancedReset.state = { ...advancedReset.state, level: '10', completedCycles: '9', targetComplexity: 44 };
+advancedReset.summary = { ...advancedReset.summary, level: '10', completedCycles: '9', targetComplexity: 44 };
+advancedReset.updated_at = iso(-500); advancedReset.last_completed_cycle_at = iso(-500);
+const advancedProgressionSource = producePrivateSource({ legacy: advancedProgressionFixture.legacy, master: advancedProgressionFixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
+assert.equal(advancedProgressionSource.reset_era_ai.canonical_projection, '10/9/44/D');
+assert.match(advancedProgressionSource.sql['reset-era-apply.sql'], /canonical_projection:10\/9\/44\/D/);
+assert.doesNotThrow(() => validatePrivateSource(advancedProgressionSource));
+const forgedProjection = structuredClone(advancedProgressionSource); forgedProjection.reset_era_ai.canonical_projection = '11/10/48/D';
+assert.throws(() => validatePrivateSource(forgedProjection), /RESET_CANONICAL_PROJECTION_DRIFT/);
+const duplicateProjectionFixture = structuredClone(fixture);
+const unrelatedProjection = duplicateProjectionFixture.master.ai.find((row) => row.user_id !== sharedMaster[13]);
+unrelatedProjection.level = 39; unrelatedProjection.completed_cycles = 108; unrelatedProjection.target_complexity = 161; unrelatedProjection.rank = 'S';
+unrelatedProjection.state = { ...unrelatedProjection.state, level: 39, completedCycles: 108, targetComplexity: 161 };
+unrelatedProjection.summary = { ...unrelatedProjection.summary, level: 39, completedCycles: 108, targetComplexity: 161 };
+assert.doesNotThrow(() => producePrivateSource({ legacy: duplicateProjectionFixture.legacy, master: duplicateProjectionFixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }));
 const overCeilingFixture = structuredClone(fixture);
 for (let index = 0; index < 33; index += 1) overCeilingFixture.legacy.receipts.push(receipt(uid(47100 + index), sharedLegacy[13], uid(67100 + index), 3100 + index));
 assert.throws(() => producePrivateSource({ legacy: overCeilingFixture.legacy, master: overCeilingFixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT/);
 
 assert.match(SNAPSHOT_SQL('public'), /transaction isolation level serializable read only/i);
 assert.match(SNAPSHOT_SQL('mazer'), /from mazer\.mazer_profiles/);
+const aclCommandSql = renderAclObservationSql('public');
+assert.match(aclCommandSql, /^\\set ON_ERROR_STOP on\n/);
+assert.doesNotMatch(normalizePsqlCommandSql(aclCommandSql), /^\\set/);
+assert.match(normalizePsqlCommandSql(aclCommandSql), /^begin transaction isolation level repeatable read read only;/);
+assert.equal(normalizePsqlCommandSql('select 1;\n\\set ON_ERROR_STOP off\n'), 'select 1;\n\\set ON_ERROR_STOP off\n');
+assert.throws(() => normalizePsqlCommandSql(''), /PSQL_COMMAND_SQL_SHAPE/);
 assert.throws(() => buildIdentityPlan({ ...fixture.legacy, auth_users: [...fixture.legacy.auth_users, fixture.legacy.auth_users[0]] }, fixture.master), /NORMALIZED_EMAIL_DUPLICATE/);
 const identityCollision = { ...fixture.legacy, auth_identities: fixture.legacy.auth_identities.map((item) => structuredClone(item)) };
 identityCollision.auth_identities.at(-1).id = fixture.master.auth_identities[0].id;
@@ -236,7 +261,7 @@ const aclMalformedTimestamp = { ...acl('public'), observed_at: 'not-a-timestamp'
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: aclMalformedTimestamp, masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /ACL_OBSERVATION_TIMESTAMP_DRIFT/);
 const aclStaleTimestamp = { ...acl('public'), observed_at: iso(-360_000) };
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: aclStaleTimestamp, masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /ACL_OBSERVATION_TIMESTAMP_DRIFT/);
-assert.throws(() => producePrivateSource({ legacy: { ...fixture.legacy, receipts: fixture.legacy.receipts.slice(1) }, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT/);
+assert.throws(() => producePrivateSource({ legacy: { ...fixture.legacy, receipts: fixture.legacy.receipts.slice(1) }, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT|RESET_IDENTITY_RECEIPT_BINDING_DRIFT/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: fixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'short', qaPassword: 'R017-fixture-password!' }), /PRIVATE_SECRET_INPUT_WEAK/);
 assert.throws(() => producePrivateSource({ legacy: fixture.legacy, master: { ...fixture.master, catalog: { ...catalog(), columns: [...catalog().columns, { table: 'mazer_profiles', column: 'username' }] } }, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /CATALOG_PREIMAGE_ALREADY_MIGRATED/);
 const wrappedMigration = wrapMigrationTransaction(Buffer.from('select 1;\n'), 'M1').toString('utf8');
@@ -249,6 +274,7 @@ const producerPath = path.join(root, 'ops/atlas/produce_supabase_mazer_master_pr
 const materializerPath = path.join(root, 'ops/atlas/materialize_supabase_mazer_master_preparation_r017.mjs');
 const classifierPath = path.join(root, 'ops/atlas/classify_supabase_mazer_master_cutover_data_fence_r001.mjs');
 const producerText = fs.readFileSync(producerPath, 'utf8');
+assert.match(producerText, /\['--no-psqlrc', '--quiet', '--tuples-only', '--no-align', '--set', 'ON_ERROR_STOP=1', '--command', commandSql\]/);
 for (const forbidden of ['execute_sql', 'apply_migration', 'supabase db push', 'vercel deploy', 'git push']) assert.ok(!producerText.toLowerCase().includes(forbidden));
 for (const token of ['PRIVATE_OUTPUT_MUST_BE_UNDER_SECRETS','EVIDENCE_DIGEST_DRIFT','IDENTITY_DENOMINATOR_DRIFT','RESET_RECEIPT_DENOMINATOR_DRIFT','transaction isolation level serializable read only']) assert.ok(producerText.includes(token));
 assert.match(source.sql['auth-apply.sql'], /i\.provider_id=e->'user'->>'id'/);
@@ -349,6 +375,7 @@ try {
   const retained = readRuntimeSecretsFromBase(privateWriteRoot, versioned.path, versioned.sha256);
   assert.equal(retained.quarantineKey, 'q'.repeat(64));
   assert.equal(retained.qaPassword, 'R017-fixture-password!');
+  assert.deepEqual(retained.resetBinding, { legacy_user_id: source.reset_era_ai.legacy_user_id, master_user_id: source.reset_era_ai.master_user_id });
   assert.throws(() => readRuntimeSecretsFromBase(privateWriteRoot, versioned.path, '0'.repeat(64)), /SECRET_BASE_DIGEST_DRIFT/);
 } finally { fs.rmSync(privateWriteRoot, { recursive: true, force: true }); }
 const junctionRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-private-junction-'));

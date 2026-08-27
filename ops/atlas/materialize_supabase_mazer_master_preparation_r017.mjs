@@ -48,7 +48,7 @@ const SQL_TOKENS = Object.freeze({
   'master-fence.sql': ['begin;', 'mazer_profiles', 'mazer_progression_states', 'mazer_ai_progression_states', 'mazer_cycle_receipts', 'revoke'],
   'master-refence.sql': ['begin;', 'mazer_initialize_progression', 'mazer_complete_level', 'mazer_complete_ai_level', 'mazer_reset_progression', 'revoke'],
   'auth-apply.sql': ['auth.users', 'auth.identities', 'create_and_bind', 'bind_existing', '4_auth_imports', '14_existing_binds'],
-  'reset-era-apply.sql': ['whole_row_override', '9/8/40/d', '39/108/161/s', 'pgp_sym_encrypt', 'player_reset_disposition', 'vault.create_secret', 'rollback_bound_username_key'],
+  'reset-era-apply.sql': ['whole_row_override', 'canonical_projection', '39/108/161/s', 'pgp_sym_encrypt', 'player_reset_disposition', 'vault.create_secret', 'rollback_bound_username_key'],
   'postverify.sql': ['data_api', 'rls', 'acl', '118', '20', '13', '17', '1887', 'receipt_conservation', 'username_origin', 'mazer-'],
   'qa-apply.sql': ['qa_ttl', 'before_user_created', 'rollback_on_error'],
   'qa-cleanup.sql': ['qa_ttl', 'delete', 'auth.identities', 'auth.users'],
@@ -174,7 +174,7 @@ export function validatePrivateSource(raw) {
     if (requiredUuid(item.identities[0].user_id, 'IMPORT_IDENTITY_OWNER') !== item.user.id.toLowerCase()) throw new Error('IMPORT_IDENTITY_OWNER_DRIFT');
   }
   if (!plain(raw.reset_era_ai)
-    || raw.reset_era_ai.canonical_projection !== '9/8/40/D'
+    || typeof raw.reset_era_ai.canonical_projection !== 'string'
     || raw.reset_era_ai.quarantined_projection !== '39/108/161/S'
     || raw.reset_era_ai.legacy_receipts < RECEIPT_CATCHUP_CONTRACT.resetLegacyBaseline
     || raw.reset_era_ai.legacy_receipts > RECEIPT_CATCHUP_CONTRACT.resetLegacyBaseline + RECEIPT_CATCHUP_CONTRACT.maxDelta
@@ -183,6 +183,9 @@ export function validatePrivateSource(raw) {
     || raw.reset_era_ai.legacy_timestamps_newer !== true
     || raw.reset_era_ai.override_mode !== 'EXACT_WHOLE_ROW'
     || raw.reset_era_ai.quarantine_encryption !== 'PGP_SYM_ENCRYPT_AES256') throw new Error('RESET_ERA_DECISION_DRIFT');
+  const resetLegacyUser = requiredUuid(raw.reset_era_ai.legacy_user_id, 'RESET_AI_LEGACY_UUID');
+  const resetSource = raw.fence_input.source_snapshot.ai.find((item) => item.user_id.toLowerCase() === resetLegacyUser && item.runner_key === 'menu-runner');
+  if (!resetSource || raw.reset_era_ai.canonical_projection !== `${resetSource.level}/${resetSource.completed_cycles}/${resetSource.target_complexity}/${resetSource.rank}`) throw new Error('RESET_CANONICAL_PROJECTION_DRIFT');
   if (!plain(raw.qa) || raw.qa.personas < 1 || raw.qa.personas > 4 || raw.qa.auth_rows < 1 || raw.qa.auth_rows > 5 || raw.qa.ttl_minutes > 30) throw new Error('QA_CEILING_DRIFT');
   if (!plain(raw.sql)) throw new Error('SQL_PACKET_MISSING');
   if (!plain(raw.sql_sha256)) throw new Error('SQL_DIGESTS_MISSING');
@@ -241,7 +244,7 @@ export function materialize(raw, outputRoot, mazerRepository, ownerToken) {
       receipt_delta_ceiling: RECEIPT_CATCHUP_CONTRACT.maxDelta,
       receipt_delta_observed: classified.desired_counts.receipts - RECEIPT_CATCHUP_CONTRACT.baselineUnion
     },
-    reset_era_ai: { canonical: '9/8/40/D', quarantined: '39/108/161/S', override: 'EXACT_WHOLE_ROW', quarantine: 'PGP_SYM_ENCRYPT_AES256' },
+    reset_era_ai: { canonical: raw.reset_era_ai.canonical_projection, quarantined: '39/108/161/S', override: 'EXACT_WHOLE_ROW', quarantine: 'PGP_SYM_ENCRYPT_AES256' },
     reset_era_player: { disposition: 'MASTER_DOMINATES_NO_OVERRIDE', source_digest: raw.reset_era_player.source_row_digest, target_digest: raw.reset_era_player.target_row_digest },
     qa: { personas: raw.qa.personas, auth_rows: raw.qa.auth_rows, ttl_minutes: raw.qa.ttl_minutes },
     files
