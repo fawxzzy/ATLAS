@@ -19,6 +19,7 @@ CONSUMPTION_SCHEMA = "atlas.scoped-approval-consumption.v1"
 TASK_ID = re.compile(r"^[0-9a-f]{8}-[0-9a-f-]{27,}$", re.IGNORECASE)
 SAFE_TOKEN = re.compile(r"^[A-Za-z0-9._:/@+-]+$")
 PACKET_LABEL = re.compile(r"(?:^|-)R(\d{3})(?:-|$)")
+CANONICAL_APPROVAL_REF = re.compile(r"^runtime/atlas/[A-Za-z0-9._-]+\.json$")
 
 
 class ScopedApprovalError(ValueError):
@@ -117,12 +118,21 @@ def _require_token(value: str, field: str) -> str:
     return value.strip()
 
 
+def _canonical_runtime_root(path: Path) -> Path:
+    resolved = path.resolve()
+    atlas_runtime = resolved.parent
+    if atlas_runtime.name.lower() != "atlas" or atlas_runtime.parent.name.lower() != "runtime":
+        raise ScopedApprovalError("Approval artifacts must be direct children of canonical runtime/atlas")
+    return atlas_runtime.parent.parent
+
+
 def _decision_ref(path: Path) -> str:
     resolved = path.resolve()
-    try:
-        return resolved.relative_to(ROOT).as_posix()
-    except ValueError:
-        return str(resolved)
+    _canonical_runtime_root(resolved)
+    reference = f"runtime/atlas/{resolved.name}"
+    if not CANONICAL_APPROVAL_REF.fullmatch(reference):
+        raise ScopedApprovalError("Approval artifact name is not canonical")
+    return reference
 
 
 def canonical_alias_path(decision_request_path: Path) -> Path:
@@ -233,10 +243,14 @@ def issue_alias(
 
 
 def _resolve_decision_path(alias_path: Path, value: str) -> Path:
-    candidate = Path(value)
-    if not candidate.is_absolute():
-        candidate = ROOT / candidate
-    return candidate.resolve()
+    if not isinstance(value, str) or not CANONICAL_APPROVAL_REF.fullmatch(value):
+        raise ScopedApprovalError("Decision reference must be canonical runtime/atlas relative")
+    canonical_root = _canonical_runtime_root(alias_path)
+    candidate = (canonical_root / Path(*value.split("/"))).resolve()
+    expected_parent = (canonical_root / "runtime" / "atlas").resolve()
+    if candidate.parent != expected_parent:
+        raise ScopedApprovalError("Decision reference escaped canonical runtime/atlas")
+    return candidate
 
 
 def authorize_alias(

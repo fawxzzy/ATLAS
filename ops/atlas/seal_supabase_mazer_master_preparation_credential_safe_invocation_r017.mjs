@@ -66,6 +66,12 @@ function resolveRelative(relative, boundary, code) {
   if (typeof relative !== 'string' || relative.length < 3 || relative.includes('\\') || path.isAbsolute(relative) || relative.split('/').includes('..')) throw new Error(code);
   return inside(path.resolve(root, ...relative.split('/')), boundary, code);
 }
+function resolveApprovalReference(relative, code) {
+  if (typeof relative !== 'string' || !/^runtime\/atlas\/[A-Za-z0-9._-]+\.json$/.test(relative)) throw new Error(code);
+  const resolved = path.resolve(root, ...relative.split('/'));
+  if (path.dirname(resolved).toLowerCase() !== runtimeRoot.toLowerCase()) throw new Error(code);
+  return resolved;
+}
 function atlasRelative(file) { return path.relative(root, file).split(path.sep).join('/'); }
 function canonicalAliasPath(decisionPath) {
   let stem=path.parse(decisionPath).name;
@@ -105,9 +111,9 @@ export function sealInvocation({ decisionRequestPath, aliasPath, authorizationPa
   if (!exactKeys(a, ['allowed_effect','approval_code','decision_request','execution_authority','expected_operator_response','expires_at','intent_digest','issued_at','originating_task_id','packet','schema','semantic_objective','single_use','status'])) throw new Error('ALIAS_KEYS');
   if (a.schema !== 'atlas.scoped-approval-alias.v1' || a.packet !== packet || a.status !== 'OPEN' || a.single_use !== true || a.execution_authority !== false || a.originating_task_id !== originatingTaskId || a.expected_operator_response !== `APPROVE ${a.approval_code}`) throw new Error('ALIAS_CONTRACT');
   if (a.allowed_effect?.effect_class !== effectClass || a.allowed_effect?.target !== effectTarget || a.allowed_effect?.max_effect_count !== maxEffectCount) throw new Error('ALIAS_EFFECT');
-  if (a.decision_request?.sha256 !== decision.sha256 || path.resolve(root, a.decision_request?.path ?? '') !== decision.path) throw new Error('ALIAS_DECISION_BINDING');
+  if (a.decision_request?.sha256 !== decision.sha256 || resolveApprovalReference(a.decision_request?.path, 'ALIAS_DECISION_REFERENCE') !== decision.path) throw new Error('ALIAS_DECISION_BINDING');
   if (sha256(Buffer.from(d.exact_authorization_phrase ?? '', 'utf8')) !== a.decision_request?.exact_authorization_phrase_sha256) throw new Error('ALIAS_PHRASE_BINDING');
-  if (z.schema !== 'atlas.scoped-approval-authorization.v1' || z.packet !== packet || z.status !== 'AUTHORIZED_SINGLE_USE' || z.single_use !== true || z.execution_authority !== true || z.originating_task_id !== originatingTaskId || z.approval_code !== a.approval_code || z.alias?.sha256 !== alias.sha256 || path.resolve(root, z.alias?.path ?? '') !== alias.path || z.decision_request?.sha256 !== decision.sha256 || z.intent_digest !== a.intent_digest) throw new Error('AUTHORIZATION_BINDING');
+  if (z.schema !== 'atlas.scoped-approval-authorization.v1' || z.packet !== packet || z.status !== 'AUTHORIZED_SINGLE_USE' || z.single_use !== true || z.execution_authority !== true || z.originating_task_id !== originatingTaskId || z.approval_code !== a.approval_code || z.alias?.sha256 !== alias.sha256 || resolveApprovalReference(z.alias?.path, 'AUTHORIZATION_ALIAS_REFERENCE') !== alias.path || z.decision_request?.sha256 !== decision.sha256 || resolveApprovalReference(z.decision_request?.path, 'AUTHORIZATION_DECISION_REFERENCE') !== decision.path || z.intent_digest !== a.intent_digest) throw new Error('AUTHORIZATION_BINDING');
   if (c.schema !== 'atlas.scoped-approval-consumption.v1' || c.packet !== packet || c.status !== 'CONSUMED' || c.reusable !== false || c.max_effect_count !== maxEffectCount || c.authorization_sha256 !== authorization.sha256 || c.intent_digest !== a.intent_digest || !uuid4(c.execution_correlation_id)) throw new Error('CONSUMPTION_BINDING');
   const nowMs = now.getTime(), aliasIssued = timestamp(a.issued_at, 'ALIAS_TIME'), authorized = timestamp(z.authorized_at, 'AUTHORIZATION_TIME'), consumed = timestamp(c.consumed_at, 'CONSUMPTION_TIME'), expires = timestamp(a.expires_at, 'ALIAS_TIME');
   if (aliasIssued > authorized || authorized > consumed || consumed > nowMs + 5000 || expires <= nowMs || expires > aliasIssued + 86400000) throw new Error('APPROVAL_TIME');
