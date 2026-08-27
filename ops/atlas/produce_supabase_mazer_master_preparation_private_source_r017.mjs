@@ -188,8 +188,13 @@ select jsonb_build_object(
 )::text;
 commit;`;
 
+export function normalizePsqlCommandSql(sql) {
+  if (typeof sql !== 'string' || !sql.trim()) throw new Error('PSQL_COMMAND_SQL_SHAPE');
+  return sql.replace(/^\\set ON_ERROR_STOP on\r?\n/, '');
+}
+
 function runPsql(psql, databaseUrl, sql, code) {
-  const commandSql = sql.replace(/^\\set ON_ERROR_STOP on\r?\n/, '');
+  const commandSql = normalizePsqlCommandSql(sql);
   const child = spawnSync(psql, ['--no-psqlrc', '--quiet', '--tuples-only', '--no-align', '--set', 'ON_ERROR_STOP=1', '--command', commandSql], {
     encoding: 'utf8', windowsHide: true, timeout: 300_000, maxBuffer: 64_000_000,
     env: { ...process.env, PGDATABASE: databaseUrl, PGPASSWORD: '' }

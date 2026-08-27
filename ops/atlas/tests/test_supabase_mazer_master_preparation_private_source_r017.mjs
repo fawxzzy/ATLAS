@@ -5,12 +5,13 @@ import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-import { CONTRACT as FENCE_CONTRACT, classifyCutover, sha256 } from '../classify_supabase_mazer_master_cutover_data_fence_r001.mjs';
+import { CONTRACT as FENCE_CONTRACT, classifyCutover, renderAclObservationSql, sha256 } from '../classify_supabase_mazer_master_cutover_data_fence_r001.mjs';
 import { validatePrivateSource, wrapMigrationTransaction } from '../materialize_supabase_mazer_master_preparation_r017.mjs';
 import {
   PRODUCER_CONTRACT,
   SNAPSHOT_SQL,
   buildIdentityPlan,
+  normalizePsqlCommandSql,
   producePrivateSource,
   readRuntimeSecretsFromBase,
   renderOperationalSql,
@@ -220,6 +221,12 @@ assert.throws(() => producePrivateSource({ legacy: overCeilingFixture.legacy, ma
 
 assert.match(SNAPSHOT_SQL('public'), /transaction isolation level serializable read only/i);
 assert.match(SNAPSHOT_SQL('mazer'), /from mazer\.mazer_profiles/);
+const aclCommandSql = renderAclObservationSql('public');
+assert.match(aclCommandSql, /^\\set ON_ERROR_STOP on\n/);
+assert.doesNotMatch(normalizePsqlCommandSql(aclCommandSql), /^\\set/);
+assert.match(normalizePsqlCommandSql(aclCommandSql), /^begin transaction isolation level repeatable read read only;/);
+assert.equal(normalizePsqlCommandSql('select 1;\n\\set ON_ERROR_STOP off\n'), 'select 1;\n\\set ON_ERROR_STOP off\n');
+assert.throws(() => normalizePsqlCommandSql(''), /PSQL_COMMAND_SQL_SHAPE/);
 assert.throws(() => buildIdentityPlan({ ...fixture.legacy, auth_users: [...fixture.legacy.auth_users, fixture.legacy.auth_users[0]] }, fixture.master), /NORMALIZED_EMAIL_DUPLICATE/);
 const identityCollision = { ...fixture.legacy, auth_identities: fixture.legacy.auth_identities.map((item) => structuredClone(item)) };
 identityCollision.auth_identities.at(-1).id = fixture.master.auth_identities[0].id;
@@ -261,6 +268,7 @@ const producerPath = path.join(root, 'ops/atlas/produce_supabase_mazer_master_pr
 const materializerPath = path.join(root, 'ops/atlas/materialize_supabase_mazer_master_preparation_r017.mjs');
 const classifierPath = path.join(root, 'ops/atlas/classify_supabase_mazer_master_cutover_data_fence_r001.mjs');
 const producerText = fs.readFileSync(producerPath, 'utf8');
+assert.match(producerText, /\['--no-psqlrc', '--quiet', '--tuples-only', '--no-align', '--set', 'ON_ERROR_STOP=1', '--command', commandSql\]/);
 for (const forbidden of ['execute_sql', 'apply_migration', 'supabase db push', 'vercel deploy', 'git push']) assert.ok(!producerText.toLowerCase().includes(forbidden));
 for (const token of ['PRIVATE_OUTPUT_MUST_BE_UNDER_SECRETS','EVIDENCE_DIGEST_DRIFT','IDENTITY_DENOMINATOR_DRIFT','RESET_RECEIPT_DENOMINATOR_DRIFT','transaction isolation level serializable read only']) assert.ok(producerText.includes(token));
 assert.match(source.sql['auth-apply.sql'], /i\.provider_id=e->'user'->>'id'/);
