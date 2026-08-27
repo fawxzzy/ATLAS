@@ -35,7 +35,10 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
-$script:ChildHostScriptPath = $PSCommandPath
+$script:VerifiedFenceSourceText = if($null-ne(Get-Variable -Name ATLAS_R017_VERIFIED_FENCE_SOURCE_TEXT -Scope Global -ErrorAction SilentlyContinue)){[string]$global:ATLAS_R017_VERIFIED_FENCE_SOURCE_TEXT}else{$null}
+$FenceDirectory = if($null-ne$script:VerifiedFenceSourceText){[IO.Path]::GetFullPath($env:ATLAS_R017_VERIFIED_FENCE_DIR)}else{[IO.Path]::GetFullPath($PSScriptRoot)}
+$script:ChildHostScriptPath = if($null-ne$script:VerifiedFenceSourceText){[IO.Path]::GetFullPath($env:ATLAS_R017_VERIFIED_FENCE_PATH)}else{$PSCommandPath}
+$script:ChildHostScriptSha256 = if($null-ne$script:VerifiedFenceSourceText){[string]$env:ATLAS_R017_VERIFIED_FENCE_SHA256}else{$null}
 
 trap {
   $category = ([string]$_.Exception.Message -replace '[^A-Za-z0-9_]', '').ToUpperInvariant()
@@ -48,8 +51,8 @@ $RunningOnWindows = [Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT
 $PathComparison = if ($RunningOnWindows) { [StringComparison]::OrdinalIgnoreCase } else { [StringComparison]::Ordinal }
 $DirectorySeparators = [char[]]@([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
 
-$AtlasRoot = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, '..', '..'))
-$Classifier = Join-Path $PSScriptRoot 'classify_supabase_mazer_master_cutover_data_fence_r001.mjs'
+$AtlasRoot = [IO.Path]::GetFullPath([IO.Path]::Combine($FenceDirectory, '..', '..'))
+$Classifier = Join-Path $FenceDirectory 'classify_supabase_mazer_master_cutover_data_fence_r001.mjs'
 $LegacyProjectRef = 'geknvnrmktchljnyddwp'
 $LegacySchema = 'public'
 $MasterProjectRef = 'bxtcuhkotumitoqtrcej'
@@ -852,9 +855,10 @@ function Read-ProtectedInvocationEnvelope([string]$Path, [string]$ExpectedSha256
   if ([string]$value.packet -cnotmatch '^FP-MAZER-MASTER-R017-[A-Z0-9-]{8,160}$' -or [string]$value.correlation_id -cnotmatch '^r017-[a-z0-9-]{8,160}$') { throw 'INVOCATION_CORRELATION' }
   if ([string]$value.mode -notin @('Forward','Reverse','Rollback') -or [string]$value.execution_step -notin @('All','FenceOnly','Continue','ReleaseLegacy') -or [bool]$value.execute_protected -ne $true) { throw 'INVOCATION_EFFECT_SHAPE' }
   if ([string]$value.expected_input_sha256 -cnotmatch '^[a-f0-9]{64}$' -or [string]$value.parent_host_sha256 -cnotmatch '^[a-f0-9]{64}$' -or [string]$value.child_host_sha256 -cnotmatch '^[a-f0-9]{64}$') { throw 'INVOCATION_HASH_SHAPE' }
-  $parentHost = Assert-PathUnder ([string]$value.parent_host_path) @($PSScriptRoot)
+  $parentHost = Assert-PathUnder ([string]$value.parent_host_path) @($FenceDirectory)
   if ([IO.Path]::GetFileName($parentHost) -cne 'invoke_supabase_mazer_master_preparation_r017.ps1' -or (Get-Sha256 $parentHost) -cne [string]$value.parent_host_sha256) { throw 'INVOCATION_PARENT_HOST_DRIFT' }
-  if ((Get-Sha256 $script:ChildHostScriptPath) -cne [string]$value.child_host_sha256) { throw 'INVOCATION_CHILD_HOST_DRIFT' }
+  $childHostSha256=if($null-ne$script:VerifiedFenceSourceText){$script:ChildHostScriptSha256}else{Get-Sha256 $script:ChildHostScriptPath}
+  if ($childHostSha256 -cne [string]$value.child_host_sha256) { throw 'INVOCATION_CHILD_HOST_DRIFT' }
   $resolvedInput = Assert-PathUnder ([string]$value.input_path) @($RuntimeRoot,$SecretRoot)
   $resolvedState = Assert-PathUnder ([string]$value.state_path) @($RuntimeRoot)
   $expectedCorrelation = 'r017-' + (Get-TextSha256 $resolvedState.ToLowerInvariant()).Substring(0, 32)
@@ -874,7 +878,7 @@ function Assert-SourceContract {
   if (-not (Test-Path -LiteralPath $Classifier -PathType Leaf)) { throw 'CLASSIFIER_MISSING' }
   $tokens = $null
   $errors = $null
-  [void][Management.Automation.Language.Parser]::ParseFile($PSCommandPath, [ref]$tokens, [ref]$errors)
+  if($null-ne$script:VerifiedFenceSourceText){[void][Management.Automation.Language.Parser]::ParseInput($script:VerifiedFenceSourceText,[ref]$tokens,[ref]$errors)}else{[void][Management.Automation.Language.Parser]::ParseFile($PSCommandPath,[ref]$tokens,[ref]$errors)}
   if ($errors.Count -ne 0) { throw 'POWERSHELL_PARSE_FAILED' }
   $node = Invoke-ProcessSanitized -FileName (Get-Command node -ErrorAction Stop).Source -Arguments @('--check',$Classifier) -TimeoutMs 30000
   if ($node.ExitCode -ne 0) { throw 'CLASSIFIER_PARSE_FAILED' }

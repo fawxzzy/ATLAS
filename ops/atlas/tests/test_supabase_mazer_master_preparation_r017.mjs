@@ -216,6 +216,8 @@ assert.ok(materializer.includes('topologyEvidenceSha256'));
 assert.ok(host.includes('Find-MazerRepository'));
 assert.ok(host.includes("'--mazer-repository',$mazerRepository"));
 for (const token of ['Invoke-VerifiedMaterializerNode','FileShare]::Read','PRIVATE_OUTPUT_PREEXISTS','ATLAS_R017_VERIFIED_CLASSIFIER_PATH','CLASSIFIER_DIGEST_DRIFT','Remove-OwnedPrivateRoot','.atlas-r017-owner','--owner-token']) assert.ok(host.includes(token), `portable materializer seam missing ${token}`);
+for (const token of ['Get-VerifiedFenceBootstrapEncoded','Invoke-VerifiedFenceChild','ATLAS_R017_VERIFIED_FENCE_PATH','ATLAS_R017_VERIFIED_FENCE_SHA256','FENCE_DIGEST_DRIFT','PASS_R017_SAME_BUFFER_FENCE_REPLACEMENT_ADVERSARY']) assert.ok(host.includes(token), `verified fence child seam missing ${token}`);
+assert.ok(!host.includes("'-File',$Fence"), 'protected fence child must execute retained verified bytes');
 assert.ok(!host.includes('r017-node-shim-reviewed2'));
 assert.ok(host.includes('import(process.argv[1])'));
 assert.ok(host.includes('([Uri]$verifiedMaterializerPath).AbsoluteUri'));
@@ -250,6 +252,13 @@ if (process.platform === 'win32') {
     assert.equal(receipt.moved_worktree, true); assert.equal(receipt.spaces, true);
     assert.equal(receipt.replacement_blocked, true); assert.equal(receipt.classifier_replacement_blocked, true); assert.equal(receipt.replacement_executed, false); assert.equal(receipt.foreign_output_preserved, true);
     assert.equal(receipt.external_calls, 0); assert.equal(receipt.credential_reads, 0); assert.equal(receipt.live_data_writes, 0);
+  }
+  for (const [shell, prefix] of [['pwsh.exe', []], ['powershell.exe', ['-ExecutionPolicy','Bypass']]]) {
+    const probe = spawnSync(shell, ['-NoLogo','-NoProfile','-NonInteractive',...prefix,'-File',hostPath,'-LocalFenceReplacementAdversary'], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 60_000 });
+    assert.equal(probe.status, 0, probe.stderr);
+    const receipt = JSON.parse(probe.stdout.trim());
+    assert.equal(receipt.result, 'PASS_R017_SAME_BUFFER_FENCE_REPLACEMENT_ADVERSARY');
+    assert.equal(receipt.replacement_executed, false); assert.equal(receipt.credential_reads, 0); assert.equal(receipt.external_calls, 0); assert.equal(receipt.live_data_writes, 0);
   }
   for (const [shell, prefix] of [['pwsh.exe', []], ['powershell.exe', ['-ExecutionPolicy','Bypass']]]) {
     const child = spawnSync(shell, ['-NoLogo','-NoProfile','-NonInteractive',...prefix,'-File',credentialSafeLauncherPath,'-SourceOnlyValidate'], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 60_000 });
