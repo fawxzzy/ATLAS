@@ -202,6 +202,18 @@ const catchupSource = producePrivateSource({ legacy: catchupFixture.legacy, mast
 const catchupValidated = validatePrivateSource(catchupSource);
 assert.deepEqual(catchupValidated.classified.desired_counts, { profiles: 13, player: 17, ai: 17, receipts: 1888 });
 assert.equal(catchupSource.reset_era_ai.legacy_receipts, 1717);
+const advancedProgressionFixture = structuredClone(fixture);
+const advancedReset = advancedProgressionFixture.legacy.ai.find((row) => row.user_id === sharedLegacy[13]);
+advancedReset.level = 10; advancedReset.completed_cycles = 9; advancedReset.target_complexity = 44; advancedReset.rank = 'D';
+advancedReset.state = { ...advancedReset.state, level: '10', completedCycles: '9', targetComplexity: 44 };
+advancedReset.summary = { ...advancedReset.summary, level: '10', completedCycles: '9', targetComplexity: 44 };
+advancedReset.updated_at = iso(-500); advancedReset.last_completed_cycle_at = iso(-500);
+const advancedProgressionSource = producePrivateSource({ legacy: advancedProgressionFixture.legacy, master: advancedProgressionFixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
+assert.equal(advancedProgressionSource.reset_era_ai.canonical_projection, '10/9/44/D');
+assert.match(advancedProgressionSource.sql['reset-era-apply.sql'], /canonical_projection:10\/9\/44\/D/);
+assert.doesNotThrow(() => validatePrivateSource(advancedProgressionSource));
+const forgedProjection = structuredClone(advancedProgressionSource); forgedProjection.reset_era_ai.canonical_projection = '11/10/48/D';
+assert.throws(() => validatePrivateSource(forgedProjection), /RESET_CANONICAL_PROJECTION_DRIFT/);
 const overCeilingFixture = structuredClone(fixture);
 for (let index = 0; index < 33; index += 1) overCeilingFixture.legacy.receipts.push(receipt(uid(47100 + index), sharedLegacy[13], uid(67100 + index), 3100 + index));
 assert.throws(() => producePrivateSource({ legacy: overCeilingFixture.legacy, master: overCeilingFixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT/);

@@ -189,8 +189,9 @@ select jsonb_build_object(
 commit;`;
 
 function runPsql(psql, databaseUrl, sql, code) {
-  const child = spawnSync(psql, ['--no-psqlrc', '--quiet', '--tuples-only', '--no-align', '--set', 'ON_ERROR_STOP=1', '--command', sql], {
-    encoding: 'utf8', windowsHide: true, timeout: 180_000, maxBuffer: 32_000_000,
+  const commandSql = sql.replace(/^\\set ON_ERROR_STOP on\r?\n/, '');
+  const child = spawnSync(psql, ['--no-psqlrc', '--quiet', '--tuples-only', '--no-align', '--set', 'ON_ERROR_STOP=1', '--command', commandSql], {
+    encoding: 'utf8', windowsHide: true, timeout: 300_000, maxBuffer: 64_000_000,
     env: { ...process.env, PGDATABASE: databaseUrl, PGPASSWORD: '' }
   });
   if (child.status !== 0 || child.signal || child.stderr.trim()) throw new Error(code);
@@ -548,7 +549,7 @@ do $username_key$ begin
  if exists(select 1 from vault.secrets where name='mazer_username_handle_key') then raise exception 'R017_MAZER_USERNAME_HANDLE_KEY_PREEXISTS'; end if;
  perform vault.create_secret(${sqlLiteral(usernameHandleKey)},'mazer_username_handle_key','R017 protected deterministic Mazer username key',null);
  if (select count(*) from vault.secrets where name='mazer_username_handle_key') <> 1 then raise exception 'R017_MAZER_USERNAME_HANDLE_KEY_CREATE_FAILED'; end if;
-end $username_key$;`, ['whole_row_override','9/8/40/D','39/108/161/S','pgp_sym_encrypt','player_reset_disposition','vault.create_secret','rollback_bound_username_key']);
+end $username_key$;`, ['whole_row_override',`canonical_projection:${reset.canonical_projection}`,'39/108/161/S','pgp_sym_encrypt','player_reset_disposition','vault.create_secret','rollback_bound_username_key']);
   sql['postverify.sql'] = sqlProgram(`
 do $r017$ begin
  if (select coalesce(jsonb_agg(to_jsonb(t)-'username'-'username_origin' order by t.user_id),'[]'::jsonb) from mazer.mazer_profiles t) <> ${expectedProfileCoreSql} then raise exception 'R017_PROFILES_CORE_DIGEST_DRIFT'; end if;
@@ -620,11 +621,12 @@ export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, qua
   const catalog_preimage = validateCatalogPreimage(master.catalog);
   const fence_input = buildFenceInput(legacy, master, legacyAcl, masterAcl, auth);
   const allEdges = [...auth.retained_edges, ...auth.new_edges];
-  const resetLegacy = legacy.ai.find((row) => String(row.level) === '9' && String(row.completed_cycles) === '8' && Number(row.target_complexity) === 40 && row.rank === 'D');
-  if (!resetLegacy) throw new Error('RESET_LEGACY_ROW_NOT_FOUND');
-  const edge = allEdges.find((item) => item.legacy_user_id === String(resetLegacy.user_id).toLowerCase());
-  const resetMaster = edge && master.ai.find((row) => String(row.user_id).toLowerCase() === edge.master_user_id && String(row.level) === '39' && String(row.completed_cycles) === '108' && Number(row.target_complexity) === 161 && row.rank === 'S');
-  if (!edge || !resetMaster) throw new Error('RESET_MASTER_ROW_NOT_FOUND');
+  const resetMasterRows = master.ai.filter((row) => String(row.level) === '39' && String(row.completed_cycles) === '108' && Number(row.target_complexity) === 161 && row.rank === 'S');
+  if (resetMasterRows.length !== 1) throw new Error('RESET_MASTER_ROW_NOT_FOUND');
+  const [resetMaster] = resetMasterRows;
+  const edge = allEdges.find((item) => item.master_user_id === String(resetMaster.user_id).toLowerCase());
+  const resetLegacy = edge && legacy.ai.find((row) => String(row.user_id).toLowerCase() === edge.legacy_user_id && row.runner_key === 'menu-runner');
+  if (!edge || !resetLegacy) throw new Error('RESET_LEGACY_ROW_NOT_FOUND');
   const legacyTimestamp = Math.max(Date.parse(resetLegacy.updated_at ?? ''), Date.parse(resetLegacy.last_completed_cycle_at ?? ''));
   const masterTimestamp = Math.max(Date.parse(resetMaster.updated_at ?? ''), Date.parse(resetMaster.last_completed_cycle_at ?? ''));
   if (!Number.isFinite(legacyTimestamp) || !Number.isFinite(masterTimestamp) || legacyTimestamp <= masterTimestamp) throw new Error('RESET_TIMESTAMP_ORDER_DRIFT');
@@ -641,7 +643,9 @@ export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, qua
     || masterReceiptCount !== RECEIPT_CATCHUP_CONTRACT.resetMasterExact) throw new Error('RESET_RECEIPT_DENOMINATOR_DRIFT');
   const sourceAiEnvelope = fence_input.source_snapshot.ai.find((row) => row.user_id === edge.legacy_user_id && row.runner_key === 'menu-runner');
   const targetAiEnvelope = fence_input.target_snapshot.ai.find((row) => row.user_id === edge.master_user_id && row.runner_key === 'menu-runner');
-  const reset_era_ai = { legacy_user_id: edge.legacy_user_id, master_user_id: edge.master_user_id, canonical_projection: '9/8/40/D', quarantined_projection: '39/108/161/S', legacy_receipts: legacyReceiptCount, master_receipts: masterReceiptCount, legacy_timestamps_newer: true, override_mode: 'EXACT_WHOLE_ROW', quarantine_encryption: 'PGP_SYM_ENCRYPT_AES256', canonical_row_digest: digest(sourceAiEnvelope), quarantined_row_digest: digest(targetAiEnvelope), quarantined_row: resetMaster };
+  if (!sourceAiEnvelope || !targetAiEnvelope) throw new Error('RESET_AI_ENVELOPE_NOT_FOUND');
+  const canonicalProjection = `${sourceAiEnvelope.level}/${sourceAiEnvelope.completed_cycles}/${sourceAiEnvelope.target_complexity}/${sourceAiEnvelope.rank}`;
+  const reset_era_ai = { legacy_user_id: edge.legacy_user_id, master_user_id: edge.master_user_id, canonical_projection: canonicalProjection, quarantined_projection: '39/108/161/S', legacy_receipts: legacyReceiptCount, master_receipts: masterReceiptCount, legacy_timestamps_newer: true, override_mode: 'EXACT_WHOLE_ROW', quarantine_encryption: 'PGP_SYM_ENCRYPT_AES256', canonical_row_digest: digest(sourceAiEnvelope), quarantined_row_digest: digest(targetAiEnvelope), quarantined_row: resetMaster };
   const qa = { personas: 4, auth_rows: 4, ttl_minutes: 30, rows: deterministicQa(auth) };
   const actionFenceInput = structuredClone(fence_input);
   if (actionFenceInput.desired_ai_overrides !== undefined) throw new Error('RESET_AI_OVERRIDE_PREEXISTS');
@@ -649,7 +653,7 @@ export function producePrivateSource({ legacy, master, legacyAcl, masterAcl, qua
   const actionTargetIndex = actionFenceInput.target_snapshot.ai.findIndex((row) => row.user_id === edge.master_user_id && row.runner_key === 'menu-runner');
   if (actionTargetIndex < 0) throw new Error('RESET_ACTION_TARGET_MISSING');
   actionFenceInput.desired_ai_overrides = [mappedSourceAi];
-  const rendered = renderOperationalSql({ auth, fenceInput: fence_input, actionFenceInput, catalogPreimage: catalog_preimage, reset: { quarantined_row: resetMaster }, qa, quarantineKey, qaPassword });
+  const rendered = renderOperationalSql({ auth, fenceInput: fence_input, actionFenceInput, catalogPreimage: catalog_preimage, reset: { quarantined_row: resetMaster, canonical_projection: canonicalProjection }, qa, quarantineKey, qaPassword });
   const raw = { schema: PRODUCER_CONTRACT.schema, packet: PRODUCER_CONTRACT.packet, evidence: { current_preimage_sha256: R017_CONTRACT.currentPreimageSha256, topology_evidence_sha256: R017_CONTRACT.topologyEvidenceSha256, restore_proof_sha256: R017_CONTRACT.restoreProofSha256, predecessor_fence_manifest_sha256: R017_CONTRACT.predecessorFenceManifestSha256, master_acl_basis: fence_input.fence.master.acl_basis }, catalog_preimage, catalog_preimage_sha256: sha256(catalog_preimage), fence_input, auth, reset_era_ai, reset_era_player, qa, sql: rendered.sql, sql_sha256: rendered.sql_sha256 };
   validatePrivateSource(raw);
   return raw;
