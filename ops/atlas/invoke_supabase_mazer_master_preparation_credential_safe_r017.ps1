@@ -92,6 +92,13 @@ function Resolve-DecisionRelative([string]$Value,[string]$Code) {
   return [IO.Path]::GetFullPath((Join-Path $Root $Value))
 }
 
+function Resolve-ApprovalReference([string]$Value,[string]$Code) {
+  if([string]::IsNullOrWhiteSpace($Value)-or$Value-cnotmatch'^runtime/atlas/[A-Za-z0-9._-]+\.json$'){throw $Code}
+  $resolved=[IO.Path]::GetFullPath((Join-Path $Root ($Value-replace'/',[IO.Path]::DirectorySeparatorChar)))
+  if((Split-Path -Parent $resolved)-cne[IO.Path]::GetFullPath($Runtime)){throw $Code}
+  return $resolved
+}
+
 function Get-CanonicalApprovalInstant([string]$Value,[string]$Code) {
   $parsed=Parse-Rfc3339 $Value $Code
   return $parsed.UtcDateTime.Ticks-($parsed.UtcDateTime.Ticks%10)
@@ -217,7 +224,7 @@ function Read-Invocation([string]$Path, [string]$ExpectedSha) {
   $decisionExpires=Get-RawJsonString $decision.Text 'expires_at' 'APPROVAL_TIMESTAMP';$aliasExpires=Get-RawJsonString $alias.Text 'expires_at' 'APPROVAL_TIMESTAMP';$aliasIssuedRaw=Get-RawJsonString $alias.Text 'issued_at' 'APPROVAL_TIMESTAMP';$authorizedRaw=Get-RawJsonString $authorization.Text 'authorized_at' 'APPROVAL_TIMESTAMP';$consumedRaw=Get-RawJsonString $consumption.Text 'consumed_at' 'APPROVAL_TIMESTAMP'
   if ([string]$d.schema-cne'atlas.operator-decision-request.v1'-or[string]$d.packet-cne$Packet-or[string]$d.status-cne'AWAITING_OPERATOR_DECISION'-or[bool]$d.execution_authority) { throw 'DECISION_CONTRACT' }
   if ([string]$a.schema-cne'atlas.scoped-approval-alias.v1'-or[string]$a.packet-cne$Packet-or[string]$a.status-cne'OPEN'-or-not[bool]$a.single_use-or[bool]$a.execution_authority-or[string]$a.originating_task_id-cne$OriginatingTaskId-or[string]$a.expected_operator_response-cne('APPROVE '+[string]$a.approval_code)) { throw 'ALIAS_CONTRACT' }
-  $decisionRelative=[IO.Path]::GetFullPath((Join-Path $Root ([string]$a.decision_request.path)));$authorizationDecisionRelative=[IO.Path]::GetFullPath((Join-Path $Root ([string]$z.decision_request.path)));$authorizationAliasRelative=[IO.Path]::GetFullPath((Join-Path $Root ([string]$z.alias.path)))
+  $decisionRelative=Resolve-ApprovalReference ([string]$a.decision_request.path) 'ALIAS_REFERENCE';$authorizationDecisionRelative=Resolve-ApprovalReference ([string]$z.decision_request.path) 'AUTHORIZATION_REFERENCE';$authorizationAliasRelative=Resolve-ApprovalReference ([string]$z.alias.path) 'AUTHORIZATION_REFERENCE'
   $phraseSha=Get-BytesSha256 ([Text.Encoding]::UTF8.GetBytes([string]$d.exact_authorization_phrase))
   if ([string]$a.allowed_effect.effect_class-cne$EffectClass-or[string]$a.allowed_effect.target-cne$EffectTarget-or[int]$a.allowed_effect.max_effect_count-ne$MaxEffectCount-or[string]$a.decision_request.sha256-cne$decision.Sha256-or$decisionRelative-cne$decisionPath-or[string]$a.decision_request.exact_authorization_phrase_sha256-cne$phraseSha) { throw 'ALIAS_BINDING' }
   if ([string]$z.schema-cne'atlas.scoped-approval-authorization.v1'-or[string]$z.packet-cne$Packet-or[string]$z.status-cne'AUTHORIZED_SINGLE_USE'-or-not[bool]$z.single_use-or-not[bool]$z.execution_authority-or[string]$z.originating_task_id-cne$OriginatingTaskId-or[string]$z.approval_code-cne[string]$a.approval_code-or[string]$z.alias.sha256-cne$alias.Sha256-or$authorizationAliasRelative-cne$aliasPath-or[string]$z.decision_request.sha256-cne$decision.Sha256-or$authorizationDecisionRelative-cne$decisionPath-or[string]$z.decision_request.exact_authorization_phrase_sha256-cne$phraseSha-or[string]$z.allowed_effect.effect_class-cne$EffectClass-or[string]$z.allowed_effect.target-cne$EffectTarget-or[int]$z.allowed_effect.max_effect_count-ne$MaxEffectCount-or[string]$z.intent_digest-cne[string]$a.intent_digest) { throw 'AUTHORIZATION_BINDING' }
