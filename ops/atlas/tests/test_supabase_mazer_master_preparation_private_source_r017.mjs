@@ -12,6 +12,7 @@ import {
   SNAPSHOT_SQL,
   buildIdentityPlan,
   producePrivateSource,
+  readRuntimeSecretsFromBase,
   renderOperationalSql,
   verifyEvidence,
   writePrivateSource
@@ -21,7 +22,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 function findEvidenceRoot(start) {
   let cursor = start;
   while (true) {
-    if (fs.existsSync(path.join(cursor, PRODUCER_CONTRACT.evidence.topology.relativePath))) return cursor;
+    if (Object.values(PRODUCER_CONTRACT.evidence).every((item) => fs.existsSync(path.join(cursor, item.relativePath)))) return cursor;
     const parent = path.dirname(cursor); if (parent === cursor) throw new Error('ATLAS_EVIDENCE_ROOT_NOT_FOUND'); cursor = parent;
   }
 }
@@ -195,6 +196,16 @@ for (const [name, sql] of Object.entries(source.sql)) {
   assert.equal(source.sql_sha256[name], sha256(Buffer.from(sql, 'utf8')));
 }
 
+const catchupFixture = structuredClone(fixture);
+catchupFixture.legacy.receipts.push(receipt(uid(47000), sharedLegacy[13], uid(67000), 3000));
+const catchupSource = producePrivateSource({ legacy: catchupFixture.legacy, master: catchupFixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' });
+const catchupValidated = validatePrivateSource(catchupSource);
+assert.deepEqual(catchupValidated.classified.desired_counts, { profiles: 13, player: 17, ai: 17, receipts: 1888 });
+assert.equal(catchupSource.reset_era_ai.legacy_receipts, 1717);
+const overCeilingFixture = structuredClone(fixture);
+for (let index = 0; index < 33; index += 1) overCeilingFixture.legacy.receipts.push(receipt(uid(47100 + index), sharedLegacy[13], uid(67100 + index), 3100 + index));
+assert.throws(() => producePrivateSource({ legacy: overCeilingFixture.legacy, master: overCeilingFixture.master, legacyAcl: acl('public'), masterAcl: acl('mazer'), quarantineKey: 'q'.repeat(64), qaPassword: 'R017-fixture-password!' }), /APP_DENOMINATOR_DRIFT|RESET_RECEIPT_DENOMINATOR_DRIFT/);
+
 assert.match(SNAPSHOT_SQL('public'), /transaction isolation level serializable read only/i);
 assert.match(SNAPSHOT_SQL('mazer'), /from mazer\.mazer_profiles/);
 assert.throws(() => buildIdentityPlan({ ...fixture.legacy, auth_users: [...fixture.legacy.auth_users, fixture.legacy.auth_users[0]] }, fixture.master), /NORMALIZED_EMAIL_DUPLICATE/);
@@ -333,6 +344,12 @@ try {
   const result = writePrivateSource(privateWriteRoot, undefined, { fixture: true });
   assert.ok(result.path.startsWith(path.join(privateWriteRoot, 'secrets')));
   assert.equal(fs.readFileSync(result.path, 'utf8'), '{"fixture":true}\n');
+  const versioned = writePrivateSource(privateWriteRoot, path.join(privateWriteRoot, 'secrets', 'packet', 'mazer-master-preparation-r017', 'private-source-action-20260827.json'), source);
+  assert.equal(path.basename(versioned.path), 'private-source-action-20260827.json');
+  const retained = readRuntimeSecretsFromBase(privateWriteRoot, versioned.path, versioned.sha256);
+  assert.equal(retained.quarantineKey, 'q'.repeat(64));
+  assert.equal(retained.qaPassword, 'R017-fixture-password!');
+  assert.throws(() => readRuntimeSecretsFromBase(privateWriteRoot, versioned.path, '0'.repeat(64)), /SECRET_BASE_DIGEST_DRIFT/);
 } finally { fs.rmSync(privateWriteRoot, { recursive: true, force: true }); }
 const junctionRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-private-junction-'));
 const junctionOutside = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-private-outside-'));

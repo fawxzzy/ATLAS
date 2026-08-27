@@ -24,6 +24,13 @@ export const CONTRACT = Object.freeze({
   sqlNames: Object.freeze(['preflight.sql', 'master-fence.sql', 'master-refence.sql', 'auth-apply.sql', 'reset-era-apply.sql', 'postverify.sql', 'qa-apply.sql', 'qa-cleanup.sql', 'rollback.sql'])
 });
 
+export const RECEIPT_CATCHUP_CONTRACT = Object.freeze({
+  baselineUnion: 1887,
+  maxDelta: 32,
+  resetLegacyBaseline: 1716,
+  resetMasterExact: 1239
+});
+
 const UUID = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 const DIGEST = /^[0-9a-f]{64}$/;
 const BCRYPT = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
@@ -140,7 +147,9 @@ export function validatePrivateSource(raw) {
   const classified = classifyCutover(raw.fence_input).receipt;
   if (classified.direction !== 'forward') throw new Error('FENCE_DIRECTION_DRIFT');
   const counts = classified.desired_counts;
-  if (counts.profiles !== 13 || counts.player !== 17 || counts.ai !== 17 || counts.receipts !== 1887) throw new Error('APP_DENOMINATOR_DRIFT');
+  const maxReceiptUnion = RECEIPT_CATCHUP_CONTRACT.baselineUnion + RECEIPT_CATCHUP_CONTRACT.maxDelta;
+  if (counts.profiles !== 13 || counts.player !== 17 || counts.ai !== 17
+    || counts.receipts < RECEIPT_CATCHUP_CONTRACT.baselineUnion || counts.receipts > maxReceiptUnion) throw new Error('APP_DENOMINATOR_DRIFT');
   if (classified.receipt_conservation.primary_conflicts !== 0 || classified.receipt_conservation.client_run_conflicts !== 0) throw new Error('RECEIPT_CONFLICT');
   if (!plain(raw.auth) || !Array.isArray(raw.auth.imports) || !Array.isArray(raw.auth.new_edges) || !Array.isArray(raw.auth.retained_edges)) throw new Error('AUTH_PLAN_SHAPE');
   if (raw.auth.imports.length !== 4 || raw.auth.new_edges.length !== 18 || raw.auth.retained_edges.length !== 2) throw new Error('AUTH_DENOMINATOR_DRIFT');
@@ -167,8 +176,10 @@ export function validatePrivateSource(raw) {
   if (!plain(raw.reset_era_ai)
     || raw.reset_era_ai.canonical_projection !== '9/8/40/D'
     || raw.reset_era_ai.quarantined_projection !== '39/108/161/S'
-    || raw.reset_era_ai.legacy_receipts !== 1716
-    || raw.reset_era_ai.master_receipts !== 1239
+    || raw.reset_era_ai.legacy_receipts < RECEIPT_CATCHUP_CONTRACT.resetLegacyBaseline
+    || raw.reset_era_ai.legacy_receipts > RECEIPT_CATCHUP_CONTRACT.resetLegacyBaseline + RECEIPT_CATCHUP_CONTRACT.maxDelta
+    || raw.reset_era_ai.legacy_receipts > raw.fence_input.source_snapshot.receipts.length
+    || raw.reset_era_ai.master_receipts !== RECEIPT_CATCHUP_CONTRACT.resetMasterExact
     || raw.reset_era_ai.legacy_timestamps_newer !== true
     || raw.reset_era_ai.override_mode !== 'EXACT_WHOLE_ROW'
     || raw.reset_era_ai.quarantine_encryption !== 'PGP_SYM_ENCRYPT_AES256') throw new Error('RESET_ERA_DECISION_DRIFT');
@@ -181,7 +192,8 @@ export function validatePrivateSource(raw) {
   }
   const actionFenceInput = bindResetEraActionInput(raw, allEdges);
   const actionClassified = classifyCutover(actionFenceInput).receipt;
-  if (actionClassified.desired_counts.profiles !== 13 || actionClassified.desired_counts.player !== 17 || actionClassified.desired_counts.ai !== 17 || actionClassified.desired_counts.receipts !== 1887) throw new Error('ACTION_APP_DENOMINATOR_DRIFT');
+  if (actionClassified.desired_counts.profiles !== 13 || actionClassified.desired_counts.player !== 17 || actionClassified.desired_counts.ai !== 17
+    || actionClassified.desired_counts.receipts < RECEIPT_CATCHUP_CONTRACT.baselineUnion || actionClassified.desired_counts.receipts > maxReceiptUnion) throw new Error('ACTION_APP_DENOMINATOR_DRIFT');
   const fenceInputSha256 = sha256(Buffer.from(canonical(actionFenceInput), 'utf8'));
   return { classified: actionClassified, fenceInputSha256, allEdges, actionFenceInput };
 }
@@ -221,7 +233,14 @@ export function materialize(raw, outputRoot, mazerRepository, ownerToken) {
     receipt_conservation: classified.receipt_conservation,
     auth_counts: { imports: 4, binds: 14, retained_edges: 2, final_edges: 20, expected_target_users: 118 },
     username_contract: { format: 'Mazer-######', origin: ['generated', 'claimed'], collision_attempts: 1000000, key_location: 'SUPABASE_VAULT', key_plaintext_emitted: false },
-    transfer_contract: { high_water_snapshots: 1, stabilization_reads: 2, bounded_delta_catchups: 1 },
+    transfer_contract: {
+      high_water_snapshots: 1,
+      stabilization_reads: 2,
+      bounded_delta_catchups: 1,
+      receipt_union_baseline: RECEIPT_CATCHUP_CONTRACT.baselineUnion,
+      receipt_delta_ceiling: RECEIPT_CATCHUP_CONTRACT.maxDelta,
+      receipt_delta_observed: classified.desired_counts.receipts - RECEIPT_CATCHUP_CONTRACT.baselineUnion
+    },
     reset_era_ai: { canonical: '9/8/40/D', quarantined: '39/108/161/S', override: 'EXACT_WHOLE_ROW', quarantine: 'PGP_SYM_ENCRYPT_AES256' },
     reset_era_player: { disposition: 'MASTER_DOMINATES_NO_OVERRIDE', source_digest: raw.reset_era_player.source_row_digest, target_digest: raw.reset_era_player.target_row_digest },
     qa: { personas: raw.qa.personas, auth_rows: raw.qa.auth_rows, ttl_minutes: raw.qa.ttl_minutes },
