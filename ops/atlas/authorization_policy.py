@@ -254,6 +254,13 @@ def evaluate_authorization(
         ),
         None,
     )
+    risk_flag_exceptions: set[str] = set()
+    if operator_rule is not None:
+        raw_exceptions = operator_rule.get("risk_flag_exceptions", [])
+        if not isinstance(raw_exceptions, list) or any(not isinstance(name, str) for name in raw_exceptions):
+            raise AuthorizationPolicyError("operator rule risk_flag_exceptions must be a list of strings")
+        risk_flag_exceptions = set(raw_exceptions)
+    blocking_risks = [name for name in risky if name not in risk_flag_exceptions]
     required_gates = list(policy["common_required_gates"])
     required_gates.extend(policy["allowlisted_action_classes"].get(action_class, []))
     if operator_rule is not None:
@@ -261,8 +268,8 @@ def evaluate_authorization(
     required_gates = list(dict.fromkeys(required_gates))
     missing_gates = sorted(name for name in required_gates if gates.get(name) is not True)
 
-    if risky:
-        reasons.extend(f"never_learn_risk:{name}" for name in risky)
+    if blocking_risks:
+        reasons.extend(f"never_learn_risk:{name}" for name in blocking_risks)
     elif action_class not in policy["allowlisted_action_classes"]:
         reasons.append("action_class_not_allowlisted")
     elif missing_gates:
@@ -302,6 +309,10 @@ def evaluate_authorization(
         "authority_profile": authority_profile,
         "operator_rule_id": operator_rule.get("rule_id") if operator_rule is not None else None,
         "operator_rule_exclusions": operator_rule.get("exclusions", []) if operator_rule is not None else [],
+        "operator_rule_risk_flag_exceptions": sorted(risk_flag_exceptions),
+        "required_post_action_proof": (
+            operator_rule.get("required_post_action_proof", []) if operator_rule is not None else []
+        ),
         "owner_first": True,
         "executes_action": False,
     }
