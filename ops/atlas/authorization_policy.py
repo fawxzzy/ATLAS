@@ -5,14 +5,20 @@ import hashlib
 import json
 import os
 import re
+import sys
 from contextlib import contextmanager
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from ops.atlas.workflow_recovery import _atomic_write_bytes
+
+
 DEFAULT_POLICY = ROOT / "docs" / "registry" / "ATLAS-AUTHORIZATION-POLICY.v1.json"
 DEFAULT_REGISTRY = ROOT / "runtime" / "atlas" / "authorization" / "learned-registry.json"
 SCHEMA = "atlas.learned-authorization-registry.v1"
@@ -42,10 +48,18 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-    temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    os.replace(temporary, path)
+    expected_digest = _digest(payload)
+    encoded = (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    try:
+        _atomic_write_bytes(path, encoded)
+        committed = _load_json(path)
+    except Exception as error:
+        raise AuthorizationPolicyError(f"durable authorization registry write failed: {error}") from error
+    committed_digest = _digest(committed)
+    if committed_digest != expected_digest:
+        raise AuthorizationPolicyError(
+            "durable authorization registry readback digest mismatch"
+        )
 
 
 def load_policy(path: Path | None = None) -> dict[str, Any]:

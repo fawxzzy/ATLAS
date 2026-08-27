@@ -6,9 +6,11 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from ops.atlas.authorization_policy import (
     AuthorizationPolicyError,
+    _atomic_write_json,
     consume_operator_authorization,
     empty_registry,
     evaluate_authorization,
@@ -571,6 +573,57 @@ class AtlasAuthorizationPolicyTests(unittest.TestCase):
             registry = json.loads(registry_path.read_text(encoding="utf-8"))
             self.assertEqual(1, len(registry["operator_authorization_consumptions"]))
             self.assertIn("cross-writer-event-1", registry["applied_event_ids"])
+
+    def test_consumption_write_is_failure_safe_and_restart_durable(self) -> None:
+        request = self.verified_release_request("verified-release-durable-consumption")
+        updated, _ = consume_operator_authorization(request, empty_registry(), self.policy)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(__file__).resolve().parents[1]
+            registry_path = Path(directory) / "registry.json"
+            request_path = Path(directory) / "request.json"
+            request_path.write_text(json.dumps(request), encoding="utf-8")
+            _atomic_write_json(registry_path, empty_registry())
+            with mock.patch(
+                "ops.atlas.authorization_policy._atomic_write_bytes",
+                side_effect=OSError("injected durable-write failure"),
+            ):
+                with self.assertRaisesRegex(
+                    AuthorizationPolicyError,
+                    "durable authorization registry write failed",
+                ):
+                    _atomic_write_json(registry_path, updated)
+            unchanged = json.loads(registry_path.read_text(encoding="utf-8"))
+            self.assertEqual({}, unchanged["operator_authorization_consumptions"])
+
+            _atomic_write_json(registry_path, updated)
+            restart_registry = json.loads(registry_path.read_text(encoding="utf-8"))
+            replay = evaluate_authorization(request, restart_registry, self.policy)
+            self.assertEqual("HOLD", replay["decision"])
+            self.assertTrue(
+                any(
+                    reason.startswith("operator_authorization_consumed:")
+                    for reason in replay["reasons"]
+                )
+            )
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(root / "ops" / "atlas" / "authorization_policy.py"),
+                    "--registry",
+                    str(registry_path),
+                    "evaluate",
+                    "--request",
+                    str(request_path),
+                ],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=True,
+            )
+            restarted = json.loads(completed.stdout)
+            self.assertEqual("HOLD", restarted["decision"])
 
 
 if __name__ == "__main__":
