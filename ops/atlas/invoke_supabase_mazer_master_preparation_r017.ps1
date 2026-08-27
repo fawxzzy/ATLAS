@@ -12,14 +12,16 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
-$script:HostScriptPath = $PSCommandPath
-$Root = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, '..', '..'))
+$script:VerifiedHostSourceText = if($null-ne(Get-Variable -Name ATLAS_R017_VERIFIED_HOST_SOURCE_TEXT -Scope Global -ErrorAction SilentlyContinue)){[string]$global:ATLAS_R017_VERIFIED_HOST_SOURCE_TEXT}else{$null}
+$HostDirectory = if($null-ne$script:VerifiedHostSourceText){[IO.Path]::GetFullPath($env:ATLAS_R017_VERIFIED_HOST_DIR)}else{[IO.Path]::GetFullPath($PSScriptRoot)}
+$script:HostScriptPath = if($null-ne$script:VerifiedHostSourceText){[IO.Path]::GetFullPath($env:ATLAS_R017_VERIFIED_HOST_PATH)}else{$PSCommandPath}
+$Root = [IO.Path]::GetFullPath([IO.Path]::Combine($HostDirectory, '..', '..'))
 $Runtime = Join-Path $Root 'runtime\atlas'
 $Secrets = Join-Path $Root 'secrets'
 $PacketRoot = Join-Path $Secrets 'packet\mazer-master-preparation-r017'
-$Materializer = Join-Path $PSScriptRoot 'materialize_supabase_mazer_master_preparation_r017.mjs'
-$Fence = Join-Path $PSScriptRoot 'invoke_supabase_mazer_master_cutover_data_fence_r001.ps1'
-$FenceClassifier = Join-Path $PSScriptRoot 'classify_supabase_mazer_master_cutover_data_fence_r001.mjs'
+$Materializer = Join-Path $HostDirectory 'materialize_supabase_mazer_master_preparation_r017.mjs'
+$Fence = Join-Path $HostDirectory 'invoke_supabase_mazer_master_cutover_data_fence_r001.ps1'
+$FenceClassifier = Join-Path $HostDirectory 'classify_supabase_mazer_master_cutover_data_fence_r001.mjs'
 $ExpectedHookUri = 'pg-functions://postgres/mazer/mazer_before_user_created'
 $Legacy = 'geknvnrmktchljnyddwp'
 $Master = 'bxtcuhkotumitoqtrcej'
@@ -350,7 +352,7 @@ function Invoke-FenceRollback([string]$FenceInputPath, [string]$InputSha, [strin
 function Assert-SourceContract {
   foreach ($path in @($Materializer, $Fence, $FenceClassifier)) { if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw 'SOURCE_MISSING' } }
   $tokens = $null; $errors = $null
-  [void][Management.Automation.Language.Parser]::ParseFile($PSCommandPath, [ref]$tokens, [ref]$errors)
+  if($null-ne$script:VerifiedHostSourceText){[void][Management.Automation.Language.Parser]::ParseInput($script:VerifiedHostSourceText,[ref]$tokens,[ref]$errors)}else{[void][Management.Automation.Language.Parser]::ParseFile($PSCommandPath,[ref]$tokens,[ref]$errors)}
   if ($errors.Count -ne 0) { throw 'POWERSHELL_PARSE' }
   $node = (Get-Command node -ErrorAction Stop).Source
   if ((Invoke-Child $node @('--check', $Materializer) @{} 30000).ExitCode -ne 0) { throw 'MATERIALIZER_PARSE' }
@@ -369,12 +371,30 @@ function Assert-SourceContract {
   }
 }
 
+function Get-VerifiedSelfBootstrapEncoded {
+  $bootstrap=@'
+$ErrorActionPreference='Stop';$p=[IO.Path]::GetFullPath($env:ATLAS_R017_VERIFIED_HOST_PATH);$s=New-Object IO.FileStream($p,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read);$b=$null
+try{if($s.Length-lt2-or$s.Length-gt2097152){exit 81};$b=New-Object byte[] ([int]$s.Length);$o=0;while($o-lt$b.Length){$r=$s.Read($b,$o,$b.Length-$o);if($r-le0){exit 82};$o+=$r};$h=[Security.Cryptography.SHA256]::Create();try{$a=([BitConverter]::ToString($h.ComputeHash($b))).Replace('-','').ToLowerInvariant()}finally{$h.Dispose()};if($a-cne$env:ATLAS_R017_VERIFIED_HOST_SHA256){exit 83};$t=(New-Object Text.UTF8Encoding($false,$true)).GetString($b)}finally{$s.Dispose();if($null-ne$b){[Array]::Clear($b,0,$b.Length)}}
+$global:ATLAS_R017_VERIFIED_HOST_SOURCE_TEXT=$t;$sb=[ScriptBlock]::Create($t);. $sb -Mode $env:ATLAS_R017_CHILD_MODE -PrivateSourcePath $env:ATLAS_R017_CHILD_SOURCE -ExpectedPrivateSourceSha256 $env:ATLAS_R017_CHILD_SOURCE_SHA -StatePath $env:ATLAS_R017_CHILD_STATE -ExecuteProtected;exit $LASTEXITCODE
+'@
+  return [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($bootstrap))
+}
+
+function Get-VerifiedSelfEnvironment([string]$ChildMode,[string]$SourcePath,[string]$SourceSha,[string]$HostState) {
+  if($null-eq$script:VerifiedHostSourceText){return $null}
+  return @{ATLAS_R017_VERIFIED_HOST_PATH=$script:HostScriptPath;ATLAS_R017_VERIFIED_HOST_SHA256=$env:ATLAS_R017_VERIFIED_HOST_SHA256;ATLAS_R017_VERIFIED_HOST_DIR=$HostDirectory;ATLAS_R017_VERIFIED_MODE='Execute';ATLAS_R017_CHILD_MODE=$ChildMode;ATLAS_R017_CHILD_SOURCE=$SourcePath;ATLAS_R017_CHILD_SOURCE_SHA=$SourceSha;ATLAS_R017_CHILD_STATE=$HostState;ATLAS_R017_VERIFIED_TEST_REPLACEMENT_PATH=''}
+}
+
 function Start-RollbackWatchdog([string]$SourcePath, [string]$SourceSha, [string]$HostState) {
+  $verified=Get-VerifiedSelfEnvironment 'Watchdog' $SourcePath $SourceSha $HostState
+  if($null-ne$verified){$start=New-Object Diagnostics.ProcessStartInfo;$start.FileName=Get-ShellPath;$start.UseShellExecute=$false;$start.CreateNoWindow=$true;$arguments=@('-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',(Get-VerifiedSelfBootstrapEncoded));if($null-ne$start.PSObject.Properties['ArgumentList']){foreach($argument in $arguments){[void]$start.ArgumentList.Add([string]$argument)}}else{$start.Arguments=(($arguments|ForEach-Object{ConvertTo-ProcessArgument([string]$_)})-join' ')};foreach($key in $verified.Keys){$start.EnvironmentVariables[[string]$key]=[string]$verified[$key]};$process=New-Object Diagnostics.Process;$process.StartInfo=$start;if(-not$process.Start()){throw 'WATCHDOG_START'};return $process.Id}
   $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$PSCommandPath,'-Mode','Watchdog','-PrivateSourcePath',$SourcePath,'-ExpectedPrivateSourceSha256',$SourceSha,'-StatePath',$HostState,'-ExecuteProtected')
   return (Start-Process -FilePath (Get-ShellPath) -ArgumentList $arguments -WindowStyle Hidden -PassThru).Id
 }
 
 function Invoke-SelfRollback([string]$SourcePath, [string]$SourceSha, [string]$HostState) {
+  $verified=Get-VerifiedSelfEnvironment 'Rollback' $SourcePath $SourceSha $HostState
+  if($null-ne$verified){return Invoke-Child (Get-ShellPath) @('-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',(Get-VerifiedSelfBootstrapEncoded)) $verified 900000}
   $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$PSCommandPath,'-Mode','Rollback','-PrivateSourcePath',$SourcePath,'-ExpectedPrivateSourceSha256',$SourceSha,'-StatePath',$HostState,'-ExecuteProtected')
   return Invoke-Child (Get-ShellPath) $arguments @{} 900000
 }

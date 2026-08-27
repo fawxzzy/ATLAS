@@ -7,15 +7,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const runtimeRoot = path.join(root, 'runtime/atlas');
 const packetRoot = path.join(root, 'secrets/packet/mazer-master-preparation-r017');
 const packet = 'FP-MAZER-MASTER-R017-SUPABASE-PREPARATION-20260825-001';
-const sourcePath = path.join(packetRoot, 'private-source-pr201-final-71884498-20260826.json');
-const manifestPath = path.join(packetRoot, 'materialized-pr201-final-20260826/manifest.json');
 const hostPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_r017.ps1');
 const launcherPath = path.join(root, 'ops/atlas/invoke_supabase_mazer_master_preparation_credential_safe_r017.ps1');
-const predecessorPath = path.join(runtimeRoot, 'mazer-master-r017-terminal-rollback-20260826-212608.json');
-const sourceSha = '71884498b45cf0ab04cb71d6533bf9ddef6426a06f92cf77e67242eaf9665e60';
-const manifestSha = 'dccfc0bb4e9cf0bc6904a7002ec8bc7acc8d2f392d76a62eb69b99872ad9d1de';
-const hostSha = 'd3ec9c210e031ebd887e5f643939ebd584efe218e0db2b346586392bc280453d';
-const predecessorSha = '5a20532f9b5e772c52dfe3869f52ed227c56c8e808d945d35a3ae7577483aae3';
 const originatingTaskId = '019fa791-8d17-7c83-9c61-3e3c687e9dd7';
 const effectClass = 'supabase_protected_master_preparation';
 const effectTarget = 'supabase:geknvnrmktchljnyddwp/public+bxtcuhkotumitoqtrcej/mazer';
@@ -23,6 +16,9 @@ const maxEffectCount = 20;
 const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const exactKeys = (value, keys) => value && typeof value === 'object' && !Array.isArray(value) && JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort());
 const uuid4 = value => typeof value === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(value);
+const digest = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+const commit = value => typeof value === 'string' && /^[a-f0-9]{40}$/.test(value);
+const positiveInteger = value => Number.isInteger(value) && value > 0;
 const formatO = date => date.toISOString().replace('Z', '0000Z');
 
 function inside(candidate, boundary, code) {
@@ -39,13 +35,18 @@ function assertNoReparse(candidate, boundary) {
   }
   if (fs.existsSync(cursor) && fs.lstatSync(cursor).isSymbolicLink()) throw new Error('REPARSE_COMPONENT');
 }
-function readJson(file, boundary, maxBytes = 262144) {
+function readJson(file, boundary, maxBytes = 262144, asciiOnly = true) {
   const resolved = inside(file, boundary, 'INPUT_SCOPE'); assertNoReparse(resolved, boundary);
   const bytes = fs.readFileSync(resolved); if (bytes.length < 2 || bytes.length > maxBytes) throw new Error('INPUT_SIZE');
-  if (!/^[\x09\x0a\x0d\x20-\x7e]+$/.test(bytes.toString('latin1'))) throw new Error('INPUT_ASCII');
-  let value; try { value = JSON.parse(bytes.toString('utf8')); } catch { throw new Error('INPUT_JSON'); }
+  if (asciiOnly && !/^[\x09\x0a\x0d\x20-\x7e]+$/.test(bytes.toString('latin1'))) throw new Error('INPUT_ASCII');
+  let text; try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); } catch { throw new Error('INPUT_UTF8'); }
+  let value; try { value = JSON.parse(text); } catch { throw new Error('INPUT_JSON'); }
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('INPUT_ROOT');
   return { path: resolved, bytes, sha256: sha256(bytes), value };
+}
+function resolveRelative(relative, boundary, code) {
+  if (typeof relative !== 'string' || relative.length < 3 || relative.includes('\\') || path.isAbsolute(relative) || relative.split('/').includes('..')) throw new Error(code);
+  return inside(path.resolve(root, ...relative.split('/')), boundary, code);
 }
 function atlasRelative(file) { return path.relative(root, file).split(path.sep).join('/'); }
 function canonicalAliasPath(decisionPath) {
@@ -93,25 +94,48 @@ export function sealInvocation({ decisionRequestPath, aliasPath, authorizationPa
   const nowMs = now.getTime(), aliasIssued = timestamp(a.issued_at, 'ALIAS_TIME'), authorized = timestamp(z.authorized_at, 'AUTHORIZATION_TIME'), consumed = timestamp(c.consumed_at, 'CONSUMPTION_TIME'), expires = timestamp(a.expires_at, 'ALIAS_TIME');
   if (aliasIssued > authorized || authorized > consumed || consumed > nowMs + 5000 || expires <= nowMs || expires > aliasIssued + 86400000) throw new Error('APPROVAL_TIME');
   if (d.expires_at !== a.expires_at || d.sealed_inputs?.execution_correlation_id !== c.execution_correlation_id) throw new Error('DECISION_EXECUTION_BINDING');
+  const sealedKeys = ['execution_correlation_id','private_source_path','private_source_sha256','manifest_path','manifest_sha256','auth_apply_sha256','postverify_sha256','host_path','host_sha256','credential_safe_launcher_path','credential_safe_launcher_sha256','packet_merge_commit','jit_invocation_merge_commit','independent_review_checkpoint','prior_rollback_state_path','prior_rollback_receipt_sha256'];
+  const effectKeys = ['execution_clusters','legacy_writer_fence_and_restore','master_migrations','auth_identity_edges','auth_user_imports','auth_existing_user_binds','auth_same_uuid_retained','profiles','player_rows','ai_rows','receipts','username_backfill_and_origin_contract','vault_key_create_and_rollback_delete','before_user_created_hook_activation','bounded_qa_and_cleanup','rollback_on_any_failed_gate','cutover','vercel_or_app_deployment','production_alias_change'];
+  if (!exactKeys(d.sealed_inputs, sealedKeys) || !exactKeys(d.effect_ceiling, effectKeys)) throw new Error('DECISION_TUPLE_KEYS');
+  const s = d.sealed_inputs, effects = d.effect_ceiling;
+  for (const value of [s.private_source_sha256,s.manifest_sha256,s.auth_apply_sha256,s.postverify_sha256,s.host_sha256,s.credential_safe_launcher_sha256,s.prior_rollback_receipt_sha256]) if (!digest(value)) throw new Error('DECISION_TUPLE_DIGEST');
+  if (!commit(s.packet_merge_commit) || !commit(s.jit_invocation_merge_commit) || typeof s.independent_review_checkpoint !== 'string' || !/^threadctx_[a-f0-9]{64}$/.test(s.independent_review_checkpoint)) throw new Error('DECISION_TUPLE_PROVENANCE');
+  if (effects.execution_clusters !== 1 || effects.legacy_writer_fence_and_restore !== true || JSON.stringify(effects.master_migrations) !== JSON.stringify(['M1','M2','M3','M4']) || effects.username_backfill_and_origin_contract !== true || effects.vault_key_create_and_rollback_delete !== true || effects.before_user_created_hook_activation !== true || effects.bounded_qa_and_cleanup !== true || effects.rollback_on_any_failed_gate !== true || effects.cutover !== false || effects.vercel_or_app_deployment !== false || effects.production_alias_change !== false) throw new Error('DECISION_EFFECT_CONTRACT');
+  for (const value of [effects.auth_identity_edges,effects.auth_user_imports,effects.auth_existing_user_binds,effects.auth_same_uuid_retained,effects.profiles,effects.player_rows,effects.ai_rows,effects.receipts]) if (!positiveInteger(value)) throw new Error('DECISION_EFFECT_COUNTS');
+  if (effects.auth_identity_edges !== effects.auth_user_imports + effects.auth_existing_user_binds + effects.auth_same_uuid_retained || effects.auth_identity_edges > maxEffectCount) throw new Error('DECISION_AUTH_TOPOLOGY');
+  const sourcePath = resolveRelative(s.private_source_path, packetRoot, 'SOURCE_PATH');
+  const manifestPath = resolveRelative(s.manifest_path, packetRoot, 'MANIFEST_PATH');
+  const predecessorPath = resolveRelative(s.prior_rollback_state_path, runtimeRoot, 'PREDECESSOR_PATH');
+  const decisionHostPath = resolveRelative(s.host_path, path.dirname(hostPath), 'HOST_PATH');
+  const decisionLauncherPath = resolveRelative(s.credential_safe_launcher_path, path.dirname(launcherPath), 'LAUNCHER_PATH');
+  if (path.dirname(sourcePath).toLowerCase() !== packetRoot.toLowerCase() || !/^private-source(?:-[a-z0-9-]+)?\.json$/.test(path.basename(sourcePath))) throw new Error('SOURCE_PATH');
+  if (path.basename(manifestPath) !== 'manifest.json' || !/^materialized-[a-z0-9-]+$/.test(path.basename(path.dirname(manifestPath)))) throw new Error('MANIFEST_PATH');
+  if (decisionHostPath.toLowerCase() !== hostPath.toLowerCase() || decisionLauncherPath.toLowerCase() !== launcherPath.toLowerCase()) throw new Error('CODE_PATH');
+  if (!/^mazer-master-r017-terminal-rollback-[a-z0-9-]+\.json$/.test(path.basename(predecessorPath))) throw new Error('PREDECESSOR_PATH');
   const launcherSha = sha256(fs.readFileSync(launcherPath));
-  if (d.sealed_inputs?.private_source_sha256 !== sourceSha || d.sealed_inputs?.manifest_sha256 !== manifestSha || d.sealed_inputs?.host_sha256 !== hostSha || d.sealed_inputs?.credential_safe_launcher_sha256 !== launcherSha) throw new Error('DECISION_SEALED_HASHES');
-  for (const [file, expected] of [[sourcePath,sourceSha],[manifestPath,manifestSha],[hostPath,hostSha],[predecessorPath,predecessorSha]]) if (sha256(fs.readFileSync(file)) !== expected) throw new Error('SEALED_FILE_DIGEST');
+  if (s.credential_safe_launcher_sha256 !== launcherSha) throw new Error('DECISION_SEALED_HASHES');
+  for (const [file, expected] of [[sourcePath,s.private_source_sha256],[manifestPath,s.manifest_sha256],[hostPath,s.host_sha256],[predecessorPath,s.prior_rollback_receipt_sha256]]) if (sha256(fs.readFileSync(file)) !== expected) throw new Error('SEALED_FILE_DIGEST');
+  const source = readJson(sourcePath, packetRoot, 32_000_000, false).value, manifest = readJson(manifestPath, packetRoot, 262144).value;
+  if (source.schema !== 'atlas.supabase.mazer-master-preparation-private-source.r017.v1' || source.packet !== packet || source.sql_sha256?.['auth-apply.sql'] !== s.auth_apply_sha256 || source.sql_sha256?.['postverify.sql'] !== s.postverify_sha256) throw new Error('SOURCE_CONTRACT');
+  if (manifest.schema !== 'atlas.supabase.mazer-master-preparation-private-manifest.r017.v1' || manifest.packet !== packet || manifest.auth_counts?.final_edges !== effects.auth_identity_edges || manifest.auth_counts?.imports !== effects.auth_user_imports || manifest.auth_counts?.binds !== effects.auth_existing_user_binds || manifest.auth_counts?.retained_edges !== effects.auth_same_uuid_retained || manifest.app_counts?.profiles !== effects.profiles || manifest.app_counts?.player !== effects.player_rows || manifest.app_counts?.ai !== effects.ai_rows || manifest.app_counts?.receipts !== effects.receipts || manifest.receipt_conservation?.final !== effects.receipts) throw new Error('MANIFEST_COUNTS');
   const correlation = c.execution_correlation_id, successor = path.join(runtimeRoot, `mazer-master-r017-execution-${correlation}.json`);
   if (fs.existsSync(successor)) throw new Error('SUCCESSOR_EXISTS');
   const issuedAt = formatO(now), envelope = {
-    schema: 'atlas.supabase.mazer-master-preparation-launcher-invocation.r017.v2', packet,
+    schema: 'atlas.supabase.mazer-master-preparation-launcher-invocation.r017.v3', packet,
     decision_request_path: decision.path, decision_request_sha256: decision.sha256,
     approval_alias_path: alias.path, approval_alias_sha256: alias.sha256,
     approval_authorization_path: authorization.path, approval_authorization_sha256: authorization.sha256,
     approval_consumption_path: consumption.path, approval_consumption_sha256: consumption.sha256,
     approval_expires_at: a.expires_at,
-    predecessor_correlation_id: 'fde0a66f-a157-4258-a92f-e6af933ecc1c', predecessor_state_path: predecessorPath, predecessor_state_sha256: predecessorSha,
+    predecessor_state_path: predecessorPath, predecessor_state_sha256: s.prior_rollback_receipt_sha256,
     execution_correlation_id: correlation,
-    private_source_path: sourcePath, private_source_sha256: sourceSha,
-    private_manifest_path: manifestPath, private_manifest_sha256: manifestSha,
+    private_source_path: sourcePath, private_source_sha256: s.private_source_sha256,
+    private_manifest_path: manifestPath, private_manifest_sha256: s.manifest_sha256,
     successor_state_path: successor,
-    host_path: hostPath, host_sha256: hostSha,
+    host_path: hostPath, host_sha256: s.host_sha256,
     launcher_path: launcherPath, launcher_sha256: launcherSha,
+    terminal_final_identity_edges: effects.auth_identity_edges, terminal_profiles: effects.profiles,
+    terminal_player: effects.player_rows, terminal_ai: effects.ai_rows, terminal_receipts: effects.receipts,
     not_before: c.consumed_at, issued_at: issuedAt, expires_at: a.expires_at
   };
   const expectedOutput = path.join(packetRoot, `launcher-invocation-${correlation}.json`);
