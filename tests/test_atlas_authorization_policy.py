@@ -1,9 +1,17 @@
 from __future__ import annotations
 
+import json
+import subprocess
+import sys
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 from ops.atlas.authorization_policy import (
     AuthorizationPolicyError,
+    _atomic_write_json,
+    consume_operator_authorization,
     empty_registry,
     evaluate_authorization,
     load_policy,
@@ -56,6 +64,40 @@ class AtlasAuthorizationPolicyTests(unittest.TestCase):
         }
         payload.update(overrides)
         return payload
+
+    def verified_release_request(self, request_id: str = "verified-release-production-1") -> dict:
+        gate_names = {
+            "bounded_scope", "exact_identity", "fresh_evidence",
+            "no_unknown_material_state", "no_writer_collision",
+            "exact_reviewed_merge_commit", "reviewed_tree_equals_merge_tree",
+            "postmerge_ci_success", "exact_named_production_project",
+            "production_binding_exact", "zero_unresolved_review_threads",
+            "zero_deployment_writer_collision", "known_good_rollback_target_retained",
+            "automatic_rollback_on_failed_acceptance",
+            "production_acceptance_checks_defined", "single_production_deployment",
+            "terminal_production_readback_defined", "cost_verified_zero",
+            "production_target_and_project_exact", "production_writer_collision_free",
+            "rollback_obligation_reserved_before_effect", "terminal_proof_before_cleanup",
+            "no_source_or_configuration_drift",
+            "no_dns_auth_data_billing_or_destructive_effect",
+        }
+        return {
+            "request_id": request_id,
+            "action_class": "VERIFIED_RELEASE_PRODUCTION_CONTINUATION",
+            "authority_profile": "verified-release-production-continuation-v1",
+            "scope_key": "vercel:fawxzzy:FawxzzyWeb:production:merge-abc",
+            "constraints": {
+                "deployments": 1, "retries": 0, "cost_usd": 0,
+                "unreviewed_promotions": 0, "dns_mutations": 0,
+                "environment_mutations": 0, "secret_mutations": 0,
+                "auth_mutations": 0, "live_data_mutations": 0,
+                "provider_configuration_mutations": 0, "billing_actions": 0,
+                "destructive_actions": 0, "deletions": 0,
+                "ownership_or_retention_changes": 0, "unrelated_provider_effects": 0,
+            },
+            "risk_flags": {"production": True, "provider_mutation": True},
+            "gates": {name: True for name in gate_names},
+        }
 
     def test_two_matching_approvals_activate_reuse(self) -> None:
         registry = record_operator_decision(empty_registry(), self.decision("event-1"), self.policy)
@@ -258,65 +300,330 @@ class AtlasAuthorizationPolicyTests(unittest.TestCase):
         self.assertEqual("AUTH-GITHUB-CLEAN-GUARDED-MERGE-V1", result["operator_rule_id"])
         self.assertIn("deployment", result["operator_rule_exclusions"])
 
-    def test_established_vercel_project_production_deploy_is_narrowly_auto_authorized(self) -> None:
-        gates = {
-            "bounded_scope": True,
-            "exact_identity": True,
-            "fresh_evidence": True,
-            "no_unknown_material_state": True,
-            "no_writer_collision": True,
-            "exact_merged_commit": True,
-            "postmerge_checks_passed": True,
-            "existing_project_binding_unchanged": True,
-            "existing_canonical_domain_binding_unchanged": True,
-            "zero_environment_or_secret_mutation": True,
-            "zero_dns_mutation": True,
-            "zero_auth_or_live_data_mutation": True,
-            "zero_provider_configuration_mutation": True,
-            "zero_destructive_cleanup": True,
-            "zero_billing_or_purchase": True,
-            "rollback_target_exact": True,
-            "postdeploy_proof_and_rollback_defined": True,
-            "reviewed_release_lineage_exact": True,
-            "postmerge_main_exact": True,
-            "deployment_cost_within_existing_plan": True,
-            "rollback_on_failed_postdeploy_proof": True,
+    def test_verified_release_production_continuation_is_narrowly_auto_authorized(self) -> None:
+        gate_names = {
+            "bounded_scope", "exact_identity", "fresh_evidence",
+            "no_unknown_material_state", "no_writer_collision",
+            "exact_reviewed_merge_commit", "reviewed_tree_equals_merge_tree",
+            "postmerge_ci_success", "exact_named_production_project",
+            "production_binding_exact", "zero_unresolved_review_threads",
+            "zero_deployment_writer_collision", "known_good_rollback_target_retained",
+            "automatic_rollback_on_failed_acceptance",
+            "production_acceptance_checks_defined", "single_production_deployment",
+            "terminal_production_readback_defined", "cost_verified_zero",
+            "production_target_and_project_exact", "production_writer_collision_free",
+            "rollback_obligation_reserved_before_effect", "terminal_proof_before_cleanup",
+            "no_source_or_configuration_drift",
+            "no_dns_auth_data_billing_or_destructive_effect",
         }
         request = {
-            "request_id": "deploy-example-1",
-            "action_class": "VERCEL_GUARDED_PRODUCTION_DEPLOY",
-            "authority_profile": "established-vercel-project-guarded-production-deploy-v1",
-            "scope_key": "vercel:fawxzzy/example:production",
-            "constraints": {"project": "example", "domain": "example.fawxzzy.com"},
-            "risk_flags": {"production": True},
-            "gates": gates,
+            "request_id": "verified-release-production-1",
+            "action_class": "VERIFIED_RELEASE_PRODUCTION_CONTINUATION",
+            "authority_profile": "verified-release-production-continuation-v1",
+            "scope_key": "vercel:fawxzzy:FawxzzyWeb:production:merge-abc",
+            "constraints": {
+                "deployments": 1,
+                "retries": 0,
+                "cost_usd": 0,
+                "unreviewed_promotions": 0,
+                "dns_mutations": 0,
+                "environment_mutations": 0,
+                "secret_mutations": 0,
+                "auth_mutations": 0,
+                "live_data_mutations": 0,
+                "provider_configuration_mutations": 0,
+                "billing_actions": 0,
+                "destructive_actions": 0,
+                "deletions": 0,
+                "ownership_or_retention_changes": 0,
+                "unrelated_provider_effects": 0,
+            },
+            "risk_flags": {"production": True, "provider_mutation": True},
+            "gates": {name: True for name in gate_names},
         }
         result = evaluate_authorization(request, empty_registry(), self.policy)
         self.assertEqual("AUTO_AUTHORIZED", result["decision"])
-        self.assertEqual(["production"], result["operator_rule_risk_flag_exceptions"])
-        self.assertIn("production_alias_readback", result["required_post_action_proof"])
+        self.assertEqual(
+            "AUTH-VERIFIED-RELEASE-PRODUCTION-CONTINUATION-V1",
+            result["operator_rule_id"],
+        )
+        self.assertEqual(
+            ["production", "provider_mutation"],
+            result["operator_rule_risk_flag_exceptions"],
+        )
+        self.assertEqual(
+            [
+                "exact_deployment_identity",
+                "exact_named_project_production_binding_readback",
+                "production_acceptance_observation_complete",
+                "automatic_rollback_or_terminal_success_receipt",
+                "terminal_production_readback",
+            ],
+            result["required_post_action_proof"],
+        )
 
-        request["risk_flags"]["dns"] = True
-        blocked = evaluate_authorization(request, empty_registry(), self.policy)
-        self.assertEqual("AUTHORIZATION_REQUIRED", blocked["decision"])
-        self.assertIn("never_learn_risk:dns", blocked["reasons"])
-
-        request["risk_flags"] = {"production": True}
-        request["gates"]["existing_project_binding_unchanged"] = False
+        request["gates"]["known_good_rollback_target_retained"] = False
         held = evaluate_authorization(request, empty_registry(), self.policy)
         self.assertEqual("HOLD", held["decision"])
+        self.assertIn(
+            "gate_not_true:known_good_rollback_target_retained",
+            held["reasons"],
+        )
 
-        request["gates"]["existing_project_binding_unchanged"] = True
-        request["gates"]["zero_destructive_cleanup"] = False
-        destructive = evaluate_authorization(request, empty_registry(), self.policy)
-        self.assertEqual("HOLD", destructive["decision"])
-        self.assertIn("gate_not_true:zero_destructive_cleanup", destructive["reasons"])
+    def test_verified_release_profile_does_not_override_auth_or_live_data_risk(self) -> None:
+        request = self.request(
+            action_class="VERIFIED_RELEASE_PRODUCTION_CONTINUATION",
+            authority_profile="verified-release-production-continuation-v1",
+            risk_flags={"production": True, "auth_mutation": True},
+        )
+        result = evaluate_authorization(request, empty_registry(), self.policy)
+        self.assertEqual("AUTHORIZATION_REQUIRED", result["decision"])
+        self.assertIn("never_learn_risk:auth_mutation", result["reasons"])
 
-        request["gates"]["zero_destructive_cleanup"] = True
-        del request["gates"]["zero_billing_or_purchase"]
-        billing_unknown = evaluate_authorization(request, empty_registry(), self.policy)
-        self.assertEqual("HOLD", billing_unknown["decision"])
-        self.assertIn("gate_not_true:zero_billing_or_purchase", billing_unknown["reasons"])
+    def test_verified_release_profile_enforces_every_declared_risk_exclusion(self) -> None:
+        gate_names = {
+            "bounded_scope", "exact_identity", "fresh_evidence",
+            "no_unknown_material_state", "no_writer_collision",
+            "exact_reviewed_merge_commit", "reviewed_tree_equals_merge_tree",
+            "postmerge_ci_success", "exact_named_production_project",
+            "production_binding_exact", "zero_unresolved_review_threads",
+            "zero_deployment_writer_collision", "known_good_rollback_target_retained",
+            "automatic_rollback_on_failed_acceptance",
+            "production_acceptance_checks_defined", "single_production_deployment",
+            "terminal_production_readback_defined", "cost_verified_zero",
+            "production_target_and_project_exact", "production_writer_collision_free",
+            "rollback_obligation_reserved_before_effect", "terminal_proof_before_cleanup",
+            "no_source_or_configuration_drift",
+            "no_dns_auth_data_billing_or_destructive_effect",
+        }
+        constraints = {
+            "deployments": 1, "retries": 0, "cost_usd": 0,
+            "unreviewed_promotions": 0, "dns_mutations": 0,
+            "environment_mutations": 0, "secret_mutations": 0,
+            "auth_mutations": 0, "live_data_mutations": 0,
+            "provider_configuration_mutations": 0, "billing_actions": 0,
+            "destructive_actions": 0, "deletions": 0,
+            "ownership_or_retention_changes": 0, "unrelated_provider_effects": 0,
+        }
+        base = {
+            "request_id": "verified-release-adversarial",
+            "action_class": "VERIFIED_RELEASE_PRODUCTION_CONTINUATION",
+            "authority_profile": "verified-release-production-continuation-v1",
+            "scope_key": "vercel:fawxzzy:FawxzzyWeb:production:merge-abc",
+            "constraints": constraints,
+            "risk_flags": {"production": True, "provider_mutation": True},
+            "gates": {name: True for name in gate_names},
+        }
+        forbidden = [
+            "unreviewed_promotion", "dns", "environment_variable_mutation",
+            "secret_or_credential_access", "auth_mutation", "live_data_mutation",
+            "provider_configuration_mutation", "billing_or_purchase",
+            "destructive_or_irreversible", "source_retirement_or_deletion",
+            "ownership_or_retention_change", "unrelated_provider_effect",
+        ]
+        for risk in forbidden:
+            with self.subTest(risk=risk):
+                request = {**base, "risk_flags": {**base["risk_flags"], risk: True}}
+                result = evaluate_authorization(request, empty_registry(), self.policy)
+                self.assertEqual("AUTHORIZATION_REQUIRED", result["decision"])
+
+    def test_verified_release_profile_rejects_nonexact_effect_constraints(self) -> None:
+        gate_names = {
+            "bounded_scope", "exact_identity", "fresh_evidence",
+            "no_unknown_material_state", "no_writer_collision",
+            "exact_reviewed_merge_commit", "reviewed_tree_equals_merge_tree",
+            "postmerge_ci_success", "exact_named_production_project",
+            "production_binding_exact", "zero_unresolved_review_threads",
+            "zero_deployment_writer_collision", "known_good_rollback_target_retained",
+            "automatic_rollback_on_failed_acceptance",
+            "production_acceptance_checks_defined", "single_production_deployment",
+            "terminal_production_readback_defined", "cost_verified_zero",
+            "production_target_and_project_exact", "production_writer_collision_free",
+            "rollback_obligation_reserved_before_effect", "terminal_proof_before_cleanup",
+            "no_source_or_configuration_drift",
+            "no_dns_auth_data_billing_or_destructive_effect",
+        }
+        constraints = {
+            "deployments": 1, "retries": 0, "cost_usd": 0,
+            "unreviewed_promotions": 0, "dns_mutations": 0,
+            "environment_mutations": 0, "secret_mutations": 0,
+            "auth_mutations": 0, "live_data_mutations": 0,
+            "provider_configuration_mutations": 0, "billing_actions": 0,
+            "destructive_actions": 0, "deletions": 0,
+            "ownership_or_retention_changes": 0, "unrelated_provider_effects": 0,
+        }
+        for name in constraints:
+            if name == "cost_usd":
+                continue
+            with self.subTest(constraint=name):
+                changed = dict(constraints)
+                changed[name] = 2 if name == "deployments" else 1
+                request = {
+                    "request_id": f"verified-release-constraint-{name.replace('_', '-')}",
+                    "action_class": "VERIFIED_RELEASE_PRODUCTION_CONTINUATION",
+                    "authority_profile": "verified-release-production-continuation-v1",
+                    "scope_key": "vercel:fawxzzy:FawxzzyWeb:production:merge-abc",
+                    "constraints": changed,
+                    "risk_flags": {"production": True, "provider_mutation": True},
+                    "gates": {gate: True for gate in gate_names},
+                }
+                result = evaluate_authorization(request, empty_registry(), self.policy)
+                self.assertEqual("HOLD", result["decision"])
+                self.assertIn(f"constraint_not_exact:{name}", result["reasons"])
+
+    def test_verified_release_profile_rejects_unknown_effects_and_wrong_types(self) -> None:
+        unknown_risk = self.verified_release_request("verified-release-unknown-risk")
+        unknown_risk["risk_flags"]["project_relink"] = True
+        result = evaluate_authorization(unknown_risk, empty_registry(), self.policy)
+        self.assertEqual("AUTHORIZATION_REQUIRED", result["decision"])
+        self.assertIn(
+            "operator_rule_unrecognized_or_forbidden_risk:project_relink",
+            result["reasons"],
+        )
+
+        extra_constraint = self.verified_release_request("verified-release-extra-constraint")
+        extra_constraint["constraints"]["project_relinks"] = 1
+        result = evaluate_authorization(extra_constraint, empty_registry(), self.policy)
+        self.assertEqual("HOLD", result["decision"])
+        self.assertIn("constraint_not_allowed:project_relinks", result["reasons"])
+
+        wrong_type = self.verified_release_request("verified-release-wrong-type")
+        wrong_type["constraints"]["deployments"] = True
+        result = evaluate_authorization(wrong_type, empty_registry(), self.policy)
+        self.assertEqual("HOLD", result["decision"])
+        self.assertIn("constraint_not_exact:deployments", result["reasons"])
+
+    def test_verified_release_single_use_consumption_rejects_sequential_replay(self) -> None:
+        request = self.verified_release_request("verified-release-single-use")
+        updated, receipt = consume_operator_authorization(
+            request, empty_registry(), self.policy
+        )
+        self.assertTrue(receipt["execution_authority"])
+        self.assertFalse(receipt["replay_permitted"])
+        replay = evaluate_authorization(request, updated, self.policy)
+        self.assertEqual("HOLD", replay["decision"])
+        self.assertTrue(
+            any(reason.startswith("operator_authorization_consumed:") for reason in replay["reasons"])
+        )
+        with self.assertRaisesRegex(AuthorizationPolicyError, "not consumable"):
+            consume_operator_authorization(request, updated, self.policy)
+
+        renamed_request = self.verified_release_request("verified-release-renamed-replay")
+        renamed_replay = evaluate_authorization(renamed_request, updated, self.policy)
+        self.assertEqual("HOLD", renamed_replay["decision"])
+        self.assertEqual(
+            replay["operator_authorization_key"],
+            renamed_replay["operator_authorization_key"],
+        )
+
+    def test_verified_release_single_use_cli_consumption_is_atomic_under_concurrency(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        script = root / "ops" / "atlas" / "authorization_policy.py"
+        request = self.verified_release_request("verified-release-concurrent-single-use")
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            request_path = temporary / "request.json"
+            registry_path = temporary / "registry.json"
+            request_path.write_text(json.dumps(request), encoding="utf-8")
+            command = [
+                sys.executable,
+                "-B",
+                str(script),
+                "--registry",
+                str(registry_path),
+                "consume",
+                "--request",
+                str(request_path),
+            ]
+            processes = [
+                subprocess.Popen(command, cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                for _ in range(2)
+            ]
+            results = [process.communicate(timeout=10) for process in processes]
+            self.assertEqual([0, 1], sorted(process.returncode for process in processes), results)
+            registry = json.loads(registry_path.read_text(encoding="utf-8"))
+            self.assertEqual(1, len(registry["operator_authorization_consumptions"]))
+
+    def test_registry_record_and_consumption_writers_are_serialized(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        script = root / "ops" / "atlas" / "authorization_policy.py"
+        request = self.verified_release_request("verified-release-cross-writer")
+        decision = self.decision("cross-writer-event-1")
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            request_path = temporary / "request.json"
+            decision_path = temporary / "decision.json"
+            registry_path = temporary / "registry.json"
+            request_path.write_text(json.dumps(request), encoding="utf-8")
+            decision_path.write_text(json.dumps(decision), encoding="utf-8")
+            consume_command = [
+                sys.executable, "-B", str(script), "--registry", str(registry_path),
+                "consume", "--request", str(request_path),
+            ]
+            record_command = [
+                sys.executable, "-B", str(script), "--registry", str(registry_path),
+                "record", "--decision", str(decision_path),
+            ]
+            processes = [
+                subprocess.Popen(command, cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                for command in (consume_command, record_command)
+            ]
+            results = [process.communicate(timeout=10) for process in processes]
+            self.assertEqual([0, 0], [process.returncode for process in processes], results)
+            registry = json.loads(registry_path.read_text(encoding="utf-8"))
+            self.assertEqual(1, len(registry["operator_authorization_consumptions"]))
+            self.assertIn("cross-writer-event-1", registry["applied_event_ids"])
+
+    def test_consumption_write_is_failure_safe_and_restart_durable(self) -> None:
+        request = self.verified_release_request("verified-release-durable-consumption")
+        updated, _ = consume_operator_authorization(request, empty_registry(), self.policy)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(__file__).resolve().parents[1]
+            registry_path = Path(directory) / "registry.json"
+            request_path = Path(directory) / "request.json"
+            request_path.write_text(json.dumps(request), encoding="utf-8")
+            _atomic_write_json(registry_path, empty_registry())
+            with mock.patch(
+                "ops.atlas.authorization_policy._atomic_write_bytes",
+                side_effect=OSError("injected durable-write failure"),
+            ):
+                with self.assertRaisesRegex(
+                    AuthorizationPolicyError,
+                    "durable authorization registry write failed",
+                ):
+                    _atomic_write_json(registry_path, updated)
+            unchanged = json.loads(registry_path.read_text(encoding="utf-8"))
+            self.assertEqual({}, unchanged["operator_authorization_consumptions"])
+
+            _atomic_write_json(registry_path, updated)
+            restart_registry = json.loads(registry_path.read_text(encoding="utf-8"))
+            replay = evaluate_authorization(request, restart_registry, self.policy)
+            self.assertEqual("HOLD", replay["decision"])
+            self.assertTrue(
+                any(
+                    reason.startswith("operator_authorization_consumed:")
+                    for reason in replay["reasons"]
+                )
+            )
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(root / "ops" / "atlas" / "authorization_policy.py"),
+                    "--registry",
+                    str(registry_path),
+                    "evaluate",
+                    "--request",
+                    str(request_path),
+                ],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=True,
+            )
+            restarted = json.loads(completed.stdout)
+            self.assertEqual("HOLD", restarted["decision"])
 
 
 if __name__ == "__main__":

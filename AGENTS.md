@@ -116,10 +116,12 @@ Learned Authorization
   source retirement or deletion, or ownership or retention changes.
 
 Vercel Production Deploy Guard
-- A fully reviewed release may automatically perform its guarded merge and deploy to an already-linked Vercel production project without asking Zac again when the exact operator-granted profiles in `ATLAS-AUTHORIZATION-POLICY.v1.json` return `AUTO_AUTHORIZED` at action time.
-- Automatic production release requires an unchanged reviewed identity, clean review graph, green required CI and post-merge CI, unchanged project and canonical-domain bindings, zero environment/secret/DNS/Auth/live-data/provider-configuration mutation, a known exact rollback target, and successful canonical alias, smoke, health, and error-log readback.
-- Any missing gate, material `UNKNOWN`, identity or binding drift, new project, relink, DNS or environment change, secret access, Auth/live-data mutation, provider configuration change, billing, destructive cleanup, or failed post-deploy proof stops the release. Failed post-deploy proof may use only the exact predeclared rollback target and must return terminal evidence.
-- Production work outside that profile still requires explicit current-thread authority. Generic autonomy language does not authorize a nonmatching production action.
+- Treat every Vercel production deployment, promotion, or production-alias cutover as approval-gated unless the owning task holds a fresh exact `AUTO_AUTHORIZED` receipt under `AUTH-VERIFIED-RELEASE-PRODUCTION-CONTINUATION-V1`.
+- Do not run `vercel deploy --prod`, `vercel promote`, production rollback/promotion APIs, or any equivalent production-targeting Vercel mutation unless the operator explicitly requests production deploy intent in the current thread or the exact verified-release production profile passes every required gate.
+- Valid explicit approval is per deploy and per named project. Generic autonomy language such as `continue`, `proceed`, `do it`, `I approve`, or broad approval of a batch does not authorize production and cannot satisfy the verified-release profile.
+- The verified-release production profile is single-use and exact-project. It applies only after an immutable independently reviewed merge, matching reviewed and merged trees, successful post-merge CI, exact production binding, zero unresolved review or deployment collision, a retained known-good rollback target, automatic rollback on failed acceptance, and terminal production readback.
+- Before the production effect, the owning task must atomically consume the exact authorization identity through the canonical authorization registry. Evaluation alone is never execution authority; a consumed identity cannot be evaluated or executed again.
+- The profile never authorizes retries, unreviewed promotion, DNS, environment-variable or secret mutation, Auth or live-data mutation, billing, deletion, ownership or retention changes, destructive cleanup, or unrelated provider effects. Any missing gate, material `UNKNOWN`, identity drift, or binding drift stops the release.
 - Read-only Vercel inspection, logs, env reads, health checks, preview deploys, and non-production analysis remain allowed unless another rule blocks them.
 
 UI Mutation Discipline
