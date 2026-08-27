@@ -233,6 +233,7 @@ def evaluate_authorization(
     request_id = _require_token(request, "request_id")
     action_class = _require_token(request, "action_class")
     scope_key = _require_token(request, "scope_key")
+    constraints = request.get("constraints")
     constraints_digest = _constraints_digest(request)
     never_learn = set(policy["never_learn_risk_flags"])
     risky = sorted(name for name, value in _risk_flags(request).items() if value and name in never_learn)
@@ -255,12 +256,30 @@ def evaluate_authorization(
         None,
     )
     risk_flag_exceptions: set[str] = set()
+    forbidden_risk_flags: set[str] = set()
+    required_constraint_values: dict[str, Any] = {}
     if operator_rule is not None:
         raw_exceptions = operator_rule.get("risk_flag_exceptions", [])
         if not isinstance(raw_exceptions, list) or any(not isinstance(name, str) for name in raw_exceptions):
             raise AuthorizationPolicyError("operator rule risk_flag_exceptions must be a list of strings")
         risk_flag_exceptions = set(raw_exceptions)
+        raw_forbidden = operator_rule.get("forbidden_risk_flags", [])
+        if not isinstance(raw_forbidden, list) or any(not isinstance(name, str) for name in raw_forbidden):
+            raise AuthorizationPolicyError("operator rule forbidden_risk_flags must be a list of strings")
+        forbidden_risk_flags = set(raw_forbidden)
+        raw_constraint_values = operator_rule.get("required_constraint_values", {})
+        if not isinstance(raw_constraint_values, dict):
+            raise AuthorizationPolicyError("operator rule required_constraint_values must be an object")
+        required_constraint_values = raw_constraint_values
     blocking_risks = [name for name in risky if name not in risk_flag_exceptions]
+    rule_forbidden_risks = sorted(
+        name for name in forbidden_risk_flags if _risk_flags(request).get(name) is True
+    )
+    constraint_mismatches = sorted(
+        name
+        for name, expected in required_constraint_values.items()
+        if not isinstance(constraints, dict) or constraints.get(name) != expected
+    )
     required_gates = list(policy["common_required_gates"])
     required_gates.extend(policy["allowlisted_action_classes"].get(action_class, []))
     if operator_rule is not None:
@@ -270,11 +289,16 @@ def evaluate_authorization(
 
     if blocking_risks:
         reasons.extend(f"never_learn_risk:{name}" for name in blocking_risks)
+    elif rule_forbidden_risks:
+        reasons.extend(f"operator_rule_forbidden_risk:{name}" for name in rule_forbidden_risks)
     elif action_class not in policy["allowlisted_action_classes"]:
         reasons.append("action_class_not_allowlisted")
     elif missing_gates:
         decision = "HOLD"
         reasons.extend(f"gate_not_true:{name}" for name in missing_gates)
+    elif constraint_mismatches:
+        decision = "HOLD"
+        reasons.extend(f"constraint_not_exact:{name}" for name in constraint_mismatches)
     elif operator_rule is not None:
         decision = "AUTO_AUTHORIZED"
         reasons.append(f"operator_granted_rule:{operator_rule['rule_id']}")
@@ -310,6 +334,8 @@ def evaluate_authorization(
         "operator_rule_id": operator_rule.get("rule_id") if operator_rule is not None else None,
         "operator_rule_exclusions": operator_rule.get("exclusions", []) if operator_rule is not None else [],
         "operator_rule_risk_flag_exceptions": sorted(risk_flag_exceptions),
+        "operator_rule_forbidden_risk_flags": sorted(forbidden_risk_flags),
+        "operator_rule_required_constraint_values": required_constraint_values,
         "required_post_action_proof": (
             operator_rule.get("required_post_action_proof", []) if operator_rule is not None else []
         ),

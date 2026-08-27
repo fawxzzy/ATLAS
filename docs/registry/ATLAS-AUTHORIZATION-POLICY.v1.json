@@ -161,6 +161,36 @@
         "production",
         "provider_mutation"
       ],
+      "forbidden_risk_flags": [
+        "unreviewed_promotion",
+        "dns",
+        "environment_variable_mutation",
+        "secret_or_credential_access",
+        "auth_mutation",
+        "live_data_mutation",
+        "provider_configuration_mutation",
+        "billing_or_purchase",
+        "destructive_or_irreversible",
+        "source_retirement_or_deletion",
+        "ownership_or_retention_change",
+        "unrelated_provider_effect"
+      ],
+      "required_constraint_values": {
+        "deployments": 1,
+        "retries": 0,
+        "unreviewed_promotions": 0,
+        "dns_mutations": 0,
+        "environment_mutations": 0,
+        "secret_mutations": 0,
+        "auth_mutations": 0,
+        "live_data_mutations": 0,
+        "provider_configuration_mutations": 0,
+        "billing_actions": 0,
+        "destructive_actions": 0,
+        "deletions": 0,
+        "ownership_or_retention_changes": 0,
+        "unrelated_provider_effects": 0
+      },
       "required_gates": [
         "production_target_and_project_exact",
         "production_writer_collision_free",
@@ -168,6 +198,13 @@
         "terminal_proof_before_cleanup",
         "no_source_or_configuration_drift",
         "no_dns_auth_data_billing_or_destructive_effect"
+      ],
+      "required_post_action_proof": [
+        "exact_deployment_identity",
+        "exact_named_project_production_binding_readback",
+        "production_acceptance_observation_complete",
+        "automatic_rollback_or_terminal_success_receipt",
+        "terminal_production_readback"
       ],
       "exclusions": [
         "second or unrelated production deployment",
