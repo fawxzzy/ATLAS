@@ -663,7 +663,7 @@ const q = (identifier) => `"${identifier.replaceAll('"', '""')}"`;
 const encodedJson = (value) => `pg_catalog.convert_from(pg_catalog.decode('${Buffer.from(JSON.stringify(value), 'utf8').toString('base64')}', 'base64'), 'UTF8')::jsonb`;
 
 const TABLE_COLUMNS = Object.freeze({
-  mazer_profiles: ['user_id', 'display_name', 'selected_control_mode', 'settings', 'created_at', 'updated_at', 'revision', 'username'],
+  mazer_profiles: ['user_id', 'display_name', 'selected_control_mode', 'settings', 'created_at', 'updated_at', 'revision', 'username', 'username_origin'],
   mazer_progression_states: ['user_id', 'schema_version', 'state', 'last_completed_cycle_at', 'created_at', 'updated_at', 'player_level', 'player_rank', 'player_target_complexity', 'player_completed_cycles', 'revision', 'level_reached_at'],
   mazer_ai_progression_states: ['user_id', 'runner_key', 'schema_version', 'state', 'summary', 'level', 'rank', 'target_complexity', 'completed_cycles', 'last_completed_cycle_at', 'created_at', 'updated_at'],
   mazer_cycle_receipts: ['id', 'user_id', 'surface', 'maze_seed', 'maze_size', 'route_quality', 'start_cell', 'goal_cell', 'path_length', 'wrong_turns', 'backtracks', 'completion_time_ms', 'reset_used', 'control_mode', 'average_frame_ms', 'receipt', 'completed_at', 'created_at', 'ruleset_id', 'recipe_version', 'recipe_hash', 'client_run_id']

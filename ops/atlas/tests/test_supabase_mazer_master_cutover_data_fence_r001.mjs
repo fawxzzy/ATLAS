@@ -339,6 +339,7 @@ assert.equal(classified.receipt.pii_emitted, false);
 assert.match(classified.privatePlan.transactional_sql, /pg_advisory_xact_lock/);
 assert.match(classified.privatePlan.transactional_sql, /TARGET_PREIMAGE_DRIFT/);
 assert.match(classified.privatePlan.transactional_sql, /on conflict/);
+assert.match(classified.privatePlan.transactional_sql, /insert into "mazer"\."mazer_profiles" as live \([^\n]+"username_origin"\)/);
 assert.match(classified.privatePlan.transactional_sql, /is distinct from/);
 assert.match(classified.privatePlan.transactional_sql, /left join atlas_expected_receipts/);
 assert.match(classified.privatePlan.transactional_sql, /do update set[\s\S]+where exists \(select 1 from atlas_expected_receipts guard/);
