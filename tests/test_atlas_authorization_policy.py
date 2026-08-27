@@ -258,65 +258,59 @@ class AtlasAuthorizationPolicyTests(unittest.TestCase):
         self.assertEqual("AUTH-GITHUB-CLEAN-GUARDED-MERGE-V1", result["operator_rule_id"])
         self.assertIn("deployment", result["operator_rule_exclusions"])
 
-    def test_established_vercel_project_production_deploy_is_narrowly_auto_authorized(self) -> None:
-        gates = {
-            "bounded_scope": True,
-            "exact_identity": True,
-            "fresh_evidence": True,
-            "no_unknown_material_state": True,
-            "no_writer_collision": True,
-            "exact_merged_commit": True,
-            "postmerge_checks_passed": True,
-            "existing_project_binding_unchanged": True,
-            "existing_canonical_domain_binding_unchanged": True,
-            "zero_environment_or_secret_mutation": True,
-            "zero_dns_mutation": True,
-            "zero_auth_or_live_data_mutation": True,
-            "zero_provider_configuration_mutation": True,
-            "zero_destructive_cleanup": True,
-            "zero_billing_or_purchase": True,
-            "rollback_target_exact": True,
-            "postdeploy_proof_and_rollback_defined": True,
-            "reviewed_release_lineage_exact": True,
-            "postmerge_main_exact": True,
-            "deployment_cost_within_existing_plan": True,
-            "rollback_on_failed_postdeploy_proof": True,
+    def test_verified_release_production_continuation_is_narrowly_auto_authorized(self) -> None:
+        gate_names = {
+            "bounded_scope", "exact_identity", "fresh_evidence",
+            "no_unknown_material_state", "no_writer_collision",
+            "exact_reviewed_merge_commit", "reviewed_tree_equals_merge_tree",
+            "postmerge_ci_success", "exact_named_production_project",
+            "production_binding_exact", "zero_unresolved_review_threads",
+            "zero_deployment_writer_collision", "known_good_rollback_target_retained",
+            "automatic_rollback_on_failed_acceptance",
+            "production_acceptance_checks_defined", "single_production_deployment",
+            "terminal_production_readback_defined", "cost_verified_zero",
+            "production_target_and_project_exact", "production_writer_collision_free",
+            "rollback_obligation_reserved_before_effect", "terminal_proof_before_cleanup",
+            "no_source_or_configuration_drift",
+            "no_dns_auth_data_billing_or_destructive_effect",
         }
         request = {
-            "request_id": "deploy-example-1",
-            "action_class": "VERCEL_GUARDED_PRODUCTION_DEPLOY",
-            "authority_profile": "established-vercel-project-guarded-production-deploy-v1",
-            "scope_key": "vercel:fawxzzy/example:production",
-            "constraints": {"project": "example", "domain": "example.fawxzzy.com"},
-            "risk_flags": {"production": True},
-            "gates": gates,
+            "request_id": "verified-release-production-1",
+            "action_class": "VERIFIED_RELEASE_PRODUCTION_CONTINUATION",
+            "authority_profile": "verified-release-production-continuation-v1",
+            "scope_key": "vercel:fawxzzy:FawxzzyWeb:production:merge-abc",
+            "constraints": {"deployments": 1, "retries": 0, "cost_usd": 0},
+            "risk_flags": {"production": True, "provider_mutation": True},
+            "gates": {name: True for name in gate_names},
         }
         result = evaluate_authorization(request, empty_registry(), self.policy)
         self.assertEqual("AUTO_AUTHORIZED", result["decision"])
-        self.assertEqual(["production"], result["operator_rule_risk_flag_exceptions"])
-        self.assertIn("production_alias_readback", result["required_post_action_proof"])
+        self.assertEqual(
+            "AUTH-VERIFIED-RELEASE-PRODUCTION-CONTINUATION-V1",
+            result["operator_rule_id"],
+        )
+        self.assertEqual(
+            ["production", "provider_mutation"],
+            result["operator_rule_risk_flag_exceptions"],
+        )
 
-        request["risk_flags"]["dns"] = True
-        blocked = evaluate_authorization(request, empty_registry(), self.policy)
-        self.assertEqual("AUTHORIZATION_REQUIRED", blocked["decision"])
-        self.assertIn("never_learn_risk:dns", blocked["reasons"])
-
-        request["risk_flags"] = {"production": True}
-        request["gates"]["existing_project_binding_unchanged"] = False
+        request["gates"]["known_good_rollback_target_retained"] = False
         held = evaluate_authorization(request, empty_registry(), self.policy)
         self.assertEqual("HOLD", held["decision"])
+        self.assertIn(
+            "gate_not_true:known_good_rollback_target_retained",
+            held["reasons"],
+        )
 
-        request["gates"]["existing_project_binding_unchanged"] = True
-        request["gates"]["zero_destructive_cleanup"] = False
-        destructive = evaluate_authorization(request, empty_registry(), self.policy)
-        self.assertEqual("HOLD", destructive["decision"])
-        self.assertIn("gate_not_true:zero_destructive_cleanup", destructive["reasons"])
-
-        request["gates"]["zero_destructive_cleanup"] = True
-        del request["gates"]["zero_billing_or_purchase"]
-        billing_unknown = evaluate_authorization(request, empty_registry(), self.policy)
-        self.assertEqual("HOLD", billing_unknown["decision"])
-        self.assertIn("gate_not_true:zero_billing_or_purchase", billing_unknown["reasons"])
+    def test_verified_release_profile_does_not_override_auth_or_live_data_risk(self) -> None:
+        request = self.request(
+            action_class="VERIFIED_RELEASE_PRODUCTION_CONTINUATION",
+            authority_profile="verified-release-production-continuation-v1",
+            risk_flags={"production": True, "auth_mutation": True},
+        )
+        result = evaluate_authorization(request, empty_registry(), self.policy)
+        self.assertEqual("AUTHORIZATION_REQUIRED", result["decision"])
+        self.assertIn("never_learn_risk:auth_mutation", result["reasons"])
 
 
 if __name__ == "__main__":
