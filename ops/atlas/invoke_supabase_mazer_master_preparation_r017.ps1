@@ -2,6 +2,7 @@
 param(
   [Parameter(Mandatory = $true, ParameterSetName = 'Source')][switch]$SourceOnlyValidate,
   [Parameter(Mandatory = $true, ParameterSetName = 'MaterializerProbe')][switch]$LocalMaterializerPortabilityProbe,
+  [Parameter(Mandatory = $true, ParameterSetName = 'FenceProbe')][switch]$LocalFenceReplacementAdversary,
   [Parameter(Mandatory = $true, ParameterSetName = 'Execute')][ValidateSet('Prepare', 'Rollback', 'Watchdog')][string]$Mode,
   [Parameter(Mandatory = $true, ParameterSetName = 'Execute')][string]$PrivateSourcePath,
   [Parameter(Mandatory = $true, ParameterSetName = 'Execute')][ValidatePattern('^[a-f0-9]{64}$')][string]$ExpectedPrivateSourceSha256,
@@ -335,7 +336,7 @@ function New-FenceInvocationEnvelope([string]$ModeValue, [string]$Step, [string]
     execute_protected = $true
     parent_host_path = [IO.Path]::GetFullPath($script:HostScriptPath)
     parent_host_sha256 = Get-Sha256 $script:HostScriptPath
-    child_host_sha256 = Get-Sha256 $script:Fence
+    child_host_sha256 = [string]$script:VerifiedFenceSha
     issued_at = $issued.ToString('o')
     expires_at = $issued.AddMinutes(5).ToString('o')
   }
@@ -350,14 +351,38 @@ function New-FenceInvocationEnvelope([string]$ModeValue, [string]$Step, [string]
   return [pscustomobject]@{ Path = $path; Sha256 = Get-Sha256 $path; CorrelationId = $correlation }
 }
 
+function Get-VerifiedFenceBootstrapEncoded {
+  $bootstrap=@'
+$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';$p=[IO.Path]::GetFullPath($env:ATLAS_R017_VERIFIED_FENCE_PATH);$s=New-Object IO.FileStream($p,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read);$b=$null
+try{if($s.Length-lt2-or$s.Length-gt2097152){exit 81};$b=New-Object byte[] ([int]$s.Length);$o=0;while($o-lt$b.Length){$r=$s.Read($b,$o,$b.Length-$o);if($r-le0){exit 82};$o+=$r};$h=[Security.Cryptography.SHA256]::Create();try{$a=([BitConverter]::ToString($h.ComputeHash($b))).Replace('-','').ToLowerInvariant()}finally{$h.Dispose()};if($a-cne$env:ATLAS_R017_VERIFIED_FENCE_SHA256){exit 83};$t=(New-Object Text.UTF8Encoding($false,$true)).GetString($b)}finally{$s.Dispose();if($null-ne$b){[Array]::Clear($b,0,$b.Length)}}
+$global:ATLAS_R017_VERIFIED_FENCE_SOURCE_TEXT=$t;if($env:ATLAS_R017_VERIFIED_FENCE_MODE-ceq'Synthetic'-and-not[string]::IsNullOrWhiteSpace($env:ATLAS_R017_VERIFIED_FENCE_TEST_REPLACEMENT_PATH)){[IO.File]::Copy($env:ATLAS_R017_VERIFIED_FENCE_TEST_REPLACEMENT_PATH,$p,$true)};$sb=[ScriptBlock]::Create($t)
+if($env:ATLAS_R017_VERIFIED_FENCE_MODE-ceq'Source'){. $sb -SourceOnlyValidate}elseif($env:ATLAS_R017_VERIFIED_FENCE_MODE-ceq'Execute'){. $sb -InvocationPath $env:ATLAS_R017_FENCE_INVOCATION_PATH -ExpectedInvocationSha256 $env:ATLAS_R017_FENCE_INVOCATION_SHA256 -ExecuteProtected}else{. $sb};exit $LASTEXITCODE
+'@
+  return [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($bootstrap))
+}
+
+function Initialize-VerifiedFenceBinding([bool]$RequireSealed) {
+  if($RequireSealed-and([string]::IsNullOrWhiteSpace($env:ATLAS_R017_VERIFIED_FENCE_PATH)-or[string]::IsNullOrWhiteSpace($env:ATLAS_R017_VERIFIED_FENCE_SHA256))){throw 'FENCE_BINDING_MISSING'}
+  $path=if([string]::IsNullOrWhiteSpace($env:ATLAS_R017_VERIFIED_FENCE_PATH)){[IO.Path]::GetFullPath($Fence)}else{[IO.Path]::GetFullPath([string]$env:ATLAS_R017_VERIFIED_FENCE_PATH)}
+  $sha=if([string]::IsNullOrWhiteSpace($env:ATLAS_R017_VERIFIED_FENCE_SHA256)){Get-Sha256 $path}else{[string]$env:ATLAS_R017_VERIFIED_FENCE_SHA256}
+  if($path-cne[IO.Path]::GetFullPath($Fence)-or$sha-cnotmatch'^[a-f0-9]{64}$'){throw 'FENCE_BINDING'}
+  Assert-NoReparse $path $HostDirectory
+  if((Get-Sha256 $path)-cne$sha){throw 'FENCE_DIGEST_DRIFT'}
+  $script:VerifiedFencePath=$path;$script:VerifiedFenceSha=$sha
+}
+
+function Invoke-VerifiedFenceChild([string]$ShellPath,[string]$VerifiedMode,[string]$InvocationPath,[string]$InvocationSha,[int]$TimeoutMs,[string]$SourcePath,[string]$ExpectedSha,[string]$TestReplacementPath) {
+  $environment=@{ATLAS_R017_VERIFIED_FENCE_PATH=[IO.Path]::GetFullPath($SourcePath);ATLAS_R017_VERIFIED_FENCE_SHA256=$ExpectedSha;ATLAS_R017_VERIFIED_FENCE_DIR=[IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($SourcePath));ATLAS_R017_VERIFIED_FENCE_MODE=$VerifiedMode;ATLAS_R017_FENCE_INVOCATION_PATH=$InvocationPath;ATLAS_R017_FENCE_INVOCATION_SHA256=$InvocationSha;ATLAS_R017_VERIFIED_FENCE_TEST_REPLACEMENT_PATH=if($VerifiedMode-ceq'Synthetic'){$TestReplacementPath}else{''}}
+  return Invoke-Child $ShellPath @('-NoLogo','-NoProfile','-NonInteractive','-EncodedCommand',(Get-VerifiedFenceBootstrapEncoded)) $environment $TimeoutMs
+}
+
 function Assert-StructuredFenceChildTransportContract([string]$ShellPath) {
   $probeRoot = Join-Path $Runtime ('r017 transport probe ' + [Guid]::NewGuid().ToString('N'))
   [IO.Directory]::CreateDirectory($probeRoot) | Out-Null
   $missingInput = Join-Path $probeRoot 'missing private input.json'
   $statePath = Join-Path $probeRoot 'fence state.json'
   $envelope = New-FenceInvocationEnvelope 'Forward' 'FenceOnly' $missingInput ('0' * 64) $statePath 'FP-MAZER-MASTER-R017-SOURCE-VALIDATION-001'
-  $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-InvocationPath',$envelope.Path,'-ExpectedInvocationSha256',$envelope.Sha256,'-ExecuteProtected')
-  $child = Invoke-Child $ShellPath $arguments @{} 120000
+  $child = Invoke-VerifiedFenceChild $ShellPath 'Execute' $envelope.Path $envelope.Sha256 120000 $script:VerifiedFencePath $script:VerifiedFenceSha ''
   if ([int]$child.ExitCode -ne 2) { throw 'FENCE_CHILD_TRANSPORT_EXIT' }
   if (-not [string]::IsNullOrEmpty([string]$child.Stderr)) { throw 'FENCE_CHILD_TRANSPORT_STDERR' }
   try { $receipt = [string]$child.Stdout | ConvertFrom-Json } catch { throw 'FENCE_CHILD_TRANSPORT_STDOUT' }
@@ -369,8 +394,7 @@ function Assert-StructuredFenceChildTransportContract([string]$ShellPath) {
 
 function Invoke-Fence([string]$Step, [string]$FenceInputPath, [string]$InputSha, [string]$FenceState, [string]$Packet) {
   $envelope = New-FenceInvocationEnvelope 'Forward' $Step $FenceInputPath $InputSha $FenceState $Packet
-  $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-InvocationPath',$envelope.Path,'-ExpectedInvocationSha256',$envelope.Sha256,'-ExecuteProtected')
-  $child = Invoke-Child (Get-ShellPath) $arguments @{} 900000
+  $child = Invoke-VerifiedFenceChild (Get-ShellPath) 'Execute' $envelope.Path $envelope.Sha256 900000 $script:VerifiedFencePath $script:VerifiedFenceSha ''
   [void](Write-FenceChildReceipt $Step $child $FenceState)
   if ($child.ExitCode -ne 0) { throw ('FENCE_' + $Step.ToUpperInvariant() + '_FAILED') }
   try { return $child.Stdout | ConvertFrom-Json } catch { throw 'FENCE_OUTPUT_SHAPE' }
@@ -378,8 +402,7 @@ function Invoke-Fence([string]$Step, [string]$FenceInputPath, [string]$InputSha,
 
 function Invoke-FenceRollback([string]$FenceInputPath, [string]$InputSha, [string]$FenceState, [string]$Packet) {
   $envelope = New-FenceInvocationEnvelope 'Rollback' 'All' $FenceInputPath $InputSha $FenceState $Packet
-  $arguments = @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-InvocationPath',$envelope.Path,'-ExpectedInvocationSha256',$envelope.Sha256,'-ExecuteProtected')
-  $child = Invoke-Child (Get-ShellPath) $arguments @{} 900000
+  $child = Invoke-VerifiedFenceChild (Get-ShellPath) 'Execute' $envelope.Path $envelope.Sha256 900000 $script:VerifiedFencePath $script:VerifiedFenceSha ''
   [void](Write-FenceChildReceipt 'Rollback' $child $FenceState)
   if ($child.ExitCode -ne 0) { throw 'FENCE_ROLLBACK_FAILED' }
 }
@@ -394,7 +417,7 @@ function Assert-SourceContract {
   if ((Invoke-Child $node @($Materializer, '--source-check', 'true') @{} 30000).ExitCode -ne 0) { throw 'MATERIALIZER_SOURCE' }
   foreach ($shell in @((Get-Command pwsh -ErrorAction SilentlyContinue), (Get-Command powershell -ErrorAction SilentlyContinue))) {
     if ($null -ne $shell) {
-      if ((Invoke-Child $shell.Source @('-NoLogo','-NoProfile','-NonInteractive','-File',$Fence,'-SourceOnlyValidate') @{} 120000).ExitCode -ne 0) { throw 'FENCE_SOURCE_VALIDATION' }
+      if ((Invoke-VerifiedFenceChild $shell.Source 'Source' '' '' 120000 $script:VerifiedFencePath $script:VerifiedFenceSha '').ExitCode -ne 0) { throw 'FENCE_SOURCE_VALIDATION' }
       Assert-StructuredFenceChildTransportContract $shell.Source
     }
   }
@@ -417,7 +440,7 @@ $global:ATLAS_R017_VERIFIED_HOST_SOURCE_TEXT=$t;$sb=[ScriptBlock]::Create($t);. 
 
 function Get-VerifiedSelfEnvironment([string]$ChildMode,[string]$SourcePath,[string]$SourceSha,[string]$HostState) {
   if($null-eq$script:VerifiedHostSourceText){return $null}
-  return @{ATLAS_R017_VERIFIED_HOST_PATH=$script:HostScriptPath;ATLAS_R017_VERIFIED_HOST_SHA256=$env:ATLAS_R017_VERIFIED_HOST_SHA256;ATLAS_R017_VERIFIED_HOST_DIR=$HostDirectory;ATLAS_R017_VERIFIED_MODE='Execute';ATLAS_R017_CHILD_MODE=$ChildMode;ATLAS_R017_CHILD_SOURCE=$SourcePath;ATLAS_R017_CHILD_SOURCE_SHA=$SourceSha;ATLAS_R017_CHILD_STATE=$HostState;ATLAS_R017_VERIFIED_MATERIALIZER_PATH=$env:ATLAS_R017_VERIFIED_MATERIALIZER_PATH;ATLAS_R017_VERIFIED_MATERIALIZER_SHA256=$env:ATLAS_R017_VERIFIED_MATERIALIZER_SHA256;ATLAS_R017_VERIFIED_CLASSIFIER_PATH=$env:ATLAS_R017_VERIFIED_CLASSIFIER_PATH;ATLAS_R017_VERIFIED_CLASSIFIER_SHA256=$env:ATLAS_R017_VERIFIED_CLASSIFIER_SHA256;ATLAS_R017_VERIFIED_NODE_PATH=$env:ATLAS_R017_VERIFIED_NODE_PATH;ATLAS_R017_VERIFIED_NODE_SHA256=$env:ATLAS_R017_VERIFIED_NODE_SHA256;ATLAS_R017_VERIFIED_TEST_REPLACEMENT_PATH=''}
+  return @{ATLAS_R017_VERIFIED_HOST_PATH=$script:HostScriptPath;ATLAS_R017_VERIFIED_HOST_SHA256=$env:ATLAS_R017_VERIFIED_HOST_SHA256;ATLAS_R017_VERIFIED_HOST_DIR=$HostDirectory;ATLAS_R017_VERIFIED_MODE='Execute';ATLAS_R017_CHILD_MODE=$ChildMode;ATLAS_R017_CHILD_SOURCE=$SourcePath;ATLAS_R017_CHILD_SOURCE_SHA=$SourceSha;ATLAS_R017_CHILD_STATE=$HostState;ATLAS_R017_VERIFIED_MATERIALIZER_PATH=$env:ATLAS_R017_VERIFIED_MATERIALIZER_PATH;ATLAS_R017_VERIFIED_MATERIALIZER_SHA256=$env:ATLAS_R017_VERIFIED_MATERIALIZER_SHA256;ATLAS_R017_VERIFIED_CLASSIFIER_PATH=$env:ATLAS_R017_VERIFIED_CLASSIFIER_PATH;ATLAS_R017_VERIFIED_CLASSIFIER_SHA256=$env:ATLAS_R017_VERIFIED_CLASSIFIER_SHA256;ATLAS_R017_VERIFIED_FENCE_PATH=$env:ATLAS_R017_VERIFIED_FENCE_PATH;ATLAS_R017_VERIFIED_FENCE_SHA256=$env:ATLAS_R017_VERIFIED_FENCE_SHA256;ATLAS_R017_VERIFIED_NODE_PATH=$env:ATLAS_R017_VERIFIED_NODE_PATH;ATLAS_R017_VERIFIED_NODE_SHA256=$env:ATLAS_R017_VERIFIED_NODE_SHA256;ATLAS_R017_VERIFIED_TEST_REPLACEMENT_PATH=''}
 }
 
 function Start-RollbackWatchdog([string]$SourcePath, [string]$SourceSha, [string]$HostState) {
@@ -435,9 +458,16 @@ function Invoke-SelfRollback([string]$SourcePath, [string]$SourceSha, [string]$H
 }
 
 if ($PSCmdlet.ParameterSetName -ceq 'Source') {
+  Initialize-VerifiedFenceBinding $false
   Assert-SourceContract
   Write-Result 'PASS_MAZER_MASTER_PREPARATION_R017_SOURCE' ([ordered]@{ materializer_sha256 = Get-Sha256 $Materializer; fence_host_sha256 = Get-Sha256 $Fence; credential_reads = 0; provider_reads = 0; provider_writes = 0; auth_writes = 0; live_data_writes = 0; state_writes = 0; private_files = 0 })
   exit 0
+}
+
+if($PSCmdlet.ParameterSetName-ceq'FenceProbe'){
+  $probeRoot=Join-Path $Runtime ('r017 fence replacement probe '+[Guid]::NewGuid().ToString('N'));[IO.Directory]::CreateDirectory($probeRoot)|Out-Null
+  $original=Join-Path $probeRoot 'fence original.ps1';$replacement=Join-Path $probeRoot 'fence replacement.ps1'
+  try{[IO.File]::WriteAllText($original,'[Console]::Out.Write("R017_ORIGINAL_FENCE_BYTES")',(New-Object Text.UTF8Encoding($false)));[IO.File]::WriteAllText($replacement,'[Console]::Out.Write("R017_REPLACEMENT_MUST_NOT_RUN")',(New-Object Text.UTF8Encoding($false)));$shellPath=(Get-Process -Id $PID).Path;$probe=Invoke-VerifiedFenceChild $shellPath 'Synthetic' '' '' 30000 $original (Get-Sha256 $original) $replacement;if($probe.ExitCode-ne0-or-not[string]::IsNullOrEmpty($probe.Stderr)-or[string]$probe.Stdout.Trim()-cne'R017_ORIGINAL_FENCE_BYTES'-or(Get-Content -Raw -LiteralPath $original)-notmatch'REPLACEMENT_MUST_NOT_RUN'){throw 'FENCE_REPLACEMENT_RACE'};Write-Result 'PASS_R017_SAME_BUFFER_FENCE_REPLACEMENT_ADVERSARY' ([ordered]@{replacement_executed=$false;credential_reads=0;external_calls=0;live_data_writes=0});exit 0}finally{if(Test-Path -LiteralPath $probeRoot){Remove-Item -LiteralPath $probeRoot -Recurse -Force}}
 }
 
 if($PSCmdlet.ParameterSetName-ceq'MaterializerProbe'){
@@ -489,16 +519,20 @@ $verifiedClassifierPath = $null
 $verifiedClassifierSha = $null
 $verifiedNodePath = $null
 $verifiedNodeSha = $null
+$verifiedFencePath = $null
+$verifiedFenceSha = $null
 $state = $null
 $providerWrites = 0
 $databaseTransactions = 0
 $fenceHasEffects = $false
 try {
+  Initialize-VerifiedFenceBinding $true
   Assert-SourceContract
   $verifiedMaterializerPath=[IO.Path]::GetFullPath([string]$env:ATLAS_R017_VERIFIED_MATERIALIZER_PATH);$verifiedMaterializerSha=[string]$env:ATLAS_R017_VERIFIED_MATERIALIZER_SHA256
   $verifiedClassifierPath=[IO.Path]::GetFullPath([string]$env:ATLAS_R017_VERIFIED_CLASSIFIER_PATH);$verifiedClassifierSha=[string]$env:ATLAS_R017_VERIFIED_CLASSIFIER_SHA256
   $verifiedNodePath=[IO.Path]::GetFullPath([string]$env:ATLAS_R017_VERIFIED_NODE_PATH);$verifiedNodeSha=[string]$env:ATLAS_R017_VERIFIED_NODE_SHA256
-  if($verifiedMaterializerPath-cne[IO.Path]::GetFullPath($Materializer)-or$verifiedClassifierPath-cne[IO.Path]::GetFullPath($FenceClassifier)-or$verifiedMaterializerSha-cnotmatch'^[a-f0-9]{64}$'-or$verifiedClassifierSha-cnotmatch'^[a-f0-9]{64}$'-or$verifiedNodeSha-cnotmatch'^[a-f0-9]{64}$'){throw 'MATERIALIZER_BINDING'}
+  $verifiedFencePath=$script:VerifiedFencePath;$verifiedFenceSha=$script:VerifiedFenceSha
+  if($verifiedMaterializerPath-cne[IO.Path]::GetFullPath($Materializer)-or$verifiedClassifierPath-cne[IO.Path]::GetFullPath($FenceClassifier)-or$verifiedFencePath-cne[IO.Path]::GetFullPath($Fence)-or$verifiedMaterializerSha-cnotmatch'^[a-f0-9]{64}$'-or$verifiedClassifierSha-cnotmatch'^[a-f0-9]{64}$'-or$verifiedFenceSha-cnotmatch'^[a-f0-9]{64}$'-or$verifiedNodeSha-cnotmatch'^[a-f0-9]{64}$'){throw 'MATERIALIZER_BINDING'}
   if (-not (Test-Path -LiteralPath $PacketRoot)) { [IO.Directory]::CreateDirectory($PacketRoot) | Out-Null }
   Assert-NoReparse $PacketRoot $Secrets
   $privateRoot = Join-Path $PacketRoot ([Guid]::NewGuid().ToString('N'))
