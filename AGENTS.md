@@ -116,11 +116,10 @@ Learned Authorization
   source retirement or deletion, or ownership or retention changes.
 
 Vercel Production Deploy Guard
-- Treat every Vercel production deployment, promotion, or production-alias cutover as approval-gated.
-- Do not run `vercel deploy --prod`, `vercel promote`, production rollback/promotion APIs, or any equivalent production-targeting Vercel mutation unless the operator explicitly requests production deploy intent in the current thread.
-- Valid approval must be explicit and current-thread-local, for example: `deploy to prod`, `deploy to production`, `ship this to Vercel production`, or `promote <project> on Vercel`.
-- Generic autonomy language such as `continue`, `proceed`, `do it`, `I approve`, or broad approval of a batch does not count as Vercel production deploy approval.
-- Approval is per deploy and per named project. One approval does not carry forward to later deploys or other Vercel projects.
+- A fully reviewed release may automatically perform its guarded merge and deploy to an already-linked Vercel production project without asking Zac again when the exact operator-granted profiles in `ATLAS-AUTHORIZATION-POLICY.v1.json` return `AUTO_AUTHORIZED` at action time.
+- Automatic production release requires an unchanged reviewed identity, clean review graph, green required CI and post-merge CI, unchanged project and canonical-domain bindings, zero environment/secret/DNS/Auth/live-data/provider-configuration mutation, a known exact rollback target, and successful canonical alias, smoke, health, and error-log readback.
+- Any missing gate, material `UNKNOWN`, identity or binding drift, new project, relink, DNS or environment change, secret access, Auth/live-data mutation, provider configuration change, billing, destructive cleanup, or failed post-deploy proof stops the release. Failed post-deploy proof may use only the exact predeclared rollback target and must return terminal evidence.
+- Production work outside that profile still requires explicit current-thread authority. Generic autonomy language does not authorize a nonmatching production action.
 - Read-only Vercel inspection, logs, env reads, health checks, preview deploys, and non-production analysis remain allowed unless another rule blocks them.
 
 UI Mutation Discipline

@@ -6,7 +6,11 @@ Durable ATLAS artifacts, Git, validated receipts, and live readback outrank chat
 
 Authority remains with the exact source owner or `00 Authorization`; no
 catch-all authority sink exists. `01 Ops` performs mechanical reconciliation
-only. Visible standing titles assume Atlas as the stack context:
+only. Exact clean guarded merges and production deploys to unchanged
+established Vercel projects may proceed without another operator message only
+when their operator-granted profiles pass every action-time gate; all binding,
+DNS, environment, Auth/live-data, provider-configuration, and destructive drift
+holds. Visible standing titles assume Atlas as the stack context:
 `00 Questions`, `00 Authorization`, `01 Release`, `01 Architect`, and
 `01 Ops`. `Inbox` and `00 Main` are compatibility history only. Stable logical
 role IDs remain canonical; legacy visible titles are read-only recovery inputs.

@@ -405,13 +405,14 @@ When working on Playbook or repository development and speed matters, default to
   exclusions; use fresh evidence and exact action-time preflight; emit one
   local `AUTO_AUTHORIZED` receipt; the owning lane still separates decision from
   execution and performs fresh action-time preflight.
-- Two exact operator-granted profiles are active now: fully proven clean
-  draft-to-ready transitions, and exact retirement of one accidental statusless
+- Four exact operator-granted profiles are active now: fully proven clean
+  draft-to-ready transitions, fully proven clean guarded merges, guarded
+  production deploys to unchanged established Vercel projects, and exact retirement of one accidental statusless
   GitHub deployment metadata record with zero workflow/provider/Vercel/
   production execution. Ready does not include merge; metadata retirement does
   not include provider execution, deployment, production, source mutation, or
   any unrelated record.
-- Production, provider mutation, Supabase apply, Auth/live-data mutation,
+- Production outside the established-project guarded deploy profile, provider mutation, Supabase apply, Auth/live-data mutation,
   secrets, credentials, DNS, billing, purchases, destructive work, security
   bypass, source retirement, deletion, ownership, and retention changes always
   require current exact authority and never become learned automatic approval.

@@ -1,6 +1,6 @@
 {
   "schema": "atlas.authorization-policy.v1",
-  "policy_version": 1,
+  "policy_version": 2,
   "operator_surface": {
     "logical_role_id": "manual.messages",
     "visible_title": "00 Authorization",
@@ -73,6 +73,20 @@
       "zero_unresolved_threads",
       "zero_deployments",
       "merge_policy_allows"
+    ],
+    "VERCEL_GUARDED_PRODUCTION_DEPLOY": [
+      "exact_merged_commit",
+      "postmerge_checks_passed",
+      "existing_project_binding_unchanged",
+      "existing_canonical_domain_binding_unchanged",
+      "zero_environment_or_secret_mutation",
+      "zero_dns_mutation",
+      "zero_auth_or_live_data_mutation",
+      "zero_provider_configuration_mutation",
+      "zero_destructive_cleanup",
+      "zero_billing_or_purchase",
+      "rollback_target_exact",
+      "postdeploy_proof_and_rollback_defined"
     ]
   },
   "operator_granted_rules": [
@@ -116,6 +130,59 @@
         "provider mutation",
         "production"
       ]
+    },
+    {
+      "rule_id": "AUTH-GITHUB-CLEAN-GUARDED-MERGE-V1",
+      "authority_profile": "clean-guarded-merge-v1",
+      "action_class": "CLEAN_GUARDED_MERGE",
+      "source": "Explicit operator standing directive recorded 2026-08-27.",
+      "required_gates": [
+        "open_ready_clean_mergeable_unmerged",
+        "exact_base_head_tree",
+        "normal_merge_commit_only",
+        "branch_preserved",
+        "postmerge_ci_defined"
+      ],
+      "exclusions": [
+        "branch deletion",
+        "force push",
+        "provider configuration mutation",
+        "deployment",
+        "production"
+      ]
+    },
+    {
+      "rule_id": "AUTH-VERCEL-ESTABLISHED-PROJECT-GUARDED-PRODUCTION-DEPLOY-V1",
+      "authority_profile": "established-vercel-project-guarded-production-deploy-v1",
+      "action_class": "VERCEL_GUARDED_PRODUCTION_DEPLOY",
+      "source": "Explicit operator standing directive recorded 2026-08-27.",
+      "risk_flag_exceptions": [
+        "production"
+      ],
+      "required_gates": [
+        "reviewed_release_lineage_exact",
+        "postmerge_main_exact",
+        "deployment_cost_within_existing_plan",
+        "rollback_on_failed_postdeploy_proof"
+      ],
+      "required_post_action_proof": [
+        "exact_deployment_identity",
+        "production_alias_readback",
+        "canonical_smoke_passed",
+        "production_error_scan_clean",
+        "rollback_or_terminal_success_receipt"
+      ],
+      "exclusions": [
+        "new Vercel project",
+        "project relink",
+        "DNS mutation",
+        "environment or secret mutation",
+        "Auth or live-data mutation",
+        "provider configuration mutation",
+        "billing or purchase",
+        "destructive cleanup",
+        "unrelated deployment"
+      ]
     }
   ],
   "never_learn_risk_flags": [
@@ -142,7 +209,7 @@
     "Any identity, scope, constraint, exclusion, policy, review, deployment, or writer drift invalidates reuse.",
     "A missing gate or material UNKNOWN produces HOLD, never approval.",
     "The evaluator emits authority only; the owning lane still performs fresh action-time preflight and exact post-action proof.",
-    "Production and other never-learn risk classes remain current-action operator decisions even after repeated prior approvals.",
+    "Production and other never-learn risk classes remain current-action operator decisions except for an exact operator-granted rule whose risk_flag_exceptions explicitly names that risk and whose complete gates pass.",
     "Operator-granted rules are exact reusable exceptions identified by authority_profile; they do not satisfy any excluded later lifecycle action."
   ]
 }

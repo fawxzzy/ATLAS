@@ -242,6 +242,82 @@ class AtlasAuthorizationPolicyTests(unittest.TestCase):
         request["gates"]["zero_provider_execution"] = False
         self.assertEqual("HOLD", evaluate_authorization(request, empty_registry(), self.policy)["decision"])
 
+    def test_operator_granted_clean_guarded_merge_is_immediately_reusable(self) -> None:
+        request = self.request(authority_profile="clean-guarded-merge-v1")
+        request["gates"].update(
+            {
+                "open_ready_clean_mergeable_unmerged": True,
+                "exact_base_head_tree": True,
+                "normal_merge_commit_only": True,
+                "branch_preserved": True,
+                "postmerge_ci_defined": True,
+            }
+        )
+        result = evaluate_authorization(request, empty_registry(), self.policy)
+        self.assertEqual("AUTO_AUTHORIZED", result["decision"])
+        self.assertEqual("AUTH-GITHUB-CLEAN-GUARDED-MERGE-V1", result["operator_rule_id"])
+        self.assertIn("deployment", result["operator_rule_exclusions"])
+
+    def test_established_vercel_project_production_deploy_is_narrowly_auto_authorized(self) -> None:
+        gates = {
+            "bounded_scope": True,
+            "exact_identity": True,
+            "fresh_evidence": True,
+            "no_unknown_material_state": True,
+            "no_writer_collision": True,
+            "exact_merged_commit": True,
+            "postmerge_checks_passed": True,
+            "existing_project_binding_unchanged": True,
+            "existing_canonical_domain_binding_unchanged": True,
+            "zero_environment_or_secret_mutation": True,
+            "zero_dns_mutation": True,
+            "zero_auth_or_live_data_mutation": True,
+            "zero_provider_configuration_mutation": True,
+            "zero_destructive_cleanup": True,
+            "zero_billing_or_purchase": True,
+            "rollback_target_exact": True,
+            "postdeploy_proof_and_rollback_defined": True,
+            "reviewed_release_lineage_exact": True,
+            "postmerge_main_exact": True,
+            "deployment_cost_within_existing_plan": True,
+            "rollback_on_failed_postdeploy_proof": True,
+        }
+        request = {
+            "request_id": "deploy-example-1",
+            "action_class": "VERCEL_GUARDED_PRODUCTION_DEPLOY",
+            "authority_profile": "established-vercel-project-guarded-production-deploy-v1",
+            "scope_key": "vercel:fawxzzy/example:production",
+            "constraints": {"project": "example", "domain": "example.fawxzzy.com"},
+            "risk_flags": {"production": True},
+            "gates": gates,
+        }
+        result = evaluate_authorization(request, empty_registry(), self.policy)
+        self.assertEqual("AUTO_AUTHORIZED", result["decision"])
+        self.assertEqual(["production"], result["operator_rule_risk_flag_exceptions"])
+        self.assertIn("production_alias_readback", result["required_post_action_proof"])
+
+        request["risk_flags"]["dns"] = True
+        blocked = evaluate_authorization(request, empty_registry(), self.policy)
+        self.assertEqual("AUTHORIZATION_REQUIRED", blocked["decision"])
+        self.assertIn("never_learn_risk:dns", blocked["reasons"])
+
+        request["risk_flags"] = {"production": True}
+        request["gates"]["existing_project_binding_unchanged"] = False
+        held = evaluate_authorization(request, empty_registry(), self.policy)
+        self.assertEqual("HOLD", held["decision"])
+
+        request["gates"]["existing_project_binding_unchanged"] = True
+        request["gates"]["zero_destructive_cleanup"] = False
+        destructive = evaluate_authorization(request, empty_registry(), self.policy)
+        self.assertEqual("HOLD", destructive["decision"])
+        self.assertIn("gate_not_true:zero_destructive_cleanup", destructive["reasons"])
+
+        request["gates"]["zero_destructive_cleanup"] = True
+        del request["gates"]["zero_billing_or_purchase"]
+        billing_unknown = evaluate_authorization(request, empty_registry(), self.policy)
+        self.assertEqual("HOLD", billing_unknown["decision"])
+        self.assertIn("gate_not_true:zero_billing_or_purchase", billing_unknown["reasons"])
+
 
 if __name__ == "__main__":
     unittest.main()
