@@ -161,6 +161,12 @@
         "production",
         "provider_mutation"
       ],
+      "allowed_true_risk_flags": [
+        "production",
+        "provider_mutation"
+      ],
+      "single_use": true,
+      "closed_constraint_schema": true,
       "forbidden_risk_flags": [
         "unreviewed_promotion",
         "dns",
@@ -178,6 +184,7 @@
       "required_constraint_values": {
         "deployments": 1,
         "retries": 0,
+        "cost_usd": 0,
         "unreviewed_promotions": 0,
         "dns_mutations": 0,
         "environment_mutations": 0,

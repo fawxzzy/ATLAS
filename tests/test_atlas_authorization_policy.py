@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+import json
+import subprocess
+import sys
+import tempfile
 import unittest
+from pathlib import Path
 
 from ops.atlas.authorization_policy import (
     AuthorizationPolicyError,
+    consume_operator_authorization,
     empty_registry,
     evaluate_authorization,
     load_policy,
@@ -56,6 +62,40 @@ class AtlasAuthorizationPolicyTests(unittest.TestCase):
         }
         payload.update(overrides)
         return payload
+
+    def verified_release_request(self, request_id: str = "verified-release-production-1") -> dict:
+        gate_names = {
+            "bounded_scope", "exact_identity", "fresh_evidence",
+            "no_unknown_material_state", "no_writer_collision",
+            "exact_reviewed_merge_commit", "reviewed_tree_equals_merge_tree",
+            "postmerge_ci_success", "exact_named_production_project",
+            "production_binding_exact", "zero_unresolved_review_threads",
+            "zero_deployment_writer_collision", "known_good_rollback_target_retained",
+            "automatic_rollback_on_failed_acceptance",
+            "production_acceptance_checks_defined", "single_production_deployment",
+            "terminal_production_readback_defined", "cost_verified_zero",
+            "production_target_and_project_exact", "production_writer_collision_free",
+            "rollback_obligation_reserved_before_effect", "terminal_proof_before_cleanup",
+            "no_source_or_configuration_drift",
+            "no_dns_auth_data_billing_or_destructive_effect",
+        }
+        return {
+            "request_id": request_id,
+            "action_class": "VERIFIED_RELEASE_PRODUCTION_CONTINUATION",
+            "authority_profile": "verified-release-production-continuation-v1",
+            "scope_key": "vercel:fawxzzy:FawxzzyWeb:production:merge-abc",
+            "constraints": {
+                "deployments": 1, "retries": 0, "cost_usd": 0,
+                "unreviewed_promotions": 0, "dns_mutations": 0,
+                "environment_mutations": 0, "secret_mutations": 0,
+                "auth_mutations": 0, "live_data_mutations": 0,
+                "provider_configuration_mutations": 0, "billing_actions": 0,
+                "destructive_actions": 0, "deletions": 0,
+                "ownership_or_retention_changes": 0, "unrelated_provider_effects": 0,
+            },
+            "risk_flags": {"production": True, "provider_mutation": True},
+            "gates": {name: True for name in gate_names},
+        }
 
     def test_two_matching_approvals_activate_reuse(self) -> None:
         registry = record_operator_decision(empty_registry(), self.decision("event-1"), self.policy)
@@ -428,6 +468,71 @@ class AtlasAuthorizationPolicyTests(unittest.TestCase):
                 result = evaluate_authorization(request, empty_registry(), self.policy)
                 self.assertEqual("HOLD", result["decision"])
                 self.assertIn(f"constraint_not_exact:{name}", result["reasons"])
+
+    def test_verified_release_profile_rejects_unknown_effects_and_wrong_types(self) -> None:
+        unknown_risk = self.verified_release_request("verified-release-unknown-risk")
+        unknown_risk["risk_flags"]["project_relink"] = True
+        result = evaluate_authorization(unknown_risk, empty_registry(), self.policy)
+        self.assertEqual("AUTHORIZATION_REQUIRED", result["decision"])
+        self.assertIn(
+            "operator_rule_unrecognized_or_forbidden_risk:project_relink",
+            result["reasons"],
+        )
+
+        extra_constraint = self.verified_release_request("verified-release-extra-constraint")
+        extra_constraint["constraints"]["project_relinks"] = 1
+        result = evaluate_authorization(extra_constraint, empty_registry(), self.policy)
+        self.assertEqual("HOLD", result["decision"])
+        self.assertIn("constraint_not_allowed:project_relinks", result["reasons"])
+
+        wrong_type = self.verified_release_request("verified-release-wrong-type")
+        wrong_type["constraints"]["deployments"] = True
+        result = evaluate_authorization(wrong_type, empty_registry(), self.policy)
+        self.assertEqual("HOLD", result["decision"])
+        self.assertIn("constraint_not_exact:deployments", result["reasons"])
+
+    def test_verified_release_single_use_consumption_rejects_sequential_replay(self) -> None:
+        request = self.verified_release_request("verified-release-single-use")
+        updated, receipt = consume_operator_authorization(
+            request, empty_registry(), self.policy
+        )
+        self.assertTrue(receipt["execution_authority"])
+        self.assertFalse(receipt["replay_permitted"])
+        replay = evaluate_authorization(request, updated, self.policy)
+        self.assertEqual("HOLD", replay["decision"])
+        self.assertTrue(
+            any(reason.startswith("operator_authorization_consumed:") for reason in replay["reasons"])
+        )
+        with self.assertRaisesRegex(AuthorizationPolicyError, "not consumable"):
+            consume_operator_authorization(request, updated, self.policy)
+
+    def test_verified_release_single_use_cli_consumption_is_atomic_under_concurrency(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        script = root / "ops" / "atlas" / "authorization_policy.py"
+        request = self.verified_release_request("verified-release-concurrent-single-use")
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            request_path = temporary / "request.json"
+            registry_path = temporary / "registry.json"
+            request_path.write_text(json.dumps(request), encoding="utf-8")
+            command = [
+                sys.executable,
+                "-B",
+                str(script),
+                "--registry",
+                str(registry_path),
+                "consume",
+                "--request",
+                str(request_path),
+            ]
+            processes = [
+                subprocess.Popen(command, cwd=root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                for _ in range(2)
+            ]
+            results = [process.communicate(timeout=10) for process in processes]
+            self.assertEqual([0, 1], sorted(process.returncode for process in processes), results)
+            registry = json.loads(registry_path.read_text(encoding="utf-8"))
+            self.assertEqual(1, len(registry["operator_authorization_consumptions"]))
 
 
 if __name__ == "__main__":
