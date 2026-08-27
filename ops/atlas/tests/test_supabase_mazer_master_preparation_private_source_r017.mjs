@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { CONTRACT as FENCE_CONTRACT, classifyCutover, sha256 } from '../classify_supabase_mazer_master_cutover_data_fence_r001.mjs';
@@ -236,6 +236,7 @@ assert.throws(() => wrapMigrationTransaction(Buffer.from('begin; select 1; commi
 
 const producerPath = path.join(root, 'ops/atlas/produce_supabase_mazer_master_preparation_private_source_r017.mjs');
 const materializerPath = path.join(root, 'ops/atlas/materialize_supabase_mazer_master_preparation_r017.mjs');
+const classifierPath = path.join(root, 'ops/atlas/classify_supabase_mazer_master_cutover_data_fence_r001.mjs');
 const producerText = fs.readFileSync(producerPath, 'utf8');
 for (const forbidden of ['execute_sql', 'apply_migration', 'supabase db push', 'vercel deploy', 'git push']) assert.ok(!producerText.toLowerCase().includes(forbidden));
 for (const token of ['PRIVATE_OUTPUT_MUST_BE_UNDER_SECRETS','EVIDENCE_DIGEST_DRIFT','IDENTITY_DENOMINATOR_DRIFT','RESET_RECEIPT_DENOMINATOR_DRIFT','transaction isolation level serializable read only']) assert.ok(producerText.includes(token));
@@ -279,17 +280,51 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-producer-'));
 try {
   const privateFile = path.join(tmp, 'private-source.json'); fs.writeFileSync(privateFile, `${JSON.stringify(source)}\n`, { mode: 0o600 });
   const out = path.join(tmp, 'materialized');
-  const child = spawnSync(process.execPath, [materializerPath, '--input', privateFile, '--output', out, '--mazer-repository', mazerRepository], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 180_000 });
+  const child = spawnSync(process.execPath, [materializerPath, '--input', privateFile, '--output', out, '--mazer-repository', mazerRepository, '--owner-token', '1'.repeat(32)], { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 180_000 });
   assert.equal(child.status, 0, child.stdout + child.stderr);
   const resultLines = child.stdout.trim().split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
   assert.equal(resultLines.length, 1, 'materializer main executed more than once');
   assert.equal(resultLines[0].result, 'PRIVATE_R017_PACKET_SEALED');
-  assert.equal(fs.readdirSync(out).length, 15);
+  assert.equal(fs.readdirSync(out).length, 16);
   for (const name of ['m1.sql','m2.sql','m3.sql','m4.sql']) {
     const migration = fs.readFileSync(path.join(out, name), 'utf8');
     assert.match(migration, /^\\set ON_ERROR_STOP on\nbegin;/);
     assert.equal((migration.match(/\ncommit;/g) ?? []).length, 1);
   }
+
+  const movedRoot = path.join(tmp, 'moved worktree with spaces');
+  fs.mkdirSync(movedRoot);
+  const movedMaterializer = path.join(movedRoot, 'materialize_supabase_mazer_master_preparation_r017.mjs');
+  fs.copyFileSync(materializerPath, movedMaterializer);
+  fs.copyFileSync(classifierPath, path.join(movedRoot, path.basename(classifierPath)));
+  const movedOut = path.join(tmp, 'materialized moved');
+  const moved = spawnSync(process.execPath, [movedMaterializer, '--input', privateFile, '--output', movedOut, '--mazer-repository', mazerRepository, '--owner-token', '2'.repeat(32)], { cwd: movedRoot, encoding: 'utf8', windowsHide: true, timeout: 180_000 });
+  assert.equal(moved.status, 0, moved.stdout + moved.stderr);
+  assert.equal(JSON.parse(moved.stdout.trim()).result, 'PRIVATE_R017_PACKET_SEALED');
+  assert.equal(fs.readdirSync(movedOut).length, 16);
+
+  const preexistingOut = path.join(tmp, 'materialized-preexisting');
+  fs.mkdirSync(preexistingOut);
+  fs.writeFileSync(path.join(preexistingOut, 'owner-sentinel'), 'original-owner\n');
+  const preexisting = spawnSync(process.execPath, [movedMaterializer, '--input', privateFile, '--output', preexistingOut, '--mazer-repository', mazerRepository, '--owner-token', '3'.repeat(32)], { cwd: movedRoot, encoding: 'utf8', windowsHide: true, timeout: 180_000 });
+  assert.notEqual(preexisting.status, 0, 'preexisting output root must fail closed');
+  assert.equal(fs.readFileSync(path.join(preexistingOut, 'owner-sentinel'), 'utf8'), 'original-owner\n');
+  assert.deepEqual(fs.readdirSync(preexistingOut), ['owner-sentinel']);
+
+  const concurrentOut = path.join(tmp, 'materialized-concurrent');
+  const runConcurrent = () => new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [movedMaterializer, '--input', privateFile, '--output', concurrentOut, '--mazer-repository', mazerRepository, '--owner-token', '4'.repeat(32)], { cwd: movedRoot, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    let stdout = ''; let stderr = '';
+    child.stdout.setEncoding('utf8'); child.stderr.setEncoding('utf8');
+    child.stdout.on('data', (chunk) => { stdout += chunk; }); child.stderr.on('data', (chunk) => { stderr += chunk; });
+    child.on('error', reject); child.on('close', (status) => resolve({ status, stdout, stderr }));
+  });
+  const concurrent = await Promise.all([runConcurrent(), runConcurrent()]);
+  assert.equal(concurrent.filter(({ status }) => status === 0).length, 1, JSON.stringify(concurrent));
+  assert.equal(concurrent.filter(({ status }) => status !== 0).length, 1, JSON.stringify(concurrent));
+  assert.equal(JSON.parse(concurrent.find(({ status }) => status === 0).stdout.trim()).result, 'PRIVATE_R017_PACKET_SEALED');
+  assert.equal(fs.readdirSync(concurrentOut).length, 16);
+  assert.doesNotThrow(() => JSON.parse(fs.readFileSync(path.join(concurrentOut, 'manifest.json'), 'utf8')));
 } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
 
 const privateWriteRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'atlas-r017-private-write-'));

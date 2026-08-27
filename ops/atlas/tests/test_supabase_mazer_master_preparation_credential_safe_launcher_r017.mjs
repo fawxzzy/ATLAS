@@ -14,18 +14,24 @@ const runtime = path.join(root, 'runtime/atlas');
 const source = path.join(packetRoot, 'private-source-pr201-final-71884498-20260826.json');
 const manifest = path.join(packetRoot, 'materialized-pr201-final-20260826/manifest.json');
 const predecessor = path.join(runtime, 'mazer-master-r017-terminal-rollback-20260826-212608.json');
+const materializer = path.join(root, 'ops/atlas/materialize_supabase_mazer_master_preparation_r017.mjs');
+const classifier = path.join(root, 'ops/atlas/classify_supabase_mazer_master_cutover_data_fence_r001.mjs');
+const nodePath = fs.realpathSync.native(process.execPath);
 const sha = value => crypto.createHash('sha256').update(value).digest('hex');
 const sourceSha = fs.existsSync(source) ? sha(fs.readFileSync(source)) : null;
 const manifestSha = fs.existsSync(manifest) ? sha(fs.readFileSync(manifest)) : null;
 const predecessorSha = fs.existsSync(predecessor) ? sha(fs.readFileSync(predecessor)) : null;
 const hostSha = sha(fs.readFileSync(host));
+const materializerSha = sha(fs.readFileSync(materializer));
+const classifierSha = sha(fs.readFileSync(classifier));
+const nodeSha = sha(fs.readFileSync(nodePath));
 
-function run(shell, args) {
-  const result = spawnSync(shell, args, { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 60_000 });
+function run(shell, args, env = process.env) {
+  const result = spawnSync(shell, args, { cwd: root, env, encoding: 'utf8', windowsHide: true, timeout: 60_000 });
   return { ...result, receipt: result.stdout.trim() ? JSON.parse(result.stdout.trim()) : null };
 }
-function runLauncher(shell, args) {
-  return run(shell, ['-NoLogo', '-NoProfile', '-NonInteractive', ...(shell === 'powershell.exe' ? ['-ExecutionPolicy', 'Bypass'] : []), '-File', launcher, ...args]);
+function runLauncher(shell, args, env = process.env) {
+  return run(shell, ['-NoLogo', '-NoProfile', '-NonInteractive', ...(shell === 'powershell.exe' ? ['-ExecutionPolicy', 'Bypass'] : []), '-File', launcher, ...args], env);
 }
 
 for (const shell of ['pwsh.exe', 'powershell.exe']) {
@@ -69,10 +75,13 @@ for (const token of [
   'ATLAS_R017_VERIFIED_HOST_SHA256', 'external_effects_unknown=[bool]$script:ProtectedChildStarted'
 ]) assert.ok(launcherText.includes(token), `MISSING_LAUNCHER_GATE:${token}`);
 for (const token of ['launcher-invocation.r017.v3','decision_request_sha256','approval_consumption_sha256','terminal_final_identity_edges','INVOCATION_NOT_YET_VALID','INVOCATION_EXPIRED','Read-JsonSnapshot']) assert.ok(launcherText.includes(token), `MISSING_JIT_GATE:${token}`);
+for (const token of ['materializer_path','materializer_sha256','classifier_path','classifier_sha256','node_path','node_sha256','ATLAS_R017_VERIFIED_MATERIALIZER_PATH','ATLAS_R017_VERIFIED_CLASSIFIER_PATH','ATLAS_R017_VERIFIED_NODE_PATH']) assert.ok(launcherText.includes(token), `MISSING_PORTABLE_MATERIALIZER_GATE:${token}`);
+for (const stale of ['r017-node-shim-reviewed2','4053ed27750a4e4593959a7caa7ea2562ebd56912852454547f12889a9b8d3c9']) assert.ok(!launcherText.includes(stale), `STALE_NODE_SHIM:${stale}`);
 for (const stale of ['71884498b45cf0ab04cb71d6533bf9ddef6426a06f92cf77e67242eaf9665e60','dccfc0bb4e9cf0bc6904a7002ec8bc7acc8d2f392d76a62eb69b99872ad9d1de','d3ec9c210e031ebd887e5f643939ebd584efe218e0db2b346586392bc280453d','final_identity_edges-ne19','player-ne16','ai-ne16']) assert.ok(!launcherText.includes(stale), `STALE_TUPLE:${stale}`);
 assert.doesNotMatch(launcherText, /PrivateSourceOverride|StatePathOverride|ExpectedSourceShaOverride/);
 
 let productionAdversaries = 0;
+let nodeIndirectionPasses = 0;
 if ([source, manifest, predecessor, host].every(file => fs.existsSync(file))) {
   assert.equal(sha(fs.readFileSync(source)), sourceSha);
   assert.equal(sha(fs.readFileSync(manifest)), manifestSha);
@@ -80,6 +89,7 @@ if ([source, manifest, predecessor, host].every(file => fs.existsSync(file))) {
   assert.equal(sha(fs.readFileSync(host)), hostSha);
   const launcherSha = sha(fs.readFileSync(launcher));
   const paths = [], directories = [], packet = 'FP-MAZER-MASTER-R017-SUPABASE-PREPARATION-20260825-001', task = '019fa791-8d17-7c83-9c61-3e3c687e9dd7', target = 'supabase:geknvnrmktchljnyddwp/public+bxtcuhkotumitoqtrcej/mazer';
+  const nodeJunction=path.join(path.dirname(packetRoot),`.launcher-test-node-junction-${crypto.randomUUID()}`);fs.symlinkSync(path.dirname(nodePath),nodeJunction,'junction');directories.push(nodeJunction);
   const o = date => date.toISOString().replace('Z','000Z');
   const write = (file, value) => { const bytes=Buffer.from(`${JSON.stringify(value,null,2)}\n`); fs.writeFileSync(file,bytes,{flag:'wx'}); paths.push(file); return {file,bytes,sha:sha(bytes)}; };
   const baseTuple={source,sourceSha,manifest,manifestSha,hostSha,predecessor,predecessorSha,authApplySha:JSON.parse(fs.readFileSync(source,'utf8')).sql_sha256['auth-apply.sql'],postverifySha:JSON.parse(fs.readFileSync(source,'utf8')).sql_sha256['postverify.sql'],counts:{edges:19,imports:3,binds:14,retained:2,profiles:13,player:16,ai:16,receipts:1887}};
@@ -92,7 +102,7 @@ if ([source, manifest, predecessor, host].every(file => fs.existsSync(file))) {
     const correlation=crypto.randomUUID(), phrase=`AUTHORIZE ${name} ${correlation}`, intent=`sha256:${sha(Buffer.from(`intent:${name}:${correlation}`))}`;
     const prefix=`.launcher-test-${name}-${process.pid}-${Date.now()}`, decisionPath=path.join(runtime,`${prefix}-decision-request.json`), aliasPath=path.join(runtime,`${prefix}-scoped-approval-alias.json`), authPath=path.join(runtime,`${prefix}-scoped-approval-alias-authorization.json`), consumptionPath=path.join(runtime,`${prefix}-scoped-approval-alias-consumption.json`);
     const rel=file=>path.relative(root,file).split(path.sep).join('/');
-    const sealed_inputs={execution_correlation_id:correlation,private_source_path:rel(tuple.source),private_source_sha256:tuple.sourceSha,manifest_path:rel(tuple.manifest),manifest_sha256:tuple.manifestSha,auth_apply_sha256:tuple.authApplySha,postverify_sha256:tuple.postverifySha,host_path:rel(host),host_sha256:tuple.hostSha,credential_safe_launcher_path:rel(launcher),credential_safe_launcher_sha256:launcherSha,packet_merge_commit:'1'.repeat(40),jit_invocation_merge_commit:'2'.repeat(40),independent_review_checkpoint:`threadctx_${'3'.repeat(64)}`,prior_rollback_state_path:rel(tuple.predecessor),prior_rollback_receipt_sha256:tuple.predecessorSha};
+    const sealed_inputs={execution_correlation_id:correlation,private_source_path:rel(tuple.source),private_source_sha256:tuple.sourceSha,manifest_path:rel(tuple.manifest),manifest_sha256:tuple.manifestSha,auth_apply_sha256:tuple.authApplySha,postverify_sha256:tuple.postverifySha,host_path:rel(host),host_sha256:tuple.hostSha,credential_safe_launcher_path:rel(launcher),credential_safe_launcher_sha256:launcherSha,materializer_path:rel(materializer),materializer_sha256:materializerSha,classifier_path:rel(classifier),classifier_sha256:classifierSha,node_path:nodePath,node_sha256:nodeSha,packet_merge_commit:'1'.repeat(40),jit_invocation_merge_commit:'2'.repeat(40),independent_review_checkpoint:`threadctx_${'3'.repeat(64)}`,prior_rollback_state_path:rel(tuple.predecessor),prior_rollback_receipt_sha256:tuple.predecessorSha};
     const effect_ceiling={execution_clusters:1,legacy_writer_fence_and_restore:true,master_migrations:['M1','M2','M3','M4'],auth_identity_edges:tuple.counts.edges,auth_user_imports:tuple.counts.imports,auth_existing_user_binds:tuple.counts.binds,auth_same_uuid_retained:tuple.counts.retained,profiles:tuple.counts.profiles,player_rows:tuple.counts.player,ai_rows:tuple.counts.ai,receipts:tuple.counts.receipts,username_backfill_and_origin_contract:true,vault_key_create_and_rollback_delete:true,before_user_created_hook_activation:true,bounded_qa_and_cleanup:true,rollback_on_any_failed_gate:true,cutover:false,vercel_or_app_deployment:false,production_alias_change:false};
     const decisionExpiry=decisionExpiresRaw??o(expires), aliasExpiry=aliasExpiresRaw??o(expires);
     const decision=write(decisionPath,{schema:'atlas.operator-decision-request.v1',packet,status:'AWAITING_OPERATOR_DECISION',execution_authority:false,expires_at:decisionExpiry,sealed_inputs,effect_ceiling,exact_authorization_phrase:phrase});
@@ -101,7 +111,7 @@ if ([source, manifest, predecessor, host].every(file => fs.existsSync(file))) {
     const consumption=write(consumptionPath,{approval_code:'R017-TEST-TEST-TEST-TEST',authorization_sha256:auth.sha,consumed_at:o(consumed),consumption_digest:`sha256:${sha(Buffer.from(`consume:${name}`))}`,execution_correlation_id:correlation,intent_digest:intent,max_effect_count:20,packet,reusable:false,schema:'atlas.scoped-approval-consumption.v1',status:'CONSUMED'});
     const successor=path.join(runtime,`mazer-master-r017-execution-${correlation}.json`);
     if(successorExists){fs.writeFileSync(successor,'{}\n',{flag:'wx'});paths.push(successor);}
-    return { correlation, decision, alias, auth, consumption, successor, envelope:{schema:'atlas.supabase.mazer-master-preparation-launcher-invocation.r017.v3',packet,decision_request_path:decisionPath,decision_request_sha256:decision.sha,approval_alias_path:aliasPath,approval_alias_sha256:alias.sha,approval_authorization_path:authPath,approval_authorization_sha256:auth.sha,approval_consumption_path:consumptionPath,approval_consumption_sha256:consumption.sha,approval_expires_at:aliasExpiry,predecessor_state_path:tuple.predecessor,predecessor_state_sha256:tuple.predecessorSha,execution_correlation_id:correlation,private_source_path:tuple.source,private_source_sha256:tuple.sourceSha,private_manifest_path:tuple.manifest,private_manifest_sha256:tuple.manifestSha,successor_state_path:successor,host_path:host,host_sha256:tuple.hostSha,launcher_path:launcher,launcher_sha256:launcherSha,terminal_final_identity_edges:tuple.counts.edges,terminal_profiles:tuple.counts.profiles,terminal_player:tuple.counts.player,terminal_ai:tuple.counts.ai,terminal_receipts:tuple.counts.receipts,not_before:o(notBefore),issued_at:o(envelopeIssued),expires_at:aliasExpiry}};
+    return { correlation, decision, alias, auth, consumption, successor, envelope:{schema:'atlas.supabase.mazer-master-preparation-launcher-invocation.r017.v3',packet,decision_request_path:decisionPath,decision_request_sha256:decision.sha,approval_alias_path:aliasPath,approval_alias_sha256:alias.sha,approval_authorization_path:authPath,approval_authorization_sha256:auth.sha,approval_consumption_path:consumptionPath,approval_consumption_sha256:consumption.sha,approval_expires_at:aliasExpiry,predecessor_state_path:tuple.predecessor,predecessor_state_sha256:tuple.predecessorSha,execution_correlation_id:correlation,private_source_path:tuple.source,private_source_sha256:tuple.sourceSha,private_manifest_path:tuple.manifest,private_manifest_sha256:tuple.manifestSha,successor_state_path:successor,host_path:host,host_sha256:tuple.hostSha,launcher_path:launcher,launcher_sha256:launcherSha,materializer_path:materializer,materializer_sha256:materializerSha,classifier_path:classifier,classifier_sha256:classifierSha,node_path:nodePath,node_sha256:nodeSha,terminal_final_identity_edges:tuple.counts.edges,terminal_profiles:tuple.counts.profiles,terminal_player:tuple.counts.player,terminal_ai:tuple.counts.ai,terminal_receipts:tuple.counts.receipts,not_before:o(notBefore),issued_at:o(envelopeIssued),expires_at:aliasExpiry}};
   };
   const validate = (shell, name, value, expectedStatus, expectedCategory) => {
     const file = path.join(packetRoot, `launcher-invocation-${value.execution_correlation_id}.json`);
@@ -120,6 +130,7 @@ if ([source, manifest, predecessor, host].every(file => fs.existsSync(file))) {
       assert.equal(validate(shell,'pr203-evolution',evolved.envelope,0).receipt.result,'PASS_R017_LAUNCHER_INVOCATION_BOUND');
       const evolvedBytes=Buffer.from(`${JSON.stringify(evolved.envelope)}\n`), evolvedFile=path.join(packetRoot,`launcher-invocation-${evolved.correlation}.json`), productionProbe=runLauncher(shell,['-LocalProductionShapeProbe','-InvocationPath',evolvedFile,'-ExpectedInvocationSha256',sha(evolvedBytes)]);
       assert.equal(productionProbe.status,0,`${productionProbe.stderr}\n${productionProbe.stdout}`);assert.equal(productionProbe.receipt.result,'PASS_R017_CREDENTIAL_SAFE_PRODUCTION_SHAPE_SENTINEL');assert.equal(productionProbe.receipt.execution_correlation_id,evolved.correlation);assert.equal(productionProbe.receipt.credential_reads,0);
+      const indirect=lineage(`node-indirection-${shell}`,{aliasIssued:new Date(now-2*3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000),envelopeIssued:now,tuple:evolutionTuple}), indirectBytes=Buffer.from(`${JSON.stringify(indirect.envelope)}\n`), indirectFile=path.join(packetRoot,`launcher-invocation-${indirect.correlation}.json`);fs.writeFileSync(indirectFile,indirectBytes,{flag:'wx'});paths.push(indirectFile);const indirectRun=runLauncher(shell,['-ValidateInvocationOnly','-InvocationPath',indirectFile,'-ExpectedInvocationSha256',sha(indirectBytes)],{...process.env,PATH:`${nodeJunction}${path.delimiter}${process.env.PATH}`});assert.equal(indirectRun.status,0,`${indirectRun.stderr}\n${indirectRun.stdout}`);assert.equal(indirectRun.receipt.result,'PASS_R017_LAUNCHER_INVOCATION_BOUND');nodeIndirectionPasses++;
       const exact=lineage(`exact-expiry-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now)});validate(shell,'exact-expiry',exact.envelope,2,'INVOCATION_EXPIRED');
       const expired=lineage(`post-expiry-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now-1000)});validate(shell,'post-expiry',expired.envelope,2,'INVOCATION_EXPIRED');
       const future=lineage(`future-${shell}`,{aliasIssued:now,authorized:new Date(now.getTime()+1000),consumed:new Date(now.getTime()+2000),expires:new Date(now.getTime()+3600000),envelopeIssued:new Date(now.getTime()+60000),notBefore:new Date(now.getTime()+2000)});validate(shell,'future',future.envelope,2,'INVOCATION_NOT_YET_VALID');
@@ -138,7 +149,10 @@ if ([source, manifest, predecessor, host].every(file => fs.existsSync(file))) {
       const staleCount=lineage(`stale-terminal-count-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)});validate(shell,'stale-terminal-count',{...staleCount.envelope,terminal_player:17},2,'TERMINAL_DENOMINATORS');
       const stalePredecessorPath=lineage(`stale-predecessor-path-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)}), stalePredecessorCopy=path.join(runtime,`.launcher-test-stale-predecessor-${crypto.randomUUID()}.json`);fs.linkSync(predecessor,stalePredecessorCopy);paths.push(stalePredecessorCopy);validate(shell,'stale-predecessor-path',{...stalePredecessorPath.envelope,predecessor_state_path:stalePredecessorCopy},2,'PREDECESSOR_PATH_BINDING');
       const stalePredecessorSha=lineage(`stale-predecessor-sha-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)});validate(shell,'stale-predecessor-sha',{...stalePredecessorSha.envelope,predecessor_state_sha256:'5e01271273a910d861c1fb0712ac7d48a8b565a971f6a270cf6fe8409138a0d9'},2,'SEALED_FILE_DIGEST_DRIFT');
-      productionAdversaries += 16;
+      const staleMaterializer=lineage(`stale-materializer-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)});validate(shell,'stale-materializer',{...staleMaterializer.envelope,materializer_sha256:'0'.repeat(64)},2,'SEALED_FILE_DIGEST_DRIFT');
+      const staleClassifier=lineage(`stale-classifier-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)});validate(shell,'stale-classifier',{...staleClassifier.envelope,classifier_sha256:'0'.repeat(64)},2,'SEALED_FILE_DIGEST_DRIFT');
+      const staleNode=lineage(`stale-node-${shell}`,{aliasIssued:new Date(now-3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)});validate(shell,'stale-node',{...staleNode.envelope,node_sha256:'0'.repeat(64)},2,'NODE_RUNTIME_DIGEST');
+      productionAdversaries += 19;
     }
     const now=new Date(), sealed=lineage('sealer-valid',{aliasIssued:new Date(now-2*3600000),authorized:new Date(now-120000),consumed:new Date(now-60000),expires:new Date(now.getTime()+3600000)}), output=path.join(packetRoot,`launcher-invocation-${sealed.correlation}.json`);
     const sealRun=run('node',[sealer,sealed.decision.file,sealed.alias.file,sealed.auth.file,sealed.consumption.file,output]);assert.equal(sealRun.status,0,`${sealRun.stderr}\n${sealRun.stdout}`);paths.push(output);assert.equal(sealRun.receipt.result,'PASS_R017_INVOCATION_SEALED');assert.equal(sealRun.receipt.execution_correlation_id,sealed.correlation);assert.equal(sealRun.receipt.external_calls,0);
@@ -166,6 +180,7 @@ console.log(JSON.stringify({
   poststart_failure_adversaries: transportAdversaries.length,
   same_buffer_host_replacement_adversaries: 2,
   production_adversaries: productionAdversaries,
+  node_indirection_passes: nodeIndirectionPasses,
   external_calls: 0,
   credential_reads: 0,
   secret_reads: 0,
