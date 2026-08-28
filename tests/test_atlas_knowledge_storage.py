@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -233,6 +234,117 @@ class SymlinkConfinementTests(TempRootMixin, unittest.TestCase):
         self.assertFalse(destination.exists())
 
 
+class DirectoryLinkTests(TempRootMixin, unittest.TestCase):
+    def _junction(self, link_path: Path, target: Path) -> bool:
+        """Create a real NTFS junction via mklink /J -- unlike symlinks,
+        junctions do not require SeCreateSymbolicLinkPrivilege, but they
+        are still Windows-only and can fail for other reasons (e.g. the
+        target not existing yet), so this is defensive-skip like
+        _symlink()."""
+        if os.name != "nt":
+            return False
+        storage._lp_mkdir(link_path.parent)
+        result = subprocess.run(
+            ["cmd", "/c", "mklink", "/J", str(link_path), str(target)],
+            capture_output=True,
+            text=True,
+        )
+        return result.returncode == 0
+
+    def test_internal_directory_symlink_is_enumerated_and_not_flagged(self) -> None:
+        root = self._temp_dir()
+        self._write(root / "real_dir" / "inside.txt", b"content")
+        link = root / "link_dir"
+        if not self._symlink(link, root / "real_dir"):
+            self.skipTest("symlink creation not permitted in this environment")
+
+        directory_links = storage.enumerate_directory_links(root)
+        rels = {d.relative_to(root).as_posix() for d in directory_links}
+        self.assertIn("link_dir", rels)
+
+        findings = storage.check_symlink_confinement(
+            root, storage.enumerate_files(root) + directory_links
+        )
+        self.assertEqual(findings, [])
+
+    def test_external_directory_symlink_is_flagged(self) -> None:
+        root = self._temp_dir()
+        outside = self._temp_dir()
+        self._write(outside / "inside.txt", b"content")
+        link = root / "escape_dir"
+        if not self._symlink(link, outside):
+            self.skipTest("symlink creation not permitted in this environment")
+
+        directory_links = storage.enumerate_directory_links(root)
+        findings = storage.check_symlink_confinement(
+            root, storage.enumerate_files(root) + directory_links
+        )
+        self.assertTrue(any("external_symlink_target_rejected" in f for f in findings))
+
+    def test_directory_symlink_recorded_in_manifest_not_silently_omitted(self) -> None:
+        root = self._temp_dir()
+        self._write(root / "real_dir" / "inside.txt", b"content")
+        link = root / "link_dir"
+        if not self._symlink(link, root / "real_dir"):
+            self.skipTest("symlink creation not permitted in this environment")
+
+        manifest = storage.build_relocation_manifest(root)
+        paths = {e["path"] for e in manifest["entries"]}
+        self.assertIn("link_dir", paths)
+        kinds = {e["path"]: e["kind"] for e in manifest["entries"]}
+        self.assertEqual(kinds["link_dir"], "symlink")
+
+    @unittest.skipUnless(os.name == "nt", "junctions are a Windows-only concept")
+    def test_windows_junction_is_detected_as_reparse_point(self) -> None:
+        root = self._temp_dir()
+        target = self._temp_dir()
+        self._write(target / "inside.txt", b"content")
+        link = root / "junction_dir"
+        if not self._junction(link, target):
+            self.skipTest("junction creation not permitted in this environment")
+
+        self.assertTrue(storage._is_reparse_point(link))
+        # A true symlink check alone must NOT be relied on for junctions --
+        # this is the exact gap the hardening wave closed.
+        directory_links = storage.enumerate_directory_links(root)
+        rels = {d.relative_to(root).as_posix() for d in directory_links}
+        self.assertIn("junction_dir", rels)
+
+    @unittest.skipUnless(os.name == "nt", "junctions are a Windows-only concept")
+    def test_external_windows_junction_is_flagged(self) -> None:
+        root = self._temp_dir()
+        outside = self._temp_dir()
+        self._write(outside / "inside.txt", b"content")
+        link = root / "escape_junction"
+        if not self._junction(link, outside):
+            self.skipTest("junction creation not permitted in this environment")
+
+        directory_links = storage.enumerate_directory_links(root)
+        findings = storage.check_symlink_confinement(
+            root, storage.enumerate_files(root) + directory_links
+        )
+        self.assertTrue(any("external_symlink_target_rejected" in f for f in findings))
+
+    def test_directory_link_is_copied_as_a_link_not_descended_into(self) -> None:
+        root = self._temp_dir()
+        self._write(root / "real_dir" / "inside.txt", b"content")
+        if not self._symlink(root / "link_dir", root / "real_dir"):
+            self.skipTest("symlink creation not permitted in this environment")
+        destination = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+
+        result = storage.resumable_copy_tree(root, destination, work_root=work)
+
+        self.assertIn("link_dir", result.copied)
+        self.assertTrue((destination / "link_dir").is_symlink())
+        # Not recursed into as a real directory -- "real_dir" itself was
+        # also copied on its own (it's a plain directory in the source
+        # tree too), but "link_dir" landed as a link, not a second,
+        # independent copy of real_dir's contents.
+        self.assertTrue((destination / "real_dir" / "inside.txt").exists())
+        self.assertFalse((destination / "link_dir").is_dir() and not (destination / "link_dir").is_symlink())
+
+
 class GeneratedCacheExclusionTests(unittest.TestCase):
     def test_matches_nested_unity_package_cache(self) -> None:
         self.assertTrue(
@@ -267,6 +379,17 @@ class ExclusionPolicyTests(unittest.TestCase):
 
 
 class SpacePreflightTests(TempRootMixin, unittest.TestCase):
+    def setUp(self) -> None:
+        # Fixtures live under the OS temp dir, which is on the system
+        # volume on this machine. Patch _is_system_volume False by default
+        # so these general-purpose tests exercise the ordinary (512 MiB)
+        # reserve they're actually meant to test, not the much larger
+        # system-volume floor -- SystemVolumeReserveTests below tests that
+        # behavior directly, with its own explicit override.
+        patcher = mock.patch.object(storage, "_is_system_volume", return_value=False)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def _fixture(self) -> tuple[Path, Path, Path]:
         source = self._temp_dir() / "source"
         self._write(source / "a.bin", b"x" * 1000)
@@ -277,7 +400,13 @@ class SpacePreflightTests(TempRootMixin, unittest.TestCase):
 
     def test_preflight_ok_when_space_is_sufficient(self) -> None:
         source, storage_root, work_root = self._fixture()
-        with mock.patch.object(storage, "_free_bytes", return_value=10 * 1024 * 1024 * 1024):
+        # Fixtures live under the OS temp dir, which is on the system
+        # volume on this machine -- mock _is_system_volume False so this
+        # test exercises the ordinary (512 MiB) reserve it's actually
+        # meant to test, not the much larger system-volume floor (see the
+        # dedicated SystemVolumeReserveTests for that).
+        with mock.patch.object(storage, "_free_bytes", return_value=10 * 1024 * 1024 * 1024), \
+             mock.patch.object(storage, "_is_system_volume", return_value=False):
             budget = storage.preflight_space_budget(
                 source_root=source, raw_destination_root=storage_root, work_root=work_root
             )
@@ -374,6 +503,7 @@ class SpacePreflightTests(TempRootMixin, unittest.TestCase):
             return "vol-raw" if str(path).startswith(str(storage_root)) else "vol-work"
 
         with mock.patch.object(storage, "_volume_id", side_effect=fake_volume_id), \
+             mock.patch.object(storage, "_is_system_volume", return_value=False), \
              mock.patch.object(storage, "_free_bytes", return_value=10 * 1024 * 1024 * 1024):
             budget = storage.preflight_space_budget(
                 source_root=source, raw_destination_root=storage_root, work_root=work_root
@@ -402,6 +532,144 @@ class SpacePreflightTests(TempRootMixin, unittest.TestCase):
             )
             with_exclusion_bytes = with_exclusion.volumes[0].required_bytes
         self.assertLess(with_exclusion_bytes, without_exclusion_bytes)
+
+
+class SystemVolumeReserveTests(TempRootMixin, unittest.TestCase):
+    def test_system_volume_uses_the_much_larger_reserve_floor(self) -> None:
+        source = self._temp_dir() / "source"
+        self._write(source / "a.bin", b"x" * 1000)
+        storage_root = self._temp_dir() / "storage"
+        work_root = self._temp_dir() / "work"
+
+        # Enough space for the content and the ordinary 512 MiB reserve,
+        # but not enough for the ~25 GiB system-volume floor.
+        available = storage.DEFAULT_VOLUME_RESERVE_POLICY.non_system_volume_reserve_bytes + 10_000
+        with mock.patch.object(storage, "_is_system_volume", return_value=True), \
+             mock.patch.object(storage, "_free_bytes", return_value=available):
+            budget = storage.preflight_space_budget(
+                source_root=source, raw_destination_root=storage_root, work_root=work_root
+            )
+
+        self.assertFalse(budget.ok)
+        self.assertTrue(any("insufficient_volume_space" in f for f in budget.findings))
+
+    def test_non_system_volume_uses_the_ordinary_reserve(self) -> None:
+        source = self._temp_dir() / "source"
+        self._write(source / "a.bin", b"x" * 1000)
+        storage_root = self._temp_dir() / "storage"
+        work_root = self._temp_dir() / "work"
+
+        available = storage.DEFAULT_VOLUME_RESERVE_POLICY.non_system_volume_reserve_bytes + 10_000
+        with mock.patch.object(storage, "_is_system_volume", return_value=False), \
+             mock.patch.object(storage, "_free_bytes", return_value=available):
+            budget = storage.preflight_space_budget(
+                source_root=source, raw_destination_root=storage_root, work_root=work_root
+            )
+
+        self.assertTrue(budget.ok)
+
+    def test_caller_override_reserve_policy_is_recorded_on_the_budget(self) -> None:
+        source = self._temp_dir() / "source"
+        self._write(source / "a.bin", b"x" * 1000)
+        storage_root = self._temp_dir() / "storage"
+        work_root = self._temp_dir() / "work"
+        custom_policy = storage.VolumeReservePolicy(
+            system_volume_minimum_free_bytes=123, non_system_volume_reserve_bytes=456
+        )
+
+        with mock.patch.object(storage, "_is_system_volume", return_value=False), \
+             mock.patch.object(storage, "_free_bytes", return_value=10 * 1024 * 1024 * 1024):
+            budget = storage.preflight_space_budget(
+                source_root=source, raw_destination_root=storage_root, work_root=work_root,
+                reserve_policy=custom_policy,
+            )
+
+        self.assertEqual(budget.safety_margin_bytes, 456)
+
+
+class RootTopologyTests(TempRootMixin, unittest.TestCase):
+    def test_destination_inside_source_is_rejected(self) -> None:
+        source = self._temp_dir()
+        destination = source / "nested-destination"
+        work = self._temp_dir() / "work"
+
+        findings = storage.validate_root_topology(
+            source_root=source, raw_destination_root=destination, work_root=work
+        )
+        self.assertTrue(any("raw_destination_root is inside" in f for f in findings))
+
+    def test_work_root_inside_source_is_rejected(self) -> None:
+        source = self._temp_dir()
+        destination = self._temp_dir() / "destination"
+        work = source / "nested-work"
+
+        findings = storage.validate_root_topology(
+            source_root=source, raw_destination_root=destination, work_root=work
+        )
+        self.assertTrue(any("work_root is inside" in f for f in findings))
+
+    def test_extracted_identical_to_raw_is_rejected(self) -> None:
+        source = self._temp_dir()
+        destination = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+
+        findings = storage.validate_root_topology(
+            source_root=source, raw_destination_root=destination, work_root=work,
+            extracted_destination_root=destination,
+        )
+        self.assertTrue(any("identical to raw_destination_root" in f for f in findings))
+
+    def test_extracted_nested_inside_raw_is_rejected(self) -> None:
+        source = self._temp_dir()
+        destination = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+        extracted = destination / "nested-extracted"
+
+        findings = storage.validate_root_topology(
+            source_root=source, raw_destination_root=destination, work_root=work,
+            extracted_destination_root=extracted,
+        )
+        self.assertTrue(any("nested inside raw_destination_root" in f for f in findings))
+
+    def test_receipt_path_inside_source_is_rejected(self) -> None:
+        source = self._temp_dir()
+        destination = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+        receipt_path = source / "receipts" / "x.json"
+
+        findings = storage.validate_root_topology(
+            source_root=source, raw_destination_root=destination, work_root=work,
+            receipt_path=receipt_path,
+        )
+        self.assertTrue(any("receipt_path is inside source_root" in f for f in findings))
+
+    def test_clean_disjoint_roots_produce_no_findings(self) -> None:
+        base = self._temp_dir()
+        source = base / "source"
+        destination = base / "destination"
+        work = base / "work"
+        extracted = base / "extracted"
+        receipt_path = base / "receipts" / "x.json"
+
+        findings = storage.validate_root_topology(
+            source_root=source, raw_destination_root=destination, work_root=work,
+            extracted_destination_root=extracted, receipt_path=receipt_path,
+        )
+        self.assertEqual(findings, [])
+
+    def test_preflight_rejects_nested_destination_before_any_enumeration(self) -> None:
+        source = self._temp_dir()
+        self._write(source / "a.txt", b"content")
+        destination = source / "nested-destination"
+        work = self._temp_dir() / "work"
+
+        budget = storage.preflight_space_budget(
+            source_root=source, raw_destination_root=destination, work_root=work
+        )
+
+        self.assertFalse(budget.ok)
+        self.assertTrue(any("raw_destination_root is inside" in f for f in budget.findings))
+        self.assertEqual(budget.volumes, [])
 
 
 class ResumableCopyTests(TempRootMixin, unittest.TestCase):
@@ -521,6 +789,103 @@ class ResumableCopyTests(TempRootMixin, unittest.TestCase):
         self.assertIn("link.txt", second.skipped_already_present)
 
 
+class DestinationSideSymlinkSafetyTests(TempRootMixin, unittest.TestCase):
+    """Proves _lp_replace()'s no-follow fix: a planted symlink already
+    sitting at a destination path must never redirect a copy or receipt
+    write to overwrite whatever that symlink points at."""
+
+    def test_copy_replaces_the_destination_link_entry_not_its_external_target(self) -> None:
+        source = self._temp_dir() / "source"
+        self._write(source / "a.txt", b"new content")
+        destination_root = self._temp_dir() / "destination"
+        external = self._temp_dir() / "external"
+        self._write(external / "victim.txt", b"must not be touched")
+        if not self._symlink(destination_root / "a.txt", external / "victim.txt"):
+            self.skipTest("symlink creation not permitted in this environment")
+        work = self._temp_dir() / "work"
+
+        result = storage.resumable_copy_tree(source, destination_root, work_root=work)
+
+        self.assertEqual(result.copied, ["a.txt"])
+        self.assertEqual((external / "victim.txt").read_bytes(), b"must not be touched")
+        self.assertFalse((destination_root / "a.txt").is_symlink())
+        self.assertEqual((destination_root / "a.txt").read_bytes(), b"new content")
+
+    def test_receipt_write_replaces_the_receipt_link_entry_not_its_external_target(self) -> None:
+        external = self._temp_dir() / "external"
+        self._write(external / "victim.json", b'{"original": true}')
+        receipts_dir = self._temp_dir() / "receipts"
+        receipt_path = receipts_dir / "fixture.latest.json"
+        if not self._symlink(receipt_path, external / "victim.json"):
+            self.skipTest("symlink creation not permitted in this environment")
+
+        storage.write_relocation_receipt({"ok": True, "n": 1}, receipt_path)
+
+        self.assertEqual((external / "victim.json").read_bytes(), b'{"original": true}')
+        self.assertFalse(receipt_path.is_symlink())
+        self.assertEqual(storage.read_relocation_receipt(receipt_path), {"ok": True, "n": 1})
+
+
+class AbsoluteInternalSymlinkTests(TempRootMixin, unittest.TestCase):
+    def test_relative_internal_target_is_preserved_unchanged(self) -> None:
+        source_root = self._temp_dir() / "source"
+        self._write(source_root / "real.txt", b"content")
+        if not self._symlink(source_root / "link.txt", Path("real.txt")):
+            self.skipTest("symlink creation not permitted in this environment")
+        destination_root = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+
+        storage.resumable_copy_tree(source_root, destination_root, work_root=work)
+
+        # A relative target string survives unchanged -- the relative
+        # relationship between link and target holds at the new location
+        # too, since the whole tree was copied with the same layout.
+        self.assertEqual(os.readlink(destination_root / "link.txt"), "real.txt")
+
+    def test_absolute_internal_target_is_rewritten_to_the_destination(self) -> None:
+        source_root = self._temp_dir() / "source"
+        self._write(source_root / "real.txt", b"content")
+        absolute_internal_target = str((source_root / "real.txt").resolve())
+        if not self._symlink(source_root / "link.txt", Path(absolute_internal_target)):
+            self.skipTest("symlink creation not permitted in this environment")
+        destination_root = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+
+        storage.resumable_copy_tree(source_root, destination_root, work_root=work)
+
+        rewritten = os.readlink(destination_root / "link.txt")
+        self.assertNotEqual(rewritten, absolute_internal_target)
+        self.assertTrue(Path(rewritten).is_relative_to(destination_root.resolve()))
+
+    def test_relocated_tree_with_absolute_internal_link_survives_source_removal(self) -> None:
+        # The acceptance test the review asked for directly: relocate,
+        # remove the original source entirely, and prove the destination
+        # link still resolves and exact restore verification still
+        # passes -- proving the relocated tree is genuinely self-
+        # contained, not silently dependent on the original source still
+        # existing.
+        source_root = self._temp_dir() / "source"
+        self._write(source_root / "real.txt", b"durable content")
+        absolute_internal_target = str((source_root / "real.txt").resolve())
+        if not self._symlink(source_root / "link.txt", Path(absolute_internal_target)):
+            self.skipTest("symlink creation not permitted in this environment")
+        destination_root = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+
+        expected_manifest = storage.build_relocation_manifest(source_root)
+        storage.resumable_copy_tree(source_root, destination_root, work_root=work)
+
+        shutil.rmtree(source_root, ignore_errors=True)
+
+        self.assertTrue((destination_root / "link.txt").is_symlink())
+        linked_target = (destination_root / "link.txt").resolve()
+        self.assertTrue(linked_target.exists())
+        self.assertEqual(linked_target.read_bytes(), b"durable content")
+
+        verification = storage.verify_restore(manifest=expected_manifest, root=destination_root)
+        self.assertTrue(verification["ok"], verification)
+
+
 class RelocationManifestAndRestoreVerificationTests(TempRootMixin, unittest.TestCase):
     def test_manifest_round_trips_through_verify_restore_as_ok(self) -> None:
         root = self._temp_dir()
@@ -610,6 +975,96 @@ class DurableReceiptTests(TempRootMixin, unittest.TestCase):
 
         siblings = list(path.parent.iterdir())
         self.assertEqual(siblings, [path])
+
+    def test_manifest_round_trips_through_write_and_read(self) -> None:
+        # At minimum the expected (source-anchored) manifest should be
+        # durably persisted, not only its digest -- a digest alone cannot
+        # reconstruct the expected entries for a later restore proof once
+        # this process has exited.
+        source = self._temp_dir()
+        self._write(source / "a.txt", b"alpha")
+        manifest = storage.build_relocation_manifest(source)
+        path = self._temp_dir() / "manifests" / "fixture.manifest.json"
+
+        storage.write_relocation_manifest(manifest, path)
+        read_back = storage.read_relocation_manifest(path)
+
+        self.assertEqual(read_back, manifest)
+
+    def test_persisted_manifest_can_verify_restore_after_reload(self) -> None:
+        source = self._temp_dir()
+        self._write(source / "a.txt", b"alpha")
+        manifest = storage.build_relocation_manifest(source)
+        path = self._temp_dir() / "manifests" / "fixture.manifest.json"
+        storage.write_relocation_manifest(manifest, path)
+
+        reloaded_manifest = storage.read_relocation_manifest(path)
+        verification = storage.verify_restore(manifest=reloaded_manifest, root=source)
+
+        self.assertTrue(verification["ok"])
+
+
+class ReceiptSemanticValidationTests(unittest.TestCase):
+    def _base_receipt(self) -> dict:
+        return {
+            "raw_leg": {"files_copied": 1, "files_failed": [], "ok": True},
+            "extracted_leg": None,
+            "destination_verification": {"ok": True},
+            "extracted_verification": None,
+            "space_budget": {"ok": True},
+            "ok": True,
+        }
+
+    def test_coherent_receipt_has_no_findings(self) -> None:
+        findings = storage.validate_relocation_receipt_semantics(self._base_receipt())
+        self.assertEqual(findings, [])
+
+    def test_raw_leg_ok_true_with_failed_files_is_rejected(self) -> None:
+        receipt = self._base_receipt()
+        receipt["raw_leg"] = {"files_copied": 1, "files_failed": ["a.txt"], "ok": True}
+        findings = storage.validate_relocation_receipt_semantics(receipt)
+        self.assertTrue(any("raw_leg.ok is true but raw_leg.files_failed" in f for f in findings))
+
+    def test_extracted_leg_ok_true_with_failed_files_is_rejected(self) -> None:
+        receipt = self._base_receipt()
+        receipt["extracted_leg"] = {"files_copied": 1, "files_failed": ["a.txt"], "ok": True}
+        findings = storage.validate_relocation_receipt_semantics(receipt)
+        self.assertTrue(any("extracted_leg.ok is true but extracted_leg.files_failed" in f for f in findings))
+
+    def test_receipt_ok_true_with_failed_destination_verification_is_rejected(self) -> None:
+        receipt = self._base_receipt()
+        receipt["destination_verification"] = {"ok": False}
+        findings = storage.validate_relocation_receipt_semantics(receipt)
+        self.assertTrue(any("destination_verification.ok is false" in f for f in findings))
+
+    def test_receipt_ok_true_with_failed_space_budget_is_rejected(self) -> None:
+        receipt = self._base_receipt()
+        receipt["space_budget"] = {"ok": False}
+        findings = storage.validate_relocation_receipt_semantics(receipt)
+        self.assertTrue(any("space_budget.ok is false" in f for f in findings))
+
+    def test_a_genuine_relocate_archive_source_receipt_is_always_semantically_coherent(self) -> None:
+        # Not just synthetic contradiction fixtures -- prove the module's
+        # own real output never trips its own semantic validator.
+        root = Path(tempfile.mkdtemp(prefix="atlas-storage-semantic-"))
+        self.addCleanup(shutil.rmtree, root, ignore_errors=True)
+        source = root / "source"
+        storage._lp_mkdir(source)
+        (source / "a.txt").write_text("content", encoding="utf-8")
+        destination = root / "destination"
+        work = root / "work"
+
+        result = storage.relocate_archive_source(
+            archive_id="synthetic--semantic-check",
+            source_root=source,
+            destination_root=destination,
+            work_root=work,
+            source_description="synthetic fixture",
+        )
+
+        self.assertTrue(result.ok)
+        findings = storage.validate_relocation_receipt_semantics(result.receipt)
+        self.assertEqual(findings, [])
 
 
 class RelocateArchiveSourceEndToEndTests(TempRootMixin, unittest.TestCase):
@@ -792,12 +1247,13 @@ class RelocateArchiveSourceEndToEndTests(TempRootMixin, unittest.TestCase):
         self.assertEqual(result.receipt["excluded_path_count"], 1)
         self.assertFalse((destination / "Library").exists())
 
-    def test_receipt_can_be_durably_persisted_and_read_back(self) -> None:
+    def test_receipt_and_expected_manifest_can_be_durably_persisted_and_read_back(self) -> None:
         source = self._temp_dir() / "synthetic-source"
         self._write(source / "notes.md", b"content")
         destination = self._temp_dir() / "destination"
         work = self._temp_dir() / "work"
         receipt_path = self._temp_dir() / "receipts" / "synthetic--persisted.latest.json"
+        manifest_path = self._temp_dir() / "manifests" / "synthetic--persisted.manifest.json"
 
         result = storage.relocate_archive_source(
             archive_id="synthetic--persisted",
@@ -806,11 +1262,20 @@ class RelocateArchiveSourceEndToEndTests(TempRootMixin, unittest.TestCase):
             work_root=work,
             source_description="synthetic fixture proving durable receipt persistence",
             receipt_path=receipt_path,
+            expected_manifest_path=manifest_path,
         )
 
         self.assertTrue(result.ok)
         read_back = storage.read_relocation_receipt(receipt_path)
         self.assertEqual(read_back, result.receipt)
+        self.assertEqual(result.receipt["expected_manifest_ref"], str(manifest_path))
+
+        reloaded_manifest = storage.read_relocation_manifest(manifest_path)
+        self.assertEqual(reloaded_manifest, result.expected_manifest)
+        # The persisted manifest independently verifies against the real
+        # destination even after being reloaded from disk.
+        verification = storage.verify_restore(manifest=reloaded_manifest, root=destination)
+        self.assertTrue(verification["ok"])
 
     def test_full_receipt_validates_against_schema(self) -> None:
         source = self._temp_dir() / "synthetic-source"
@@ -889,6 +1354,7 @@ class RelocationReceiptSchemaTests(unittest.TestCase):
             "exclusion_policy_version": "v1",
             "excluded_path_count": 0,
             "excluded_paths_digest": "sha256:" + ("a" * 64),
+            "expected_manifest_ref": "/tmp/receipts/synthetic--fixture.manifest.json",
             "raw_leg": leg,
             "extracted_leg": None,
             "expected_manifest_digest": "sha256:" + ("b" * 64),

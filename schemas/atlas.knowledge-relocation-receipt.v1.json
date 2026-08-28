@@ -17,6 +17,7 @@
     "excluded_paths_digest",
     "raw_leg",
     "extracted_leg",
+    "expected_manifest_ref",
     "expected_manifest_digest",
     "destination_manifest_digest",
     "destination_verification",
@@ -91,6 +92,11 @@
         "bytes_copied": { "type": "integer", "minimum": 0 },
         "ok": { "type": "boolean" }
       }
+    },
+    "expected_manifest_ref": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "description": "Path where the full expected-manifest content (not only its digest) was durably persisted via write_relocation_manifest(), or null if the caller did not pass expected_manifest_path. A digest alone cannot reconstruct the expected entries for a later restore proof once the process that computed it has exited."
     },
     "expected_manifest_digest": {
       "type": "string",

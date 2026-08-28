@@ -32,6 +32,7 @@ import hashlib
 import json
 import os
 import shutil
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -150,7 +151,15 @@ def _lp_copy2(source: Path, destination: Path) -> None:
 
 
 def _lp_replace(source: Path, destination: Path) -> None:
-    os.replace(_win_long_path(source), _win_long_path(destination))
+    # No-follow on both sides. destination in particular must never be
+    # resolve()d first: if a destination path is already a symlink (or a
+    # symlink is planted there between preflight and copy), resolving it
+    # would target os.replace() at the link's *target* instead of the
+    # directory entry, silently overwriting whatever that target is --
+    # potentially outside every admitted root. This applies to every
+    # _lp_replace() caller, including receipt/manifest writes, not only
+    # regular-file copy.
+    os.replace(_win_long_path_no_follow(source), _win_long_path_no_follow(destination))
 
 
 def _lp_symlink(target: str, link_path: Path) -> None:
@@ -288,37 +297,92 @@ def enumerate_files(root: Path) -> list[Path]:
     return [root / rel for rel in rel_entries]
 
 
+def _is_reparse_point(path: Path) -> bool:
+    """True for both symlinks and Windows junctions/mount-point reparse
+    points. `Path.is_symlink()` alone is not reliable for junctions on
+    Windows -- junctions use `IO_REPARSE_TAG_MOUNT_POINT`, not
+    `IO_REPARSE_TAG_SYMLINK` -- so this also checks the raw reparse tag
+    via `lstat()`, which Python exposes as `st_reparse_tag` on Windows."""
+    if _lp_is_symlink(path):
+        return True
+    if os.name != "nt":
+        return False
+    try:
+        st = _win_long_path_no_follow(path).lstat()
+    except OSError:
+        return False
+    return getattr(st, "st_reparse_tag", 0) != 0
+
+
+def enumerate_directory_links(root: Path) -> list[Path]:
+    """Enumerate directory symlinks and Windows junctions found under
+    `root`, without descending into them -- `enumerate_files()`'s
+    `os.walk(followlinks=False)` already prevents traversal into them, but
+    it only records `filenames`, never `dirnames`, so a directory link was
+    previously invisible to the manifest and to symlink confinement
+    entirely: silently omitted from a claimed lossless raw preservation,
+    and never checked for an external target.
+
+    Kept separate from `enumerate_files()` rather than merged into it, so
+    that function's contract for `_pipeline.list_files()` -- files only,
+    proven identical to the previous `rglob()`-based behavior -- is
+    unchanged.
+    """
+    if not root.exists():
+        return []
+    walk_root = _win_long_path(root)
+    rel_entries: list[str] = []
+    for dirpath, dirnames, _filenames in os.walk(walk_root, followlinks=False):
+        dirpath_path = Path(dirpath)
+        link_names = [name for name in dirnames if _is_reparse_point(dirpath_path / name)]
+        for name in sorted(link_names, key=_sort_key):
+            candidate = dirpath_path / name
+            rel_entries.append(candidate.relative_to(walk_root).as_posix())
+        # os.walk(followlinks=False) already will not descend into these;
+        # removing them from dirnames here is hygiene, not a safety
+        # requirement, so a later os.walk internals change can't
+        # accidentally start recursing into a directory link.
+        dirnames[:] = [d for d in dirnames if d not in link_names]
+    rel_entries.sort(key=_sort_key)
+    return [root / rel for rel in rel_entries]
+
+
 # ---------------------------------------------------------------------------
 # 3. Symlink confinement
 # ---------------------------------------------------------------------------
 
 
-def check_symlink_confinement(root: Path, files: list[Path]) -> list[str]:
-    """Return one blocking finding per file symlink among `files` whose
-    real target resolves outside `root`.
+def check_symlink_confinement(root: Path, entries: list[Path]) -> list[str]:
+    """Return one blocking finding per symlink or junction among `entries`
+    whose real target resolves outside `root`. `entries` should be the
+    combination of `enumerate_files(root)` (file symlinks) and
+    `enumerate_directory_links(root)` (directory symlinks and Windows
+    junctions) -- checking only files would leave a directory link's
+    target completely unconfined.
 
-    Directory-symlink recursion is already prevented by
-    enumerate_files()'s os.walk(followlinks=False). This handles the
-    remaining gap: a *file* symlink inside an admitted source tree whose
-    target points somewhere else entirely -- shutil.copy2() follows
-    symlinks by default, so without this check such a link would silently
-    copy content from outside the admitted root into the "preserved"
-    destination.
+    Directory-link *recursion* is already prevented by
+    `enumerate_files()`'s `os.walk(followlinks=False)`. This handles the
+    remaining gap: a link inside an admitted source tree whose target
+    points somewhere else entirely -- `shutil.copy2()` follows file
+    symlinks by default, and a directory link would otherwise be silently
+    omitted from the manifest with its target never checked at all --
+    without this check either would silently expose content from outside
+    the admitted root.
     """
     findings: list[str] = []
     normal_root = _win_long_path(root).resolve()
-    for f in files:
-        if not _lp_is_symlink(f):
+    for entry in entries:
+        if not _is_reparse_point(entry):
             continue
         try:
-            target = _win_long_path(f).resolve()
+            target = _win_long_path(entry).resolve()
         except OSError:
-            findings.append(f"unresolvable_symlink_target: {f}")
+            findings.append(f"unresolvable_symlink_target: {entry}")
             continue
         try:
             target.relative_to(normal_root)
         except ValueError:
-            findings.append(f"external_symlink_target_rejected: {f} -> {target}")
+            findings.append(f"external_symlink_target_rejected: {entry} -> {target}")
     return findings
 
 
@@ -413,6 +477,24 @@ class SpaceBudget:
     findings: list[str] = field(default_factory=list)
 
 
+# System-volume floor: 25 GiB, matching the operational threshold this
+# ATLAS engagement already established the hard way -- the constrained
+# band starts at 25GB free on the system drive, below which no bounded
+# large-write work should proceed at all. A universal 512 MiB margin does
+# not protect that floor; the system volume needs a much larger reserve
+# than any other volume this preflight might touch.
+SYSTEM_VOLUME_MINIMUM_FREE_BYTES = 25 * 1024 * 1024 * 1024
+
+
+@dataclass(frozen=True)
+class VolumeReservePolicy:
+    system_volume_minimum_free_bytes: int = SYSTEM_VOLUME_MINIMUM_FREE_BYTES
+    non_system_volume_reserve_bytes: int = DEFAULT_SAFETY_MARGIN_BYTES
+
+
+DEFAULT_VOLUME_RESERVE_POLICY = VolumeReservePolicy()
+
+
 def _existing_ancestor(path: Path) -> Path:
     probe = path
     while not _lp_exists(probe):
@@ -426,6 +508,68 @@ def _existing_ancestor(path: Path) -> Path:
 def _volume_id(path: Path) -> Any:
     ancestor = _existing_ancestor(path)
     return _lp_stat(ancestor).st_dev
+
+
+def _is_system_volume(probe_path: Path) -> bool:
+    if os.name == "nt":
+        system_drive = os.environ.get("SystemDrive", "C:").rstrip("\\").upper()
+        return str(probe_path).upper().startswith(system_drive)
+    try:
+        return _lp_stat(probe_path).st_dev == _lp_stat(Path("/")).st_dev
+    except OSError:
+        return False
+
+
+def _reserve_for(probe_path: Path, reserve_policy: VolumeReservePolicy) -> int:
+    return (
+        reserve_policy.system_volume_minimum_free_bytes
+        if _is_system_volume(probe_path)
+        else reserve_policy.non_system_volume_reserve_bytes
+    )
+
+
+def _is_within_or_equal(parent: Path, candidate: Path) -> bool:
+    parent_r = parent.resolve()
+    candidate_r = candidate.resolve()
+    return candidate_r == parent_r or candidate_r.is_relative_to(parent_r)
+
+
+def validate_root_topology(
+    *,
+    source_root: Path,
+    raw_destination_root: Path,
+    work_root: Path,
+    extracted_destination_root: Path | None = None,
+    receipt_path: Path | None = None,
+    expected_manifest_path: Path | None = None,
+) -> list[str]:
+    """Reject dangerous root relationships before any filesystem mutation
+    starts. The most dangerous case is a destination nested inside the
+    source: a resumed operation would then enumerate its own previous
+    output as part of the source and re-copy (or recursively expand) it.
+    Called before any enumeration or space computation in
+    preflight_space_budget() -- a topology violation is worse than a
+    space shortfall and is checked first.
+    """
+    findings: list[str] = []
+    if _is_within_or_equal(source_root, raw_destination_root):
+        findings.append("raw_destination_root is inside (or equal to) source_root")
+    if _is_within_or_equal(source_root, work_root):
+        findings.append("work_root is inside (or equal to) source_root")
+    if extracted_destination_root is not None:
+        if _is_within_or_equal(source_root, extracted_destination_root):
+            findings.append("extracted_destination_root is inside (or equal to) source_root")
+        if extracted_destination_root.resolve() == raw_destination_root.resolve():
+            findings.append("extracted_destination_root is identical to raw_destination_root")
+        elif _is_within_or_equal(raw_destination_root, extracted_destination_root):
+            findings.append("extracted_destination_root is nested inside raw_destination_root")
+        elif _is_within_or_equal(extracted_destination_root, raw_destination_root):
+            findings.append("raw_destination_root is nested inside extracted_destination_root")
+    if receipt_path is not None and _is_within_or_equal(source_root, receipt_path):
+        findings.append("receipt_path is inside source_root")
+    if expected_manifest_path is not None and _is_within_or_equal(source_root, expected_manifest_path):
+        findings.append("expected_manifest_path is inside source_root")
+    return findings
 
 
 def _free_bytes(path: Path) -> int:
@@ -475,18 +619,22 @@ def preflight_space_budget(
     raw_destination_root: Path,
     work_root: Path,
     extracted_destination_root: Path | None = None,
-    safety_margin_bytes: int = DEFAULT_SAFETY_MARGIN_BYTES,
+    reserve_policy: VolumeReservePolicy = DEFAULT_VOLUME_RESERVE_POLICY,
     exclude: Callable[[str], bool] | None = None,
+    receipt_path: Path | None = None,
+    expected_manifest_path: Path | None = None,
 ) -> SpaceBudget:
     """Compute the PEAK space this relocation will actually require,
     modeled per real filesystem volume (`st_dev`), not per logical root --
     raw destination, extracted destination, and work root can be three
     separate volumes, two of the three, or all one, and the budget must
     reflect whichever is actually true rather than checking each root's
-    requirement independently. Fails closed (ok=False) on insufficient
-    space on any volume, an unstatable source file, or a symlink whose
-    target escapes source_root (see check_symlink_confinement()) --
-    nothing starts copying until every one of these passes.
+    requirement independently. Fails closed (ok=False) on: a dangerous
+    root-topology relationship (checked first, before any enumeration --
+    see validate_root_topology()), insufficient space on any volume, an
+    unstatable source file, or a symlink/junction whose target escapes
+    source_root (see check_symlink_confinement()) -- nothing starts
+    copying until every one of these passes.
 
     Demand modeled per volume:
     - raw/extracted destination volumes: bytes still needed (not yet
@@ -503,9 +651,39 @@ def preflight_space_budget(
       checked independently, so two individually-passing checks can no
       longer both be true while the real combined operation runs out of
       space.
+
+    `reserve_policy` sets the minimum free space each volume must retain
+    after the operation, distinct for the system volume versus any other
+    -- a flat 512 MiB margin does not protect the much larger operational
+    floor this ATLAS engagement already established for the system drive
+    (see SYSTEM_VOLUME_MINIMUM_FREE_BYTES). The policy actually used is
+    recorded on the returned SpaceBudget so a caller override is bound
+    into the relocation receipt, not silently applied.
     """
+    topology_findings = validate_root_topology(
+        source_root=source_root,
+        raw_destination_root=raw_destination_root,
+        work_root=work_root,
+        extracted_destination_root=extracted_destination_root,
+        receipt_path=receipt_path,
+        expected_manifest_path=expected_manifest_path,
+    )
+    if topology_findings:
+        # A topology violation is worse than a space shortfall -- do not
+        # even enumerate the source, let alone compute demand, once one
+        # is found.
+        return SpaceBudget(
+            volumes=[],
+            safety_margin_bytes=reserve_policy.non_system_volume_reserve_bytes,
+            ok=False,
+            findings=list(topology_findings),
+        )
+
     all_source_files = enumerate_files(source_root)
-    blocking_findings = list(check_symlink_confinement(source_root, all_source_files))
+    all_source_directory_links = enumerate_directory_links(source_root)
+    blocking_findings = list(
+        check_symlink_confinement(source_root, all_source_files + all_source_directory_links)
+    )
 
     raw_needed, raw_largest, raw_blocking = _bytes_still_needed(source_root, raw_destination_root, exclude=exclude)
     blocking_findings.extend(raw_blocking)
@@ -537,14 +715,15 @@ def preflight_space_budget(
     volumes: list[VolumeRequirement] = []
     findings = list(blocking_findings)
     for entry in demands.values():
-        required = entry["bytes"] + safety_margin_bytes
+        reserve = _reserve_for(entry["probe_path"], reserve_policy)
+        required = entry["bytes"] + reserve
         available = _free_bytes(entry["probe_path"])
         volume_ok = available >= required
         if not volume_ok:
             findings.append(
                 "insufficient_volume_space: "
                 f"volume_probe={entry['probe_path']} required={required} available={available} "
-                f"demands=[{', '.join(entry['labels'])}]"
+                f"reserve={reserve} demands=[{', '.join(entry['labels'])}]"
             )
         volumes.append(
             VolumeRequirement(
@@ -556,7 +735,12 @@ def preflight_space_budget(
         )
 
     ok = not blocking_findings and all(v.ok for v in volumes)
-    return SpaceBudget(volumes=volumes, safety_margin_bytes=safety_margin_bytes, ok=ok, findings=findings)
+    return SpaceBudget(
+        volumes=volumes,
+        safety_margin_bytes=reserve_policy.non_system_volume_reserve_bytes,
+        ok=ok,
+        findings=findings,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -576,13 +760,78 @@ class CopyResult:
     total_bytes_copied: int = 0
 
 
-def _matches_existing(source: Path, destination: Path) -> bool:
-    if _lp_is_symlink(source):
-        if not _lp_is_symlink(destination):
+def _rewrite_symlink_target_if_needed(
+    *, link_source: Path, raw_target: str, source_root: Path | None, destination_root: Path | None
+) -> str:
+    """Return the target text a preserved symlink should actually carry at
+    the destination.
+
+    A *relative* target is returned unchanged: the relative relationship
+    between a link and its target survives an identical-layout copy of
+    the whole tree.
+
+    An *absolute* target is different. If it is left untouched, a
+    relocated tree is not self-contained -- the destination's link would
+    still point back at the original source location, and would break
+    (or silently point at stale content) once that source is later moved
+    or deleted, which is exactly what a relocation is for. So an absolute
+    target that resolves inside `source_root` is rewritten to the
+    corresponding absolute path under `destination_root`. An absolute
+    target outside `source_root` should already have been rejected by
+    check_symlink_confinement() before any copy starts; this raises
+    defensively for a caller that invokes the copy primitives directly
+    without going through that preflight.
+
+    `source_root`/`destination_root` are optional: when either is None
+    (a caller with no root context), an absolute target is returned
+    unchanged rather than raising, preserving the previous unqualified
+    behavior for callers that never had this context.
+    """
+    if source_root is None or destination_root is None:
+        return raw_target
+    candidate = Path(raw_target)
+    if not candidate.is_absolute():
+        return raw_target
+    normal_source_root = source_root.resolve()
+    normal_candidate = Path(os.path.normpath(str(candidate)))
+    try:
+        rel = normal_candidate.relative_to(normal_source_root)
+    except ValueError:
+        raise ResumableCopyError(
+            f"absolute symlink target could not be confined to source_root: {link_source} -> {raw_target}"
+        )
+    return str(destination_root / rel)
+
+
+def _matches_existing(
+    source: Path,
+    destination: Path,
+    *,
+    source_root: Path | None = None,
+    destination_root: Path | None = None,
+) -> bool:
+    if _is_reparse_point(source):
+        if not _is_reparse_point(destination):
             return False
         try:
-            return _lp_readlink(source) == _lp_readlink(destination)
-        except OSError:
+            if _lp_is_symlink(source):
+                if not _lp_is_symlink(destination):
+                    return False
+                raw_target = _lp_readlink(source)
+                expected_target = _rewrite_symlink_target_if_needed(
+                    link_source=source, raw_target=raw_target,
+                    source_root=source_root, destination_root=destination_root,
+                )
+                return _lp_readlink(destination) == expected_target
+            # Junction: os.readlink() cannot read its raw target, so
+            # compare resolved targets instead (see
+            # _copy_one_junction_resumable() for the same reasoning).
+            expected_resolved = _resolved_and_rebased_target(
+                source, source_root=source_root, destination_root=destination_root
+            ).resolve()
+            destination_resolved = _win_long_path(destination).resolve()
+            return destination_resolved == expected_resolved
+        except (OSError, ResumableCopyError):
             return False
     if not _lp_is_file(destination):
         return False
@@ -611,14 +860,36 @@ def _atomic_place(staged: Path, destination: Path) -> None:
     _lp_unlink(staged, missing_ok=True)
 
 
-def _copy_one_symlink_resumable(source: Path, destination: Path) -> int:
+def _copy_one_symlink_resumable(
+    source: Path, destination: Path, *, source_root: Path | None = None, destination_root: Path | None = None
+) -> int:
     """Preserve `source` as a symlink at `destination` rather than
     dereferencing it into a regular-file copy of its target's content.
     Symlink creation is itself a single atomic filesystem operation (no
     partial-write state exists the way it does for file content), so no
     staging is needed here the way _copy_one_resumable() stages regular
-    files."""
-    target = _lp_readlink(source)
+    files.
+
+    An absolute target confined to source_root is rewritten to the
+    corresponding path under destination_root, so the relocated tree does
+    not silently point back at the original source (see
+    _rewrite_symlink_target_if_needed()).
+
+    A non-symlink reparse point (a Windows junction) is handled
+    separately: `os.readlink()` cannot portably read a junction's raw
+    target -- junctions store it in a different reparse-data format than
+    symlinks -- so its resolved target is used instead and rebased onto
+    destination_root the same way an absolute symlink target is, then
+    recreated as a new junction via `mklink /J` (which, unlike
+    `os.symlink()`, does not require SeCreateSymbolicLinkPrivilege)."""
+    if not _lp_is_symlink(source):
+        return _copy_one_junction_resumable(
+            source, destination, source_root=source_root, destination_root=destination_root
+        )
+    raw_target = _lp_readlink(source)
+    target = _rewrite_symlink_target_if_needed(
+        link_source=source, raw_target=raw_target, source_root=source_root, destination_root=destination_root
+    )
     if _lp_exists(destination) or _lp_is_symlink(destination):
         _lp_unlink(destination, missing_ok=True)
     try:
@@ -628,10 +899,52 @@ def _copy_one_symlink_resumable(source: Path, destination: Path) -> int:
     return 0
 
 
-def _copy_one_resumable(source: Path, destination: Path, *, work_root: Path) -> int:
+def _resolved_and_rebased_target(
+    source: Path, *, source_root: Path | None, destination_root: Path | None
+) -> Path:
+    resolved = _win_long_path(source).resolve()
+    if source_root is not None and destination_root is not None:
+        try:
+            rel = resolved.relative_to(source_root.resolve())
+            return destination_root / rel
+        except ValueError:
+            pass  # external target; should already be rejected by preflight confinement
+    return resolved
+
+
+def _copy_one_junction_resumable(
+    source: Path, destination: Path, *, source_root: Path | None, destination_root: Path | None
+) -> int:
+    if os.name != "nt":
+        raise ResumableCopyError(f"non-symlink reparse point cannot be preserved on this platform: {source}")
+    target = _resolved_and_rebased_target(source, source_root=source_root, destination_root=destination_root)
+    if _lp_exists(destination) or _lp_is_symlink(destination):
+        _lp_unlink(destination, missing_ok=True)
+    result = subprocess.run(
+        ["cmd", "/c", "mklink", "/J", str(destination), str(target)],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise ResumableCopyError(
+            f"failed to create junction {destination} -> {target}: {result.stderr or result.stdout}"
+        )
+    return 0
+
+
+def _copy_one_resumable(
+    source: Path,
+    destination: Path,
+    *,
+    work_root: Path,
+    source_root: Path | None = None,
+    destination_root: Path | None = None,
+) -> int:
     _lp_mkdir(destination.parent)
-    if _lp_is_symlink(source):
-        return _copy_one_symlink_resumable(source, destination)
+    if _is_reparse_point(source):
+        return _copy_one_symlink_resumable(
+            source, destination, source_root=source_root, destination_root=destination_root
+        )
     stage_dir = work_root / "copy-staging"
     _lp_mkdir(stage_dir)
     stage_name = hashlib.sha1(str(destination).encode("utf-8")).hexdigest() + ".part"
@@ -666,22 +979,34 @@ def resumable_copy_tree(
     checksum-verified against the source, and only then moved into
     destination_root with an atomic rename (see _atomic_place).
     destination_root never contains a partially-written file, even if the
-    process is killed mid-copy. Symlinks are preserved as symlinks (see
-    _copy_one_symlink_resumable), not dereferenced into a copy of their
-    target's content.
+    process is killed mid-copy. File symlinks and directory symlinks /
+    junctions (see enumerate_directory_links()) are preserved as links
+    (see _copy_one_symlink_resumable), not dereferenced into a copy of
+    their target's content -- an absolute link target confined to
+    source_root is rewritten to the corresponding destination path so the
+    relocated tree is self-contained.
     """
     files = enumerate_files(source_root)
+    directory_links = enumerate_directory_links(source_root)
     result = CopyResult()
-    for source_path in files:
+    for source_path in list(files) + list(directory_links):
         rel = source_path.relative_to(source_root).as_posix()
         if exclude is not None and exclude(rel):
             continue
         destination_path = destination_root / rel
-        if _matches_existing(source_path, destination_path):
+        if _matches_existing(
+            source_path, destination_path, source_root=source_root, destination_root=destination_root
+        ):
             result.skipped_already_present.append(rel)
             continue
         try:
-            size = _copy_one_resumable(source_path, destination_path, work_root=work_root)
+            size = _copy_one_resumable(
+                source_path,
+                destination_path,
+                work_root=work_root,
+                source_root=source_root,
+                destination_root=destination_root,
+            )
             result.copied.append(rel)
             result.total_bytes_copied += size
         except (OSError, ResumableCopyError):
@@ -696,15 +1021,19 @@ def resumable_copy_tree(
 
 def build_relocation_manifest(root: Path, *, exclude: Callable[[str], bool] | None = None) -> dict[str, Any]:
     """Build a manifest of `root`'s current real content via long-path-safe
-    enumeration. Contains only relative paths, sizes, and checksums (a
-    symlink's "checksum" is a digest of its link target, not its target's
-    content) -- no reference to junctions, drive letters, or any storage
-    mechanism -- so it reconciles identically regardless of how `root` is
-    currently reached.
+    enumeration -- files, file symlinks, and directory symlinks/junctions
+    (see enumerate_directory_links()) alike. Contains only relative paths,
+    kinds, sizes, and checksums (a link's "checksum" is a digest of its
+    resolved/readlink-derived target, not its target's content) -- no
+    reference to drive letters or any storage mechanism -- so it
+    reconciles identically regardless of how `root` is currently reached.
+    A directory link's own target is never traversed into for this
+    manifest; the link is one entry, not a subtree.
     """
     files = enumerate_files(root)
+    directory_links = enumerate_directory_links(root)
     entries: list[dict[str, Any]] = []
-    for path in files:
+    for path in list(files) + list(directory_links):
         rel = path.relative_to(root).as_posix()
         if exclude is not None and exclude(rel):
             continue
@@ -715,6 +1044,22 @@ def build_relocation_manifest(root: Path, *, exclude: Callable[[str], bool] | No
                     "kind": "symlink",
                     "size_bytes": 0,
                     "checksum": stable_json_digest({"symlink_target": _lp_readlink(path)}),
+                }
+            )
+            continue
+        if _is_reparse_point(path):
+            # Windows junction: no portable raw-target read, so the
+            # checksum is over the resolved target instead.
+            try:
+                resolved_target = str(_win_long_path(path).resolve())
+            except OSError:
+                resolved_target = "<unresolvable>"
+            entries.append(
+                {
+                    "path": rel,
+                    "kind": "junction",
+                    "size_bytes": 0,
+                    "checksum": stable_json_digest({"resolved_target": resolved_target}),
                 }
             )
             continue
@@ -792,6 +1137,7 @@ def build_relocation_receipt(
     raw_copy_result: CopyResult,
     extracted_copy_result: CopyResult | None,
     expected_manifest: dict[str, Any],
+    expected_manifest_ref: str | None,
     destination_manifest: dict[str, Any],
     space_budget: SpaceBudget,
     exclusion_policy: ExclusionPolicy,
@@ -828,6 +1174,15 @@ def build_relocation_receipt(
             if extracted_copy_result is not None
             else None
         ),
+        # expected_manifest_ref: where the full expected-manifest content
+        # (not just its digest) was durably persisted, when it was --
+        # a digest alone cannot reconstruct the expected entries for a
+        # later restore proof once the process that computed it has
+        # exited. destination_manifest is deliberately digest-only: it is
+        # always recomputable on demand from a live destination_root via
+        # build_relocation_manifest(), so persisting it separately would
+        # be redundant with what is already sitting on disk.
+        "expected_manifest_ref": expected_manifest_ref,
         "expected_manifest_digest": stable_json_digest(expected_manifest),
         "destination_manifest_digest": stable_json_digest(destination_manifest),
         "destination_verification": destination_verification,
@@ -850,20 +1205,82 @@ def build_relocation_receipt(
     }
 
 
-def write_relocation_receipt(receipt: dict[str, Any], path: Path) -> None:
-    """Atomically persist a relocation receipt to disk. Written to a
-    same-directory temp file first, then moved into place with an atomic
-    rename (see _atomic_place), so a reader never observes a
-    partially-written receipt file."""
+def _write_json_atomic(payload: dict[str, Any], path: Path) -> None:
+    """Atomically persist a JSON document to disk. Written to a
+    same-directory temp file first, then moved into place with an atomic,
+    no-follow rename (see _atomic_place / _lp_replace), so a reader never
+    observes a partially-written file and a planted symlink at `path`
+    cannot redirect the write."""
     _lp_mkdir(path.parent)
     temp_path = path.parent / f"{path.name}.{os.getpid()}.tmp"
-    payload = json.dumps(receipt, indent=2, sort_keys=True) + "\n"
-    _win_long_path(temp_path).write_text(payload, encoding="utf-8")
+    text = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    _win_long_path(temp_path).write_text(text, encoding="utf-8")
     _atomic_place(temp_path, path)
 
 
-def read_relocation_receipt(path: Path) -> dict[str, Any]:
+def _read_json_atomic(path: Path) -> dict[str, Any]:
     return json.loads(_win_long_path(path).read_text(encoding="utf-8"))
+
+
+def write_relocation_receipt(receipt: dict[str, Any], path: Path) -> None:
+    _write_json_atomic(receipt, path)
+
+
+def read_relocation_receipt(path: Path) -> dict[str, Any]:
+    return _read_json_atomic(path)
+
+
+def write_relocation_manifest(manifest: dict[str, Any], path: Path) -> None:
+    """Durably persist the manifest itself, not only its digest. At
+    minimum the expected (source-anchored) manifest should be persisted
+    this way -- a receipt's expected_manifest_digest alone gives no way
+    to reconstruct the expected entries for a later restore proof once
+    the process that computed it has exited."""
+    _write_json_atomic(manifest, path)
+
+
+def read_relocation_manifest(path: Path) -> dict[str, Any]:
+    return _read_json_atomic(path)
+
+
+def validate_relocation_receipt_semantics(receipt: dict[str, Any]) -> list[str]:
+    """Beyond schema-shape validation, check that a receipt's own claims
+    are mutually consistent. A closed schema shape alone can still accept
+    an internally contradictory receipt -- e.g. raw_leg.ok=true with a
+    non-empty raw_leg.files_failed. Runtime readback should reject
+    incoherent evidence rather than trust a shape-valid but self-
+    contradictory record.
+    """
+    findings: list[str] = []
+    raw_leg = receipt.get("raw_leg") or {}
+    if raw_leg.get("files_failed") and raw_leg.get("ok"):
+        findings.append("raw_leg.ok is true but raw_leg.files_failed is non-empty")
+    if not raw_leg.get("files_failed") and raw_leg.get("ok") is False:
+        findings.append("raw_leg.ok is false but raw_leg.files_failed is empty")
+
+    extracted_leg = receipt.get("extracted_leg")
+    if extracted_leg is not None:
+        if extracted_leg.get("files_failed") and extracted_leg.get("ok"):
+            findings.append("extracted_leg.ok is true but extracted_leg.files_failed is non-empty")
+        if not extracted_leg.get("files_failed") and extracted_leg.get("ok") is False:
+            findings.append("extracted_leg.ok is false but extracted_leg.files_failed is empty")
+
+    destination_verification = receipt.get("destination_verification") or {}
+    space_budget = receipt.get("space_budget") or {}
+    extracted_verification = receipt.get("extracted_verification")
+
+    if receipt.get("ok"):
+        if raw_leg.get("ok") is False:
+            findings.append("receipt.ok is true but raw_leg.ok is false")
+        if extracted_leg is not None and extracted_leg.get("ok") is False:
+            findings.append("receipt.ok is true but extracted_leg.ok is false")
+        if destination_verification and destination_verification.get("ok") is False:
+            findings.append("receipt.ok is true but destination_verification.ok is false")
+        if extracted_verification is not None and extracted_verification.get("ok") is False:
+            findings.append("receipt.ok is true but extracted_verification.ok is false")
+        if space_budget and space_budget.get("ok") is False:
+            findings.append("receipt.ok is true but space_budget.ok is false")
+    return findings
 
 
 # ---------------------------------------------------------------------------
@@ -896,11 +1313,13 @@ def relocate_archive_source(
     exclusion_policy: ExclusionPolicy = NO_EXCLUSION_POLICY,
     require_exact_match: bool = True,
     receipt_path: Path | None = None,
+    expected_manifest_path: Path | None = None,
+    reserve_policy: VolumeReservePolicy = DEFAULT_VOLUME_RESERVE_POLICY,
 ) -> RelocationResult:
-    """Compose the full Wave 1 architecture into one call: preflight, one
-    raw preservation copy, optional selective extracted materialization,
-    a source-anchored expected manifest, exact destination reconciliation,
-    and a relocation receipt.
+    """Compose the full Wave 1 architecture into one call: root-topology
+    validation, preflight, one raw preservation copy, optional selective
+    extracted materialization, a source-anchored expected manifest, exact
+    destination reconciliation, and a relocation receipt.
 
     `exclusion_policy` defaults to NO_EXCLUSION_POLICY: raw preservation
     means every admitted source entry is preserved by default, including
@@ -922,10 +1341,46 @@ def relocate_archive_source(
     destination still matched itself a moment later.
 
     Passing `receipt_path` durably persists the receipt via
-    write_relocation_receipt(); omitting it returns the receipt as an
-    in-memory dict only.
+    write_relocation_receipt(). Passing `expected_manifest_path` durably
+    persists the expected manifest itself (not just its digest) via
+    write_relocation_manifest() -- at minimum this should be given,
+    since a digest alone cannot reconstruct the expected entries for a
+    later restore proof once this process has exited; the destination
+    manifest is not separately persisted since it is always recomputable
+    on demand from a live destination_root.
+
+    `reserve_policy` and the root-topology check (dangerous nesting
+    between source/destination/work/receipt/manifest paths) are enforced
+    inside preflight_space_budget() before anything is enumerated or
+    copied -- see that function and validate_root_topology().
     """
     exclude = exclusion_policy.predicate
+
+    budget = preflight_space_budget(
+        source_root=source_root,
+        raw_destination_root=destination_root,
+        work_root=work_root,
+        extracted_destination_root=materialize_extracted_root,
+        reserve_policy=reserve_policy,
+        exclude=exclude,
+        receipt_path=receipt_path,
+        expected_manifest_path=expected_manifest_path,
+    )
+    if not budget.ok:
+        # Topology or space failures are both checked before any
+        # enumeration of source content beyond what the preflight itself
+        # needed, so no expected_manifest is built here either.
+        return RelocationResult(
+            ok=False,
+            space_budget=budget,
+            raw_copy_result=None,
+            extracted_copy_result=None,
+            expected_manifest=None,
+            destination_manifest=None,
+            destination_verification=None,
+            extracted_verification=None,
+            receipt=None,
+        )
 
     all_source_files = enumerate_files(source_root)
     excluded_paths = sorted(
@@ -934,26 +1389,10 @@ def relocate_archive_source(
         if exclude(f.relative_to(source_root).as_posix())
     )
     expected_manifest = build_relocation_manifest(source_root, exclude=exclude)
-
-    budget = preflight_space_budget(
-        source_root=source_root,
-        raw_destination_root=destination_root,
-        work_root=work_root,
-        extracted_destination_root=materialize_extracted_root,
-        exclude=exclude,
-    )
-    if not budget.ok:
-        return RelocationResult(
-            ok=False,
-            space_budget=budget,
-            raw_copy_result=None,
-            extracted_copy_result=None,
-            expected_manifest=expected_manifest,
-            destination_manifest=None,
-            destination_verification=None,
-            extracted_verification=None,
-            receipt=None,
-        )
+    expected_manifest_ref: str | None = None
+    if expected_manifest_path is not None:
+        write_relocation_manifest(expected_manifest, expected_manifest_path)
+        expected_manifest_ref = str(expected_manifest_path)
 
     raw_copy_result = resumable_copy_tree(source_root, destination_root, work_root=work_root, exclude=exclude)
 
@@ -988,6 +1427,7 @@ def relocate_archive_source(
         raw_copy_result=raw_copy_result,
         extracted_copy_result=extracted_copy_result,
         expected_manifest=expected_manifest,
+        expected_manifest_ref=expected_manifest_ref,
         destination_manifest=destination_manifest,
         space_budget=budget,
         exclusion_policy=exclusion_policy,

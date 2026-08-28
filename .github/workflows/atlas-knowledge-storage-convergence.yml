@@ -29,7 +29,32 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run Wave 1 storage convergence tests
+      - name: Discover and run knowledge-pipeline test modules
         shell: bash
         run: |
-          python -m unittest tests.test_atlas_knowledge_storage -v
+          python - <<'PY'
+          import pathlib
+          import re
+          import subprocess
+          import sys
+
+          # Discovers every tests/*.py module that actually imports or
+          # references ops.knowledge (the shared _pipeline.list_files()
+          # this PR changes lives there), rather than maintaining a fixed,
+          # guessable module list -- if a future test file starts
+          # exercising ops.knowledge._pipeline, this picks it up
+          # automatically without a workflow edit.
+          tests_dir = pathlib.Path("tests")
+          pattern = re.compile(r"\bops\.knowledge\b|\bfrom ops import knowledge\b|\bimport ops\.knowledge\b")
+          modules = []
+          for path in sorted(tests_dir.glob("*.py")):
+              text = path.read_text(encoding="utf-8", errors="ignore")
+              if pattern.search(text):
+                  modules.append(f"tests.{path.stem}")
+          if "tests.test_atlas_knowledge_storage" not in modules:
+              modules.append("tests.test_atlas_knowledge_storage")
+
+          print("Discovered knowledge-pipeline test modules:", modules)
+          result = subprocess.run([sys.executable, "-m", "unittest", *modules, "-v"])
+          sys.exit(result.returncode)
+          PY

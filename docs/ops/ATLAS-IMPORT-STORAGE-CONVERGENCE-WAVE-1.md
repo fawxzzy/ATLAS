@@ -7,15 +7,23 @@ Wave 1 delivers reusable knowledge-import pipeline architecture only:
 - first-class, independently configurable storage/work roots
   (`ATLAS_IMPORT_STORAGE_ROOT`, `ATLAS_IMPORT_WORK_ROOT`)
 - long-path-safe deterministic file enumeration
-- symlink confinement (external-target file symlinks rejected before any
-  copy starts)
-- per-volume peak-space preflight budgeting
-- resumable, atomic file copy (including symlink preservation)
+- symlink and Windows-junction confinement (external-target links of
+  either kind rejected before any copy starts) -- covering both file and
+  directory links
+- root-topology validation (dangerous nesting between source/destination/
+  work/receipt/manifest paths rejected before any enumeration)
+- per-volume peak-space preflight budgeting, with a distinct, much larger
+  reserve floor for the system volume
+- resumable, atomic, no-follow-safe file copy (including file and
+  directory symlink/junction preservation, with absolute internal link
+  targets rewritten so a relocated tree is self-contained)
 - explicit, named, opt-in generated-cache exclusion policy (never applied
   by default to a raw preservation copy)
 - a source-anchored relocation manifest, copy, and exact destination
   reconciliation
-- durably persisted relocation receipts and restore verification
+- durably persisted relocation receipts *and* the expected manifest
+  itself, plus runtime semantic validation of a receipt's internal
+  consistency
 
 **Wave 1 explicitly does not include:**
 
@@ -215,39 +223,85 @@ follow-on work, deliberately left out of Wave 1 so this PR does not change
 any behavior of the actively-used live import path -- only `list_files()`
 changes, and only in a way proven to be a pure correctness fix.
 
+## Second hardening wave (post-push, adversarial review)
+
+A full adversarial review of the first implementation found five real
+architectural gaps, all confirmed against the code before fixing:
+
+1. **Directory symlinks/junctions were ungoverned.** `enumerate_files()`
+   only ever recorded `filenames`, never `dirnames` -- a directory link
+   was invisible to the manifest (a real lossless-preservation break) and
+   never confinement-checked. Fixed with `enumerate_directory_links()`
+   (enumerated, not descended into) and `_is_reparse_point()` (detects
+   Windows junctions via `st_reparse_tag`, since `Path.is_symlink()`
+   alone does not recognize `IO_REPARSE_TAG_MOUNT_POINT`). Both file and
+   directory links are now confinement-checked, manifest-represented, and
+   copied as links (junctions recreated via `mklink /J`, since
+   `os.readlink()` cannot portably read a junction's raw target).
+2. **Destination-side replacement could still follow a symlink on
+   Windows.** `_lp_replace()` was resolve()-based on both arguments; if a
+   destination path was already a symlink, the "atomic replace" would
+   silently target the link's *external* destination instead of the link
+   entry itself -- a real outside-root-overwrite risk, for copies and for
+   receipt/manifest writes alike. Fixed: `_lp_replace()` is now
+   `_win_long_path_no_follow()`-based on both sides.
+3. **Absolute internal symlinks preserved the wrong meaning.** A relative
+   link target survives an identical-layout copy unchanged; an absolute
+   target confined to `source_root` did not -- it kept pointing at the
+   original source, defeating the point of a relocation once that source
+   is later moved or deleted. Fixed: `_rewrite_symlink_target_if_needed()`
+   rewrites a confined absolute target to the corresponding path under
+   `destination_root`; a relative target is left untouched.
+4. **The receipt was durable; the authoritative manifest was not.**
+   `expected_manifest`/`destination_manifest` were digest-only in the
+   receipt -- no way to reconstruct the expected entries for a later
+   restore proof once the process exits. Fixed:
+   `write_relocation_manifest()`/`read_relocation_manifest()` persist the
+   expected (source-anchored) manifest atomically, bound into the receipt
+   as `expected_manifest_ref`. `validate_relocation_receipt_semantics()`
+   additionally rejects an internally contradictory receipt on readback
+   (e.g. `raw_leg.ok=true` with a non-empty `raw_leg.files_failed`).
+5. **The preflight lacked a host reserve and root-topology enforcement.**
+   A flat 512 MiB margin did not reflect the much larger reserve this
+   ATLAS engagement already established for the system volume the hard
+   way; and nothing rejected a destination nested inside its own source,
+   which a resumed operation could enumerate as part of the source and
+   recursively re-copy. Fixed: `VolumeReservePolicy` applies
+   `SYSTEM_VOLUME_MINIMUM_FREE_BYTES` (25 GiB) on the system volume and
+   the ordinary margin elsewhere; `validate_root_topology()` rejects
+   nested/overlapping source, destination, extracted, work, receipt, and
+   manifest paths before any enumeration or copy starts.
+
 ## Tests
 
-`tests/test_atlas_knowledge_storage.py` -- 63 tests (58 unconditional, 5
-symlink-preservation/confinement tests that gracefully skip in
-environments lacking symlink-creation privilege, e.g. non-admin Windows
-without Developer Mode), including:
+`tests/test_atlas_knowledge_storage.py` -- 93 tests (79 unconditional, 14
+symlink/junction-dependent tests that gracefully skip in environments
+lacking symlink-creation privilege, e.g. non-admin Windows without
+Developer Mode -- junction tests are unaffected by that privilege and run
+regardless), including everything from the first wave plus:
 
-- a genuine >260-character path fixture proving long-path safety directly
-- a deterministic Windows-only regression test reproducing the exact
-  8.3-short-name-alias mismatch shape found on hosted CI
-- a Windows-only mixed-case sort-order compatibility test, plus a
-  cross-platform old-vs-new relative-path-set compatibility test against
-  `_pipeline.list_files()`
-- external-symlink rejection (blocking preflight, before any copy starts)
-  and internal-symlink preservation-as-a-link
-- per-volume preflight: aggregation when roots share a volume, independent
-  accounting when they don't, fail-closed on an unstatable source file,
-  budgeting only the remaining bytes on a resumed operation
-- resumability (full copy / re-run skips / interrupted-and-resumed / stale
-  content re-copied) and atomicity (a failed staged copy leaves no partial
-  destination file)
-- source-anchored verification: an undercopy that a buggy copy step
-  silently drops is still caught (proving the proof isn't
-  self-referential), and pre-existing unrelated destination content is
-  caught as unexpected rather than silently certified
-- an extracted-leg-only failure (raw leg succeeds) still fails the whole
-  composed result
-- durable receipt round-trip (write, then independently read back)
-- lossless raw-preservation default, including `.git` and generated-cache-shaped
-  content, both preserved by default
-- a named exclusion policy bound into the receipt's `exclusion_policy_id`
-- full receipt schema validation (well-formed with and without an
-  extracted leg, five malformed shapes rejected)
+- directory symlink and Windows junction: internal (enumerated, not
+  flagged), external (confinement-rejected), manifest-represented, and
+  copied as a link rather than descended into
+- destination-side symlink safety: a planted symlink at a copy
+  destination or a receipt path is replaced as a link, never followed
+  through to overwrite its external target
+- absolute internal symlink rewriting, including the full acceptance
+  test: relocate a tree with an absolute internal link, delete the
+  original source entirely, and prove the destination link still
+  resolves and exact restore verification still passes
+- durable expected-manifest persistence and reload, including verifying
+  restore against a manifest reloaded from disk rather than the
+  in-memory original
+- semantic receipt validation: five synthetic contradiction cases
+  rejected, plus a genuine `relocate_archive_source()` receipt proven to
+  always pass its own semantic validator
+- system-volume reserve: the much larger floor enforced on the system
+  volume, the ordinary margin elsewhere, and a caller override recorded
+  on the returned budget
+- root topology: six dangerous-nesting cases each rejected on their own,
+  plus an end-to-end preflight proof that a nested destination is
+  rejected before any enumeration happens
 
 No real archive data anywhere in this PR -- every fixture is synthetic,
 created and destroyed within its own test.
@@ -255,5 +309,11 @@ created and destroyed within its own test.
 ## Hosted CI
 
 `.github/workflows/atlas-knowledge-storage-convergence.yml` -- path-filtered
-to this change's own files, matrix over `[ubuntu-latest, windows-latest]`,
-runs `python -m unittest tests.test_atlas_knowledge_storage -v` directly.
+to this change's own files, matrix over `[ubuntu-latest, windows-latest]`.
+Rather than a fixed module list, the workflow scans every `tests/*.py`
+file for an `ops.knowledge` import reference and runs whatever it finds
+(always including this PR's own test module) via
+`python -m unittest <discovered modules> -v` -- so a future test file
+that starts exercising `ops.knowledge._pipeline` is picked up
+automatically without a workflow edit, rather than the workflow silently
+missing it.
