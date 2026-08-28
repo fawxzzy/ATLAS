@@ -74,13 +74,39 @@ def _win_long_path(path: Path) -> Path:
     return Path("\\\\?\\" + text)
 
 
+def _win_long_path_no_follow(path: Path) -> Path:
+    """Like _win_long_path, but never resolves through a trailing symlink.
+
+    Path.resolve() always follows symlinks to their final target -- correct
+    for most operations here, but wrong for anything that must act on a
+    symlink *itself* (is_symlink, lstat, readlink, unlink): resolving first
+    would silently operate on the link's target instead of the link, which
+    is exactly the bug hosted Windows CI caught -- _lp_is_symlink() built on
+    _win_long_path() always reported False because it was checking the
+    resolved target, not the link. os.path.abspath() performs pure lexical
+    normalization (collapsing `.`/`..`/duplicate separators) without
+    touching the filesystem at all, so it never follows a symlink.
+    """
+    if os.name != "nt":
+        return path
+    absolute = Path(os.path.abspath(str(path)))
+    text = str(absolute)
+    if text.startswith("\\\\?\\"):
+        return absolute
+    if text.startswith("\\\\"):
+        return Path("\\\\?\\UNC\\" + text[2:])
+    return Path("\\\\?\\" + text)
+
+
 # Every actual filesystem touch in this module goes through one of these
 # _lp_* wrappers rather than calling pathlib/shutil/os directly on a
 # possibly-deep path. This was not an abstract concern: constructing this
 # module's own test fixtures with plain Path.mkdir() failed past
 # MAX_PATH on the machine this was developed on, confirming the defect
 # reaches every write/stat/copy/rename call, not only directory
-# enumeration.
+# enumeration. The link-aware wrappers below (_lp_lstat, _lp_is_symlink,
+# _lp_readlink, _lp_unlink) deliberately use _win_long_path_no_follow
+# instead, for the reason documented on that function.
 
 
 def _lp_exists(path: Path) -> bool:
@@ -97,15 +123,15 @@ def _lp_stat(path: Path) -> os.stat_result:
 
 
 def _lp_lstat(path: Path) -> os.stat_result:
-    return _win_long_path(path).lstat()
+    return _win_long_path_no_follow(path).lstat()
 
 
 def _lp_is_symlink(path: Path) -> bool:
-    return _win_long_path(path).is_symlink()
+    return _win_long_path_no_follow(path).is_symlink()
 
 
 def _lp_readlink(path: Path) -> str:
-    return os.readlink(_win_long_path(path))
+    return os.readlink(_win_long_path_no_follow(path))
 
 
 def _lp_mkdir(path: Path) -> None:
@@ -113,7 +139,10 @@ def _lp_mkdir(path: Path) -> None:
 
 
 def _lp_unlink(path: Path, *, missing_ok: bool = False) -> None:
-    _win_long_path(path).unlink(missing_ok=missing_ok)
+    # No-follow: removing a path must remove that exact directory entry.
+    # If path is a symlink, a resolve()-based prefix would target its
+    # *destination* for deletion instead of the link itself.
+    _win_long_path_no_follow(path).unlink(missing_ok=missing_ok)
 
 
 def _lp_copy2(source: Path, destination: Path) -> None:

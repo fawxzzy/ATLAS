@@ -168,6 +168,28 @@ class EnumerateFilesTests(TempRootMixin, unittest.TestCase):
 
 
 class SymlinkConfinementTests(TempRootMixin, unittest.TestCase):
+    @unittest.skipUnless(os.name == "nt", "no-follow long-path prefixing is a Windows-only concern")
+    def test_win_long_path_no_follow_never_calls_resolve(self) -> None:
+        # Structural, privilege-independent proof of the fix: hosted
+        # Windows CI found that _lp_is_symlink() (built on the
+        # resolve()-based _win_long_path()) always reported False for a
+        # real symlink, because Path.resolve() follows symlinks to their
+        # target before is_symlink() ever runs. This proves the fixed
+        # no-follow variant structurally cannot make that mistake -- it
+        # never calls resolve() at all -- without depending on this
+        # environment actually being able to create a real symlink.
+        called = {"n": 0}
+        original_resolve = Path.resolve
+
+        def counting_resolve(path_self, *args, **kwargs):
+            called["n"] += 1
+            return original_resolve(path_self, *args, **kwargs)
+
+        with mock.patch.object(Path, "resolve", counting_resolve):
+            storage._win_long_path_no_follow(Path("C:/some/path/for/this/test"))
+
+        self.assertEqual(called["n"], 0)
+
     def test_internal_symlink_is_not_flagged(self) -> None:
         root = self._temp_dir()
         self._write(root / "real.txt", b"content")
