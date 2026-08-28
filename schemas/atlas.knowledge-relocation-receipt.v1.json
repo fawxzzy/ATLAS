@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "atlas.knowledge-relocation-receipt.v1",
   "title": "ATLAS knowledge-import relocation receipt",
-  "description": "A record of one ops.knowledge.storage.relocate_archive_source() invocation: what was copied, whether the peak-space preflight passed, and the resulting manifest digest. Produced by ops/knowledge/storage.py's build_relocation_receipt(). This is architecture-only evidence for Wave S / Wave 1 -- it does not itself certify any specific real archive migration, since no real archive migration is performed in Wave 1.",
+  "description": "A record of one ops.knowledge.storage.relocate_archive_source() invocation: the exclusion policy applied, the raw and (if requested) extracted copy legs, the source-anchored expected manifest versus the destination manifest, per-volume peak-space preflight results, and destination reconciliation. Produced by ops/knowledge/storage.py's build_relocation_receipt(). This is architecture-only evidence for Wave S / Wave 1 -- it does not itself certify any specific real archive migration, since no real archive migration is performed in Wave 1. NOTE: this repo's schema validator falls back to a dependency-free subset validator when the `jsonschema` package is unavailable (see ops/atlas/ui_standards/validate.py) -- that fallback does not support $ref combined with sibling keywords, oneOf, or anyOf, so nullable object fields below are expressed as `type: [\"object\", \"null\"]` with inline properties rather than a $ref/oneOf union, and the two copyLeg-shaped legs are duplicated inline rather than shared via $ref.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -11,13 +11,16 @@
     "recorded_at",
     "source_description",
     "destination_root",
-    "files_copied",
-    "files_skipped_already_present",
-    "files_failed",
-    "bytes_copied",
-    "manifest_entry_count",
-    "manifest_total_bytes",
-    "manifest_digest",
+    "exclusion_policy_id",
+    "exclusion_policy_version",
+    "excluded_path_count",
+    "excluded_paths_digest",
+    "raw_leg",
+    "extracted_leg",
+    "expected_manifest_digest",
+    "destination_manifest_digest",
+    "destination_verification",
+    "extracted_verification",
     "space_budget",
     "ok"
   ],
@@ -43,60 +46,130 @@
       "type": "string",
       "minLength": 1
     },
-    "files_copied": {
+    "exclusion_policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exclusion_policy_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "excluded_path_count": {
       "type": "integer",
       "minimum": 0
     },
-    "files_skipped_already_present": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "files_failed": {
-      "type": "array",
-      "items": { "type": "string", "minLength": 1 }
-    },
-    "bytes_copied": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "manifest_entry_count": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "manifest_total_bytes": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "manifest_digest": {
+    "excluded_paths_digest": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "raw_leg": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["files_copied", "files_skipped_already_present", "files_failed", "bytes_copied", "ok"],
+      "properties": {
+        "files_copied": { "type": "integer", "minimum": 0 },
+        "files_skipped_already_present": { "type": "integer", "minimum": 0 },
+        "files_failed": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "bytes_copied": { "type": "integer", "minimum": 0 },
+        "ok": { "type": "boolean" }
+      }
+    },
+    "extracted_leg": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["files_copied", "files_skipped_already_present", "files_failed", "bytes_copied", "ok"],
+      "properties": {
+        "files_copied": { "type": "integer", "minimum": 0 },
+        "files_skipped_already_present": { "type": "integer", "minimum": 0 },
+        "files_failed": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "bytes_copied": { "type": "integer", "minimum": 0 },
+        "ok": { "type": "boolean" }
+      }
+    },
+    "expected_manifest_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Digest of the manifest built from source_root BEFORE any copy, with the exclusion policy already applied. The authoritative statement of what this relocation was supposed to produce."
+    },
+    "destination_manifest_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Digest of the manifest built from destination_root AFTER the copy, unfiltered -- so pre-existing unrelated content at the destination is detectable as an unexpected path during reconciliation, not silently absorbed into the proof."
+    },
+    "destination_verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version", "root", "require_exact_match", "expected_entry_count",
+        "current_entry_count", "missing_paths", "unexpected_paths", "mismatched_paths", "ok"
+      ],
+      "properties": {
+        "contract_version": { "const": "atlas.knowledge-restore-verification.v1" },
+        "root": { "type": "string", "minLength": 1 },
+        "require_exact_match": { "type": "boolean" },
+        "expected_entry_count": { "type": "integer", "minimum": 0 },
+        "current_entry_count": { "type": "integer", "minimum": 0 },
+        "missing_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "unexpected_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "mismatched_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "ok": { "type": "boolean" }
+      }
+    },
+    "extracted_verification": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": [
+        "contract_version", "root", "require_exact_match", "expected_entry_count",
+        "current_entry_count", "missing_paths", "unexpected_paths", "mismatched_paths", "ok"
+      ],
+      "properties": {
+        "contract_version": { "const": "atlas.knowledge-restore-verification.v1" },
+        "root": { "type": "string", "minLength": 1 },
+        "require_exact_match": { "type": "boolean" },
+        "expected_entry_count": { "type": "integer", "minimum": 0 },
+        "current_entry_count": { "type": "integer", "minimum": 0 },
+        "missing_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "unexpected_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "mismatched_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "ok": { "type": "boolean" }
+      }
     },
     "space_budget": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "required_storage_bytes",
-        "required_work_bytes",
-        "available_storage_bytes",
-        "available_work_bytes",
-        "ok",
-        "findings"
-      ],
+      "required": ["safety_margin_bytes", "ok", "findings", "volumes"],
       "properties": {
-        "required_storage_bytes": { "type": "integer", "minimum": 0 },
-        "required_work_bytes": { "type": "integer", "minimum": 0 },
-        "available_storage_bytes": { "type": "integer", "minimum": 0 },
-        "available_work_bytes": { "type": "integer", "minimum": 0 },
+        "safety_margin_bytes": { "type": "integer", "minimum": 0 },
         "ok": { "type": "boolean" },
         "findings": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 }
+        },
+        "volumes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["probe_path", "required_bytes", "available_bytes", "ok"],
+            "properties": {
+              "probe_path": { "type": "string", "minLength": 1 },
+              "required_bytes": { "type": "integer", "minimum": 0 },
+              "available_bytes": { "type": "integer", "minimum": 0 },
+              "ok": { "type": "boolean" }
+            }
+          }
         }
       }
     },
     "ok": {
       "type": "boolean",
-      "description": "True only when the space preflight passed and zero files failed to copy."
+      "description": "True only when the space preflight passed, both the raw leg and (if requested) the extracted leg copied with zero failures, and destination reconciliation (and extracted reconciliation, if requested) found no missing, mismatched, or unexpected paths."
     }
   }
 }
