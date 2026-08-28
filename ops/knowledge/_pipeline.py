@@ -17,6 +17,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops.atlas.observations import build_observation, emit_observation
+from ops.knowledge.storage import enumerate_files as _long_path_safe_enumerate_files
 
 PIPELINE_VERSION = "atlas.knowledge.pipeline.v2"
 RECEIPT_VERSION = "atlas.knowledge.receipt.v1"
@@ -411,9 +412,15 @@ def file_checksum_if_exists(path: Path) -> str | None:
 
 
 def list_files(root: Path) -> list[Path]:
-    if not root.exists():
-        return []
-    return sorted(path for path in root.rglob("*") if path.is_file())
+    # Delegates to ops.knowledge.storage.enumerate_files(), which is
+    # long-path-safe on Windows (rglob() silently drops entries past the
+    # 260-character MAX_PATH boundary unless the process-wide
+    # LongPathsEnabled policy is set, which requires admin rights and is
+    # not guaranteed). Same signature and return type as before -- this is
+    # a correctness fix, not a behavior change for any path under the
+    # limit. See ops/knowledge/storage.py and
+    # docs/ops/ATLAS-IMPORT-STORAGE-CONVERGENCE-WAVE-1.md.
+    return _long_path_safe_enumerate_files(root)
 
 
 def tree_digest(root: Path) -> str:

@@ -1,0 +1,35 @@
+name: Atlas Knowledge Storage Convergence
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/atlas-knowledge-storage-convergence.yml"
+      - "ops/knowledge/storage.py"
+      - "ops/knowledge/_pipeline.py"
+      - "schemas/atlas.knowledge-relocation-receipt.v1.json"
+      - "tests/test_atlas_knowledge_storage.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  knowledge-storage-convergence:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Wave 1 storage convergence tests
+        shell: bash
+        run: |
+          python -m unittest tests.test_atlas_knowledge_storage -v

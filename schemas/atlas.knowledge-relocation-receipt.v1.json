@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "atlas.knowledge-relocation-receipt.v1",
+  "title": "ATLAS knowledge-import relocation receipt",
+  "description": "A record of one ops.knowledge.storage.relocate_archive_source() invocation: what was copied, whether the peak-space preflight passed, and the resulting manifest digest. Produced by ops/knowledge/storage.py's build_relocation_receipt(). This is architecture-only evidence for Wave S / Wave 1 -- it does not itself certify any specific real archive migration, since no real archive migration is performed in Wave 1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "archive_id",
+    "recorded_at",
+    "source_description",
+    "destination_root",
+    "files_copied",
+    "files_skipped_already_present",
+    "files_failed",
+    "bytes_copied",
+    "manifest_entry_count",
+    "manifest_total_bytes",
+    "manifest_digest",
+    "space_budget",
+    "ok"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "atlas.knowledge-relocation-receipt.v1"
+    },
+    "archive_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recorded_at": {
+      "type": "string",
+      "minLength": 1,
+      "description": "UTC ISO-8601 timestamp with a trailing Z."
+    },
+    "source_description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable description of what was relocated, for audit trail purposes. Not a path -- the manifest carries the real paths."
+    },
+    "destination_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "files_copied": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "files_skipped_already_present": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "files_failed": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "bytes_copied": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "manifest_entry_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "manifest_total_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "manifest_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "space_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_storage_bytes",
+        "required_work_bytes",
+        "available_storage_bytes",
+        "available_work_bytes",
+        "ok",
+        "findings"
+      ],
+      "properties": {
+        "required_storage_bytes": { "type": "integer", "minimum": 0 },
+        "required_work_bytes": { "type": "integer", "minimum": 0 },
+        "available_storage_bytes": { "type": "integer", "minimum": 0 },
+        "available_work_bytes": { "type": "integer", "minimum": 0 },
+        "ok": { "type": "boolean" },
+        "findings": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "ok": {
+      "type": "boolean",
+      "description": "True only when the space preflight passed and zero files failed to copy."
+    }
+  }
+}
