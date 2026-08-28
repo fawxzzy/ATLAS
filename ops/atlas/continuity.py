@@ -1443,10 +1443,18 @@ def build_initiative_continuity_manifest_health(*, root: Path | None = None) -> 
     }
 
 
-def build_open_marker_manifest_coverage(*, root: Path | None = None) -> dict[str, Any]:
+def build_open_marker_manifest_coverage(
+    *,
+    root: Path | None = None,
+    manifest_health: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
-    manifest_health = build_initiative_continuity_manifest_health(root=base_root)
-    manifest_items = manifest_health.get("items", [])
+    resolved_manifest_health = (
+        manifest_health
+        if manifest_health is not None
+        else build_initiative_continuity_manifest_health(root=base_root)
+    )
+    manifest_items = resolved_manifest_health.get("items", [])
     manifest_by_marker: dict[str, dict[str, Any]] = {}
     for item in manifest_items:
         if not isinstance(item, dict):
@@ -1554,9 +1562,17 @@ def build_open_marker_manifest_coverage(*, root: Path | None = None) -> dict[str
     }
 
 
-def _load_initiative_manifest_bundles(*, root: Path) -> list[dict[str, Any]]:
-    manifest_health = build_initiative_continuity_manifest_health(root=root)
-    manifest_items = manifest_health.get("items", [])
+def _load_initiative_manifest_bundles(
+    *,
+    root: Path,
+    manifest_health: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    resolved_manifest_health = (
+        manifest_health
+        if manifest_health is not None
+        else build_initiative_continuity_manifest_health(root=root)
+    )
+    manifest_items = resolved_manifest_health.get("items", [])
     bundles: list[dict[str, Any]] = []
     for item in manifest_items:
         if not isinstance(item, dict):
@@ -1580,10 +1596,19 @@ def _load_initiative_manifest_bundles(*, root: Path) -> list[dict[str, Any]]:
     return bundles
 
 
-def build_open_marker_restart_index(*, root: Path | None = None) -> dict[str, Any]:
+def build_open_marker_restart_index(
+    *,
+    root: Path | None = None,
+    manifest_bundles: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
     manifest_by_marker: dict[str, dict[str, Any]] = {}
-    for bundle in _load_initiative_manifest_bundles(root=base_root):
+    resolved_manifest_bundles = (
+        manifest_bundles
+        if manifest_bundles is not None
+        else _load_initiative_manifest_bundles(root=base_root)
+    )
+    for bundle in resolved_manifest_bundles:
         health_item = bundle.get("health") if isinstance(bundle.get("health"), dict) else {}
         manifest_payload = bundle.get("payload") if isinstance(bundle.get("payload"), dict) else {}
         for marker_item in health_item.get("marker_posture", []):
@@ -1751,9 +1776,17 @@ def build_open_marker_restart_index(*, root: Path | None = None) -> dict[str, An
     }
 
 
-def build_maintained_manifest_restart_index(*, root: Path | None = None) -> dict[str, Any]:
+def build_maintained_manifest_restart_index(
+    *,
+    root: Path | None = None,
+    manifest_bundles: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
-    bundles = _load_initiative_manifest_bundles(root=base_root)
+    bundles = (
+        manifest_bundles
+        if manifest_bundles is not None
+        else _load_initiative_manifest_bundles(root=base_root)
+    )
     items: list[dict[str, Any]] = []
     for bundle in bundles:
         health_item = bundle.get("health") if isinstance(bundle.get("health"), dict) else {}
@@ -1842,9 +1875,22 @@ def build_continuity_status_slices(*, root: Path | None = None) -> tuple[dict[st
     manifest = build_continuity_source_manifest(root=base_root)
     historical_query_coverage = build_historical_query_coverage(root=base_root)
     initiative_manifest_health = build_initiative_continuity_manifest_health(root=base_root)
-    open_marker_manifest_coverage = build_open_marker_manifest_coverage(root=base_root)
-    open_marker_restart_index = build_open_marker_restart_index(root=base_root)
-    maintained_manifest_restart_index = build_maintained_manifest_restart_index(root=base_root)
+    manifest_bundles = _load_initiative_manifest_bundles(
+        root=base_root,
+        manifest_health=initiative_manifest_health,
+    )
+    open_marker_manifest_coverage = build_open_marker_manifest_coverage(
+        root=base_root,
+        manifest_health=initiative_manifest_health,
+    )
+    open_marker_restart_index = build_open_marker_restart_index(
+        root=base_root,
+        manifest_bundles=manifest_bundles,
+    )
+    maintained_manifest_restart_index = build_maintained_manifest_restart_index(
+        root=base_root,
+        manifest_bundles=manifest_bundles,
+    )
     sources = manifest.get("sources", []) if isinstance(manifest.get("sources"), list) else []
 
     lane_counts = Counter(str(item.get("lane") or "other") for item in sources if isinstance(item, dict))

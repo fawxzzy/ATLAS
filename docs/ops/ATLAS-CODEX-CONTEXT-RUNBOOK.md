@@ -213,6 +213,11 @@ Builder:
 
 - `python ops/atlas/build_codex_context.py --task-id <task-id> --objective "<objective>" --intent-class <intent>`
 
+The builder writes the full durable pack and prints only a compact summary by
+default. This keeps large context JSON out of Codex tool output while retaining
+its exact content digest and artifact references. Use `--print-payload` only
+when a caller intentionally consumes the full JSON from stdout.
+
 Outputs:
 
 - `runtime/atlas/context-packs/<task-id>/context.json`

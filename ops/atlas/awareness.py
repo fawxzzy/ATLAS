@@ -1020,8 +1020,14 @@ def _initiative_catalog_item(initiative_id: str, *, root: Path, refresh: bool) -
     return None
 
 
-def _initiative_status_view(initiative_id: str, *, root: Path, refresh: bool) -> dict[str, Any] | None:
-    status = atlas_status(root=root, refresh=refresh)
+def _initiative_status_view(
+    initiative_id: str,
+    *,
+    root: Path,
+    refresh: bool,
+    status_snapshot: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    status = status_snapshot if status_snapshot is not None else atlas_status(root=root, refresh=refresh)
     initiatives = status.get("initiatives", {}) if isinstance(status.get("initiatives"), dict) else {}
     for key in ("active_items", "pending_proposal_items", "waiting_on_review_items", "repo_linked_items"):
         items = initiatives.get(key, [])
@@ -1041,10 +1047,16 @@ def _proposal_payload_for_initiative(
     *,
     root: Path,
     refresh: bool,
+    status_snapshot: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     initiative_payload = fetch_memory(initiative_id, root=root, refresh=refresh)
     initiative_metadata = initiative_payload.get("metadata", {}) if isinstance(initiative_payload.get("metadata"), dict) else {}
-    status_view = _initiative_status_view(initiative_id, root=root, refresh=refresh) or {}
+    status_view = _initiative_status_view(
+        initiative_id,
+        root=root,
+        refresh=refresh,
+        status_snapshot=status_snapshot,
+    ) or {}
     proposal_ref = str(status_view.get("proposal_ref") or "").strip()
     if not proposal_ref:
         proposal_ref = str(initiative_metadata.get("document_metadata", {}).get("proposal_ref") or "").strip()
@@ -1087,11 +1099,12 @@ def fetch_status_slice(
     *,
     root: Path | None = None,
     refresh: bool = False,
+    status_snapshot: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
     if slice_name not in _slice_titles():
         raise FileNotFoundError(f"Unknown awareness status slice: {slice_name}")
-    status = atlas_status(root=base_root, refresh=refresh)
+    status = status_snapshot if status_snapshot is not None else atlas_status(root=base_root, refresh=refresh)
     payload = _status_slice_payload(status, slice_name)
     return {
         "schema_version": FETCH_CONTRACT_VERSION,
@@ -1791,9 +1804,9 @@ def fetch(
     *,
     root: Path | None = None,
     refresh: bool = False,
+    status_snapshot: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
-    inventory = _load_repo_inventory(root=base_root, refresh=refresh)
     if identifier.startswith("knowledge:"):
         archive_id = identifier.split(":", 1)[1]
         record = _knowledge_record(archive_id, root=base_root, refresh=refresh)
@@ -1916,14 +1929,25 @@ def fetch(
 
     if identifier.startswith("proposal:"):
         initiative_id = identifier.split(":", 1)[1]
-        return _proposal_payload_for_initiative(initiative_id, root=base_root, refresh=refresh)
+        return _proposal_payload_for_initiative(
+            initiative_id,
+            root=base_root,
+            refresh=refresh,
+            status_snapshot=status_snapshot,
+        )
 
     if identifier.startswith("slice:"):
         slice_name = identifier.split(":", 1)[1]
-        return fetch_status_slice(slice_name, root=base_root, refresh=refresh)
+        return fetch_status_slice(
+            slice_name,
+            root=base_root,
+            refresh=refresh,
+            status_snapshot=status_snapshot,
+        )
 
     if identifier.startswith("repo:"):
         repo_id = identifier.split(":", 1)[1]
+        inventory = _load_repo_inventory(root=base_root, refresh=refresh)
         item = find_repo_inventory_entry(inventory, repo_id=repo_id)
         if item is None:
             raise FileNotFoundError(f"Unknown repo inventory id: {identifier}")
@@ -1947,6 +1971,7 @@ def fetch(
 
     if identifier.startswith("repo_path:"):
         repo_path = identifier.split(":", 1)[1]
+        inventory = _load_repo_inventory(root=base_root, refresh=refresh)
         item = find_repo_inventory_entry(inventory, repo_path=repo_path)
         if item is None:
             raise FileNotFoundError(f"Unknown repo inventory path: {identifier}")
@@ -1971,6 +1996,7 @@ def fetch(
 
     if identifier.startswith("excluded_surface:"):
         surface_id = identifier.split(":", 1)[1]
+        inventory = _load_repo_inventory(root=base_root, refresh=refresh)
         item = find_excluded_surface(inventory, surface_id)
         if item is None:
             raise FileNotFoundError(f"Unknown excluded surface: {identifier}")

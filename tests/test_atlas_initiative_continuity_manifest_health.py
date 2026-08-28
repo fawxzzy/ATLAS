@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from ops._atlas import atlas_root
 from ops.atlas.awareness import atlas_status, fetch_status_slice, search
@@ -14,6 +15,7 @@ from ops.atlas.continuity import (
     build_open_marker_manifest_coverage,
     build_open_marker_restart_index,
 )
+from ops.atlas import continuity
 
 
 def _write_json(path: Path, payload: dict[str, object]) -> None:
@@ -511,6 +513,65 @@ class AtlasInitiativeContinuityManifestHealthTests(unittest.TestCase):
         self.assertEqual(payload["open_marker_manifest_coverage_status"], "ok")
         self.assertEqual(payload["open_marker_restart_index_status"], "ok")
         self.assertEqual(payload["maintained_manifest_restart_index_status"], "ok")
+
+    def test_continuity_rollup_reuses_manifest_health_and_bundles_per_request(self) -> None:
+        root = atlas_root()
+        with (
+            mock.patch.object(
+                continuity,
+                "build_initiative_continuity_manifest_health",
+                wraps=continuity.build_initiative_continuity_manifest_health,
+            ) as health_builder,
+            mock.patch.object(
+                continuity,
+                "_load_initiative_manifest_bundles",
+                wraps=continuity._load_initiative_manifest_bundles,
+            ) as bundle_builder,
+        ):
+            build_continuity_status_slices(root=root)
+
+        self.assertEqual(1, health_builder.call_count)
+        self.assertEqual(1, bundle_builder.call_count)
+
+    def test_continuity_rollup_matches_fresh_standalone_slices(self) -> None:
+        root = atlas_root()
+        _, slices = build_continuity_status_slices(root=root)
+        health = build_initiative_continuity_manifest_health(root=root)
+        bundles = continuity._load_initiative_manifest_bundles(root=root, manifest_health=health)
+
+        self.assertEqual(health, slices["continuity_initiative_manifest_health"])
+        self.assertEqual(
+            build_open_marker_manifest_coverage(root=root, manifest_health=health),
+            slices["continuity_open_marker_manifest_coverage"],
+        )
+        self.assertEqual(
+            build_open_marker_restart_index(root=root, manifest_bundles=bundles),
+            slices["continuity_open_marker_restart_index"],
+        )
+        self.assertEqual(
+            build_maintained_manifest_restart_index(root=root, manifest_bundles=bundles),
+            slices["continuity_maintained_manifest_restart_index"],
+        )
+
+    def test_continuity_rollup_refreshes_across_requests(self) -> None:
+        root = self._temp_root()
+        marker_path = root / "docs" / "atlas-book" / "02-lanes-and-markers.md"
+        marker_path.write_text(
+            "## Active Front-Page Marker Table\n\n- Freshness Fixture: `50%`\n",
+            encoding="utf-8",
+        )
+        _, first = build_continuity_status_slices(root=root)
+
+        marker_path.write_text(
+            "## Active Front-Page Marker Table\n\n- Freshness Fixture: `75%`\n",
+            encoding="utf-8",
+        )
+        _, second = build_continuity_status_slices(root=root)
+
+        first_item = first["continuity_open_marker_manifest_coverage"]["items"][0]
+        second_item = second["continuity_open_marker_manifest_coverage"]["items"][0]
+        self.assertEqual(50, first_item["percent"])
+        self.assertEqual(75, second_item["percent"])
 
 
 if __name__ == "__main__":

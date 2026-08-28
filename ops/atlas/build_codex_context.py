@@ -739,6 +739,7 @@ def _collect_related_proposals(
     *,
     initiative_records: list[dict[str, Any]],
     root: Path,
+    status_snapshot: dict[str, Any],
 ) -> list[dict[str, Any]]:
     proposals: list[dict[str, Any]] = []
     for initiative in initiative_records:
@@ -746,8 +747,17 @@ def _collect_related_proposals(
         if not initiative_id:
             continue
         try:
-            proposals.append(fetch(f"proposal:{initiative_id}", root=root))
-        except FileNotFoundError:
+            proposals.append(
+                fetch(
+                    f"proposal:{initiative_id}",
+                    root=root,
+                    status_snapshot=status_snapshot,
+                )
+            )
+        except (FileNotFoundError, ValueError):
+            # Proposal linkage is advisory context. A stale or malformed
+            # proposal ref must not prevent the rest of the current, valid
+            # Atlas context pack from loading.
             continue
     proposals.sort(key=lambda item: str(item.get("title") or item.get("id") or ""))
     return proposals
@@ -781,8 +791,9 @@ def _collect_knowledge(
     intent_class: str,
     root: Path,
 ) -> list[dict[str, Any]]:
-    if intent_class != "knowledge":
-        return []
+    # Precedent lookup is an engineering-memory gate for every task intent, not
+    # a special behavior reserved for tasks whose subject is knowledge itself.
+    _ = intent_class
     payload = query_knowledge(objective_query, root=root, limit=MAX_KNOWLEDGE_ITEMS)
     records = payload.get("results", []) if isinstance(payload.get("results"), list) else []
     return [record for record in records if isinstance(record, dict)]
@@ -856,6 +867,13 @@ def _bootstrap_records(
             owner="stack-root",
             kind="persistent_context",
             why="Zachariah Workflow Profile is the canonical durable operator and assistant bootstrap context.",
+            root=root,
+        ),
+        _file_record(
+            "docs/atlas-book/AI-SYSTEM-MAP.v1.json",
+            owner="stack-root",
+            kind="ai_system_map",
+            why="Compact Book companion routes AI workflows to canonical sources, truth precedence, and recent-first retrieval without loading the full Book.",
             root=root,
         ),
     ]
@@ -974,7 +992,11 @@ def build_codex_context(
 
     slice_records: list[dict[str, Any]] = []
     for slice_name in awareness_slice_names:
-        slice_payload = fetch_status_slice(slice_name, root=base_root)
+        slice_payload = fetch_status_slice(
+            slice_name,
+            root=base_root,
+            status_snapshot=status,
+        )
         slice_records.append(
             _slice_record(
                 slice_name,
@@ -997,6 +1019,7 @@ def build_codex_context(
     proposal_payloads = _collect_related_proposals(
         initiative_records=initiative_documents,
         root=base_root,
+        status_snapshot=status,
     )
     proposal_records = [
         _proposal_record(item, why="Related proposed session selected from the initiative lane.")
@@ -1077,6 +1100,23 @@ def build_codex_context(
         proposal_payloads=proposal_payloads,
     )
 
+    engineering_memory_records = [
+        _file_record(
+            "docs/registry/ATLAS-ENGINEERING-MEMORY-POLICY.v1.json",
+            owner="atlas-root",
+            kind="engineering_memory_policy",
+            why="Mandatory precedent, mutation, verification, expansion, and archive gate for engineering work.",
+            root=base_root,
+        ),
+        _file_record(
+            "docs/knowledge/patterns/engineering-memory-enforcement.md",
+            owner="atlas-root",
+            kind="engineering_memory_seed",
+            why="Seeded rules, patterns, failure modes, and decision for precedent-aware implementation.",
+            root=base_root,
+        ),
+    ]
+
     bootstrap_records = _bootstrap_records(
         root=base_root,
         slice_records=slice_records,
@@ -1085,6 +1125,7 @@ def build_codex_context(
         trust_records=trust_records,
         session_mode_records=session_mode_records,
     )
+    bootstrap_records = _unique_records([*bootstrap_records, *engineering_memory_records])
 
     selected_refs = {
         "bootstrap": bootstrap_records,
@@ -1094,6 +1135,7 @@ def build_codex_context(
         "attention": _unique_records(attention_records),
         "working_memory": _unique_records(working_memory_records),
         "knowledge": _unique_records(knowledge_records),
+        "engineering_memory": _unique_records(engineering_memory_records),
         "excluded_surfaces": _unique_records(excluded_surface_records),
         "deferred_repo_refs": _unique_records(deferred_repo_records),
     }
@@ -1116,6 +1158,27 @@ def build_codex_context(
             "intent_class": canonical_intent,
             "owner_lane": route_config["owner_lane"],
             "rule": route_config["routing_rule"],
+        },
+        "precedent_lookup": {
+            "required_before_mutation": True,
+            "query": objective_query,
+            "indexed_status": "candidates-found" if knowledge_records else "no-indexed-match",
+            "indexed_candidate_refs": [record["ref"] for record in knowledge_records],
+            "minimum_direct_search_sources": ["current_repo", "atlas_docs"],
+            "conditional_search_sources": [
+                "sibling_repo",
+                "playbook",
+                "task_archive",
+                "design_system",
+                "test_fixture",
+                "visual_fixture",
+            ],
+            "policy_ref": "docs/registry/ATLAS-ENGINEERING-MEMORY-POLICY.v1.json",
+            "gate_ref": "ops/atlas/engineering_memory_gate.mjs",
+            "completion_rule": (
+                "Indexed candidates are only a first pass. Before source mutation, attach direct repository and "
+                "ATLAS-doc search evidence to atlas.job-envelope.v2.extensions.engineering_memory and pass the mutation gate."
+            ),
         },
         "selection_limits": {
             "route_surfaces": MAX_ROUTE_SURFACES,
@@ -1207,6 +1270,7 @@ def render_codex_context_markdown(payload: dict[str, Any]) -> str:
         "attention",
         "working_memory",
         "knowledge",
+        "engineering_memory",
         "excluded_surfaces",
         "deferred_repo_refs",
     ):
@@ -1225,6 +1289,7 @@ def render_codex_context_markdown(payload: dict[str, Any]) -> str:
         "- Raw evidence stays where it lives; promoted truth is tracked deliberately.",
         "- Runtime and query artifacts are rebuildable and should not become second truth sources.",
         "- Open target repo docs or code only after the root bootstrap contract is complete.",
+        "- Every engineering task must complete direct current-repo and ATLAS-doc precedent searches and pass the engineering-memory mutation gate before editing source.",
         "- Persist a compact source-linked thread checkpoint after every substantive turn and before handoff, blocker closeout, terminal receipt, or archival.",
         "- Use `ops/atlas/persist_thread_context.py`; never copy raw transcripts or secret material into Atlas context checkpoints.",
         "",
@@ -1289,6 +1354,19 @@ def render_codex_prompt(payload: dict[str, Any]) -> str:
         lines += ["", "Only after the bootstrap contract, open these repo-owned refs if needed:"]
         for record in deferred_refs:
             lines.append(f"- `{record['ref']}`")
+    precedent = payload["precedent_lookup"]
+    lines += [
+        "",
+        "Engineering memory gate:",
+        f"- Indexed precedent status: {precedent['indexed_status']}.",
+        f"- Indexed candidate refs: {', '.join(precedent['indexed_candidate_refs']) or 'none'}.",
+        "- Preserve the user's rough note and normalize it into the canonical job/card identity; do not ask the user to fill a template when evidence is sufficient.",
+        "- Search the current repository and ATLAS docs directly. Search sibling repos, Playbook, archives, tests, design-system docs, and visual fixtures when relevant.",
+        "- Record reuse, adaptation, rejection with rationale, or `No matching precedent found. Creating first durable pattern.` in `job.extensions.engineering_memory`.",
+        "- For parity language, identify the canonical source, every target, shared properties, implementation strategy, and route-aware visual evidence.",
+        "- Before source mutation, run `node ops/atlas/engineering_memory_gate.mjs --job-envelope <job.json> --card-record <card.json> --gate mutation` and stop if it blocks.",
+        "- New discoveries become linked child tasks; they do not silently expand the parent or replace queued work.",
+    ]
     lines += [
         "",
         "ATLAS workflow response contract:",
@@ -1342,6 +1420,34 @@ def write_codex_context_pack(
     return context_payload
 
 
+def context_pack_output_summary(
+    payload: dict[str, Any],
+    *,
+    task_id: str,
+    output_root: Path,
+    root: Path,
+) -> dict[str, Any]:
+    task_dir = output_root / task_id
+
+    def output_ref(path: Path) -> str:
+        try:
+            return atlas_relative(path, root=root)
+        except ValueError:
+            return path.as_posix()
+
+    return {
+        "status": "written",
+        "task_id": task_id,
+        "context_digest": payload["context_digest"],
+        "context_ref": output_ref(task_dir / "context.json"),
+        "markdown_ref": output_ref(task_dir / "context.md"),
+        "prompt_input_chars": len(render_codex_prompt(payload)),
+        "ordered_read_count": len(payload["bootstrap_contract"]["ordered_reads"]),
+        "selected_ref_count": sum(len(records) for records in payload["selected_refs"].values()),
+        "full_payload_stdout": False,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Build a deterministic ATLAS Codex context pack.")
     parser.add_argument("--task-id", required=True)
@@ -1352,20 +1458,34 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--session-mode-id")
     parser.add_argument("--session-mode-repo")
     parser.add_argument("--output-root")
+    parser.add_argument(
+        "--print-payload",
+        action="store_true",
+        help="Print the full context payload instead of the compact default write summary.",
+    )
     args = parser.parse_args(argv)
 
+    base_root = atlas_root()
+    task_id = _slug(args.task_id)
+    output_root = Path(args.output_root).resolve() if args.output_root else (base_root / DEFAULT_OUTPUT_ROOT).resolve()
     payload = write_codex_context_pack(
-        task_id=_slug(args.task_id),
+        task_id=task_id,
         objective=args.objective,
         intent_class=args.intent_class,
         target_repo_ids=args.target_repo,
         target_repo_paths=args.target_path,
         session_mode_id=args.session_mode_id,
         session_mode_repo_input=args.session_mode_repo,
-        root=atlas_root(),
-        output_root=Path(args.output_root).resolve() if args.output_root else None,
+        root=base_root,
+        output_root=output_root,
     )
-    print(json.dumps(payload, indent=2))
+    output = payload if args.print_payload else context_pack_output_summary(
+        payload,
+        task_id=task_id,
+        output_root=output_root,
+        root=base_root,
+    )
+    print(json.dumps(output, indent=2))
     return 0
 
 
