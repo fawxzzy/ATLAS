@@ -195,14 +195,29 @@ class LongPathEnumerationError(Exception):
 def enumerate_files(root: Path) -> list[Path]:
     """Deterministic, long-path-safe file enumeration.
 
-    Returns plain (non-`\\\\?\\`-prefixed) absolute paths rooted at
-    `root.resolve()`, sorted by their POSIX-style relative-to-root
-    representation -- not OS scandir order, which is not guaranteed stable
-    across runs or platforms. Every returned entry is confirmed statable at
-    enumeration time, so a long-path failure raises LongPathEnumerationError
-    instead of silently vanishing from the result (the exact failure mode
-    that caused a prior 290-file manifest gap in `_pipeline.py`'s previous
-    `rglob()`-based enumeration).
+    Returns plain (non-`\\\\?\\`-prefixed) paths anchored to `root` exactly
+    as passed in -- each entry is `root / <relative-path>`, never
+    `root.resolve() / <relative-path>` -- sorted by their POSIX-style
+    relative-to-root representation, not OS scandir order (which is not
+    guaranteed stable across runs or platforms).
+
+    Anchoring to the caller's own `root` object, not a resolved copy of it,
+    matters: a caller that later does `entry.relative_to(root)` must get
+    the same `root` value back out, or the call raises ValueError. This
+    was found live on Windows CI, where the runner's temp directory
+    resolves through an 8.3 short-name alias (`RUNNER~1` vs
+    `runneradmin`) -- `root.resolve()` normalizes to the long form, so an
+    entry built from the resolved root no longer satisfied
+    `.relative_to(root)` against the caller's original, unresolved `root`.
+    The original `rglob()`-based enumeration this replaces never resolved
+    its base either, so this preserves that same contract while adding
+    long-path safety.
+
+    Every returned entry is confirmed statable at enumeration time, so a
+    long-path failure raises LongPathEnumerationError instead of silently
+    vanishing from the result (the exact failure mode that caused a prior
+    290-file manifest gap in `_pipeline.py`'s previous `rglob()`-based
+    enumeration).
 
     Junction-independent by construction: this only cares about what is
     actually reachable at `root` right now via long-path-safe traversal. It
@@ -211,8 +226,7 @@ def enumerate_files(root: Path) -> list[Path]:
     """
     if not root.exists():
         return []
-    normal_root = root.resolve()
-    walk_root = _win_long_path(normal_root)
+    walk_root = _win_long_path(root)
     rel_entries: list[str] = []
     for dirpath, dirnames, filenames in os.walk(walk_root):
         dirnames.sort()
@@ -227,7 +241,7 @@ def enumerate_files(root: Path) -> list[Path]:
                 ) from exc
             rel_entries.append(candidate.relative_to(walk_root).as_posix())
     rel_entries.sort()
-    return [normal_root / rel for rel in rel_entries]
+    return [root / rel for rel in rel_entries]
 
 
 # ---------------------------------------------------------------------------
@@ -301,10 +315,9 @@ def preflight_space_budget(
     """
     files = enumerate_files(source_root)
     if exclude is not None:
-        normal_source_root = source_root.resolve()
         files = [
             f for f in files
-            if not exclude(f.relative_to(normal_source_root).as_posix())
+            if not exclude(f.relative_to(source_root).as_posix())
         ]
     tree_bytes = 0
     largest_file_bytes = 0
@@ -431,10 +444,9 @@ def resumable_copy_tree(
     partially-written file, even if the process is killed mid-copy.
     """
     files = enumerate_files(source_root)
-    normal_source_root = source_root.resolve()
     result = CopyResult()
     for source_path in files:
-        rel = source_path.relative_to(normal_source_root).as_posix()
+        rel = source_path.relative_to(source_root).as_posix()
         if exclude is not None and exclude(rel):
             continue
         destination_path = destination_root / rel
@@ -461,11 +473,10 @@ def build_relocation_manifest(root: Path, *, exclude: Callable[[str], bool] | No
     reference to junctions, drive letters, or any storage mechanism -- so it
     reconciles identically regardless of how `root` is currently reached.
     """
-    normal_root = root.resolve()
     files = enumerate_files(root)
     entries: list[dict[str, Any]] = []
     for path in files:
-        rel = path.relative_to(normal_root).as_posix()
+        rel = path.relative_to(root).as_posix()
         if exclude is not None and exclude(rel):
             continue
         entries.append(

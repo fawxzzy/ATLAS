@@ -81,6 +81,33 @@ class EnumerateFilesTests(TempRootMixin, unittest.TestCase):
         missing = self._temp_dir() / "does-not-exist"
         self.assertEqual(storage.enumerate_files(missing), [])
 
+    @unittest.skipUnless(os.name == "nt", "8.3 short-name aliasing is a Windows-only concern")
+    def test_enumerate_files_anchors_to_root_even_when_resolve_differs(self) -> None:
+        # Reproduces, deterministically, the exact failure hit on Windows
+        # CI: that runner's temp directory resolves through an 8.3
+        # short-name alias (RUNNER~1 vs runneradmin), so root.resolve()
+        # produced a different string than the caller's original root,
+        # breaking entry.relative_to(root). NTFS lookups are
+        # case-insensitive, so upper-casing root's string here reaches the
+        # same real directory while differing textually -- the same shape
+        # of mismatch as the short-name alias, without depending on that
+        # specific CI runner behavior to reproduce it.
+        root = self._temp_dir()
+        self._write(root / "a.txt", b"alpha")
+        original_resolve = Path.resolve
+
+        def fake_resolve(path_self, *args, **kwargs):
+            if path_self == root:
+                return Path(str(root).upper())
+            return original_resolve(path_self, *args, **kwargs)
+
+        with mock.patch.object(Path, "resolve", fake_resolve):
+            files = storage.enumerate_files(root)
+
+        self.assertEqual(len(files), 1)
+        rels = [f.relative_to(root).as_posix() for f in files]
+        self.assertEqual(rels, ["a.txt"])
+
     def test_enumerate_files_finds_a_genuinely_long_path_entry(self) -> None:
         # Construct a path whose full length exceeds Windows' classic
         # 260-character MAX_PATH, to directly prove enumerate_files() can
