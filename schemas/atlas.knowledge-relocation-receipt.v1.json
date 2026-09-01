@@ -72,7 +72,7 @@
         "files_skipped_already_present": { "type": "integer", "minimum": 0 },
         "files_failed": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 }
+          "items": { "$ref": "#/$defs/copyFailure" }
         },
         "bytes_copied": { "type": "integer", "minimum": 0 },
         "ok": { "type": "boolean" }
@@ -87,7 +87,7 @@
         "files_skipped_already_present": { "type": "integer", "minimum": 0 },
         "files_failed": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 }
+          "items": { "$ref": "#/$defs/copyFailure" }
         },
         "bytes_copied": { "type": "integer", "minimum": 0 },
         "ok": { "type": "boolean" }
@@ -176,6 +176,31 @@
     "ok": {
       "type": "boolean",
       "description": "True only when the space preflight passed, both the raw leg and (if requested) the extracted leg copied with zero failures, and destination reconciliation (and extracted reconciliation, if requested) found no missing, mismatched, or unexpected paths."
+    }
+  },
+  "$defs": {
+    "copyFailure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "category", "message_digest"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "category": {
+          "type": "string",
+          "enum": [
+            "unsupported_link_entry",
+            "source_read_failed",
+            "staging_copy_failed",
+            "checksum_mismatch",
+            "destination_replace_failed"
+          ]
+        },
+        "message_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "Digest of the underlying error's repr, not raw provider/system error text -- which can disclose local machine paths -- while still being reproducible enough to correlate repeated failures."
+        }
+      }
     }
   }
 }

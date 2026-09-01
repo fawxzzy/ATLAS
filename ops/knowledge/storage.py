@@ -32,7 +32,6 @@ import hashlib
 import json
 import os
 import shutil
-import subprocess
 import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -348,8 +347,35 @@ def enumerate_directory_links(root: Path) -> list[Path]:
 
 
 # ---------------------------------------------------------------------------
-# 3. Symlink confinement
+# 3. Link policy and symlink/junction confinement
 # ---------------------------------------------------------------------------
+#
+# Wave 1's contract is safe storage relocation, not a portable archive
+# format. An earlier version of this module attempted to preserve file
+# symlinks, directory symlinks, and Windows junctions as live links across
+# a copy, including rewriting absolute internal targets. That produced
+# three real, distinct defects across three review rounds (a resolve()d
+# destination that could be redirected through a planted symlink; an
+# 8.3-short-name mismatch in a target-rebasing comparison on Windows CI;
+# and a manifest built from pre-rewrite targets that could never match a
+# post-rewrite destination). Reliably preserving every combination of
+# POSIX/Windows file and directory links, absolute and relative targets,
+# and Windows reparse-point semantics is a separate, substantially larger
+# problem than this wave's actual requirement. The policy below detects
+# and reports every link entry precisely, then fails closed before any
+# copy starts, rather than attempting to materialize link semantics this
+# module does not yet get right on every platform.
+
+
+class LinkPolicy:
+    """Wave 1 ships exactly one policy: reject every link entry (file
+    symlink, directory symlink, or Windows junction/reparse point) before
+    any copy starts. A future dedicated wave can add a real portable
+    link-preservation policy; this module deliberately does not pretend
+    to be one yet."""
+
+    REJECT_ALL = "reject-all"
+
 
 
 def check_symlink_confinement(root: Path, entries: list[Path]) -> list[str]:
@@ -383,6 +409,39 @@ def check_symlink_confinement(root: Path, entries: list[Path]) -> list[str]:
             target.relative_to(normal_root)
         except ValueError:
             findings.append(f"external_symlink_target_rejected: {entry} -> {target}")
+    return findings
+
+
+def _link_entry_kind(entry: Path, *, is_directory_entry: bool) -> str:
+    if _lp_is_symlink(entry):
+        return "directory_symlink" if is_directory_entry else "file_symlink"
+    return "windows_junction"
+
+
+def check_link_entries(
+    root: Path,
+    files: list[Path],
+    directory_links: list[Path],
+    *,
+    link_policy: str = LinkPolicy.REJECT_ALL,
+) -> list[str]:
+    """Return one structured, blocking finding per link entry found under
+    `link_policy`. Under LinkPolicy.REJECT_ALL (the only policy Wave 1
+    ships), every file symlink, directory symlink, and Windows junction
+    is rejected -- internal or external target, it does not matter --
+    before any copy starts. See the module-level note above LinkPolicy
+    for why this module does not attempt to preserve link semantics yet.
+    """
+    if link_policy != LinkPolicy.REJECT_ALL:
+        return []
+    findings: list[str] = []
+    for entry in files:
+        if _is_reparse_point(entry):
+            kind = _link_entry_kind(entry, is_directory_entry=False)
+            findings.append(f"unsupported_link_entry: path={entry.relative_to(root).as_posix()} kind={kind}")
+    for entry in directory_links:
+        kind = _link_entry_kind(entry, is_directory_entry=True)
+        findings.append(f"unsupported_link_entry: path={entry.relative_to(root).as_posix()} kind={kind}")
     return findings
 
 
@@ -620,6 +679,7 @@ def preflight_space_budget(
     work_root: Path,
     extracted_destination_root: Path | None = None,
     reserve_policy: VolumeReservePolicy = DEFAULT_VOLUME_RESERVE_POLICY,
+    link_policy: str = LinkPolicy.REJECT_ALL,
     exclude: Callable[[str], bool] | None = None,
     receipt_path: Path | None = None,
     expected_manifest_path: Path | None = None,
@@ -632,9 +692,10 @@ def preflight_space_budget(
     requirement independently. Fails closed (ok=False) on: a dangerous
     root-topology relationship (checked first, before any enumeration --
     see validate_root_topology()), insufficient space on any volume, an
-    unstatable source file, or a symlink/junction whose target escapes
-    source_root (see check_symlink_confinement()) -- nothing starts
-    copying until every one of these passes.
+    unstatable source file, or -- under LinkPolicy.REJECT_ALL, the
+    default -- any link entry at all, internal or external target alike
+    (see check_link_entries()) -- nothing starts copying until every one
+    of these passes.
 
     Demand modeled per volume:
     - raw/extracted destination volumes: bytes still needed (not yet
@@ -682,7 +743,9 @@ def preflight_space_budget(
     all_source_files = enumerate_files(source_root)
     all_source_directory_links = enumerate_directory_links(source_root)
     blocking_findings = list(
-        check_symlink_confinement(source_root, all_source_files + all_source_directory_links)
+        check_link_entries(
+            source_root, all_source_files, all_source_directory_links, link_policy=link_policy
+        )
     )
 
     raw_needed, raw_largest, raw_blocking = _bytes_still_needed(source_root, raw_destination_root, exclude=exclude)
@@ -744,95 +807,52 @@ def preflight_space_budget(
 
 
 # ---------------------------------------------------------------------------
-# 6. Resumable, atomic copy
+# 6. Resumable, atomic copy -- REGULAR FILES ONLY
 # ---------------------------------------------------------------------------
+#
+# See the module note above LinkPolicy (section 3): link entries are never
+# copied here. resumable_copy_tree() rejects one defensively if it ever
+# sees one, but the primary enforcement point is
+# preflight_space_budget()/check_link_entries(), which blocks before this
+# function is ever called on a tree containing a link.
 
 
 class ResumableCopyError(Exception):
-    pass
+    def __init__(self, message: str, *, category: str = "staging_copy_failed"):
+        super().__init__(message)
+        self.category = category
+
+
+@dataclass(frozen=True)
+class CopyFailure:
+    path: str
+    category: str
+    message_digest: str
 
 
 @dataclass
 class CopyResult:
     copied: list[str] = field(default_factory=list)
     skipped_already_present: list[str] = field(default_factory=list)
-    failed: list[str] = field(default_factory=list)
+    failed: list[CopyFailure] = field(default_factory=list)
     total_bytes_copied: int = 0
 
 
-def _rewrite_symlink_target_if_needed(
-    *, link_source: Path, raw_target: str, source_root: Path | None, destination_root: Path | None
-) -> str:
-    """Return the target text a preserved symlink should actually carry at
-    the destination.
-
-    A *relative* target is returned unchanged: the relative relationship
-    between a link and its target survives an identical-layout copy of
-    the whole tree.
-
-    An *absolute* target is different. If it is left untouched, a
-    relocated tree is not self-contained -- the destination's link would
-    still point back at the original source location, and would break
-    (or silently point at stale content) once that source is later moved
-    or deleted, which is exactly what a relocation is for. So an absolute
-    target that resolves inside `source_root` is rewritten to the
-    corresponding absolute path under `destination_root`. An absolute
-    target outside `source_root` should already have been rejected by
-    check_symlink_confinement() before any copy starts; this raises
-    defensively for a caller that invokes the copy primitives directly
-    without going through that preflight.
-
-    `source_root`/`destination_root` are optional: when either is None
-    (a caller with no root context), an absolute target is returned
-    unchanged rather than raising, preserving the previous unqualified
-    behavior for callers that never had this context.
-    """
-    if source_root is None or destination_root is None:
-        return raw_target
-    candidate = Path(raw_target)
-    if not candidate.is_absolute():
-        return raw_target
-    normal_source_root = source_root.resolve()
-    normal_candidate = Path(os.path.normpath(str(candidate)))
-    try:
-        rel = normal_candidate.relative_to(normal_source_root)
-    except ValueError:
-        raise ResumableCopyError(
-            f"absolute symlink target could not be confined to source_root: {link_source} -> {raw_target}"
-        )
-    return str(destination_root / rel)
+def _copy_failure(path: str, exc: Exception, *, category: str) -> CopyFailure:
+    # Bounded, reproducible failure reason: a digest of the error's repr,
+    # not the raw text. Raw provider/system error text can disclose local
+    # machine paths (already a real concern this module handles carefully
+    # elsewhere -- see _win_long_path()); a digest is still useful for
+    # correlating repeated failures without that exposure.
+    return CopyFailure(
+        path=path, category=category, message_digest=stable_json_digest({"error_repr": repr(exc)})
+    )
 
 
-def _matches_existing(
-    source: Path,
-    destination: Path,
-    *,
-    source_root: Path | None = None,
-    destination_root: Path | None = None,
-) -> bool:
-    if _is_reparse_point(source):
-        if not _is_reparse_point(destination):
-            return False
-        try:
-            if _lp_is_symlink(source):
-                if not _lp_is_symlink(destination):
-                    return False
-                raw_target = _lp_readlink(source)
-                expected_target = _rewrite_symlink_target_if_needed(
-                    link_source=source, raw_target=raw_target,
-                    source_root=source_root, destination_root=destination_root,
-                )
-                return _lp_readlink(destination) == expected_target
-            # Junction: os.readlink() cannot read its raw target, so
-            # compare resolved targets instead (see
-            # _copy_one_junction_resumable() for the same reasoning).
-            expected_resolved = _resolved_and_rebased_target(
-                source, source_root=source_root, destination_root=destination_root
-            ).resolve()
-            destination_resolved = _win_long_path(destination).resolve()
-            return destination_resolved == expected_resolved
-        except (OSError, ResumableCopyError):
-            return False
+def _matches_existing(source: Path, destination: Path) -> bool:
+    """Regular-file resumability check only. A link source never reaches
+    this function in the normal flow -- resumable_copy_tree() rejects
+    link entries before considering whether they "match" anything."""
     if not _lp_is_file(destination):
         return False
     try:
@@ -860,103 +880,43 @@ def _atomic_place(staged: Path, destination: Path) -> None:
     _lp_unlink(staged, missing_ok=True)
 
 
-def _copy_one_symlink_resumable(
-    source: Path, destination: Path, *, source_root: Path | None = None, destination_root: Path | None = None
-) -> int:
-    """Preserve `source` as a symlink at `destination` rather than
-    dereferencing it into a regular-file copy of its target's content.
-    Symlink creation is itself a single atomic filesystem operation (no
-    partial-write state exists the way it does for file content), so no
-    staging is needed here the way _copy_one_resumable() stages regular
-    files.
-
-    An absolute target confined to source_root is rewritten to the
-    corresponding path under destination_root, so the relocated tree does
-    not silently point back at the original source (see
-    _rewrite_symlink_target_if_needed()).
-
-    A non-symlink reparse point (a Windows junction) is handled
-    separately: `os.readlink()` cannot portably read a junction's raw
-    target -- junctions store it in a different reparse-data format than
-    symlinks -- so its resolved target is used instead and rebased onto
-    destination_root the same way an absolute symlink target is, then
-    recreated as a new junction via `mklink /J` (which, unlike
-    `os.symlink()`, does not require SeCreateSymbolicLinkPrivilege)."""
-    if not _lp_is_symlink(source):
-        return _copy_one_junction_resumable(
-            source, destination, source_root=source_root, destination_root=destination_root
-        )
-    raw_target = _lp_readlink(source)
-    target = _rewrite_symlink_target_if_needed(
-        link_source=source, raw_target=raw_target, source_root=source_root, destination_root=destination_root
-    )
-    if _lp_exists(destination) or _lp_is_symlink(destination):
-        _lp_unlink(destination, missing_ok=True)
-    try:
-        _lp_symlink(target, destination)
-    except OSError as exc:
-        raise ResumableCopyError(f"failed to preserve symlink {source} -> {target}: {exc}") from exc
-    return 0
-
-
-def _resolved_and_rebased_target(
-    source: Path, *, source_root: Path | None, destination_root: Path | None
-) -> Path:
-    resolved = _win_long_path(source).resolve()
-    if source_root is not None and destination_root is not None:
-        try:
-            rel = resolved.relative_to(source_root.resolve())
-            return destination_root / rel
-        except ValueError:
-            pass  # external target; should already be rejected by preflight confinement
-    return resolved
-
-
-def _copy_one_junction_resumable(
-    source: Path, destination: Path, *, source_root: Path | None, destination_root: Path | None
-) -> int:
-    if os.name != "nt":
-        raise ResumableCopyError(f"non-symlink reparse point cannot be preserved on this platform: {source}")
-    target = _resolved_and_rebased_target(source, source_root=source_root, destination_root=destination_root)
-    if _lp_exists(destination) or _lp_is_symlink(destination):
-        _lp_unlink(destination, missing_ok=True)
-    result = subprocess.run(
-        ["cmd", "/c", "mklink", "/J", str(destination), str(target)],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        raise ResumableCopyError(
-            f"failed to create junction {destination} -> {target}: {result.stderr or result.stdout}"
-        )
-    return 0
-
-
-def _copy_one_resumable(
-    source: Path,
-    destination: Path,
-    *,
-    work_root: Path,
-    source_root: Path | None = None,
-    destination_root: Path | None = None,
-) -> int:
-    _lp_mkdir(destination.parent)
+def _copy_one_resumable(source: Path, destination: Path, *, work_root: Path) -> int:
+    """Copy exactly one regular file, resumably and atomically. Raises
+    ResumableCopyError (with a bounded category) rather than attempting
+    anything for a link source -- this is a defense-in-depth check, not
+    the primary enforcement point: under LinkPolicy.REJECT_ALL,
+    preflight_space_budget() already blocks before resumable_copy_tree()
+    is ever called on a tree containing one."""
     if _is_reparse_point(source):
-        return _copy_one_symlink_resumable(
-            source, destination, source_root=source_root, destination_root=destination_root
+        raise ResumableCopyError(
+            f"link entries are not copied under LinkPolicy.REJECT_ALL: {source}",
+            category="unsupported_link_entry",
         )
+    _lp_mkdir(destination.parent)
     stage_dir = work_root / "copy-staging"
     _lp_mkdir(stage_dir)
     stage_name = hashlib.sha1(str(destination).encode("utf-8")).hexdigest() + ".part"
     staged = stage_dir / stage_name
     if _lp_exists(staged):
         _lp_unlink(staged)
-    _lp_copy2(source, staged)
+    try:
+        _lp_copy2(source, staged)
+    except OSError as exc:
+        failing_path = str(getattr(exc, "filename", "") or "")
+        category = "source_read_failed" if failing_path and failing_path in str(source) else "staging_copy_failed"
+        raise ResumableCopyError(f"copy to staging failed for {source}: {exc}", category=category) from exc
     if file_checksum(staged) != file_checksum(source):
         _lp_unlink(staged, missing_ok=True)
-        raise ResumableCopyError(f"staged copy checksum mismatch for {source}")
+        raise ResumableCopyError(f"staged copy checksum mismatch for {source}", category="checksum_mismatch")
     size = _lp_stat(staged).st_size
-    _atomic_place(staged, destination)
+    try:
+        _atomic_place(staged, destination)
+    except OSError as exc:
+        _lp_unlink(staged, missing_ok=True)
+        raise ResumableCopyError(
+            f"atomic replace into destination failed for {destination}: {exc}",
+            category="destination_replace_failed",
+        ) from exc
     return size
 
 
@@ -967,50 +927,46 @@ def resumable_copy_tree(
     work_root: Path,
     exclude: Callable[[str], bool] | None = None,
 ) -> CopyResult:
-    """Copy source_root's file tree into destination_root, resumably and
-    atomically per file.
+    """Copy source_root's REGULAR FILE tree into destination_root,
+    resumably and atomically per file. Link entries (file symlinks,
+    directory symlinks, Windows junctions) are recorded as a bounded
+    `unsupported_link_entry` failure, never copied or dereferenced -- see
+    the module-level note above LinkPolicy for why. In the normal
+    relocate_archive_source() flow this should never actually happen,
+    since preflight_space_budget() already blocked before this function
+    is called on a tree containing any link.
 
     Resumable: on re-invocation after an interruption, any destination
-    entry that already matches the source (same size and checksum for
-    regular files, same link target for symlinks) is skipped rather than
-    re-copied, so an interrupted run can simply be re-run to completion.
+    file that already matches the source (same size and checksum) is
+    skipped rather than re-copied, so an interrupted run can simply be
+    re-run to completion.
 
-    Atomic per file: each regular file is staged under work_root,
-    checksum-verified against the source, and only then moved into
+    Atomic per file: each file is staged under work_root, checksum-
+    verified against the source, and only then moved into
     destination_root with an atomic rename (see _atomic_place).
     destination_root never contains a partially-written file, even if the
-    process is killed mid-copy. File symlinks and directory symlinks /
-    junctions (see enumerate_directory_links()) are preserved as links
-    (see _copy_one_symlink_resumable), not dereferenced into a copy of
-    their target's content -- an absolute link target confined to
-    source_root is rewritten to the corresponding destination path so the
-    relocated tree is self-contained.
+    process is killed mid-copy.
     """
     files = enumerate_files(source_root)
-    directory_links = enumerate_directory_links(source_root)
     result = CopyResult()
-    for source_path in list(files) + list(directory_links):
+    for source_path in files:
         rel = source_path.relative_to(source_root).as_posix()
         if exclude is not None and exclude(rel):
             continue
         destination_path = destination_root / rel
-        if _matches_existing(
-            source_path, destination_path, source_root=source_root, destination_root=destination_root
-        ):
+        if _is_reparse_point(source_path):
+            result.failed.append(_copy_failure(rel, ResumableCopyError("link entry"), category="unsupported_link_entry"))
+            continue
+        if _matches_existing(source_path, destination_path):
             result.skipped_already_present.append(rel)
             continue
         try:
-            size = _copy_one_resumable(
-                source_path,
-                destination_path,
-                work_root=work_root,
-                source_root=source_root,
-                destination_root=destination_root,
-            )
+            size = _copy_one_resumable(source_path, destination_path, work_root=work_root)
             result.copied.append(rel)
             result.total_bytes_copied += size
-        except (OSError, ResumableCopyError):
-            result.failed.append(rel)
+        except (OSError, ResumableCopyError) as exc:
+            category = getattr(exc, "category", "staging_copy_failed")
+            result.failed.append(_copy_failure(rel, exc, category=category))
     return result
 
 
@@ -1019,47 +975,66 @@ def resumable_copy_tree(
 # ---------------------------------------------------------------------------
 
 
+def _classify_link_entry(path: Path, *, root: Path, is_directory_entry: bool) -> dict[str, Any]:
+    """Canonical, location-independent classification of a link entry for
+    manifest/diagnostic purposes -- kind, and whether its target is
+    confined within root ('internal', with a root-relative target_path
+    two logically-identical trees produce the same entry for regardless
+    of where either physically lives) or escapes it ('external', where
+    only a bounded target_digest is recorded -- never the full external
+    path, which could disclose machine-specific detail in a broadly
+    retained receipt). This is diagnostic inventory only: Wave 1 never
+    copies a link (see LinkPolicy.REJECT_ALL), so this is what lets a
+    caller see precisely what was found and rejected.
+    """
+    kind = _link_entry_kind(path, is_directory_entry=is_directory_entry)
+    try:
+        resolved_target = _win_long_path(path).resolve()
+    except OSError:
+        return {"kind": kind, "target_scope": "unresolvable"}
+    normal_root = _win_long_path(root).resolve()
+    try:
+        rel_target = resolved_target.relative_to(normal_root)
+        return {"kind": kind, "target_scope": "internal", "target_path": rel_target.as_posix()}
+    except ValueError:
+        return {
+            "kind": kind,
+            "target_scope": "external",
+            "target_digest": stable_json_digest({"resolved_target": str(resolved_target)}),
+        }
+
+
 def build_relocation_manifest(root: Path, *, exclude: Callable[[str], bool] | None = None) -> dict[str, Any]:
     """Build a manifest of `root`'s current real content via long-path-safe
     enumeration -- files, file symlinks, and directory symlinks/junctions
-    (see enumerate_directory_links()) alike. Contains only relative paths,
-    kinds, sizes, and checksums (a link's "checksum" is a digest of its
-    resolved/readlink-derived target, not its target's content) -- no
-    reference to drive letters or any storage mechanism -- so it
-    reconciles identically regardless of how `root` is currently reached.
-    A directory link's own target is never traversed into for this
-    manifest; the link is one entry, not a subtree.
+    (see enumerate_directory_links()) alike. Contains relative paths,
+    kinds, sizes, and checksums; a link entry's checksum is derived from
+    its canonical classification (see _classify_link_entry()), not raw
+    target text, so two logically-identical trees produce the same
+    checksum for a link regardless of where either physically lives -- no
+    reference to drive letters or any storage mechanism -- so the
+    manifest reconciles identically regardless of how `root` is currently
+    reached. A directory link's own target is never traversed into for
+    this manifest; the link is one entry, not a subtree. Wave 1 never
+    copies a link entry (LinkPolicy.REJECT_ALL); this remains a
+    diagnostic inventory usable independently of that policy.
     """
     files = enumerate_files(root)
     directory_links = enumerate_directory_links(root)
+    directory_link_set = set(directory_links)
     entries: list[dict[str, Any]] = []
     for path in list(files) + list(directory_links):
         rel = path.relative_to(root).as_posix()
         if exclude is not None and exclude(rel):
             continue
-        if _lp_is_symlink(path):
-            entries.append(
-                {
-                    "path": rel,
-                    "kind": "symlink",
-                    "size_bytes": 0,
-                    "checksum": stable_json_digest({"symlink_target": _lp_readlink(path)}),
-                }
-            )
-            continue
         if _is_reparse_point(path):
-            # Windows junction: no portable raw-target read, so the
-            # checksum is over the resolved target instead.
-            try:
-                resolved_target = str(_win_long_path(path).resolve())
-            except OSError:
-                resolved_target = "<unresolvable>"
+            classification = _classify_link_entry(path, root=root, is_directory_entry=path in directory_link_set)
             entries.append(
                 {
                     "path": rel,
-                    "kind": "junction",
                     "size_bytes": 0,
-                    "checksum": stable_json_digest({"resolved_target": resolved_target}),
+                    "checksum": stable_json_digest(classification),
+                    **classification,
                 }
             )
             continue
@@ -1129,6 +1104,10 @@ def verify_restore(*, manifest: dict[str, Any], root: Path, require_exact_match:
 # ---------------------------------------------------------------------------
 
 
+def _serialize_copy_failures(failures: list[CopyFailure]) -> list[dict[str, str]]:
+    return [{"path": f.path, "category": f.category, "message_digest": f.message_digest} for f in failures]
+
+
 def build_relocation_receipt(
     *,
     archive_id: str,
@@ -1159,7 +1138,7 @@ def build_relocation_receipt(
         "raw_leg": {
             "files_copied": len(raw_copy_result.copied),
             "files_skipped_already_present": len(raw_copy_result.skipped_already_present),
-            "files_failed": list(raw_copy_result.failed),
+            "files_failed": _serialize_copy_failures(raw_copy_result.failed),
             "bytes_copied": raw_copy_result.total_bytes_copied,
             "ok": not raw_copy_result.failed,
         },
@@ -1167,7 +1146,7 @@ def build_relocation_receipt(
             {
                 "files_copied": len(extracted_copy_result.copied),
                 "files_skipped_already_present": len(extracted_copy_result.skipped_already_present),
-                "files_failed": list(extracted_copy_result.failed),
+                "files_failed": _serialize_copy_failures(extracted_copy_result.failed),
                 "bytes_copied": extracted_copy_result.total_bytes_copied,
                 "ok": not extracted_copy_result.failed,
             }
@@ -1315,11 +1294,19 @@ def relocate_archive_source(
     receipt_path: Path | None = None,
     expected_manifest_path: Path | None = None,
     reserve_policy: VolumeReservePolicy = DEFAULT_VOLUME_RESERVE_POLICY,
+    link_policy: str = LinkPolicy.REJECT_ALL,
 ) -> RelocationResult:
     """Compose the full Wave 1 architecture into one call: root-topology
     validation, preflight, one raw preservation copy, optional selective
     extracted materialization, a source-anchored expected manifest, exact
     destination reconciliation, and a relocation receipt.
+
+    `link_policy` defaults to LinkPolicy.REJECT_ALL, the only policy this
+    module ships: any file symlink, directory symlink, or Windows
+    junction found under source_root fails the preflight with a
+    structured `unsupported_link_entry` finding per entry, before any
+    copy starts. This module does not attempt to preserve link semantics
+    -- see the note above LinkPolicy for why.
 
     `exclusion_policy` defaults to NO_EXCLUSION_POLICY: raw preservation
     means every admitted source entry is preserved by default, including
@@ -1362,6 +1349,7 @@ def relocate_archive_source(
         work_root=work_root,
         extracted_destination_root=materialize_extracted_root,
         reserve_policy=reserve_policy,
+        link_policy=link_policy,
         exclude=exclude,
         receipt_path=receipt_path,
         expected_manifest_path=expected_manifest_path,

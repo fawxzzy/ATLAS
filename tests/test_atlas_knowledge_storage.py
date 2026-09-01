@@ -215,6 +215,12 @@ class SymlinkConfinementTests(TempRootMixin, unittest.TestCase):
         self.assertTrue(any("external_symlink_target_rejected" in f for f in findings))
 
     def test_external_symlink_blocks_preflight_before_any_copy(self) -> None:
+        # Under LinkPolicy.REJECT_ALL (preflight_space_budget()'s default),
+        # every link entry is blocking regardless of internal/external
+        # target -- check_link_entries() is what actually runs here, not
+        # the legacy check_symlink_confinement() exercised by the tests
+        # above, so the finding text is "unsupported_link_entry", not
+        # "external_symlink_target_rejected".
         source = self._temp_dir()
         self._write(source / "keep.txt", b"keep me")
         outside = self._temp_dir()
@@ -230,7 +236,35 @@ class SymlinkConfinementTests(TempRootMixin, unittest.TestCase):
             )
 
         self.assertFalse(budget.ok)
-        self.assertTrue(any("external_symlink_target_rejected" in f for f in budget.findings))
+        self.assertTrue(
+            any("unsupported_link_entry" in f and "escape.txt" in f and "file_symlink" in f
+                for f in budget.findings)
+        )
+        self.assertFalse(destination.exists())
+
+    def test_internal_symlink_still_blocks_preflight_under_reject_all(self) -> None:
+        # The pre-pivot confinement model treated an internal-target link
+        # as safe. REJECT_ALL does not distinguish -- any link entry at
+        # all is blocking, internal target included -- so this is the one
+        # behavioral change from check_symlink_confinement() worth its own
+        # explicit regression test.
+        source = self._temp_dir()
+        self._write(source / "real.txt", b"content")
+        if not self._symlink(source / "link.txt", source / "real.txt"):
+            self.skipTest("symlink creation not permitted in this environment")
+        destination = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+
+        with mock.patch.object(storage, "_free_bytes", return_value=10 * 1024 * 1024 * 1024):
+            budget = storage.preflight_space_budget(
+                source_root=source, raw_destination_root=destination, work_root=work
+            )
+
+        self.assertFalse(budget.ok)
+        self.assertTrue(
+            any("unsupported_link_entry" in f and "link.txt" in f and "file_symlink" in f
+                for f in budget.findings)
+        )
         self.assertFalse(destination.exists())
 
 
@@ -325,7 +359,57 @@ class DirectoryLinkTests(TempRootMixin, unittest.TestCase):
         )
         self.assertTrue(any("external_symlink_target_rejected" in f for f in findings))
 
-    def test_directory_link_is_copied_as_a_link_not_descended_into(self) -> None:
+    def test_external_directory_symlink_blocks_preflight_before_any_copy(self) -> None:
+        root = self._temp_dir()
+        outside = self._temp_dir()
+        self._write(outside / "inside.txt", b"content")
+        link = root / "escape_dir"
+        if not self._symlink(link, outside):
+            self.skipTest("symlink creation not permitted in this environment")
+        destination = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+
+        with mock.patch.object(storage, "_free_bytes", return_value=10 * 1024 * 1024 * 1024):
+            budget = storage.preflight_space_budget(
+                source_root=root, raw_destination_root=destination, work_root=work
+            )
+
+        self.assertFalse(budget.ok)
+        self.assertTrue(
+            any("unsupported_link_entry" in f and "escape_dir" in f and "directory_symlink" in f
+                for f in budget.findings)
+        )
+        self.assertFalse(destination.exists())
+
+    @unittest.skipUnless(os.name == "nt", "junctions are a Windows-only concept")
+    def test_windows_junction_blocks_preflight_before_any_copy(self) -> None:
+        root = self._temp_dir()
+        target = self._temp_dir()
+        self._write(target / "inside.txt", b"content")
+        link = root / "junction_dir"
+        if not self._junction(link, target):
+            self.skipTest("junction creation not permitted in this environment")
+        destination = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+
+        with mock.patch.object(storage, "_free_bytes", return_value=10 * 1024 * 1024 * 1024):
+            budget = storage.preflight_space_budget(
+                source_root=root, raw_destination_root=destination, work_root=work
+            )
+
+        self.assertFalse(budget.ok)
+        self.assertTrue(
+            any("unsupported_link_entry" in f and "junction_dir" in f and "windows_junction" in f
+                for f in budget.findings)
+        )
+        self.assertFalse(destination.exists())
+
+    def test_directory_link_blocks_relocation_before_any_destination_write(self) -> None:
+        # Under LinkPolicy.REJECT_ALL (Wave 1's only policy), a directory
+        # link is rejected at preflight -- resumable_copy_tree() itself
+        # never even sees directory-level entries (its scope is regular
+        # files only, see the module note above LinkPolicy), so this
+        # tests the actual enforcement point: relocate_archive_source().
         root = self._temp_dir()
         self._write(root / "real_dir" / "inside.txt", b"content")
         if not self._symlink(root / "link_dir", root / "real_dir"):
@@ -333,16 +417,20 @@ class DirectoryLinkTests(TempRootMixin, unittest.TestCase):
         destination = self._temp_dir() / "destination"
         work = self._temp_dir() / "work"
 
-        result = storage.resumable_copy_tree(root, destination, work_root=work)
+        result = storage.relocate_archive_source(
+            archive_id="synthetic--directory-link-rejected",
+            source_root=root,
+            destination_root=destination,
+            work_root=work,
+            source_description="synthetic fixture proving directory links block relocation",
+        )
 
-        self.assertIn("link_dir", result.copied)
-        self.assertTrue((destination / "link_dir").is_symlink())
-        # Not recursed into as a real directory -- "real_dir" itself was
-        # also copied on its own (it's a plain directory in the source
-        # tree too), but "link_dir" landed as a link, not a second,
-        # independent copy of real_dir's contents.
-        self.assertTrue((destination / "real_dir" / "inside.txt").exists())
-        self.assertFalse((destination / "link_dir").is_dir() and not (destination / "link_dir").is_symlink())
+        self.assertFalse(result.ok)
+        self.assertTrue(
+            any("unsupported_link_entry" in f and "link_dir" in f and "directory_symlink" in f
+                for f in result.space_budget.findings)
+        )
+        self.assertFalse(destination.exists())
 
 
 class GeneratedCacheExclusionTests(unittest.TestCase):
@@ -758,10 +846,22 @@ class ResumableCopyTests(TempRootMixin, unittest.TestCase):
         with mock.patch.object(storage, "file_checksum", side_effect=corrupt_then_restore):
             result = storage.resumable_copy_tree(source, destination, work_root=work)
 
-        self.assertEqual(result.failed, ["a.txt"])
+        self.assertEqual([f.path for f in result.failed], ["a.txt"])
+        self.assertEqual(result.failed[0].category, "checksum_mismatch")
+        self.assertTrue(result.failed[0].message_digest.startswith("sha256:"))
         self.assertFalse((destination / "a.txt").exists())
 
-    def test_internal_symlink_is_preserved_as_a_symlink_not_dereferenced(self) -> None:
+    def test_symlink_source_is_rejected_not_copied_or_dereferenced(self) -> None:
+        # Defense in depth at the low-level primitive: Wave 1's primary
+        # enforcement is preflight_space_budget() rejecting a tree
+        # containing any link before resumable_copy_tree() is ever
+        # called on it, but this proves the copy step itself also
+        # refuses a link source outright -- neither preserving it as a
+        # link (removed after three review rounds of real, distinct
+        # platform-specific defects) nor silently dereferencing it into
+        # a regular-file copy of its target's content (which would
+        # reopen the exact exfiltration risk check_symlink_confinement()
+        # exists to prevent).
         source = self._temp_dir() / "source"
         self._write(source / "real.txt", b"real content")
         link = source / "link.txt"
@@ -772,21 +872,10 @@ class ResumableCopyTests(TempRootMixin, unittest.TestCase):
 
         result = storage.resumable_copy_tree(source, destination, work_root=work)
 
-        self.assertIn("link.txt", result.copied)
-        self.assertTrue((destination / "link.txt").is_symlink())
-
-    def test_symlink_resumability_skips_when_target_already_matches(self) -> None:
-        source = self._temp_dir() / "source"
-        self._write(source / "real.txt", b"content")
-        if not self._symlink(source / "link.txt", source / "real.txt"):
-            self.skipTest("symlink creation not permitted in this environment")
-        destination = self._temp_dir() / "destination"
-        work = self._temp_dir() / "work"
-
-        storage.resumable_copy_tree(source, destination, work_root=work)
-        second = storage.resumable_copy_tree(source, destination, work_root=work)
-
-        self.assertIn("link.txt", second.skipped_already_present)
+        self.assertEqual([f.path for f in result.failed], ["link.txt"])
+        self.assertEqual(result.failed[0].category, "unsupported_link_entry")
+        self.assertFalse((destination / "link.txt").exists())
+        self.assertNotIn("link.txt", result.copied)
 
 
 class DestinationSideSymlinkSafetyTests(TempRootMixin, unittest.TestCase):
@@ -824,66 +913,6 @@ class DestinationSideSymlinkSafetyTests(TempRootMixin, unittest.TestCase):
         self.assertEqual((external / "victim.json").read_bytes(), b'{"original": true}')
         self.assertFalse(receipt_path.is_symlink())
         self.assertEqual(storage.read_relocation_receipt(receipt_path), {"ok": True, "n": 1})
-
-
-class AbsoluteInternalSymlinkTests(TempRootMixin, unittest.TestCase):
-    def test_relative_internal_target_is_preserved_unchanged(self) -> None:
-        source_root = self._temp_dir() / "source"
-        self._write(source_root / "real.txt", b"content")
-        if not self._symlink(source_root / "link.txt", Path("real.txt")):
-            self.skipTest("symlink creation not permitted in this environment")
-        destination_root = self._temp_dir() / "destination"
-        work = self._temp_dir() / "work"
-
-        storage.resumable_copy_tree(source_root, destination_root, work_root=work)
-
-        # A relative target string survives unchanged -- the relative
-        # relationship between link and target holds at the new location
-        # too, since the whole tree was copied with the same layout.
-        self.assertEqual(os.readlink(destination_root / "link.txt"), "real.txt")
-
-    def test_absolute_internal_target_is_rewritten_to_the_destination(self) -> None:
-        source_root = self._temp_dir() / "source"
-        self._write(source_root / "real.txt", b"content")
-        absolute_internal_target = str((source_root / "real.txt").resolve())
-        if not self._symlink(source_root / "link.txt", Path(absolute_internal_target)):
-            self.skipTest("symlink creation not permitted in this environment")
-        destination_root = self._temp_dir() / "destination"
-        work = self._temp_dir() / "work"
-
-        storage.resumable_copy_tree(source_root, destination_root, work_root=work)
-
-        rewritten = os.readlink(destination_root / "link.txt")
-        self.assertNotEqual(rewritten, absolute_internal_target)
-        self.assertTrue(Path(rewritten).is_relative_to(destination_root.resolve()))
-
-    def test_relocated_tree_with_absolute_internal_link_survives_source_removal(self) -> None:
-        # The acceptance test the review asked for directly: relocate,
-        # remove the original source entirely, and prove the destination
-        # link still resolves and exact restore verification still
-        # passes -- proving the relocated tree is genuinely self-
-        # contained, not silently dependent on the original source still
-        # existing.
-        source_root = self._temp_dir() / "source"
-        self._write(source_root / "real.txt", b"durable content")
-        absolute_internal_target = str((source_root / "real.txt").resolve())
-        if not self._symlink(source_root / "link.txt", Path(absolute_internal_target)):
-            self.skipTest("symlink creation not permitted in this environment")
-        destination_root = self._temp_dir() / "destination"
-        work = self._temp_dir() / "work"
-
-        expected_manifest = storage.build_relocation_manifest(source_root)
-        storage.resumable_copy_tree(source_root, destination_root, work_root=work)
-
-        shutil.rmtree(source_root, ignore_errors=True)
-
-        self.assertTrue((destination_root / "link.txt").is_symlink())
-        linked_target = (destination_root / "link.txt").resolve()
-        self.assertTrue(linked_target.exists())
-        self.assertEqual(linked_target.read_bytes(), b"durable content")
-
-        verification = storage.verify_restore(manifest=expected_manifest, root=destination_root)
-        self.assertTrue(verification["ok"], verification)
 
 
 class RelocationManifestAndRestoreVerificationTests(TempRootMixin, unittest.TestCase):
@@ -1108,7 +1137,9 @@ class RelocateArchiveSourceEndToEndTests(TempRootMixin, unittest.TestCase):
             if call_count["n"] == 2:
                 # Simulate the extracted leg (the second copy) failing.
                 result = original_copy_tree(source_root, destination_root, **kwargs)
-                result.failed.append("notes.md")
+                result.failed.append(
+                    storage.CopyFailure(path="notes.md", category="staging_copy_failed", message_digest="sha256:" + "0" * 64)
+                )
                 return result
             return original_copy_tree(source_root, destination_root, **kwargs)
 
@@ -1124,7 +1155,7 @@ class RelocateArchiveSourceEndToEndTests(TempRootMixin, unittest.TestCase):
 
         self.assertFalse(result.ok)
         self.assertIsNotNone(result.extracted_copy_result)
-        self.assertIn("notes.md", result.extracted_copy_result.failed)
+        self.assertIn("notes.md", [f.path for f in result.extracted_copy_result.failed])
         self.assertFalse(result.receipt["ok"])
         self.assertFalse(result.receipt["extracted_leg"]["ok"])
         # The raw leg itself genuinely succeeded -- only the extracted leg
