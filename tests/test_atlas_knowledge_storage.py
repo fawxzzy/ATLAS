@@ -326,7 +326,10 @@ class DirectoryLinkTests(TempRootMixin, unittest.TestCase):
         paths = {e["path"] for e in manifest["entries"]}
         self.assertIn("link_dir", paths)
         kinds = {e["path"]: e["kind"] for e in manifest["entries"]}
-        self.assertEqual(kinds["link_dir"], "symlink")
+        # _classify_link_entry() (third hardening wave) distinguishes file
+        # vs. directory symlinks explicitly rather than a generic "symlink"
+        # label -- see _link_entry_kind().
+        self.assertEqual(kinds["link_dir"], "directory_symlink")
 
     @unittest.skipUnless(os.name == "nt", "junctions are a Windows-only concept")
     def test_windows_junction_is_detected_as_reparse_point(self) -> None:
