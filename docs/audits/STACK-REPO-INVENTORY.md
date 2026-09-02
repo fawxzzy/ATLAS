@@ -15,30 +15,30 @@ Operational rule:
 ## Summary
 
 - Repo count: `13`
-- Root-blocking dirty repo count: `1`
-- Visible dirty repo count: `2`
+- Root-blocking dirty repo count: `3`
+- Visible dirty repo count: `4`
 - Advisory dirty repo count: `1`
 - Release-eligible repo count: `4`
 - Excluded surface count: `16`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:0815714911cbe7647cba76cea64077aa0849c06bc9f384dc51114efc2bca7291`
+- Inventory digest: `sha256:4017e58d969964a1acd3a26e7a7e99f276bb8640bcf21d50431c043ac8038754`
 
 ## Managed Repos
 
 | Repo id | Path | Display | Provider project | Public origin | Role | Playbook adoption status | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| _stack | repos/_stack | - | - | - | workflow-operator | verified | main | 40ab40f80ac914dd9bd59dbb64272be3ed1cf70f | 7aed5495d2702a653e461549877d8fa77b3a33d2 | False | True | False | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
-| discordos | repos/DiscordOS | - | - | - | board-and-discord-writer | not-claimed | main | 876b30e17733b6cb3c3c89a667b5d546be09b4c6 | 38e881d4265206c2148caaeb6a6a457e3e5bcda8 | False | True | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
-| fitness | repos/fawxzzy-fitness | - | - | - | application | - | codex/fitness-qa-002-board-binding | - | b98fa17b90e62fbe191bf3c20c88bf674bc76c13 | False | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
+| _stack | repos/_stack | - | - | - | workflow-operator | verified | main | 7aed5495d2702a653e461549877d8fa77b3a33d2 | 7aed5495d2702a653e461549877d8fa77b3a33d2 | True | True | True | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
+| discordos | repos/DiscordOS | - | - | - | board-and-discord-writer | not-claimed | main | aef01f277e006e3cb46550e507ebd8e4a1be9d21 | aef01f277e006e3cb46550e507ebd8e4a1be9d21 | True | True | True | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| fitness | repos/fawxzzy-fitness | - | - | - | application | - | main | - | da4d71afaecb19f470ce60ba182776d9fb0589e1 | False | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | - | - | - | shared-contract-foundation | not-claimed | main | e0c2978e4f0d0b73aaee6fc5d14b982b78d89b97 | e0c2978e4f0d0b73aaee6fc5d14b982b78d89b97 | False | True | False | trusted | True | - |
 | lifeline | repos/lifeline | - | - | - | local-operator | - | codex/path-discipline-warning-slice-lifeline | 54eeb56006099235723b60ce44de8a65e4c85889 | 54eeb56006099235723b60ce44de8a65e4c85889 | False | True | False | trusted | True | - |
 | mazer | repos/mazer | - | - | - | application | - | codex/player-goal-default-colors | - | a537d2d17429bdf0482989c280373a6ea751f9c0 | True | False | False | adjacent | False | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | - | - | - | application | - | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | True | False | trusted | False | - |
 | playbook | repos/playbook | - | - | - | governance-runtime | - | codex/atlas-knowledge-candidate-v2-consumer | 14fce44268084bcaaab6d189b6ef18eb7a992faf | 14fce44268084bcaaab6d189b6ef18eb7a992faf | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization<br>initiative:initiative-fawxzzy-tech-plan-convergence |
 | playbook-demo | repos/playbook-demo/playbook-demo | - | - | - | demo | - | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
-| socials-os | repos/socials-os | - | - | - | analytics-data-system | - | codex/fitness-walkthrough-v2 | - | d9cc13717cf5e63a069bb46577a2267f9161396f | False | False | False | adjacent | False | - |
-| stack | . | - | - | - | operator-layer | - | codex/fawxzzyweb-identity-compat | - | 82a0fda9127899b26ec5b3071b7f710d58279031 | True | True | True | trusted | False | - |
+| socials-os | repos/socials-os | - | - | - | analytics-data-system | - | codex/youtube-readonly-live-transport | - | ab0a012b38a4bfbad0b385a8431f1f6a7dbcc0b5 | False | False | False | adjacent | False | - |
+| stack | . | - | - | - | operator-layer | - | main | - | 1f7a9141cd329866bb3ec45602e335e1c725bb23 | True | True | True | trusted | False | - |
 | stream | repos/stream | - | - | - | application | - | main | 43769ba86d4c6ebc419ab9e7847c3843460a094f | 43769ba86d4c6ebc419ab9e7847c3843460a094f | False | True | False | trusted | False | - |
 | trove | repos/trove | FawxzzyWeb | fawxzzyweb | https://fawxzzy.com | application | - | codex/path-discipline-warning-slice-trove | 908fed4618aaf0bc869989e515ecacc410f47883 | 908fed4618aaf0bc869989e515ecacc410f47883 | False | True | False | trusted | True | - |
 

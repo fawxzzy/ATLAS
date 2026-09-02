@@ -17,6 +17,15 @@ role IDs remain canonical; legacy visible titles are read-only recovery inputs.
 Resolve active peer targets by stable logical role ID through the live
 registry; opaque thread IDs are replaceable runtime epochs.
 
+Archived or retired project tasks are provenance only. Historical cards,
+branches, pull requests, receipts, task titles, or bootstrap prose cannot
+select, bind, create, unarchive, activate, schedule, wake, dispatch, or
+authorize pull-request creation for a retired owner. In particular, DiscordOS
+is retired and must remain held from every live route. Future project-board
+product work routes to `owner.fawxzzyweb`, and master-data work routes to
+`platform.supabase-migration`, only after their exact contracts are proven;
+neither route implies that the implementation already exists.
+
 Use stable `event_id`, canonical `payload_digest`, source correlation, and
 route-back receipts. An unchanged retry is silent. The same event ID with a
 different digest is a safety incident. Never steer or interrupt an active
@@ -25,6 +34,20 @@ owner task. Return owner-first at a proven safe boundary; use the retired
 bind, recreate, activate, schedule, wake, or target `atlas.main`.
 
 One ATLAS-root mutation writer, one owner-repository writer per repository, and optional read-only scouts may be active. Stop on duplicate role bindings, lease collision, cwd/worktree drift, stale Git identity, or unknown active-writer state.
+
+Apply the installed common release-safety controls before owner-specific
+release proof. For Workbox precache verification, canonicalize strict
+same-origin URL paths before exact comparison: relative and root-relative keys
+may converge, but foreign origins, unsafe decoded paths, traversal, duplicate
+canonical keys, unadmitted query or fragment changes, missing required entries,
+and byte or SHA-256 drift fail closed. Never substitute basename matching. For
+linkage-capable Vercel CLI surfaces, validate the immutable expected workspace,
+project, organization or team, exact local binding bytes, and a classified
+explicit target before invocation. Missing, generated, mismatched, wrong-team,
+ambiguous, symlink or reparse-bound, or unclassified bindings fail closed; a
+diagnostic must never implicitly link or create a provider project. The shared
+gate grants no product-source, provider, deployment, production, cleanup, or
+credential authority.
 
 Full local/network capability does not grant provider, production, live-data, secret, destructive, GitHub, board, Discord, billing, or owner-repository authority. Those actions require an exact separately admitted packet. Do not archive, delete, rename, replace, pause, pin/unpin, or interrupt another standing task except through a separately accepted lifecycle/recovery plan.
 
