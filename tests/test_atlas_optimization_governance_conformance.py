@@ -373,6 +373,24 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertIn("PC025_COMMON_CONTROL_NOT_INSTALLED", {error["code"] for error in result["errors"]})
 
+    def test_missing_common_release_controls_returns_structured_invalid(self) -> None:
+        del self.optimization_governance["common_release_safety_controls"]
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("COMMON_RELEASE_CONTROLS_MISSING", {error["code"] for error in result["errors"]})
+
+    def test_wrong_type_common_release_controls_returns_structured_invalid(self) -> None:
+        self.optimization_governance["common_release_safety_controls"] = []
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("COMMON_RELEASE_CONTROLS_MISSING", {error["code"] for error in result["errors"]})
+
     def test_fails_when_common_release_publication_state_overclaims_current_main(self) -> None:
         self.optimization_governance["common_release_safety_controls"]["publication_state"] = "installed-current-main"
         (self.root / self.optimization_governance_ref).write_text(
@@ -415,6 +433,23 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         result = self.validate()
         self.assertFalse(result["valid"])
         self.assertIn("CHECKPOINT_RECEIPT_STALE", {error["code"] for error in result["errors"]})
+
+    def test_accepts_checkpoint_at_future_clock_skew_boundary(self) -> None:
+        checkpoint_path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
+        checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+        checkpoint["payload"]["recorded_at"] = "2026-08-27T22:05:00Z"
+        checkpoint_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+        result = self.validate()
+        self.assertTrue(result["valid"], result["errors"])
+
+    def test_rejects_checkpoint_beyond_future_clock_skew_window(self) -> None:
+        checkpoint_path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
+        checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+        checkpoint["payload"]["recorded_at"] = "2026-08-27T22:05:01Z"
+        checkpoint_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("CHECKPOINT_TIMESTAMP_IN_FUTURE", {error["code"] for error in result["errors"]})
 
     def test_accepts_content_addressed_latest_receipt_anchor(self) -> None:
         receipt_path = self.root / self.receipt_ref

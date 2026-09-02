@@ -24,6 +24,9 @@ COMMON_RELEASE_BASELINE_MARKERS = (
     "validate the immutable expected workspace",
     "a diagnostic must never implicitly link or create a provider project",
 )
+MAX_CHECKPOINT_FUTURE_SKEW_SECONDS = 300
+
+
 class ConformanceError(ValueError):
     pass
 
@@ -379,13 +382,15 @@ def validate_conformance(
     pc024 = common_controls.get("pc024", {}) if isinstance(common_controls, dict) else {}
     pc025 = common_controls.get("pc025", {}) if isinstance(common_controls, dict) else {}
     check(
-        common_controls.get("decision_id") == "ACCEPT_BOUNDED_COMMON_CONTROL_R001"
+        isinstance(common_controls, dict)
+        and common_controls.get("decision_id") == "ACCEPT_BOUNDED_COMMON_CONTROL_R001"
         and common_controls.get("status") == "INSTALLED",
         "COMMON_RELEASE_CONTROL_DECISION_DRIFT",
         str(common_controls.get("decision_id") if isinstance(common_controls, dict) else None),
     )
     check(
-        common_controls.get("local_installation_state") == "installed-and-verified-in-canonical-dirty-root"
+        isinstance(common_controls, dict)
+        and common_controls.get("local_installation_state") == "installed-and-verified-in-canonical-dirty-root"
         and common_controls.get("publication_state") == "current-main-candidate-unmerged",
         "COMMON_RELEASE_CONTROL_PUBLICATION_STATE_DRIFT",
         str(common_controls.get("publication_state") if isinstance(common_controls, dict) else None),
@@ -482,7 +487,14 @@ def validate_conformance(
     recorded_at = payload.get("recorded_at") if isinstance(payload, dict) else None
     checkpoint_age_hours: float | None = None
     if isinstance(recorded_at, str):
-        checkpoint_age_hours = max(0.0, (now - _parse_datetime(recorded_at)).total_seconds() / 3600)
+        checkpoint_time = _parse_datetime(recorded_at)
+        future_skew_seconds = (checkpoint_time - now).total_seconds()
+        check(
+            future_skew_seconds <= MAX_CHECKPOINT_FUTURE_SKEW_SECONDS,
+            "CHECKPOINT_TIMESTAMP_IN_FUTURE",
+            f"future_skew_seconds={future_skew_seconds:.4f}",
+        )
+        checkpoint_age_hours = max(0.0, (now - checkpoint_time).total_seconds() / 3600)
         check(
             checkpoint_age_hours <= max_checkpoint_age_hours,
             "CHECKPOINT_TOO_OLD",

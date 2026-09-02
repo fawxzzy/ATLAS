@@ -83,6 +83,8 @@ def canonicalize_same_origin_workbox_key(
 
     if not isinstance(raw_url, str) or not raw_url or raw_url != raw_url.strip():
         _fail("WORKBOX_URL_INVALID", "URL must be a nonempty string without surrounding whitespace")
+    if _CONTROL_RE.search(raw_url):
+        _fail("WORKBOX_URL_INVALID", "URL must not contain control characters")
     if query_policy not in {"exact", "ignore", "reject"} or fragment_policy not in {"exact", "ignore", "reject"}:
         _fail("WORKBOX_URL_POLICY_INVALID", "query and fragment policies must be exact, ignore, or reject")
     if raw_url.startswith("//"):
