@@ -1,0 +1,114 @@
+{
+  "contract_version": "atlas.decision.v1",
+  "id": "decision-atlas-common-release-safety-controls-r001",
+  "title": "Install Common ATLAS Release Safety Controls R001",
+  "summary": "Install PC-024 strict same-origin Workbox URL comparison and PC-025 immutable Vercel no-auto-link preflight as shared ATLAS release-safety controls.",
+  "status": "accepted",
+  "owner": "atlas.workflow-optimization",
+  "created_at": "2026-08-29T23:42:39Z",
+  "updated_at": "2026-09-02T04:47:20Z",
+  "related_session_refs": [
+    "02 ATLAS Optimization & Learning/01a03746-df21-7770-bf72-41adb70052b4"
+  ],
+  "related_artifact_refs": [
+    "docs/architecture/ATLAS-OPTIMIZATION-AND-LEARNING-TASK-CHARTER.md",
+    "docs/registry/ATLAS-ENGINEERING-MEMORY-POLICY.v1.json",
+    "docs/registry/ATLAS-WORKFLOW-OPTIMIZATION-GOVERNANCE.v1.json",
+    "docs/prompts/atlas-workflow/STANDING-BASELINE.md",
+    "ops/atlas/release_safety_controls.py",
+    "ops/atlas/validate_optimization_governance_conformance.py",
+    "tests/test_atlas_release_safety_controls.py",
+    "tests/test_atlas_optimization_governance_conformance.py"
+  ],
+  "evidence_refs": [
+    "runtime/atlas/knowledge-expansion/unified-optimization-integration-r001/post-install-successor-108/execution-receipt.json",
+    "runtime/atlas/knowledge-expansion/unified-optimization-integration-r001/post-install-successor-108/material-failure-adoption.json",
+    "runtime/atlas/knowledge-expansion/unified-optimization-integration-r001/post-install-successor-109/execution-receipt.json",
+    "runtime/atlas/knowledge-expansion/unified-optimization-integration-r001/post-install-successor-109/job-envelope.json"
+  ],
+  "supersedes": [],
+  "superseded_by": [],
+  "metadata": {
+    "legacy_schema": "atlas.engineering-memory.decision.v1",
+    "decision_id": "ACCEPT_BOUNDED_COMMON_CONTROL_R001",
+    "recorded_at": "2026-08-29T23:42:39Z",
+    "status": "accepted-installed-local-publication-pending",
+    "local_installation_state": "installed-and-verified-in-canonical-dirty-root",
+    "publication_state": "current-main-candidate-unmerged",
+    "publication_claim_boundary": "The controls are installed and verified in local ATLAS evidence and present in this publication-held candidate; they are not installed on current main until this candidate is separately published and merged.",
+    "owner_role_id": "atlas.workflow-optimization",
+    "summary": "Install PC-024 strict same-origin Workbox URL comparison and PC-025 immutable Vercel no-auto-link preflight as shared ATLAS release-safety controls.",
+    "provenance": [
+      "FA-027 / PC-024: Workbox relative versus root-relative same-origin comparison false negative",
+      "FA-028 / PC-025: unbound Vercel CLI diagnostic auto-linked a disposable project",
+      "operator decision ACCEPT_BOUNDED_COMMON_CONTROL_R001"
+    ],
+    "precedent_review": {
+      "result": "PARTIAL_PRECEDENT_REUSE",
+      "reused": [
+        "ops/atlas/ai_work_session_preflight.py reparse-point fail-closed pattern",
+        "ops/atlas/vercel_hobby_guardrail_report.py exact Vercel project-binding readback pattern",
+        "existing workflow baseline, governance registry, conformance validator, and Engineering Memory decision seams"
+      ],
+      "rejected_as_incomplete": [
+        "No existing shared strict same-origin Workbox canonicalizer preserved URL semantics plus byte and hash identity.",
+        "No existing shared Vercel gate combined immutable binding bytes, workspace identity, project and organization identity, reparse rejection, and command-profile classification before CLI invocation."
+      ]
+    },
+    "cli_evidence": {
+      "observed_local_version": "50.41.0",
+      "read_only_help_surfaces": [
+        "vercel curl --help",
+        "vercel inspect --help",
+        "vercel list --help"
+      ],
+      "installed_profile": "vercel curl <path> --deployment <ID|URL> --scope <ORG_OR_TEAM_ID>",
+      "explicitly_forbidden_in_common_gate": [
+        "--yes",
+        "unclassified command surfaces",
+        "link, pull, dev, or deploy mutation surfaces"
+      ],
+      "provider_invocations": 0,
+      "binding_mutations": 0,
+      "discovery_boundary": "CLI-specific profiles require fresh exact command help before expansion."
+    },
+    "rules": [
+      {
+        "kind": "Rule",
+        "candidate_id": "PC-024",
+        "text": "Compare Workbox precache entries only after strict same-origin URL canonicalization, while retaining exact admitted query and fragment semantics, duplicate rejection, required coverage, and byte and SHA-256 identity."
+      },
+      {
+        "kind": "Failure Mode",
+        "candidate_id": "FA-027",
+        "text": "Raw relative versus root-relative comparison can falsely reject equivalent same-origin Workbox entries and force a safe but unnecessary rollback."
+      },
+      {
+        "kind": "Rule",
+        "candidate_id": "PC-025",
+        "text": "Validate immutable local Vercel binding and a supported explicit command target before any linkage-capable CLI invocation; unknown or ambiguous command and binding surfaces fail closed."
+      },
+      {
+        "kind": "Failure Mode",
+        "candidate_id": "FA-028",
+        "text": "An unbound diagnostic Vercel CLI command can mutate local linkage and create provider resources even when no deployment is intended."
+      }
+    ],
+    "implementation": {
+      "shared_gate": "ops/atlas/release_safety_controls.py",
+      "governance": "docs/registry/ATLAS-WORKFLOW-OPTIMIZATION-GOVERNANCE.v1.json",
+      "baseline": "docs/prompts/atlas-workflow/STANDING-BASELINE.md",
+      "conformance": "ops/atlas/validate_optimization_governance_conformance.py",
+      "focused_tests": "tests/test_atlas_release_safety_controls.py"
+    },
+    "authority": {
+      "root_controls_only": true,
+      "owner_repository_mutation": false,
+      "provider_or_vercel_invocation": false,
+      "binding_mutation": false,
+      "deployment_or_production": false,
+      "credential_lifecycle": false,
+      "cleanup_or_deletion": false
+    }
+  }
+}

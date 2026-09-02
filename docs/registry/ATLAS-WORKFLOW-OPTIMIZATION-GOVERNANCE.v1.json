@@ -1,0 +1,284 @@
+{
+  "schema": "atlas.workflow-optimization-governance.v1",
+  "version": 1,
+  "status": "accepted",
+  "adopted_at": "2026-08-25T00:00:00Z",
+  "owner_role_id": "atlas.workflow-optimization",
+  "visible_title": "02 ATLAS Optimization & Learning",
+  "purpose": "More than double effective ATLAS workflow speed where representative evidence supports it while lowering avoidable compute, token, cost, retry, and coordination churn and converting verified historical repetition into governed Engineering Memory without weakening correctness, verification, safety, or authority boundaries.",
+  "scope": [
+    "all ATLAS-governed task and workflow prompts",
+    "phase-specific model, reasoning, verbosity, and service-tier routing",
+    "prompt, context, tool-surface, history-read, and commentary overhead",
+    "task clustering, retry suppression, cursor and receipt reuse",
+    "canonical v2 execution-receipt instrumentation",
+    "bounded host compute and storage cleanup",
+    "cursor-driven review of every retrievable authorized Codex, ChatGPT, and Claude task corpus and deduplicated pattern learning",
+    "content-addressed inventory and learning across every retrievable durable software receipt or receipt-like lifecycle artifact in scope",
+    "repetition-to-automation candidate discovery through existing Engineering Memory gates",
+    "measurement and continuous improvement of atlas-thread-capability-retirement conversions from completed standing tasks into reusable skills or genuinely stateful agents",
+    "retrieval-on-demand and provenance-preserving synthesis across ATLAS, Windows, Codex, imported or exported Claude context, and direct operator evidence"
+  ],
+  "non_authority": [
+    "product or owner-repository source ownership",
+    "release or merge authority",
+    "provider, Supabase, production, live-data, secret, billing, or destructive authority",
+    "removal of required verification, independent review, migration proof, or safety gates"
+  ],
+  "task_charter": "docs/architecture/ATLAS-OPTIMIZATION-AND-LEARNING-TASK-CHARTER.md",
+  "unified_lineage": {
+    "canonical_task": {
+      "thread_id": "01a03746-df21-7770-bf72-41adb70052b4",
+      "title": "02 ATLAS Optimization & Learning",
+      "status": "active"
+    },
+    "absorbed_predecessors": [
+      {
+        "thread_id": "01a034f8-0701-7ac2-b2ca-af9ee21978b2",
+        "title": "02 Compute Cleanup & ATLAS Optimization",
+        "status": "archived",
+        "component_id": "component.host-compute-and-storage"
+      },
+      {
+        "thread_id": "01a02fc6-07b8-70e1-9798-25dabc4e07e0",
+        "title": "02 Repair and Learn",
+        "status": "archived",
+        "component_id": "component.repair-and-learn-corpus"
+      }
+    ],
+    "runner_contract": "One recurring heartbeat targets only the canonical task, selects the highest-value non-conflicting component cluster, and persists one shared checkpoint and next wake condition."
+  },
+  "atlas_first_execution": {
+    "requirement": "Use Atlas as the operating substrate for every optimization and learning cluster while incrementally improving the same canonical system.",
+    "pre_mutation": [
+      "read the smallest current workflow manifest and shared task checkpoint slice",
+      "resolve the exact selector or admitted packet, binding, writer lease, and valid prior receipts",
+      "answer whether the problem was already solved through Engineering Memory and record reuse or explicit rejection"
+    ],
+    "canonical_seams": [
+      "atlas.job-envelope.v2",
+      "atlas.execution-receipt.v2",
+      "task-context checkpoint",
+      "Engineering Memory precedent search, mutation gate, EvidenceBundle, and KnowledgeCandidate",
+      "owner-first routing, correlations, exact resource claims, and wake conditions"
+    ],
+    "adoption_proof": "Every Atlas setup or optimization ratchet must remove a measured bottleneck, enable real admitted work, or strengthen proof at an existing risk boundary, and must pass the touched contract plus one representative inheriting workflow.",
+    "prohibitions": [
+      "parallel scheduler or polling loop",
+      "parallel task or result protocol",
+      "parallel queue or receipt type",
+      "parallel memory or precedent system",
+      "meta-work with no measured workflow or proof effect"
+    ]
+  },
+  "context_domains": [
+    {
+      "domain_id": "atlas",
+      "sources": ["root governance", "registries", "receipts", "runtime state", "stack documentation", "named repositories", "supported task continuity", "separately authorized provider readback"],
+      "default_work": ["index", "reconcile", "benchmark", "learn", "admitted ATLAS-root workflow improvements"],
+      "boundary": "No absorption of repository writers, Release, provider, production, Supabase, live-data, secret, billing, or destructive authority."
+    },
+    {
+      "domain_id": "windows-host",
+      "sources": ["explicitly accessible files", "configuration", "installed tools", "processes", "services", "storage", "logs", "performance evidence"],
+      "default_work": ["latency diagnosis", "compute diagnosis", "storage diagnosis", "cache and runtime diagnosis", "bounded cleanup preparation"],
+      "boundary": "No ambient screen or history claim, secrets extraction, deletion, or retention change without proven exact targets and authority."
+    },
+    {
+      "domain_id": "codex",
+      "sources": ["current task", "projects", "attached folders", "local task or session evidence", "AGENTS.md", "memories", "skills", "plugins", "MCP", "automations", "supported terminal, browser, app, and task readbacks"],
+      "default_work": ["context optimization", "tool-surface optimization", "model and reasoning routing", "retry suppression", "verification reuse", "durable instruction and recovery improvements"],
+      "boundary": "A title, goal, plugin, remembered fact, or broad filesystem access does not create protected or external effect authority."
+    },
+    {
+      "domain_id": "chatgpt",
+      "sources": ["every task or chat retrievable through supported app readback", "explicit exports", "project attachments", "operator-provided artifacts"],
+      "default_work": ["exact-cursor historical review", "decision and failure-pattern reconciliation", "deduplication against current governance", "content-addressed cursor advancement"],
+      "boundary": "ChatGPT private or cloud history is not ambiently available; unreadable or unexported tasks remain inventoried UNKNOWN, and conversation prose does not outrank current source or validated receipts."
+    },
+    {
+      "domain_id": "claude",
+      "sources": ["explicitly imported Claude Code or Claude Cowork setup", "projects", "project memories", "recent chats", "skills or plugins", "MCP", "hooks", "commands", "subagents", "authorized local or exported artifacts"],
+      "default_work": ["pattern reconciliation", "instruction deduplication", "provenance preservation", "conflict detection", "Engineering Memory candidate routing"],
+      "boundary": "Claude cloud or private context is not ambiently available and is not current until imported, exported, connected, or read back through a supported authorized surface."
+    },
+    {
+      "domain_id": "software-receipts",
+      "sources": ["ATLAS receipts", "repository and CI receipts", "Git and provider receipts", "deployment receipts", "database receipts", "browser and terminal receipts", "desktop-application receipts", "other explicitly scoped durable lifecycle artifacts"],
+      "default_work": ["producer and schema inventory", "task and effect-boundary correlation", "content-addressed deduplication", "retry and lifecycle-gap measurement", "Engineering Memory candidate routing"],
+      "boundary": "Receipt intake is read-only evidence. It grants no provider, production, live-data, secret, billing, destructive, merge, deployment, or owner-repository authority; secrets and raw tool outputs are excluded."
+    },
+    {
+      "domain_id": "cross-system-synthesis",
+      "sources": ["content-addressed summaries", "source references", "accepted decisions", "measurements", "deduplicated candidates"],
+      "default_work": ["coherent operating model", "repetition discovery", "bottleneck measurement", "reusable workflow ratchets"],
+      "boundary": "Never paste raw histories into the active task, merge conflicting authorities, or present inference as verified state."
+    },
+    {
+      "domain_id": "operator",
+      "sources": ["direct requirements", "approvals", "corrections", "reported symptoms", "acceptance decisions"],
+      "default_work": ["intent preservation", "same-task decisions", "canonical routing of reusable approved rules"],
+      "boundary": "Silence is not approval and one task's authority does not generalize to protected effects or unrelated owners."
+    }
+  ],
+  "operating_cycle": [
+    "discover the smallest required source slice",
+    "classify truth, currentness, provenance, and authority",
+    "measure the bottleneck and preserve UNKNOWN telemetry",
+    "choose one coherent precedent-aware ratchet with rollback",
+    "execute only admitted work in the exact writer and effect scope",
+    "verify the touched contract and a representative inherited workflow",
+    "deduplicate the learning and route retained candidates to exact owners",
+    "persist Done, Now, Next, receipts, blockers, source refs, and next cursor or wake condition"
+  ],
+  "routing": {
+    "mechanical": {"model": "gpt-5.6-luna", "effort": ["low", "medium"], "examples": ["status", "bounded readback", "formatting", "polling", "mechanical reconciliation"]},
+    "balanced": {"model": "gpt-5.6-terra", "effort": ["medium"], "examples": ["ordinary reversible implementation", "tests", "documentation", "source corrections"]},
+    "frontier": {"model": "gpt-5.6-sol", "effort": ["high", "xhigh"], "examples": ["complex architecture", "migrations", "security or privacy", "difficult debugging", "adversarial review", "irreversible decisions"]},
+    "escalation": "Escalate immediately at a declared high-risk boundary or after two bounded cheaper-tier failures for the same reason; record why and downshift when the boundary closes.",
+    "title_independence": "A standing task title never establishes a permanent frontier-model or high-reasoning floor."
+  },
+  "cluster_contract": [
+    "fresh bounded preflight",
+    "one coherent execution slice",
+    "focused risk-scaled verification",
+    "compact content-addressed receipt"
+  ],
+  "measurement": {
+    "primary_outcome": "verified useful work per wall-clock hour",
+    "target": ">2x portfolio median effective speed versus the recorded representative baseline",
+    "quality_floor": ["task success", "answer or artifact completeness", "required evidence", "risk-scaled verification", "authority compliance"],
+    "receipt_metrics_when_observable": [
+      "wall_clock_seconds",
+      "time_to_first_useful_artifact_seconds",
+      "attempts",
+      "agent_turns",
+      "tool_calls",
+      "history_reads",
+      "commentary_updates",
+      "prompt_input_chars",
+      "input_tokens",
+      "cached_input_tokens",
+      "cache_write_tokens",
+      "output_tokens",
+      "estimated_cost_usd",
+      "reusable_verification_steps",
+      "cache_valid_verification_steps",
+      "quality_gate_failures",
+      "operator_interventions"
+    ],
+    "unknown_rule": "Unavailable telemetry is recorded as UNKNOWN in evidence or extensions and is never fabricated as zero.",
+    "claim_rule": "Fewer turns, less text, a faster model, or a lower cost is not an optimization win unless the quality floor passes."
+  },
+  "ratchet": {
+    "variable_classes": ["model-and-reasoning", "prompt-and-context", "tool-exposure", "history-read", "task-clustering", "retry", "verification-reuse", "service-tier"],
+    "method": "Change one variable class at a time where practical, compare representative clusters, preserve a rollback boundary, and adopt only proof-backed gains.",
+    "stop_conditions": ["quality regression", "missing required evidence", "authority drift", "writer collision", "unbounded spend", "unexplained retry amplification"]
+  },
+  "anti_churn": {
+    "single_observation_failure_gate": {
+      "canonical_observation_only": true,
+      "default_state": "recorded-no-fanout-no-promotion-no-implementation",
+      "escalation_any_of": [
+        "matching recurrence with content-addressed evidence",
+        "product-blocking impact",
+        "bounded diagnostics identify a cause"
+      ],
+      "prohibitions_before_escalation": [
+        "additional worker fan-out",
+        "Engineering Memory promotion",
+        "implementation dispatch",
+        "retry or owner polling solely to reproduce the observation"
+      ]
+    },
+    "census_identity_classes": {
+      "material_denominator": "standing and user-visible task identities",
+      "auxiliary_denominator": "ephemeral reviewer and bounded helper identities",
+      "ephemeral_only_material_delta_handoff": false,
+      "classification_requirement": "Every newly observed Codex identity is classified before material-delta evaluation; self-generated ephemeral identities remain measurable but cannot trigger a material handoff solely because the program created them."
+    },
+    "avoided_amplification_measurement": {
+      "unit": "unchanged single-observation plus ephemeral-only census cycle",
+      "observed_lower_bound": {
+        "material_downstream_wakes_or_handoffs": 2,
+        "downstream_receipts_or_adoptions": 3
+      },
+      "basis": [
+        "After canonical FA-026, Master Plan R027 and successor 106 added one downstream worker wake and two receipt or adoption artifacts without admitting implementation.",
+        "An ephemeral-only Census delta would otherwise add at least one material integrator handoff and one adoption receipt while changing no standing or user-visible task coverage."
+      ],
+      "claim_boundary": "This is a conservative avoided-amplification lower bound for the evidenced paths, not a universal speed or cost claim."
+    }
+  },
+  "common_release_safety_controls": {
+    "decision_id": "ACCEPT_BOUNDED_COMMON_CONTROL_R001",
+    "status": "INSTALLED",
+    "local_installation_state": "installed-and-verified-in-canonical-dirty-root",
+    "publication_state": "current-main-candidate-unmerged",
+    "publication_claim_boundary": "INSTALLED describes the source-proven local ATLAS control. Current-main installation is not claimed until this publication-held candidate is separately published and merged.",
+    "owner_role_id": "atlas.workflow-optimization",
+    "engineering_memory_ref": "docs/memory/decisions/decision-atlas-common-release-safety-controls-r001.json",
+    "engineering_memory_seed_ids": [
+      "rule-workbox-strict-same-origin-canonical-comparison",
+      "failure-workbox-raw-url-shape-false-negative",
+      "rule-vercel-immutable-binding-no-auto-link-preflight",
+      "failure-vercel-unbound-diagnostic-auto-link"
+    ],
+    "implementation_ref": "ops/atlas/release_safety_controls.py",
+    "focused_test_ref": "tests/test_atlas_release_safety_controls.py",
+    "pc024": {
+      "status": "INSTALLED",
+      "rule": "Canonicalize strict same-origin Workbox URL keys before exact comparison; relative and root-relative paths may converge, but origin, decoded-path safety, admitted query and fragment semantics, duplicate detection, required coverage, byte count, and SHA-256 identity remain exact.",
+      "forbidden_shortcuts": ["basename matching", "foreign-origin acceptance", "dot-segment normalization", "silent query or fragment removal", "duplicate collapse", "byte or hash omission"],
+      "owner_boundary": "The common validator is root-owned; product verifier integration remains owner-repository work."
+    },
+    "pc025": {
+      "status": "INSTALLED",
+      "rule": "Before a linkage-capable Vercel CLI surface, validate an immutable workspace, project, organization or team, binding-file hash, non-reparse binding path, and an explicitly classified command target without invoking Vercel.",
+      "installed_command_profiles": ["vercel curl --deployment <ID|URL> --scope <ORG_OR_TEAM_ID>"],
+      "fail_closed_on": ["missing binding", "binding hash drift", "project mismatch", "organization or team mismatch", "partial or mismatched environment binding", "ambiguous direct and repository binding", "symlink or reparse ambiguity", "unclassified command surface", "implicit-link mutation command", "confirmation-skipping option"],
+      "provider_effects": 0,
+      "owner_boundary": "Provider commands, provider cleanup, .vercel mutation, deployment, and product integration remain separately owned and admitted."
+    }
+  },
+  "canonical_contracts": {
+    "task": "atlas.job-envelope.v2",
+    "result": "atlas.execution-receipt.v2",
+    "engineering_memory_policy": "docs/registry/ATLAS-ENGINEERING-MEMORY-POLICY.v1.json",
+    "embedded_corpus_component": "component.repair-and-learn-corpus",
+    "extension_rule": "Extend the canonical v2 seam additively; do not create another scheduler, task protocol, receipt protocol, supervisor task, or polling loop."
+  },
+  "historical_learning": {
+    "predecessor_role_id": "atlas.repair-and-learn",
+    "predecessor_thread_id": "01a02fc6-07b8-70e1-9798-25dabc4e07e0",
+    "execution_shape": "embedded cursor-driven component under atlas.workflow-optimization",
+    "canonical_checkpoint": "runtime/atlas/engineering-memory-tasks/repair-and-learn-thread-corpus/checkpoint.json",
+    "candidate_ledger": "runtime/atlas/engineering-memory-tasks/repair-and-learn-thread-corpus/candidate-ledger.json",
+    "batch_preparation_command": "node ops/atlas/prepare_repair_and_learn_corpus_batch.mjs --turns 20 --write-plan runtime/atlas/engineering-memory-tasks/repair-and-learn-thread-corpus/prepared-review-plan.json",
+    "batch_preparation_contract": "Select only unique logical turns immediately preceding the exact partial cursor, coalesce adjacent repeated turn-context segments, fail closed on non-contiguous duplicate turn identities, persist metadata and digests but no message text, exclude completed content and tool output, and leave cursor advancement to a validated review receipt.",
+    "review_finalization_command": "node ops/atlas/finalize_repair_and_learn_corpus_review.mjs --review runtime/atlas/engineering-memory-tasks/repair-and-learn-thread-corpus/review-decision-NNNN.json",
+    "review_finalization_contract": "Revalidate the exact prepared plan against the source, fail closed on checkpoint or cursor drift, deduplicate against the current candidate ledger, and atomically persist the paraphrased batch, ledger, checkpoint, alignment, and canonical execution receipt without raw message content.",
+    "review_priority": {
+      "default": "recent-first",
+      "source_order": "Select the most recently updated authorized source with unread content, then work backward to older sources.",
+      "page_order": "Within a source, process the newest unread contiguous page at the exact durable cursor, then advance backward.",
+      "exceptions": [
+        "older dependency required for current interpretation",
+        "identity or provenance resolution",
+        "authority, privacy, security, migration, or rollback boundary",
+        "current contradiction that explicitly requires older evidence"
+      ],
+      "supersession_rule": "Newer validated truth may supersede older evidence; older evidence remains lineage and never overrides current source or receipts without explicit reconciliation."
+    },
+    "rules": [
+      "resume from exact partial cursors",
+      "inventory every retrievable authorized Codex, ChatGPT, and Claude task plus every durable software receipt source in scope, and record inaccessible sources with exact wake conditions",
+      "never copy raw historical conversations into the active task",
+      "persist receipt identities, schemas, correlations, hashes, and secret-free paraphrases only; never persist raw tool output or secret material",
+      "never reread completed pages when content-addressed evidence is valid",
+      "deduplicate before retaining a candidate",
+      "route retained candidates to exact owners and require a newly admitted packet before source work",
+      "report unavailable content and telemetry as UNKNOWN"
+    ]
+  }
+}

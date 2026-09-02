@@ -182,6 +182,38 @@
       "statement": "Atlas does not rely on model recollection; it requires explicit lookup, application or rejection, proof, and archival at lifecycle boundaries.",
       "status": "accepted-atlas-root",
       "playbook_promotion": "candidate"
+    },
+    {
+      "id": "rule-workbox-strict-same-origin-canonical-comparison",
+      "kind": "rule",
+      "title": "Workbox Strict Same-Origin Canonical Comparison",
+      "statement": "Canonicalize same-origin Workbox URL keys before exact comparison while preserving decoded-path safety, admitted query and fragment semantics, duplicate rejection, required coverage, byte count, and SHA-256 identity; never compare by basename.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "installed-common-control"
+    },
+    {
+      "id": "failure-workbox-raw-url-shape-false-negative",
+      "kind": "failure-mode",
+      "title": "Workbox Raw URL Shape False Negative",
+      "statement": "Raw relative versus root-relative comparison can falsely reject equivalent same-origin Workbox entries and force a safe but unnecessary rollback.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "installed-common-control"
+    },
+    {
+      "id": "rule-vercel-immutable-binding-no-auto-link-preflight",
+      "kind": "rule",
+      "title": "Vercel Immutable Binding No-Auto-Link Preflight",
+      "statement": "Before a linkage-capable Vercel CLI call, validate immutable workspace, project, organization or team, exact binding bytes, non-reparse path, and an installed explicit command-target profile; unknown or ambiguous surfaces fail closed before invocation.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "installed-common-control"
+    },
+    {
+      "id": "failure-vercel-unbound-diagnostic-auto-link",
+      "kind": "failure-mode",
+      "title": "Vercel Unbound Diagnostic Auto-Link",
+      "statement": "An unbound diagnostic Vercel CLI command can mutate local linkage and create provider resources even when no deployment is intended.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "installed-common-control"
     }
   ],
   "source_refs": [
@@ -193,6 +225,7 @@
     "packages/atlas-contracts/schemas/atlas.card-record.v2.schema.json",
     "packages/atlas-contracts/schemas/atlas.engineering-memory-closeout.v1.schema.json",
     "packages/atlas-contracts/schemas/atlas.engineering-memory-runner-verification.v1.schema.json",
-    "packages/atlas-contracts/schemas/atlas.knowledge-candidate.v2.schema.json"
+    "packages/atlas-contracts/schemas/atlas.knowledge-candidate.v2.schema.json",
+    "docs/memory/decisions/decision-atlas-common-release-safety-controls-r001.json"
   ]
 }
