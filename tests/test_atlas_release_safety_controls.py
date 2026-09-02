@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -188,6 +189,17 @@ class VercelNoAutoLinkTests(unittest.TestCase):
             "VERCEL_ENV_BINDING_MISMATCH",
             environment={"VERCEL_PROJECT_ID": "prj_other", "VERCEL_ORG_ID": "team_exact"},
         )
+
+    def test_omitted_environment_rejects_ambient_binding_mismatch(self) -> None:
+        values = {key: value for key, value in self.kwargs.items() if key != "environment"}
+        with mock.patch.dict(
+            os.environ,
+            {"VERCEL_PROJECT_ID": "prj_other", "VERCEL_ORG_ID": "team_exact"},
+            clear=True,
+        ):
+            with self.assertRaises(ReleaseSafetyViolation) as caught:
+                validate_vercel_no_auto_link_preflight(**values)
+        self.assertEqual("VERCEL_ENV_BINDING_MISMATCH", caught.exception.code)
 
     def test_rejects_ambiguous_repo_binding(self) -> None:
         (self.workspace / ".vercel" / "repo.json").write_text(

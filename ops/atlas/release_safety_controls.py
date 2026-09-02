@@ -310,7 +310,7 @@ def validate_vercel_no_auto_link_preflight(
     if org_id != expected_org_id:
         _fail("VERCEL_ORG_BINDING_MISMATCH", "binding organization/team ID differs from the expected immutable identity")
 
-    env = environment or {}
+    env = dict(os.environ) if environment is None else dict(environment)
     env_project = env.get("VERCEL_PROJECT_ID")
     env_org = env.get("VERCEL_ORG_ID")
     if bool(env_project) != bool(env_org):
