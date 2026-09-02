@@ -259,7 +259,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
             set(item["role_id"] for item in self.manifest["roles"]),
             set(item["role_id"] for item in self.registry["bindings"]),
         )
-        self.assertEqual(9, result["unbound_runtime_claims"])
+        self.assertEqual(10, result["unbound_runtime_claims"])
         self.assertEqual(3, result["manual_questions"])
         self.assertEqual(3, result["answered_manual_questions"])
         self.assertEqual("ARCHIVED", result["bootstrap_source_lifecycle"])
@@ -517,6 +517,75 @@ class WorkflowRecoveryTests(unittest.TestCase):
         )
         self.assertEqual(0, adapter.mutations)
         self.assertFalse(any(item.role_marker == "atlas.main" for item in adapter.threads))
+
+    def test_retired_discordos_is_provenance_only_and_cannot_reactivate(self) -> None:
+        component = next(
+            item
+            for item in self.manifest["components"]
+            if item["component_id"] == "component.discordos"
+        )
+        self.assertEqual("retired-project-provenance", component["kind"])
+        self.assertFalse(component["standing_task"])
+        self.assertEqual([], RECOVERY._retired_routing_errors(self.manifest, self.registry))
+
+        claim = next(
+            item
+            for item in self.registry["unbound_runtime_claims"]
+            if "retired_component:component.discordos" in item["evidence"]
+        )
+        self.assertEqual("HISTORICAL_PROGRAM_SURFACE", claim["disposition"])
+        self.assertIsNone(claim["canonical_target_id"])
+        self.assertEqual("HOLD_NO_CREATE", claim["recovery_action"])
+        self.assertFalse(claim["standing_contract_claim"])
+        self.assertFalse(claim["lifecycle_action_authorized"])
+        self.assertIn("fawxzzy/DiscordOS#110 closed without merge", claim["evidence"][-1])
+
+        plan, adapter = self.plan("healthy.json", mode="apply")
+        self.assertNotIn(claim["runtime_id"], {item["runtime_id"] for item in plan["roles"]})
+        self.assertFalse(
+            any(
+                "component.discordos" in {
+                    *role["dependencies"],
+                    *role["upstream_routes"],
+                    *role["downstream_routes"],
+                    role["owner"],
+                }
+                for role in self.manifest["roles"]
+            )
+        )
+        self.assertFalse(
+            any(
+                "component.discordos" in {edge["from"], edge["to"]}
+                for edge in self.manifest["edges"]
+            )
+        )
+        self.assertEqual([], RECOVERY.apply_plan(plan, self.manifest, self.registry, adapter))
+        self.assertEqual(0, adapter.mutations)
+
+        hostile_manifest = copy.deepcopy(self.manifest)
+        hostile_manifest["roles"][0]["dependencies"].append("component.discordos")
+        hostile_manifest["edges"].append(
+            {
+                "edge_id": "owner.operations.retired-discordos",
+                "type": "owner",
+                "from": "atlas.workflow-operations",
+                "to": "component.discordos",
+                "contract": "Historical evidence attempts to reactivate a retired owner.",
+                "runtime_binding": "resolve-by-logical-role-at-send-time",
+            }
+        )
+        errors = RECOVERY._retired_routing_errors(hostile_manifest, self.registry)
+        self.assertTrue(any("operational route targets retired component" in item for item in errors))
+        self.assertTrue(any("endpoint targets retired component" in item for item in errors))
+
+        baseline = (ROOT / "docs/prompts/atlas-workflow/STANDING-BASELINE.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Historical cards,\nbranches, pull requests, receipts", baseline)
+        self.assertIn("cannot\nselect, bind, create, unarchive, activate, schedule, wake, dispatch", baseline)
+        self.assertIn("authorize pull-request creation for a retired owner", baseline)
+        self.assertIn("`owner.fawxzzyweb`", baseline)
+        self.assertIn("`platform.supabase-migration`", baseline)
 
     def test_active_workflow_graph_has_no_main_or_inbox_fanout(self) -> None:
         active_role_ids = {item["role_id"] for item in self.manifest["roles"]}

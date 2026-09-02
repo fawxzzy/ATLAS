@@ -1153,6 +1153,73 @@ def _validate_relative_ref(reference: str, label: str) -> list[str]:
     return errors
 
 
+def _retired_routing_errors(manifest: dict[str, Any], registry: dict[str, Any]) -> list[str]:
+    """Reject every operational route to a retired provenance-only component."""
+    errors: list[str] = []
+    retired_components = {
+        component["component_id"]
+        for component in manifest["components"]
+        if component.get("kind") == "retired-project-provenance"
+    }
+    if not retired_components:
+        return errors
+
+    for component in manifest["components"]:
+        component_id = component["component_id"]
+        if component_id not in retired_components:
+            continue
+        if component.get("standing_task") is not False:
+            errors.append(f"{component_id}: retired component must not be a standing task")
+        recovery = component.get("recovery", "").lower()
+        for prohibited in ("select", "unarchive", "wake", "dispatch", "pull-request creation"):
+            if prohibited not in recovery:
+                errors.append(f"{component_id}: retired recovery contract must prohibit {prohibited}")
+
+    for role in manifest["roles"]:
+        operational_routes = {
+            *role["dependencies"],
+            *role["upstream_routes"],
+            *role["downstream_routes"],
+            role["owner"],
+        }
+        for component_id in sorted(retired_components & operational_routes):
+            errors.append(f"{role['role_id']}: operational route targets retired component {component_id}")
+
+    for edge in manifest["edges"]:
+        for endpoint in ("from", "to"):
+            if edge[endpoint] in retired_components:
+                errors.append(
+                    f"{edge['edge_id']}: {endpoint} endpoint targets retired component {edge[endpoint]}"
+                )
+
+    for component_id in sorted(retired_components):
+        marker = f"retired_component:{component_id}"
+        claims = [
+            claim
+            for claim in registry["unbound_runtime_claims"]
+            if marker in claim.get("evidence", [])
+        ]
+        if len(claims) != 1:
+            errors.append(f"{component_id}: expected exactly one retired runtime provenance claim")
+            continue
+        claim = claims[0]
+        required = {
+            "standing_contract_claim": False,
+            "admission_state": "NOT_DURABLY_ADMITTED",
+            "disposition": "HISTORICAL_PROGRAM_SURFACE",
+            "canonical_target_id": None,
+            "health": "HELD",
+            "recovery_action": "HOLD_NO_CREATE",
+            "lifecycle_action_authorized": False,
+        }
+        for field, expected in required.items():
+            if claim.get(field) != expected:
+                errors.append(
+                    f"{claim['runtime_id']}: retired provenance {field} must be {expected!r}"
+                )
+    return errors
+
+
 def validate_repository(
     manifest_path: Path = ROOT / MANIFEST_REF,
     registry_path: Path = ROOT / REGISTRY_REF,
@@ -1220,6 +1287,8 @@ def validate_repository(
     for component in manifest["components"]:
         for reference in component["source_of_truth"]:
             errors.extend(_validate_relative_ref(reference, f"{component['component_id']} source_of_truth"))
+
+    errors.extend(_retired_routing_errors(manifest, registry))
 
     edge_ids: list[str] = []
     for edge in manifest["edges"]:

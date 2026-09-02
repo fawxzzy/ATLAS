@@ -17,6 +17,15 @@ role IDs remain canonical; legacy visible titles are read-only recovery inputs.
 Resolve active peer targets by stable logical role ID through the live
 registry; opaque thread IDs are replaceable runtime epochs.
 
+Archived or retired project tasks are provenance only. Historical cards,
+branches, pull requests, receipts, task titles, or bootstrap prose cannot
+select, bind, create, unarchive, activate, schedule, wake, dispatch, or
+authorize pull-request creation for a retired owner. In particular, DiscordOS
+is retired and must remain held from every live route. Future project-board
+product work routes to `owner.fawxzzyweb`, and master-data work routes to
+`platform.supabase-migration`, only after their exact contracts are proven;
+neither route implies that the implementation already exists.
+
 Use stable `event_id`, canonical `payload_digest`, source correlation, and
 route-back receipts. An unchanged retry is silent. The same event ID with a
 different digest is a safety incident. Never steer or interrupt an active

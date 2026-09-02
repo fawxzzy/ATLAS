@@ -381,8 +381,14 @@ When working on Playbook or repository development and speed matters, default to
   truth and returns lifecycle receipts owner-first; `01 Ops` reconciles only
   admitted scheduling and settlement while account collection, planning, and
   implementation remain in that owner lane.
-- DiscordOS is an embedded governed service and single logical writer, not a
-  required standing conversation.
+- DiscordOS is an archived and retired project retained as provenance only. It
+  is not an execution, project-board, repository-writer, or standing-task
+  owner. Historical cards, branches, pull requests, receipts, and bootstrap
+  prose never authorize selecting, unarchiving, waking, dispatching, or
+  publishing through DiscordOS. Future project-board product work routes to
+  `owner.fawxzzyweb`, and master-data work routes to
+  `platform.supabase-migration`, only after each exact owner/data contract is
+  proven; this routing does not claim either implementation already exists.
 - Archive bounded Codex tasks after their accepted terminal receipt is durable.
   Do not archive active standing conversations.
 - Atlas may pause Mazer or another owner lane at a safe checkpoint when a
@@ -540,7 +546,8 @@ started before standing by to review it.
   Vercel and Supabase.
 - Keep GitHub repository inventory, branch and remote parity, pull requests,
   Actions, releases, dependency/security signals, and stale-resource cleanup
-  visible in Atlas and correlated with `_stack` and DiscordOS receipts.
+  visible in Atlas and correlated with `_stack`; DiscordOS receipts remain
+  read-only historical provenance.
 - Cross-account social references must use the public account name `Fawxzzy`
   as the visible label, never an internal or legacy username. Never claim that
   typed `@` text is a native profile link until the rendered target and link

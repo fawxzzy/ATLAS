@@ -1,7 +1,7 @@
 {
   "schema": "atlas.workflow.runtime-registry.v1",
   "manifest_ref": "docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json",
-  "manifest_digest": "sha256:96f12d9b4e4f15a5fcbf7a0ed0b6f0197e59544ca638c2eb3e1ed7c259d0a6e6",
+  "manifest_digest": "sha256:97f8857d04ba095b23133870efe06c18a3fff8c026c928173e772f60faeaaf3a",
   "observed_at": "2026-07-30",
   "observation_precision": "day",
   "discovery": {
@@ -188,16 +188,30 @@
     {
       "runtime_id": "019f6d9d-a192-7a51-8d2d-463494c87d3a",
       "title": "DiscordOS",
-      "observed_status": "notLoaded",
-      "standing_contract_claim": true,
+      "observed_status": "historical",
+      "standing_contract_claim": false,
       "admission_state": "NOT_DURABLY_ADMITTED",
-      "disposition": "EMBEDDED_COORDINATION_RUNTIME",
-      "canonical_target_id": "component.discordos",
+      "disposition": "HISTORICAL_PROGRAM_SURFACE",
+      "canonical_target_id": null,
       "health": "HELD",
-      "recovery_action": "IGNORE_FOR_ROLE_CREATION",
+      "recovery_action": "HOLD_NO_CREATE",
       "lifecycle_action_authorized": false,
-      "evidence": ["task-tool live readback", "codex-session://2026/07/16/019f6d9d-a192-7a51-8d2d-463494c87d3a", "canonical workflow profile classifies DiscordOS as an embedded governed service, not a required standing conversation"],
-      "rationale": "The runtime's bootstrap prose claims standing status, but the higher-ranked durable profile explicitly reconstructs DiscordOS as an embedded service. Preserve the runtime and never recreate or lifecycle-mutate it automatically."
+      "evidence": ["historical DiscordOS runtime provenance", "codex-session://2026/07/16/019f6d9d-a192-7a51-8d2d-463494c87d3a", "superseded embedded-service classification retained for audit"],
+      "rationale": "This earlier DiscordOS runtime is immutable historical provenance. The retired project contract forbids selection, binding, creation, unarchive, activation, scheduling, wake, dispatch, and source publication."
+    },
+    {
+      "runtime_id": "019f8bc1-2f78-7d62-91f8-cab4abd673d7",
+      "title": "DiscordOS",
+      "observed_status": "archived-after-erroneous-reactivation",
+      "standing_contract_claim": false,
+      "admission_state": "NOT_DURABLY_ADMITTED",
+      "disposition": "HISTORICAL_PROGRAM_SURFACE",
+      "canonical_target_id": null,
+      "health": "HELD",
+      "recovery_action": "HOLD_NO_CREATE",
+      "lifecycle_action_authorized": false,
+      "evidence": ["retired_component:component.discordos", "operator-confirmed archived/retired project postimage", "runtime/receipts/mazer/discordos-mazer-run-quality-source-publication-20260902-001.execution-receipt.v2.json#sha256=a83559e60e622df0fd7f5c0342c514d5ec19d27209577bc51de7686cbdd94ddb", "fawxzzy/DiscordOS#110 closed without merge; branch codex/discordos-mazer-run-quality-current-main-reconciliation-20260902 at 6a1e432cd40326e2c1b78cde544d8c22326e4a21 retained as provenance"],
+      "rationale": "DiscordOS is an archived retired project and provenance-only runtime. Historical cards, branches, pull requests, receipts, or bootstrap prose cannot select, bind, create, unarchive, activate, schedule, wake, dispatch, or authorize source publication for it."
     },
     {
       "runtime_id": "019f6dad-8e00-7563-ba96-8b7ceae8fdf9",
