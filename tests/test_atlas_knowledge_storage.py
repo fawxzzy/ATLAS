@@ -9,6 +9,7 @@ every fixture here is synthetic and created/destroyed within the test.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -28,6 +29,73 @@ from ops.knowledge import _pipeline
 from ops.atlas.ui_standards.validate import validate_json_schema
 
 RECEIPT_SCHEMA_PATH = ROOT / "schemas" / "atlas.knowledge-relocation-receipt.v1.json"
+
+
+def _legacy_tree_digest(root: Path) -> str:
+    """The pre-delegation _pipeline.tree_digest(), reproduced exactly:
+    files ordered by the old `sorted(root.rglob("*"))` (pathlib
+    component-wise ordering), each folded as rel-path / size / checksum."""
+    digest = hashlib.sha256()
+    for path in sorted(p for p in root.rglob("*") if p.is_file()):
+        digest.update(path.relative_to(root).as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(str(path.stat().st_size).encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(storage.file_checksum(path).encode("utf-8"))
+        digest.update(b"\n")
+    return f"sha256:{digest.hexdigest()}"
+
+
+def valid_receipt_fixture() -> dict:
+    """A schema-valid AND internally-consistent relocation receipt. Used
+    wherever a test needs a receipt that passes the public
+    write_relocation_receipt()/read_relocation_receipt() boundary, which
+    now enforces both closed-schema and semantic validation."""
+    leg = {
+        "files_copied": 2,
+        "files_skipped_already_present": 0,
+        "files_failed": [],
+        "bytes_copied": 100,
+        "ok": True,
+    }
+    verification = {
+        "contract_version": "atlas.knowledge-restore-verification.v1",
+        "root": "/tmp/destination",
+        "require_exact_match": True,
+        "expected_entry_count": 2,
+        "current_entry_count": 2,
+        "missing_paths": [],
+        "unexpected_paths": [],
+        "mismatched_paths": [],
+        "ok": True,
+    }
+    return {
+        "contract_version": "atlas.knowledge-relocation-receipt.v1",
+        "archive_id": "synthetic--fixture",
+        "recorded_at": "2026-08-28T00:00:00Z",
+        "source_description": "synthetic fixture",
+        "destination_root": "/tmp/destination",
+        "exclusion_policy_id": "atlas.knowledge.no-exclusion",
+        "exclusion_policy_version": "v1",
+        "excluded_path_count": 0,
+        "excluded_paths_digest": "sha256:" + ("a" * 64),
+        "expected_manifest_ref": "/tmp/receipts/synthetic--fixture.manifest.json",
+        "raw_leg": leg,
+        "extracted_leg": None,
+        "expected_manifest_digest": "sha256:" + ("b" * 64),
+        "destination_manifest_digest": "sha256:" + ("c" * 64),
+        "destination_verification": verification,
+        "extracted_verification": None,
+        "space_budget": {
+            "safety_margin_bytes": 1000,
+            "ok": True,
+            "findings": [],
+            "volumes": [
+                {"probe_path": "/tmp", "required_bytes": 1000, "available_bytes": 999999, "ok": True}
+            ],
+        },
+        "ok": True,
+    }
 
 
 class TempRootMixin:
@@ -907,15 +975,17 @@ class DestinationSideSymlinkSafetyTests(TempRootMixin, unittest.TestCase):
         external = self._temp_dir() / "external"
         self._write(external / "victim.json", b'{"original": true}')
         receipts_dir = self._temp_dir() / "receipts"
+        receipts_dir.mkdir(parents=True, exist_ok=True)
         receipt_path = receipts_dir / "fixture.latest.json"
         if not self._symlink(receipt_path, external / "victim.json"):
             self.skipTest("symlink creation not permitted in this environment")
+        receipt = valid_receipt_fixture()
 
-        storage.write_relocation_receipt({"ok": True, "n": 1}, receipt_path)
+        storage.write_relocation_receipt(receipt, receipt_path)
 
         self.assertEqual((external / "victim.json").read_bytes(), b'{"original": true}')
         self.assertFalse(receipt_path.is_symlink())
-        self.assertEqual(storage.read_relocation_receipt(receipt_path), {"ok": True, "n": 1})
+        self.assertEqual(storage.read_relocation_receipt(receipt_path), receipt)
 
 
 class RelocationManifestAndRestoreVerificationTests(TempRootMixin, unittest.TestCase):
@@ -992,7 +1062,7 @@ class RelocationManifestAndRestoreVerificationTests(TempRootMixin, unittest.Test
 
 class DurableReceiptTests(TempRootMixin, unittest.TestCase):
     def test_receipt_round_trips_through_write_and_read(self) -> None:
-        receipt = {"contract_version": "atlas.knowledge-relocation-receipt.v1", "ok": True, "n": 1}
+        receipt = valid_receipt_fixture()
         path = self._temp_dir() / "receipts" / "fixture.latest.json"
 
         storage.write_relocation_receipt(receipt, path)
@@ -1001,12 +1071,43 @@ class DurableReceiptTests(TempRootMixin, unittest.TestCase):
         self.assertEqual(read_back, receipt)
 
     def test_write_leaves_no_partial_file_on_disk(self) -> None:
-        receipt = {"ok": True}
+        receipt = valid_receipt_fixture()
         path = self._temp_dir() / "receipts" / "fixture.latest.json"
         storage.write_relocation_receipt(receipt, path)
 
         siblings = list(path.parent.iterdir())
         self.assertEqual(siblings, [path])
+
+    def test_write_relocation_receipt_rejects_a_semantically_incoherent_receipt(self) -> None:
+        # Schema-valid shape, but self-contradictory: raw_leg.ok=true with
+        # a non-empty raw_leg.files_failed. The public writer must refuse
+        # it -- incoherent evidence never reaches disk.
+        receipt = valid_receipt_fixture()
+        receipt["raw_leg"]["files_failed"] = [
+            {"path": "a.txt", "category": "checksum_mismatch", "message_digest": "sha256:" + "0" * 64}
+        ]
+        path = self._temp_dir() / "receipts" / "bad.json"
+        with self.assertRaises(storage.ReceiptValidationError):
+            storage.write_relocation_receipt(receipt, path)
+        self.assertFalse(path.exists())
+
+    def test_read_relocation_receipt_rejects_a_semantically_incoherent_receipt(self) -> None:
+        # A receipt that got onto disk by some other path (hand edit,
+        # legacy writer) must still be rejected on the way out.
+        receipt = valid_receipt_fixture()
+        receipt["raw_leg"]["files_failed"] = [
+            {"path": "a.txt", "category": "checksum_mismatch", "message_digest": "sha256:" + "0" * 64}
+        ]
+        path = self._temp_dir() / "receipts" / "bad.json"
+        storage._write_json_atomic(receipt, path)  # bypass the validating public writer
+        with self.assertRaises(storage.ReceiptValidationError):
+            storage.read_relocation_receipt(path)
+
+    def test_read_relocation_receipt_rejects_a_schema_invalid_receipt(self) -> None:
+        path = self._temp_dir() / "receipts" / "bad.json"
+        storage._write_json_atomic({"contract_version": "atlas.knowledge-relocation-receipt.v1", "ok": True}, path)
+        with self.assertRaises(storage.ReceiptValidationError):
+            storage.read_relocation_receipt(path)
 
     def test_manifest_round_trips_through_write_and_read(self) -> None:
         # At minimum the expected (source-anchored) manifest should be
@@ -1360,51 +1461,7 @@ class RelocationReceiptSchemaTests(unittest.TestCase):
         return json.loads(RECEIPT_SCHEMA_PATH.read_text(encoding="utf-8"))
 
     def _minimal_valid_receipt(self) -> dict:
-        leg = {
-            "files_copied": 2,
-            "files_skipped_already_present": 0,
-            "files_failed": [],
-            "bytes_copied": 100,
-            "ok": True,
-        }
-        verification = {
-            "contract_version": "atlas.knowledge-restore-verification.v1",
-            "root": "/tmp/destination",
-            "require_exact_match": True,
-            "expected_entry_count": 2,
-            "current_entry_count": 2,
-            "missing_paths": [],
-            "unexpected_paths": [],
-            "mismatched_paths": [],
-            "ok": True,
-        }
-        return {
-            "contract_version": "atlas.knowledge-relocation-receipt.v1",
-            "archive_id": "synthetic--fixture",
-            "recorded_at": "2026-08-28T00:00:00Z",
-            "source_description": "synthetic fixture",
-            "destination_root": "/tmp/destination",
-            "exclusion_policy_id": "atlas.knowledge.no-exclusion",
-            "exclusion_policy_version": "v1",
-            "excluded_path_count": 0,
-            "excluded_paths_digest": "sha256:" + ("a" * 64),
-            "expected_manifest_ref": "/tmp/receipts/synthetic--fixture.manifest.json",
-            "raw_leg": leg,
-            "extracted_leg": None,
-            "expected_manifest_digest": "sha256:" + ("b" * 64),
-            "destination_manifest_digest": "sha256:" + ("c" * 64),
-            "destination_verification": verification,
-            "extracted_verification": None,
-            "space_budget": {
-                "safety_margin_bytes": 1000,
-                "ok": True,
-                "findings": [],
-                "volumes": [
-                    {"probe_path": "/tmp", "required_bytes": 1000, "available_bytes": 999999, "ok": True}
-                ],
-            },
-            "ok": True,
-        }
+        return valid_receipt_fixture()
 
     def test_minimal_valid_receipt_with_null_extracted_leg_passes(self) -> None:
         errors = validate_json_schema(self._minimal_valid_receipt(), self._schema())
@@ -1464,6 +1521,63 @@ class PipelineCompatibilityTests(TempRootMixin, unittest.TestCase):
 
         self.assertEqual(old_rels, new_rels)
 
+    def test_ordering_matches_legacy_path_sort_for_nested_prefix_and_punctuation(self) -> None:
+        # Regression for a real divergence: the earlier flat-string sort
+        # key ordered "a.txt" before "a/x.txt" ('.' < '/'), while the
+        # previous sorted(rglob()) -- which pathlib compares
+        # component-by-component -- orders "a/x.txt" first ('a' < 'a.txt').
+        # _pipeline.tree_digest() folds files in list_files() order, so any
+        # tree with a `foo/` + `foo.ext` pair (extremely common) got a
+        # different digest. Also covers punctuation-prefix cases.
+        root = self._temp_dir()
+        for rel in [
+            "a/x.txt", "a.txt", "a-b.txt", "a_b.txt",
+            "docs/readme.md", "docs.md", "docs-old/z.md",
+            "p!/q.txt", "p~/q.txt", "p/q.txt",
+            "nested/deep/file.txt", "nested/deep.txt", "nested-x/a.txt",
+        ]:
+            self._write(root / rel, rel.encode())
+
+        legacy_order = [
+            p.relative_to(root).as_posix()
+            for p in sorted(p for p in root.rglob("*") if p.is_file())
+        ]
+        new_order = [p.relative_to(root).as_posix() for p in _pipeline.list_files(root)]
+
+        self.assertEqual(new_order, legacy_order)
+        # And the digest itself, computed the legacy way, must match.
+        self.assertEqual(_pipeline.tree_digest(root), _legacy_tree_digest(root))
+
+    def test_enumerate_files_does_not_traverse_into_a_reparse_point_directory(self) -> None:
+        # os.walk(followlinks=False) already stops at directory *symlinks*;
+        # a Windows *junction* was still traversed, silently absorbing the
+        # target's files into the enumeration (and into list_files()).
+        root = self._temp_dir()
+        self._write(root / "real.txt", b"real")
+        target = self._temp_dir()
+        self._write(target / "outside-content.txt", b"should not be enumerated through the link")
+        link = root / "linked_dir"
+        made = False
+        if os.name == "nt":
+            made = (
+                subprocess.run(["cmd", "/c", "mklink", "/J", str(link), str(target)],
+                               capture_output=True, text=True).returncode == 0
+            )
+        else:
+            try:
+                os.symlink(target, link)
+                made = True
+            except OSError:
+                made = False
+        if not made:
+            self.skipTest("could not create a directory link in this environment")
+
+        rels = {p.relative_to(root).as_posix() for p in storage.enumerate_files(root)}
+        self.assertIn("real.txt", rels)
+        self.assertNotIn("linked_dir/outside-content.txt", rels)
+        dir_links = {p.relative_to(root).as_posix() for p in storage.enumerate_directory_links(root)}
+        self.assertIn("linked_dir", dir_links)
+
     @unittest.skipUnless(os.name == "nt", "case-insensitive sort compatibility is a Windows-only concern")
     def test_tree_digest_order_is_unchanged_for_a_mixed_case_tree(self) -> None:
         root = self._temp_dir()
@@ -1492,6 +1606,162 @@ class JsonDigestHelpersTests(unittest.TestCase):
         a = storage.stable_json_digest({"x": 1})
         b = storage.stable_json_digest({"x": 2})
         self.assertNotEqual(a, b)
+
+
+class WriteConfinementRegressionTests(TempRootMixin, unittest.TestCase):
+    """Regressions for defect 1: the write boundary permitted
+    outside-root overwrites via (a) a symlink at a predictable temp-file
+    name and (b) a symlinked destination-parent directory. All of these
+    fail on the reviewed head; they pass now."""
+
+    SENTINEL = b"ORIGINAL-OUTSIDE-CONTENT-MUST-SURVIVE"
+
+    def _outside_sentinel(self) -> Path:
+        outside = self._temp_dir() / "outside"
+        outside.mkdir()
+        sentinel = outside / "sentinel.txt"
+        sentinel.write_bytes(self.SENTINEL)
+        return sentinel
+
+    def test_predictable_temp_name_symlink_cannot_redirect_a_manifest_write(self) -> None:
+        sentinel = self._outside_sentinel()
+        dest_dir = self._temp_dir() / "receipts"
+        dest_dir.mkdir()
+        target = dest_dir / "expected.manifest.json"
+        # The pre-fix implementation opened exactly this name with a
+        # following write:
+        legacy_tmp = dest_dir / f"{target.name}.{os.getpid()}.tmp"
+        if not self._symlink(legacy_tmp, sentinel):
+            self.skipTest("symlink creation not permitted in this environment")
+
+        storage.write_relocation_manifest({"contract_version": storage.RELOCATION_MANIFEST_VERSION,
+                                           "entry_count": 0, "total_bytes": 0, "entries": []}, target)
+
+        self.assertEqual(sentinel.read_bytes(), self.SENTINEL)
+        self.assertTrue(target.exists())
+        self.assertFalse(os.path.islink(target))
+
+    def test_symlinked_parent_directory_is_refused_not_written_through(self) -> None:
+        sentinel = self._outside_sentinel()
+        outside_dir = sentinel.parent
+        link_parent = self._temp_dir() / "linkparent"
+        if not self._symlink(link_parent, outside_dir):
+            self.skipTest("symlink creation not permitted in this environment")
+
+        with self.assertRaises(storage.WriteConfinementError):
+            storage.write_relocation_manifest(
+                {"contract_version": storage.RELOCATION_MANIFEST_VERSION, "entry_count": 0,
+                 "total_bytes": 0, "entries": []},
+                link_parent / "written-through-symlink.json",
+            )
+        self.assertFalse((outside_dir / "written-through-symlink.json").exists())
+
+    def test_copy_refuses_a_symlinked_destination_subdirectory(self) -> None:
+        outside = self._temp_dir() / "outside"
+        outside.mkdir()
+        (outside / "keepme.txt").write_bytes(self.SENTINEL)
+        source = self._temp_dir() / "source"
+        self._write(source / "sub" / "payload.txt", b"attacker-controlled bytes")
+        destination = self._temp_dir() / "destination"
+        destination.mkdir()
+        if not self._symlink(destination / "sub", outside):
+            self.skipTest("symlink creation not permitted in this environment")
+        work = self._temp_dir() / "work"
+
+        result = storage.resumable_copy_tree(source, destination, work_root=work)
+
+        self.assertEqual([f.path for f in result.failed], ["sub/payload.txt"])
+        self.assertEqual(result.failed[0].category, "destination_replace_failed")
+        self.assertEqual((outside / "keepme.txt").read_bytes(), self.SENTINEL)
+        self.assertFalse((outside / "payload.txt").exists())
+
+    def test_relocation_rejects_a_symlinked_destination_root_at_preflight(self) -> None:
+        outside = self._temp_dir() / "outside"
+        outside.mkdir()
+        source = self._temp_dir() / "source"
+        self._write(source / "a.txt", b"content")
+        destination = self._temp_dir() / "destination"
+        if not self._symlink(destination, outside):
+            self.skipTest("symlink creation not permitted in this environment")
+        work = self._temp_dir() / "work"
+
+        with mock.patch.object(storage, "_free_bytes", return_value=10 * 1024 * 1024 * 1024):
+            budget = storage.preflight_space_budget(
+                source_root=source, raw_destination_root=destination, work_root=work
+            )
+        self.assertFalse(budget.ok)
+        self.assertTrue(any("raw_destination_root already exists as a symlink" in f for f in budget.findings))
+        self.assertEqual(list(outside.iterdir()), [])
+
+    def test_atomic_place_reraises_a_non_cross_device_error(self) -> None:
+        # The fallback must fire ONLY for EXDEV; any other OSError is a
+        # real failure and must propagate, not be silently routed through
+        # a same-directory copy.
+        staged = self._temp_dir() / "staged"
+        staged.write_bytes(b"x")
+        destination = self._temp_dir() / "dest" / "out.bin"
+        destination.parent.mkdir()
+
+        boom = OSError(13, "Permission denied")  # EACCES, not EXDEV
+        with mock.patch.object(storage, "_lp_replace", side_effect=boom):
+            with self.assertRaises(OSError) as ctx:
+                storage._atomic_place(staged, destination)
+        self.assertEqual(ctx.exception.errno, 13)
+
+
+class SourceEnumerationRegressionTests(TempRootMixin, unittest.TestCase):
+    """Regressions for defect 4: an unreadable subtree silently vanished
+    from enumeration, and a missing source was indistinguishable from an
+    empty one."""
+
+    @unittest.skipIf(os.name == "nt", "chmod(0o000) does not remove directory read on Windows")
+    def test_unreadable_subtree_raises_instead_of_returning_a_partial_list(self) -> None:
+        root = self._temp_dir()
+        self._write(root / "readable.txt", b"ok")
+        blocked = root / "blocked"
+        self._write(blocked / "must-be-preserved.txt", b"secret")
+        os.chmod(blocked, 0o000)
+        try:
+            with self.assertRaises(storage.SourceEnumerationError):
+                storage.enumerate_files(root)
+        finally:
+            os.chmod(blocked, 0o755)
+
+    def test_preflight_rejects_a_missing_source_without_touching_the_destination(self) -> None:
+        source = self._temp_dir() / "does-not-exist"
+        destination = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+        with mock.patch.object(storage, "_free_bytes", return_value=10 * 1024 * 1024 * 1024):
+            budget = storage.preflight_space_budget(
+                source_root=source, raw_destination_root=destination, work_root=work
+            )
+        self.assertFalse(budget.ok)
+        self.assertIn("source_root does not exist", budget.findings)
+        self.assertFalse(destination.exists())
+
+    def test_preflight_rejects_a_non_directory_source(self) -> None:
+        source = self._temp_dir() / "a-file"
+        source.write_bytes(b"i am a file, not a directory")
+        destination = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+        with mock.patch.object(storage, "_free_bytes", return_value=10 * 1024 * 1024 * 1024):
+            budget = storage.preflight_space_budget(
+                source_root=source, raw_destination_root=destination, work_root=work
+            )
+        self.assertFalse(budget.ok)
+        self.assertIn("source_root exists but is not a directory", budget.findings)
+
+    def test_empty_source_directory_stays_valid(self) -> None:
+        source = self._temp_dir() / "empty-source"
+        source.mkdir()
+        destination = self._temp_dir() / "destination"
+        work = self._temp_dir() / "work"
+        result = storage.relocate_archive_source(
+            archive_id="synthetic--empty", source_root=source, destination_root=destination,
+            work_root=work, source_description="an intentionally empty source",
+        )
+        self.assertTrue(result.ok, result.receipt)
+        self.assertEqual(result.expected_manifest["entry_count"], 0)
 
 
 if __name__ == "__main__":

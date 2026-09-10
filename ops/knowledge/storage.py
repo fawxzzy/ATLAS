@@ -28,11 +28,13 @@ changed by this module.
 
 from __future__ import annotations
 
+import errno
 import hashlib
 import json
 import os
 import shutil
 import sys
+import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -165,6 +167,64 @@ def _lp_symlink(target: str, link_path: Path) -> None:
     os.symlink(target, _win_long_path(link_path))
 
 
+class WriteConfinementError(Exception):
+    """Raised when a write would pass through a symlink or reparse-point
+    directory before reaching its final, lexically-controlled component --
+    i.e. the directory entry is safe but an ancestor of it is not, so the
+    write would still land outside the admitted tree."""
+
+
+def _assert_write_parent_confined(target: Path, *, admitted_root: Path | None = None) -> None:
+    """Fail closed if any directory between `target` and `admitted_root`
+    (or, when no admitted_root is given, `target`'s immediate parent) is a
+    symlink / reparse point.
+
+    The final component of a write is already handled no-follow
+    (`_lp_replace`, and `mkstemp` with O_EXCL for staging), but `open()`
+    and `os.replace()` both resolve *parent*-directory symlinks normally.
+    A planted symlinked parent therefore still redirects an otherwise
+    lexically-safe write to wherever the link points. This walks the
+    parentage and refuses before any bytes are written. Bounded to the
+    admitted subtree so it never trips on legitimate system-level symlinks
+    above the roots this operation was actually handed.
+    """
+    parent = target.parent
+    boundary = admitted_root.resolve() if admitted_root is not None else None
+    current = parent
+    seen: set[Path] = set()
+    while True:
+        if current in seen:
+            break
+        seen.add(current)
+        if _lp_exists(current) and _is_reparse_point(current):
+            raise WriteConfinementError(
+                f"refusing to write through a reparse-point directory: {current} (target={target})"
+            )
+        if boundary is not None and current.resolve() == boundary:
+            break
+        nxt = current.parent
+        if nxt == current:
+            break
+        if boundary is None:
+            # No admitted root: check only the immediate parent, which is
+            # the concrete reproduced attack (a symlink planted exactly at
+            # the destination's parent directory).
+            break
+        current = nxt
+
+
+def _secure_staging_file(directory: Path, *, prefix: str) -> Path:
+    """Create a fresh, uniquely-named file in `directory` via mkstemp
+    (O_CREAT | O_EXCL), so a pre-existing symlink at a *predictable* temp
+    name can never be opened/followed. Returns the new empty file's path;
+    the caller overwrites its contents and then atomically renames it into
+    place. `directory` must already exist and have been confinement-checked
+    by the caller."""
+    fd, name = tempfile.mkstemp(prefix=prefix, suffix=".part", dir=str(_win_long_path(directory)))
+    os.close(fd)
+    return Path(name)
+
+
 def file_checksum(path: Path) -> str:
     digest = hashlib.sha256()
     with _win_long_path(path).open("rb") as handle:
@@ -230,16 +290,40 @@ class LongPathEnumerationError(Exception):
     -- a real long-path failure rather than a silently dropped entry."""
 
 
-def _sort_key(rel_path: str) -> str:
-    # Matches the platform behavior of the previous rglob()-based
-    # enumeration exactly: PureWindowsPath ordering is case-insensitive
-    # (Windows filesystems are case-insensitive), PurePosixPath ordering is
-    # case-sensitive. Sorting the plain POSIX-string relative path without
-    # this would silently reorder mixed-case siblings on Windows relative
-    # to the old implementation, changing tree_digest() output for any
-    # tree with case-differing filenames at the same level even though
-    # nothing about the tree's actual content changed.
-    return rel_path.lower() if os.name == "nt" else rel_path
+class SourceEnumerationError(Exception):
+    """Raised when a directory under an enumerated root cannot be traversed
+    at all (e.g. permission denied on a subtree). `os.walk` silently omits
+    an unreadable subtree by default; this module refuses to, so a partial
+    enumeration can never be mistaken for a complete one."""
+
+
+def _raise_walk_error(exc: OSError) -> None:
+    # os.walk swallows scandir/opendir errors unless given an onerror
+    # callback. Re-raising here turns "a subtree silently vanished" into a
+    # hard, blocking failure -- the same fail-closed stance enumerate_files
+    # already takes for an unstatable individual entry.
+    raise SourceEnumerationError(
+        f"directory traversal failed, source not fully enumerable: "
+        f"{getattr(exc, 'filename', None) or exc}"
+    ) from exc
+
+
+def _sort_key(rel_path: str) -> tuple[str, ...]:
+    # Reproduces the previous `sorted(root.rglob("*"))` ordering exactly.
+    # pathlib compares path objects component-by-component -- a tuple of
+    # parts -- NOT as one flat string. The two disagree whenever a
+    # directory name is a proper prefix of a sibling entry's name: "a/x.txt"
+    # sorts BEFORE "a.txt" under pathlib ('a' < 'a.txt' as the first
+    # component) but AFTER it as a flat string ('.' 0x2E < '/' 0x2F). The
+    # earlier flat-string-lower() key silently reordered every such pair,
+    # which changes `_pipeline.tree_digest()` output (it hashes files in
+    # `list_files()` order) for any real tree with a `foo/` + `foo.ext`
+    # pair -- an extremely common shape. Case handling matches pathlib too:
+    # case-insensitive on Windows, case-sensitive on POSIX. Verified
+    # against `sorted(Path)` on Windows (3.13) and Linux (3.12) for
+    # nested-prefix, punctuation-prefix, and mixed-case fixtures.
+    parts = rel_path.split("/")
+    return tuple(p.lower() for p in parts) if os.name == "nt" else tuple(parts)
 
 
 def enumerate_files(root: Path) -> list[Path]:
@@ -271,18 +355,29 @@ def enumerate_files(root: Path) -> list[Path]:
     symlink policy (see check_symlink_confinement()) rather than having
     one silently applied during enumeration.
 
-    Junction-independent by construction: this only cares about what is
-    actually reachable at `root` right now via long-path-safe traversal. It
-    never inspects reparse-point metadata, so it behaves identically whether
-    `root` is a plain directory or the far side of an NTFS junction.
+    Reparse-point directories (directory symlinks and -- the case
+    `os.walk(followlinks=False)` still misses -- Windows junctions) are
+    pruned, never descended into: walking through one would enumerate its
+    target's content as if it belonged to `root`. Such entries are
+    enumerated separately by `enumerate_directory_links()` and rejected by
+    `check_link_entries()`. `_pipeline.list_files()` delegates here, so its
+    trees stop at a junction rather than silently absorbing the target's
+    files (the previous `rglob()`-based implementation followed junctions).
+
+    A subtree that cannot be traversed at all (permission denied, etc.)
+    raises `SourceEnumerationError` rather than being silently omitted --
+    `os.walk`'s default behavior is to skip it without a word.
     """
     if not root.exists():
         return []
     walk_root = _win_long_path(root)
     rel_entries: list[str] = []
-    for dirpath, dirnames, filenames in os.walk(walk_root, followlinks=False):
-        dirnames.sort(key=_sort_key)
+    for dirpath, dirnames, filenames in os.walk(walk_root, followlinks=False, onerror=_raise_walk_error):
         dirpath_path = Path(dirpath)
+        dirnames[:] = sorted(
+            (d for d in dirnames if not _is_reparse_point(dirpath_path / d)),
+            key=_sort_key,
+        )
         for name in sorted(filenames, key=_sort_key):
             candidate = dirpath_path / name
             try:
@@ -331,7 +426,7 @@ def enumerate_directory_links(root: Path) -> list[Path]:
         return []
     walk_root = _win_long_path(root)
     rel_entries: list[str] = []
-    for dirpath, dirnames, _filenames in os.walk(walk_root, followlinks=False):
+    for dirpath, dirnames, _filenames in os.walk(walk_root, followlinks=False, onerror=_raise_walk_error):
         dirpath_path = Path(dirpath)
         link_names = [name for name in dirnames if _is_reparse_point(dirpath_path / name)]
         for name in sorted(link_names, key=_sort_key):
@@ -609,6 +704,11 @@ def validate_root_topology(
     Called before any enumeration or space computation in
     preflight_space_budget() -- a topology violation is worse than a
     space shortfall and is checked first.
+
+    Relationship checks only. Filesystem-state checks on the roots
+    (source missing / not a directory, an admitted write root already
+    being a symlink) are done by validate_relocation_roots_state(), also
+    before any mutation -- see preflight_space_budget().
     """
     findings: list[str] = []
     if _is_within_or_equal(source_root, raw_destination_root):
@@ -628,6 +728,49 @@ def validate_root_topology(
         findings.append("receipt_path is inside source_root")
     if expected_manifest_path is not None and _is_within_or_equal(source_root, expected_manifest_path):
         findings.append("expected_manifest_path is inside source_root")
+    return findings
+
+
+def validate_relocation_roots_state(
+    *,
+    source_root: Path,
+    raw_destination_root: Path,
+    work_root: Path,
+    extracted_destination_root: Path | None = None,
+    receipt_path: Path | None = None,
+    expected_manifest_path: Path | None = None,
+) -> list[str]:
+    """Filesystem-state checks on the relocation roots, run before any
+    mutation (alongside validate_root_topology() in
+    preflight_space_budget()):
+
+    - the relocation source must exist and be a directory. An empty
+      directory is valid and stays valid -- it is not conflated with a
+      missing or unreadable source.
+    - no admitted write root (raw/extracted destination, work root) may
+      already exist as a symlink / reparse point, and no receipt/manifest
+      parent directory may be one -- such a root would silently redirect
+      every write through the link before this module's no-follow leaf
+      handling ever applies.
+    """
+    findings: list[str] = []
+    if not source_root.exists():
+        findings.append("source_root does not exist")
+    elif not source_root.is_dir():
+        findings.append("source_root exists but is not a directory")
+    for label, candidate in (
+        ("raw_destination_root", raw_destination_root),
+        ("work_root", work_root),
+        ("extracted_destination_root", extracted_destination_root),
+    ):
+        if candidate is not None and _lp_exists(candidate) and _is_reparse_point(candidate):
+            findings.append(f"{label} already exists as a symlink/reparse point")
+    for label, path in (
+        ("receipt_path", receipt_path),
+        ("expected_manifest_path", expected_manifest_path),
+    ):
+        if path is not None and _lp_exists(path.parent) and _is_reparse_point(path.parent):
+            findings.append(f"{label} parent directory is a symlink/reparse point")
     return findings
 
 
@@ -690,12 +833,16 @@ def preflight_space_budget(
     separate volumes, two of the three, or all one, and the budget must
     reflect whichever is actually true rather than checking each root's
     requirement independently. Fails closed (ok=False) on: a dangerous
-    root-topology relationship (checked first, before any enumeration --
-    see validate_root_topology()), insufficient space on any volume, an
-    unstatable source file, or -- under LinkPolicy.REJECT_ALL, the
-    default -- any link entry at all, internal or external target alike
-    (see check_link_entries()) -- nothing starts copying until every one
-    of these passes.
+    root-topology relationship or root filesystem-state problem -- a
+    missing/non-directory source, or an admitted write root that is
+    already a symlink (both checked first, before any enumeration -- see
+    validate_root_topology() and validate_relocation_roots_state());
+    insufficient space on any volume; an unstatable source file; a subtree
+    that cannot be traversed at all (SourceEnumerationError, raised, not
+    returned); or -- under LinkPolicy.REJECT_ALL, the default -- any link
+    entry at all, internal or external target alike (see
+    check_link_entries()) -- nothing starts copying until every one of
+    these passes.
 
     Demand modeled per volume:
     - raw/extracted destination volumes: bytes still needed (not yet
@@ -721,7 +868,14 @@ def preflight_space_budget(
     recorded on the returned SpaceBudget so a caller override is bound
     into the relocation receipt, not silently applied.
     """
-    topology_findings = validate_root_topology(
+    precheck_findings = validate_root_topology(
+        source_root=source_root,
+        raw_destination_root=raw_destination_root,
+        work_root=work_root,
+        extracted_destination_root=extracted_destination_root,
+        receipt_path=receipt_path,
+        expected_manifest_path=expected_manifest_path,
+    ) + validate_relocation_roots_state(
         source_root=source_root,
         raw_destination_root=raw_destination_root,
         work_root=work_root,
@@ -729,15 +883,15 @@ def preflight_space_budget(
         receipt_path=receipt_path,
         expected_manifest_path=expected_manifest_path,
     )
-    if topology_findings:
-        # A topology violation is worse than a space shortfall -- do not
-        # even enumerate the source, let alone compute demand, once one
-        # is found.
+    if precheck_findings:
+        # A topology or root-state violation is worse than a space
+        # shortfall -- do not even enumerate the source, let alone compute
+        # demand, once one is found.
         return SpaceBudget(
             volumes=[],
             safety_margin_bytes=reserve_policy.non_system_volume_reserve_bytes,
             ok=False,
-            findings=list(topology_findings),
+            findings=list(precheck_findings),
         )
 
     all_source_files = enumerate_files(source_root)
@@ -863,45 +1017,75 @@ def _matches_existing(source: Path, destination: Path) -> bool:
     return file_checksum(source) == file_checksum(destination)
 
 
-def _atomic_place(staged: Path, destination: Path) -> None:
+def _atomic_place(staged: Path, destination: Path, *, admitted_root: Path | None = None) -> None:
     """Move `staged` into `destination` so a reader never observes a
     partially-written destination file. Prefers a direct atomic rename;
-    falls back to a same-directory temp copy + rename when `staged` and
-    `destination` are on different volumes (os.replace raises EXDEV for
-    cross-device renames on POSIX)."""
+    falls back to a same-directory temp copy + rename ONLY on a recognized
+    cross-device error (os.replace raises EXDEV when `staged` and
+    `destination` are on different volumes) -- any other OSError is a real
+    failure and is re-raised, not silently routed through the fallback.
+
+    Both the direct rename and the fallback are no-follow on the final
+    component; the fallback's same-directory temp is created with mkstemp
+    (O_EXCL), never at a predictable name. The parentage of `destination`
+    is confinement-checked first: a symlinked parent directory would
+    otherwise redirect the write regardless of leaf-level no-follow.
+    """
+    _assert_write_parent_confined(destination, admitted_root=admitted_root)
     try:
         _lp_replace(staged, destination)
         return
-    except OSError:
-        pass
-    same_dir_temp = destination.parent / f"{destination.name}.{os.getpid()}.part"
-    _lp_copy2(staged, same_dir_temp)
-    _lp_replace(same_dir_temp, destination)
+    except OSError as exc:
+        # Fall back ONLY for a genuine cross-device rename. EXDEV on POSIX;
+        # ERROR_NOT_SAME_DEVICE (winerror 17) on Windows, which CPython
+        # also maps to errno EXDEV but check both to be certain. Any other
+        # OSError (permission, missing parent, ...) is a real failure and
+        # must propagate, not be routed through a same-directory copy.
+        if exc.errno != errno.EXDEV and getattr(exc, "winerror", None) != 17:
+            raise
+    same_dir_temp = _secure_staging_file(destination.parent, prefix=f".{destination.name}.")
+    try:
+        _lp_copy2(staged, same_dir_temp)
+        _lp_replace(same_dir_temp, destination)
+    except BaseException:
+        _lp_unlink(same_dir_temp, missing_ok=True)
+        raise
     _lp_unlink(staged, missing_ok=True)
 
 
-def _copy_one_resumable(source: Path, destination: Path, *, work_root: Path) -> int:
+def _copy_one_resumable(
+    source: Path, destination: Path, *, work_root: Path, admitted_root: Path | None = None
+) -> int:
     """Copy exactly one regular file, resumably and atomically. Raises
     ResumableCopyError (with a bounded category) rather than attempting
     anything for a link source -- this is a defense-in-depth check, not
     the primary enforcement point: under LinkPolicy.REJECT_ALL,
     preflight_space_budget() already blocks before resumable_copy_tree()
-    is ever called on a tree containing one."""
+    is ever called on a tree containing one.
+
+    `admitted_root` (the destination tree root) bounds the parentage
+    confinement check: no directory between it and `destination` may be a
+    symlink / reparse point.
+    """
     if _is_reparse_point(source):
         raise ResumableCopyError(
             f"link entries are not copied under LinkPolicy.REJECT_ALL: {source}",
             category="unsupported_link_entry",
         )
+    _assert_write_parent_confined(destination, admitted_root=admitted_root)
     _lp_mkdir(destination.parent)
     stage_dir = work_root / "copy-staging"
     _lp_mkdir(stage_dir)
-    stage_name = hashlib.sha1(str(destination).encode("utf-8")).hexdigest() + ".part"
-    staged = stage_dir / stage_name
-    if _lp_exists(staged):
-        _lp_unlink(staged)
+    _assert_write_parent_confined(stage_dir / "x", admitted_root=work_root)
+    # Fresh O_EXCL staging file every call: a predictable staging name is a
+    # symlink-plant target, and staging is transient per file anyway
+    # (resume works off destination checksum match, not a stable stage
+    # path).
+    staged = _secure_staging_file(stage_dir, prefix="copy-")
     try:
         _lp_copy2(source, staged)
     except OSError as exc:
+        _lp_unlink(staged, missing_ok=True)
         failing_path = str(getattr(exc, "filename", "") or "")
         category = "source_read_failed" if failing_path and failing_path in str(source) else "staging_copy_failed"
         raise ResumableCopyError(f"copy to staging failed for {source}: {exc}", category=category) from exc
@@ -910,8 +1094,8 @@ def _copy_one_resumable(source: Path, destination: Path, *, work_root: Path) -> 
         raise ResumableCopyError(f"staged copy checksum mismatch for {source}", category="checksum_mismatch")
     size = _lp_stat(staged).st_size
     try:
-        _atomic_place(staged, destination)
-    except OSError as exc:
+        _atomic_place(staged, destination, admitted_root=admitted_root)
+    except (OSError, WriteConfinementError) as exc:
         _lp_unlink(staged, missing_ok=True)
         raise ResumableCopyError(
             f"atomic replace into destination failed for {destination}: {exc}",
@@ -945,7 +1129,10 @@ def resumable_copy_tree(
     verified against the source, and only then moved into
     destination_root with an atomic rename (see _atomic_place).
     destination_root never contains a partially-written file, even if the
-    process is killed mid-copy.
+    process is killed mid-copy. No directory between destination_root and
+    a file's destination may be a symlink / reparse point -- such an entry
+    is a bounded `destination_replace_failed` failure, never written
+    through.
     """
     files = enumerate_files(source_root)
     result = CopyResult()
@@ -961,11 +1148,15 @@ def resumable_copy_tree(
             result.skipped_already_present.append(rel)
             continue
         try:
-            size = _copy_one_resumable(source_path, destination_path, work_root=work_root)
+            size = _copy_one_resumable(
+                source_path, destination_path, work_root=work_root, admitted_root=destination_root
+            )
             result.copied.append(rel)
             result.total_bytes_copied += size
-        except (OSError, ResumableCopyError) as exc:
-            category = getattr(exc, "category", "staging_copy_failed")
+        except (OSError, ResumableCopyError, WriteConfinementError) as exc:
+            category = getattr(exc, "category", None) or (
+                "destination_replace_failed" if isinstance(exc, WriteConfinementError) else "staging_copy_failed"
+            )
             result.failed.append(_copy_failure(rel, exc, category=category))
     return result
 
@@ -1184,42 +1375,121 @@ def build_relocation_receipt(
     }
 
 
-def _write_json_atomic(payload: dict[str, Any], path: Path) -> None:
-    """Atomically persist a JSON document to disk. Written to a
-    same-directory temp file first, then moved into place with an atomic,
-    no-follow rename (see _atomic_place / _lp_replace), so a reader never
-    observes a partially-written file and a planted symlink at `path`
-    cannot redirect the write."""
+def _write_json_atomic(payload: dict[str, Any], path: Path, *, admitted_root: Path | None = None) -> None:
+    """Atomically persist a JSON document to disk.
+
+    Confinement: `path.parent` (bounded by `admitted_root` when given) must
+    not be a symlink / reparse point -- `open()` and `os.replace()` both
+    resolve parent-directory symlinks normally, so a planted symlinked
+    parent would redirect the write regardless of the no-follow leaf
+    rename. The temp file is created with mkstemp (O_CREAT | O_EXCL) at an
+    unpredictable name, so a symlink pre-planted at a *predictable* temp
+    path can neither be opened nor followed. It is then moved into place
+    with an atomic, no-follow rename (see _atomic_place / _lp_replace).
+    """
+    _assert_write_parent_confined(path, admitted_root=admitted_root)
     _lp_mkdir(path.parent)
-    temp_path = path.parent / f"{path.name}.{os.getpid()}.tmp"
-    text = json.dumps(payload, indent=2, sort_keys=True) + "\n"
-    _win_long_path(temp_path).write_text(text, encoding="utf-8")
-    _atomic_place(temp_path, path)
+    _assert_write_parent_confined(path, admitted_root=admitted_root)
+    staged = _secure_staging_file(path.parent, prefix=f".{path.name}.")
+    try:
+        text = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+        _win_long_path_no_follow(staged).write_text(text, encoding="utf-8")
+        _atomic_place(staged, path, admitted_root=admitted_root)
+    except BaseException:
+        _lp_unlink(staged, missing_ok=True)
+        raise
 
 
 def _read_json_atomic(path: Path) -> dict[str, Any]:
     return json.loads(_win_long_path(path).read_text(encoding="utf-8"))
 
 
-def write_relocation_receipt(receipt: dict[str, Any], path: Path) -> None:
-    _write_json_atomic(receipt, path)
+class ReceiptValidationError(Exception):
+    """Raised at the public receipt/manifest boundary when a document
+    fails closed-schema validation, internal-consistency (semantic)
+    validation, or -- for a manifest loaded against a receipt -- a digest
+    check. Incoherent or tampered evidence is rejected at read/write time,
+    not merely by a separately-invokable validator a caller might forget
+    to call."""
+
+
+_RECEIPT_SCHEMA_PATH = ROOT / "schemas" / "atlas.knowledge-relocation-receipt.v1.json"
+
+
+def _receipt_schema() -> dict[str, Any]:
+    return json.loads(_win_long_path(_RECEIPT_SCHEMA_PATH).read_text(encoding="utf-8"))
+
+
+def _assert_receipt_coherent(receipt: dict[str, Any], *, context: str) -> None:
+    # Lazy import: ops.atlas.ui_standards.validate pulls in the wider
+    # ui-standards module tree; keep that off storage.py's import path
+    # and only pay it when a receipt actually crosses the boundary.
+    from ops.atlas.ui_standards.validate import validate_json_schema
+
+    schema_errors = validate_json_schema(receipt, _receipt_schema())
+    semantic_errors = validate_relocation_receipt_semantics(receipt)
+    if schema_errors or semantic_errors:
+        raise ReceiptValidationError(
+            f"{context}: schema_errors={schema_errors!r} semantic_errors={semantic_errors!r}"
+        )
+
+
+def write_relocation_receipt(receipt: dict[str, Any], path: Path, *, admitted_root: Path | None = None) -> None:
+    """Persist a relocation receipt. Refuses to write a receipt that is not
+    schema-valid AND internally consistent -- incoherent evidence never
+    reaches disk through this boundary."""
+    _assert_receipt_coherent(receipt, context="write_relocation_receipt")
+    _write_json_atomic(receipt, path, admitted_root=admitted_root)
 
 
 def read_relocation_receipt(path: Path) -> dict[str, Any]:
-    return _read_json_atomic(path)
+    """Load a relocation receipt, enforcing closed-schema and semantic
+    validation on the way out. A shape-valid but self-contradictory
+    receipt (e.g. raw_leg.ok=true with a non-empty raw_leg.files_failed),
+    or a hand-edited/legacy-malformed one, raises ReceiptValidationError
+    rather than being returned as if it were trustworthy evidence."""
+    receipt = _read_json_atomic(path)
+    _assert_receipt_coherent(receipt, context=f"read_relocation_receipt({path})")
+    return receipt
 
 
-def write_relocation_manifest(manifest: dict[str, Any], path: Path) -> None:
+def write_relocation_manifest(manifest: dict[str, Any], path: Path, *, admitted_root: Path | None = None) -> None:
     """Durably persist the manifest itself, not only its digest. At
     minimum the expected (source-anchored) manifest should be persisted
     this way -- a receipt's expected_manifest_digest alone gives no way
     to reconstruct the expected entries for a later restore proof once
     the process that computed it has exited."""
-    _write_json_atomic(manifest, path)
+    _write_json_atomic(manifest, path, admitted_root=admitted_root)
 
 
-def read_relocation_manifest(path: Path) -> dict[str, Any]:
-    return _read_json_atomic(path)
+def read_relocation_manifest(path: Path, *, expected_digest: str | None = None) -> dict[str, Any]:
+    """Load a persisted relocation manifest. When `expected_digest` is
+    given (e.g. a receipt's `expected_manifest_digest`), the loaded
+    manifest's `stable_json_digest` must match it or ReceiptValidationError
+    is raised -- so restore verification cannot be run against a manifest
+    that has drifted from the one the receipt actually attested to."""
+    manifest = _read_json_atomic(path)
+    if expected_digest is not None:
+        actual = stable_json_digest(manifest)
+        if actual != expected_digest:
+            raise ReceiptValidationError(
+                f"manifest digest mismatch at {path}: receipt attested {expected_digest}, file is {actual}"
+            )
+    return manifest
+
+
+def load_expected_manifest_for_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
+    """Load the source-anchored expected manifest a receipt references,
+    with its digest checked against the receipt. Use this (not a bare
+    read_relocation_manifest) when re-running restore verification from a
+    persisted receipt."""
+    ref = receipt.get("expected_manifest_ref")
+    if not ref:
+        raise ReceiptValidationError(
+            "receipt has no expected_manifest_ref -- the expected manifest was not persisted, "
+            "so restore verification cannot be reproduced from this receipt alone"
+        )
+    return read_relocation_manifest(Path(ref), expected_digest=receipt.get("expected_manifest_digest"))
 
 
 def validate_relocation_receipt_semantics(receipt: dict[str, Any]) -> list[str]:

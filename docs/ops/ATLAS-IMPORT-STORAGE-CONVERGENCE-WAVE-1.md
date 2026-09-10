@@ -6,18 +6,26 @@ Wave 1 delivers reusable knowledge-import pipeline architecture only:
 
 - first-class, independently configurable storage/work roots
   (`ATLAS_IMPORT_STORAGE_ROOT`, `ATLAS_IMPORT_WORK_ROOT`)
-- long-path-safe deterministic file enumeration
+- long-path-safe deterministic file enumeration, ordered
+  component-wise to match the previous `sorted(rglob())` byte-for-byte,
+  stopping at reparse-point directories, and raising rather than
+  silently truncating on an unreadable subtree
 - link detection and rejection (`LinkPolicy.REJECT_ALL`): every file
   symlink, directory symlink, and Windows junction is a blocking preflight
   finding -- internal or external target, it does not matter -- recorded
   precisely and refused before any copy starts, covering both file and
   directory links
 - root-topology validation (dangerous nesting between source/destination/
-  work/receipt/manifest paths rejected before any enumeration)
+  work/receipt/manifest paths rejected before any enumeration) and
+  root-state validation (missing/non-directory source, or an admitted
+  write root that is already a symlink)
 - per-volume peak-space preflight budgeting, with a distinct, much larger
   reserve floor for the system volume
-- resumable, atomic, no-follow-safe copy of regular files, with each
-  copy failure retaining a bounded, structured category
+- resumable, atomic copy of regular files with a bounded write boundary:
+  `mkstemp` (O_EXCL) staging, no-follow atomic rename, a reparse-point
+  parentage check on the admitted destination/work subtrees, and a
+  cross-device fallback that fires only on a recognized `EXDEV`. Each
+  copy failure retains a bounded, structured category
   (`unsupported_link_entry`, `source_read_failed`, `staging_copy_failed`,
   `checksum_mismatch`, `destination_replace_failed`) and a digest of the
   underlying error rather than raw error text
@@ -26,8 +34,10 @@ Wave 1 delivers reusable knowledge-import pipeline architecture only:
 - a source-anchored relocation manifest, copy, and exact destination
   reconciliation
 - durably persisted relocation receipts *and* the expected manifest
-  itself, plus runtime semantic validation of a receipt's internal
-  consistency
+  itself, with closed-schema **and** semantic validation enforced at the
+  public read/write boundary (not left to a separately-invokable
+  validator), and a manifest-digest check when loading restore evidence
+  from a receipt
 
 **Wave 1 explicitly does not include:**
 
@@ -86,20 +96,47 @@ This was a real, hosted-CI-caught bug during development: that Windows
 runner's temp directory resolves through an 8.3 short-name alias
 (`RUNNER~1` vs `runneradmin`), so a caller doing `entry.relative_to(root)`
 against its own original `root` broke when entries were anchored to a
-resolved copy instead. Sort order matches the previous `rglob()`-based
-enumeration's per-platform behavior exactly (case-sensitive on POSIX,
-case-insensitive on Windows, since `pathlib.Path` ordering is
-case-insensitive there) -- a plain POSIX-string sort would have silently
-reordered mixed-case siblings relative to the old implementation, which
-would have changed `tree_digest()` output for any tree with case-differing
-filenames even though nothing about the tree's content changed.
+resolved copy instead.
+
+Sort order reproduces the previous `sorted(root.rglob("*"))` ordering
+exactly, which means a **component-wise** comparison (a tuple of path
+parts), not a flat-string comparison. The two disagree whenever a
+directory name is a proper prefix of a sibling entry's name: pathlib
+sorts `a/x.txt` before `a.txt` (`'a' < 'a.txt'` on the first component),
+a flat string sorts them the other way (`'.'` 0x2E `< '/'` 0x2F). An
+earlier flat-`str.lower()` key silently reordered every such pair --
+`foo/` next to `foo.ext` is an extremely common shape -- which changes
+`_pipeline.tree_digest()` output (it folds files in `list_files()`
+order). Case handling matches pathlib: case-insensitive on Windows,
+case-sensitive on POSIX. The key is verified against `sorted(Path)` on
+Windows (3.13) and Linux (3.12) for nested-prefix, punctuation-prefix,
+and mixed-case fixtures, and `_pipeline.tree_digest()` is compared to a
+byte-for-byte reproduction of the pre-delegation digest for a
+nested-prefix tree.
+
+Reparse-point directories (directory symlinks, and -- the case
+`os.walk(followlinks=False)` still misses -- Windows junctions) are
+pruned, never traversed: walking through one would enumerate its
+target's content as if it belonged to `root`. They are enumerated
+separately by `enumerate_directory_links()`. `list_files()` therefore
+stops at a junction rather than silently absorbing the target's files,
+which the previous `rglob()`-based implementation did not.
+
+A subtree that cannot be traversed at all (permission denied, a
+long-path failure on `opendir`) raises `SourceEnumerationError` rather
+than being silently dropped -- `os.walk`'s default is to skip it without
+a word, which previously let a partial enumeration pass for a complete
+one.
 
 `ops/knowledge/_pipeline.py`'s `list_files()` now delegates to this
-function. This is the one live-pipeline change in this PR, and it is a
-pure correctness fix: identical signature, identical return type,
-identical sort order, identical behavior for any path under the limit --
-proven directly by a compatibility test comparing old- and new-derived
-relative-path sets and orderings for an ordinary mixed-case tree.
+function. For any ordinary tree under the 260-character limit with no
+reparse points and no unreadable subtree, behavior is identical --
+same signature, same return type, same order -- proven by a
+compatibility test against the old `rglob()`-based relative-path set,
+ordering, and digest. The two deliberate differences from the old
+behavior (stop at a reparse-point directory; raise instead of silently
+truncating on an unreadable subtree) are both correctness improvements,
+each with its own test.
 
 ### Link detection and rejection: `LinkPolicy.REJECT_ALL`
 
@@ -177,18 +214,37 @@ link entry should never actually reach this function -- preflight already
 refused the operation -- but if it is ever called directly on a tree that
 still contains one, `_copy_one_resumable()` rejects it defensively with
 an `unsupported_link_entry` failure rather than copying or dereferencing
-it. Each admitted regular file is staged under `work_root`,
-checksum-verified against the source, and only then moved into
-`destination_root` with an atomic rename, so the destination never shows
-a partial file; re-running after an interruption skips any destination
-file that already checksum-matches the source rather than re-copying it.
-A copy failure is retained as a structured `CopyFailure(path, category,
-message_digest)`, never a bare string -- `category` is one of a fixed,
-bounded set (`unsupported_link_entry`, `source_read_failed`,
-`staging_copy_failed`, `checksum_mismatch`, `destination_replace_failed`)
-and `message_digest` is a digest of the underlying error's `repr()`,
-deliberately not the raw error text, since a raw OS error can embed local
-machine paths.
+it. Each admitted regular file is staged under `work_root` at an
+**unpredictable, O_EXCL-created** name (`mkstemp`, not a name an attacker
+could pre-plant a symlink at), checksum-verified against the source, and
+only then moved into `destination_root`. The move is a no-follow atomic
+rename; it falls back to a same-directory `mkstemp` copy + rename **only**
+on a recognized cross-device error (`EXDEV` / Windows `ERROR_NOT_SAME_DEVICE`),
+never on an arbitrary `OSError`. Before any of that, the destination's
+parentage is checked: no directory between `destination_root` and the
+file may be a symlink / reparse point, or the write is refused as a
+bounded `destination_replace_failed` failure rather than followed through
+to wherever the link points. The destination never shows a partial file;
+re-running after an interruption skips any destination file that already
+checksum-matches the source. A copy failure is retained as a structured
+`CopyFailure(path, category, message_digest)`, never a bare string --
+`category` is one of a fixed, bounded set (`unsupported_link_entry`,
+`source_read_failed`, `staging_copy_failed`, `checksum_mismatch`,
+`destination_replace_failed`) and `message_digest` is a digest of the
+underlying error's `repr()`, deliberately not the raw error text, since a
+raw OS error can embed local machine paths.
+
+**Scope of the write-path guarantee.** The no-follow leaf rename, the
+`mkstemp` staging, and the parentage check together confine writes to the
+admitted destination/work subtrees for the concrete attack classes
+exercised in tests: a symlink planted at a predictable staging/temp name,
+a symlink planted at a write's immediate parent, a symlinked destination
+subdirectory, and a symlinked destination or work root (rejected at
+preflight). It is *not* a general filesystem sandbox -- a caller that
+hands this module a `destination_root` or `receipt_path` that is itself
+already inside a symlinked tree it does not control is outside the model;
+topology and root-state validation reject the roots it *can* see as
+unsafe, and everything below the admitted roots is checked per write.
 
 ### Generated-cache exclusion: named, opt-in, never the raw default
 
@@ -239,8 +295,22 @@ discarded), the source-anchored expected-manifest digest and the
 destination-manifest digest, destination (and extracted, if requested)
 verification results, and the full per-volume space-budget outcome.
 `write_relocation_receipt()` / `read_relocation_receipt()` persist and
-read back a receipt atomically (same-directory temp file, then atomic
-rename) -- an in-memory dict alone is not yet a durable receipt.
+read back a receipt atomically (same-directory `mkstemp` temp file, then
+no-follow atomic rename) -- an in-memory dict alone is not yet a durable
+receipt.
+
+**Validation is enforced at the public boundary, not left to the
+caller.** `write_relocation_receipt()` refuses to persist a receipt that
+is not both closed-schema-valid *and* internally consistent
+(`validate_relocation_receipt_semantics()` -- e.g. `raw_leg.ok=true` with
+a non-empty `raw_leg.files_failed`); `read_relocation_receipt()` runs the
+same two checks on the way out, so a hand-edited or legacy-malformed
+receipt raises `ReceiptValidationError` rather than being returned as
+trustworthy evidence. `read_relocation_manifest(path, expected_digest=…)`
+checks the loaded manifest's `stable_json_digest` against the digest a
+receipt attested to; `load_expected_manifest_for_receipt(receipt)` uses
+that so restore verification can only ever run against the manifest the
+receipt actually vouched for, not one that has since drifted.
 
 **Note on this repo's schema validator:** `ops/atlas/ui_standards/validate.py`
 falls back to a dependency-free subset validator when the `jsonschema`
@@ -392,14 +462,92 @@ record them precisely, and fail before mutation. Live cross-platform
 link preservation, if it is ever needed, belongs in a separate, dedicated
 wave that can treat it as the archive-format problem it actually is.
 
+## Fourth hardening wave: acceptance-gap review (function-level probes)
+
+A review that ran isolated reproductions of the published functions'
+behavior against synthetic files -- not a full checkout or a Windows test
+run -- found four concrete gaps the green suite did not cover. Each was
+reproduced against the reviewed head before fixing, and each has a
+regression test that fails on that head and passes now.
+
+1. **The write boundary permitted outside-root overwrites.** The final
+   rename was no-follow, but `_write_json_atomic()` first opened a
+   *predictable* temp name (`<name>.<pid>.tmp`) with a following write, so
+   a symlink pre-planted there redirected the write; and a symlink in a
+   destination's *parent* directory redirected the write even with the
+   leaf handled lexically. Fixed: temp files are created with `mkstemp`
+   (O_EXCL, unpredictable name) inside the admitted directory; the
+   destination/work parentage is checked for reparse points before any
+   write, bounded to the admitted subtree; this covers regular-copy
+   staging, the cross-volume fallback, and receipt/manifest writes.
+   `_atomic_place()` now falls back **only** on a recognized cross-device
+   error (`EXDEV` / Windows `ERROR_NOT_SAME_DEVICE`), re-raising anything
+   else instead of routing it through the fallback.
+2. **Semantic receipt validation existed but the boundary did not call
+   it.** `read_relocation_receipt()` was a bare `json.loads`;
+   `validate_relocation_receipt_semantics()` was never invoked by the
+   reader or writer. Fixed: `write_relocation_receipt()` and
+   `read_relocation_receipt()` both enforce closed-schema *and* semantic
+   validation and raise `ReceiptValidationError` on failure;
+   `read_relocation_manifest(path, expected_digest=…)` /
+   `load_expected_manifest_for_receipt()` check the manifest digest a
+   receipt attested to before restore verification runs against it. Tests
+   drive these through the *public* functions and expect rejection, not
+   just call the validator directly.
+3. **Ordinary nested-file ordering differed from the old pipeline.** The
+   flat `str.lower()` sort key did not reproduce pathlib's component-wise
+   ordering (`a/x.txt` vs `a.txt`), so `_pipeline.tree_digest()` changed
+   for any tree with a `foo/` + `foo.ext` pair. Fixed: the key is a tuple
+   of path components (case-folded on Windows), verified against
+   `sorted(Path)` on both platforms and against a byte-for-byte
+   reproduction of the pre-delegation digest.
+4. **Directory-enumeration errors could still disappear.** `os.walk` had
+   no `onerror` handler, so an unreadable subtree was silently omitted; a
+   missing source returned the same empty list as an empty directory.
+   Fixed: `onerror` re-raises as `SourceEnumerationError`;
+   `validate_relocation_roots_state()` (run in preflight, before any
+   mutation) rejects a missing or non-directory source while keeping an
+   empty directory valid; reparse-point directories are pruned before
+   descent.
+
+Everything from the first three waves is preserved: `LinkPolicy.REJECT_ALL`,
+the no-follow `_lp_replace()`, per-volume budgeting, the system-volume
+reserve, root-topology validation, the source-anchored manifest, exact
+reconciliation, the lossless-by-default exclusion policy, and the
+structured `CopyFailure` inventory are all unchanged by this wave.
+
 ## Tests
 
-`tests/test_atlas_knowledge_storage.py` -- 92 tests (80 unconditional, 12
-symlink-dependent tests that gracefully skip in environments lacking
-symlink-creation privilege, e.g. non-admin Windows without Developer
-Mode -- junction tests are unaffected by that privilege, since `mklink /J`
-does not require it, and run regardless), including everything from the
-first two waves plus, from the third:
+`tests/test_atlas_knowledge_storage.py` -- 106 tests. On Linux/hosted
+Ubuntu CI, 99 run and 7 skip (Windows-only: junction and 8.3-alias
+tests). On hosted Windows CI, all symlink-dependent tests run too. On a
+non-privileged local Windows dev box, ~17 skip (symlink-creation
+privilege) -- **a skipped test is reported as skipped, never as passed**;
+the per-platform counts below are stated separately for exactly that
+reason. Every symlink-dependent guarantee is exercised on at least one
+hosted platform. Beyond the first two waves and the third
+(`LinkPolicy.REJECT_ALL`) coverage:
+
+- **write confinement:** a symlink at a predictable temp name cannot
+  redirect a manifest/receipt write; a symlinked parent directory is
+  refused (`WriteConfinementError`); a symlinked destination
+  subdirectory produces a bounded `destination_replace_failed` and the
+  external sentinel is untouched; a symlinked destination root is
+  rejected at preflight with zero writes; `_atomic_place()` re-raises a
+  non-`EXDEV` `OSError` instead of falling back
+- **receipt/manifest boundary:** an incoherent receipt is rejected
+  through the public writer *and* the public reader; a schema-invalid
+  receipt is rejected on read
+- **ordering:** `enumerate_files()` / `list_files()` ordering matches
+  `sorted(Path)` for nested-prefix and punctuation-prefix trees, and
+  `_pipeline.tree_digest()` matches a reproduced legacy digest
+- **enumeration failures:** an unreadable subtree raises
+  `SourceEnumerationError` rather than returning a partial list; a
+  missing source and a non-directory source are each rejected at
+  preflight with zero destination writes; an empty source stays valid;
+  `enumerate_files()` does not traverse into a reparse-point directory
+
+Earlier waves' coverage (unchanged):
 
 - a link source (file symlink, directory symlink, or Windows junction)
   is rejected at preflight before any destination write, whether its
