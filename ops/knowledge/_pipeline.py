@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import sys
@@ -17,7 +18,21 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops.atlas.observations import build_observation, emit_observation
+from ops.knowledge import storage
 from ops.knowledge.storage import enumerate_files as _long_path_safe_enumerate_files
+
+# Wave S2A: opt-out switch back to the pre-convergence folder-import
+# behavior (two unconditional shutil copies into raw/ and extracted/).
+# Default is the convergence path: one verified relocation into raw/,
+# extracted/ materialized only when explicitly requested. Set
+# ATLAS_IMPORT_LEGACY_FOLDER_COPY=1 to roll back per-run without a code
+# change.
+_LEGACY_FOLDER_COPY_ENV = "ATLAS_IMPORT_LEGACY_FOLDER_COPY"
+
+
+def _legacy_folder_copy_enabled(*, env: dict[str, str] | None = None) -> bool:
+    source = env if env is not None else os.environ
+    return source.get(_LEGACY_FOLDER_COPY_ENV, "").strip().lower() in {"1", "true", "yes", "on"}
 
 PIPELINE_VERSION = "atlas.knowledge.pipeline.v2"
 RECEIPT_VERSION = "atlas.knowledge.receipt.v1"
@@ -221,6 +236,29 @@ def raw_dir(path: Path) -> Path:
 
 def extracted_dir(path: Path) -> Path:
     return path / "extracted"
+
+
+def review_source_dir(archive_path: Path) -> Path:
+    """The tree downstream review (evaluate/promote/catalog/secret-scan)
+    should read for a folder import.
+
+    Historically every folder import made two identical copies -- raw/ and
+    extracted/ -- and everything downstream read extracted/. Under Wave
+    S2A a folder import materializes only raw/ by default (a single
+    verified relocation), so downstream must fall back to raw/ when
+    extracted/ was not materialized. For a zip import, or a folder import
+    run with materialize_extracted=True, extracted/ exists and is used as
+    before. Raises only if neither exists.
+    """
+    extracted = extracted_dir(archive_path)
+    if extracted.exists():
+        return extracted
+    raw = raw_dir(archive_path)
+    if raw.exists():
+        return raw
+    raise FileNotFoundError(
+        f"Neither extracted/ nor raw/ exists under {relative_to_atlas(archive_path)}"
+    )
 
 
 def manifest_path(path: Path) -> Path:
@@ -458,6 +496,69 @@ def copy_folder(source: Path, destination: Path) -> None:
             shutil.copytree(item, target)
         else:
             shutil.copy2(item, target)
+
+
+class FolderImportRelocationError(RuntimeError):
+    """A folder import's verified relocation into raw/ failed at preflight
+    or copy. Raised before the import manifest is written, so a failed
+    relocation never produces a half-imported archive."""
+
+
+def _relocate_folder_import(
+    *,
+    archive_id: str,
+    input_path: Path,
+    knowledge_dir: Path,
+    materialize_extracted: bool,
+    env: dict[str, str] | None,
+) -> dict[str, Any]:
+    """Wave S2A: a folder import copies its source into raw/ exactly once,
+    through storage.relocate_archive_source() -- per-volume peak-space
+    preflight (fail closed, no silent fallback), a source-anchored
+    manifest, an atomic resumable copy with bounded write confinement,
+    exact destination reconciliation, and a durable relocation receipt.
+    The pre-S2A path made two unconditional shutil copies (raw/ and
+    extracted/); extracted/ is now materialized only when the caller
+    asks for it.
+
+    Staging uses storage.import_work_root() (ATLAS_IMPORT_WORK_ROOT), so
+    the transient copy volume can be moved off a constrained system
+    drive without touching where the durable archive lands.
+    """
+    work_root = storage.import_work_root(env=env) / archive_id
+    receipt_path = knowledge_dir / "RELOCATION-RECEIPT.json"
+    expected_manifest_ref_path = knowledge_dir / "RELOCATION-MANIFEST.json"
+    result = storage.relocate_archive_source(
+        archive_id=archive_id,
+        source_root=input_path,
+        destination_root=raw_dir(knowledge_dir),
+        work_root=work_root,
+        source_description=f"knowledge-import folder relocation for {archive_id}",
+        materialize_extracted_root=extracted_dir(knowledge_dir) if materialize_extracted else None,
+        receipt_path=receipt_path,
+        expected_manifest_path=expected_manifest_ref_path,
+    )
+    if not result.ok:
+        findings = list(result.space_budget.findings)
+        raw_failures = [f.category for f in result.raw_copy_result.failed] if result.raw_copy_result else []
+        raise FolderImportRelocationError(
+            f"folder import relocation failed for {archive_id}: "
+            f"space_budget_ok={result.space_budget.ok} findings={findings} "
+            f"raw_copy_failures={raw_failures}"
+        )
+    receipt = result.receipt or {}
+    return {
+        "ok": True,
+        "mode": "storage-convergence",
+        "materialized_extracted": bool(materialize_extracted),
+        "expected_manifest_digest": receipt.get("expected_manifest_digest"),
+        "destination_manifest_digest": receipt.get("destination_manifest_digest"),
+        "expected_manifest_ref": relative_to_atlas(expected_manifest_ref_path),
+        "receipt_ref": relative_to_atlas(receipt_path),
+        "space_budget_ok": result.space_budget.ok,
+        "staging_outside_atlas_root": not work_root.resolve().is_relative_to(atlas_root()),
+        "destination_verification_ok": bool((result.destination_verification or {}).get("ok")),
+    }
 
 
 def build_raw_entries(root: Path) -> list[dict[str, Any]]:
@@ -785,7 +886,7 @@ def build_promotion_scaffold_sections(
     evaluation: dict[str, Any],
     archive_id: str,
 ) -> dict[str, str]:
-    extracted_root = extracted_dir(archive_path)
+    extracted_root = review_source_dir(archive_path)
     extracted_files = list_files(extracted_root)
     dominant_extensions = list(evaluation.get("summary", {}).get("extension_counts", {}).items())[:5]
     rendered_extensions = (
@@ -1421,9 +1522,12 @@ def import_archive(
     provenance_note: str | None,
     dry_run: bool,
     force: bool,
+    materialize_extracted: bool = False,
+    env: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     if privacy_flag not in PRIVACY_FLAGS:
         raise ValueError(f"Unsupported privacy flag: {privacy_flag}")
+    legacy_folder_copy = _legacy_folder_copy_enabled(env=env)
     input_path = resolve_atlas_path(input_path)
     if not input_path.exists():
         raise FileNotFoundError(f"Input path does not exist: {relative_to_atlas(input_path)}")
@@ -1467,20 +1571,34 @@ def import_archive(
     }
     if provenance_note:
         manifest["provenance"]["note"] = provenance_note
+    # For a folder import, extracted/ is only materialized when the caller
+    # explicitly asks for it (or the legacy rollback switch is on) --
+    # otherwise raw/ is the single verified copy and downstream review
+    # reads it via review_source_dir(). A zip import always extracts.
+    folder_materializes_extracted = detected_type == "folder" and (
+        materialize_extracted or legacy_folder_copy
+    )
+    manifest["extracted_materialized"] = detected_type == "zip" or folder_materializes_extracted
+
     if detected_type == "zip":
         manifest["checksum"] = file_checksum(input_path)
         manifest["raw_archive_path"] = f"{relative_to_atlas(raw_dir(knowledge_dir))}/{input_path.name}"
     else:
         manifest["raw_reference_dir"] = relative_to_atlas(raw_dir(knowledge_dir))
         manifest["raw_entries"] = build_raw_entries(input_path)
+        manifest["folder_import_mode"] = "legacy-double-copy" if legacy_folder_copy else "storage-convergence"
 
     operations: list[str] = [f"prepare:{relative_to_atlas(knowledge_dir)}"]
     if detected_type == "zip":
         operations.append(f"copy:{relative_to_atlas(raw_dir(knowledge_dir) / input_path.name)}")
         operations.append(f"extract:{relative_to_atlas(extracted_dir(knowledge_dir))}")
-    else:
+    elif legacy_folder_copy:
         operations.append(f"copytree:{relative_to_atlas(raw_dir(knowledge_dir))}")
         operations.append(f"copytree:{relative_to_atlas(extracted_dir(knowledge_dir))}")
+    else:
+        operations.append(f"relocate:{relative_to_atlas(raw_dir(knowledge_dir))}")
+        if folder_materializes_extracted:
+            operations.append(f"materialize-extracted:{relative_to_atlas(extracted_dir(knowledge_dir))}")
     operations.append(f"write:{relative_to_atlas(manifest_path(knowledge_dir))}")
 
     if not dry_run:
@@ -1491,11 +1609,21 @@ def import_archive(
             raw_dir(knowledge_dir).mkdir(parents=True, exist_ok=True)
             shutil.copy2(input_path, raw_dir(knowledge_dir) / input_path.name)
             extract_zip_safely(input_path, extracted_dir(knowledge_dir))
-        else:
+        elif legacy_folder_copy:
             copy_folder(input_path, raw_dir(knowledge_dir))
             copy_folder(input_path, extracted_dir(knowledge_dir))
+        else:
+            manifest["raw_relocation"] = _relocate_folder_import(
+                archive_id=manifest["archive_id"],
+                input_path=input_path,
+                knowledge_dir=knowledge_dir,
+                materialize_extracted=folder_materializes_extracted,
+                env=env,
+            )
         manifest["artifact_digests"] = build_manifest_artifact_digests(manifest, knowledge_dir)
         manifest["extracted_snapshot_digest"] = extracted_snapshot_digest(knowledge_dir)
+        if not extracted_dir(knowledge_dir).exists():
+            manifest["raw_snapshot_digest"] = tree_digest(raw_dir(knowledge_dir))
         write_json(manifest_path(knowledge_dir), manifest, dry_run=False)
         write_knowledge_receipt(
             archive_path=knowledge_dir,
@@ -1521,9 +1649,7 @@ def import_archive(
 
 def evaluate_archive(*, archive_path: Path, dry_run: bool) -> dict[str, Any]:
     archive_path = archive_path.resolve()
-    review_dir = extracted_dir(archive_path)
-    if not review_dir.exists():
-        raise FileNotFoundError(f"Missing extracted directory: {relative_to_atlas(review_dir)}")
+    review_dir = review_source_dir(archive_path)
     manifest = read_json(manifest_path(archive_path))
     paths = list_files(review_dir)
     text_paths = iter_text_files(paths)
@@ -1669,7 +1795,7 @@ def promote_archive(
         existing_text=existing_text,
         refresh_derived=refresh_derived,
     )
-    evidence_secret_hits = scan_secret_risk(paths=list_files(extracted_dir(archive_path)))
+    evidence_secret_hits = scan_secret_risk(paths=list_files(review_source_dir(archive_path)))
     candidate_secret_hits = scan_secret_risk(
         inline_documents=[(relative_to_atlas(promotion_file), rendered)]
     )
