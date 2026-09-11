@@ -87,13 +87,15 @@ none of it should move just because that root does:
   emergency junctions, and the nine stale `pipeline_digest` receipts
   stay exactly where Wave S1/S2A left them -- Wave S2B.
 - `ops/validation/validate_stack.py`'s hardcoded scan of
-  `personal/verta-core-sanitized/{raw,extracted}` is unchanged and
-  unaffected: that archive is not being relocated by this wave, so its
-  fixed default-location check remains correct for as long as the
-  storage root stays at its default (true today -- nothing configures
-  `ATLAS_IMPORT_STORAGE_ROOT` yet). Updating validators with their own
-  hardcoded archive-path assumptions is S2B/real-migration work, once an
-  archive actually moves.
+  `personal/verta-core-sanitized/{raw,extracted}` is unchanged in this
+  wave -- that archive is not being relocated by this wave, so the check
+  stays correct today, while `ATLAS_IMPORT_STORAGE_ROOT` remains unset in
+  production. **This is a named prerequisite for S2B, not a permanent
+  exemption**: if `personal/verta-core-sanitized` is ever migrated onto
+  a relocated storage root, this hardcoded scan must be updated (or
+  routed through `discover_import_manifests()`/`resolve_atlas_path()`
+  like everything else in `_pipeline.py`) as part of that migration --
+  it will not track the relocation on its own.
 - **No change to `knowledge_receipts_root()` / receipt storage.**
   Receipts are operational evidence under `runtime/`, not the archive
   tree itself; moving them was not asked for and is a separate,
@@ -106,30 +108,91 @@ none of it should move just because that root does:
   of where the archive lives).
 - `#142` / Fitness / Mazer.
 
+## The `@storage-root` reference is a defined, confined grammar
+
+A marker reference is not unrestricted path concatenation. `resolve_atlas_path()`:
+
+1. Rejects any component that is empty, `.`, `..`, or contains `:`
+   **before** joining it -- a fast, clear "invalid reference" error for a
+   malformed or adversarial string, distinct from an escape.
+2. Verifies the fully **resolved** result still lives under
+   `import_storage_root()` -- this is what catches a symlink or junction
+   *inside* the storage root whose target escapes it, which
+   per-component rejection alone cannot see (every individual component
+   can look perfectly ordinary; only the resolved destination is wrong).
+
+`relative_to_atlas()` refuses to encode an ordinary ATLAS path whose
+first component is literally named `@storage-root`: that string would be
+indistinguishable from a genuine marker reference on decode. No real
+ATLAS directory is named this, so treating it as reserved is what keeps
+every *accepted* encoded reference decoding to the same location it was
+encoded from.
+
+## Discovery preserves legacy inventory across a configuration change
+
+`discover_import_manifests()` reads **both** the configured storage root
+and the legacy default location (`atlas_root()/data/imports/knowledge`)
+whenever they differ, deduplicating when they are the same physical
+location (the common, unconfigured case). Changing
+`ATLAS_IMPORT_STORAGE_ROOT` changes where *new* archives are written; it
+must never make an archive that already exists at the previous default
+location invisible to the catalog/validation/backfill/ranking tooling
+that all consume this list, since nothing has actually moved it there.
+If two different roots each hold a manifest claiming the same
+`(source_name, slug)` identity, that is a genuine collision --
+`DuplicateArchiveIdentityError` is raised rather than silently picking
+one. An unavailable *configured* root (doesn't exist) no longer reads as
+"the archive inventory is empty" when a legacy archive is real and
+readable -- the legacy scan still finds it.
+
+## `env=` is honored consistently within `import_archive()`
+
+`import_archive(env=...)`'s explicit override, once given, is used for
+**every** storage-root-relative decision the call makes internally
+(admission, manifest fields, the attempt record, the artifact-digest
+lookup, the knowledge receipt) -- not silently ignored for some of them
+while honored for `ATLAS_IMPORT_WORK_ROOT`. `source_dir()`,
+`archive_dir()`, `relative_to_atlas()`, and `resolve_atlas_path()` all
+accept an optional `env` parameter for this; every call site *inside*
+`import_archive()`'s own call graph threads it through.
+Standalone entry points with no `env` parameter of their own
+(`evaluate_archive()`, `promote_archive()`, `normalize_archive()`,
+`discover_import_manifests()`, `resolve_archive_dir()`, the catalog and
+validation builders) read real `os.environ` directly, as a normal CLI
+invocation would.
+
 ## Tests
 
-`tests/test_atlas_knowledge_pipeline_s2a.py` -- 42 tests (35 from S2A,
-unchanged and passing with zero modification, plus 7 new in
-`StorageRootIntegrationTests`, all synthetic). Local: Windows 42/42 (2
-skipped, symlink-privilege), Ubuntu (WSL) 42/42 (0 skipped). Combined
-with the storage suite (106, unchanged): 148 total.
-
-New this wave:
+`tests/test_atlas_knowledge_pipeline_s2a.py` -- 52 tests. Local: Windows
+52/52 (3 skipped, symlink-privilege), Ubuntu (WSL) 52/52 (0 skipped).
+Combined with the storage suite (106, unchanged): 158 total.
 
 - archive resolution follows a configured `ATLAS_IMPORT_STORAGE_ROOT`
-  entirely outside the ATLAS checkout -- the archive lands there, not
-  under the default `data/imports/knowledge/`
-- the default (unconfigured) root never produces the `@storage-root`
-  marker -- every manifest field is a plain atlas-relative string,
-  byte-for-byte what Wave S2A produced
+  entirely outside the ATLAS checkout; the default (unconfigured) root
+  never produces the `@storage-root` marker
 - `resolve_atlas_path()` round-trips a marker-form manifest path back to
-  the real, relocated filesystem location
-- `discover_import_manifests()` finds archives under the configured
-  root and does **not** see an archive left behind at the previous
-  default location once relocated
-- `evaluate_archive()` and `update_catalog_doc()` -- downstream
-  consumers -- both run end to end against a relocated archive without
-  raising, and the catalog's recorded manifest/evaluation paths
-  round-trip correctly
+  the real, relocated filesystem location; an explicit `env=` override
+  is honored end to end (proven with no `os.environ` mutation at all)
+- **reference grammar**: a `..` parent-traversal reference and a
+  symlinked escape *inside* the storage root are both rejected before
+  any consumer sees the resolved path (the sentinel each attempts to
+  reach is proven untouched); an ordinary reference round-trips; a
+  literal ATLAS path named `@storage-root` is rejected at encode time,
+  not misdecoded; a Windows drive-letter component in a realistic
+  (single-string) reference is rejected; the component validator itself
+  is proven to reject empty/`.`/`..` directly, since pathlib normalizes
+  those away before they could ever reach it through a real string
+- **discovery migration safety**: an archive left at the legacy default
+  location remains discoverable after the root is reconfigured; the
+  same physical root reached two ways is not double-counted; two
+  different roots claiming the same archive identity raise
+  `DuplicateArchiveIdentityError`; a missing configured root still finds
+  a real legacy archive rather than reading as an empty inventory
+- **downstream consumers, end to end, against a relocated archive**:
+  persisted import -> `evaluate_archive()` -> `normalize_archive()` ->
+  `update_catalog_doc()` -> `validate_catalog()`, plus a second
+  CLI-style resolution via `resolve_archive_dir()`'s `--archive-dir`
+  path from the saved marker string, plus an independent restore check
+  against the persisted relocation receipt/manifest
 - promotion and catalog docs stay under `atlas_root()` regardless of
   where the storage root points

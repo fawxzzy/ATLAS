@@ -725,6 +725,16 @@ class StorageRootIntegrationTests(_ImportHarness):
     another location still under fake_atlas, never needs the
     @storage-root marker at all (relative_to_atlas() resolves it via its
     original atlas_root()-relative branch unchanged).
+
+    Configuration is threaded through BOTH channels a real invocation
+    could use, deliberately: os.environ (mock.patch.dict) for every
+    function that has no env parameter of its own (discover/evaluate/
+    normalize/catalog/resolve_atlas_path/resolve_archive_dir -- exactly
+    the standalone CLI entry points), and an explicit env= dict merged
+    into every _import() call -- since import_archive(env=...), once
+    given an explicit dict, uses it consistently for every
+    storage-root-relative decision it makes internally and does NOT
+    silently fall back to os.environ for some of them and not others.
     """
 
     def _external_storage_env(self) -> dict[str, str]:
@@ -733,10 +743,14 @@ class StorageRootIntegrationTests(_ImportHarness):
         self._external_storage = external
         return {"ATLAS_IMPORT_STORAGE_ROOT": str(external)}
 
+    def _import_to_external(self, src: Path, storage_env: dict[str, str], **kw):
+        return self._import(src, env={**self._work_root_env(), **storage_env}, **kw)
+
     def test_archive_resolution_follows_the_configured_storage_root(self) -> None:
         src = self._make_source_folder()
-        with mock.patch.dict(os.environ, self._external_storage_env()):
-            result = self._import(src)
+        env = self._external_storage_env()
+        with mock.patch.dict(os.environ, env):
+            result = self._import_to_external(src, env)
 
         # The archive must actually live under the configured root, not
         # under fake_atlas's default data/imports/knowledge -- and NOT
@@ -762,65 +776,147 @@ class StorageRootIntegrationTests(_ImportHarness):
 
     def test_resolve_atlas_path_round_trips_a_relocated_manifest_path(self) -> None:
         src = self._make_source_folder()
-        with mock.patch.dict(os.environ, self._external_storage_env()):
-            result = self._import(src)
+        env = self._external_storage_env()
+        with mock.patch.dict(os.environ, env):
+            result = self._import_to_external(src, env)
             resolved = _pipeline.resolve_atlas_path(Path(result["import_dir"]))
         self.assertEqual(resolved.resolve(), (self._external_storage / "synthetic-source" / "sample").resolve())
 
+    def test_explicit_env_override_is_honored_not_silently_ignored(self) -> None:
+        # import_archive(env=...) must use ITS OWN explicit override for
+        # archive resolution too, not silently fall back to os.environ
+        # for storage root while honoring the same dict for work root --
+        # proven by NOT setting os.environ at all here.
+        src = self._make_source_folder()
+        external = self._base / "explicit-only-storage"
+        result = self._import(
+            src, env={**self._work_root_env(), "ATLAS_IMPORT_STORAGE_ROOT": str(external)}
+        )
+        self.assertTrue(result["import_dir"].startswith("@storage-root/"))
+        self.assertTrue((external / "synthetic-source" / "sample" / "raw" / "top.txt").exists())
+
     def test_discovery_finds_archives_under_the_configured_root(self) -> None:
         src = self._make_source_folder()
-        with mock.patch.dict(os.environ, self._external_storage_env()):
-            self._import(src)
+        env = self._external_storage_env()
+        with mock.patch.dict(os.environ, env):
+            self._import_to_external(src, env)
             found = _pipeline.discover_import_manifests()
         self.assertEqual(len(found), 1)
         self.assertEqual(found[0].name, "IMPORT-MANIFEST.json")
         self.assertTrue(found[0].is_relative_to(self._external_storage))
 
-    def test_discovery_does_not_see_archives_under_the_default_root_once_relocated(self) -> None:
+    def test_legacy_archives_remain_discoverable_after_the_root_is_reconfigured(self) -> None:
+        # The exact gap the review demonstrated: relocating the storage
+        # root must not make an archive that already exists at the
+        # previous default location invisible to discovery -- nothing
+        # migrated it, so nothing should stop accounting for it.
         src_default = self._make_source_folder("inbox/defaultarchive")
         self._import(src_default)  # lands under the default (fake_atlas) root
 
-        with mock.patch.dict(os.environ, self._external_storage_env()):
+        env = self._external_storage_env()
+        with mock.patch.dict(os.environ, env):
+            src_new = self._make_source_folder("inbox/newarchive")
+            self._import_to_external(src_new, {**env, "ATLAS_IMPORT_WORK_ROOT": str(self._base / "work2")})
             found = _pipeline.discover_import_manifests()
-        self.assertEqual(found, [])  # the default-root archive is invisible from the relocated root
 
-    def test_evaluate_and_catalog_work_against_a_relocated_archive(self) -> None:
-        # Downstream consumers: evaluate_archive() (reads/writes files
-        # under the archive tree) and update_catalog_doc() (discovery +
-        # per-archive relative_to_atlas() calls for manifest/evaluation
-        # paths, which now live outside atlas_root() entirely) must both
-        # work without raising, and the catalog's recorded paths must
-        # round-trip.
+        found_roots = {p.is_relative_to(self.fake_atlas) for p in found}
+        self.assertEqual(len(found), 2)
+        self.assertIn(True, found_roots)  # the legacy-location archive
+        self.assertIn(False, found_roots)  # the newly-relocated archive
+
+    def test_identical_default_and_configured_root_is_not_double_counted(self) -> None:
+        # When the two roots are physically the same location (storage
+        # root configured back to its own default, or simply unset),
+        # each archive must be counted once, not twice.
         src = self._make_source_folder()
-        # docs/knowledge/ is checked into the real repo, so
-        # catalog_doc_path()'s parent always exists there; this synthetic
-        # fixture needs it created explicitly.
+        self._import(src)
+        found = _pipeline.discover_import_manifests()
+        self.assertEqual(len(found), 1)
+
+    def test_duplicate_archive_identity_across_roots_is_a_reported_conflict(self) -> None:
+        # Two DIFFERENT physical manifests claiming the same
+        # (source_name, slug) identity must never be silently resolved by
+        # picking one -- that would hide real data from whichever
+        # consumer didn't get chosen.
+        default_manifest = (
+            self.fake_atlas / "data" / "imports" / "knowledge" / "synthetic-source" / "sample"
+            / "IMPORT-MANIFEST.json"
+        )
+        default_manifest.parent.mkdir(parents=True)
+        default_manifest.write_text('{"archive_id": "synthetic-source--sample"}', encoding="utf-8")
+
+        env = self._external_storage_env()
+        external_manifest = self._external_storage / "synthetic-source" / "sample" / "IMPORT-MANIFEST.json"
+        external_manifest.parent.mkdir(parents=True)
+        external_manifest.write_text('{"archive_id": "synthetic-source--sample"}', encoding="utf-8")
+
+        with mock.patch.dict(os.environ, env):
+            with self.assertRaises(_pipeline.DuplicateArchiveIdentityError):
+                _pipeline.discover_import_manifests()
+
+    def test_missing_configured_root_still_finds_legacy_archives_not_an_empty_inventory(self) -> None:
+        # A configured root that doesn't exist (unavailable) must not be
+        # interpreted as "there are zero archives" when a legacy archive
+        # genuinely exists and is readable.
+        src_default = self._make_source_folder("inbox/stillthere")
+        self._import(src_default)
+
+        missing = self._base / "does-not-exist-storage"
+        with mock.patch.dict(os.environ, {"ATLAS_IMPORT_STORAGE_ROOT": str(missing)}):
+            found = _pipeline.discover_import_manifests()
+        self.assertEqual(len(found), 1)
+
+    def test_persisted_import_evaluate_normalize_and_catalog_validation_against_relocated_archive(self) -> None:
+        # Downstream consumers: evaluate_archive(), normalize_archive(),
+        # update_catalog_doc(), and validate_catalog() must all run
+        # end to end against an archive that lives entirely outside
+        # atlas_root(), plus an independent restore check against the
+        # persisted relocation evidence -- not just import + a dry-run
+        # evaluation.
+        src = self._make_source_folder()
         (self.fake_atlas / "docs" / "knowledge").mkdir(parents=True, exist_ok=True)
         env = self._external_storage_env()
         with mock.patch.dict(os.environ, env):
-            imported = self._import(src)
+            imported = self._import_to_external(src, env)
             archive = _pipeline.resolve_atlas_path(Path(imported["import_dir"]))
+
             evaluation = _pipeline.evaluate_archive(archive_path=archive, dry_run=False)
             self.assertEqual(evaluation["review_source_kind"], "raw")
+            self.assertTrue(evaluation["normalization_allowed"])
+
+            normalized = _pipeline.normalize_archive(archive_path=archive, dry_run=False, force=False)
+            self.assertEqual(normalized["status"], "normalized")
 
             catalog = _pipeline.update_catalog_doc(dry_run=False)
-
             self.assertEqual(catalog["record_count"], 1)
             record = catalog["records"][0]
             self.assertEqual(record["archive_id"], imported["archive_id"])
-            # manifest_path/evaluation_path describe the (relocated)
-            # archive tree -> carry the marker; catalog_path itself is
-            # always under atlas_root()/docs/, regardless of where
-            # archives live.
             self.assertTrue(record["manifest_path"].startswith("@storage-root/"))
             self.assertFalse(catalog["catalog_path"].startswith("@storage-root"))
-            # Resolved while ATLAS_IMPORT_STORAGE_ROOT is still the same
-            # override the record was produced under -- resolution is a
-            # function of the *current* configuration, exactly like a
-            # real second CLI invocation with the same env var set would
-            # see.
-            resolved_manifest = _pipeline.resolve_atlas_path(Path(record["manifest_path"]))
-            self.assertTrue(resolved_manifest.exists())
+
+            # validate_catalog() must run to completion (no path-resolution
+            # error) against the relocated archive and account for it.
+            validation = _pipeline.validate_catalog(include_query_bundle=False)
+            self.assertEqual(validation["record_count"], 1)
+
+            # CLI-style second invocation: resolve the archive again via
+            # resolve_archive_dir()'s --archive-dir path, from the SAVED
+            # marker string, as a fresh CLI call with the same env would.
+            resolved_by_cli = _pipeline.resolve_archive_dir(None, None, Path(imported["import_dir"]))
+            self.assertEqual(resolved_by_cli, archive.resolve())
+
+            # Independent restore check against the persisted relocation
+            # evidence, exactly as the S2A doc's chain test does for the
+            # default root.
+            rel = imported["manifest"]["raw_relocation"]
+            receipt = storage.read_relocation_receipt(_pipeline.resolve_atlas_path(Path(rel["receipt_ref"])))
+            expected_manifest = storage.read_relocation_manifest(
+                _pipeline.resolve_atlas_path(Path(rel["expected_manifest_ref"])),
+                expected_digest=rel["expected_manifest_digest"],
+            )
+            restore_check = storage.verify_restore(manifest=expected_manifest, root=_pipeline.raw_dir(archive))
+            self.assertTrue(restore_check["ok"])
+            self.assertTrue(receipt["ok"])
 
     def test_promotion_and_catalog_docs_stay_under_atlas_root_regardless_of_storage_root(self) -> None:
         # docs/knowledge/... is ATLAS documentation, not archived storage
@@ -828,6 +924,97 @@ class StorageRootIntegrationTests(_ImportHarness):
         with mock.patch.dict(os.environ, self._external_storage_env()):
             catalog_path = _pipeline.catalog_doc_path()
         self.assertTrue(catalog_path.resolve().is_relative_to(self.fake_atlas.resolve()))
+
+
+class StorageReferenceGrammarTests(_ImportHarness):
+    """Wave S2A2 correction: @storage-root is a defined reference
+    grammar, not unrestricted path concatenation -- a reference must
+    resolve to somewhere under the configured storage root, and never be
+    confused with an ordinary ATLAS-relative path."""
+
+    def _configured_root(self) -> Path:
+        external = self._base / "grammar-storage"
+        external.mkdir(parents=True, exist_ok=True)
+        return external
+
+    def test_parent_traversal_reference_is_rejected(self) -> None:
+        external = self._configured_root()
+        outside = self._base / "outside"
+        outside.mkdir()
+        sentinel = outside / "sentinel.txt"
+        sentinel.write_text("SENTINEL", encoding="utf-8")
+        with mock.patch.dict(os.environ, {"ATLAS_IMPORT_STORAGE_ROOT": str(external)}):
+            with self.assertRaises(ValueError):
+                _pipeline.resolve_atlas_path(Path("@storage-root/../outside/sentinel.txt"))
+        self.assertEqual(sentinel.read_text(encoding="utf-8"), "SENTINEL")
+
+    def test_symlinked_escape_inside_storage_root_is_rejected(self) -> None:
+        external = self._configured_root()
+        outside = self._base / "outside2"
+        outside.mkdir()
+        sentinel = outside / "sentinel.txt"
+        sentinel.write_text("SENTINEL", encoding="utf-8")
+        try:
+            (external / "escape").symlink_to(outside, target_is_directory=True)
+        except OSError:
+            self.skipTest("symlink creation not permitted in this environment")
+        with mock.patch.dict(os.environ, {"ATLAS_IMPORT_STORAGE_ROOT": str(external)}):
+            with self.assertRaises(ValueError):
+                _pipeline.resolve_atlas_path(Path("@storage-root/escape/sentinel.txt"))
+        self.assertEqual(sentinel.read_text(encoding="utf-8"), "SENTINEL")
+
+    def test_ordinary_marker_reference_still_round_trips(self) -> None:
+        external = self._configured_root()
+        real = external / "personal" / "example" / "IMPORT-MANIFEST.json"
+        real.parent.mkdir(parents=True)
+        real.write_text("{}", encoding="utf-8")
+        with mock.patch.dict(os.environ, {"ATLAS_IMPORT_STORAGE_ROOT": str(external)}):
+            encoded = _pipeline.relative_to_atlas(real)
+            decoded = _pipeline.resolve_atlas_path(Path(encoded))
+        self.assertEqual(decoded, real.resolve())
+
+    def test_literal_path_named_like_the_marker_is_rejected_not_misdecoded(self) -> None:
+        # A real ATLAS-tree path whose first component is literally named
+        # "@storage-root" would be indistinguishable, on decode, from a
+        # genuine marker reference -- refused at encode time rather than
+        # silently producing an ambiguous string.
+        literal_dir = self.fake_atlas / "@storage-root"
+        literal_dir.mkdir(parents=True)
+        literal = literal_dir / "literal.txt"
+        literal.write_text("LITERAL", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            _pipeline.relative_to_atlas(literal)
+
+    def test_windows_drive_component_in_a_reference_is_rejected(self) -> None:
+        # Constructed as ONE string, the way a reference actually arrives
+        # in this system -- a JSON-decoded manifest field or a CLI
+        # --archive-dir argument, both parsed via Path(the_string) --
+        # rather than joined with `/`. pathlib's `/` operator on a
+        # bare drive-letter segment ("C:") resets the path and silently
+        # discards everything to its left (a real, separate pathlib
+        # footgun -- see _reject_unsafe_storage_reference_component's
+        # docstring-adjacent comment above), which is exactly why this
+        # module never constructs a reference that way and neither
+        # should this test.
+        external = self._configured_root()
+        with mock.patch.dict(os.environ, {"ATLAS_IMPORT_STORAGE_ROOT": str(external)}):
+            with self.assertRaises(ValueError):
+                _pipeline.resolve_atlas_path(Path("@storage-root/C:/Windows"))
+
+    def test_empty_and_dot_components_are_rejected_at_the_validator(self) -> None:
+        # pathlib itself normalizes away "." and empty components during
+        # parsing -- Path("@storage-root/./x").parts == ("@storage-root",
+        # "x"), Path("@storage-root//x").parts == ("@storage-root", "x")
+        # -- so neither can actually reach resolve_atlas_path() through
+        # any real string input; there is nothing to reject at that
+        # layer. The bounded validator itself still defends against
+        # both, verified directly.
+        with self.assertRaises(ValueError):
+            _pipeline._reject_unsafe_storage_reference_component(".", reference="@storage-root/.")
+        with self.assertRaises(ValueError):
+            _pipeline._reject_unsafe_storage_reference_component("", reference="@storage-root/")
+        with self.assertRaises(ValueError):
+            _pipeline._reject_unsafe_storage_reference_component("..", reference="@storage-root/..")
 
 
 if __name__ == "__main__":
