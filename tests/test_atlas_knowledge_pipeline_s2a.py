@@ -13,7 +13,9 @@ reserve or mocking the copy.
 
 from __future__ import annotations
 
+import json
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -398,6 +400,152 @@ class OrderingAndAdmissionRegressionTests(_ImportHarness):
 
         self.assertFalse(_pipeline.extracted_dir(archive).exists())
         self.assertFalse(_pipeline.manifest_path(archive).exists())
+
+    def test_mismatched_attempt_with_empty_payload_is_rejected_and_record_preserved(self) -> None:
+        # The exact gap the record-lifecycle fix closes: a stale attempt
+        # record with no payload copied yet must still be validated, not
+        # treated as absent just because raw/ is empty.
+        src = self._make_source_folder()
+        first = self._import(src)
+        archive = self.fake_atlas / first["import_dir"]
+        _pipeline.manifest_path(archive).unlink()
+        record_path = _pipeline.import_attempt_record_path(archive)
+        original_attempt_bytes = record_path.read_bytes()
+        shutil.rmtree(_pipeline.raw_dir(archive))  # simulate zero payload copied yet
+        (src / "top.txt").write_text("changed after the record was written\n", encoding="utf-8")
+
+        with self.assertRaises(_pipeline.AdmissionIdentityMismatchError):
+            self._import(src)
+
+        self.assertEqual(record_path.read_bytes(), original_attempt_bytes)
+
+    def test_symlinked_attempt_record_is_never_read_or_written_through(self) -> None:
+        src = self._make_source_folder("inbox/symattempt")
+        archive = _pipeline.archive_dir("synthetic-source", "symattempt")
+        outside = self._base / "outside-attempt-sentinel.json"
+        outside.write_text('{"original": true}', encoding="utf-8")
+        record_path = _pipeline.import_attempt_record_path(archive)
+        record_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            os.symlink(outside, record_path)
+        except OSError:
+            self.skipTest("symlink creation not permitted in this environment")
+
+        with self.assertRaises(_pipeline.CorruptAttemptRecordError):
+            self._import(src)
+
+        self.assertEqual(outside.read_text(encoding="utf-8"), '{"original": true}')
+        self.assertTrue(os.path.islink(record_path))
+
+    def test_malformed_json_attempt_record_is_rejected_before_any_write(self) -> None:
+        src = self._make_source_folder("inbox/malformedjson")
+        archive = _pipeline.archive_dir("synthetic-source", "malformedjson")
+        record_path = _pipeline.import_attempt_record_path(archive)
+        record_path.parent.mkdir(parents=True, exist_ok=True)
+        record_path.write_text("{not valid json", encoding="utf-8")
+
+        with self.assertRaises(_pipeline.CorruptAttemptRecordError):
+            self._import(src)
+
+        self.assertEqual(record_path.read_text(encoding="utf-8"), "{not valid json")
+
+    def test_wrong_contract_version_attempt_record_is_rejected(self) -> None:
+        src = self._make_source_folder("inbox/wrongversion")
+        archive = _pipeline.archive_dir("synthetic-source", "wrongversion")
+        record_path = _pipeline.import_attempt_record_path(archive)
+        record_path.parent.mkdir(parents=True, exist_ok=True)
+        stale = {"contract_version": "some.other.contract.v0", "archive_id": "x"}
+        record_path.write_text(json.dumps(stale), encoding="utf-8")
+
+        with self.assertRaises(_pipeline.CorruptAttemptRecordError):
+            self._import(src)
+
+        self.assertEqual(json.loads(record_path.read_text(encoding="utf-8")), stale)
+
+    def test_attempt_record_missing_a_required_field_is_rejected(self) -> None:
+        src = self._make_source_folder("inbox/missingfield")
+        archive = _pipeline.archive_dir("synthetic-source", "missingfield")
+        record_path = _pipeline.import_attempt_record_path(archive)
+        record_path.parent.mkdir(parents=True, exist_ok=True)
+        incomplete = {
+            "contract_version": _pipeline.ATTEMPT_RECORD_CONTRACT_VERSION,
+            "archive_id": "synthetic-source--missingfield",
+            # destination / source_snapshot_digest / materialize_extracted omitted
+        }
+        record_path.write_text(json.dumps(incomplete), encoding="utf-8")
+
+        with self.assertRaises(_pipeline.CorruptAttemptRecordError):
+            self._import(src)
+
+    def test_failed_preflight_publishes_no_attempt_record(self) -> None:
+        src = self._make_source_folder("inbox/preflightfail")
+        archive = _pipeline.archive_dir("synthetic-source", "preflightfail")
+        with mock.patch.object(storage, "_free_bytes", return_value=1024):
+            with self.assertRaises(_pipeline.FolderImportRelocationError):
+                self._import(src)
+        self.assertFalse(_pipeline.import_attempt_record_path(archive).exists())
+        self.assertFalse(_pipeline.raw_dir(archive).exists())
+        self.assertFalse(_pipeline.manifest_path(archive).exists())
+
+    def test_fresh_attempt_record_is_published_via_the_confined_atomic_writer(self) -> None:
+        src = self._make_source_folder("inbox/atomicwriter")
+        with mock.patch.object(storage, "_write_json_atomic", wraps=storage._write_json_atomic) as spy:
+            result = self._import(src)
+        archive = self.fake_atlas / result["import_dir"]
+        target_paths = [call.args[1] for call in spy.call_args_list]
+        self.assertIn(_pipeline.import_attempt_record_path(archive), target_paths)
+
+    def test_a_crash_during_attempt_record_publication_leaves_no_torn_record(self) -> None:
+        # storage._write_json_atomic()'s own atomicity (mkstemp staging,
+        # then a no-follow atomic rename) is exhaustively covered by
+        # test_atlas_knowledge_storage.py's DurableReceiptTests and
+        # WriteConfinementRegressionTests. This proves the pipeline
+        # actually routes the attempt record through it rather than a
+        # separate, non-atomic path: a raise from inside that call
+        # (standing in for a crash mid-write) must never leave a real
+        # file at the target path.
+        src = self._make_source_folder("inbox/crashduringwrite")
+        archive = _pipeline.archive_dir("synthetic-source", "crashduringwrite")
+        with mock.patch.object(storage, "_write_json_atomic", side_effect=OSError("simulated crash")):
+            with self.assertRaises(OSError):
+                self._import(src)
+        self.assertFalse(_pipeline.import_attempt_record_path(archive).exists())
+        self.assertFalse(_pipeline.manifest_path(archive).exists())
+
+    def test_matching_retry_does_not_rewrite_the_attempt_record(self) -> None:
+        # A retry whose identity matches must reuse the existing record
+        # unchanged -- not because rewriting it with identical content
+        # would be wrong in itself, but because a non-atomic or
+        # unnecessary rewrite is exactly the kind of operation that can
+        # tear the one piece of evidence a *later* retry depends on if
+        # interrupted mid-write. Proven both by byte/mtime identity and by
+        # asserting the writer was never invoked for this path at all --
+        # whether the underlying resume completes on its first try or
+        # after copying only some files, the record is untouched either
+        # way, since it is never rewritten once it matches.
+        src = self._make_source_folder()
+        first = self._import(src)
+        archive = self.fake_atlas / first["import_dir"]
+        _pipeline.manifest_path(archive).unlink()
+        record_path = _pipeline.import_attempt_record_path(archive)
+        original_bytes = record_path.read_bytes()
+        original_mtime_ns = record_path.stat().st_mtime_ns
+
+        calls_for_record: list[Path] = []
+        real_writer = storage._write_json_atomic
+
+        def _spy(payload, path, **kw):
+            if path == record_path:
+                calls_for_record.append(path)
+            return real_writer(payload, path, **kw)
+
+        with mock.patch.object(storage, "_write_json_atomic", side_effect=_spy):
+            result = self._import(src)
+
+        self.assertEqual(calls_for_record, [])
+        self.assertEqual(record_path.read_bytes(), original_bytes)
+        self.assertEqual(record_path.stat().st_mtime_ns, original_mtime_ns)
+        self.assertTrue(result["manifest"]["raw_relocation"]["ok"])
 
 
 class ReviewSourceContractTests(_ImportHarness):

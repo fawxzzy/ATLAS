@@ -27,12 +27,14 @@ entitled to write into the destination**:
 
 | Destination state | Admission decision |
 |---|---|
-| No `IMPORT-MANIFEST.json`, `raw/`+`extracted/` empty or absent | fresh import -- proceeds |
+| No `IMPORT-MANIFEST.json`, no `IMPORT-ATTEMPT.json`, `raw/`+`extracted/` empty or absent | fresh import -- preflight, then a fresh attempt record, then copy |
 | Completed archive (`IMPORT-MANIFEST.json` present), no `--force` | `FileExistsError` |
 | Completed archive, `--force` given | `FolderImportReplacementUnsupportedError` -- refused, not deleted (see below) |
-| `raw/` or `extracted/` holds content, no `IMPORT-MANIFEST.json`, no `IMPORT-ATTEMPT.json` | `UnownedDestinationError` -- refused, untouched |
-| `IMPORT-ATTEMPT.json` present but its recorded identity doesn't match this request | `AdmissionIdentityMismatchError` -- refused, untouched |
-| `IMPORT-ATTEMPT.json` present and matches this request exactly | resumes |
+| `IMPORT-ATTEMPT.json` is a symlink / reparse point | `CorruptAttemptRecordError` -- never read or written through, refused before any mutation |
+| `IMPORT-ATTEMPT.json` exists but isn't valid JSON, the right `contract_version`, or has a missing/wrong-typed field | `CorruptAttemptRecordError` -- refused, untouched |
+| `IMPORT-ATTEMPT.json` exists, is valid, but its recorded identity doesn't match this request -- checked **regardless of whether `raw/`/`extracted/` hold any content yet** | `AdmissionIdentityMismatchError` -- refused, untouched |
+| No `IMPORT-ATTEMPT.json`, but `raw/` or `extracted/` already holds content | `UnownedDestinationError` -- refused, untouched |
+| `IMPORT-ATTEMPT.json` exists, is valid, and matches this request exactly | resumes -- record reused unchanged, never rewritten |
 
 **Why a directory existing is not proof of ownership.** `knowledge_dir`
 is deterministic from `(source_name, slug)`, but that only makes the
@@ -60,6 +62,29 @@ A genuine matching resume still isn't unconditionally trusted:
 the specific missing/unexpected/mismatched paths named in the error --
 if the destination doesn't end up matching the source exactly (e.g. a
 file dropped in after the interruption that the source never had).
+
+**The record itself is part of the protected write boundary, not
+bookkeeping alongside it.** It is validated whenever it exists --
+*independent of whether `raw/`/`extracted/` hold any content yet*, since
+a record can legitimately exist before a single byte has been copied
+(the boundary between "no attempt yet" and "an interrupted attempt" is
+the record's existence, not the payload's). It is never read through a
+symlink (`CorruptAttemptRecordError` if `IMPORT-ATTEMPT.json` is one --
+checked before any read, exactly as the write side never writes through
+one either). A fresh record is only ever published *after* preflight has
+passed -- via `storage`'s own confined atomic writer
+(`_write_json_atomic()`: `mkstemp` staging, no-follow atomic rename),
+never a plain `write_text()` a pre-planted symlink could be written
+through, and the same machinery S1 built for every other
+authority-bearing write in this system, not a new one. A retry whose
+identity already matches **reuses the existing record unchanged and
+never rewrites it** -- a rewrite that only restates what the file
+already said would still be a needless risk if interrupted mid-write,
+since a plain (non-atomic) rewrite could tear the one piece of evidence
+a *later* retry depends on. The order is exactly: inspect destination
+and existing evidence -> validate any existing attempt (regardless of
+payload) -> preflight -> publish a fresh record or reuse the matching
+one -> copy/resume -> reconcile and publish completion evidence.
 
 `--force` against a *completed* archive is refused outright
 (`FolderImportReplacementUnsupportedError`) on the storage-convergence
@@ -141,10 +166,10 @@ with a path past the 260-character Windows limit -- not just
 
 ## Tests
 
-`tests/test_atlas_knowledge_pipeline_s2a.py` -- 26 tests, all synthetic
-fixtures. Local: Windows 26/26 (1 skipped, symlink-privilege), Ubuntu
-(WSL) 26/26 (0 skipped). Combined with the storage suite (106,
-unchanged): 132 total.
+`tests/test_atlas_knowledge_pipeline_s2a.py` -- 35 tests, all synthetic
+fixtures. Local: Windows 35/35 (2 skipped, symlink-privilege), Ubuntu
+(WSL) 35/35 (0 skipped). Combined with the storage suite (106,
+unchanged): 141 total.
 
 - default folder import -> one verified `raw/`, no `extracted/`
 - `RELOCATION-RECEIPT.json` round-trips through the public, validating
@@ -178,13 +203,28 @@ unchanged): 132 total.
 - **review selection**: a malformed `extracted_materialized` value and
   an unsupported `source_type` are rejected, not coerced; a selected
   tree that exists but isn't a directory is rejected
+- **attempt-record lifecycle**:
+  - a mismatched attempt record is validated (and rejected, record
+    preserved) even when zero payload bytes have been copied yet -- not
+    just when `raw/`/`extracted/` already hold content
+  - a symlinked `IMPORT-ATTEMPT.json` is never read or written through;
+    the outside file it points at is provably untouched
+  - malformed JSON, a wrong `contract_version`, and a missing/wrong-typed
+    field in an existing record are each rejected before any write
+  - a failed preflight publishes no attempt record at all
+  - a fresh record is proven to go through `storage._write_json_atomic()`
+    (spied), and a raise from inside that call (standing in for a crash
+    mid-write) leaves no file at the target path at all
+  - a matching retry never rewrites the record -- proven by byte and
+    mtime identity, and by asserting the atomic writer is never invoked
+    for that path
 - persisted import -> evaluate -> normalize chain, plus an independent
   restore check against the persisted relocation evidence
 - a >260-character fixture survives the real import/evaluate path
 
 ## Design history
 
-Three review rounds shaped this PR before the table above became true.
+Four review rounds shaped this PR before the tables above became true.
 Kept for anyone reconstructing the reasoning; the current-state
 description above is authoritative, not this section.
 
@@ -214,3 +254,18 @@ description above is authoritative, not this section.
    Fixed with the durable, validated `IMPORT-ATTEMPT.json` record
    described above; this round also tightened `review_source_dir()` to
    validate field types rather than coerce them.
+4. **Third correction round:** the second round's own record was not yet
+   safely managed as authority-bearing evidence. Its validation was
+   gated on `raw/`/`extracted/` holding content, so a record that
+   existed before any payload was copied -- or one whose target source
+   had since changed with nothing copied yet -- was never checked at
+   all; and it was written with the plain `write_json()` helper
+   (`Path.write_text()`, which follows a symlink and is not atomic), so
+   a symlinked record could redirect a write to an outside file, and
+   every matching retry rewrote the record unconditionally, risking a
+   torn file if interrupted mid-write -- destroying the exact evidence
+   the retry depended on. Fixed by validating any existing record
+   independent of payload presence, routing the write through
+   `storage._write_json_atomic()` (never a plain write), running
+   preflight before publishing a fresh record, and never rewriting a
+   record that already matches.

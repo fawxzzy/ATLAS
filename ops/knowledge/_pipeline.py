@@ -588,8 +588,85 @@ class AdmissionIdentityMismatchError(RuntimeError):
     behind. Refused instead; nothing under the destination is touched."""
 
 
+class CorruptAttemptRecordError(RuntimeError):
+    """IMPORT-ATTEMPT.json exists but is not safe to trust as ownership
+    evidence: it is a symlink / reparse point (never read or written
+    through -- the record itself is part of the protected write
+    boundary, exactly like any other destination path), its content is
+    not valid JSON, its contract_version is not recognized, or a
+    required field is missing or the wrong type. Refused before any of
+    its claimed content is trusted and before any write touches it."""
+
+
+ATTEMPT_RECORD_CONTRACT_VERSION = "atlas.knowledge.import-attempt.v1"
+_ATTEMPT_RECORD_REQUIRED_FIELDS: dict[str, type] = {
+    "archive_id": str,
+    "destination": str,
+    "source_snapshot_digest": str,
+    "materialize_extracted": bool,
+}
+
+
 def import_attempt_record_path(knowledge_dir: Path) -> Path:
     return knowledge_dir / "IMPORT-ATTEMPT.json"
+
+
+def _read_and_validate_attempt_record(path: Path) -> dict[str, Any] | None:
+    """Return the existing attempt record at `path`, or None if none
+    exists. Never opens or reads through a symlink -- checked first, via
+    storage's own no-follow primitive, exactly as the write path (see
+    _write_json_atomic()) never writes through one. Any content that
+    exists but cannot be trusted (unreadable, malformed JSON, wrong
+    contract_version, a required field missing or the wrong type) raises
+    CorruptAttemptRecordError rather than being silently treated as
+    absent or, worse, partially trusted."""
+    if storage._lp_is_symlink(path):
+        # relative_to_atlas() calls Path.resolve(), which follows a
+        # symlink straight through to wherever it points -- exactly the
+        # wrong thing to do while reporting that this path IS a symlink,
+        # and it can itself raise (the target may not even be under
+        # atlas_root()) before the real error is ever raised. path is
+        # always exactly knowledge_dir / "IMPORT-ATTEMPT.json" by
+        # construction, so a lexical relative_to() against atlas_root()
+        # describes it without following anything.
+        described = path.relative_to(atlas_root()).as_posix()
+        raise CorruptAttemptRecordError(
+            f"{described} is a symlink, not a plain record file. Refusing to "
+            f"read or write through it -- remove it yourself first if you have independently "
+            f"confirmed it is safe to discard."
+        )
+    if not path.exists():
+        return None
+    try:
+        record = read_json(path)
+    except (OSError, ValueError) as exc:
+        raise CorruptAttemptRecordError(
+            f"{relative_to_atlas(path)} could not be read as a valid JSON record: {exc}"
+        ) from exc
+    if not isinstance(record, dict) or record.get("contract_version") != ATTEMPT_RECORD_CONTRACT_VERSION:
+        raise CorruptAttemptRecordError(
+            f"{relative_to_atlas(path)} is not a recognized attempt record "
+            f"(contract_version={(record.get('contract_version') if isinstance(record, dict) else None)!r})"
+        )
+    for key, expected_type in _ATTEMPT_RECORD_REQUIRED_FIELDS.items():
+        if key not in record or not isinstance(record[key], expected_type):
+            raise CorruptAttemptRecordError(
+                f"{relative_to_atlas(path)} has a missing or invalid field: {key!r}"
+            )
+    return record
+
+
+def _folder_relocation_layout(
+    *, archive_id: str, knowledge_dir: Path, env: dict[str, str] | None
+) -> dict[str, Path]:
+    """The three derived paths a folder relocation needs, shared between
+    the standalone preflight check run during admission and the actual
+    relocate_archive_source() call, so the two can never drift apart."""
+    return {
+        "work_root": storage.import_work_root(env=env) / archive_id,
+        "receipt_path": knowledge_dir / "RELOCATION-RECEIPT.json",
+        "expected_manifest_path": knowledge_dir / "RELOCATION-MANIFEST.json",
+    }
 
 
 def _archive_destination_has_content(knowledge_dir: Path) -> bool:
@@ -644,9 +721,10 @@ def _relocate_folder_import(
     the transient copy volume can be moved off a constrained system
     drive without touching where the durable archive lands.
     """
-    work_root = storage.import_work_root(env=env) / archive_id
-    receipt_path = knowledge_dir / "RELOCATION-RECEIPT.json"
-    expected_manifest_ref_path = knowledge_dir / "RELOCATION-MANIFEST.json"
+    layout = _folder_relocation_layout(archive_id=archive_id, knowledge_dir=knowledge_dir, env=env)
+    work_root = layout["work_root"]
+    receipt_path = layout["receipt_path"]
+    expected_manifest_ref_path = layout["expected_manifest_path"]
     result = storage.relocate_archive_source(
         archive_id=archive_id,
         source_root=input_path,
@@ -1723,9 +1801,29 @@ def import_archive(
             f"--force behavior."
         )
 
+    # Full attempt-record lifecycle, in this exact order:
+    #   inspect destination and any existing evidence
+    #   -> validate any existing attempt record, independent of whether
+    #      raw/extracted hold content yet (a record can legitimately
+    #      exist before a single byte has been copied)
+    #   -> (in the execution block below) required preflight
+    #   -> create a fresh record safely, or reuse a matching one unchanged
+    #   -> copy/resume
+    #   -> reconcile and publish completion evidence (IMPORT-MANIFEST.json)
+    #
+    # The record itself is part of the protected write boundary, exactly
+    # like raw/ or extracted/: it is never read through a symlink, never
+    # silently replaced because "there's no payload yet" (an attempt can
+    # legitimately exist before any copying starts), and never rewritten
+    # once it already matches the current request -- rewriting a valid
+    # record for no reason is itself a way to destroy it, if interrupted
+    # mid-write. See _read_and_validate_attempt_record(),
+    # CorruptAttemptRecordError, AdmissionIdentityMismatchError.
     attempt_record_path = import_attempt_record_path(knowledge_dir)
     source_snapshot_digest_value: str | None = None
-    if new_engine_folder_path:
+    existing_attempt: dict[str, Any] | None = None
+    reuse_existing_attempt = False
+    if new_engine_folder_path and not archive_previously_completed:
         # Needed either way: to validate a claimed resume below, or to
         # record for a *future* retry to validate against once this call
         # proceeds. Computed from input_path directly -- read-only, and
@@ -1733,8 +1831,9 @@ def import_archive(
         # _classify_link_entry(), which classifies a link entry without
         # opening it).
         source_snapshot_digest_value = _source_snapshot_digest(input_path)
-        if not archive_previously_completed and _archive_destination_has_content(knowledge_dir):
-            if not attempt_record_path.exists():
+        existing_attempt = _read_and_validate_attempt_record(attempt_record_path)
+        if existing_attempt is None:
+            if _archive_destination_has_content(knowledge_dir):
                 raise UnownedDestinationError(
                     f"{relative_to_atlas(raw_dir(knowledge_dir))} and/or "
                     f"{relative_to_atlas(extracted_dir(knowledge_dir))} already contain content, "
@@ -1743,7 +1842,8 @@ def import_archive(
                     f"belongs to this import. Refusing to resume into it -- verify what is "
                     f"actually there and remove it yourself first if it is safe to discard."
                 )
-            recorded_attempt = read_json(attempt_record_path)
+            # else: genuinely fresh -- no record, no content either.
+        else:
             expected_attempt = {
                 "archive_id": archive_id_value,
                 "destination": relative_to_atlas(knowledge_dir),
@@ -1751,9 +1851,9 @@ def import_archive(
                 "materialize_extracted": folder_materializes_extracted,
             }
             mismatches = {
-                key: {"recorded": recorded_attempt.get(key), "current": expected}
+                key: {"recorded": existing_attempt.get(key), "current": expected}
                 for key, expected in expected_attempt.items()
-                if recorded_attempt.get(key) != expected
+                if existing_attempt.get(key) != expected
             }
             if mismatches:
                 raise AdmissionIdentityMismatchError(
@@ -1762,6 +1862,7 @@ def import_archive(
                     f"belong to a different source, a changed source, or different import "
                     f"options -- nothing under the destination has been touched."
                 )
+            reuse_existing_attempt = True  # matches exactly -- never rewritten
 
     manifest: dict[str, Any] = {
         "archive_id": archive_id_value,
@@ -1849,34 +1950,61 @@ def import_archive(
             copy_folder(input_path, raw_dir(knowledge_dir))
             copy_folder(input_path, extracted_dir(knowledge_dir))
         else:
-            # Admission (ownership proven above) and preflight (inside
-            # relocate_archive_source(), via
-            # preflight_space_budget()/check_link_entries()) both run
-            # before any source content is read or hashed into the
-            # manifest, and before any destructive mutation of
-            # knowledge_dir has happened -- nothing above this point
-            # deleted or altered an existing archive. A rejected link is
-            # therefore never content-read, and a failed relocation
-            # leaves whatever previously existed at knowledge_dir intact.
-            #
-            # The attempt record is written here, after admission has
-            # proven this call is entitled to write into knowledge_dir at
-            # all (fresh, or a validated matching resume) and before any
-            # byte of the copy itself starts -- so a *future* retry has a
-            # durable, matching record to validate against, no matter
-            # where in the copy this attempt is interrupted.
-            write_json(
-                attempt_record_path,
-                {
-                    "contract_version": "atlas.knowledge.import-attempt.v1",
-                    "archive_id": manifest["archive_id"],
-                    "destination": relative_to_atlas(knowledge_dir),
-                    "source_snapshot_digest": source_snapshot_digest_value,
-                    "materialize_extracted": folder_materializes_extracted,
-                    "recorded_at": utc_now(),
-                },
-                dry_run=False,
-            )
+            # Admission (ownership proven above) has already established
+            # this call is entitled to write into knowledge_dir -- fresh,
+            # or a validated matching resume -- before any destructive
+            # mutation happens. What remains, in order:
+            #   required preflight -> create a fresh record safely, or
+            #   reuse the matching one unchanged -> copy/resume
+            if not reuse_existing_attempt:
+                layout = _folder_relocation_layout(
+                    archive_id=manifest["archive_id"], knowledge_dir=knowledge_dir, env=env
+                )
+                budget = storage.preflight_space_budget(
+                    source_root=input_path,
+                    raw_destination_root=raw_dir(knowledge_dir),
+                    work_root=layout["work_root"],
+                    extracted_destination_root=(
+                        extracted_dir(knowledge_dir) if folder_materializes_extracted else None
+                    ),
+                    receipt_path=layout["receipt_path"],
+                    expected_manifest_path=layout["expected_manifest_path"],
+                )
+                if not budget.ok:
+                    # No attempt record published for a preflight that
+                    # never passed -- nothing here to resume from, and
+                    # nothing to leave behind that a later retry would
+                    # need to reconcile against.
+                    raise FolderImportRelocationError(
+                        f"folder import preflight failed for {manifest['archive_id']}: "
+                        f"findings={list(budget.findings)}"
+                    )
+                # Published only now, after preflight passed and before
+                # any byte of the copy starts -- so a *future* retry has
+                # a durable, matching record to validate against no
+                # matter where the copy itself is interrupted. Uses
+                # storage's own confined atomic writer (mkstemp staging,
+                # no-follow rename), the same machinery S1 built for
+                # every other authority-bearing write in this system --
+                # not a new one, and never the plain write_json() a
+                # pre-planted symlink at this path could be written
+                # through.
+                storage._write_json_atomic(
+                    {
+                        "contract_version": ATTEMPT_RECORD_CONTRACT_VERSION,
+                        "archive_id": manifest["archive_id"],
+                        "destination": relative_to_atlas(knowledge_dir),
+                        "source_snapshot_digest": source_snapshot_digest_value,
+                        "materialize_extracted": folder_materializes_extracted,
+                        "recorded_at": utc_now(),
+                    },
+                    attempt_record_path,
+                )
+            # else: existing_attempt already matches this request exactly
+            # -- reused as-is. Rewriting a record that already says the
+            # right thing is a needless risk, not a refresh: interrupted
+            # mid-write, a plain (non-atomic) rewrite would have torn the
+            # one piece of evidence a later retry depends on.
             manifest["raw_relocation"] = _relocate_folder_import(
                 archive_id=manifest["archive_id"],
                 input_path=input_path,
