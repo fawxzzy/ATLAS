@@ -18,6 +18,17 @@ def main() -> int:
     parser.add_argument("--provenance-note")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument(
+        "--materialize-extracted",
+        action="store_true",
+        help=(
+            "Folder imports only: also materialize a separate extracted/ tree. "
+            "Default (Wave S2A) keeps a single verified raw/ copy and lets "
+            "downstream review read it directly. Ignored for zip imports "
+            "(which always extract). Set ATLAS_IMPORT_LEGACY_FOLDER_COPY=1 "
+            "to restore the pre-S2A unconditional double copy."
+        ),
+    )
     args = parser.parse_args()
 
     result = import_archive(
@@ -28,6 +39,7 @@ def main() -> int:
         provenance_note=args.provenance_note,
         dry_run=args.dry_run,
         force=args.force,
+        materialize_extracted=args.materialize_extracted,
     )
     print(json.dumps(result, indent=2))
     return 0
