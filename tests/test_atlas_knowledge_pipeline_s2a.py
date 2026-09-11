@@ -314,16 +314,20 @@ class OrderingAndAdmissionRegressionTests(_ImportHarness):
         self.assertFalse(_pipeline.manifest_path(archive).exists())
 
     def test_interrupted_first_import_resumes_without_force(self) -> None:
+        # A *genuine* interruption, not a hand-built partial directory: a
+        # real successful import, then simulate a crash between the
+        # relocation succeeding and the top-level manifest write by
+        # removing only IMPORT-MANIFEST.json. IMPORT-ATTEMPT.json, raw/,
+        # and the relocation's own receipt/manifest survive exactly as a
+        # real interruption there would leave them.
         src = self._make_source_folder()
-        archive = _pipeline.archive_dir("synthetic-source", "sample")
-        # Simulate an interrupted first attempt: the destination directory
-        # exists with a genuine partial copy, but no manifest was ever
-        # written (the process died before that point).
-        (_pipeline.raw_dir(archive) / "docs").mkdir(parents=True)
-        (_pipeline.raw_dir(archive) / "docs" / "a.md").write_bytes((src / "docs" / "a.md").read_bytes())
+        first = self._import(src)
+        archive = self.fake_atlas / first["import_dir"]
+        _pipeline.manifest_path(archive).unlink()
         self.assertFalse(_pipeline.manifest_path(archive).exists())
+        self.assertTrue(_pipeline.import_attempt_record_path(archive).exists())
 
-        result = self._import(src)  # force=False -- must NOT raise FileExistsError
+        result = self._import(src)  # force=False, same source -- must resume, not raise
 
         self.assertTrue(result["manifest"]["raw_relocation"]["ok"])
         self.assertEqual(
@@ -332,18 +336,67 @@ class OrderingAndAdmissionRegressionTests(_ImportHarness):
         )
         self.assertTrue(_pipeline.manifest_path(archive).exists())
 
-    def test_interrupted_import_with_orphaned_leftover_fails_closed_precisely(self) -> None:
+    def test_matching_attempt_with_orphaned_leftover_still_fails_closed(self) -> None:
+        # The identity check passing (source genuinely unchanged) is not
+        # the last word -- relocate_archive_source()'s own exact
+        # reconciliation must still catch a leftover file that doesn't
+        # belong to the source, e.g. dropped in after the interruption.
         src = self._make_source_folder()
-        archive = _pipeline.archive_dir("synthetic-source", "sample")
-        # A leftover file that no longer exists in the real source --
-        # exact reconciliation must catch this rather than silently
-        # completing with stale extra content.
-        (_pipeline.raw_dir(archive)).mkdir(parents=True)
-        (_pipeline.raw_dir(archive) / "orphan-from-a-different-attempt.txt").write_text("stale", encoding="utf-8")
+        first = self._import(src)
+        archive = self.fake_atlas / first["import_dir"]
+        _pipeline.manifest_path(archive).unlink()
+        (_pipeline.raw_dir(archive) / "orphan-from-elsewhere.txt").write_text("stale", encoding="utf-8")
 
         with self.assertRaises(_pipeline.FolderImportRelocationError) as ctx:
             self._import(src)
         self.assertIn("destination_verification_issues", str(ctx.exception))
+        self.assertFalse(_pipeline.manifest_path(archive).exists())
+
+    def test_unmarked_destination_with_conflicting_content_is_rejected_and_preserved(self) -> None:
+        # The exact source-derived counterexample: same destination path,
+        # a same-named file with DIFFERENT content already there, and no
+        # IMPORT-MANIFEST.json or IMPORT-ATTEMPT.json to prove ownership.
+        # A deterministic path alone must never be trusted as identity.
+        src = self._make_source_folder()  # top.txt = "top-level\n"
+        archive = _pipeline.archive_dir("synthetic-source", "sample")
+        valuable = b"valuable earlier content that must survive"
+        (_pipeline.raw_dir(archive)).mkdir(parents=True)
+        (_pipeline.raw_dir(archive) / "top.txt").write_bytes(valuable)
+
+        with self.assertRaises(_pipeline.UnownedDestinationError):
+            self._import(src)
+
+        self.assertEqual((_pipeline.raw_dir(archive) / "top.txt").read_bytes(), valuable)
+        self.assertFalse(_pipeline.manifest_path(archive).exists())
+        self.assertFalse(_pipeline.import_attempt_record_path(archive).exists())
+
+    def test_attempt_record_with_changed_source_is_rejected_before_overwrite(self) -> None:
+        src = self._make_source_folder()
+        first = self._import(src)
+        archive = self.fake_atlas / first["import_dir"]
+        _pipeline.manifest_path(archive).unlink()
+        original_bytes = (_pipeline.raw_dir(archive) / "top.txt").read_bytes()
+
+        # The source changes before the retry -- same destination, same
+        # archive_id, genuinely different content.
+        (src / "top.txt").write_text("a completely different top-level file\n", encoding="utf-8")
+
+        with self.assertRaises(_pipeline.AdmissionIdentityMismatchError):
+            self._import(src)
+
+        self.assertEqual((_pipeline.raw_dir(archive) / "top.txt").read_bytes(), original_bytes)
+        self.assertFalse(_pipeline.manifest_path(archive).exists())
+
+    def test_attempt_record_with_changed_options_is_rejected_before_overwrite(self) -> None:
+        src = self._make_source_folder()
+        first = self._import(src)  # materialize_extracted defaults to False
+        archive = self.fake_atlas / first["import_dir"]
+        _pipeline.manifest_path(archive).unlink()
+
+        with self.assertRaises(_pipeline.AdmissionIdentityMismatchError):
+            self._import(src, materialize_extracted=True)
+
+        self.assertFalse(_pipeline.extracted_dir(archive).exists())
         self.assertFalse(_pipeline.manifest_path(archive).exists())
 
 
@@ -402,6 +455,40 @@ class ReviewSourceContractTests(_ImportHarness):
 
         chosen = _pipeline.review_source_dir(archive, manifest)
         self.assertEqual(chosen.resolve(), _pipeline.extracted_dir(archive).resolve())
+
+    def test_malformed_extracted_materialized_value_is_rejected_not_coerced(self) -> None:
+        src = self._make_source_folder("inbox/malformed1")
+        result = self._import(src)
+        archive = self.fake_atlas / result["import_dir"]
+        manifest = _pipeline.read_json(_pipeline.manifest_path(archive))
+        # A JSON string, not a boolean -- bool("false") is True in Python,
+        # which would silently select extracted/ (nonexistent here)
+        # instead of correctly refusing.
+        manifest["extracted_materialized"] = "false"
+
+        with self.assertRaises(ValueError):
+            _pipeline.review_source_dir(archive, manifest)
+
+    def test_unsupported_source_type_is_rejected(self) -> None:
+        src = self._make_source_folder("inbox/malformed2")
+        result = self._import(src)
+        archive = self.fake_atlas / result["import_dir"]
+        manifest = _pipeline.read_json(_pipeline.manifest_path(archive))
+        manifest["source_type"] = "tarball"
+
+        with self.assertRaises(ValueError):
+            _pipeline.review_source_dir(archive, manifest)
+
+    def test_selected_review_path_must_be_a_directory(self) -> None:
+        src = self._make_source_folder("inbox/malformed3")
+        result = self._import(src)
+        archive = self.fake_atlas / result["import_dir"]
+        manifest = _pipeline.read_json(_pipeline.manifest_path(archive))
+        _pipeline.raw_dir(archive).rename(archive / "raw-renamed")
+        (archive / "raw").write_text("not a directory", encoding="utf-8")
+
+        with self.assertRaises(NotADirectoryError):
+            _pipeline.review_source_dir(archive, manifest)
 
 
 class PersistedChainTests(_ImportHarness):
