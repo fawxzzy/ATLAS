@@ -238,27 +238,46 @@ def extracted_dir(path: Path) -> Path:
     return path / "extracted"
 
 
-def review_source_dir(archive_path: Path) -> Path:
+def review_source_dir(archive_path: Path, manifest: dict[str, Any]) -> Path:
     """The tree downstream review (evaluate/promote/catalog/secret-scan)
-    should read for a folder import.
+    must read -- chosen from the import's own recorded contract, never
+    from which directories happen to exist on disk.
 
-    Historically every folder import made two identical copies -- raw/ and
-    extracted/ -- and everything downstream read extracted/. Under Wave
-    S2A a folder import materializes only raw/ by default (a single
-    verified relocation), so downstream must fall back to raw/ when
-    extracted/ was not materialized. For a zip import, or a folder import
-    run with materialize_extracted=True, extracted/ exists and is used as
-    before. Raises only if neither exists.
+    Selecting by directory presence is wrong two ways: a stray extracted/
+    sitting next to a raw-only folder import would silently redirect
+    evaluation to it, and a zip import missing its extracted/ tree would
+    silently fall back to "reviewing" the raw .zip blob instead of
+    failing. Both must fail closed instead.
+
+        new raw-only folder import          -> raw/
+        explicitly materialized folder import -> extracted/
+        zip import                          -> extracted/ (required)
+        missing required tree               -> error, not fallback
+
+    Legacy compatibility: a manifest written before Wave S2A has no
+    extracted_materialized key at all -- every import back then always
+    produced both raw/ and extracted/, so its absence is treated as
+    materialized=True, matching that era's actual on-disk guarantee
+    rather than reinterpreting history.
     """
-    extracted = extracted_dir(archive_path)
-    if extracted.exists():
+    source_type = manifest.get("source_type")
+    extracted_materialized = bool(manifest.get("extracted_materialized", True))
+    if source_type == "zip" or extracted_materialized:
+        extracted = extracted_dir(archive_path)
+        if not extracted.exists():
+            raise FileNotFoundError(
+                f"Manifest for {relative_to_atlas(archive_path)} requires extracted/ as "
+                f"the review tree (source_type={source_type!r}, "
+                f"extracted_materialized={extracted_materialized}), but it does not exist"
+            )
         return extracted
     raw = raw_dir(archive_path)
-    if raw.exists():
-        return raw
-    raise FileNotFoundError(
-        f"Neither extracted/ nor raw/ exists under {relative_to_atlas(archive_path)}"
-    )
+    if not raw.exists():
+        raise FileNotFoundError(
+            f"Manifest for {relative_to_atlas(archive_path)} requires raw/ as the review "
+            f"tree, but it does not exist"
+        )
+    return raw
 
 
 def manifest_path(path: Path) -> Path:
@@ -433,8 +452,15 @@ def write_json(path: Path, data: dict[str, Any], dry_run: bool) -> None:
 
 
 def file_checksum(path: Path) -> str:
+    # Long-path-safe: a plain path.open() fails past the 260-character
+    # MAX_PATH boundary on Windows without the admin-only LongPathsEnabled
+    # policy. list_files()/enumerate_files() already return long-path-safe
+    # paths, but reading their content still needs the same \\?\ prefixing
+    # storage.py applies internally -- found via a >260-character fixture
+    # pushed through the actual import -> evaluate path, not just
+    # storage.py's own enumeration tests.
     digest = hashlib.sha256()
-    with path.open("rb") as handle:
+    with storage._win_long_path(path).open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return f"sha256:{digest.hexdigest()}"
@@ -467,7 +493,7 @@ def tree_digest(root: Path) -> str:
         rel = path.relative_to(root).as_posix().encode("utf-8")
         digest.update(rel)
         digest.update(b"\0")
-        digest.update(str(path.stat().st_size).encode("utf-8"))
+        digest.update(str(storage._lp_stat(path).st_size).encode("utf-8"))
         digest.update(b"\0")
         digest.update(file_checksum(path).encode("utf-8"))
         digest.update(b"\n")
@@ -502,6 +528,18 @@ class FolderImportRelocationError(RuntimeError):
     """A folder import's verified relocation into raw/ failed at preflight
     or copy. Raised before the import manifest is written, so a failed
     relocation never produces a half-imported archive."""
+
+
+class FolderImportReplacementUnsupportedError(RuntimeError):
+    """--force was given to replace an already-completed archive under the
+    storage-convergence folder path, which cannot yet do that safely: a
+    destructive delete-then-relocate would destroy the existing archive
+    before the new one's preflight/link checks even run. Rather than
+    build transactional replacement (a separate, larger piece of work),
+    this refuses the destructive path outright. The operator can remove
+    the existing archive directory themselves first, or set
+    ATLAS_IMPORT_LEGACY_FOLDER_COPY=1 to use the old destructive --force
+    behavior."""
 
 
 def _relocate_folder_import(
@@ -539,12 +577,28 @@ def _relocate_folder_import(
         expected_manifest_path=expected_manifest_ref_path,
     )
     if not result.ok:
+        # Surface every distinct failure mode so a caller sees a precise,
+        # recoverable state -- not just "it failed" -- including the case
+        # where knowledge_dir held a leftover partial from an earlier
+        # interrupted attempt that didn't cleanly resume: verify_restore's
+        # require_exact_match=True catches an orphaned/mismatched leftover
+        # rather than silently accepting it, and that shows up here as a
+        # destination_verification finding, not a copy failure.
         findings = list(result.space_budget.findings)
         raw_failures = [f.category for f in result.raw_copy_result.failed] if result.raw_copy_result else []
+        extracted_failures = (
+            [f.category for f in result.extracted_copy_result.failed] if result.extracted_copy_result else []
+        )
+        destination_issues = {
+            k: v
+            for k, v in (result.destination_verification or {}).items()
+            if k in {"missing_paths", "unexpected_paths", "mismatched_paths"} and v
+        }
         raise FolderImportRelocationError(
             f"folder import relocation failed for {archive_id}: "
             f"space_budget_ok={result.space_budget.ok} findings={findings} "
-            f"raw_copy_failures={raw_failures}"
+            f"raw_copy_failures={raw_failures} extracted_copy_failures={extracted_failures} "
+            f"destination_verification_issues={destination_issues}"
         )
     receipt = result.receipt or {}
     return {
@@ -567,7 +621,7 @@ def build_raw_entries(root: Path) -> list[dict[str, Any]]:
         entries.append(
             {
                 "path": path.relative_to(root).as_posix(),
-                "size_bytes": path.stat().st_size,
+                "size_bytes": storage._lp_stat(path).st_size,
                 "checksum": file_checksum(path),
             }
         )
@@ -595,7 +649,9 @@ def representative_relative_paths(root: Path, paths: list[Path], limit: int = 6)
 
 
 def read_text_limited(path: Path, max_chars: int = 4000) -> str:
-    return path.read_text(encoding="utf-8", errors="ignore")[:max_chars]
+    # Long-path-safe for the same reason as file_checksum(): this reads
+    # arbitrary enumerated source-tree paths, which can exceed MAX_PATH.
+    return storage._win_long_path(path).read_text(encoding="utf-8", errors="ignore")[:max_chars]
 
 
 def detect_executable_content(paths: list[Path]) -> tuple[bool, list[dict[str, str]]]:
@@ -886,7 +942,7 @@ def build_promotion_scaffold_sections(
     evaluation: dict[str, Any],
     archive_id: str,
 ) -> dict[str, str]:
-    extracted_root = review_source_dir(archive_path)
+    extracted_root = review_source_dir(archive_path, manifest)
     extracted_files = list_files(extracted_root)
     dominant_extensions = list(evaluation.get("summary", {}).get("extension_counts", {}).items())[:5]
     rendered_extensions = (
@@ -1537,9 +1593,38 @@ def import_archive(
     detected_type = "zip" if input_path.is_file() and input_path.suffix.lower() == ".zip" else "folder"
     if detected_type not in {"zip", "folder"}:
         raise ValueError("Input must be a directory or a .zip file.")
-    if knowledge_dir.exists() and not force:
+
+    # The identity check for "does an import already live here" is
+    # whether a *completed* prior import wrote a manifest -- not whether
+    # the directory merely exists. knowledge_dir is a deterministic
+    # function of (source_name, slug), so its presence without a manifest
+    # can only be an interrupted prior attempt at this exact archive_id,
+    # never someone else's unrelated content; resuming into it is safe
+    # because relocate_archive_source()'s exact reconciliation
+    # (require_exact_match=True) fails closed on any mismatched or
+    # orphaned leftover rather than silently accepting it. This is what
+    # makes a failed first import retryable without deleting an unknown
+    # directory: an ordinary re-run (no --force) now proceeds instead of
+    # raising on the leftover partial directory.
+    new_engine_folder_path = detected_type == "folder" and not legacy_folder_copy
+    archive_previously_completed = manifest_path(knowledge_dir).exists()
+    if archive_previously_completed and not force:
         raise FileExistsError(
             f"Import destination already exists: {relative_to_atlas(knowledge_dir)}"
+        )
+    if archive_previously_completed and force and new_engine_folder_path:
+        # Refuse the destructive replacement rather than delete the
+        # completed archive and then risk the new copy's preflight or
+        # link-rejection check failing with nothing left to restore.
+        # Transactional (atomic) replacement is future work, not built
+        # here -- see FolderImportReplacementUnsupportedError.
+        raise FolderImportReplacementUnsupportedError(
+            f"--force cannot yet safely replace the completed archive at "
+            f"{relative_to_atlas(knowledge_dir)} under the storage-convergence "
+            f"folder path (no transactional replacement implemented). Remove "
+            f"the existing archive directory yourself first, or set "
+            f"ATLAS_IMPORT_LEGACY_FOLDER_COPY=1 to use the prior destructive "
+            f"--force behavior."
         )
 
     manifest: dict[str, Any] = {
@@ -1585,8 +1670,17 @@ def import_archive(
         manifest["raw_archive_path"] = f"{relative_to_atlas(raw_dir(knowledge_dir))}/{input_path.name}"
     else:
         manifest["raw_reference_dir"] = relative_to_atlas(raw_dir(knowledge_dir))
-        manifest["raw_entries"] = build_raw_entries(input_path)
         manifest["folder_import_mode"] = "legacy-double-copy" if legacy_folder_copy else "storage-convergence"
+        if legacy_folder_copy:
+            # No link-rejection check exists on this path (matches its
+            # pre-S2A behavior exactly) -- reading source content here is
+            # not a "read before reject" hazard the way it would be on
+            # the storage-convergence path below.
+            manifest["raw_entries"] = build_raw_entries(input_path)
+        # For the storage-convergence path, raw_entries is filled in
+        # after relocation succeeds, from raw_dir(knowledge_dir) -- the
+        # verified destination, not the unchecked source -- so a
+        # rejected link's content is never read. See _relocate_folder_import.
 
     operations: list[str] = [f"prepare:{relative_to_atlas(knowledge_dir)}"]
     if detected_type == "zip":
@@ -1602,7 +1696,14 @@ def import_archive(
     operations.append(f"write:{relative_to_atlas(manifest_path(knowledge_dir))}")
 
     if not dry_run:
-        if knowledge_dir.exists() and force:
+        # Destructive delete-then-recreate is preserved only for the
+        # paths that have no preflight to bypass (zip, legacy double
+        # copy) -- exactly their pre-S2A behavior. The storage-convergence
+        # folder path never reaches here with force=True on a completed
+        # archive (refused above); on an incomplete prior attempt it must
+        # NOT be deleted -- relocate_archive_source() resumes into it
+        # safely (see the comment above archive_previously_completed).
+        if knowledge_dir.exists() and force and not new_engine_folder_path:
             shutil.rmtree(knowledge_dir)
         knowledge_dir.mkdir(parents=True, exist_ok=True)
         if detected_type == "zip":
@@ -1613,6 +1714,14 @@ def import_archive(
             copy_folder(input_path, raw_dir(knowledge_dir))
             copy_folder(input_path, extracted_dir(knowledge_dir))
         else:
+            # Admission and preflight (inside relocate_archive_source(),
+            # via preflight_space_budget()/check_link_entries()) run
+            # before any source content is read or hashed for the
+            # manifest, and before any destructive mutation of
+            # knowledge_dir has happened -- nothing above this point
+            # deleted or altered an existing archive. A rejected link is
+            # therefore never content-read, and a failed relocation
+            # leaves whatever previously existed at knowledge_dir intact.
             manifest["raw_relocation"] = _relocate_folder_import(
                 archive_id=manifest["archive_id"],
                 input_path=input_path,
@@ -1620,6 +1729,7 @@ def import_archive(
                 materialize_extracted=folder_materializes_extracted,
                 env=env,
             )
+            manifest["raw_entries"] = build_raw_entries(raw_dir(knowledge_dir))
         manifest["artifact_digests"] = build_manifest_artifact_digests(manifest, knowledge_dir)
         manifest["extracted_snapshot_digest"] = extracted_snapshot_digest(knowledge_dir)
         if not extracted_dir(knowledge_dir).exists():
@@ -1649,8 +1759,8 @@ def import_archive(
 
 def evaluate_archive(*, archive_path: Path, dry_run: bool) -> dict[str, Any]:
     archive_path = archive_path.resolve()
-    review_dir = review_source_dir(archive_path)
     manifest = read_json(manifest_path(archive_path))
+    review_dir = review_source_dir(archive_path, manifest)
     paths = list_files(review_dir)
     text_paths = iter_text_files(paths)
     private_hits = match_patterns(paths, PRIVATE_PATTERNS)
@@ -1689,6 +1799,8 @@ def evaluate_archive(*, archive_path: Path, dry_run: bool) -> dict[str, Any]:
         "evaluated_at": utc_now(),
         "import_dir": relative_to_atlas(archive_path),
         "extracted_dir": relative_to_atlas(review_dir),
+        "review_source_kind": "extracted" if review_dir == extracted_dir(archive_path) else "raw",
+        "review_source_digest": tree_digest(review_dir),
         "manifest_path": relative_to_atlas(manifest_path(archive_path)),
         "review_status": "evaluated",
         "privacy_flag": manifest["privacy_flag"],
@@ -1795,7 +1907,7 @@ def promote_archive(
         existing_text=existing_text,
         refresh_derived=refresh_derived,
     )
-    evidence_secret_hits = scan_secret_risk(paths=list_files(review_source_dir(archive_path)))
+    evidence_secret_hits = scan_secret_risk(paths=list_files(review_source_dir(archive_path, manifest)))
     candidate_secret_hits = scan_secret_risk(
         inline_documents=[(relative_to_atlas(promotion_file), rendered)]
     )
