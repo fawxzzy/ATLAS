@@ -159,8 +159,9 @@ with a path past the 260-character Windows limit -- not just
   junctions, and its nine stale `pipeline_digest` receipts -- Wave S2B.
 - Relocating the durable archive root itself off the checkout via
   `ATLAS_IMPORT_STORAGE_ROOT` -- entangled with `relative_to_atlas()` /
-  manifest-path semantics, needs its own bounded change. Tracked as the
-  immediate next step (S2A2), not dropped.
+  manifest-path semantics, needed its own bounded change. **Done in Wave
+  S2A2** -- see
+  [ATLAS-IMPORT-STORAGE-CONVERGENCE-WAVE-2A2.md](ATLAS-IMPORT-STORAGE-CONVERGENCE-WAVE-2A2.md).
 - Transactional (atomic swap) replacement of a completed archive.
 - `#142` / Fitness / Mazer.
 

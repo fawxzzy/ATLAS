@@ -57,6 +57,19 @@ class _ImportHarness(unittest.TestCase):
         self._p = mock.patch.object(_pipeline, "atlas_root", return_value=self.fake_atlas)
         self._p.start()
         self.addCleanup(self._p.stop)
+        # storage.import_storage_root() (Wave S2A2) defaults to
+        # storage.atlas_root()/data/imports/knowledge -- a SEPARATE
+        # function from _pipeline.atlas_root(), unpatched by the line
+        # above. Without also patching it, an unconfigured storage root
+        # would resolve against the real repo checkout instead of this
+        # fixture tree. Patched to the same fake_atlas so the default
+        # (unconfigured) case matches exactly what every existing test
+        # already assumes; tests that specifically exercise
+        # ATLAS_IMPORT_STORAGE_ROOT override it via
+        # mock.patch.dict(os.environ, ...) instead.
+        self._sp = mock.patch.object(storage, "atlas_root", return_value=self.fake_atlas)
+        self._sp.start()
+        self.addCleanup(self._sp.stop)
         # receipt_tooling() pins Path(__file__) relative to atlas_root();
         # with atlas_root patched to a temp dir it cannot resolve the real
         # _pipeline.py. It is unrelated to what S2A changes -- stub it.
@@ -699,6 +712,122 @@ class LongPathPipelineTests(_ImportHarness):
 
         evaluation = _pipeline.evaluate_archive(archive_path=archive, dry_run=True)
         self.assertGreaterEqual(evaluation["summary"]["file_count"], 1)
+
+
+class StorageRootIntegrationTests(_ImportHarness):
+    """Wave S2A2: ATLAS_IMPORT_STORAGE_ROOT threaded through archive
+    resolution, discovery, manifests, and downstream consumers -- not
+    just staging (ATLAS_IMPORT_WORK_ROOT, already covered above).
+
+    All of these configure a storage root OUTSIDE fake_atlas entirely
+    (a sibling directory, not nested under it) -- the case that actually
+    exercises the fix, since a root left at its default, or moved to
+    another location still under fake_atlas, never needs the
+    @storage-root marker at all (relative_to_atlas() resolves it via its
+    original atlas_root()-relative branch unchanged).
+    """
+
+    def _external_storage_env(self) -> dict[str, str]:
+        external = self._base / "external-storage"
+        external.mkdir(parents=True, exist_ok=True)
+        self._external_storage = external
+        return {"ATLAS_IMPORT_STORAGE_ROOT": str(external)}
+
+    def test_archive_resolution_follows_the_configured_storage_root(self) -> None:
+        src = self._make_source_folder()
+        with mock.patch.dict(os.environ, self._external_storage_env()):
+            result = self._import(src)
+
+        # The archive must actually live under the configured root, not
+        # under fake_atlas's default data/imports/knowledge -- and NOT
+        # under fake_atlas at all in this test, since the two roots are
+        # siblings.
+        archive = self._external_storage / "synthetic-source" / "sample"
+        self.assertTrue((_pipeline.raw_dir(archive) / "top.txt").exists())
+        self.assertFalse((self.fake_atlas / "data" / "imports").exists())
+
+        # Manifest fields describing the archive tree carry the portable
+        # marker, since the archive is not under atlas_root() at all.
+        self.assertTrue(result["import_dir"].startswith("@storage-root/"))
+        self.assertEqual(result["manifest"]["paths"]["import_dir"], result["import_dir"])
+
+    def test_default_storage_root_never_produces_the_marker(self) -> None:
+        # No ATLAS_IMPORT_STORAGE_ROOT set -- the default storage root is
+        # still under atlas_root() (fake_atlas here), so every path stays
+        # a plain atlas-relative string exactly as before this wave.
+        src = self._make_source_folder()
+        result = self._import(src)
+        self.assertFalse(result["import_dir"].startswith("@storage-root"))
+        self.assertEqual(result["import_dir"], "data/imports/knowledge/synthetic-source/sample")
+
+    def test_resolve_atlas_path_round_trips_a_relocated_manifest_path(self) -> None:
+        src = self._make_source_folder()
+        with mock.patch.dict(os.environ, self._external_storage_env()):
+            result = self._import(src)
+            resolved = _pipeline.resolve_atlas_path(Path(result["import_dir"]))
+        self.assertEqual(resolved.resolve(), (self._external_storage / "synthetic-source" / "sample").resolve())
+
+    def test_discovery_finds_archives_under_the_configured_root(self) -> None:
+        src = self._make_source_folder()
+        with mock.patch.dict(os.environ, self._external_storage_env()):
+            self._import(src)
+            found = _pipeline.discover_import_manifests()
+        self.assertEqual(len(found), 1)
+        self.assertEqual(found[0].name, "IMPORT-MANIFEST.json")
+        self.assertTrue(found[0].is_relative_to(self._external_storage))
+
+    def test_discovery_does_not_see_archives_under_the_default_root_once_relocated(self) -> None:
+        src_default = self._make_source_folder("inbox/defaultarchive")
+        self._import(src_default)  # lands under the default (fake_atlas) root
+
+        with mock.patch.dict(os.environ, self._external_storage_env()):
+            found = _pipeline.discover_import_manifests()
+        self.assertEqual(found, [])  # the default-root archive is invisible from the relocated root
+
+    def test_evaluate_and_catalog_work_against_a_relocated_archive(self) -> None:
+        # Downstream consumers: evaluate_archive() (reads/writes files
+        # under the archive tree) and update_catalog_doc() (discovery +
+        # per-archive relative_to_atlas() calls for manifest/evaluation
+        # paths, which now live outside atlas_root() entirely) must both
+        # work without raising, and the catalog's recorded paths must
+        # round-trip.
+        src = self._make_source_folder()
+        # docs/knowledge/ is checked into the real repo, so
+        # catalog_doc_path()'s parent always exists there; this synthetic
+        # fixture needs it created explicitly.
+        (self.fake_atlas / "docs" / "knowledge").mkdir(parents=True, exist_ok=True)
+        env = self._external_storage_env()
+        with mock.patch.dict(os.environ, env):
+            imported = self._import(src)
+            archive = _pipeline.resolve_atlas_path(Path(imported["import_dir"]))
+            evaluation = _pipeline.evaluate_archive(archive_path=archive, dry_run=False)
+            self.assertEqual(evaluation["review_source_kind"], "raw")
+
+            catalog = _pipeline.update_catalog_doc(dry_run=False)
+
+            self.assertEqual(catalog["record_count"], 1)
+            record = catalog["records"][0]
+            self.assertEqual(record["archive_id"], imported["archive_id"])
+            # manifest_path/evaluation_path describe the (relocated)
+            # archive tree -> carry the marker; catalog_path itself is
+            # always under atlas_root()/docs/, regardless of where
+            # archives live.
+            self.assertTrue(record["manifest_path"].startswith("@storage-root/"))
+            self.assertFalse(catalog["catalog_path"].startswith("@storage-root"))
+            # Resolved while ATLAS_IMPORT_STORAGE_ROOT is still the same
+            # override the record was produced under -- resolution is a
+            # function of the *current* configuration, exactly like a
+            # real second CLI invocation with the same env var set would
+            # see.
+            resolved_manifest = _pipeline.resolve_atlas_path(Path(record["manifest_path"]))
+            self.assertTrue(resolved_manifest.exists())
+
+    def test_promotion_and_catalog_docs_stay_under_atlas_root_regardless_of_storage_root(self) -> None:
+        # docs/knowledge/... is ATLAS documentation, not archived storage
+        # -- it must never move just because the storage root did.
+        with mock.patch.dict(os.environ, self._external_storage_env()):
+            catalog_path = _pipeline.catalog_doc_path()
+        self.assertTrue(catalog_path.resolve().is_relative_to(self.fake_atlas.resolve()))
 
 
 if __name__ == "__main__":

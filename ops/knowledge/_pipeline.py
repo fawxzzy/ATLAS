@@ -166,18 +166,46 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+# Wave S2A2: the import archive tree (source_dir()/archive_dir() and
+# everything under them) is anchored to storage.import_storage_root(),
+# which is ATLAS-relative by default (ATLAS_IMPORT_STORAGE_ROOT unset)
+# but can be configured to live anywhere, including off the checkout
+# entirely -- exactly like ATLAS_IMPORT_WORK_ROOT already does for
+# transient staging. relative_to_atlas()/resolve_atlas_path() are the one
+# shared pair every manifest, evaluation, receipt, and catalog path
+# round-trips through (100+ call sites) -- rather than touch every one of
+# them individually, this marker teaches the pair a second root, so every
+# existing caller becomes storage-root-aware automatically. When the
+# storage root is at its default (still under atlas_root()), a path under
+# it resolves via the first branch exactly as before and the marker never
+# appears -- fully backward compatible, proven by the existing S2A suite
+# passing unchanged.
+_STORAGE_ROOT_MARKER = "@storage-root"
+
+
 def relative_to_atlas(path: Path) -> str:
     root = atlas_root()
     resolved = path.resolve()
-    if not resolved.is_relative_to(root):
+    if resolved.is_relative_to(root):
+        rel = resolved.relative_to(root)
+        return "." if not rel.parts else rel.as_posix()
+    storage_root = storage.import_storage_root().resolve()
+    try:
+        rel = resolved.relative_to(storage_root)
+    except ValueError:
         raise ValueError(
-            f"Input must already be staged under ATLAS so paths stay ATLAS-relative: {resolved}"
-        )
-    rel = resolved.relative_to(root)
-    return "." if not rel.parts else rel.as_posix()
+            f"Input must already be staged under ATLAS or the configured import "
+            f"storage root so paths stay portable: {resolved}"
+        ) from None
+    return _STORAGE_ROOT_MARKER if not rel.parts else f"{_STORAGE_ROOT_MARKER}/{rel.as_posix()}"
 
 
 def resolve_atlas_path(path: Path) -> Path:
+    if path.parts and path.parts[0] == _STORAGE_ROOT_MARKER:
+        target = storage.import_storage_root()
+        for part in path.parts[1:]:
+            target = target / part
+        return target.resolve()
     return path.resolve() if path.is_absolute() else (atlas_root() / path).resolve()
 
 
@@ -223,7 +251,7 @@ def deep_merge(existing: Any, updates: Any) -> Any:
 
 
 def source_dir(source_name: str) -> Path:
-    return atlas_root() / "data" / "imports" / "knowledge" / slugify(source_name)
+    return storage.import_storage_root() / slugify(source_name)
 
 
 def archive_dir(source_name: str, slug: str) -> Path:
@@ -2352,7 +2380,9 @@ def normalize_archive(*, archive_path: Path, dry_run: bool, force: bool) -> dict
 
 
 def discover_import_manifests() -> list[Path]:
-    root = atlas_root() / "data" / "imports" / "knowledge"
+    root = storage.import_storage_root()
+    if not root.exists():
+        return []
     return sorted(root.glob("*/*/IMPORT-MANIFEST.json"))
 
 
