@@ -224,7 +224,22 @@ def relative_to_atlas(path: Path, *, env: dict[str, str] | None = None) -> str:
             f"Input must already be staged under ATLAS or the configured import "
             f"storage root so paths stay portable: {resolved}"
         ) from None
-    return _STORAGE_ROOT_MARKER if not rel.parts else f"{_STORAGE_ROOT_MARKER}/{rel.as_posix()}"
+    if not rel.parts:
+        return _STORAGE_ROOT_MARKER
+    reference = f"{_STORAGE_ROOT_MARKER}/{rel.as_posix()}"
+    # Encoding must refuse exactly what decoding refuses: resolve_atlas_path()
+    # rejects an empty/"."/".."/colon/separator-containing component before
+    # trusting it. Emitting a reference the decoder cannot round-trip would
+    # produce a manifest field that silently stops resolving the moment
+    # anything reads it back -- e.g. an ordinary (on POSIX) filename
+    # containing a literal colon, which a Windows drive-letter reference
+    # also uses, so the grammar must forbid it on both ends alike. Refused
+    # here rather than renaming or omitting the underlying file: the file
+    # itself is untouched, only representing it as a portable reference
+    # fails.
+    for part in rel.parts:
+        _reject_unsafe_storage_reference_component(part, reference=reference)
+    return reference
 
 
 def resolve_atlas_path(path: Path, *, env: dict[str, str] | None = None) -> Path:
@@ -2449,16 +2464,51 @@ def normalize_archive(*, archive_path: Path, dry_run: bool, force: bool) -> dict
 
 
 class DuplicateArchiveIdentityError(RuntimeError):
-    """The same (source_name, slug) archive identity exists as a real,
-    distinct manifest under two different roots discover_import_manifests()
-    scanned. Silently preferring one would hide the other from every
-    downstream consumer (catalog, validation, backfill, ranking) without
-    any record that it happened. Refused instead -- an operator must
-    resolve the collision explicitly (this never moves or deletes
-    anything itself)."""
+    """The same archive_id (the manifest's own declared identity, not just
+    the directory names it happens to sit under) exists as a real, distinct
+    manifest under two different roots discover_import_manifests() scanned.
+    Silently preferring one would hide the other from every downstream
+    consumer (catalog, validation, backfill, ranking) without any record
+    that it happened. Refused instead -- an operator must resolve the
+    collision explicitly (this never moves or deletes anything itself)."""
 
 
-def discover_import_manifests() -> list[Path]:
+class ArchiveIdentityLayoutMismatchError(RuntimeError):
+    """A manifest's own declared identity (source_name/slug, slugified)
+    does not match the directory layout discover_import_manifests() found
+    it under. archive_dir()/source_dir() guarantee this always agrees for
+    anything this pipeline itself wrote; disagreement means the manifest or
+    its containing directories were edited or moved out of band, and
+    trusting either side over the other (directory layout for dedup, or
+    the manifest's declared archive_id for identity) without checking the
+    other could let a tampered or relocated manifest silently collide with,
+    or shadow, a different archive. Refused instead -- nothing is renamed,
+    moved, or chosen on the caller's behalf."""
+
+
+class IncompleteDiscoveryError(RuntimeError):
+    """The explicitly configured import storage root
+    (ATLAS_IMPORT_STORAGE_ROOT) could not be fully enumerated -- missing,
+    not a directory, or an OSError partway through enumeration -- so the
+    manifest list discover_import_manifests() would otherwise return cannot
+    be proven complete. Letting a partial inventory stand in for a
+    complete one would silently drop real archives from catalog,
+    validation, backfill, and promotion-ranking tooling with no record
+    that anything was missed -- exactly the failure mode a configuration
+    change (not a real migration) must never cause. Raised instead of
+    returning a partial list. A caller that only needs a best-effort,
+    read-only snapshot (diagnostics, not authoritative publication) may
+    pass allow_partial=True to opt out; this never applies when no
+    external root is configured at all (the normal, first-use case), since
+    then there is nothing "configured" to be unavailable."""
+
+
+def _storage_root_is_explicitly_configured(*, env: dict[str, str] | None = None) -> bool:
+    source = env if env is not None else os.environ
+    return bool(source.get(storage._STORAGE_ROOT_ENV, "").strip())
+
+
+def discover_import_manifests(*, allow_partial: bool = False) -> list[Path]:
     """Enumerate every IMPORT-MANIFEST.json this ATLAS installation knows
     about.
 
@@ -2475,33 +2525,90 @@ def discover_import_manifests() -> list[Path]:
     case), only one is scanned -- exactly the previous, single-root
     behavior, proven unchanged by the existing test suite.
 
-    If two different roots each hold a manifest claiming the same
-    (source_name, slug) archive identity, that is a genuine collision,
-    not something safe to resolve by silently preferring one --
-    DuplicateArchiveIdentityError is raised instead.
+    A missing/unconfigured default root is a normal, empty first-use
+    inventory, not an error. But an EXPLICITLY configured root
+    (ATLAS_IMPORT_STORAGE_ROOT set) that is missing, not a directory, or
+    raises OSError while being enumerated is different: some of its
+    contents might be unreachable rather than genuinely absent, so the
+    list this function would otherwise return cannot be proven complete.
+    IncompleteDiscoveryError is raised in that case instead of silently
+    returning whatever the legacy root alone could find -- unless
+    allow_partial=True, for read-only diagnostics that only want a
+    best-effort snapshot rather than an authoritative inventory.
+
+    Identity is the manifest's OWN declared (source_name, slug) --
+    slugified, exactly as source_dir()/archive_dir() derive it -- not the
+    literal directory names discover_import_manifests() happened to find
+    it under; those two must always agree for anything this pipeline
+    itself wrote, and ArchiveIdentityLayoutMismatchError is raised if they
+    do not. If two different roots each hold a manifest claiming the same
+    resulting archive_id, that is a genuine collision, not something safe
+    to resolve by silently preferring one -- DuplicateArchiveIdentityError
+    is raised instead.
     """
     configured_root = storage.import_storage_root()
     legacy_root = atlas_root() / "data" / "imports" / "knowledge"
+    same_physical_root = legacy_root.resolve() == configured_root.resolve()
     roots = [configured_root]
-    if legacy_root.resolve() != configured_root.resolve():
+    if not same_physical_root:
         roots.append(legacy_root)
+    explicitly_configured = _storage_root_is_explicitly_configured()
 
-    by_identity: dict[tuple[str, str], Path] = {}
+    by_identity: dict[str, Path] = {}
     manifests: list[Path] = []
     for root in roots:
-        if not root.exists():
+        is_configured_root = root == configured_root
+        must_be_complete = is_configured_root and explicitly_configured and not allow_partial
+        try:
+            if not root.exists():
+                if must_be_complete:
+                    raise IncompleteDiscoveryError(
+                        f"configured import storage root {root} does not exist; "
+                        f"discovery cannot be proven complete"
+                    )
+                continue
+            if not root.is_dir():
+                if must_be_complete:
+                    raise IncompleteDiscoveryError(
+                        f"configured import storage root {root} is not a directory; "
+                        f"discovery cannot be proven complete"
+                    )
+                continue
+            found = sorted(root.glob("*/*/IMPORT-MANIFEST.json"))
+        except OSError as exc:
+            if must_be_complete:
+                raise IncompleteDiscoveryError(
+                    f"configured import storage root {root} could not be fully "
+                    f"enumerated: {exc}"
+                ) from exc
             continue
-        for manifest_file in root.glob("*/*/IMPORT-MANIFEST.json"):
-            identity = (manifest_file.parent.parent.name, manifest_file.parent.name)
-            existing = by_identity.get(identity)
+        for manifest_file in found:
+            source_dir_name = manifest_file.parent.parent.name
+            slug_dir_name = manifest_file.parent.name
+            manifest = read_json(manifest_file)
+            source_name = manifest.get("source_name")
+            slug = manifest.get("slug")
+            archive_id = manifest.get("archive_id")
+            if (
+                not isinstance(source_name, str)
+                or not isinstance(slug, str)
+                or not isinstance(archive_id, str)
+                or slugify(source_name) != source_dir_name
+                or slugify(slug) != slug_dir_name
+            ):
+                raise ArchiveIdentityLayoutMismatchError(
+                    f"{manifest_file} declares source_name={source_name!r} slug={slug!r} "
+                    f"archive_id={archive_id!r}, which does not match its directory "
+                    f"layout ({source_dir_name}/{slug_dir_name})"
+                )
+            existing = by_identity.get(archive_id)
             if existing is not None:
                 if existing.resolve() == manifest_file.resolve():
                     continue  # the same physical file, reached via both roots
                 raise DuplicateArchiveIdentityError(
-                    f"archive identity {identity[0]}/{identity[1]} exists at both "
-                    f"{existing} and {manifest_file}"
+                    f"archive_id {archive_id!r} exists at both {existing} and {manifest_file}"
                 )
-            by_identity[identity] = manifest_file
+            by_identity[archive_id] = manifest_file
             manifests.append(manifest_file)
     return sorted(manifests)
 

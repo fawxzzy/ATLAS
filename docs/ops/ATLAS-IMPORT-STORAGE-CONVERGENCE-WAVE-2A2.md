@@ -52,17 +52,20 @@ full pre-existing test suite (106 storage + 35 S2A tests) passing
 unchanged. When it is relocated, the same call sites correctly produce
 and consume the marker without having been individually touched.
 
-### Discovery follows the configured root
+### Discovery follows the configured root, and stays complete
 
 `discover_import_manifests()` (the one function that walks
 `*/*/IMPORT-MANIFEST.json` to enumerate every imported archive --
 consumed by `backfill_v2.py`, `rank_promotion_candidates.py`, and the
-catalog/validation builders in `_pipeline.py`) now globs
-`storage.import_storage_root()` instead of a hardcoded path. An archive
-under the *previous* default location is invisible once the root is
-relocated -- deliberately: this wave does not migrate existing archives
-(that is real-data work, explicitly out of scope here and in S2A/S1 --
-see below), it only changes where *new* activity looks.
+catalog/validation builders in `_pipeline.py`) now scans
+`storage.import_storage_root()` instead of a hardcoded path -- and, since
+relocating that root is a configuration change, not a migration, it also
+scans the legacy default location whenever the two differ, so nothing
+already sitting at the previous location goes missing from discovery on
+its own. See "Discovery preserves legacy inventory across a
+configuration change" and "Discovery distinguishes complete from
+partial inventory" below for the full contract, including what happens
+when the configured root itself is unavailable.
 
 ### What deliberately stays ATLAS-relative regardless of the storage root
 
@@ -128,6 +131,24 @@ ATLAS directory is named this, so treating it as reserved is what keeps
 every *accepted* encoded reference decoding to the same location it was
 encoded from.
 
+### Encoding enforces the same grammar as decoding
+
+The component grammar is not decode-only. `relative_to_atlas()` applies
+`_reject_unsafe_storage_reference_component()` -- the same validator
+`resolve_atlas_path()` uses -- to every component of a storage-root
+reference **before** returning it, not just when reading one back. A
+colon is an ordinary character in a POSIX filename (and irrelevant on
+Windows, where such a name cannot exist on disk at all), but it is
+reserved in this grammar precisely because it is also how a Windows
+drive letter would be injected into a reference -- so a real file named
+e.g. `notes:2026.txt` sitting under the storage root on a POSIX
+filesystem must never be *encoded* into a reference the decoder would
+then refuse. Refusing at encode time means the underlying file is never
+renamed, moved, or silently omitted -- only the specific operation that
+would need to produce an unrepresentable portable reference for it
+fails, loudly, instead of handing a caller a string that breaks the
+moment anything tries to resolve it back.
+
 ## Discovery preserves legacy inventory across a configuration change
 
 `discover_import_manifests()` reads **both** the configured storage root
@@ -138,12 +159,43 @@ location (the common, unconfigured case). Changing
 must never make an archive that already exists at the previous default
 location invisible to the catalog/validation/backfill/ranking tooling
 that all consume this list, since nothing has actually moved it there.
-If two different roots each hold a manifest claiming the same
-`(source_name, slug)` identity, that is a genuine collision --
-`DuplicateArchiveIdentityError` is raised rather than silently picking
-one. An unavailable *configured* root (doesn't exist) no longer reads as
-"the archive inventory is empty" when a legacy archive is real and
-readable -- the legacy scan still finds it.
+
+Identity for both the legacy-preservation dedup and the collision check
+below is the manifest's **own declared** `(source_name, slug)` -- read
+from `IMPORT-MANIFEST.json` and slugified exactly as
+`source_dir()`/`archive_dir()` derive it -- not simply the literal
+directory names discovery happened to find the manifest under. Those two
+always agree for anything this pipeline itself wrote; if they disagree,
+`ArchiveIdentityLayoutMismatchError` is raised rather than trusting
+either side over the other, since a manifest or its containing
+directories having been edited or moved out of band is exactly the
+situation where guessing wrong (for dedup, or for the identity every
+downstream consumer reads) is unsafe. If two different roots each hold a
+manifest whose validated identity resolves to the same `archive_id`,
+that is a genuine collision -- `DuplicateArchiveIdentityError` is raised
+rather than silently picking one, even when the two manifests sit under
+different directory layouts.
+
+### Discovery distinguishes complete from partial inventory
+
+A missing or not-yet-created default root is ordinary first use --
+nothing has ever been imported, so an empty list is correct, not an
+error. But once `ATLAS_IMPORT_STORAGE_ROOT` is **explicitly** set, its
+target being unavailable is a different situation: missing, not a
+directory, or an `OSError` partway through enumeration all mean some of
+its contents might be unreachable rather than genuinely absent, so the
+list `discover_import_manifests()` would otherwise return cannot be
+proven complete. Silently falling back to whatever the legacy root alone
+finds would let a configuration change masquerade as a completed
+migration -- exactly the failure mode this wave exists to prevent.
+`IncompleteDiscoveryError` is raised instead, before
+`update_catalog_doc()` (or `validate_catalog()`, backfill, or ranking)
+ever builds or publishes a record from a possibly-partial list; since
+the error is raised before any write, an existing catalog document is
+left completely unchanged on refusal. A caller that only wants a
+best-effort, read-only snapshot -- not an authoritative inventory used
+for publication -- may pass `discover_import_manifests(allow_partial=True)`
+to opt out and see whatever the legacy root still finds.
 
 ## `env=` is honored consistently within `import_archive()`
 
@@ -163,9 +215,9 @@ invocation would.
 
 ## Tests
 
-`tests/test_atlas_knowledge_pipeline_s2a.py` -- 52 tests. Local: Windows
-52/52 (3 skipped, symlink-privilege), Ubuntu (WSL) 52/52 (0 skipped).
-Combined with the storage suite (106, unchanged): 158 total.
+`tests/test_atlas_knowledge_pipeline_s2a.py` -- 59 tests. Local: Windows
+59/59 (3 skipped, symlink-privilege), Ubuntu (WSL) 59/59 (0 skipped).
+Combined with the storage suite (106, unchanged): 165 total.
 
 - archive resolution follows a configured `ATLAS_IMPORT_STORAGE_ROOT`
   entirely outside the ATLAS checkout; the default (unconfigured) root
@@ -173,26 +225,39 @@ Combined with the storage suite (106, unchanged): 158 total.
 - `resolve_atlas_path()` round-trips a marker-form manifest path back to
   the real, relocated filesystem location; an explicit `env=` override
   is honored end to end (proven with no `os.environ` mutation at all)
-- **reference grammar**: a `..` parent-traversal reference and a
-  symlinked escape *inside* the storage root are both rejected before
-  any consumer sees the resolved path (the sentinel each attempts to
-  reach is proven untouched); an ordinary reference round-trips; a
-  literal ATLAS path named `@storage-root` is rejected at encode time,
-  not misdecoded; a Windows drive-letter component in a realistic
-  (single-string) reference is rejected; the component validator itself
-  is proven to reject empty/`.`/`..` directly, since pathlib normalizes
-  those away before they could ever reach it through a real string
-- **discovery migration safety**: an archive left at the legacy default
-  location remains discoverable after the root is reconfigured; the
-  same physical root reached two ways is not double-counted; two
-  different roots claiming the same archive identity raise
-  `DuplicateArchiveIdentityError`; a missing configured root still finds
-  a real legacy archive rather than reading as an empty inventory
+- **reference grammar, both directions**: on decode, a `..`
+  parent-traversal reference and a symlinked escape *inside* the storage
+  root are both rejected before any consumer sees the resolved path (the
+  sentinel each attempts to reach is proven untouched); a literal ATLAS
+  path named `@storage-root` is rejected at encode time, not misdecoded;
+  a Windows drive-letter component in a realistic (single-string)
+  reference is rejected; the component validator itself is proven to
+  reject empty/`.`/`..` directly, since pathlib normalizes those away
+  before they could ever reach it through a real string. On encode, a
+  name containing a reserved character (e.g. a POSIX filename with a
+  literal colon) is refused rather than turned into a reference the
+  decoder would then reject, while an ordinary representable name still
+  round-trips through encode and decode both
+- **discovery migration safety and completeness**: an archive left at
+  the legacy default location remains discoverable after the root is
+  reconfigured; the same physical root reached two ways is not
+  double-counted; two different roots whose manifests declare the same
+  archive identity raise `DuplicateArchiveIdentityError` even when filed
+  under different directory layouts; a manifest whose declared identity
+  disagrees with its own directory layout raises
+  `ArchiveIdentityLayoutMismatchError`; an unconfigured, not-yet-existing
+  default root is a normal empty first-use inventory; an *explicitly
+  configured* root that is missing raises `IncompleteDiscoveryError`
+  instead of silently returning a legacy-only partial list, and a
+  read-only caller may opt into that partial view with
+  `allow_partial=True`; `update_catalog_doc()` refusing on incomplete
+  discovery leaves an existing catalog document completely unchanged
 - **downstream consumers, end to end, against a relocated archive**:
   persisted import -> `evaluate_archive()` -> `normalize_archive()` ->
-  `update_catalog_doc()` -> `validate_catalog()`, plus a second
-  CLI-style resolution via `resolve_archive_dir()`'s `--archive-dir`
-  path from the saved marker string, plus an independent restore check
-  against the persisted relocation receipt/manifest
+  `update_catalog_doc()` -> `validate_catalog()` (asserting a fully
+  clean result, not just that it returned), plus a second CLI-style
+  resolution via `resolve_archive_dir()`'s `--archive-dir` path from the
+  saved marker string, plus an independent restore check against the
+  persisted relocation receipt/manifest
 - promotion and catalog docs stay under `atlas_root()` regardless of
   where the storage root points

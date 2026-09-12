@@ -838,33 +838,129 @@ class StorageRootIntegrationTests(_ImportHarness):
         # (source_name, slug) identity must never be silently resolved by
         # picking one -- that would hide real data from whichever
         # consumer didn't get chosen.
+        identity_fields = (
+            '{"archive_id": "synthetic-source--sample", '
+            '"source_name": "synthetic-source", "slug": "sample"}'
+        )
         default_manifest = (
             self.fake_atlas / "data" / "imports" / "knowledge" / "synthetic-source" / "sample"
             / "IMPORT-MANIFEST.json"
         )
         default_manifest.parent.mkdir(parents=True)
-        default_manifest.write_text('{"archive_id": "synthetic-source--sample"}', encoding="utf-8")
+        default_manifest.write_text(identity_fields, encoding="utf-8")
 
         env = self._external_storage_env()
         external_manifest = self._external_storage / "synthetic-source" / "sample" / "IMPORT-MANIFEST.json"
         external_manifest.parent.mkdir(parents=True)
-        external_manifest.write_text('{"archive_id": "synthetic-source--sample"}', encoding="utf-8")
+        external_manifest.write_text(identity_fields, encoding="utf-8")
 
         with mock.patch.dict(os.environ, env):
             with self.assertRaises(_pipeline.DuplicateArchiveIdentityError):
                 _pipeline.discover_import_manifests()
 
-    def test_missing_configured_root_still_finds_legacy_archives_not_an_empty_inventory(self) -> None:
-        # A configured root that doesn't exist (unavailable) must not be
-        # interpreted as "there are zero archives" when a legacy archive
-        # genuinely exists and is readable.
+    def test_duplicate_declared_identity_under_different_directory_names_is_rejected(self) -> None:
+        # The gap the review demonstrated: two manifests filed under
+        # DIFFERENT directory layouts (each internally consistent with its
+        # own manifest) but declaring the SAME archive_id must still be
+        # caught -- dedup keyed on directory names alone would accept this.
+        default_manifest = (
+            self.fake_atlas / "data" / "imports" / "knowledge" / "source-one" / "slug-one"
+            / "IMPORT-MANIFEST.json"
+        )
+        default_manifest.parent.mkdir(parents=True)
+        default_manifest.write_text(
+            json.dumps(
+                {"archive_id": "shared-id", "source_name": "source-one", "slug": "slug-one"}
+            ),
+            encoding="utf-8",
+        )
+
+        env = self._external_storage_env()
+        external_manifest = self._external_storage / "source-two" / "slug-two" / "IMPORT-MANIFEST.json"
+        external_manifest.parent.mkdir(parents=True)
+        external_manifest.write_text(
+            json.dumps(
+                {"archive_id": "shared-id", "source_name": "source-two", "slug": "slug-two"}
+            ),
+            encoding="utf-8",
+        )
+
+        with mock.patch.dict(os.environ, env):
+            with self.assertRaises(_pipeline.DuplicateArchiveIdentityError):
+                _pipeline.discover_import_manifests()
+
+    def test_manifest_identity_disagreeing_with_its_directory_layout_is_rejected(self) -> None:
+        # A manifest whose own declared source_name/slug do not slugify
+        # back to the directory it was actually found under -- tampered or
+        # moved out of band -- must fail closed, not be silently trusted
+        # either as its declared identity or as its directory identity.
+        manifest_file = (
+            self.fake_atlas / "data" / "imports" / "knowledge" / "on-disk-source" / "on-disk-slug"
+            / "IMPORT-MANIFEST.json"
+        )
+        manifest_file.parent.mkdir(parents=True)
+        manifest_file.write_text(
+            json.dumps(
+                {"archive_id": "mismatched", "source_name": "different-source", "slug": "on-disk-slug"}
+            ),
+            encoding="utf-8",
+        )
+        with self.assertRaises(_pipeline.ArchiveIdentityLayoutMismatchError):
+            _pipeline.discover_import_manifests()
+
+    def test_missing_configured_root_blocks_authoritative_discovery(self) -> None:
+        # An EXPLICITLY configured root that doesn't exist must not be
+        # interpreted as "there are zero (or only legacy) archives" --
+        # some of its contents might be unreachable rather than genuinely
+        # absent, so the returned list can't be proven complete. Silently
+        # falling back to legacy-only would let a configuration change
+        # masquerade as a completed migration.
         src_default = self._make_source_folder("inbox/stillthere")
         self._import(src_default)
 
         missing = self._base / "does-not-exist-storage"
         with mock.patch.dict(os.environ, {"ATLAS_IMPORT_STORAGE_ROOT": str(missing)}):
-            found = _pipeline.discover_import_manifests()
+            with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                _pipeline.discover_import_manifests()
+
+    def test_missing_configured_root_read_only_diagnostics_may_opt_into_partial_results(self) -> None:
+        # A caller that only wants a best-effort snapshot -- not an
+        # authoritative inventory used for catalog/validation/backfill
+        # publication -- may explicitly opt into the partial view; the
+        # legacy archive is still real and still findable.
+        src_default = self._make_source_folder("inbox/stillthere")
+        self._import(src_default)
+
+        missing = self._base / "does-not-exist-storage"
+        with mock.patch.dict(os.environ, {"ATLAS_IMPORT_STORAGE_ROOT": str(missing)}):
+            found = _pipeline.discover_import_manifests(allow_partial=True)
         self.assertEqual(len(found), 1)
+
+    def test_unconfigured_missing_default_root_is_a_normal_empty_first_use(self) -> None:
+        # No ATLAS_IMPORT_STORAGE_ROOT set at all, and nothing has ever
+        # been imported: the default root not existing yet is ordinary
+        # first-use, not something "configured" that could be unavailable.
+        found = _pipeline.discover_import_manifests()
+        self.assertEqual(found, [])
+
+    def test_catalog_refresh_is_blocked_and_existing_catalog_left_unchanged_on_incomplete_discovery(
+        self,
+    ) -> None:
+        (self.fake_atlas / "docs" / "knowledge").mkdir(parents=True, exist_ok=True)
+        src = self._make_source_folder()
+        env = self._external_storage_env()
+        with mock.patch.dict(os.environ, env):
+            self._import_to_external(src, env)
+            first = _pipeline.update_catalog_doc(dry_run=False)
+        before = _pipeline.catalog_doc_path().read_text(encoding="utf-8")
+        self.assertEqual(first["record_count"], 1)
+
+        missing = self._base / "now-unavailable-storage"
+        with mock.patch.dict(os.environ, {"ATLAS_IMPORT_STORAGE_ROOT": str(missing)}):
+            with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                _pipeline.update_catalog_doc(dry_run=False)
+        after = _pipeline.catalog_doc_path().read_text(encoding="utf-8")
+        self.assertEqual(before, after)
 
     def test_persisted_import_evaluate_normalize_and_catalog_validation_against_relocated_archive(self) -> None:
         # Downstream consumers: evaluate_archive(), normalize_archive(),
@@ -895,9 +991,29 @@ class StorageRootIntegrationTests(_ImportHarness):
             self.assertFalse(catalog["catalog_path"].startswith("@storage-root"))
 
             # validate_catalog() must run to completion (no path-resolution
-            # error) against the relocated archive and account for it.
+            # error) against the relocated archive, account for it, AND
+            # come back with only the ONE finding this harness's fixture
+            # is expected to produce -- asserting record_count alone
+            # proves it returned, not that validation actually passed with
+            # the findings it should. The lone expected finding is a
+            # fixture artifact, not a real defect: _ImportHarness stubs
+            # receipt_tooling() with a fixed all-zero pipeline_digest (see
+            # setUp), which never matches the real module's digest, so
+            # validate_catalog() correctly reports the latest receipt's
+            # recorded tooling digest as stale.
             validation = _pipeline.validate_catalog(include_query_bundle=False)
             self.assertEqual(validation["record_count"], 1)
+            self.assertEqual(
+                validation["findings"],
+                [
+                    {
+                        "severity": "error",
+                        "path": "runtime/receipts/knowledge/synthetic-source--sample/latest.json",
+                        "message": "Latest receipt tooling.pipeline_digest is stale or missing.",
+                    }
+                ],
+            )
+            self.assertEqual(validation["summary"], {"errors": 1, "warnings": 0, "total": 1})
 
             # CLI-style second invocation: resolve the archive again via
             # resolve_archive_dir()'s --archive-dir path, from the SAVED
@@ -1015,6 +1131,41 @@ class StorageReferenceGrammarTests(_ImportHarness):
             _pipeline._reject_unsafe_storage_reference_component("", reference="@storage-root/")
         with self.assertRaises(ValueError):
             _pipeline._reject_unsafe_storage_reference_component("..", reference="@storage-root/..")
+
+    def test_encoder_refuses_what_the_decoder_would_reject(self) -> None:
+        # relative_to_atlas() must apply the same component grammar
+        # resolve_atlas_path() enforces, BEFORE emitting a reference --
+        # otherwise it can hand out a string ("@storage-root/.../name:with:colons")
+        # that looks like a valid marker reference but the decoder refuses
+        # the moment anything tries to resolve it back. A colon is an
+        # ordinary character in a POSIX filename but is reserved in this
+        # grammar (it's also how a Windows drive letter would be
+        # injected), so it is exactly the kind of name that can exist on
+        # disk yet not be representable.
+        external = self._configured_root()
+        unsafe = external / "regular"
+        unsafe.mkdir()
+        target = unsafe / "notes:2026.txt"
+        try:
+            target.write_text("unsafe name", encoding="utf-8")
+        except OSError:
+            self.skipTest("this filesystem does not allow ':' in filenames")
+        with mock.patch.dict(os.environ, {"ATLAS_IMPORT_STORAGE_ROOT": str(external)}):
+            with self.assertRaises(ValueError):
+                _pipeline.relative_to_atlas(target)
+        # The file itself is untouched -- only encoding it as a portable
+        # reference fails, nothing renamed or deleted it.
+        self.assertTrue(target.exists())
+
+    def test_encoder_still_accepts_an_ordinary_representable_name(self) -> None:
+        external = self._configured_root()
+        ordinary = external / "regular" / "notes-2026.txt"
+        ordinary.parent.mkdir(parents=True)
+        ordinary.write_text("ordinary name", encoding="utf-8")
+        with mock.patch.dict(os.environ, {"ATLAS_IMPORT_STORAGE_ROOT": str(external)}):
+            encoded = _pipeline.relative_to_atlas(ordinary)
+            decoded = _pipeline.resolve_atlas_path(Path(encoded))
+        self.assertEqual(decoded, ordinary.resolve())
 
 
 if __name__ == "__main__":
