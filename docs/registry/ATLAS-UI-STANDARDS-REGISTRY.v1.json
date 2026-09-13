@@ -8,7 +8,7 @@
     "root_owner": "ATLAS root",
     "implementation_owner": "each owner repository",
     "doctrine_owner": "Playbook",
-    "board_writer": "DiscordOS single writer",
+    "board_writer": "owner.fawxzzyweb for product-board continuation and platform.supabase-migration for master-data work after exact contracts are proven; DiscordOS is retired provenance only",
     "mutation_authorized": false
   },
   "provenance": [
@@ -71,7 +71,7 @@
       "ref": "packages/atlas-contracts",
       "authority": "ATLAS root contracts",
       "canonical_for": ["card lifecycle wire values", "evidence bundle semantics", "marker evidence", "knowledge candidates", "board events"],
-      "may_not_override": ["owner implementation truth", "DiscordOS applied readback"]
+      "may_not_override": ["owner implementation truth", "accepted owner board readback"]
     },
     {
       "rank": 4,
@@ -101,8 +101,8 @@
       "rank": 7,
       "source_id": "discordos-projection",
       "ref": "docs/atlas-book/03-operating-model.md",
-      "authority": "DiscordOS single writer",
-      "canonical_for": ["applied board state", "publication state", "readback receipts"],
+      "authority": "ATLAS root governance (retired DiscordOS provenance only)",
+      "canonical_for": ["historical board state", "historical publication state", "historical readback receipts"],
       "may_not_override": ["engineering proof", "registry semantics", "marker evidence"]
     }
   ],
@@ -133,7 +133,7 @@
       "The requested-change checklist contains no failed, blocked, deferred, planned, or unplanned item.",
       "Repo-native verification and the adopted QA LLEL gate pass for the target revision.",
       "The Atlas CardRecord is in review before it enters completed.",
-      "Board completion, if projected, is applied only by DiscordOS with readback."
+      "Board completion, if projected, is applied by owner.fawxzzyweb only after an exact product-board contract and readback; master-data work belongs to platform.supabase-migration after its exact data contract."
     ]
   },
   "evidence_dimensions": [
@@ -562,7 +562,7 @@
     {"rule_id": "atlas-ui-collision-004", "statement": "Owner implementation precedes root proof reconciliation; root does not fabricate owner artifacts."},
     {"rule_id": "atlas-ui-collision-005", "statement": "Execution, proof or reconciliation, and marker ratchet remain one serial cluster per lane."},
     {"rule_id": "atlas-ui-collision-006", "statement": "No marker moves from wording, root-only prototypes, missing evidence, or an unaccepted denominator."},
-    {"rule_id": "atlas-ui-collision-007", "statement": "Board mutation is deferred to DiscordOS single-writer application and readback; candidate files authorize no mutation."},
+    {"rule_id": "atlas-ui-collision-007", "statement": "Board mutation is deferred to owner.fawxzzyweb after an exact product-board contract and readback; master-data mutation belongs to platform.supabase-migration after its exact data contract; candidate files and retired DiscordOS provenance authorize no mutation."},
     {"rule_id": "atlas-ui-collision-008", "statement": "Atlas Book projection follows executed and accepted state; it does not lead implementation truth."},
     {"rule_id": "atlas-ui-collision-009", "statement": "Playbook ingestion follows repeated verified evidence and KnowledgeCandidate review; raw research is never copied into doctrine truth."},
     {"rule_id": "atlas-ui-collision-010", "statement": "Owner-repo adoption wraps healthy repo-native QA commands before any new generic tool is introduced."}
@@ -581,10 +581,10 @@
       "promotion_gate": "Require evidence-backed repetition, explicit review, and owner-side Playbook adoption proof."
     },
     "discordos": {
-      "owner": "DiscordOS single writer",
-      "ingests": ["Candidate cards after explicit admission", "Board events", "Accepted completion and readback intents"],
-      "rejects": ["Direct mutation from this registry", "Marker inference", "Engineering proof inferred from prose"],
-      "promotion_gate": "Require separately authorized application plus idempotent readback."
+      "owner": "ATLAS root governance (retired provenance only)",
+      "ingests": ["Historical DiscordOS cards", "Historical board events", "Historical completion and readback receipts"],
+      "rejects": ["Task selection or wake", "Dispatch or PR creation", "Board or provider mutation", "Marker inference", "Engineering proof inferred from prose"],
+      "promotion_gate": "No DiscordOS promotion or reactivation. Route future product-board work to owner.fawxzzyweb and master-data work to platform.supabase-migration only after exact contracts are proven."
     }
   },
   "encoding_policy": {

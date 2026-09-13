@@ -70,6 +70,15 @@ class WorkboxReleaseSafetyTests(unittest.TestCase):
                 expected_origin=self.origin,
             )
 
+    def test_rejects_expected_origin_control_characters_before_url_parsing(self) -> None:
+        for control in ("\t", "\r", "\n"):
+            self.assert_rejected(
+                "WORKBOX_EXPECTED_ORIGIN_INVALID",
+                canonicalize_same_origin_workbox_key,
+                "/favicon.ico",
+                expected_origin=f"https://app{control}.example",
+            )
+
     def test_rejects_raw_and_encoded_traversal(self) -> None:
         for value in ("../favicon.ico", "%2e%2e/favicon.ico", "/safe/%2E%2E/favicon.ico"):
             self.assert_rejected(

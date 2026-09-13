@@ -408,6 +408,18 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
                 self.assertIn(expected_code, {error["code"] for error in result["errors"]})
                 self.ledger["worker_topology"]["integrator"][field] = original
 
+    def test_unhashable_writer_scope_returns_structured_invalid(self) -> None:
+        for value in (["not", "hashable"], {"not": "hashable"}):
+            with self.subTest(value=value):
+                original = self.ledger["worker_topology"]["integrator"]["writer_scope"]
+                self.ledger["worker_topology"]["integrator"]["writer_scope"] = value
+                self._write_ledger()
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn("WRITER_SCOPE_COLLISION", {error["code"] for error in result["errors"]})
+                self.assertEqual(0, result["writer_authority"]["unique_writer_scopes"])
+                self.ledger["worker_topology"]["integrator"]["writer_scope"] = original
+
     def test_fails_when_single_observation_fanout_gate_is_removed(self) -> None:
         self.optimization_governance["anti_churn"]["single_observation_failure_gate"][
             "canonical_observation_only"

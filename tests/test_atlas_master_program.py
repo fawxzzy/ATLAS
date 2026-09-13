@@ -142,7 +142,22 @@ class AtlasMasterProgramTests(unittest.TestCase):
             ["FP-DOS-REC-001", "FP-MZR-REC-001", "FP-FIT-REC-001", "FP-PARITY-RATCHET-001"],
             [packet["id"] for packet in packets],
         )
-        self.assertEqual("FP-DOS-REC-001", admission["next_packet"])
+        self.assertEqual("NONE_HELD_PENDING_EXACT_OWNER_AND_DATA_CONTRACTS", admission["next_packet"])
+        discordos_packet = packets[0]
+        self.assertEqual("TERMINAL_PROVENANCE", discordos_packet["status"])
+        self.assertIn("retired provenance", discordos_packet["owner"])
+        self.assertEqual("NONE_RETIRED_PROVENANCE", discordos_packet["next_packet"])
+        self.assertNotIn("FP-DOS-REC-001", packets[1]["dependencies"])
+        self.assertNotIn("FP-DOS-REC-001", packets[3]["dependencies"])
+        active_routing = json.dumps({
+            "owner": admission["owner"],
+            "dependencies": admission["dependencies"],
+            "serialization": admission["serialization"],
+            "next_packet": admission["next_packet"],
+        })
+        self.assertNotIn("DiscordOS single writer", active_routing)
+        self.assertIn("owner.fawxzzyweb", active_routing)
+        self.assertIn("platform.supabase-migration", active_routing)
         self.assertIn("vercel-production", admission["approval_gates"])
 
         registry = load_json("docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json")

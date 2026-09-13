@@ -35,6 +35,8 @@ def _fail(code: str, detail: str) -> None:
 
 
 def _canonical_origin(origin: str) -> tuple[str, str, int | None]:
+    if not isinstance(origin, str) or _CONTROL_RE.search(origin):
+        _fail("WORKBOX_EXPECTED_ORIGIN_INVALID", "expected origin must not contain control characters")
     parsed = urlsplit(origin)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
         _fail("WORKBOX_EXPECTED_ORIGIN_INVALID", "expected origin must be absolute HTTP(S)")

@@ -3,7 +3,7 @@
   "admission_id": "fawxzzy-platform-migration-wave-0-2026-07-16",
   "generated_at": "2026-07-16T23:26:40Z",
   "title": "FawxzzyPlatform Migration Wave 0 Admission",
-  "owner": "ATLAS coordinator with serialized Fitness, Mazer, DiscordOS, Foundation, Lifeline, _stack, FawxzzyWeb, and application-owner packets",
+  "owner": "ATLAS coordinator with serialized Fitness, Mazer, Foundation, Lifeline, _stack, owner.fawxzzyweb, platform.supabase-migration, and application-owner packets; DiscordOS is retired provenance only",
   "authority": {
     "mode": "governance-admission-only",
     "root_writer": "single writer in isolated ATLAS worktree",
@@ -14,7 +14,6 @@
   },
   "scope": "Admit the platform migration and serialized recovery/parity prerequisites without creating the platform repository, implementing infrastructure, changing owner repositories, or touching Supabase, Vercel, Discord, production, secrets, or the canonical ATLAS checkout.",
   "dependencies": [
-    "FP-DOS-REC-001",
     "FP-MZR-REC-001",
     "FP-FIT-REC-001",
     "FP-PARITY-RATCHET-001",
@@ -23,11 +22,13 @@
   ],
   "serialization": [
     "Overall HOLD applies to platform repository creation, schema/Auth/billing migration, and rehearsal.",
-    "Run FP-DOS-REC-001, then FP-MZR-REC-001, then FP-FIT-REC-001, then FP-PARITY-RATCHET-001.",
+    "FP-DOS-REC-001 is terminal provenance and must not be selected, woken, dispatched, replayed, or used for PR creation.",
+    "Future product-board continuation belongs to owner.fawxzzyweb and master-data work belongs to platform.supabase-migration only after their exact owner and data contracts are proven.",
+    "Run FP-MZR-REC-001, then FP-FIT-REC-001, then FP-PARITY-RATCHET-001 only after separate current admission.",
     "Use one canonical migration ledger.",
     "Expand -> migrate -> verify -> cutover -> contract.",
     "Root coordinates and receipts; each owner repository owns its implementation.",
-    "DiscordOS remains physically separate by default and one logical board writer remains in force."
+    "DiscordOS remains physically separate as read-only historical provenance and has no live writer role."
   ],
   "approval_gates": [
     "paid-project",
@@ -58,7 +59,7 @@
     "No percentage is assigned until an accepted deterministic measurement contract exists."
   ],
   "status": "HOLD",
-  "next_packet": "FP-DOS-REC-001",
+  "next_packet": "NONE_HELD_PENDING_EXACT_OWNER_AND_DATA_CONTRACTS",
   "measurement_status": "UNMEASURED",
   "source_import": {
     "stored_ref": "data/imports/fawxzzy-platform/2026-07-16/ATLAS_MAIN_FAWXZZY_PLATFORM_SUPABASE_MIGRATION_PROMPT_2026-07-16.md",
@@ -68,7 +69,7 @@
   },
   "architecture_decision": {
     "platform_seed": "The existing Fitness Supabase project seeds FawxzzyPlatform.",
-    "discordos": "DiscordOS remains physically separate by default.",
+    "discordos": "DiscordOS remains physically separate as archived and retired read-only provenance; it is not an execution, board, provider, or PR owner.",
     "new_blank_project": "Do not create a fourth blank project.",
     "migration_sequence": ["expand", "migrate", "verify", "cutover", "contract"],
     "ledger": "One canonical migration ledger after convergence.",
@@ -106,12 +107,12 @@
     "recovery_packets": [
       {
         "id": "FP-DOS-REC-001",
-        "owner": "DiscordOS",
-        "status": "NEXT-AFTER-CURRENT-DISCORD-BOARD-CLUSTER",
-        "authority": "source-only recovery and disposable replay; no production deploy",
-        "scope": "Recover six live-only migrations and the JWT-verified discordos-update-drafts Edge v5 source, then prove disposable replay and RPC security contracts.",
+        "owner": "ATLAS root governance (retired provenance only)",
+        "status": "TERMINAL_PROVENANCE",
+        "authority": "historical source references only; no selection, wake, dispatch, replay, PR, board, provider, or production authority",
+        "scope": "Preserve historical evidence for six live-only migrations and the JWT-verified discordos-update-drafts Edge v5 source without reactivating DiscordOS.",
         "dependencies": [],
-        "serialization": ["Run first.", "Recover exact source before replay.", "Never read, expose, or store the cron bearer."],
+        "serialization": ["Never run or replay this retired packet.", "Preserve exact source evidence as read-only provenance.", "Never read, expose, or store the cron bearer."],
         "approval_gates": ["breaking-secret-rotation", "production-data-cutover", "irreversible-action"],
         "evidence": [
           "live project ref nwexsktuuenfdegzrbut: 17 migrations (operator-supplied snapshot)",
@@ -124,7 +125,7 @@
           "RPCs are public(payload jsonb), security invoker, search_path=discordos,public,pg_temp, and service_role only.",
           "Only a secret-reference contract is stored; later secret-authorized proof may compare command MD5 a643548eb2f16b7959ff8b4c45d98c02."
         ],
-        "next_packet": "FP-MZR-REC-001",
+        "next_packet": "NONE_RETIRED_PROVENANCE",
         "measurement_status": "UNMEASURED",
         "migrations": [
           {"version": "20260612082854", "sha256": "dfc460760a4d2c78e5afb0c13e668c13fff7daddb07d1721e1f50e2fa6eb28c2"},
@@ -141,8 +142,8 @@
         "status": "QUEUED",
         "authority": "source-only exact replay and parity; no live repair",
         "scope": "Recover the exact four-entry live ledger, prove replay/parity, then normalize source-only aliases.",
-        "dependencies": ["FP-DOS-REC-001"],
-        "serialization": ["Run after FP-DOS-REC-001.", "Exact replay/parity precedes alias normalization."],
+        "dependencies": [],
+        "serialization": ["Requires separate current owner admission.", "Exact replay/parity precedes alias normalization."],
         "approval_gates": ["production-data-cutover", "destructive-contraction", "irreversible-action"],
         "evidence": ["operator-supplied exact live ledger snapshot"],
         "definition_of_done": ["All four source files match recorded digests.", "Disposable replay and parity pass.", "No live repair occurs."],
@@ -185,8 +186,8 @@
         "status": "QUEUED",
         "authority": "fresh read-only parity from clean owner worktrees after all recovery merges",
         "scope": "Recheck ordered ledger equality or ratified baselines, source checksums, disposable replay, schema/RLS/function comparison where applicable, and backup/restore evidence.",
-        "dependencies": ["FP-DOS-REC-001", "FP-MZR-REC-001", "FP-FIT-REC-001"],
-        "serialization": ["Run only after all three recovery merges.", "Admit platform repository and first rehearsal only after fresh ratchet acceptance."],
+        "dependencies": ["FP-MZR-REC-001", "FP-FIT-REC-001"],
+        "serialization": ["Run only after both live recovery packets close; FP-DOS-REC-001 is provenance only.", "Admit platform repository and first rehearsal only after fresh ratchet acceptance."],
         "approval_gates": ["paid-project", "production-auth-oauth", "production-data-cutover", "maintenance-window", "irreversible-action"],
         "evidence": ["clean owner worktrees", "ordered ledgers", "source digests", "disposable replay receipts", "backup/restore receipts"],
         "definition_of_done": ["Each owner has ordered ledger equality or an accepted explicit baseline.", "Source checksums, replay, and backup/restore evidence pass.", "A fresh accepted receipt explicitly lifts or preserves the platform hold."],

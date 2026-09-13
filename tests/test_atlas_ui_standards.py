@@ -131,6 +131,22 @@ class AtlasUiStandardsTests(unittest.TestCase):
         self.assertEqual(result["status"], "valid", result["errors"])
         self.assertTrue(result["safe_to_adopt_root_foundation"])
 
+    def test_retired_discordos_is_provenance_only_and_not_a_live_board_writer(self) -> None:
+        board_writer = self.registry["authority"]["board_writer"]
+        self.assertIn("owner.fawxzzyweb", board_writer)
+        self.assertIn("platform.supabase-migration", board_writer)
+        discordos = self.registry["ingestion_boundaries"]["discordos"]
+        self.assertIn("retired provenance only", discordos["owner"])
+        self.assertIn("Task selection or wake", discordos["rejects"])
+        self.assertIn("Dispatch or PR creation", discordos["rejects"])
+        active_contract = json.dumps({
+            "authority": self.registry["authority"],
+            "lifecycle": self.registry["lifecycle"],
+            "collision_rules": self.registry["collision_rules"],
+        })
+        self.assertNotIn("DiscordOS single writer", active_contract)
+        self.assertNotIn("applied only by DiscordOS", active_contract)
+
     def test_duplicate_standard_id_is_rejected(self) -> None:
         registry = copy.deepcopy(self.registry)
         registry["standards"].append(copy.deepcopy(registry["standards"][0]))

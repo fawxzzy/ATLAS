@@ -670,8 +670,10 @@ def validate_conformance(
     check(lock.get("task_count") == 4, "PROGRAM_TASK_LOCK_DRIFT", str(lock.get("task_count")))
     check(lock.get("additional_program_tasks_permitted") is False, "PROGRAM_TASK_WIDENING", "additional tasks must remain false")
     writer_scopes = [entry.get("writer_scope") for entry in entries]
+    valid_writer_scopes = all(isinstance(scope, str) and bool(scope) for scope in writer_scopes)
+    unique_writer_scope_count = len(set(writer_scopes)) if valid_writer_scopes else 0
     check(
-        len(set(writer_scopes)) == 4 and all(isinstance(scope, str) and scope for scope in writer_scopes),
+        valid_writer_scopes and unique_writer_scope_count == 4,
         "WRITER_SCOPE_COLLISION",
         "four unique writer scopes are required",
     )
@@ -797,7 +799,7 @@ def validate_conformance(
         "writer_authority": {
             "program_task_count": lock.get("task_count"),
             "additional_program_tasks_permitted": lock.get("additional_program_tasks_permitted"),
-            "unique_writer_scopes": len(set(writer_scopes)),
+            "unique_writer_scopes": unique_writer_scope_count,
             "product_provider_effects_allowed": authority.get("product_provider_effects_allowed") if isinstance(authority, dict) else None,
             "decision_memory_repair_owned_elsewhere": authority.get("decision_memory_repair_owned_elsewhere") if isinstance(authority, dict) else None,
         },
