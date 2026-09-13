@@ -515,6 +515,41 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertIn("COMMON_RELEASE_CONTROLS_MISSING", {error["code"] for error in result["errors"]})
 
+    def test_unhashable_engineering_memory_seed_id_returns_structured_invalid(self) -> None:
+        seed_ids = self.optimization_governance["common_release_safety_controls"]["engineering_memory_seed_ids"]
+        original = seed_ids[0]
+        for value in (["not", "hashable"], {"not": "hashable"}):
+            with self.subTest(value=value):
+                seed_ids[0] = value
+                (self.root / self.optimization_governance_ref).write_text(
+                    json.dumps(self.optimization_governance), encoding="utf-8"
+                )
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn(
+                    "COMMON_RELEASE_ENGINEERING_MEMORY_PROMOTION_MISSING",
+                    {error["code"] for error in result["errors"]},
+                )
+                seed_ids[0] = original
+
+    def test_rejects_boolean_source_coverage_counters(self) -> None:
+        coverage = self.ledger["source_coverage"]
+        for field in (
+            "cross_source_tasks_discovered",
+            "metadata_indexed",
+            "inaccessible",
+            "content_reviewed_tasks",
+            "remaining_content_review_tasks",
+        ):
+            with self.subTest(field=field):
+                original = coverage[field]
+                coverage[field] = True
+                self._write_ledger()
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn("SOURCE_DENOMINATOR_INVALID", {error["code"] for error in result["errors"]})
+                coverage[field] = original
+
     def test_fails_when_common_release_publication_state_overclaims_current_main(self) -> None:
         self.optimization_governance["common_release_safety_controls"]["publication_state"] = "installed-current-main"
         (self.root / self.optimization_governance_ref).write_text(

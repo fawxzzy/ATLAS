@@ -1,16 +1,16 @@
 # Operating Model
 
-## 2026-07-15 current capability override
+## 2026-09-13 current capability override
 
-Atlas root owns governance, markers, v1 contracts, and accepted receipts; `_stack` owns governed action routing, operator flows, and event normalization; Playbook owns doctrine and repo verification; root-owned Cortex surfaces provide advisory context/routing/synthesis; owner repos own product/code truth; DiscordOS is the one logical board/publication/readback writer; GitHub is remote/CI/review/release/security truth; Vercel is delivery/observability; Supabase is auth/persistence; Codex supplies bounded execution tasks; 01 Ops mechanically reconciles exact already-authorized standing work without becoming a catch-all authority sink.
+Atlas root owns governance, markers, v1 contracts, and accepted receipts; `_stack` owns governed action routing, operator flows, and event normalization; Playbook owns doctrine and repo verification; root-owned Cortex surfaces provide advisory context/routing/synthesis; owner repos own product/code truth; `owner.fawxzzyweb` owns future product-board continuation after an exact board contract; `platform.supabase-migration` owns future master-data work after an exact data contract; DiscordOS is archived and retired read-only provenance with no writer, dispatch, provider, or PR authority; GitHub is remote/CI/review/release/security truth; Vercel is delivery/observability; Supabase is auth/persistence; and Codex supplies bounded execution tasks.
 
 Runtime placement is explicit: Foundation is the hosted read-only portfolio,
-DiscordOS is the hosted API/writer, Playbook Observer is the private loopback
+DiscordOS is retained only as historical hosted-runtime provenance, Playbook Observer is the private loopback
 cockpit, Lifeline is its intended local supervisor, `_stack` may later run one
 bounded serialized scheduled sweep, and Cortex refreshes read models only on
 accepted state or digest changes. See [Runtime Placement](16-runtime-placement.md).
 
-Native desktop handoff creates a separate Codex transcript and receipts are the durable reverse handoff. Current manual evidence proves local/worktree/cloud tasks, deep links, follow-up steer/queue behavior, subagent threads, and task-scoped IDE context, but not the full Atlas callback loop. Atlas Control and its backend-neutral ledger, persistent workspace/browser leases, delivery event plane, historical task intelligence, and systematic cross-project promotion remain partial or **PROPOSED**. SQLite is a frozen proposal, not deployed truth. Current standing surfaces include 00 Questions, 00 Authorization, 01 Ops, existing Mazer, and future Fitness after gates, with DiscordOS embedded. Main is historical compatibility only.
+Native desktop handoff creates a separate Codex transcript and receipts are the durable reverse handoff. Current manual evidence proves local/worktree/cloud tasks, deep links, follow-up steer/queue behavior, subagent threads, and task-scoped IDE context, but not the full Atlas callback loop. Atlas Control and its backend-neutral ledger, persistent workspace/browser leases, delivery event plane, historical task intelligence, and systematic cross-project promotion remain partial or **PROPOSED**. SQLite is a frozen proposal, not deployed truth. Current standing surfaces include 00 Questions, existing Mazer, and future Fitness after gates. DiscordOS, 00 Authorization, 01 Ops, and Main are historical compatibility provenance only.
 
 ## Canonical Owner Split
 
@@ -28,22 +28,23 @@ Owns:
 
 Does not own by default:
 
-- future DiscordOS platform/runtime code
+- archived DiscordOS platform/runtime provenance
 
-### Discord work lane
+### Historical DiscordOS provenance lane
 
-Owns:
+Preserves:
 
-- DiscordOS runtime
-- feedback/update/moderation workflows
-- Music Sesh runtime
-- Discord publication reliability
-- DiscordOS Supabase runtime state
+- historical DiscordOS runtime evidence
+- historical feedback/update/moderation workflow evidence
+- historical Music Sesh runtime evidence
+- historical Discord publication reliability evidence
+- historical DiscordOS Supabase runtime observations
 
-Does not own by default:
+Does not own:
 
 - Fitness auth/profile truth
 - Fitness release-proof truth
+- task selection, wake, dispatch, PR creation, board mutation, provider work, or production effects
 
 ### ATLAS systems lane
 
@@ -89,9 +90,11 @@ conversations:
   it receives a current Atlas context packet and resumes from its preserved
   checkpoint instead of being replaced by a new conversation.
 
-DiscordOS is not a standing operator conversation. It remains the single
-logical board and Discord writer invoked by governed Fitness, Mazer, Atlas,
-and Codex task workflows.
+DiscordOS is not a standing operator conversation or a live writer. Its cards,
+branches, receipts, and hosted-runtime observations remain read-only provenance.
+Future product-board work routes to `owner.fawxzzyweb`, and future master-data
+work routes to `platform.supabase-migration`, only after their exact contracts
+are proven.
 
 Creating `Fitness` and refreshing `Mazer` are readiness-triggered bootstrap
 actions, not evidence that the projects were already ready. The
@@ -100,13 +103,14 @@ operational-preparation closeout must prove:
 - Atlas root truth and the canonical workspace writer are healthy
 - the Work-to-Codex-to-`_stack` execution and receipt loop passes
 - runtime policy is explicit and receipted
-- DiscordOS board inspection, mutation, idempotency, sync/readback, and
-  appropriate Updates-channel publication pass a governed canary
+- the current `owner.fawxzzyweb` product-board contract, if admitted, proves
+  inspection, mutation, idempotency, sync/readback, and publication through a
+  governed canary
 - each project has a current component manifest, Playbook profile, repo
   context packet, and board snapshot
 - Mazer has a reconstructible live preview and browser workspace
-- Fitness validation is healthy and direct Discord writes no longer bypass
-  the DiscordOS single-writer boundary
+- Fitness validation is healthy and no retired DiscordOS route is selected,
+  woken, dispatched, or used for board or provider mutation
 
 After those gates pass, create the Work conversation named `Fitness` and send
 the existing `Mazer` conversation a current context-and-resume packet. Each
@@ -129,13 +133,12 @@ under `runtime/atlas/thread-context/`. Every cross-thread message explicitly
 labels whether it is a handoff, whether a response is expected, its return
 target, and its wake condition.
 
-At the start and closeout of every governed owner-lane task, the workflow must
-inspect the relevant DiscordOS project board and then create, update, move,
-archive, or remove cards only when current board truth and task evidence
-justify the action. Appropriate completions, releases, deployments, and other
-policy-selected events publish through the event-specific Updates-channel
-format. Routine internal steps must not turn the Updates channel into a
-firehose.
+At the start and closeout of every governed owner-lane task, board work is held
+unless the exact `owner.fawxzzyweb` product-board contract is proven. Any
+admitted board mutation must use current board truth, task evidence, idempotent
+readback, and the event-specific publication format. Master-data work is held
+unless the exact `platform.supabase-migration` data contract is proven.
+Historical DiscordOS cards and receipts authorize no mutation or reactivation.
 
 ## Atlas Reopen Sequence
 
@@ -172,15 +175,15 @@ closing audit itself moves from `50%` to `100%` only after its evidence is
 accepted; wording changes or child-lane progress contribute zero points.
 
 General Atlas systems work includes Atlas root, `_stack`, Playbook, Cortex,
-Foundation, Lifeline, DiscordOS platform work, Atlas Contracts, governance,
+Foundation, Lifeline, archived DiscordOS provenance, Atlas Contracts, governance,
 automation, knowledge promotion, delivery events, and other governed Atlas
 software or projects. It excludes Fitness and Mazer owner-repository feature
 work, which resumes through the separate `Fitness` and `Mazer` Work
 conversations.
 
 That exclusion does not create silos. Shared rules, contracts, components,
-failure modes, automation, evidence formats, deployment patterns, DiscordOS
-capabilities, and infrastructure improvements discovered in any lane should be
+failure modes, automation, evidence formats, deployment patterns, historical
+DiscordOS evidence, and infrastructure improvements discovered in any lane should be
 promoted into the correct Atlas-owned surface when they are genuinely reusable.
 Atlas coordinates the overlap; it does not absorb owner-project implementation.
 
@@ -188,7 +191,7 @@ Atlas coordinates the overlap; it does not absorb owner-project implementation.
 
 After the pre-development gate passes, Atlas enters a distinct software and
 platform development program. Its target scope is the completion and deep
-integration of Lifeline, Foundation, Cortex, `_stack`, DiscordOS, Playbook,
+integration of Lifeline, Foundation, Cortex, `_stack`, Playbook,
 Atlas root, Atlas Contracts, Atlas Control, the Atlas Book, and every governed
 cross-system seam. This phase is not a continuation of operational cleanup; it
 is product and platform engineering against separately ratified development
@@ -228,8 +231,9 @@ signals, stale-resource cleanup, and the relationship between commits, pushes,
 merges, deployments, cards, receipts, and Updates-channel publications.
 
 `_stack` produces verified Git and delivery facts. Atlas records their durable
-identity and policy consequence. DiscordOS renders policy-selected status and
-alerts; it does not infer GitHub truth from chat prose. Cleanup of old branches,
+identity and policy consequence. After exact admission, `owner.fawxzzyweb` may
+render policy-selected product-board status and alerts; no retired DiscordOS
+surface may do so. Cleanup of old branches,
 worktrees, runs, releases, or other remote state remains evidence-based and
 must preserve active work.
 
@@ -284,7 +288,7 @@ Failure mode:
 ## Current Canonical Repo / Source Truth
 
 - Fitness owner repo: `repos/fawxzzy-fitness`
-- future Discord owner repo: `repos/DiscordOS`
+- archived DiscordOS provenance repo: `repos/DiscordOS` (read-only routing input)
 - ATLAS root: stack coordination and truth-map layer
 - `_stack`: deploy and operator execution layer
 

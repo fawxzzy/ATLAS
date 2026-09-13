@@ -534,16 +534,23 @@ def validate_conformance(
     memory_policy_path = atlas_root / memory_policy_ref
     memory_policy = _load_json(memory_policy_path) if memory_policy_path.is_file() else {}
     observed_seed_ids = {
-        seed.get("id")
+        seed_id
         for seed in memory_policy.get("knowledge_seeds", [])
         if isinstance(seed, dict)
         and seed.get("status") == "accepted-atlas-root"
         and seed.get("playbook_promotion") == "installed-common-control"
+        and isinstance((seed_id := seed.get("id")), str)
+        and bool(seed_id)
     }
+    valid_seed_ids = (
+        isinstance(seed_ids, list)
+        and all(isinstance(seed_id, str) and bool(seed_id) for seed_id in seed_ids)
+    )
+    seed_id_set = set(seed_ids) if valid_seed_ids else set()
     check(
-        isinstance(seed_ids, list) and len(seed_ids) == 6 and set(seed_ids) <= observed_seed_ids,
+        valid_seed_ids and len(seed_ids) == 6 and seed_id_set <= observed_seed_ids,
         "COMMON_RELEASE_ENGINEERING_MEMORY_PROMOTION_MISSING",
-        ",".join(sorted(set(seed_ids) - observed_seed_ids)) if isinstance(seed_ids, list) else "invalid seed list",
+        ",".join(sorted(seed_id_set - observed_seed_ids)) if valid_seed_ids else "invalid seed list",
     )
     covered_roles: list[str] = []
     for role in roles:
@@ -701,14 +708,18 @@ def validate_conformance(
     inaccessible = coverage.get("inaccessible")
     reviewed = coverage.get("content_reviewed_tasks")
     remaining = coverage.get("remaining_content_review_tasks")
+    coverage_values = [discovered, indexed, inaccessible, reviewed, remaining]
+    valid_coverage_counts = all(
+        isinstance(value, int) and not isinstance(value, bool) and value >= 0
+        for value in coverage_values
+    )
     check(
-        all(isinstance(value, int) and value >= 0 for value in [discovered, indexed, inaccessible, reviewed, remaining]),
+        valid_coverage_counts,
         "SOURCE_DENOMINATOR_INVALID",
         "coverage counts must be nonnegative integers",
     )
-    if all(isinstance(value, int) for value in [discovered, indexed, inaccessible]):
+    if valid_coverage_counts:
         check(discovered == indexed + inaccessible, "SOURCE_DISCOVERY_ARITHMETIC_DRIFT", f"{discovered}!={indexed}+{inaccessible}")
-    if all(isinstance(value, int) for value in [indexed, reviewed, remaining]):
         check(indexed == reviewed + remaining, "SOURCE_REVIEW_ARITHMETIC_DRIFT", f"{indexed}!={reviewed}+{remaining}")
     check(coverage.get("coverage_claim") == "partial-denominator-backed", "UNIVERSAL_COVERAGE_OVERCLAIM", str(coverage.get("coverage_claim")))
 
@@ -766,7 +777,7 @@ def validate_conformance(
             ),
             "required_artifact_count": len(common_control_refs),
             "present_artifact_count": len(common_control_refs) - len(missing_common_control_refs),
-            "engineering_memory_seed_count": len(observed_seed_ids & set(seed_ids)) if isinstance(seed_ids, list) else 0,
+            "engineering_memory_seed_count": len(observed_seed_ids & seed_id_set),
             "baseline_markers_present": len(COMMON_RELEASE_BASELINE_MARKERS) - len(missing_common_release_markers),
             "baseline_markers_required": len(COMMON_RELEASE_BASELINE_MARKERS),
         },

@@ -545,6 +545,17 @@ class WorkflowRecoveryTests(unittest.TestCase):
             any("fawxzzy/DiscordOS#110 closed without merge" in claim["evidence"][-1] for claim in claims)
         )
 
+        operating_model = (ROOT / "docs/atlas-book/03-operating-model.md").read_text(encoding="utf-8")
+        runtime_placement = (ROOT / "docs/atlas-book/16-runtime-placement.md").read_text(encoding="utf-8")
+        current_projection = operating_model + runtime_placement
+        self.assertIn("owner.fawxzzyweb", current_projection)
+        self.assertIn("platform.supabase-migration", current_projection)
+        self.assertIn("retired read-only provenance", operating_model)
+        self.assertIn("Retired provenance only", runtime_placement)
+        self.assertNotIn("DiscordOS is the hosted API/writer", current_projection)
+        self.assertNotIn("DiscordOS is the hosted Discord API and logical writer", current_projection)
+        self.assertNotIn("DiscordOS is the one logical board/publication/readback writer", current_projection)
+
         plan, adapter = self.plan("healthy.json", mode="apply")
         self.assertTrue(
             {claim["runtime_id"] for claim in claims}.isdisjoint(
