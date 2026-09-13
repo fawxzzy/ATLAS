@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import sys
@@ -17,6 +18,21 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from ops.atlas.observations import build_observation, emit_observation
+from ops.knowledge import storage
+from ops.knowledge.storage import enumerate_files as _long_path_safe_enumerate_files
+
+# Wave S2A: opt-out switch back to the pre-convergence folder-import
+# behavior (two unconditional shutil copies into raw/ and extracted/).
+# Default is the convergence path: one verified relocation into raw/,
+# extracted/ materialized only when explicitly requested. Set
+# ATLAS_IMPORT_LEGACY_FOLDER_COPY=1 to roll back per-run without a code
+# change.
+_LEGACY_FOLDER_COPY_ENV = "ATLAS_IMPORT_LEGACY_FOLDER_COPY"
+
+
+def _legacy_folder_copy_enabled(*, env: dict[str, str] | None = None) -> bool:
+    source = env if env is not None else os.environ
+    return source.get(_LEGACY_FOLDER_COPY_ENV, "").strip().lower() in {"1", "true", "yes", "on"}
 
 PIPELINE_VERSION = "atlas.knowledge.pipeline.v2"
 RECEIPT_VERSION = "atlas.knowledge.receipt.v1"
@@ -222,6 +238,71 @@ def extracted_dir(path: Path) -> Path:
     return path / "extracted"
 
 
+def review_source_dir(archive_path: Path, manifest: dict[str, Any]) -> Path:
+    """The tree downstream review (evaluate/promote/catalog/secret-scan)
+    must read -- chosen from the import's own recorded contract, never
+    from which directories happen to exist on disk.
+
+    Selecting by directory presence is wrong two ways: a stray extracted/
+    sitting next to a raw-only folder import would silently redirect
+    evaluation to it, and a zip import missing its extracted/ tree would
+    silently fall back to "reviewing" the raw .zip blob instead of
+    failing. Both must fail closed instead.
+
+        new raw-only folder import          -> raw/
+        explicitly materialized folder import -> extracted/
+        zip import                          -> extracted/ (required)
+        missing required tree               -> error, not fallback
+
+    Legacy compatibility: a manifest written before Wave S2A has no
+    extracted_materialized key at all -- every import back then always
+    produced both raw/ and extracted/, so its absence (the key missing
+    entirely) is treated as materialized=True, matching that era's
+    actual on-disk guarantee rather than reinterpreting history. This is
+    the ONLY case coerced; a key that is merely falsy/malformed is not
+    treated as absent -- see below.
+
+    Field values are validated, not coerced: a malformed
+    extracted_materialized (e.g. the string "false", which bool()
+    would silently turn into True) or an unsupported source_type is
+    rejected outright rather than quietly selecting the wrong tree. The
+    selected tree must also actually be a directory, not merely exist.
+    """
+    source_type = manifest.get("source_type")
+    if source_type not in {"zip", "folder"}:
+        raise ValueError(
+            f"Manifest for {relative_to_atlas(archive_path)} has an unsupported "
+            f"source_type: {source_type!r}"
+        )
+    if "extracted_materialized" in manifest:
+        raw_value = manifest["extracted_materialized"]
+        if not isinstance(raw_value, bool):
+            raise ValueError(
+                f"Manifest for {relative_to_atlas(archive_path)} has a non-boolean "
+                f"extracted_materialized value: {raw_value!r}"
+            )
+        extracted_materialized = raw_value
+    else:
+        extracted_materialized = True  # legacy default -- key absent entirely, see above
+
+    if source_type == "zip" or extracted_materialized:
+        chosen, label = extracted_dir(archive_path), "extracted/"
+    else:
+        chosen, label = raw_dir(archive_path), "raw/"
+    if not chosen.exists():
+        raise FileNotFoundError(
+            f"Manifest for {relative_to_atlas(archive_path)} requires {label} as the review "
+            f"tree (source_type={source_type!r}, extracted_materialized={extracted_materialized}), "
+            f"but it does not exist"
+        )
+    if not chosen.is_dir():
+        raise NotADirectoryError(
+            f"Manifest for {relative_to_atlas(archive_path)} requires {label} as the review "
+            f"tree, but {relative_to_atlas(chosen)} is not a directory"
+        )
+    return chosen
+
+
 def manifest_path(path: Path) -> Path:
     return path / "IMPORT-MANIFEST.json"
 
@@ -394,8 +475,15 @@ def write_json(path: Path, data: dict[str, Any], dry_run: bool) -> None:
 
 
 def file_checksum(path: Path) -> str:
+    # Long-path-safe: a plain path.open() fails past the 260-character
+    # MAX_PATH boundary on Windows without the admin-only LongPathsEnabled
+    # policy. list_files()/enumerate_files() already return long-path-safe
+    # paths, but reading their content still needs the same \\?\ prefixing
+    # storage.py applies internally -- found via a >260-character fixture
+    # pushed through the actual import -> evaluate path, not just
+    # storage.py's own enumeration tests.
     digest = hashlib.sha256()
-    with path.open("rb") as handle:
+    with storage._win_long_path(path).open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return f"sha256:{digest.hexdigest()}"
@@ -411,9 +499,15 @@ def file_checksum_if_exists(path: Path) -> str | None:
 
 
 def list_files(root: Path) -> list[Path]:
-    if not root.exists():
-        return []
-    return sorted(path for path in root.rglob("*") if path.is_file())
+    # Delegates to ops.knowledge.storage.enumerate_files(), which is
+    # long-path-safe on Windows (rglob() silently drops entries past the
+    # 260-character MAX_PATH boundary unless the process-wide
+    # LongPathsEnabled policy is set, which requires admin rights and is
+    # not guaranteed). Same signature and return type as before -- this is
+    # a correctness fix, not a behavior change for any path under the
+    # limit. See ops/knowledge/storage.py and
+    # docs/ops/ATLAS-IMPORT-STORAGE-CONVERGENCE-WAVE-1.md.
+    return _long_path_safe_enumerate_files(root)
 
 
 def tree_digest(root: Path) -> str:
@@ -422,7 +516,7 @@ def tree_digest(root: Path) -> str:
         rel = path.relative_to(root).as_posix().encode("utf-8")
         digest.update(rel)
         digest.update(b"\0")
-        digest.update(str(path.stat().st_size).encode("utf-8"))
+        digest.update(str(storage._lp_stat(path).st_size).encode("utf-8"))
         digest.update(b"\0")
         digest.update(file_checksum(path).encode("utf-8"))
         digest.update(b"\n")
@@ -453,13 +547,240 @@ def copy_folder(source: Path, destination: Path) -> None:
             shutil.copy2(item, target)
 
 
+class FolderImportRelocationError(RuntimeError):
+    """A folder import's verified relocation into raw/ failed at preflight
+    or copy. Raised before the import manifest is written, so a failed
+    relocation never produces a half-imported archive."""
+
+
+class FolderImportReplacementUnsupportedError(RuntimeError):
+    """--force was given to replace an already-completed archive under the
+    storage-convergence folder path, which cannot yet do that safely: a
+    destructive delete-then-relocate would destroy the existing archive
+    before the new one's preflight/link checks even run. Rather than
+    build transactional replacement (a separate, larger piece of work),
+    this refuses the destructive path outright. The operator can remove
+    the existing archive directory themselves first, or set
+    ATLAS_IMPORT_LEGACY_FOLDER_COPY=1 to use the old destructive --force
+    behavior."""
+
+
+class UnownedDestinationError(RuntimeError):
+    """raw/ and/or extracted/ under this archive's destination already
+    hold content, there is no completed IMPORT-MANIFEST.json, and there
+    is no IMPORT-ATTEMPT.json proving the content belongs to an earlier
+    attempt at this exact import. A deterministic destination path
+    (source_name + slug) does not by itself prove ownership -- it could
+    be a different source, a changed source, or content someone
+    deliberately preserved there. resumable_copy_tree() overwrites any
+    file that doesn't match the new source byte-for-byte, so resuming
+    without proof of ownership would silently destroy whatever is
+    actually there. Refused instead; nothing under the destination is
+    touched."""
+
+
+class AdmissionIdentityMismatchError(RuntimeError):
+    """An IMPORT-ATTEMPT.json exists at this destination, but its
+    recorded identity (archive_id, source content snapshot, destination,
+    materialize_extracted) does not match the current request. Treating
+    this as a legitimate resume would let a changed or different source
+    silently overwrite content that a genuine interrupted attempt left
+    behind. Refused instead; nothing under the destination is touched."""
+
+
+class CorruptAttemptRecordError(RuntimeError):
+    """IMPORT-ATTEMPT.json exists but is not safe to trust as ownership
+    evidence: it is a symlink / reparse point (never read or written
+    through -- the record itself is part of the protected write
+    boundary, exactly like any other destination path), its content is
+    not valid JSON, its contract_version is not recognized, or a
+    required field is missing or the wrong type. Refused before any of
+    its claimed content is trusted and before any write touches it."""
+
+
+ATTEMPT_RECORD_CONTRACT_VERSION = "atlas.knowledge.import-attempt.v1"
+_ATTEMPT_RECORD_REQUIRED_FIELDS: dict[str, type] = {
+    "archive_id": str,
+    "destination": str,
+    "source_snapshot_digest": str,
+    "materialize_extracted": bool,
+}
+
+
+def import_attempt_record_path(knowledge_dir: Path) -> Path:
+    return knowledge_dir / "IMPORT-ATTEMPT.json"
+
+
+def _read_and_validate_attempt_record(path: Path) -> dict[str, Any] | None:
+    """Return the existing attempt record at `path`, or None if none
+    exists. Never opens or reads through a symlink -- checked first, via
+    storage's own no-follow primitive, exactly as the write path (see
+    _write_json_atomic()) never writes through one. Any content that
+    exists but cannot be trusted (unreadable, malformed JSON, wrong
+    contract_version, a required field missing or the wrong type) raises
+    CorruptAttemptRecordError rather than being silently treated as
+    absent or, worse, partially trusted."""
+    if storage._lp_is_symlink(path):
+        # relative_to_atlas() calls Path.resolve(), which follows a
+        # symlink straight through to wherever it points -- exactly the
+        # wrong thing to do while reporting that this path IS a symlink,
+        # and it can itself raise (the target may not even be under
+        # atlas_root()) before the real error is ever raised. path is
+        # always exactly knowledge_dir / "IMPORT-ATTEMPT.json" by
+        # construction, so a lexical relative_to() against atlas_root()
+        # describes it without following anything.
+        described = path.relative_to(atlas_root()).as_posix()
+        raise CorruptAttemptRecordError(
+            f"{described} is a symlink, not a plain record file. Refusing to "
+            f"read or write through it -- remove it yourself first if you have independently "
+            f"confirmed it is safe to discard."
+        )
+    if not path.exists():
+        return None
+    try:
+        record = read_json(path)
+    except (OSError, ValueError) as exc:
+        raise CorruptAttemptRecordError(
+            f"{relative_to_atlas(path)} could not be read as a valid JSON record: {exc}"
+        ) from exc
+    if not isinstance(record, dict) or record.get("contract_version") != ATTEMPT_RECORD_CONTRACT_VERSION:
+        raise CorruptAttemptRecordError(
+            f"{relative_to_atlas(path)} is not a recognized attempt record "
+            f"(contract_version={(record.get('contract_version') if isinstance(record, dict) else None)!r})"
+        )
+    for key, expected_type in _ATTEMPT_RECORD_REQUIRED_FIELDS.items():
+        if key not in record or not isinstance(record[key], expected_type):
+            raise CorruptAttemptRecordError(
+                f"{relative_to_atlas(path)} has a missing or invalid field: {key!r}"
+            )
+    return record
+
+
+def _folder_relocation_layout(
+    *, archive_id: str, knowledge_dir: Path, env: dict[str, str] | None
+) -> dict[str, Path]:
+    """The three derived paths a folder relocation needs, shared between
+    the standalone preflight check run during admission and the actual
+    relocate_archive_source() call, so the two can never drift apart."""
+    return {
+        "work_root": storage.import_work_root(env=env) / archive_id,
+        "receipt_path": knowledge_dir / "RELOCATION-RECEIPT.json",
+        "expected_manifest_path": knowledge_dir / "RELOCATION-MANIFEST.json",
+    }
+
+
+def _archive_destination_has_content(knowledge_dir: Path) -> bool:
+    """True if raw/ or extracted/ under knowledge_dir already hold at
+    least one entry. Checked shallowly (one iterdir() at the raw/ or
+    extracted/ level itself, whose own path is short and bounded even
+    when content nested inside it is deep) -- existence alone is enough
+    to require proof of ownership before anything resumes into it."""
+    for sub in (raw_dir(knowledge_dir), extracted_dir(knowledge_dir)):
+        if not sub.exists():
+            continue
+        try:
+            next(sub.iterdir())
+            return True
+        except StopIteration:
+            continue
+    return False
+
+
+def _source_snapshot_digest(input_path: Path) -> str:
+    """A content-sensitive identity for a folder import's source tree,
+    computed the same way relocate_archive_source() computes its own
+    source-anchored expected manifest (so a same-named file with
+    different bytes changes this digest, not just a different file
+    list). Computed independently in the pipeline layer, before any
+    admission decision, rather than extending storage.py's API for it --
+    the redundant tree walk inside relocate_archive_source() itself is
+    an accepted, bounded cost for a correctness-critical identity check,
+    not a hot path."""
+    manifest = storage.build_relocation_manifest(input_path)
+    return storage.stable_json_digest(manifest)
+
+
+def _relocate_folder_import(
+    *,
+    archive_id: str,
+    input_path: Path,
+    knowledge_dir: Path,
+    materialize_extracted: bool,
+    env: dict[str, str] | None,
+) -> dict[str, Any]:
+    """Wave S2A: a folder import copies its source into raw/ exactly once,
+    through storage.relocate_archive_source() -- per-volume peak-space
+    preflight (fail closed, no silent fallback), a source-anchored
+    manifest, an atomic resumable copy with bounded write confinement,
+    exact destination reconciliation, and a durable relocation receipt.
+    The pre-S2A path made two unconditional shutil copies (raw/ and
+    extracted/); extracted/ is now materialized only when the caller
+    asks for it.
+
+    Staging uses storage.import_work_root() (ATLAS_IMPORT_WORK_ROOT), so
+    the transient copy volume can be moved off a constrained system
+    drive without touching where the durable archive lands.
+    """
+    layout = _folder_relocation_layout(archive_id=archive_id, knowledge_dir=knowledge_dir, env=env)
+    work_root = layout["work_root"]
+    receipt_path = layout["receipt_path"]
+    expected_manifest_ref_path = layout["expected_manifest_path"]
+    result = storage.relocate_archive_source(
+        archive_id=archive_id,
+        source_root=input_path,
+        destination_root=raw_dir(knowledge_dir),
+        work_root=work_root,
+        source_description=f"knowledge-import folder relocation for {archive_id}",
+        materialize_extracted_root=extracted_dir(knowledge_dir) if materialize_extracted else None,
+        receipt_path=receipt_path,
+        expected_manifest_path=expected_manifest_ref_path,
+    )
+    if not result.ok:
+        # Surface every distinct failure mode so a caller sees a precise,
+        # recoverable state -- not just "it failed" -- including the case
+        # where knowledge_dir held a leftover partial from an earlier
+        # interrupted attempt that didn't cleanly resume: verify_restore's
+        # require_exact_match=True catches an orphaned/mismatched leftover
+        # rather than silently accepting it, and that shows up here as a
+        # destination_verification finding, not a copy failure.
+        findings = list(result.space_budget.findings)
+        raw_failures = [f.category for f in result.raw_copy_result.failed] if result.raw_copy_result else []
+        extracted_failures = (
+            [f.category for f in result.extracted_copy_result.failed] if result.extracted_copy_result else []
+        )
+        destination_issues = {
+            k: v
+            for k, v in (result.destination_verification or {}).items()
+            if k in {"missing_paths", "unexpected_paths", "mismatched_paths"} and v
+        }
+        raise FolderImportRelocationError(
+            f"folder import relocation failed for {archive_id}: "
+            f"space_budget_ok={result.space_budget.ok} findings={findings} "
+            f"raw_copy_failures={raw_failures} extracted_copy_failures={extracted_failures} "
+            f"destination_verification_issues={destination_issues}"
+        )
+    receipt = result.receipt or {}
+    return {
+        "ok": True,
+        "mode": "storage-convergence",
+        "materialized_extracted": bool(materialize_extracted),
+        "expected_manifest_digest": receipt.get("expected_manifest_digest"),
+        "destination_manifest_digest": receipt.get("destination_manifest_digest"),
+        "expected_manifest_ref": relative_to_atlas(expected_manifest_ref_path),
+        "receipt_ref": relative_to_atlas(receipt_path),
+        "space_budget_ok": result.space_budget.ok,
+        "staging_outside_atlas_root": not work_root.resolve().is_relative_to(atlas_root()),
+        "destination_verification_ok": bool((result.destination_verification or {}).get("ok")),
+    }
+
+
 def build_raw_entries(root: Path) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     for path in list_files(root):
         entries.append(
             {
                 "path": path.relative_to(root).as_posix(),
-                "size_bytes": path.stat().st_size,
+                "size_bytes": storage._lp_stat(path).st_size,
                 "checksum": file_checksum(path),
             }
         )
@@ -487,7 +808,9 @@ def representative_relative_paths(root: Path, paths: list[Path], limit: int = 6)
 
 
 def read_text_limited(path: Path, max_chars: int = 4000) -> str:
-    return path.read_text(encoding="utf-8", errors="ignore")[:max_chars]
+    # Long-path-safe for the same reason as file_checksum(): this reads
+    # arbitrary enumerated source-tree paths, which can exceed MAX_PATH.
+    return storage._win_long_path(path).read_text(encoding="utf-8", errors="ignore")[:max_chars]
 
 
 def detect_executable_content(paths: list[Path]) -> tuple[bool, list[dict[str, str]]]:
@@ -778,7 +1101,7 @@ def build_promotion_scaffold_sections(
     evaluation: dict[str, Any],
     archive_id: str,
 ) -> dict[str, str]:
-    extracted_root = extracted_dir(archive_path)
+    extracted_root = review_source_dir(archive_path, manifest)
     extracted_files = list_files(extracted_root)
     dominant_extensions = list(evaluation.get("summary", {}).get("extension_counts", {}).items())[:5]
     rendered_extensions = (
@@ -1414,25 +1737,135 @@ def import_archive(
     provenance_note: str | None,
     dry_run: bool,
     force: bool,
+    materialize_extracted: bool = False,
+    env: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     if privacy_flag not in PRIVACY_FLAGS:
         raise ValueError(f"Unsupported privacy flag: {privacy_flag}")
+    legacy_folder_copy = _legacy_folder_copy_enabled(env=env)
     input_path = resolve_atlas_path(input_path)
     if not input_path.exists():
         raise FileNotFoundError(f"Input path does not exist: {relative_to_atlas(input_path)}")
     input_path_rel = relative_to_atlas(input_path)
     archive_slug = slugify(slug or input_path.stem or input_path.name)
+    archive_id_value = f"{slugify(source_name)}--{archive_slug}"
     knowledge_dir = archive_dir(source_name, archive_slug)
     detected_type = "zip" if input_path.is_file() and input_path.suffix.lower() == ".zip" else "folder"
     if detected_type not in {"zip", "folder"}:
         raise ValueError("Input must be a directory or a .zip file.")
-    if knowledge_dir.exists() and not force:
+
+    new_engine_folder_path = detected_type == "folder" and not legacy_folder_copy
+    folder_materializes_extracted = detected_type == "folder" and (
+        materialize_extracted or legacy_folder_copy
+    )
+
+    # "Does an import already live here" has two distinct positive
+    # answers, and a leftover directory with neither is NOT one of them:
+    #
+    # 1. A *completed* prior import -- a written IMPORT-MANIFEST.json.
+    # 2. A genuinely *interrupted* prior attempt at this exact request --
+    #    proven by a durable IMPORT-ATTEMPT.json (written after this same
+    #    admission gate passed, before any copying, on some earlier call)
+    #    whose recorded identity (archive_id, a content-sensitive digest
+    #    of the source tree, destination, materialize_extracted) matches
+    #    the current request exactly.
+    #
+    # knowledge_dir being a deterministic function of (source_name, slug)
+    # is NOT proof of either -- a different source, a changed source, or
+    # content someone deliberately preserved can occupy the same path.
+    # relocate_archive_source()'s resumable copy overwrites any file that
+    # doesn't match the new source byte-for-byte (that is what makes
+    # resuming a *genuine* interrupted attempt work); its final exact
+    # reconciliation can only prove the destination matches the source
+    # *afterward* -- it cannot protect content that a wrongly-assumed
+    # resume already overwrote. So ownership must be established BEFORE
+    # any copying starts, not inferred from the path alone and verified
+    # only after the fact.
+    archive_previously_completed = manifest_path(knowledge_dir).exists()
+    if archive_previously_completed and not force:
         raise FileExistsError(
             f"Import destination already exists: {relative_to_atlas(knowledge_dir)}"
         )
+    if archive_previously_completed and force and new_engine_folder_path:
+        # Refuse the destructive replacement rather than delete the
+        # completed archive and then risk the new copy's preflight or
+        # link-rejection check failing with nothing left to restore.
+        # Transactional (atomic) replacement is future work, not built
+        # here -- see FolderImportReplacementUnsupportedError.
+        raise FolderImportReplacementUnsupportedError(
+            f"--force cannot yet safely replace the completed archive at "
+            f"{relative_to_atlas(knowledge_dir)} under the storage-convergence "
+            f"folder path (no transactional replacement implemented). Remove "
+            f"the existing archive directory yourself first, or set "
+            f"ATLAS_IMPORT_LEGACY_FOLDER_COPY=1 to use the prior destructive "
+            f"--force behavior."
+        )
+
+    # Full attempt-record lifecycle, in this exact order:
+    #   inspect destination and any existing evidence
+    #   -> validate any existing attempt record, independent of whether
+    #      raw/extracted hold content yet (a record can legitimately
+    #      exist before a single byte has been copied)
+    #   -> (in the execution block below) required preflight
+    #   -> create a fresh record safely, or reuse a matching one unchanged
+    #   -> copy/resume
+    #   -> reconcile and publish completion evidence (IMPORT-MANIFEST.json)
+    #
+    # The record itself is part of the protected write boundary, exactly
+    # like raw/ or extracted/: it is never read through a symlink, never
+    # silently replaced because "there's no payload yet" (an attempt can
+    # legitimately exist before any copying starts), and never rewritten
+    # once it already matches the current request -- rewriting a valid
+    # record for no reason is itself a way to destroy it, if interrupted
+    # mid-write. See _read_and_validate_attempt_record(),
+    # CorruptAttemptRecordError, AdmissionIdentityMismatchError.
+    attempt_record_path = import_attempt_record_path(knowledge_dir)
+    source_snapshot_digest_value: str | None = None
+    existing_attempt: dict[str, Any] | None = None
+    reuse_existing_attempt = False
+    if new_engine_folder_path and not archive_previously_completed:
+        # Needed either way: to validate a claimed resume below, or to
+        # record for a *future* retry to validate against once this call
+        # proceeds. Computed from input_path directly -- read-only, and
+        # never touches a rejected link's content (see
+        # _classify_link_entry(), which classifies a link entry without
+        # opening it).
+        source_snapshot_digest_value = _source_snapshot_digest(input_path)
+        existing_attempt = _read_and_validate_attempt_record(attempt_record_path)
+        if existing_attempt is None:
+            if _archive_destination_has_content(knowledge_dir):
+                raise UnownedDestinationError(
+                    f"{relative_to_atlas(raw_dir(knowledge_dir))} and/or "
+                    f"{relative_to_atlas(extracted_dir(knowledge_dir))} already contain content, "
+                    f"but there is no IMPORT-MANIFEST.json (completed import) or "
+                    f"IMPORT-ATTEMPT.json (proven interrupted attempt) to establish that it "
+                    f"belongs to this import. Refusing to resume into it -- verify what is "
+                    f"actually there and remove it yourself first if it is safe to discard."
+                )
+            # else: genuinely fresh -- no record, no content either.
+        else:
+            expected_attempt = {
+                "archive_id": archive_id_value,
+                "destination": relative_to_atlas(knowledge_dir),
+                "source_snapshot_digest": source_snapshot_digest_value,
+                "materialize_extracted": folder_materializes_extracted,
+            }
+            mismatches = {
+                key: {"recorded": existing_attempt.get(key), "current": expected}
+                for key, expected in expected_attempt.items()
+                if existing_attempt.get(key) != expected
+            }
+            if mismatches:
+                raise AdmissionIdentityMismatchError(
+                    f"IMPORT-ATTEMPT.json at {relative_to_atlas(knowledge_dir)} does not match "
+                    f"this request: {mismatches}. Refusing to resume into content that may "
+                    f"belong to a different source, a changed source, or different import "
+                    f"options -- nothing under the destination has been touched."
+                )
+            reuse_existing_attempt = True  # matches exactly -- never rewritten
 
     manifest: dict[str, Any] = {
-        "archive_id": f"{slugify(source_name)}--{archive_slug}",
+        "archive_id": archive_id_value,
         "source_name": source_name,
         "slug": archive_slug,
         "source_type": detected_type,
@@ -1460,35 +1893,130 @@ def import_archive(
     }
     if provenance_note:
         manifest["provenance"]["note"] = provenance_note
+    # For a folder import, extracted/ is only materialized when the caller
+    # explicitly asks for it (or the legacy rollback switch is on) --
+    # otherwise raw/ is the single verified copy and downstream review
+    # reads it via review_source_dir(). A zip import always extracts.
+    # (folder_materializes_extracted itself is computed earlier, before
+    # the admission gate, since it's part of an attempt record's identity.)
+    manifest["extracted_materialized"] = detected_type == "zip" or folder_materializes_extracted
+
     if detected_type == "zip":
         manifest["checksum"] = file_checksum(input_path)
         manifest["raw_archive_path"] = f"{relative_to_atlas(raw_dir(knowledge_dir))}/{input_path.name}"
     else:
         manifest["raw_reference_dir"] = relative_to_atlas(raw_dir(knowledge_dir))
-        manifest["raw_entries"] = build_raw_entries(input_path)
+        manifest["folder_import_mode"] = "legacy-double-copy" if legacy_folder_copy else "storage-convergence"
+        if legacy_folder_copy:
+            # No link-rejection check exists on this path (matches its
+            # pre-S2A behavior exactly) -- reading source content here is
+            # not a "read before reject" hazard the way it would be on
+            # the storage-convergence path below.
+            manifest["raw_entries"] = build_raw_entries(input_path)
+        # For the storage-convergence path, raw_entries is filled in
+        # after relocation succeeds, from raw_dir(knowledge_dir) -- the
+        # verified destination, not the unchecked source -- so a
+        # rejected link's content is never read. See _relocate_folder_import.
 
     operations: list[str] = [f"prepare:{relative_to_atlas(knowledge_dir)}"]
     if detected_type == "zip":
         operations.append(f"copy:{relative_to_atlas(raw_dir(knowledge_dir) / input_path.name)}")
         operations.append(f"extract:{relative_to_atlas(extracted_dir(knowledge_dir))}")
-    else:
+    elif legacy_folder_copy:
         operations.append(f"copytree:{relative_to_atlas(raw_dir(knowledge_dir))}")
         operations.append(f"copytree:{relative_to_atlas(extracted_dir(knowledge_dir))}")
+    else:
+        operations.append(f"relocate:{relative_to_atlas(raw_dir(knowledge_dir))}")
+        if folder_materializes_extracted:
+            operations.append(f"materialize-extracted:{relative_to_atlas(extracted_dir(knowledge_dir))}")
     operations.append(f"write:{relative_to_atlas(manifest_path(knowledge_dir))}")
 
     if not dry_run:
-        if knowledge_dir.exists() and force:
+        # Destructive delete-then-recreate is preserved only for the
+        # paths that have no preflight to bypass (zip, legacy double
+        # copy) -- exactly their pre-S2A behavior. The storage-convergence
+        # folder path never reaches here with force=True on a completed
+        # archive (refused above); on an incomplete prior attempt it must
+        # NOT be deleted -- relocate_archive_source() resumes into it
+        # safely (see the comment above archive_previously_completed).
+        if knowledge_dir.exists() and force and not new_engine_folder_path:
             shutil.rmtree(knowledge_dir)
         knowledge_dir.mkdir(parents=True, exist_ok=True)
         if detected_type == "zip":
             raw_dir(knowledge_dir).mkdir(parents=True, exist_ok=True)
             shutil.copy2(input_path, raw_dir(knowledge_dir) / input_path.name)
             extract_zip_safely(input_path, extracted_dir(knowledge_dir))
-        else:
+        elif legacy_folder_copy:
             copy_folder(input_path, raw_dir(knowledge_dir))
             copy_folder(input_path, extracted_dir(knowledge_dir))
+        else:
+            # Admission (ownership proven above) has already established
+            # this call is entitled to write into knowledge_dir -- fresh,
+            # or a validated matching resume -- before any destructive
+            # mutation happens. What remains, in order:
+            #   required preflight -> create a fresh record safely, or
+            #   reuse the matching one unchanged -> copy/resume
+            if not reuse_existing_attempt:
+                layout = _folder_relocation_layout(
+                    archive_id=manifest["archive_id"], knowledge_dir=knowledge_dir, env=env
+                )
+                budget = storage.preflight_space_budget(
+                    source_root=input_path,
+                    raw_destination_root=raw_dir(knowledge_dir),
+                    work_root=layout["work_root"],
+                    extracted_destination_root=(
+                        extracted_dir(knowledge_dir) if folder_materializes_extracted else None
+                    ),
+                    receipt_path=layout["receipt_path"],
+                    expected_manifest_path=layout["expected_manifest_path"],
+                )
+                if not budget.ok:
+                    # No attempt record published for a preflight that
+                    # never passed -- nothing here to resume from, and
+                    # nothing to leave behind that a later retry would
+                    # need to reconcile against.
+                    raise FolderImportRelocationError(
+                        f"folder import preflight failed for {manifest['archive_id']}: "
+                        f"findings={list(budget.findings)}"
+                    )
+                # Published only now, after preflight passed and before
+                # any byte of the copy starts -- so a *future* retry has
+                # a durable, matching record to validate against no
+                # matter where the copy itself is interrupted. Uses
+                # storage's own confined atomic writer (mkstemp staging,
+                # no-follow rename), the same machinery S1 built for
+                # every other authority-bearing write in this system --
+                # not a new one, and never the plain write_json() a
+                # pre-planted symlink at this path could be written
+                # through.
+                storage._write_json_atomic(
+                    {
+                        "contract_version": ATTEMPT_RECORD_CONTRACT_VERSION,
+                        "archive_id": manifest["archive_id"],
+                        "destination": relative_to_atlas(knowledge_dir),
+                        "source_snapshot_digest": source_snapshot_digest_value,
+                        "materialize_extracted": folder_materializes_extracted,
+                        "recorded_at": utc_now(),
+                    },
+                    attempt_record_path,
+                )
+            # else: existing_attempt already matches this request exactly
+            # -- reused as-is. Rewriting a record that already says the
+            # right thing is a needless risk, not a refresh: interrupted
+            # mid-write, a plain (non-atomic) rewrite would have torn the
+            # one piece of evidence a later retry depends on.
+            manifest["raw_relocation"] = _relocate_folder_import(
+                archive_id=manifest["archive_id"],
+                input_path=input_path,
+                knowledge_dir=knowledge_dir,
+                materialize_extracted=folder_materializes_extracted,
+                env=env,
+            )
+            manifest["raw_entries"] = build_raw_entries(raw_dir(knowledge_dir))
         manifest["artifact_digests"] = build_manifest_artifact_digests(manifest, knowledge_dir)
         manifest["extracted_snapshot_digest"] = extracted_snapshot_digest(knowledge_dir)
+        if not extracted_dir(knowledge_dir).exists():
+            manifest["raw_snapshot_digest"] = tree_digest(raw_dir(knowledge_dir))
         write_json(manifest_path(knowledge_dir), manifest, dry_run=False)
         write_knowledge_receipt(
             archive_path=knowledge_dir,
@@ -1514,10 +2042,8 @@ def import_archive(
 
 def evaluate_archive(*, archive_path: Path, dry_run: bool) -> dict[str, Any]:
     archive_path = archive_path.resolve()
-    review_dir = extracted_dir(archive_path)
-    if not review_dir.exists():
-        raise FileNotFoundError(f"Missing extracted directory: {relative_to_atlas(review_dir)}")
     manifest = read_json(manifest_path(archive_path))
+    review_dir = review_source_dir(archive_path, manifest)
     paths = list_files(review_dir)
     text_paths = iter_text_files(paths)
     private_hits = match_patterns(paths, PRIVATE_PATTERNS)
@@ -1556,6 +2082,8 @@ def evaluate_archive(*, archive_path: Path, dry_run: bool) -> dict[str, Any]:
         "evaluated_at": utc_now(),
         "import_dir": relative_to_atlas(archive_path),
         "extracted_dir": relative_to_atlas(review_dir),
+        "review_source_kind": "extracted" if review_dir == extracted_dir(archive_path) else "raw",
+        "review_source_digest": tree_digest(review_dir),
         "manifest_path": relative_to_atlas(manifest_path(archive_path)),
         "review_status": "evaluated",
         "privacy_flag": manifest["privacy_flag"],
@@ -1662,7 +2190,7 @@ def promote_archive(
         existing_text=existing_text,
         refresh_derived=refresh_derived,
     )
-    evidence_secret_hits = scan_secret_risk(paths=list_files(extracted_dir(archive_path)))
+    evidence_secret_hits = scan_secret_risk(paths=list_files(review_source_dir(archive_path, manifest)))
     candidate_secret_hits = scan_secret_risk(
         inline_documents=[(relative_to_atlas(promotion_file), rendered)]
     )
