@@ -943,6 +943,134 @@ class StorageRootIntegrationTests(_ImportHarness):
         found = _pipeline.discover_import_manifests()
         self.assertEqual(found, [])
 
+    # -- Unreadable-subtree regressions -----------------------------------
+    # Path.glob() silently swallows an OSError raised while descending
+    # into an unreadable subdirectory (documented CPython behavior) --
+    # wrapping the old glob() call in try/except OSError never actually
+    # saw the error. Each test injects a REAL PermissionError at the
+    # actual os.scandir() boundary (chmod 0o000 on a real directory), not
+    # by mocking Path.glob itself to raise -- proving the fix works at
+    # the filesystem layer these hosted jobs actually hit.
+
+    @unittest.skipIf(os.name == "nt", "chmod(0o000) does not remove directory read on Windows")
+    def test_unreadable_configured_root_blocks_authoritative_discovery(self) -> None:
+        env = self._external_storage_env()
+        os.chmod(self._external_storage, 0o000)
+        try:
+            with mock.patch.dict(os.environ, env):
+                with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                    _pipeline.discover_import_manifests()
+        finally:
+            os.chmod(self._external_storage, 0o755)
+
+    @unittest.skipIf(os.name == "nt", "chmod(0o000) does not remove directory read on Windows")
+    def test_unreadable_configured_source_directory_blocks_authoritative_discovery(self) -> None:
+        # A configured root that itself lists fine, but has ONE source
+        # directory inside it that cannot be scanned, must still block --
+        # not silently return whatever the readable siblings contained.
+        env = self._external_storage_env()
+        readable = self._external_storage / "readable-source" / "one" / "IMPORT-MANIFEST.json"
+        readable.parent.mkdir(parents=True)
+        readable.write_text(
+            json.dumps({"archive_id": "readable-source--one", "source_name": "readable-source", "slug": "one"}),
+            encoding="utf-8",
+        )
+        blocked = self._external_storage / "blocked-source"
+        blocked_manifest = blocked / "two" / "IMPORT-MANIFEST.json"
+        blocked_manifest.parent.mkdir(parents=True)
+        blocked_manifest.write_text(
+            json.dumps({"archive_id": "blocked-source--two", "source_name": "blocked-source", "slug": "two"}),
+            encoding="utf-8",
+        )
+        os.chmod(blocked, 0o000)
+        try:
+            with mock.patch.dict(os.environ, env):
+                with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                    _pipeline.discover_import_manifests()
+        finally:
+            os.chmod(blocked, 0o755)
+
+    @unittest.skipIf(os.name == "nt", "chmod(0o000) does not remove directory read on Windows")
+    def test_unreadable_legacy_source_directory_blocks_authoritative_discovery(self) -> None:
+        # The gap the review demonstrated: an unreadable directory inside
+        # the LEGACY root (not the configured one) must ALSO block
+        # authoritative discovery -- it must not read as "the legacy root
+        # simply has nothing more", since something real is unreachable.
+        legacy_root = self.fake_atlas / "data" / "imports" / "knowledge"
+        blocked = legacy_root / "blocked-legacy-source"
+        blocked_manifest = blocked / "one" / "IMPORT-MANIFEST.json"
+        blocked_manifest.parent.mkdir(parents=True)
+        blocked_manifest.write_text(
+            json.dumps(
+                {"archive_id": "blocked-legacy-source--one", "source_name": "blocked-legacy-source", "slug": "one"}
+            ),
+            encoding="utf-8",
+        )
+        os.chmod(blocked, 0o000)
+        try:
+            env = self._external_storage_env()
+            with mock.patch.dict(os.environ, env):
+                with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                    _pipeline.discover_import_manifests()
+        finally:
+            os.chmod(blocked, 0o755)
+
+    @unittest.skipIf(os.name == "nt", "chmod(0o000) does not remove directory read on Windows")
+    def test_enumeration_failure_after_a_valid_manifest_still_blocks_publication(self) -> None:
+        # A readable manifest found EARLIER in the scan must not survive
+        # into a partial result once a later sibling can't be scanned --
+        # the whole call fails, nothing is silently half-returned.
+        env = self._external_storage_env()
+        found_first = self._external_storage / "aaa-readable-first" / "one" / "IMPORT-MANIFEST.json"
+        found_first.parent.mkdir(parents=True)
+        found_first.write_text(
+            json.dumps(
+                {"archive_id": "aaa-readable-first--one", "source_name": "aaa-readable-first", "slug": "one"}
+            ),
+            encoding="utf-8",
+        )
+        blocked = self._external_storage / "zzz-blocked-later"
+        blocked_manifest = blocked / "one" / "IMPORT-MANIFEST.json"
+        blocked_manifest.parent.mkdir(parents=True)
+        blocked_manifest.write_text(
+            json.dumps({"archive_id": "zzz-blocked-later--one", "source_name": "zzz-blocked-later", "slug": "one"}),
+            encoding="utf-8",
+        )
+        os.chmod(blocked, 0o000)
+        try:
+            with mock.patch.dict(os.environ, env):
+                with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                    _pipeline.discover_import_manifests()
+        finally:
+            os.chmod(blocked, 0o755)
+
+    @unittest.skipIf(os.name == "nt", "chmod(0o000) does not remove directory read on Windows")
+    def test_unreadable_root_read_only_diagnostics_may_opt_into_the_other_roots_results(self) -> None:
+        # Symmetric with the missing-root case: allow_partial=True skips
+        # the root that could not be fully scanned (a caller explicitly
+        # asking for a best-effort snapshot accepts that granularity --
+        # this never applies to authoritative publication) but still
+        # returns what the OTHER, healthy root has -- the legacy archive
+        # is not lost just because the configured root has a problem.
+        src_default = self._make_source_folder("inbox/stillthere")
+        self._import(src_default)
+
+        env = self._external_storage_env()
+        blocked_manifest = self._external_storage / "blocked-source" / "two" / "IMPORT-MANIFEST.json"
+        blocked_manifest.parent.mkdir(parents=True)
+        blocked_manifest.write_text(
+            json.dumps({"archive_id": "blocked-source--two", "source_name": "blocked-source", "slug": "two"}),
+            encoding="utf-8",
+        )
+        os.chmod(self._external_storage / "blocked-source", 0o000)
+        try:
+            with mock.patch.dict(os.environ, env):
+                found = _pipeline.discover_import_manifests(allow_partial=True)
+        finally:
+            os.chmod(self._external_storage / "blocked-source", 0o755)
+        self.assertEqual(len(found), 1)
+        self.assertTrue(found[0].is_relative_to(self.fake_atlas))
+
     def test_catalog_refresh_is_blocked_and_existing_catalog_left_unchanged_on_incomplete_discovery(
         self,
     ) -> None:

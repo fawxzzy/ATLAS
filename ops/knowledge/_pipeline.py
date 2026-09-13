@@ -2487,25 +2487,72 @@ class ArchiveIdentityLayoutMismatchError(RuntimeError):
 
 
 class IncompleteDiscoveryError(RuntimeError):
-    """The explicitly configured import storage root
-    (ATLAS_IMPORT_STORAGE_ROOT) could not be fully enumerated -- missing,
-    not a directory, or an OSError partway through enumeration -- so the
-    manifest list discover_import_manifests() would otherwise return cannot
-    be proven complete. Letting a partial inventory stand in for a
+    """A root discover_import_manifests() scanned could not be proven
+    fully enumerated, so the manifest list it would otherwise return
+    cannot be trusted as complete. Two distinct situations raise this:
+    (1) the EXPLICITLY configured import storage root
+    (ATLAS_IMPORT_STORAGE_ROOT) is missing or not a directory -- its
+    absence might mean real content is simply unreachable, not that
+    nothing was ever imported there; (2) a root that DOES exist (the
+    configured root OR the legacy default location) cannot be fully
+    scanned -- an unreadable subdirectory, a permission error, or any
+    other OSError partway through enumeration. The second case applies
+    to every root that is actually present, not only the configured one:
+    an inaccessible legacy tree must not quietly present as "nothing
+    more to find" either. Letting a partial inventory stand in for a
     complete one would silently drop real archives from catalog,
     validation, backfill, and promotion-ranking tooling with no record
     that anything was missed -- exactly the failure mode a configuration
     change (not a real migration) must never cause. Raised instead of
     returning a partial list. A caller that only needs a best-effort,
     read-only snapshot (diagnostics, not authoritative publication) may
-    pass allow_partial=True to opt out; this never applies when no
-    external root is configured at all (the normal, first-use case), since
-    then there is nothing "configured" to be unavailable."""
+    pass allow_partial=True to opt out. The narrower "missing entirely"
+    case never applies to an unconfigured default root that simply has
+    not been created yet (the normal, first-use case), since then there
+    is nothing "configured" to be unavailable."""
 
 
 def _storage_root_is_explicitly_configured(*, env: dict[str, str] | None = None) -> bool:
     source = env if env is not None else os.environ
     return bool(source.get(storage._STORAGE_ROOT_ENV, "").strip())
+
+
+def _scan_subdirectories(path: Path) -> list[Path]:
+    """A single directory level's immediate subdirectories, sorted by
+    name, raising OSError normally on failure.
+
+    Deliberately os.scandir(), not Path.iterdir()/Path.glob(): pathlib's
+    glob() silently swallows an OSError raised while descending into an
+    unreadable subdirectory (documented CPython behavior, confirmed
+    against the exact Python version this project's hosted CI runs) --
+    a whole subtree can vanish from a glob() result with no signal at
+    all, which is exactly the failure IncompleteDiscoveryError exists to
+    prevent. os.scandir() raises immediately if `path` itself can't be
+    opened, and iterating it raises normally on a later entry-level
+    failure too -- neither is caught here, so a caller's own try/except
+    OSError sees it."""
+    with os.scandir(path) as entries:
+        return sorted(
+            (Path(entry.path) for entry in entries if entry.is_dir(follow_symlinks=False)),
+            key=lambda p: p.name,
+        )
+
+
+def _list_import_manifests(root: Path) -> list[Path]:
+    """Bounded, error-propagating enumeration of root's known three-level
+    layout: root / source_dir / archive_dir / IMPORT-MANIFEST.json.
+
+    Deliberately NOT a recursive walk -- archive payloads (raw/,
+    extracted/) can be arbitrarily large and deep, and discovery only
+    needs the manifest layout two levels below root, not another pass
+    over every file inside every archive."""
+    manifests: list[Path] = []
+    for source_dir in _scan_subdirectories(root):
+        for archive_dir in _scan_subdirectories(source_dir):
+            candidate = archive_dir / "IMPORT-MANIFEST.json"
+            if candidate.is_file():
+                manifests.append(candidate)
+    return manifests
 
 
 def discover_import_manifests(*, allow_partial: bool = False) -> list[Path]:
@@ -2527,14 +2574,23 @@ def discover_import_manifests(*, allow_partial: bool = False) -> list[Path]:
 
     A missing/unconfigured default root is a normal, empty first-use
     inventory, not an error. But an EXPLICITLY configured root
-    (ATLAS_IMPORT_STORAGE_ROOT set) that is missing, not a directory, or
-    raises OSError while being enumerated is different: some of its
-    contents might be unreachable rather than genuinely absent, so the
-    list this function would otherwise return cannot be proven complete.
-    IncompleteDiscoveryError is raised in that case instead of silently
-    returning whatever the legacy root alone could find -- unless
+    (ATLAS_IMPORT_STORAGE_ROOT set) that is missing or not a directory is
+    different: its absence might mean real content is simply unreachable
+    rather than genuinely never having existed, so the list this function
+    would otherwise return cannot be proven complete. Separately, ANY
+    root that DOES exist -- configured or legacy -- but cannot be fully
+    scanned (an unreadable subdirectory, or any other OSError partway
+    through enumeration) is always incomplete, regardless of which root
+    it is: an inaccessible legacy tree must not quietly present as
+    "nothing more to find" either. IncompleteDiscoveryError is raised in
+    either case instead of silently returning a partial list -- unless
     allow_partial=True, for read-only diagnostics that only want a
-    best-effort snapshot rather than an authoritative inventory.
+    best-effort snapshot rather than an authoritative inventory. The
+    granularity of that best-effort view is per ROOT, not per
+    subdirectory: a scan failure anywhere inside a root discards
+    whatever that same root had already found (nothing under a root
+    that could not be fully trusted is reported), but a fully readable
+    sibling root is still scanned and returned normally.
 
     Identity is the manifest's OWN declared (source_name, slug) --
     slugified, exactly as source_dir()/archive_dir() derive it -- not the
@@ -2558,27 +2614,28 @@ def discover_import_manifests(*, allow_partial: bool = False) -> list[Path]:
     manifests: list[Path] = []
     for root in roots:
         is_configured_root = root == configured_root
-        must_be_complete = is_configured_root and explicitly_configured and not allow_partial
-        try:
-            if not root.exists():
-                if must_be_complete:
-                    raise IncompleteDiscoveryError(
-                        f"configured import storage root {root} does not exist; "
-                        f"discovery cannot be proven complete"
-                    )
-                continue
-            if not root.is_dir():
-                if must_be_complete:
-                    raise IncompleteDiscoveryError(
-                        f"configured import storage root {root} is not a directory; "
-                        f"discovery cannot be proven complete"
-                    )
-                continue
-            found = sorted(root.glob("*/*/IMPORT-MANIFEST.json"))
-        except OSError as exc:
-            if must_be_complete:
+        missing_root_is_fatal = is_configured_root and explicitly_configured and not allow_partial
+        unreadable_root_is_fatal = not allow_partial
+        if not root.exists():
+            if missing_root_is_fatal:
                 raise IncompleteDiscoveryError(
-                    f"configured import storage root {root} could not be fully "
+                    f"configured import storage root {root} does not exist; "
+                    f"discovery cannot be proven complete"
+                )
+            continue
+        if not root.is_dir():
+            if missing_root_is_fatal:
+                raise IncompleteDiscoveryError(
+                    f"configured import storage root {root} is not a directory; "
+                    f"discovery cannot be proven complete"
+                )
+            continue
+        try:
+            found = sorted(_list_import_manifests(root))
+        except OSError as exc:
+            if unreadable_root_is_fatal:
+                raise IncompleteDiscoveryError(
+                    f"import storage root {root} exists but could not be fully "
                     f"enumerated: {exc}"
                 ) from exc
             continue

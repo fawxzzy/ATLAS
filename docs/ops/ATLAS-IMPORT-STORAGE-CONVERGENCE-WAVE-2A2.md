@@ -181,21 +181,46 @@ different directory layouts.
 A missing or not-yet-created default root is ordinary first use --
 nothing has ever been imported, so an empty list is correct, not an
 error. But once `ATLAS_IMPORT_STORAGE_ROOT` is **explicitly** set, its
-target being unavailable is a different situation: missing, not a
-directory, or an `OSError` partway through enumeration all mean some of
-its contents might be unreachable rather than genuinely absent, so the
-list `discover_import_manifests()` would otherwise return cannot be
-proven complete. Silently falling back to whatever the legacy root alone
-finds would let a configuration change masquerade as a completed
-migration -- exactly the failure mode this wave exists to prevent.
-`IncompleteDiscoveryError` is raised instead, before
-`update_catalog_doc()` (or `validate_catalog()`, backfill, or ranking)
-ever builds or publishes a record from a possibly-partial list; since
-the error is raised before any write, an existing catalog document is
-left completely unchanged on refusal. A caller that only wants a
-best-effort, read-only snapshot -- not an authoritative inventory used
-for publication -- may pass `discover_import_manifests(allow_partial=True)`
-to opt out and see whatever the legacy root still finds.
+target being missing or not a directory is a different situation: it
+might mean real content is simply unreachable rather than genuinely
+never having existed, so the list `discover_import_manifests()` would
+otherwise return cannot be proven complete.
+
+Separately -- and regardless of which root it is -- ANY root that DOES
+exist but cannot be FULLY scanned is also incomplete: an unreadable
+subdirectory partway through enumeration must block just as hard for
+the legacy default location as for the configured root, since an
+inaccessible legacy tree presenting as "nothing more to find" is the
+same silent-data-loss failure this wave exists to prevent. This is
+enforced at the actual filesystem boundary, not by wrapping a
+try/except around the wrong call: `Path.glob()` silently swallows an
+`OSError` raised while descending into an unreadable subdirectory (this
+is documented CPython behavior, confirmed against the Python version
+this project's hosted CI runs) -- a whole subtree can vanish from a
+`glob()` result with no signal at all, which defeats an outer
+`except OSError` wrapped around the call. Discovery instead enumerates
+its known, bounded three-level layout (`root / source_dir / archive_dir
+/ IMPORT-MANIFEST.json`) with `os.scandir()` directly at each level,
+which raises normally; it is not a recursive walk, since archive
+payloads (`raw/`, `extracted/`) are irrelevant to discovery and can be
+arbitrarily large.
+
+Silently falling back to whatever the legacy root alone finds -- or to
+whatever a partially-scanned root happened to see before hitting an
+unreadable subdirectory -- would let a configuration change (or a
+transient permission problem) masquerade as a completed migration or a
+smaller-than-real inventory. `IncompleteDiscoveryError` is raised
+instead, before `update_catalog_doc()` (or `validate_catalog()`,
+backfill, or ranking) ever builds or publishes a record from a
+possibly-partial list; since the error is raised before any write, an
+existing catalog document is left completely unchanged on refusal. A
+caller that only wants a best-effort, read-only snapshot -- not an
+authoritative inventory used for publication -- may pass
+`discover_import_manifests(allow_partial=True)` to opt out. That
+best-effort view is granular per ROOT, not per subdirectory: a scan
+failure anywhere inside a root discards whatever that same root had
+already found, but a fully readable sibling root is still scanned and
+returned normally.
 
 ## `env=` is honored consistently within `import_archive()`
 
@@ -215,9 +240,10 @@ invocation would.
 
 ## Tests
 
-`tests/test_atlas_knowledge_pipeline_s2a.py` -- 59 tests. Local: Windows
-59/59 (3 skipped, symlink-privilege), Ubuntu (WSL) 59/59 (0 skipped).
-Combined with the storage suite (106, unchanged): 165 total.
+`tests/test_atlas_knowledge_pipeline_s2a.py` -- 64 tests. Local: Windows
+64/64 (25 skipped: 20 symlink-privilege, 5 `chmod(0o000)` does not
+restrict read access on Windows), Ubuntu (WSL) 64/64 (0 skipped).
+Combined with the storage suite (106, unchanged): 170 total.
 
 - archive resolution follows a configured `ATLAS_IMPORT_STORAGE_ROOT`
   entirely outside the ATLAS checkout; the default (unconfigured) root
@@ -248,10 +274,21 @@ Combined with the storage suite (106, unchanged): 165 total.
   `ArchiveIdentityLayoutMismatchError`; an unconfigured, not-yet-existing
   default root is a normal empty first-use inventory; an *explicitly
   configured* root that is missing raises `IncompleteDiscoveryError`
-  instead of silently returning a legacy-only partial list, and a
-  read-only caller may opt into that partial view with
-  `allow_partial=True`; `update_catalog_doc()` refusing on incomplete
-  discovery leaves an existing catalog document completely unchanged
+  instead of silently returning a legacy-only partial list;
+  `update_catalog_doc()` refusing on incomplete discovery leaves an
+  existing catalog document completely unchanged
+- **unreadable-subtree enumeration, at the real filesystem boundary**
+  (each injects an actual `PermissionError` via `chmod(0o000)` on a real
+  directory, not a mock of `Path.glob` itself): a configured root that
+  cannot be listed at all raises `IncompleteDiscoveryError`; one
+  unreadable source directory *inside* an otherwise-listable configured
+  root does too; the same is proven for the **legacy** root specifically
+  -- the gap a `glob()`-based `except OSError` never actually caught,
+  since `glob()` silently swallows that error internally; a manifest
+  found earlier in the scan does not survive into a partial result once
+  a later sibling can't be scanned, proving there is no partial merge; a
+  read-only `allow_partial=True` caller still gets a healthy sibling
+  root's results even while the broken root is skipped
 - **downstream consumers, end to end, against a relocated archive**:
   persisted import -> `evaluate_archive()` -> `normalize_archive()` ->
   `update_catalog_doc()` -> `validate_catalog()` (asserting a fully
