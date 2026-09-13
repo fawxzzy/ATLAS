@@ -410,6 +410,12 @@ def validate_conformance(
         "HOSTED_REVIEW_QUIESCENCE_EFFECT_BOUNDARY_DRIFT",
         str(hosted_review_quiescence.get("provider_effects")),
     )
+    check(
+        hosted_review_quiescence.get("publication_state")
+        == (common_controls.get("publication_state") if isinstance(common_controls, dict) else None),
+        "HOSTED_REVIEW_QUIESCENCE_PUBLICATION_STATE_DRIFT",
+        str(hosted_review_quiescence.get("publication_state")),
+    )
     common_control_refs = [
         common_controls.get("engineering_memory_ref"),
         common_controls.get("implementation_ref"),
@@ -608,6 +614,7 @@ def validate_conformance(
             "provider_effects": pc025.get("provider_effects"),
             "hosted_review_quiescence_status": hosted_review_quiescence.get("status"),
             "hosted_review_quiescence_provider_effects": hosted_review_quiescence.get("provider_effects"),
+            "hosted_review_quiescence_publication_state": hosted_review_quiescence.get("publication_state"),
             "required_artifact_count": len(common_control_refs),
             "present_artifact_count": len(common_control_refs) - len(missing_common_control_refs),
             "engineering_memory_seed_count": len(observed_seed_ids & set(seed_ids)) if isinstance(seed_ids, list) else 0,

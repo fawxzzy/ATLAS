@@ -247,7 +247,7 @@
       "rule": "After a draft-to-ready transition bound to the exact immutable head, merge preflight requires positive terminal completion from every named hosted reviewer strictly later in that ready epoch, with zero queued or in-progress attempts, completed findings, or unresolved non-outdated exact-head threads; explicitly outdated historical threads do not block.",
       "fail_closed_on": ["empty post-ready review snapshot", "pre-ready review reuse", "wrong-head review", "queued review", "in-progress review", "completed findings", "unresolved non-outdated exact-head thread"],
       "provider_effects": 0,
-      "publication_state": "isolated-worktree-source-candidate-uncommitted",
+      "publication_state": "current-main-candidate-unmerged",
       "owner_boundary": "The common validator is root-owned and performs no GitHub call; source-owner release gates bind supported readback into it before any separately authorized merge."
     }
   },
