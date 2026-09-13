@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import json
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from ops._atlas import atlas_root
 from ops.atlas.awareness import atlas_status, fetch, search
 from ops.stack import export_repo_inventory as repo_inventory_module
 from ops.stack.export_repo_inventory import build_repo_inventory
+from ops.stack.generate_lockfile import load_stack_config
 
 
 class StackRepoInventoryTests(unittest.TestCase):
@@ -37,6 +39,19 @@ class StackRepoInventoryTests(unittest.TestCase):
         self.assertEqual("FawxzzyWeb", trove["operational_identity"]["display_name"])
         self.assertEqual("fawxzzyweb", trove["operational_identity"]["vercel_project"])
         self.assertEqual("https://fawxzzy.com", trove["operational_identity"]["public_origin"])
+
+    def test_discordos_is_provenance_only_and_cannot_block_root(self) -> None:
+        source_root = Path(__file__).resolve().parents[1]
+        inventory = build_repo_inventory(
+            root=self.root,
+            config=load_stack_config(source_root / "stack.yaml"),
+        )
+        discordos = next(item for item in inventory["repos"] if item["logical_id"] == "discordos")
+
+        self.assertEqual("retired-project-provenance", discordos["role"])
+        self.assertEqual("archived", discordos["status"])
+        self.assertFalse(discordos["root_blocking"])
+        self.assertFalse(discordos["dirty_blocks_root"])
 
     def test_awareness_search_and_fetch_resolve_repo_by_id_and_path(self) -> None:
         by_id = search("mazer", root=self.root, limit=20)

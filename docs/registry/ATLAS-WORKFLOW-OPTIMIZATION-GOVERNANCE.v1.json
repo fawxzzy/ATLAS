@@ -230,8 +230,8 @@
     "focused_test_ref": "tests/test_atlas_release_safety_controls.py",
     "pc024": {
       "status": "INSTALLED",
-      "rule": "Canonicalize strict same-origin Workbox URL keys before exact comparison; relative and root-relative paths may converge, but origin, decoded-path safety, admitted query and fragment semantics, duplicate detection, required coverage, byte count, and SHA-256 identity remain exact.",
-      "forbidden_shortcuts": ["basename matching", "foreign-origin acceptance", "dot-segment normalization", "silent query or fragment removal", "duplicate collapse", "byte or hash omission"],
+      "rule": "Canonicalize strict same-origin Workbox URL keys before exact comparison; relative and root-relative paths and equivalent literal or percent-encoded Unicode may converge, but encoded reserved separators, origin, decoded-path safety, admitted query and fragment semantics, duplicate detection, required coverage, byte count, and SHA-256 identity remain exact.",
+      "forbidden_shortcuts": ["basename matching", "foreign-origin acceptance", "encoded reserved-separator collapse", "noncanonical Unicode encoding", "dot-segment normalization", "silent query or fragment removal", "duplicate collapse", "byte or hash omission"],
       "owner_boundary": "The common validator is root-owned; product verifier integration remains owner-repository work."
     },
     "pc025": {

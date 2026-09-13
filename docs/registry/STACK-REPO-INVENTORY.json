@@ -1,18 +1,18 @@
 {
   "schema_version": "atlas.stack.repo-inventory.v1",
   "stack_manifest_ref": "stack.yaml",
-  "stack_manifest_digest": "sha256:e9f0e16fb6516e6a8694045d425ed61a6bcce5fb54dbc92afa3049088d5d788b",
+  "stack_manifest_digest": "sha256:d6eb7cf9c51cbb067271e0148af1fdc5ca66e909df04edcc284a594eb97b19e9",
   "stack_lock_ref": "stack.lock.yaml",
-  "stack_lock_digest": "sha256:39f42edca50325e012892c148bf35384f343a8fce865cdb3e183c564b3e6a904",
+  "stack_lock_digest": "sha256:3358231b1f4f30dc06cad7da07d7d09dae5d9c02f45cce47fb5b71213c6bfe4e",
   "working_memory_digest": "sha256:6536c59dcfde11b0a4c180d6595adc8e6c59be34149ad512c1e3331462cf57f7",
   "published_refs": {
     "json": "docs/registry/STACK-REPO-INVENTORY.json",
     "markdown": "docs/audits/STACK-REPO-INVENTORY.md"
   },
   "repo_count": 13,
-  "dirty_repo_count": 3,
+  "dirty_repo_count": 2,
   "visible_dirty_repo_count": 4,
-  "advisory_dirty_repo_count": 1,
+  "advisory_dirty_repo_count": 2,
   "release_eligible_count": 4,
   "repos": [
     {
@@ -90,13 +90,13 @@
       "logical_id": "discordos",
       "local_path": "repos/DiscordOS",
       "operational_identity": null,
-      "role": "board-and-discord-writer",
+      "role": "retired-project-provenance",
       "playbook_adoption_status": "not-claimed",
       "playbook_adoption_profile": "",
       "playbook_adoption_version": "",
       "playbook_adoption_owner_head": "",
       "playbook_adoption_owner_ref": "",
-      "status": "incubating",
+      "status": "archived",
       "remote_url": "https://github.com/fawxzzy/DiscordOS.git",
       "pinned_commit": "aef01f277e006e3cb46550e507ebd8e4a1be9d21",
       "current_commit": "aef01f277e006e3cb46550e507ebd8e4a1be9d21",
@@ -106,8 +106,8 @@
       "current_ref": "main",
       "branch": "main",
       "dirty": true,
-      "root_blocking": true,
-      "dirty_blocks_root": true,
+      "root_blocking": false,
+      "dirty_blocks_root": false,
       "remote_ref_alignment_ref": null,
       "remote_ref_alignment_remote_commit": null,
       "remote_ref_alignment_status": "UNKNOWN",
@@ -738,5 +738,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:4017e58d969964a1acd3a26e7a7e99f276bb8640bcf21d50431c043ac8038754"
+  "content_digest": "sha256:21554628dfbf9512c352c7f1d13fbb7d36402e049e60c992a8f18d4f99c00f02"
 }

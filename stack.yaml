@@ -149,9 +149,10 @@ repo_registry:
           - node_modules
   discordos:
     path: repos/DiscordOS
-    role: board-and-discord-writer
+    role: retired-project-provenance
     playbook_adoption_status: not-claimed
-    status: incubating
+    status: archived
+    root_blocking: false
     validation:
       generated_state_cleanup:
         command: npm run ops:repo-hygiene:cleanup

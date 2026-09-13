@@ -9,7 +9,7 @@ import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
-from urllib.parse import unquote_to_bytes, urlsplit
+from urllib.parse import quote, unquote_to_bytes, urlsplit
 
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -64,14 +64,31 @@ def _decode_safe_path(path: str) -> str:
         _fail("WORKBOX_PATH_TRAVERSAL", "dot segments are forbidden before canonical comparison")
 
     normalized_raw = unicodedata.normalize("NFC", path)
-
-    def normalize_escape(match: re.Match[str]) -> str:
+    canonical_parts: list[str] = []
+    chunk_start = 0
+    for match in re.finditer(r"%[0-9A-Fa-f]{2}", normalized_raw):
         value = int(match.group(0)[1:], 16)
-        if value in _UNRESERVED_BYTES:
-            return chr(value)
-        return f"%{value:02X}"
-
-    canonical = re.sub(r"%[0-9A-Fa-f]{2}", normalize_escape, normalized_raw)
+        if value >= 128 or value in _UNRESERVED_BYTES:
+            continue
+        chunk = normalized_raw[chunk_start : match.start()]
+        if chunk:
+            canonical_parts.append(
+                quote(
+                    unicodedata.normalize("NFC", unquote_to_bytes(chunk).decode("utf-8", errors="strict")),
+                    safe="/-._~!$&'()*+,;=:@",
+                )
+            )
+        canonical_parts.append(f"%{value:02X}")
+        chunk_start = match.end()
+    final_chunk = normalized_raw[chunk_start:]
+    if final_chunk:
+        canonical_parts.append(
+            quote(
+                unicodedata.normalize("NFC", unquote_to_bytes(final_chunk).decode("utf-8", errors="strict")),
+                safe="/-._~!$&'()*+,;=:@",
+            )
+        )
+    canonical = "".join(canonical_parts)
     return "/" + canonical.lstrip("/")
 
 

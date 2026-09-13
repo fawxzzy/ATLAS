@@ -187,7 +187,7 @@
       "id": "rule-workbox-strict-same-origin-canonical-comparison",
       "kind": "rule",
       "title": "Workbox Strict Same-Origin Canonical Comparison",
-      "statement": "Canonicalize same-origin Workbox URL keys before exact comparison while preserving decoded-path safety, admitted query and fragment semantics, duplicate rejection, required coverage, byte count, and SHA-256 identity; never compare by basename.",
+      "statement": "Canonicalize same-origin Workbox URL keys before exact comparison, normalize equivalent literal and percent-encoded Unicode to canonical UTF-8 while keeping encoded reserved separators distinct, and preserve decoded-path safety, admitted query and fragment semantics, duplicate rejection, required coverage, byte count, and SHA-256 identity; never compare by basename.",
       "status": "accepted-atlas-root",
       "playbook_promotion": "installed-common-control"
     },

@@ -4,11 +4,14 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 import tomllib
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from ops.atlas.persist_thread_context import ThreadContextError, validate_checkpoint
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -62,6 +65,27 @@ def _parse_datetime(value: str) -> datetime:
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
+
+def _root_relative_path(atlas_root: Path, ref: Any) -> Path | None:
+    if (
+        not isinstance(ref, str)
+        or not ref
+        or "\\" in ref
+        or ref.startswith("/")
+        or re.match(r"^[A-Za-z]:", ref)
+    ):
+        return None
+    parts = ref.split("/")
+    if any(part in {"", ".", ".."} for part in parts):
+        return None
+    root = atlas_root.resolve()
+    candidate = (root / Path(*parts)).resolve()
+    try:
+        candidate.relative_to(root)
+    except ValueError:
+        return None
+    return candidate
 
 
 def _rrule_minutes(rrule: str) -> int | None:
@@ -476,27 +500,52 @@ def validate_conformance(
     memory_refs = conformance.get("engineering_memory_gate_refs", [])
     if not isinstance(memory_refs, list):
         raise ConformanceError("engineering_memory_gate_refs must be an array")
-    missing_memory_refs = [ref for ref in memory_refs if not (atlas_root / str(ref)).is_file()]
+    invalid_memory_refs = [ref for ref in memory_refs if _root_relative_path(atlas_root, ref) is None]
+    check(
+        not invalid_memory_refs,
+        "ENGINEERING_MEMORY_GATE_REF_INVALID",
+        ",".join(map(str, invalid_memory_refs)),
+    )
+    missing_memory_refs = [
+        ref
+        for ref in memory_refs
+        if (path := _root_relative_path(atlas_root, ref)) is not None and not path.is_file()
+    ]
     check(not missing_memory_refs, "ENGINEERING_MEMORY_GATE_MISSING", ",".join(map(str, missing_memory_refs)))
 
     seam_refs = conformance.get("job_receipt_seam_refs", [])
     if not isinstance(seam_refs, list):
         raise ConformanceError("job_receipt_seam_refs must be an array")
-    missing_seam_refs = [ref for ref in seam_refs if not (atlas_root / str(ref)).is_file()]
+    invalid_seam_refs = [ref for ref in seam_refs if _root_relative_path(atlas_root, ref) is None]
+    check(not invalid_seam_refs, "JOB_RECEIPT_SEAM_REF_INVALID", ",".join(map(str, invalid_seam_refs)))
+    missing_seam_refs = [
+        ref
+        for ref in seam_refs
+        if (path := _root_relative_path(atlas_root, ref)) is not None and not path.is_file()
+    ]
     check(not missing_seam_refs, "JOB_RECEIPT_SEAM_MISSING", ",".join(map(str, missing_seam_refs)))
 
     latest_receipt_ref = ledger.get("automation", {}).get("latest_active_successor_ref")
-    latest_receipt_path = atlas_root / str(latest_receipt_ref)
-    check(latest_receipt_path.is_file(), "LATEST_RECEIPT_MISSING", str(latest_receipt_ref))
-    latest_receipt = _load_json(latest_receipt_path) if latest_receipt_path.is_file() else {}
+    latest_receipt_path = _root_relative_path(atlas_root, latest_receipt_ref)
+    check(latest_receipt_path is not None, "LATEST_RECEIPT_REF_INVALID", str(latest_receipt_ref))
+    check(
+        latest_receipt_path is not None and latest_receipt_path.is_file(),
+        "LATEST_RECEIPT_MISSING",
+        str(latest_receipt_ref),
+    )
+    latest_receipt = (
+        _load_json(latest_receipt_path)
+        if latest_receipt_path is not None and latest_receipt_path.is_file()
+        else {}
+    )
     check(
         latest_receipt.get("contract_version") == "atlas.execution-receipt.v2",
         "LATEST_RECEIPT_CONTRACT_DRIFT",
         str(latest_receipt_ref),
     )
-    latest_job_path = latest_receipt_path.with_name("job-envelope.json")
-    check(latest_job_path.is_file(), "LATEST_JOB_MISSING", str(latest_job_path))
-    latest_job = _load_json(latest_job_path) if latest_job_path.is_file() else {}
+    latest_job_path = latest_receipt_path.with_name("job-envelope.json") if latest_receipt_path is not None else None
+    check(latest_job_path is not None and latest_job_path.is_file(), "LATEST_JOB_MISSING", str(latest_job_path))
+    latest_job = _load_json(latest_job_path) if latest_job_path is not None and latest_job_path.is_file() else {}
     check(
         latest_job.get("contract_version") == "atlas.job-envelope.v2",
         "LATEST_JOB_CONTRACT_DRIFT",
@@ -508,11 +557,24 @@ def validate_conformance(
     checkpoint_path = atlas_root / "runtime" / "atlas" / "thread-context" / str(thread_id) / "latest.json"
     check(checkpoint_path.is_file(), "CHECKPOINT_MISSING", str(thread_id))
     checkpoint = _load_json(checkpoint_path) if checkpoint_path.is_file() else {}
-    payload = checkpoint.get("payload", {}) if isinstance(checkpoint, dict) else {}
+    payload: dict[str, Any] = {}
+    if checkpoint_path.is_file():
+        try:
+            payload = validate_checkpoint(checkpoint)
+        except ThreadContextError as error:
+            check(False, "CHECKPOINT_ENVELOPE_INVALID", str(error))
+    expected_role_id = integrator.get("logical_role_id") or integrator.get("role_id") or integrator.get("writer_scope")
+    if payload:
+        check(payload.get("thread_id") == thread_id, "CHECKPOINT_THREAD_IDENTITY_DRIFT", str(payload.get("thread_id")))
+        check(
+            payload.get("logical_role_id") == expected_role_id,
+            "CHECKPOINT_ROLE_IDENTITY_DRIFT",
+            str(payload.get("logical_role_id")),
+        )
     checkpoint_receipts = payload.get("receipts", []) if isinstance(payload, dict) else []
     latest_receipt_anchor = (
         f"{latest_receipt_ref}#sha256={_sha256(latest_receipt_path)}"
-        if latest_receipt_path.is_file()
+        if latest_receipt_path is not None and latest_receipt_path.is_file()
         else None
     )
     contains_latest_receipt = latest_receipt_ref in checkpoint_receipts or latest_receipt_anchor in checkpoint_receipts
@@ -520,19 +582,23 @@ def validate_conformance(
     recorded_at = payload.get("recorded_at") if isinstance(payload, dict) else None
     checkpoint_age_hours: float | None = None
     if isinstance(recorded_at, str):
-        checkpoint_time = _parse_datetime(recorded_at)
-        future_skew_seconds = (checkpoint_time - now).total_seconds()
-        check(
-            future_skew_seconds <= MAX_CHECKPOINT_FUTURE_SKEW_SECONDS,
-            "CHECKPOINT_TIMESTAMP_IN_FUTURE",
-            f"future_skew_seconds={future_skew_seconds:.4f}",
-        )
-        checkpoint_age_hours = max(0.0, (now - checkpoint_time).total_seconds() / 3600)
-        check(
-            checkpoint_age_hours <= max_checkpoint_age_hours,
-            "CHECKPOINT_TOO_OLD",
-            f"age_hours={checkpoint_age_hours:.4f}",
-        )
+        try:
+            checkpoint_time = _parse_datetime(recorded_at)
+        except (TypeError, ValueError) as error:
+            check(False, "CHECKPOINT_TIMESTAMP_INVALID", str(error))
+        else:
+            future_skew_seconds = (checkpoint_time - now).total_seconds()
+            check(
+                future_skew_seconds <= MAX_CHECKPOINT_FUTURE_SKEW_SECONDS,
+                "CHECKPOINT_TIMESTAMP_IN_FUTURE",
+                f"future_skew_seconds={future_skew_seconds:.4f}",
+            )
+            checkpoint_age_hours = max(0.0, (now - checkpoint_time).total_seconds() / 3600)
+            check(
+                checkpoint_age_hours <= max_checkpoint_age_hours,
+                "CHECKPOINT_TOO_OLD",
+                f"age_hours={checkpoint_age_hours:.4f}",
+            )
     else:
         check(False, "CHECKPOINT_TIMESTAMP_MISSING", str(thread_id))
 
@@ -648,7 +714,11 @@ def validate_conformance(
             "required_refs": len(seam_refs),
             "present_refs": len(seam_refs) - len(missing_seam_refs),
             "latest_receipt_ref": latest_receipt_ref,
-            "latest_job_ref": str(latest_job_path.relative_to(atlas_root)).replace("\\", "/") if latest_job_path.is_file() else None,
+            "latest_job_ref": (
+                str(latest_job_path.relative_to(atlas_root)).replace("\\", "/")
+                if latest_job_path is not None and latest_job_path.is_file()
+                else None
+            ),
         },
         "checkpoint": {
             "ref": str(checkpoint_path.relative_to(atlas_root)).replace("\\", "/"),

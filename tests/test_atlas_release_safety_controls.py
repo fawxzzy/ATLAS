@@ -78,6 +78,18 @@ class WorkboxReleaseSafetyTests(unittest.TestCase):
             canonicalize_same_origin_workbox_key("/b/favicon.ico", expected_origin=self.origin),
         )
 
+    def test_literal_and_percent_encoded_unicode_paths_are_equivalent(self) -> None:
+        self.assertEqual(
+            canonicalize_same_origin_workbox_key("/café/猫", expected_origin=self.origin),
+            canonicalize_same_origin_workbox_key("/caf%C3%A9/%E7%8C%AB", expected_origin=self.origin),
+        )
+
+    def test_unicode_normalization_is_canonical(self) -> None:
+        self.assertEqual(
+            canonicalize_same_origin_workbox_key("/cafe\u0301", expected_origin=self.origin),
+            canonicalize_same_origin_workbox_key("/caf%C3%A9", expected_origin=self.origin),
+        )
+
     def test_encoded_reserved_delimiters_and_separators_remain_distinct(self) -> None:
         self.assertNotEqual(
             canonicalize_same_origin_workbox_key("/a%3Fb", expected_origin=self.origin),

@@ -15,21 +15,21 @@ Operational rule:
 ## Summary
 
 - Repo count: `13`
-- Root-blocking dirty repo count: `3`
+- Root-blocking dirty repo count: `2`
 - Visible dirty repo count: `4`
-- Advisory dirty repo count: `1`
+- Advisory dirty repo count: `2`
 - Release-eligible repo count: `4`
 - Excluded surface count: `16`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:4017e58d969964a1acd3a26e7a7e99f276bb8640bcf21d50431c043ac8038754`
+- Inventory digest: `sha256:21554628dfbf9512c352c7f1d13fbb7d36402e049e60c992a8f18d4f99c00f02`
 
 ## Managed Repos
 
 | Repo id | Path | Display | Provider project | Public origin | Role | Playbook adoption status | Branch | Pinned commit | Current commit | Dirty | Root-blocking | Dirty blocks root | Trust | Release | Related initiatives |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | _stack | repos/_stack | - | - | - | workflow-operator | verified | main | 7aed5495d2702a653e461549877d8fa77b3a33d2 | 7aed5495d2702a653e461549877d8fa77b3a33d2 | True | True | True | trusted | False | initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-local-data-gateway<br>initiative:continuity-manifest-post-convergence-lane-split-readiness<br>initiative:continuity-manifest-stack-readiness<br>initiative:continuity-manifest-vision-future-alignment |
-| discordos | repos/DiscordOS | - | - | - | board-and-discord-writer | not-claimed | main | aef01f277e006e3cb46550e507ebd8e4a1be9d21 | aef01f277e006e3cb46550e507ebd8e4a1be9d21 | True | True | True | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
+| discordos | repos/DiscordOS | - | - | - | retired-project-provenance | not-claimed | main | aef01f277e006e3cb46550e507ebd8e4a1be9d21 | aef01f277e006e3cb46550e507ebd8e4a1be9d21 | True | False | False | trusted | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation |
 | fitness | repos/fawxzzy-fitness | - | - | - | application | - | main | - | da4d71afaecb19f470ce60ba182776d9fb0589e1 | False | False | False | adjacent | False | initiative:continuity-manifest-dependency-untangling<br>initiative:continuity-manifest-discord-os-feedback-workflow-canonicalization<br>initiative:continuity-manifest-discord-os-infrastructure-separation<br>initiative:continuity-manifest-local-data-gateway |
 | foundation | repos/foundation | - | - | - | shared-contract-foundation | not-claimed | main | e0c2978e4f0d0b73aaee6fc5d14b982b78d89b97 | e0c2978e4f0d0b73aaee6fc5d14b982b78d89b97 | False | True | False | trusted | True | - |
 | lifeline | repos/lifeline | - | - | - | local-operator | - | codex/path-discipline-warning-slice-lifeline | 54eeb56006099235723b60ce44de8a65e4c85889 | 54eeb56006099235723b60ce44de8a65e4c85889 | False | True | False | trusted | True | - |

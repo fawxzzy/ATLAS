@@ -7,6 +7,7 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
+from ops.atlas.persist_thread_context import build_checkpoint
 from ops.atlas.validate_optimization_governance_conformance import validate_conformance
 
 
@@ -130,17 +131,7 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         )
         checkpoint_path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
         checkpoint_path.parent.mkdir(parents=True)
-        checkpoint_path.write_text(
-            json.dumps(
-                {
-                    "payload": {
-                        "recorded_at": "2026-08-27T21:30:00Z",
-                        "receipts": [self.receipt_ref],
-                    }
-                }
-            ),
-            encoding="utf-8",
-        )
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T21:30:00Z")
 
         entries = [
             ("integrator", "Integrator", "thread-integrator", 60, "scope.integrator"),
@@ -325,6 +316,26 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
     def _write_ledger(self) -> None:
         self.ledger_path.write_text(json.dumps(self.ledger), encoding="utf-8")
 
+    def _write_integrator_checkpoint(
+        self,
+        *,
+        recorded_at: str,
+        receipts: list[str] | None = None,
+        thread_id: str = "thread-integrator",
+        role_id: str = "scope.integrator",
+    ) -> None:
+        checkpoint = build_checkpoint(
+            thread_id=thread_id,
+            role_id=role_id,
+            title="Integrator",
+            state="ACTIVE",
+            summary="Fixture checkpoint",
+            recorded_at=recorded_at,
+            receipts=[self.receipt_ref] if receipts is None else receipts,
+        )
+        path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
+        path.write_text(json.dumps(checkpoint), encoding="utf-8")
+
     def validate(self) -> dict:
         return validate_conformance(
             self.root,
@@ -494,46 +505,78 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         self.assertIn("AUTOMATION_STATUS_DRIFT", {error["code"] for error in result["errors"]})
 
     def test_fails_when_checkpoint_does_not_reference_latest_receipt(self) -> None:
-        checkpoint_path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
-        checkpoint_path.write_text(
-            json.dumps({"payload": {"recorded_at": "2026-08-27T21:30:00Z", "receipts": []}}),
-            encoding="utf-8",
-        )
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T21:30:00Z", receipts=[])
         result = self.validate()
         self.assertFalse(result["valid"])
         self.assertIn("CHECKPOINT_RECEIPT_STALE", {error["code"] for error in result["errors"]})
 
     def test_accepts_checkpoint_at_future_clock_skew_boundary(self) -> None:
-        checkpoint_path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
-        checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
-        checkpoint["payload"]["recorded_at"] = "2026-08-27T22:05:00Z"
-        checkpoint_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T22:05:00Z")
         result = self.validate()
         self.assertTrue(result["valid"], result["errors"])
 
     def test_rejects_checkpoint_beyond_future_clock_skew_window(self) -> None:
-        checkpoint_path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
-        checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
-        checkpoint["payload"]["recorded_at"] = "2026-08-27T22:05:01Z"
-        checkpoint_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T22:05:01Z")
         result = self.validate()
         self.assertFalse(result["valid"])
         self.assertIn("CHECKPOINT_TIMESTAMP_IN_FUTURE", {error["code"] for error in result["errors"]})
 
+    def test_malformed_checkpoint_timestamp_returns_structured_invalid(self) -> None:
+        self._write_integrator_checkpoint(recorded_at="not-a-timestamp")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("CHECKPOINT_TIMESTAMP_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_checkpoint_payload_digest_drift(self) -> None:
+        checkpoint_path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
+        checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+        checkpoint["payload"]["summary"] = "tampered"
+        checkpoint_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("CHECKPOINT_ENVELOPE_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_checkpoint_from_another_thread(self) -> None:
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T21:30:00Z", thread_id="other-thread")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("CHECKPOINT_THREAD_IDENTITY_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_rejects_checkpoint_from_another_logical_role(self) -> None:
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T21:30:00Z", role_id="other.role")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("CHECKPOINT_ROLE_IDENTITY_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_rejects_absolute_engineering_memory_reference(self) -> None:
+        self.ledger["active_task_governance_conformance"]["engineering_memory_gate_refs"][0] = str(
+            self.root / self.memory_refs[0]
+        )
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("ENGINEERING_MEMORY_GATE_REF_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_traversal_job_receipt_seam_reference(self) -> None:
+        self.ledger["active_task_governance_conformance"]["job_receipt_seam_refs"][0] = "../outside.json"
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("JOB_RECEIPT_SEAM_REF_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_absolute_latest_receipt_reference(self) -> None:
+        self.ledger["automation"]["latest_active_successor_ref"] = str(self.root / self.receipt_ref)
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("LATEST_RECEIPT_REF_INVALID", {error["code"] for error in result["errors"]})
+
     def test_accepts_content_addressed_latest_receipt_anchor(self) -> None:
         receipt_path = self.root / self.receipt_ref
         receipt_sha = hashlib.sha256(receipt_path.read_bytes()).hexdigest()
-        checkpoint_path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
-        checkpoint_path.write_text(
-            json.dumps(
-                {
-                    "payload": {
-                        "recorded_at": "2026-08-27T21:30:00Z",
-                        "receipts": [f"{self.receipt_ref}#sha256={receipt_sha}"],
-                    }
-                }
-            ),
-            encoding="utf-8",
+        self._write_integrator_checkpoint(
+            recorded_at="2026-08-27T21:30:00Z",
+            receipts=[f"{self.receipt_ref}#sha256={receipt_sha}"],
         )
         result = self.validate()
         self.assertTrue(result["valid"], result["errors"])
