@@ -411,14 +411,13 @@ When working on Playbook or repository development and speed matters, default to
   exclusions; use fresh evidence and exact action-time preflight; emit one
   local `AUTO_AUTHORIZED` receipt; the owning lane still separates decision from
   execution and performs fresh action-time preflight.
-- Two exact operator-granted profiles are active immediately: fully proven
-  clean draft-to-ready transitions and exact retirement of one accidental
-  statusless GitHub deployment metadata record with zero workflow/provider/
-  Vercel/production execution. Ready does not include merge; metadata
-  retirement does not include provider execution, deployment, production,
-  source mutation, or any unrelated record. This profile never grants guarded
-  merge or production authority; only the current governing root contract can
-  admit an additional exact profile.
+- Exact operator-granted profiles are active only when enumerated by the
+  canonical authorization policy and admitted by the currently loaded
+  governing root contract. This durable behavior profile does not enumerate,
+  create, widen, or revoke those authorities. Every reuse remains bound to its
+  named action class, exact gates, exclusions, single-use semantics where
+  applicable, and fresh action-time proof; a ready transition never implies a
+  merge, and a source merge never implies provider or production authority.
 - Production, provider mutation, Supabase apply, Auth/live-data mutation,
   secrets, credentials, DNS, billing, purchases, destructive work, security
   bypass, source retirement, deletion, ownership, and retention changes always

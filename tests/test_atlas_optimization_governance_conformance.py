@@ -208,21 +208,7 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         self.status_checkpoint_ref = f"runtime/atlas/thread-context/{self.status_thread_id}/latest.json"
         status_checkpoint_path = self.root / self.status_checkpoint_ref
         status_checkpoint_path.parent.mkdir(parents=True)
-        status_checkpoint_path.write_text(
-            json.dumps(
-                {
-                    "payload": {
-                        "thread_id": self.status_thread_id,
-                        "logical_role_id": "atlas.status-projection",
-                        "receipts": [
-                            f"{self.status_json_ref}#sha256={self.status_json_sha.removeprefix('sha256:')}",
-                            f"{self.status_markdown_ref}#sha256={self.status_markdown_sha.removeprefix('sha256:')}",
-                        ],
-                    }
-                }
-            ),
-            encoding="utf-8",
-        )
+        self._write_status_checkpoint()
 
         def topology_entry(values: tuple[str, str, str, int, str]) -> dict:
             automation_id, name, thread_id, cadence, scope = values
@@ -336,6 +322,29 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
         path.write_text(json.dumps(checkpoint), encoding="utf-8")
 
+    def _write_status_checkpoint(
+        self,
+        *,
+        receipts: list[str] | None = None,
+        thread_id: str | None = None,
+        role_id: str = "atlas.status-projection",
+    ) -> None:
+        checkpoint = build_checkpoint(
+            thread_id=thread_id or self.status_thread_id,
+            role_id=role_id,
+            title="Status Refresh",
+            state="ACTIVE",
+            summary="Fixture status checkpoint",
+            recorded_at="2026-08-27T21:30:00Z",
+            receipts=receipts
+            or [
+                f"{self.status_json_ref}#sha256={self.status_json_sha.removeprefix('sha256:')}",
+                f"{self.status_markdown_ref}#sha256={self.status_markdown_sha.removeprefix('sha256:')}",
+            ],
+        )
+        path = self.root / self.status_checkpoint_ref
+        path.write_text(json.dumps(checkpoint), encoding="utf-8")
+
     def validate(self) -> dict:
         return validate_conformance(
             self.root,
@@ -375,6 +384,14 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
                 "hosted_review_quiescence_maximum_observation_age_seconds"
             ],
         )
+
+    def test_fails_when_program_tasks_share_one_thread_identity(self) -> None:
+        integrator_thread = self.ledger["worker_topology"]["integrator"]["thread_id"]
+        self.ledger["worker_topology"]["bounded_workers"][0]["thread_id"] = integrator_thread
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("PROGRAM_TASK_IDENTITY_DRIFT", {error["code"] for error in result["errors"]})
 
     def test_fails_when_single_observation_fanout_gate_is_removed(self) -> None:
         self.optimization_governance["anti_churn"]["single_observation_failure_gate"][
@@ -489,6 +506,15 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertIn("COMMON_RELEASE_CONTROL_ARTIFACT_MISSING", {error["code"] for error in result["errors"]})
 
+    def test_rejects_traversal_common_release_control_reference(self) -> None:
+        self.optimization_governance["common_release_safety_controls"]["implementation_ref"] = "../outside.py"
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("COMMON_RELEASE_CONTROL_REF_INVALID", {error["code"] for error in result["errors"]})
+
     def test_fails_when_any_manifest_role_loses_baseline(self) -> None:
         self.manifest["roles"][1]["prompt_template"]["fragments"] = []
         self.manifest_path.write_text(json.dumps(self.manifest), encoding="utf-8")
@@ -503,6 +529,13 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         result = self.validate()
         self.assertFalse(result["valid"])
         self.assertIn("AUTOMATION_STATUS_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_rejects_traversal_automation_identity_path(self) -> None:
+        self.ledger["worker_topology"]["bounded_workers"][0]["automation_id"] = "../escape"
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("AUTOMATION_REF_INVALID", {error["code"] for error in result["errors"]})
 
     def test_fails_when_checkpoint_does_not_reference_latest_receipt(self) -> None:
         self._write_integrator_checkpoint(recorded_at="2026-08-27T21:30:00Z", receipts=[])
@@ -630,11 +663,36 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertIn("STATUS_PROJECTION_HASH_DRIFT", {error["code"] for error in result["errors"]})
 
-    def test_fails_when_status_checkpoint_receipt_hash_drifts(self) -> None:
+    def test_rejects_traversal_status_projection_reference(self) -> None:
+        self.ledger["operator_visibility_topology"]["projection"]["json_ref"] = "../outside.json"
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("STATUS_PROJECTION_REF_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_traversal_status_checkpoint_reference(self) -> None:
+        self.ledger["operator_visibility_topology"]["checkpoint"]["ref"] = "../outside.json"
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("STATUS_CHECKPOINT_REF_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_status_checkpoint_envelope_drift(self) -> None:
         checkpoint_path = self.root / self.status_checkpoint_ref
         checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
-        checkpoint["payload"]["receipts"][1] = f"{self.status_markdown_ref}#sha256=wrong"
+        checkpoint["payload"]["summary"] = "tampered"
         checkpoint_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("STATUS_CHECKPOINT_ENVELOPE_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_status_checkpoint_receipt_hash_drifts(self) -> None:
+        self._write_status_checkpoint(
+            receipts=[
+                f"{self.status_json_ref}#sha256={self.status_json_sha.removeprefix('sha256:')}",
+                f"{self.status_markdown_ref}#sha256=wrong",
+            ]
+        )
         result = self.validate()
         self.assertFalse(result["valid"])
         self.assertIn("STATUS_CHECKPOINT_RECEIPT_HASH_DRIFT", {error["code"] for error in result["errors"]})

@@ -303,6 +303,25 @@ class AtlasMasterProgramTests(unittest.TestCase):
         self.assertEqual(20, len(index["lane_ids"]))
         self.assertEqual(48, len(index["backlog_ids"]))
 
+    def test_discordos_program_is_terminal_provenance_not_a_live_route(self) -> None:
+        register = load_json("docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json")
+        discordos = next(
+            program
+            for program in register["programs"]
+            if program["id"] == "program-discordos-board-governance"
+        )
+        serialized = json.dumps(register, sort_keys=True)
+
+        self.assertEqual("stack-root-provenance", discordos["owner"])
+        self.assertEqual("retired-provenance-only", discordos["status"])
+        self.assertEqual("TERMINAL_PROVENANCE", discordos["measurement_status"])
+        self.assertEqual([], discordos["dependencies"])
+        self.assertIn("No live DiscordOS packet", discordos["next_packet"])
+        self.assertIn("owner.fawxzzyweb", register["authority_model"]["retired_owner_rule"])
+        self.assertIn("platform.supabase-migration", register["authority_model"]["retired_owner_rule"])
+        self.assertNotIn("currently admitted DiscordOS board cluster", serialized)
+        self.assertNotIn('"next_packet": "FP-DOS-REC-001"', serialized)
+
 
 if __name__ == "__main__":
     unittest.main()

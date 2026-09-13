@@ -44,7 +44,8 @@
     ],
     "unknown_rule": "Unavailable or denied evidence remains UNKNOWN, never zero or healthy.",
     "owner_lane_rule": "Fitness, Mazer, Socials OS, and FawxzzyWeb remain independent standing owner lanes.",
-    "single_writer_rule": "At most one ATLAS root writer, one owner-repository writer, and one logical DiscordOS board writer."
+    "single_writer_rule": "At most one ATLAS root writer and one owner-repository or declared external-resource writer per conflict group.",
+    "retired_owner_rule": "Archived or retired project owners are provenance only and cannot be selected, reactivated, dispatched, or used for pull-request creation. DiscordOS history remains indexed, while future project-board product work routes only to owner.fawxzzyweb and master-data work routes only to platform.supabase-migration after their exact contracts are proven."
   },
   "measurement_policy": {
     "new_work": "UNMEASURED",
@@ -97,7 +98,7 @@
     {
       "id": "fawxzzy-platform-parity-hold",
       "status": "HOLD",
-      "rule": "Platform repository creation, schema/Auth/billing migration, and rehearsal remain held until FP-DOS-REC-001, FP-MZR-REC-001, FP-FIT-REC-001, and a fresh FP-PARITY-RATCHET-001 close serially."
+      "rule": "Platform repository creation, schema/Auth/billing migration, and rehearsal remain held until the exact owner.fawxzzyweb project-board contract, platform.supabase-migration master-data contract, FP-MZR-REC-001, FP-FIT-REC-001, and a fresh FP-PARITY-RATCHET-001 close serially."
     },
     {
       "id": "post-preparation-development-gate",
@@ -163,32 +164,27 @@
     },
     {
       "id": "program-discordos-board-governance",
-      "title": "DiscordOS board consistency and maintenance",
-      "owner": "DiscordOS",
-      "authority": "DiscordOS contracts, exact journals/readback, owner export, and accepted board receipts",
-      "scope": "Maintain canonical profiles, tags, permissions, board #14 FawxzzyWeb, exact journal/readback semantics, current-state consistency, and one logical writer.",
-      "dependencies": [
-        "DiscordOS single-writer admission",
-        "exact live readback for mutations"
-      ],
+      "title": "DiscordOS board-governance provenance",
+      "owner": "stack-root-provenance",
+      "authority": "Retired DiscordOS contracts, exact historical journals/readback, owner exports, and accepted board receipts as provenance only",
+      "scope": "Preserve historical DiscordOS board evidence without selecting, reactivating, dispatching, or mutating it as an operational owner.",
+      "dependencies": [],
       "serialization": [
-        "Identity reconciliation precedes event replay.",
-        "Board writes are idempotent and exact-thread scoped."
+        "Historical identity and receipt evidence remains immutable provenance.",
+        "Future project-board product work routes only to owner.fawxzzyweb and master-data work only to platform.supabase-migration after exact owner contracts are proven."
       ],
-      "approval_gates": [
-        "irreversible-action"
-      ],
+      "approval_gates": [],
       "evidence": [
         "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
         "docs/registry/project-board-owner-exports/atlas.project-board.owner-export.v1.json"
       ],
       "definition_of_done": [
-        "Current cards and journals reconcile exactly with zero duplicate stable IDs.",
-        "Historical records remain distinct from active state."
+        "Historical records remain distinct from active state.",
+        "No live owner or packet points to DiscordOS."
       ],
-      "status": "authority-referenced",
-      "next_packet": "Use the currently admitted DiscordOS board cluster before FP-DOS-REC-001.",
-      "measurement_status": "AUTHORITY_REFERENCED"
+      "status": "retired-provenance-only",
+      "next_packet": "No live DiscordOS packet. Resolve future board product work from owner.fawxzzyweb and master-data work from platform.supabase-migration only after exact contract proof.",
+      "measurement_status": "TERMINAL_PROVENANCE"
     },
     {
       "id": "program-github-control-plane",
@@ -222,8 +218,8 @@
       "id": "program-fawxzzyweb-distribution",
       "title": "FawxzzyWeb distribution and canonical-origin migration",
       "owner": "FawxzzyWeb",
-      "authority": "FawxzzyWeb owner repository, owner export, Discord admission, and current deployment/link readback",
-      "scope": "Govern canonical origin, link migration, public distribution, owner export, and Discord admission without absorbing product implementation into root.",
+      "authority": "FawxzzyWeb owner repository, owner export, project-board ownership contract, and current deployment/link readback",
+      "scope": "Govern canonical origin, link migration, public distribution, owner export, and project-board product ownership without absorbing product implementation into root.",
       "dependencies": [
         "owner-side inventory",
         "canonical-origin decision",
@@ -243,7 +239,7 @@
       ],
       "definition_of_done": [
         "Canonical origin and every migrated link are route-proven.",
-        "Owner export and Discord admission reconcile without duplicate authority."
+        "Owner export and project-board ownership reconcile without duplicate authority."
       ],
       "status": "independent-owner-lane",
       "next_packet": "Resolve from the FawxzzyWeb owner lane after its current board cluster.",
@@ -252,11 +248,12 @@
     {
       "id": "program-fawxzzy-platform-migration",
       "title": "FawxzzyPlatform migration",
-      "owner": "ATLAS coordinator plus serialized Fitness, Mazer, DiscordOS, Foundation, Lifeline, _stack, and application owners",
+      "owner": "ATLAS coordinator plus serialized Fitness, Mazer, FawxzzyWeb, platform.supabase-migration, Foundation, Lifeline, _stack, and application owners",
       "authority": "docs/registry/FAWXZZY-PLATFORM-MIGRATION-ADMISSION.json",
       "scope": "Recover source truth, prove backup/restore and ledger parity, seed the platform from Fitness, rehearse identity/data/RLS/billing/cross-service auth, use previews, perform separately approved cutovers, observe and roll back or quarantine, and separately approve retirement or deletion.",
       "dependencies": [
-        "FP-DOS-REC-001",
+        "owner.fawxzzyweb project-board contract proven",
+        "platform.supabase-migration master-data contract proven",
         "FP-MZR-REC-001",
         "FP-FIT-REC-001",
         "FP-PARITY-RATCHET-001"
@@ -264,7 +261,7 @@
       "serialization": [
         "One canonical ledger.",
         "Expand -> migrate -> verify -> cutover -> contract.",
-        "DiscordOS remains physically separate by default."
+        "DiscordOS remains archived provenance and is never a live dependency owner."
       ],
       "approval_gates": [
         "paid-project",
@@ -288,7 +285,7 @@
         "No source is disabled or deleted without separate exact approval."
       ],
       "status": "HOLD",
-      "next_packet": "FP-DOS-REC-001",
+      "next_packet": "Resolve from exact owner.fawxzzyweb project-board and platform.supabase-migration master-data contracts; never route to DiscordOS.",
       "measurement_status": "UNMEASURED"
     },
     {
@@ -356,7 +353,7 @@
       "title": "Post-preparation Atlas development",
       "owner": "stack-root-and-component-owners",
       "authority": "docs/memory/initiatives/initiative-atlas-post-preparation-development.json",
-      "scope": "After the closing gate, complete Lifeline, Foundation, Cortex, _stack, DiscordOS, Playbook, Atlas wiring, Atlas Book, and governed integrations.",
+      "scope": "After the closing gate, complete Lifeline, Foundation, Cortex, _stack, Playbook, Atlas wiring, Atlas Book, and governed integrations while preserving DiscordOS as archived provenance only.",
       "dependencies": [
         "mandatory closing exhaustive audit accepted",
         "all preparatory markers terminal"
@@ -507,7 +504,7 @@
         "Retirement and deletion remain separately approved after migration proof."
       ],
       "status": "independent-standing-owner-lane",
-      "next_packet": "FP-MZR-REC-001 after FP-DOS-REC-001.",
+      "next_packet": "Resolve FP-MZR-REC-001 from the Mazer owner lane after current owner.fawxzzyweb and platform.supabase-migration dependency contracts; never route through DiscordOS.",
       "measurement_status": "OWNER_AUTHORITY"
     },
     {

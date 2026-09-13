@@ -142,11 +142,18 @@ def validate_conformance(
 
     entries = _topology_entries(ledger)
     expected_ids = [entry.get("automation_id") for entry in entries]
+    expected_thread_ids = [entry.get("thread_id") for entry in entries]
     check(len(entries) == 4, "PROGRAM_TASK_DENOMINATOR_DRIFT", f"expected 4 entries, found {len(entries)}")
     check(
         len(set(expected_ids)) == 4 and all(isinstance(value, str) and value for value in expected_ids),
         "AUTOMATION_IDENTITY_DRIFT",
         "four unique nonempty automation ids are required",
+    )
+    check(
+        len(set(expected_thread_ids)) == 4
+        and all(isinstance(value, str) and value for value in expected_thread_ids),
+        "PROGRAM_TASK_IDENTITY_DRIFT",
+        "four unique nonempty task identities are required",
     )
 
     live_automations: list[dict[str, Any]] = []
@@ -154,7 +161,10 @@ def validate_conformance(
         automation_id = entry.get("automation_id")
         if not isinstance(automation_id, str) or not automation_id:
             continue
-        automation_path = automations_root / automation_id / "automation.toml"
+        automation_path = _root_relative_path(automations_root, f"{automation_id}/automation.toml")
+        if automation_path is None:
+            check(False, "AUTOMATION_REF_INVALID", automation_id)
+            continue
         if not automation_path.is_file():
             check(False, "AUTOMATION_MISSING", automation_id)
             continue
@@ -219,8 +229,13 @@ def validate_conformance(
         str(status_automation_id),
     )
     status_live: dict[str, Any] = {}
-    status_automation_path = automations_root / str(status_automation_id) / "automation.toml"
-    if not status_automation_path.is_file():
+    status_automation_path = _root_relative_path(
+        automations_root,
+        f"{status_automation_id}/automation.toml",
+    )
+    if status_automation_path is None:
+        check(False, "STATUS_AUTOMATION_REF_INVALID", str(status_automation_id))
+    elif not status_automation_path.is_file():
         check(False, "STATUS_AUTOMATION_MISSING", str(status_automation_id))
     else:
         status_live = _load_toml(status_automation_path)
@@ -270,9 +285,18 @@ def validate_conformance(
     for label in ("json", "markdown"):
         ref = projection_refs.get(f"{label}_ref")
         expected_hash = projection_refs.get(f"{label}_sha256")
-        projection_path = atlas_root / str(ref)
-        check(projection_path.is_file(), "STATUS_PROJECTION_MISSING", str(ref))
-        observed_hash = f"sha256:{_sha256(projection_path)}" if projection_path.is_file() else None
+        projection_path = _root_relative_path(atlas_root, ref)
+        check(projection_path is not None, "STATUS_PROJECTION_REF_INVALID", str(ref))
+        check(
+            projection_path is not None and projection_path.is_file(),
+            "STATUS_PROJECTION_MISSING",
+            str(ref),
+        )
+        observed_hash = (
+            f"sha256:{_sha256(projection_path)}"
+            if projection_path is not None and projection_path.is_file()
+            else None
+        )
         check(observed_hash == expected_hash, "STATUS_PROJECTION_HASH_DRIFT", f"{label}:{ref}")
         projection_checks.append({"kind": label, "ref": ref, "expected_sha256": expected_hash, "observed_sha256": observed_hash})
 
@@ -280,10 +304,19 @@ def validate_conformance(
     if not isinstance(status_checkpoint, dict):
         raise ConformanceError("operator visibility topology is missing checkpoint")
     status_checkpoint_ref = status_checkpoint.get("ref")
-    status_checkpoint_path = atlas_root / str(status_checkpoint_ref)
-    check(status_checkpoint_path.is_file(), "STATUS_CHECKPOINT_MISSING", str(status_checkpoint_ref))
-    status_checkpoint_value = _load_json(status_checkpoint_path) if status_checkpoint_path.is_file() else {}
-    status_payload = status_checkpoint_value.get("payload", {}) if isinstance(status_checkpoint_value, dict) else {}
+    status_checkpoint_path = _root_relative_path(atlas_root, status_checkpoint_ref)
+    check(status_checkpoint_path is not None, "STATUS_CHECKPOINT_REF_INVALID", str(status_checkpoint_ref))
+    check(
+        status_checkpoint_path is not None and status_checkpoint_path.is_file(),
+        "STATUS_CHECKPOINT_MISSING",
+        str(status_checkpoint_ref),
+    )
+    status_payload: dict[str, Any] = {}
+    if status_checkpoint_path is not None and status_checkpoint_path.is_file():
+        try:
+            status_payload = validate_checkpoint(_load_json(status_checkpoint_path))
+        except ThreadContextError as error:
+            check(False, "STATUS_CHECKPOINT_ENVELOPE_INVALID", str(error))
     check(status_payload.get("thread_id") == status_thread_id, "STATUS_CHECKPOINT_THREAD_DRIFT", str(status_thread_id))
     check(status_payload.get("logical_role_id") == "atlas.status-projection", "STATUS_CHECKPOINT_ROLE_DRIFT", str(status_payload.get("logical_role_id")))
     status_receipts = status_payload.get("receipts", []) if isinstance(status_payload, dict) else []
@@ -300,9 +333,21 @@ def validate_conformance(
     if not isinstance(questions_consumer, dict):
         raise ConformanceError("operator visibility topology is missing questions_consumer")
     questions_automation_id = questions_consumer.get("automation_id")
-    questions_path = automations_root / str(questions_automation_id) / "automation.toml"
-    check(questions_path.is_file(), "QUESTIONS_AUTOMATION_MISSING", str(questions_automation_id))
-    questions_live = _load_toml(questions_path) if questions_path.is_file() else {}
+    questions_path = _root_relative_path(
+        automations_root,
+        f"{questions_automation_id}/automation.toml",
+    )
+    check(questions_path is not None, "QUESTIONS_AUTOMATION_REF_INVALID", str(questions_automation_id))
+    check(
+        questions_path is not None and questions_path.is_file(),
+        "QUESTIONS_AUTOMATION_MISSING",
+        str(questions_automation_id),
+    )
+    questions_live = (
+        _load_toml(questions_path)
+        if questions_path is not None and questions_path.is_file()
+        else {}
+    )
     check(questions_live.get("target_thread_id") == questions_consumer.get("thread_id"), "QUESTIONS_AUTOMATION_TARGET_DRIFT", str(questions_automation_id))
     check(questions_live.get("status") == questions_consumer.get("schedule_status"), "QUESTIONS_AUTOMATION_STATUS_DRIFT", str(questions_automation_id))
     questions_cadence = _rrule_minutes(str(questions_live.get("rrule", "")))
@@ -310,7 +355,12 @@ def validate_conformance(
     if isinstance(expected_questions_cadence, int):
         check(questions_cadence == expected_questions_cadence, "QUESTIONS_AUTOMATION_CADENCE_DRIFT", str(questions_automation_id))
     expected_questions_hash = questions_consumer.get("toml_sha256")
-    if questions_path.is_file() and isinstance(expected_questions_hash, str) and expected_questions_hash:
+    if (
+        questions_path is not None
+        and questions_path.is_file()
+        and isinstance(expected_questions_hash, str)
+        and expected_questions_hash
+    ):
         observed_questions_hash = f"sha256:{_sha256(questions_path)}"
         check(observed_questions_hash == expected_questions_hash, "QUESTIONS_AUTOMATION_HASH_DRIFT", str(questions_automation_id))
     questions_prompt = str(questions_live.get("prompt", "")).lower()
@@ -460,8 +510,18 @@ def validate_conformance(
         common_controls.get("implementation_ref"),
         common_controls.get("focused_test_ref"),
     ] if isinstance(common_controls, dict) else []
+    invalid_common_control_refs = [
+        str(ref) for ref in common_control_refs if _root_relative_path(atlas_root, ref) is None
+    ]
+    check(
+        not invalid_common_control_refs,
+        "COMMON_RELEASE_CONTROL_REF_INVALID",
+        ",".join(invalid_common_control_refs),
+    )
     missing_common_control_refs = [
-        str(ref) for ref in common_control_refs if not isinstance(ref, str) or not (atlas_root / ref).is_file()
+        str(ref)
+        for ref in common_control_refs
+        if (path := _root_relative_path(atlas_root, ref)) is not None and not path.is_file()
     ]
     check(
         not missing_common_control_refs,
@@ -554,11 +614,13 @@ def validate_conformance(
 
     integrator = entries[0]
     thread_id = integrator.get("thread_id")
-    checkpoint_path = atlas_root / "runtime" / "atlas" / "thread-context" / str(thread_id) / "latest.json"
-    check(checkpoint_path.is_file(), "CHECKPOINT_MISSING", str(thread_id))
-    checkpoint = _load_json(checkpoint_path) if checkpoint_path.is_file() else {}
+    checkpoint_ref = f"runtime/atlas/thread-context/{thread_id}/latest.json"
+    checkpoint_path = _root_relative_path(atlas_root, checkpoint_ref)
+    check(checkpoint_path is not None, "CHECKPOINT_REF_INVALID", str(thread_id))
+    check(checkpoint_path is not None and checkpoint_path.is_file(), "CHECKPOINT_MISSING", str(thread_id))
+    checkpoint = _load_json(checkpoint_path) if checkpoint_path is not None and checkpoint_path.is_file() else {}
     payload: dict[str, Any] = {}
-    if checkpoint_path.is_file():
+    if checkpoint_path is not None and checkpoint_path.is_file():
         try:
             payload = validate_checkpoint(checkpoint)
         except ThreadContextError as error:
@@ -721,7 +783,11 @@ def validate_conformance(
             ),
         },
         "checkpoint": {
-            "ref": str(checkpoint_path.relative_to(atlas_root)).replace("\\", "/"),
+            "ref": (
+                str(checkpoint_path.relative_to(atlas_root)).replace("\\", "/")
+                if checkpoint_path is not None
+                else checkpoint_ref
+            ),
             "recorded_at": recorded_at,
             "age_hours": round(checkpoint_age_hours, 4) if checkpoint_age_hours is not None else None,
             "max_age_hours": max_checkpoint_age_hours,
