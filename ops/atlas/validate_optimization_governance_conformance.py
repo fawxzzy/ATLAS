@@ -23,6 +23,7 @@ COMMON_RELEASE_BASELINE_MARKERS = (
     "canonicalize strict same-origin URL paths before exact comparison",
     "validate the immutable expected workspace",
     "a diagnostic must never implicitly link or create a provider project",
+    "positive terminal completion from every named hosted reviewer",
 )
 MAX_CHECKPOINT_FUTURE_SKEW_SECONDS = 300
 
@@ -381,6 +382,7 @@ def validate_conformance(
     check(isinstance(common_controls, dict), "COMMON_RELEASE_CONTROLS_MISSING", GOVERNANCE_REF)
     pc024 = common_controls.get("pc024", {}) if isinstance(common_controls, dict) else {}
     pc025 = common_controls.get("pc025", {}) if isinstance(common_controls, dict) else {}
+    hosted_review_quiescence = common_controls.get("hosted_review_quiescence", {}) if isinstance(common_controls, dict) else {}
     check(
         isinstance(common_controls, dict)
         and common_controls.get("decision_id") == "ACCEPT_BOUNDED_COMMON_CONTROL_R001"
@@ -398,6 +400,16 @@ def validate_conformance(
     check(pc024.get("status") == "INSTALLED", "PC024_COMMON_CONTROL_NOT_INSTALLED", str(pc024))
     check(pc025.get("status") == "INSTALLED", "PC025_COMMON_CONTROL_NOT_INSTALLED", str(pc025))
     check(pc025.get("provider_effects") == 0, "PC025_PROVIDER_EFFECT_BOUNDARY_DRIFT", str(pc025.get("provider_effects")))
+    check(
+        hosted_review_quiescence.get("status") == "INSTALLED_LOCAL_PUBLICATION_HELD",
+        "HOSTED_REVIEW_QUIESCENCE_CONTROL_NOT_INSTALLED",
+        str(hosted_review_quiescence),
+    )
+    check(
+        hosted_review_quiescence.get("provider_effects") == 0,
+        "HOSTED_REVIEW_QUIESCENCE_EFFECT_BOUNDARY_DRIFT",
+        str(hosted_review_quiescence.get("provider_effects")),
+    )
     common_control_refs = [
         common_controls.get("engineering_memory_ref"),
         common_controls.get("implementation_ref"),
@@ -423,7 +435,7 @@ def validate_conformance(
         and seed.get("playbook_promotion") == "installed-common-control"
     }
     check(
-        isinstance(seed_ids, list) and len(seed_ids) == 4 and set(seed_ids) <= observed_seed_ids,
+        isinstance(seed_ids, list) and len(seed_ids) == 6 and set(seed_ids) <= observed_seed_ids,
         "COMMON_RELEASE_ENGINEERING_MEMORY_PROMOTION_MISSING",
         ",".join(sorted(set(seed_ids) - observed_seed_ids)) if isinstance(seed_ids, list) else "invalid seed list",
     )
@@ -594,6 +606,8 @@ def validate_conformance(
             "pc024_status": pc024.get("status"),
             "pc025_status": pc025.get("status"),
             "provider_effects": pc025.get("provider_effects"),
+            "hosted_review_quiescence_status": hosted_review_quiescence.get("status"),
+            "hosted_review_quiescence_provider_effects": hosted_review_quiescence.get("provider_effects"),
             "required_artifact_count": len(common_control_refs),
             "present_artifact_count": len(common_control_refs) - len(missing_common_control_refs),
             "engineering_memory_seed_count": len(observed_seed_ids & set(seed_ids)) if isinstance(seed_ids, list) else 0,

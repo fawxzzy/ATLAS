@@ -1,12 +1,12 @@
 {
   "contract_version": "atlas.decision.v1",
   "id": "decision-atlas-common-release-safety-controls-r001",
-  "title": "Install Common ATLAS Release Safety Controls R001",
-  "summary": "Install PC-024 strict same-origin Workbox URL comparison and PC-025 immutable Vercel no-auto-link preflight as shared ATLAS release-safety controls.",
+  "title": "Install and Extend Common ATLAS Release Safety Controls R001",
+  "summary": "Install PC-024 strict same-origin Workbox URL comparison, PC-025 immutable Vercel no-auto-link preflight, and post-ready exact-head hosted-review quiescence as shared ATLAS release-safety controls.",
   "status": "accepted",
   "owner": "atlas.workflow-optimization",
   "created_at": "2026-08-29T23:42:39Z",
-  "updated_at": "2026-09-02T04:47:20Z",
+  "updated_at": "2026-09-13T16:34:47Z",
   "related_session_refs": [
     "02 ATLAS Optimization & Learning/01a03746-df21-7770-bf72-41adb70052b4"
   ],
@@ -24,7 +24,9 @@
     "runtime/atlas/knowledge-expansion/unified-optimization-integration-r001/post-install-successor-108/execution-receipt.json",
     "runtime/atlas/knowledge-expansion/unified-optimization-integration-r001/post-install-successor-108/material-failure-adoption.json",
     "runtime/atlas/knowledge-expansion/unified-optimization-integration-r001/post-install-successor-109/execution-receipt.json",
-    "runtime/atlas/knowledge-expansion/unified-optimization-integration-r001/post-install-successor-109/job-envelope.json"
+    "runtime/atlas/knowledge-expansion/unified-optimization-integration-r001/post-install-successor-109/job-envelope.json",
+    "runtime/atlas/continuity/fitness-pr187-guarded-merge-postmerge-hold-r001-20260913.json#sha256=d5fd29181eda2aaa5c11f95211201e49d008a22dc07e7ca4384da357c6a34773",
+    "github:fawxzzy/FawxzzyWeb#65@36e5fd16d8d157ff93f4928212c995d6efbb3d02#merged=2026-09-13T16:32:25Z"
   ],
   "supersedes": [],
   "superseded_by": [],
@@ -37,22 +39,27 @@
     "publication_state": "current-main-candidate-unmerged",
     "publication_claim_boundary": "The controls are installed and verified in local ATLAS evidence and present in this publication-held candidate; they are not installed on current main until this candidate is separately published and merged.",
     "owner_role_id": "atlas.workflow-optimization",
-    "summary": "Install PC-024 strict same-origin Workbox URL comparison and PC-025 immutable Vercel no-auto-link preflight as shared ATLAS release-safety controls.",
+    "summary": "Install PC-024 strict same-origin Workbox URL comparison, PC-025 immutable Vercel no-auto-link preflight, and post-ready exact-head hosted-review quiescence as shared ATLAS release-safety controls.",
     "provenance": [
       "FA-027 / PC-024: Workbox relative versus root-relative same-origin comparison false negative",
       "FA-028 / PC-025: unbound Vercel CLI diagnostic auto-linked a disposable project",
+      "Fitness PR #187: ready-triggered hosted review reported a valid unresolved P1 only after merge because preflight did not require post-ready completion",
+      "FawxzzyWeb PR #65: hosted review began at 2026-09-13T16:32:21Z and the exact head merged at 2026-09-13T16:32:25Z while that review remained running",
       "operator decision ACCEPT_BOUNDED_COMMON_CONTROL_R001"
     ],
+    "hosted_review_race_recurrence_count": 2,
     "precedent_review": {
       "result": "PARTIAL_PRECEDENT_REUSE",
       "reused": [
         "ops/atlas/ai_work_session_preflight.py reparse-point fail-closed pattern",
         "ops/atlas/vercel_hobby_guardrail_report.py exact Vercel project-binding readback pattern",
-        "existing workflow baseline, governance registry, conformance validator, and Engineering Memory decision seams"
+        "existing workflow baseline, governance registry, conformance validator, and Engineering Memory decision seams",
+        "atlas-release-gate exact-head identity, independent review, and separate ready-versus-merge lifecycle rules"
       ],
       "rejected_as_incomplete": [
         "No existing shared strict same-origin Workbox canonicalizer preserved URL semantics plus byte and hash identity.",
-        "No existing shared Vercel gate combined immutable binding bytes, workspace identity, project and organization identity, reparse rejection, and command-profile classification before CLI invocation."
+        "No existing shared Vercel gate combined immutable binding bytes, workspace identity, project and organization identity, reparse rejection, and command-profile classification before CLI invocation.",
+        "No existing merge preflight required positive completion from every named hosted reviewer on the exact head after the ready transition; an empty snapshot could therefore race future review publication."
       ]
     },
     "cli_evidence": {
@@ -92,6 +99,16 @@
         "kind": "Failure Mode",
         "candidate_id": "FA-028",
         "text": "An unbound diagnostic Vercel CLI command can mutate local linkage and create provider resources even when no deployment is intended."
+      },
+      {
+        "kind": "Rule",
+        "candidate_id": "rule-hosted-review-post-ready-exact-head-quiescence",
+        "text": "After a draft-to-ready transition bound to the exact immutable head, require positive terminal completion from every named hosted reviewer strictly later in that ready epoch before merge; queued or in-progress attempts, completed findings, and unresolved non-outdated current threads fail closed while explicitly outdated historical threads do not block."
+      },
+      {
+        "kind": "Failure Mode",
+        "candidate_id": "failure-ready-triggered-hosted-review-merge-race",
+        "text": "A pre-ready clean result or initially empty review snapshot can race a hosted review started by the ready transition, allowing merge before that review reports a valid finding."
       }
     ],
     "implementation": {
@@ -99,7 +116,8 @@
       "governance": "docs/registry/ATLAS-WORKFLOW-OPTIMIZATION-GOVERNANCE.v1.json",
       "baseline": "docs/prompts/atlas-workflow/STANDING-BASELINE.md",
       "conformance": "ops/atlas/validate_optimization_governance_conformance.py",
-      "focused_tests": "tests/test_atlas_release_safety_controls.py"
+      "focused_tests": "tests/test_atlas_release_safety_controls.py",
+      "hosted_review_gate": "validate_hosted_review_quiescence_premerge"
     },
     "authority": {
       "root_controls_only": true,

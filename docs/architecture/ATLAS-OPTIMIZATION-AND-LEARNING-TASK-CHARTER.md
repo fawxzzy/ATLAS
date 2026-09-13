@@ -83,7 +83,7 @@ checkpoint, and Engineering Memory seams; they create no new protocol.
 
 ### Common release-safety controls
 
-`ACCEPT_BOUNDED_COMMON_CONTROL_R001` installs two root-owned reusable gates.
+`ACCEPT_BOUNDED_COMMON_CONTROL_R001` installs root-owned reusable gates.
 PC-024 performs strict same-origin Workbox URL canonicalization before exact
 coverage, byte-count, and SHA-256 comparison. It rejects foreign origins,
 unsafe decoded paths, traversal, duplicate canonical keys, and unadmitted query
@@ -92,6 +92,13 @@ read-only immutable Vercel workspace, project, organization or team, binding
 hash, reparse-path, and supported command-profile preflight before any CLI
 invocation. Missing, generated, mismatched, ambiguous, wrong-team, or
 unclassified linkage surfaces fail closed.
+
+The hosted-review quiescence gate binds a draft-to-ready transition to one
+positive completion from every named hosted reviewer on the exact immutable
+head strictly after a ready transition bound to that same head. Pre-ready reviews, empty snapshots, wrong-head results, queued or
+in-progress attempts, completed findings, and unresolved non-outdated threads
+cannot satisfy the merge preflight. This prevents a ready-triggered hosted
+review from publishing a valid finding only after the source has merged.
 
 These common controls are governance and validation primitives only. Product
 verifier adoption remains owner work. Vercel invocation, `.vercel` mutation,

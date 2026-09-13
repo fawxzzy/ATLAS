@@ -6,6 +6,7 @@ import os
 import re
 import stat
 import unicodedata
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 from urllib.parse import unquote_to_bytes, urlsplit
@@ -16,6 +17,8 @@ _PERCENT_ESCAPE_RE = re.compile(r"%(?![0-9A-Fa-f]{2})")
 _CONTROL_RE = re.compile(r"[\x00-\x1f\x7f]")
 _LINKAGE_MUTATION_COMMANDS = {"deploy", "dev", "link", "pull"}
 _UNRESERVED_BYTES = frozenset(b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~")
+_HOSTED_REVIEW_STATUSES = {"queued", "in_progress", "completed"}
+_HOSTED_REVIEW_RESULTS = {"pass", "findings"}
 
 
 class ReleaseSafetyViolation(ValueError):
@@ -172,6 +175,132 @@ def verify_workbox_precache_entries(
         "unexpected_entry_count": len(unexpected),
         "query_policy": query_policy,
         "fragment_policy": fragment_policy,
+    }
+
+
+def _parse_utc_timestamp(value: Any, *, code: str, label: str) -> datetime:
+    if not isinstance(value, str) or not value:
+        _fail(code, f"{label} must be a nonempty UTC timestamp")
+    candidate = value[:-1] + "+00:00" if value.endswith("Z") else value
+    try:
+        parsed = datetime.fromisoformat(candidate)
+    except ValueError:
+        _fail(code, f"{label} must be an ISO-8601 timestamp")
+    if parsed.tzinfo is None or parsed.utcoffset() != timezone.utc.utcoffset(parsed):
+        _fail(code, f"{label} must be explicitly UTC")
+    return parsed.astimezone(timezone.utc)
+
+
+def validate_hosted_review_quiescence_premerge(
+    *,
+    expected_head_sha: str,
+    ready_transition_head_sha: str,
+    ready_transition_at: str,
+    observed_at: str,
+    required_reviewers: Sequence[str],
+    review_attempts: Iterable[Mapping[str, Any]],
+    review_threads: Iterable[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Require positive post-ready exact-head review completion before merge."""
+
+    if not isinstance(expected_head_sha, str) or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", expected_head_sha):
+        _fail("HOSTED_REVIEW_HEAD_INVALID", "expected head must be a lowercase 40- or 64-character hexadecimal SHA")
+    if ready_transition_head_sha != expected_head_sha:
+        _fail("HOSTED_REVIEW_HEAD_IDENTITY_DRIFT", "the ready transition is not bound to the expected head")
+    ready_at = _parse_utc_timestamp(
+        ready_transition_at,
+        code="HOSTED_REVIEW_READY_TRANSITION_INVALID",
+        label="ready transition",
+    )
+    snapshot_at = _parse_utc_timestamp(
+        observed_at,
+        code="HOSTED_REVIEW_OBSERVATION_INVALID",
+        label="observation",
+    )
+    if snapshot_at < ready_at:
+        _fail("HOSTED_REVIEW_OBSERVATION_INVALID", "observation predates the ready transition")
+
+    reviewers = list(required_reviewers)
+    if not reviewers or any(not isinstance(reviewer, str) or not reviewer.strip() for reviewer in reviewers):
+        _fail("HOSTED_REVIEW_REQUIRED_REVIEWERS_INVALID", "at least one named hosted reviewer is required")
+    if len(set(reviewers)) != len(reviewers):
+        _fail("HOSTED_REVIEW_REQUIRED_REVIEWERS_INVALID", "required hosted reviewers must be unique")
+
+    completed_reviewers: set[str] = set()
+    attempt_count = 0
+    for attempt in review_attempts:
+        attempt_count += 1
+        if not isinstance(attempt, Mapping):
+            _fail("HOSTED_REVIEW_ATTEMPT_INVALID", "each review attempt must be an object")
+        reviewer = attempt.get("reviewer")
+        head_sha = attempt.get("head_sha")
+        status = attempt.get("status")
+        if not isinstance(reviewer, str) or not reviewer:
+            _fail("HOSTED_REVIEW_ATTEMPT_INVALID", "review attempt reviewer is required")
+        if head_sha != expected_head_sha:
+            _fail("HOSTED_REVIEW_HEAD_IDENTITY_DRIFT", "a hosted review attempt is not bound to the expected head")
+        if status not in _HOSTED_REVIEW_STATUSES:
+            _fail("HOSTED_REVIEW_ATTEMPT_INVALID", "review attempt status is not recognized")
+        started_at = _parse_utc_timestamp(
+            attempt.get("started_at"),
+            code="HOSTED_REVIEW_ATTEMPT_INVALID",
+            label="review attempt start",
+        )
+        if started_at <= ready_at:
+            _fail("HOSTED_REVIEW_COMPLETION_PREDATES_READY", "pre-ready review evidence cannot satisfy the merge gate")
+        if status != "completed":
+            _fail("HOSTED_REVIEW_NOT_QUIESCENT", "a hosted review attempt remains queued or in progress")
+        completed_at = _parse_utc_timestamp(
+            attempt.get("completed_at"),
+            code="HOSTED_REVIEW_ATTEMPT_INVALID",
+            label="review attempt completion",
+        )
+        if completed_at < started_at or completed_at > snapshot_at:
+            _fail("HOSTED_REVIEW_ATTEMPT_INVALID", "review completion is outside the admitted observation window")
+        result = attempt.get("result")
+        if result not in _HOSTED_REVIEW_RESULTS:
+            _fail("HOSTED_REVIEW_ATTEMPT_INVALID", "completed review result must be pass or findings")
+        if result == "findings":
+            _fail("HOSTED_REVIEW_FINDINGS_PRESENT", "a completed exact-head hosted review has findings")
+        completed_reviewers.add(reviewer)
+
+    missing = sorted(set(reviewers) - completed_reviewers)
+    if missing:
+        _fail(
+            "HOSTED_REVIEW_COMPLETION_MISSING",
+            "every required hosted reviewer must complete on the exact head after the ready transition",
+        )
+
+    thread_count = 0
+    for thread in review_threads:
+        thread_count += 1
+        if not isinstance(thread, Mapping):
+            _fail("HOSTED_REVIEW_THREAD_INVALID", "each review thread must be an object")
+        is_resolved = thread.get("is_resolved")
+        is_outdated = thread.get("is_outdated")
+        if not isinstance(is_resolved, bool) or not isinstance(is_outdated, bool):
+            _fail("HOSTED_REVIEW_THREAD_INVALID", "review thread resolution and outdated state must be explicit booleans")
+        if is_outdated:
+            continue
+        if thread.get("head_sha") != expected_head_sha:
+            _fail("HOSTED_REVIEW_HEAD_IDENTITY_DRIFT", "a current review thread is not bound to the expected head")
+        if not is_resolved and not is_outdated:
+            _fail("HOSTED_REVIEW_THREAD_UNRESOLVED", "a non-outdated exact-head review thread remains unresolved")
+
+    return {
+        "schema": "atlas.hosted-review-quiescence-premerge.v1",
+        "valid": True,
+        "exact_head": expected_head_sha,
+        "ready_transition_head_exact": True,
+        "ready_transition_at": ready_transition_at,
+        "observed_at": observed_at,
+        "required_reviewer_count": len(reviewers),
+        "completed_reviewer_count": len(set(reviewers) & completed_reviewers),
+        "review_attempt_count": attempt_count,
+        "review_thread_count": thread_count,
+        "queued_or_in_progress": 0,
+        "unresolved_non_outdated_threads": 0,
+        "provider_invocations": 0,
     }
 
 

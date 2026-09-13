@@ -24,7 +24,8 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
             "ephemeral-only identity change must not trigger a material handoff\n"
             "canonicalize strict same-origin URL paths before exact comparison\n"
             "validate the immutable expected workspace before Vercel\n"
-            "a diagnostic must never implicitly link or create a provider project\n",
+            "a diagnostic must never implicitly link or create a provider project\n"
+            "positive terminal completion from every named hosted reviewer\n",
             encoding="utf-8",
         )
         self.optimization_governance_ref = "docs/registry/ATLAS-WORKFLOW-OPTIMIZATION-GOVERNANCE.v1.json"
@@ -58,11 +59,22 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
                 "local_installation_state": "installed-and-verified-in-canonical-dirty-root",
                 "publication_state": "current-main-candidate-unmerged",
                 "engineering_memory_ref": self.common_control_refs[0],
-                "engineering_memory_seed_ids": ["seed.pc024.rule", "seed.fa027.failure", "seed.pc025.rule", "seed.fa028.failure"],
+                "engineering_memory_seed_ids": [
+                    "seed.pc024.rule",
+                    "seed.fa027.failure",
+                    "seed.pc025.rule",
+                    "seed.fa028.failure",
+                    "seed.hosted-review-quiescence.rule",
+                    "seed.hosted-review-merge-race.failure",
+                ],
                 "implementation_ref": self.common_control_refs[1],
                 "focused_test_ref": self.common_control_refs[2],
                 "pc024": {"status": "INSTALLED"},
                 "pc025": {"status": "INSTALLED", "provider_effects": 0},
+                "hosted_review_quiescence": {
+                    "status": "INSTALLED_LOCAL_PUBLICATION_HELD",
+                    "provider_effects": 0,
+                },
             },
         }
         optimization_governance_path = self.root / self.optimization_governance_ref
@@ -334,7 +346,11 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
             result["common_release_safety_controls"]["publication_state"],
         )
         self.assertEqual(3, result["common_release_safety_controls"]["present_artifact_count"])
-        self.assertEqual(4, result["common_release_safety_controls"]["engineering_memory_seed_count"])
+        self.assertEqual(6, result["common_release_safety_controls"]["engineering_memory_seed_count"])
+        self.assertEqual(
+            "INSTALLED_LOCAL_PUBLICATION_HELD",
+            result["common_release_safety_controls"]["hosted_review_quiescence_status"],
+        )
 
     def test_fails_when_single_observation_fanout_gate_is_removed(self) -> None:
         self.optimization_governance["anti_churn"]["single_observation_failure_gate"][
@@ -372,6 +388,18 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         result = self.validate()
         self.assertFalse(result["valid"])
         self.assertIn("PC025_COMMON_CONTROL_NOT_INSTALLED", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_hosted_review_quiescence_control_is_removed(self) -> None:
+        del self.optimization_governance["common_release_safety_controls"]["hosted_review_quiescence"]
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn(
+            "HOSTED_REVIEW_QUIESCENCE_CONTROL_NOT_INSTALLED",
+            {error["code"] for error in result["errors"]},
+        )
 
     def test_missing_common_release_controls_returns_structured_invalid(self) -> None:
         del self.optimization_governance["common_release_safety_controls"]

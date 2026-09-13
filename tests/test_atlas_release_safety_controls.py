@@ -11,6 +11,7 @@ from unittest import mock
 from ops.atlas.release_safety_controls import (
     ReleaseSafetyViolation,
     canonicalize_same_origin_workbox_key,
+    validate_hosted_review_quiescence_premerge,
     validate_vercel_no_auto_link_preflight,
     verify_workbox_precache_entries,
 )
@@ -260,6 +261,97 @@ class VercelNoAutoLinkTests(unittest.TestCase):
             "VERCEL_COMMAND_PATH_AMBIGUOUS",
             command_args=["curl", "/health", "/other", "--deployment", "dpl_exact", "--scope", "team_exact"],
         )
+
+
+class HostedReviewQuiescenceTests(unittest.TestCase):
+    head = "a" * 40
+    ready_at = "2026-09-13T16:05:00Z"
+    observed_at = "2026-09-13T16:10:00Z"
+    reviewer = "chatgpt-codex-connector"
+
+    def setUp(self) -> None:
+        self.kwargs = {
+            "expected_head_sha": self.head,
+            "ready_transition_head_sha": self.head,
+            "ready_transition_at": self.ready_at,
+            "observed_at": self.observed_at,
+            "required_reviewers": [self.reviewer],
+            "review_attempts": [
+                {
+                    "reviewer": self.reviewer,
+                    "head_sha": self.head,
+                    "status": "completed",
+                    "started_at": "2026-09-13T16:05:10Z",
+                    "completed_at": "2026-09-13T16:09:00Z",
+                    "result": "pass",
+                }
+            ],
+            "review_threads": [],
+        }
+
+    def assert_rejected(self, code: str, **changes) -> None:
+        values = {**self.kwargs, **changes}
+        with self.assertRaises(ReleaseSafetyViolation) as caught:
+            validate_hosted_review_quiescence_premerge(**values)
+        self.assertEqual(code, caught.exception.code)
+
+    def test_accepts_post_ready_exact_head_terminal_quiescence(self) -> None:
+        result = validate_hosted_review_quiescence_premerge(**self.kwargs)
+        self.assertTrue(result["valid"])
+        self.assertEqual(1, result["completed_reviewer_count"])
+        self.assertEqual(0, result["provider_invocations"])
+
+    def test_pr187_race_rejects_empty_snapshot_after_ready(self) -> None:
+        self.assert_rejected("HOSTED_REVIEW_COMPLETION_MISSING", review_attempts=[])
+
+    def test_rejects_queued_or_in_progress_review(self) -> None:
+        for status in ("queued", "in_progress"):
+            attempt = {**self.kwargs["review_attempts"][0], "status": status, "completed_at": None, "result": None}
+            self.assert_rejected("HOSTED_REVIEW_NOT_QUIESCENT", review_attempts=[attempt])
+
+    def test_rejects_pre_ready_or_wrong_head_completion(self) -> None:
+        pre_ready = {
+            **self.kwargs["review_attempts"][0],
+            "started_at": "2026-09-13T16:04:00Z",
+            "completed_at": "2026-09-13T16:04:30Z",
+        }
+        self.assert_rejected("HOSTED_REVIEW_COMPLETION_PREDATES_READY", review_attempts=[pre_ready])
+        same_timestamp = {
+            **self.kwargs["review_attempts"][0],
+            "started_at": self.ready_at,
+            "completed_at": "2026-09-13T16:05:01Z",
+        }
+        self.assert_rejected("HOSTED_REVIEW_COMPLETION_PREDATES_READY", review_attempts=[same_timestamp])
+        wrong_head = {**self.kwargs["review_attempts"][0], "head_sha": "b" * 40}
+        self.assert_rejected("HOSTED_REVIEW_HEAD_IDENTITY_DRIFT", review_attempts=[wrong_head])
+        self.assert_rejected("HOSTED_REVIEW_HEAD_IDENTITY_DRIFT", ready_transition_head_sha="b" * 40)
+
+    def test_rejects_findings_and_unresolved_current_threads(self) -> None:
+        finding = {**self.kwargs["review_attempts"][0], "result": "findings"}
+        self.assert_rejected("HOSTED_REVIEW_FINDINGS_PRESENT", review_attempts=[finding])
+        self.assert_rejected(
+            "HOSTED_REVIEW_THREAD_UNRESOLVED",
+            review_threads=[
+                {"head_sha": self.head, "is_resolved": False, "is_outdated": False}
+            ],
+        )
+
+    def test_all_named_reviewers_must_complete_in_same_epoch(self) -> None:
+        self.assert_rejected(
+            "HOSTED_REVIEW_COMPLETION_MISSING",
+            required_reviewers=[self.reviewer, "independent-exact-head-reviewer"],
+        )
+
+    def test_ignores_resolved_outdated_thread_from_prior_head(self) -> None:
+        result = validate_hosted_review_quiescence_premerge(
+            **{
+                **self.kwargs,
+                "review_threads": [
+                    {"head_sha": "b" * 40, "is_resolved": True, "is_outdated": True}
+                ],
+            }
+        )
+        self.assertTrue(result["valid"])
 
 
 if __name__ == "__main__":

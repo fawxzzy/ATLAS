@@ -222,7 +222,9 @@
       "rule-workbox-strict-same-origin-canonical-comparison",
       "failure-workbox-raw-url-shape-false-negative",
       "rule-vercel-immutable-binding-no-auto-link-preflight",
-      "failure-vercel-unbound-diagnostic-auto-link"
+      "failure-vercel-unbound-diagnostic-auto-link",
+      "rule-hosted-review-post-ready-exact-head-quiescence",
+      "failure-ready-triggered-hosted-review-merge-race"
     ],
     "implementation_ref": "ops/atlas/release_safety_controls.py",
     "focused_test_ref": "tests/test_atlas_release_safety_controls.py",
@@ -239,6 +241,14 @@
       "fail_closed_on": ["missing binding", "binding hash drift", "project mismatch", "organization or team mismatch", "partial or mismatched environment binding", "ambiguous direct and repository binding", "symlink or reparse ambiguity", "unclassified command surface", "implicit-link mutation command", "confirmation-skipping option"],
       "provider_effects": 0,
       "owner_boundary": "Provider commands, provider cleanup, .vercel mutation, deployment, and product integration remain separately owned and admitted."
+    },
+    "hosted_review_quiescence": {
+      "status": "INSTALLED_LOCAL_PUBLICATION_HELD",
+      "rule": "After a draft-to-ready transition bound to the exact immutable head, merge preflight requires positive terminal completion from every named hosted reviewer strictly later in that ready epoch, with zero queued or in-progress attempts, completed findings, or unresolved non-outdated exact-head threads; explicitly outdated historical threads do not block.",
+      "fail_closed_on": ["empty post-ready review snapshot", "pre-ready review reuse", "wrong-head review", "queued review", "in-progress review", "completed findings", "unresolved non-outdated exact-head thread"],
+      "provider_effects": 0,
+      "publication_state": "isolated-worktree-source-candidate-uncommitted",
+      "owner_boundary": "The common validator is root-owned and performs no GitHub call; source-owner release gates bind supported readback into it before any separately authorized merge."
     }
   },
   "canonical_contracts": {

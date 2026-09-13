@@ -214,6 +214,22 @@
       "statement": "An unbound diagnostic Vercel CLI command can mutate local linkage and create provider resources even when no deployment is intended.",
       "status": "accepted-atlas-root",
       "playbook_promotion": "installed-common-control"
+    },
+    {
+      "id": "rule-hosted-review-post-ready-exact-head-quiescence",
+      "kind": "rule",
+      "title": "Hosted Review Post-Ready Exact-Head Quiescence",
+      "statement": "After a draft-to-ready transition, require positive terminal completion from every named hosted reviewer on the exact head in that ready epoch; empty snapshots, pre-ready results, active attempts, findings, and unresolved current threads fail closed before merge.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "installed-common-control"
+    },
+    {
+      "id": "failure-ready-triggered-hosted-review-merge-race",
+      "kind": "failure-mode",
+      "title": "Ready-Triggered Hosted Review Merge Race",
+      "statement": "A merge preflight can incorrectly reuse a pre-ready clean state or an initially empty review snapshot while the ready transition is still producing a hosted review that later reports a valid finding.",
+      "status": "accepted-atlas-root",
+      "playbook_promotion": "installed-common-control"
     }
   ],
   "source_refs": [
