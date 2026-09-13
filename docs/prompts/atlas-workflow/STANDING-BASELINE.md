@@ -51,9 +51,11 @@ credential authority.
 
 After changing a draft pull request to ready, do not reuse a pre-ready clean
 review or treat an empty review snapshot as quiescent. Before merge, require
-positive terminal completion from every named hosted reviewer on the exact
-current head strictly after a ready transition bound to that head, no queued or in-progress hosted review,
+one trusted action-time observation no more than 60 seconds old and positive
+terminal completion from every named hosted reviewer on the exact current head
+strictly after a ready transition bound to that head, no queued or in-progress hosted review,
 no completed finding, and no unresolved non-outdated exact-head thread.
+Future or stale observations fail closed.
 
 Full local/network capability does not grant provider, production, live-data, secret, destructive, GitHub, board, Discord, billing, or owner-repository authority. Those actions require an exact separately admitted packet. Do not archive, delete, rename, replace, pause, pin/unpin, or interrupt another standing task except through a separately accepted lifecycle/recovery plan.
 

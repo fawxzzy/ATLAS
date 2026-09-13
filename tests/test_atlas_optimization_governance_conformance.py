@@ -75,6 +75,8 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
                     "status": "INSTALLED_LOCAL_PUBLICATION_HELD",
                     "provider_effects": 0,
                     "publication_state": "current-main-candidate-unmerged",
+                    "maximum_observation_age_seconds": 60,
+                    "absolute_freshness_ceiling_seconds": 300,
                 },
             },
         }
@@ -356,6 +358,12 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
             "current-main-candidate-unmerged",
             result["common_release_safety_controls"]["hosted_review_quiescence_publication_state"],
         )
+        self.assertEqual(
+            60,
+            result["common_release_safety_controls"][
+                "hosted_review_quiescence_maximum_observation_age_seconds"
+            ],
+        )
 
     def test_fails_when_single_observation_fanout_gate_is_removed(self) -> None:
         self.optimization_governance["anti_churn"]["single_observation_failure_gate"][
@@ -417,6 +425,20 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertIn(
             "HOSTED_REVIEW_QUIESCENCE_PUBLICATION_STATE_DRIFT",
+            {error["code"] for error in result["errors"]},
+        )
+
+    def test_fails_when_hosted_review_quiescence_freshness_policy_drifts(self) -> None:
+        self.optimization_governance["common_release_safety_controls"]["hosted_review_quiescence"][
+            "maximum_observation_age_seconds"
+        ] = 3600
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn(
+            "HOSTED_REVIEW_QUIESCENCE_FRESHNESS_POLICY_DRIFT",
             {error["code"] for error in result["errors"]},
         )
 

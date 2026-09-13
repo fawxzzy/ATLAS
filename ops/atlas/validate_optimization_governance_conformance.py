@@ -411,6 +411,21 @@ def validate_conformance(
         str(hosted_review_quiescence.get("provider_effects")),
     )
     check(
+        hosted_review_quiescence.get("maximum_observation_age_seconds") == 60
+        and hosted_review_quiescence.get("absolute_freshness_ceiling_seconds") == 300,
+        "HOSTED_REVIEW_QUIESCENCE_FRESHNESS_POLICY_DRIFT",
+        str(
+            {
+                "maximum_observation_age_seconds": hosted_review_quiescence.get(
+                    "maximum_observation_age_seconds"
+                ),
+                "absolute_freshness_ceiling_seconds": hosted_review_quiescence.get(
+                    "absolute_freshness_ceiling_seconds"
+                ),
+            }
+        ),
+    )
+    check(
         hosted_review_quiescence.get("publication_state")
         == (common_controls.get("publication_state") if isinstance(common_controls, dict) else None),
         "HOSTED_REVIEW_QUIESCENCE_PUBLICATION_STATE_DRIFT",
@@ -615,6 +630,9 @@ def validate_conformance(
             "hosted_review_quiescence_status": hosted_review_quiescence.get("status"),
             "hosted_review_quiescence_provider_effects": hosted_review_quiescence.get("provider_effects"),
             "hosted_review_quiescence_publication_state": hosted_review_quiescence.get("publication_state"),
+            "hosted_review_quiescence_maximum_observation_age_seconds": hosted_review_quiescence.get(
+                "maximum_observation_age_seconds"
+            ),
             "required_artifact_count": len(common_control_refs),
             "present_artifact_count": len(common_control_refs) - len(missing_common_control_refs),
             "engineering_memory_seed_count": len(observed_seed_ids & set(seed_ids)) if isinstance(seed_ids, list) else 0,

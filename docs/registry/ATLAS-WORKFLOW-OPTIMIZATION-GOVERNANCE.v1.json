@@ -244,8 +244,10 @@
     },
     "hosted_review_quiescence": {
       "status": "INSTALLED_LOCAL_PUBLICATION_HELD",
-      "rule": "After a draft-to-ready transition bound to the exact immutable head, merge preflight requires positive terminal completion from every named hosted reviewer strictly later in that ready epoch, with zero queued or in-progress attempts, completed findings, or unresolved non-outdated exact-head threads; explicitly outdated historical threads do not block.",
-      "fail_closed_on": ["empty post-ready review snapshot", "pre-ready review reuse", "wrong-head review", "queued review", "in-progress review", "completed findings", "unresolved non-outdated exact-head thread"],
+      "rule": "After a draft-to-ready transition bound to the exact immutable head, merge preflight requires a fresh action-time observation and positive terminal completion from every named hosted reviewer strictly later in that ready epoch, with zero queued or in-progress attempts, completed findings, or unresolved non-outdated exact-head threads; explicitly outdated historical threads do not block.",
+      "fail_closed_on": ["empty post-ready review snapshot", "pre-ready review reuse", "stale or future action-time observation", "wrong-head review", "queued review", "in-progress review", "completed findings", "unresolved non-outdated exact-head thread"],
+      "maximum_observation_age_seconds": 60,
+      "absolute_freshness_ceiling_seconds": 300,
       "provider_effects": 0,
       "publication_state": "current-main-candidate-unmerged",
       "owner_boundary": "The common validator is root-owned and performs no GitHub call; source-owner release gates bind supported readback into it before any separately authorized merge."

@@ -197,6 +197,8 @@ def validate_hosted_review_quiescence_premerge(
     ready_transition_head_sha: str,
     ready_transition_at: str,
     observed_at: str,
+    action_time: str,
+    max_observation_age_seconds: int,
     required_reviewers: Sequence[str],
     review_attempts: Iterable[Mapping[str, Any]],
     review_threads: Iterable[Mapping[str, Any]],
@@ -217,8 +219,30 @@ def validate_hosted_review_quiescence_premerge(
         code="HOSTED_REVIEW_OBSERVATION_INVALID",
         label="observation",
     )
+    action_at = _parse_utc_timestamp(
+        action_time,
+        code="HOSTED_REVIEW_ACTION_TIME_INVALID",
+        label="action time",
+    )
+    if (
+        not isinstance(max_observation_age_seconds, int)
+        or isinstance(max_observation_age_seconds, bool)
+        or not 1 <= max_observation_age_seconds <= 300
+    ):
+        _fail(
+            "HOSTED_REVIEW_FRESHNESS_CEILING_INVALID",
+            "maximum observation age must be an integer from 1 through 300 seconds",
+        )
     if snapshot_at < ready_at:
         _fail("HOSTED_REVIEW_OBSERVATION_INVALID", "observation predates the ready transition")
+    if snapshot_at > action_at:
+        _fail("HOSTED_REVIEW_OBSERVATION_FUTURE", "observation is later than the trusted action time")
+    observation_age_seconds = (action_at - snapshot_at).total_seconds()
+    if observation_age_seconds > max_observation_age_seconds:
+        _fail(
+            "HOSTED_REVIEW_OBSERVATION_STALE",
+            "hosted-review observation is older than the admitted action-time freshness ceiling",
+        )
 
     reviewers = list(required_reviewers)
     if not reviewers or any(not isinstance(reviewer, str) or not reviewer.strip() for reviewer in reviewers):
@@ -294,6 +318,9 @@ def validate_hosted_review_quiescence_premerge(
         "ready_transition_head_exact": True,
         "ready_transition_at": ready_transition_at,
         "observed_at": observed_at,
+        "action_time": action_time,
+        "observation_age_seconds": observation_age_seconds,
+        "max_observation_age_seconds": max_observation_age_seconds,
         "required_reviewer_count": len(reviewers),
         "completed_reviewer_count": len(set(reviewers) & completed_reviewers),
         "review_attempt_count": attempt_count,

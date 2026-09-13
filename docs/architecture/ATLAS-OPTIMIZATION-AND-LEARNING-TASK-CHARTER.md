@@ -93,9 +93,10 @@ hash, reparse-path, and supported command-profile preflight before any CLI
 invocation. Missing, generated, mismatched, ambiguous, wrong-team, or
 unclassified linkage surfaces fail closed.
 
-The hosted-review quiescence gate binds a draft-to-ready transition to one
-positive completion from every named hosted reviewer on the exact immutable
-head strictly after a ready transition bound to that same head. Pre-ready reviews, empty snapshots, wrong-head results, queued or
+The hosted-review quiescence gate binds a draft-to-ready transition to a fresh
+trusted action-time observation and positive completion from every named hosted
+reviewer on the exact immutable head strictly after a ready transition bound to
+that same head. Future or stale observations, pre-ready reviews, empty snapshots, wrong-head results, queued or
 in-progress attempts, completed findings, and unresolved non-outdated threads
 cannot satisfy the merge preflight. This prevents a ready-triggered hosted
 review from publishing a valid finding only after the source has merged.

@@ -267,6 +267,7 @@ class HostedReviewQuiescenceTests(unittest.TestCase):
     head = "a" * 40
     ready_at = "2026-09-13T16:05:00Z"
     observed_at = "2026-09-13T16:10:00Z"
+    action_time = "2026-09-13T16:10:30Z"
     reviewer = "chatgpt-codex-connector"
 
     def setUp(self) -> None:
@@ -275,6 +276,8 @@ class HostedReviewQuiescenceTests(unittest.TestCase):
             "ready_transition_head_sha": self.head,
             "ready_transition_at": self.ready_at,
             "observed_at": self.observed_at,
+            "action_time": self.action_time,
+            "max_observation_age_seconds": 60,
             "required_reviewers": [self.reviewer],
             "review_attempts": [
                 {
@@ -303,6 +306,20 @@ class HostedReviewQuiescenceTests(unittest.TestCase):
 
     def test_pr187_race_rejects_empty_snapshot_after_ready(self) -> None:
         self.assert_rejected("HOSTED_REVIEW_COMPLETION_MISSING", review_attempts=[])
+
+    def test_rejects_stale_or_future_snapshot_at_action_time(self) -> None:
+        self.assert_rejected(
+            "HOSTED_REVIEW_OBSERVATION_STALE",
+            action_time="2026-09-13T16:11:01Z",
+        )
+        self.assert_rejected(
+            "HOSTED_REVIEW_OBSERVATION_FUTURE",
+            action_time="2026-09-13T16:09:59Z",
+        )
+        self.assert_rejected(
+            "HOSTED_REVIEW_FRESHNESS_CEILING_INVALID",
+            max_observation_age_seconds=301,
+        )
 
     def test_rejects_queued_or_in_progress_review(self) -> None:
         for status in ("queued", "in_progress"):
