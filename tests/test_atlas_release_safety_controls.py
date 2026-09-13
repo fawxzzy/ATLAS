@@ -28,6 +28,17 @@ class WorkboxReleaseSafetyTests(unittest.TestCase):
         }
         self.assertEqual({"/favicon.ico"}, keys)
 
+    def test_absolute_same_origin_preserves_repeated_leading_slashes(self) -> None:
+        repeated = canonicalize_same_origin_workbox_key(
+            "https://app.example//assets/app.js", expected_origin=self.origin
+        )
+        ordinary = canonicalize_same_origin_workbox_key(
+            "https://app.example/assets/app.js", expected_origin=self.origin
+        )
+        self.assertEqual("//assets/app.js", repeated)
+        self.assertEqual("/assets/app.js", ordinary)
+        self.assertNotEqual(ordinary, repeated)
+
     def test_exact_verification_preserves_bytes_and_hash(self) -> None:
         result = verify_workbox_precache_entries(
             [{"url": "favicon.ico", "bytes": 42, "sha256": self.digest}],
@@ -178,6 +189,7 @@ class VercelNoAutoLinkTests(unittest.TestCase):
             "expected_project_id": "prj_exact",
             "expected_org_id": "team_exact",
             "expected_binding_sha256": self.binding_hash,
+            "deployment_project_bindings": {"dpl_exact": "prj_exact"},
             "command_args": ["curl", "/health", "--deployment", "dpl_exact", "--scope", "team_exact"],
             "environment": {},
         }
@@ -210,6 +222,16 @@ class VercelNoAutoLinkTests(unittest.TestCase):
         self.assert_rejected(
             "VERCEL_ENV_BINDING_MISMATCH",
             environment={"VERCEL_PROJECT_ID": "prj_other", "VERCEL_ORG_ID": "team_exact"},
+        )
+
+    def test_rejects_missing_or_mismatched_deployment_project_binding(self) -> None:
+        self.assert_rejected(
+            "VERCEL_DEPLOYMENT_PROJECT_BINDING_MISSING",
+            deployment_project_bindings={},
+        )
+        self.assert_rejected(
+            "VERCEL_DEPLOYMENT_PROJECT_BINDING_MISMATCH",
+            deployment_project_bindings={"dpl_exact": "prj_other"},
         )
 
     def test_omitted_environment_rejects_ambient_binding_mismatch(self) -> None:

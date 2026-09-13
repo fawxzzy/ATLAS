@@ -29,7 +29,7 @@
     "authority_invariants": [
       "No new general-purpose ATLAS server is admitted.",
       "Foundation is the hosted read-only portfolio surface; Playbook Observer is the private local operator cockpit.",
-      "DiscordOS is the hosted Discord API and logical writer; its Vercel, Supabase, and GitHub Actions surfaces retain distinct responsibilities.",
+      "DiscordOS is retired provenance-only; historical Vercel, Supabase, and GitHub Actions observations cannot route owner, writer, provider, or source work. Future project-board product work belongs to owner.fawxzzyweb and master-data work to platform.supabase-migration after their exact contracts are proven.",
       "Cortex recomputes read models after accepted state changes or digests and does not become a competing daemon or scheduler.",
       "Fitness, Mazer, Socials OS, FawxzzyWeb, Stream, Nat1, and other products remain owner lanes."
     ],
@@ -334,39 +334,37 @@
     },
     {
       "id": "discordos-vercel-api",
-      "runtime_responsibility": "Public Discord callback, runtime-health, writer, and transfer API edge.",
-      "authority_owner": "DiscordOS",
+      "runtime_responsibility": "Historical provenance for the former public Discord callback, runtime-health, writer, and transfer API edge; no current runtime authority.",
+      "authority_owner": "ATLAS root governance (retired provenance only)",
       "implemented_surface": [
         "DiscordOS Vercel serverless functions",
         "/api/runtime-health",
         "/api/discord-message-commands-poll"
       ],
-      "intended_placement": "Vercel",
+      "intended_placement": "no_server/on_demand",
       "current_availability": {
-        "state": "operational",
+        "state": "retired_provenance_only",
         "observed_at": "2026-07-17T01:54:50Z",
         "proof": [
-          "Runtime health returned HTTP 200, ok=true, posture=operational, readinessPercent=100 during the read-only reconciliation probe."
+          "Historical runtime health returned HTTP 200 during a read-only reconciliation probe; the observation is retained only as provenance and grants no current authority."
         ]
       },
       "consumer": [
-        "Discord callbacks",
-        "GitHub Actions polling",
-        "ATLAS read-only health checks"
+        "Historical evidence and audit consumers"
       ],
-      "lifecycle": "continuously hosted serverless edge",
+      "lifecycle": "retired provenance only; never select, wake, dispatch, deploy, or create source work",
       "persistence": {
         "mode": "stateless edge with Supabase-backed state",
         "path": null
       },
       "secrets_boundary": "Vercel-managed environment and OIDC-authenticated poll requests; no secret values in ATLAS receipts.",
       "port": null,
-      "availability_target": "Public HTTPS callback and writer availability.",
+      "availability_target": "No runtime availability target; preserve historical evidence only.",
       "failure_modes": [
         "Treating HTTP reachability as end-to-end interaction reliability",
         "Creating a second public writer"
       ],
-      "activation_deployment_gate": "Already hosted; changes require DiscordOS owner proof and explicit per-deploy production approval.",
+      "activation_deployment_gate": "Retired provenance only; no activation, deployment, provider, writer, or source lifecycle action is admitted.",
       "evidence_refs": [
         "repos/DiscordOS/vercel.json",
         "https://fawxzzy-discordos.vercel.app/api/runtime-health"
@@ -374,38 +372,37 @@
     },
     {
       "id": "discordos-supabase-state",
-      "runtime_responsibility": "DiscordOS durable writer, transfer, and runtime state.",
-      "authority_owner": "DiscordOS",
+      "runtime_responsibility": "Historical provenance for former durable writer, transfer, and runtime state; no current data or provider authority.",
+      "authority_owner": "ATLAS root governance (retired provenance only)",
       "implemented_surface": [
         "DiscordOS Supabase project",
         "Supabase Edge service-role writer",
         "persisted writer and transfer state"
       ],
-      "intended_placement": "Supabase",
+      "intended_placement": "no_server/on_demand",
       "current_availability": {
-        "state": "operational",
+        "state": "retired_provenance_only",
         "observed_at": "2026-07-17T01:54:50Z",
         "proof": [
-          "Runtime health reports supabaseProject, serviceRole, persistedWriter, and liveTransferStatus ready with no blocked reasons."
+          "Historical runtime health reported managed state ready; the observation is retained only as provenance and grants no current data or provider authority."
         ]
       },
       "consumer": [
-        "DiscordOS Vercel API",
-        "DiscordOS writer and transfer flows"
+        "Historical evidence and audit consumers"
       ],
-      "lifecycle": "hosted durable state and edge writer",
+      "lifecycle": "retired provenance only; never select, wake, dispatch, read live data, write, or deploy",
       "persistence": {
         "mode": "Supabase-managed durable state",
         "path": null
       },
       "secrets_boundary": "Supabase credentials stay in managed runtime secrets and never enter root registries or logs.",
       "port": null,
-      "availability_target": "Durable hosted writer state with exact readback.",
+      "availability_target": "No runtime availability target; preserve historical evidence only.",
       "failure_modes": [
         "Live-state mutation during read-only health inspection",
         "Persisting secrets in receipts"
       ],
-      "activation_deployment_gate": "Read-only health is admitted; schema, edge-function, data, and production mutations require separate owner authority.",
+      "activation_deployment_gate": "Retired provenance only; no schema, edge-function, data, provider, writer, or production action is admitted.",
       "evidence_refs": [
         "https://fawxzzy-discordos.vercel.app/api/runtime-health",
         "docs/audits/GITHUB-CONTROL-PLANE-OPENING-AUDIT-2026-07-12.md"
@@ -413,36 +410,36 @@
     },
     {
       "id": "discordos-github-actions-poll",
-      "runtime_responsibility": "Bounded hosted message-command polling for DiscordOS.",
-      "authority_owner": "DiscordOS",
+      "runtime_responsibility": "Historical provenance for former bounded hosted message-command polling; no current scheduler authority.",
+      "authority_owner": "ATLAS root governance (retired provenance only)",
       "implemented_surface": [
         "Discord Message Command Poll workflow",
         "OIDC-authenticated bounded burst polling"
       ],
-      "intended_placement": "GitHub Actions",
+      "intended_placement": "no_server/on_demand",
       "current_availability": {
-        "state": "active_successful",
+        "state": "retired_provenance_only",
         "observed_at": "2026-07-15T18:51:06Z",
         "proof": [
-          "Scheduled run 29442036556 completed successfully on 2026-07-15 at DiscordOS head 876b30e."
+          "Historical scheduled run 29442036556 completed successfully on 2026-07-15; the observation is retained only as provenance and grants no current scheduler authority."
         ]
       },
       "consumer": [
-        "DiscordOS message-command ingress"
+        "Historical evidence and audit consumers"
       ],
-      "lifecycle": "bounded scheduled cloud run with concurrency serialization",
+      "lifecycle": "retired provenance only; never select, schedule, wake, dispatch, or alter workflows",
       "persistence": {
         "mode": "GitHub Actions run history and DiscordOS durable state",
         "path": null
       },
       "secrets_boundary": "GitHub OIDC token is ephemeral and masked; no token is retained in ATLAS evidence.",
       "port": null,
-      "availability_target": "Successful bounded scheduled polls without a permanent local watcher.",
+      "availability_target": "No runtime availability target; preserve historical evidence only.",
       "failure_modes": [
         "Assuming cron expression equals precise execution cadence",
         "Adding parallel polling authorities"
       ],
-      "activation_deployment_gate": "Existing workflow is observed read-only; workflow or production changes require DiscordOS owner authority.",
+      "activation_deployment_gate": "Retired provenance only; no workflow, scheduler, provider, writer, or production action is admitted.",
       "evidence_refs": [
         "repos/DiscordOS/.github/workflows/discord-message-command-poll.yml",
         "https://github.com/fawxzzy/DiscordOS/actions/runs/29442036556"
@@ -450,39 +447,37 @@
     },
     {
       "id": "discordos-runtime",
-      "runtime_responsibility": "Compose the DiscordOS hosted edge, durable state, and bounded polling surfaces without duplicating their authorities.",
-      "authority_owner": "DiscordOS",
+      "runtime_responsibility": "Historical provenance that composes the former hosted edge, durable state, and polling observations without retaining operational authority.",
+      "authority_owner": "ATLAS root governance (retired provenance only)",
       "implemented_surface": [
         "Vercel API",
         "Supabase state and writer",
         "GitHub Actions scheduled polling"
       ],
-      "intended_placement": "hybrid",
+      "intended_placement": "no_server/on_demand",
       "current_availability": {
-        "state": "operational",
+        "state": "retired_provenance_only",
         "observed_at": "2026-07-17T01:54:50Z",
         "proof": [
-          "Runtime health reports all hosted component states ready and live cutover active.",
-          "Latest bounded scheduled polling run succeeded."
+          "Historical runtime health reported former hosted components ready and a bounded scheduled run succeeded; both observations are provenance only."
         ]
       },
       "consumer": [
-        "Discord users",
-        "ATLAS status and correlation consumers"
+        "Historical evidence and audit consumers"
       ],
-      "lifecycle": "continuous hosted edge/state plus bounded scheduled polling",
+      "lifecycle": "retired provenance only; never select, wake, dispatch, activate, deploy, or create source work",
       "persistence": {
         "mode": "Supabase durable state with Vercel and GitHub run evidence",
         "path": null
       },
       "secrets_boundary": "Each hosted plane owns its managed credentials; ATLAS records identifiers and redacted health only.",
       "port": null,
-      "availability_target": "Interaction-first end-to-end reliability across hosted planes.",
+      "availability_target": "No runtime availability target; preserve historical evidence only.",
       "failure_modes": [
         "Healthy component checks masking interaction-path failure",
         "Duplicate public or scheduled writer authority"
       ],
-      "activation_deployment_gate": "Operational now; the next admitted work is an owner-side interaction-first reliability review, not a deployment.",
+      "activation_deployment_gate": "Retired provenance only; no interaction review, provider, writer, deployment, or source lifecycle action is admitted.",
       "evidence_refs": [
         "https://fawxzzy-discordos.vercel.app/api/runtime-health",
         "repos/DiscordOS/vercel.json",
@@ -1056,10 +1051,10 @@
     {
       "order": 7,
       "id": "discordos-interaction-first-reliability-review",
-      "owner": "DiscordOS",
-      "packet": "DiscordOS interaction-first reliability review",
+      "owner": "ATLAS root governance (retired provenance only)",
+      "packet": "DiscordOS historical interaction reliability provenance reconciliation",
       "status": "accepted",
-      "admission_proof": "Draft, unmerged DiscordOS PR #104 at exact reviewed head c62b31e76ac0c401b0213dcd3537df86e1ab371c proves the five fixed stateful scenarios on READY Preview dpl_7zBA8ggFEATvj7tRFeS2oYf5NWXP with 31 fixture requests, 12 reads, 19 in-memory writes, zero external requests or writes, five exact readbacks, restart-lease-bound recovered publication, and deployment-bound digest; production-path adoption and real-user coverage remain UNKNOWN.",
+      "admission_proof": "Historical draft DiscordOS PR #104 and its exact reviewed preview evidence are retained as accepted provenance only. DiscordOS is retired and this step grants no owner, writer, provider, activation, deployment, or source lifecycle authority.",
       "evidence_refs": [
         "https://github.com/fawxzzy/DiscordOS/pull/104",
         "https://github.com/fawxzzy/DiscordOS/pull/104#issuecomment-4999418558",
@@ -1229,7 +1224,7 @@
           ]
         }
       ],
-      "admission_rule": "Count only scenarios with accepted deterministic identity, state, and receipt proof; hosted DiscordOS interaction reliability remains a separate activation-sequence review."
+      "admission_rule": "Count only scenarios with accepted deterministic identity, state, and receipt proof; historical DiscordOS interaction evidence is retired provenance and cannot become an activation-sequence owner."
     },
     {
       "id": "lane-operator-surface-adoption",
@@ -1319,8 +1314,7 @@
   "current_unknowns": [
     "Actual restoration after a new Windows logon is UNKNOWN.",
     "Sustained unattended Playbook Observer uptime is UNKNOWN; current state is intentionally stopped and restorable.",
-    "DiscordOS production message-command adoption of the interaction reliability contract is UNKNOWN because PR #104 remains draft and unmerged.",
-    "DiscordOS real-user interaction coverage outside the fixed Preview canary is UNKNOWN.",
+    "Future project-board product work under owner.fawxzzyweb and master-data work under platform.supabase-migration remain UNKNOWN until their exact owner and data contracts are proven; historical DiscordOS evidence cannot satisfy them.",
     "PostgreSQL 5432 and 5433 ownership is UNKNOWN.",
     "The loopback browser-debugger process ownership is UNKNOWN."
   ],

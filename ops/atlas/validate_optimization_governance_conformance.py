@@ -145,13 +145,14 @@ def validate_conformance(
     expected_thread_ids = [entry.get("thread_id") for entry in entries]
     check(len(entries) == 4, "PROGRAM_TASK_DENOMINATOR_DRIFT", f"expected 4 entries, found {len(entries)}")
     check(
-        len(set(expected_ids)) == 4 and all(isinstance(value, str) and value for value in expected_ids),
+        all(isinstance(value, str) and value for value in expected_ids)
+        and len(set(expected_ids)) == 4,
         "AUTOMATION_IDENTITY_DRIFT",
         "four unique nonempty automation ids are required",
     )
     check(
-        len(set(expected_thread_ids)) == 4
-        and all(isinstance(value, str) and value for value in expected_thread_ids),
+        all(isinstance(value, str) and value for value in expected_thread_ids)
+        and len(set(expected_thread_ids)) == 4,
         "PROGRAM_TASK_IDENTITY_DRIFT",
         "four unique nonempty task identities are required",
     )

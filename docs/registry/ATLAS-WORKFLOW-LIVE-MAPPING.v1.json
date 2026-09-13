@@ -196,7 +196,7 @@
       "health": "HELD",
       "recovery_action": "HOLD_NO_CREATE",
       "lifecycle_action_authorized": false,
-      "evidence": ["historical DiscordOS runtime provenance", "codex-session://2026/07/16/019f6d9d-a192-7a51-8d2d-463494c87d3a", "superseded embedded-service classification retained for audit"],
+      "evidence": ["retired_component:component.discordos", "historical DiscordOS runtime provenance", "codex-session://2026/07/16/019f6d9d-a192-7a51-8d2d-463494c87d3a", "superseded embedded-service classification retained for audit"],
       "rationale": "This earlier DiscordOS runtime is immutable historical provenance. The retired project contract forbids selection, binding, creation, unarchive, activation, scheduling, wake, dispatch, and source publication."
     },
     {

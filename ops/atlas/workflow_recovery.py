@@ -1194,15 +1194,16 @@ def _retired_routing_errors(manifest: dict[str, Any], registry: dict[str, Any]) 
 
     for component_id in sorted(retired_components):
         marker = f"retired_component:{component_id}"
+        retired_title = re.sub(r"[^a-z0-9]", "", component_id.removeprefix("component.").lower())
         claims = [
             claim
             for claim in registry["unbound_runtime_claims"]
             if marker in claim.get("evidence", [])
+            or re.sub(r"[^a-z0-9]", "", str(claim.get("title", "")).lower()) == retired_title
         ]
-        if len(claims) != 1:
-            errors.append(f"{component_id}: expected exactly one retired runtime provenance claim")
+        if not claims:
+            errors.append(f"{component_id}: expected at least one retired runtime provenance claim")
             continue
-        claim = claims[0]
         required = {
             "standing_contract_claim": False,
             "admission_state": "NOT_DURABLY_ADMITTED",
@@ -1212,11 +1213,16 @@ def _retired_routing_errors(manifest: dict[str, Any], registry: dict[str, Any]) 
             "recovery_action": "HOLD_NO_CREATE",
             "lifecycle_action_authorized": False,
         }
-        for field, expected in required.items():
-            if claim.get(field) != expected:
+        for claim in claims:
+            if marker not in claim.get("evidence", []):
                 errors.append(
-                    f"{claim['runtime_id']}: retired provenance {field} must be {expected!r}"
+                    f"{claim['runtime_id']}: retired provenance claim must include {marker}"
                 )
+            for field, expected in required.items():
+                if claim.get(field) != expected:
+                    errors.append(
+                        f"{claim['runtime_id']}: retired provenance {field} must be {expected!r}"
+                    )
     return errors
 
 

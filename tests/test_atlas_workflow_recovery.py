@@ -528,20 +528,29 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertFalse(component["standing_task"])
         self.assertEqual([], RECOVERY._retired_routing_errors(self.manifest, self.registry))
 
-        claim = next(
+        claims = [
             item
             for item in self.registry["unbound_runtime_claims"]
-            if "retired_component:component.discordos" in item["evidence"]
+            if item["title"] == "DiscordOS"
+        ]
+        self.assertEqual(2, len(claims))
+        for claim in claims:
+            self.assertIn("retired_component:component.discordos", claim["evidence"])
+            self.assertEqual("HISTORICAL_PROGRAM_SURFACE", claim["disposition"])
+            self.assertIsNone(claim["canonical_target_id"])
+            self.assertEqual("HOLD_NO_CREATE", claim["recovery_action"])
+            self.assertFalse(claim["standing_contract_claim"])
+            self.assertFalse(claim["lifecycle_action_authorized"])
+        self.assertTrue(
+            any("fawxzzy/DiscordOS#110 closed without merge" in claim["evidence"][-1] for claim in claims)
         )
-        self.assertEqual("HISTORICAL_PROGRAM_SURFACE", claim["disposition"])
-        self.assertIsNone(claim["canonical_target_id"])
-        self.assertEqual("HOLD_NO_CREATE", claim["recovery_action"])
-        self.assertFalse(claim["standing_contract_claim"])
-        self.assertFalse(claim["lifecycle_action_authorized"])
-        self.assertIn("fawxzzy/DiscordOS#110 closed without merge", claim["evidence"][-1])
 
         plan, adapter = self.plan("healthy.json", mode="apply")
-        self.assertNotIn(claim["runtime_id"], {item["runtime_id"] for item in plan["roles"]})
+        self.assertTrue(
+            {claim["runtime_id"] for claim in claims}.isdisjoint(
+                {item["runtime_id"] for item in plan["roles"]}
+            )
+        )
         self.assertFalse(
             any(
                 "component.discordos" in {
@@ -577,6 +586,16 @@ class WorkflowRecoveryTests(unittest.TestCase):
         errors = RECOVERY._retired_routing_errors(hostile_manifest, self.registry)
         self.assertTrue(any("operational route targets retired component" in item for item in errors))
         self.assertTrue(any("endpoint targets retired component" in item for item in errors))
+
+        hostile_registry = copy.deepcopy(self.registry)
+        hostile_claim = next(
+            item for item in hostile_registry["unbound_runtime_claims"] if item["title"] == "DiscordOS"
+        )
+        hostile_claim["evidence"].remove("retired_component:component.discordos")
+        hostile_claim["standing_contract_claim"] = True
+        errors = RECOVERY._retired_routing_errors(self.manifest, hostile_registry)
+        self.assertTrue(any("must include retired_component:component.discordos" in item for item in errors))
+        self.assertTrue(any("standing_contract_claim must be False" in item for item in errors))
 
         baseline = (ROOT / "docs/prompts/atlas-workflow/STANDING-BASELINE.md").read_text(
             encoding="utf-8"

@@ -89,7 +89,7 @@ def _decode_safe_path(path: str) -> str:
             )
         )
     canonical = "".join(canonical_parts)
-    return "/" + canonical.lstrip("/")
+    return canonical if canonical.startswith("/") else f"/{canonical}"
 
 
 def canonicalize_same_origin_workbox_key(
@@ -441,6 +441,7 @@ def validate_vercel_no_auto_link_preflight(
     expected_project_id: str,
     expected_org_id: str,
     expected_binding_sha256: str,
+    deployment_project_bindings: Mapping[str, str],
     command_args: Sequence[str],
     environment: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
@@ -504,6 +505,18 @@ def validate_vercel_no_auto_link_preflight(
     request_path, deployment, scope = _parse_exact_curl_profile(args[1:])
     if scope != expected_org_id:
         _fail("VERCEL_COMMAND_SCOPE_MISMATCH", "explicit command scope differs from the expected organization/team")
+    if not isinstance(deployment_project_bindings, Mapping):
+        _fail("VERCEL_DEPLOYMENT_PROJECT_BINDING_MISSING", "deployment-to-project binding evidence must be a mapping")
+    if set(deployment_project_bindings) != {deployment}:
+        _fail(
+            "VERCEL_DEPLOYMENT_PROJECT_BINDING_MISSING",
+            "exactly one binding for the selected deployment is required",
+        )
+    if deployment_project_bindings.get(deployment) != expected_project_id:
+        _fail(
+            "VERCEL_DEPLOYMENT_PROJECT_BINDING_MISMATCH",
+            "selected deployment belongs to a different project",
+        )
     return {
         "schema": "atlas.vercel-no-auto-link-preflight.v1",
         "valid": True,
@@ -515,6 +528,7 @@ def validate_vercel_no_auto_link_preflight(
         "command": "curl",
         "request_path_present": bool(request_path),
         "deployment_target_present": bool(deployment),
+        "deployment_project_exact": True,
         "scope_exact": True,
         "provider_invocations": 0,
     }

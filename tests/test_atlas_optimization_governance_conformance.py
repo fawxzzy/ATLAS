@@ -393,6 +393,21 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         self.assertFalse(result["valid"])
         self.assertIn("PROGRAM_TASK_IDENTITY_DRIFT", {error["code"] for error in result["errors"]})
 
+    def test_wrong_type_topology_ids_return_structured_invalid(self) -> None:
+        cases = (
+            ("automation_id", ["not", "hashable"], "AUTOMATION_IDENTITY_DRIFT"),
+            ("thread_id", {"not": "hashable"}, "PROGRAM_TASK_IDENTITY_DRIFT"),
+        )
+        for field, value, expected_code in cases:
+            with self.subTest(field=field):
+                original = self.ledger["worker_topology"]["integrator"][field]
+                self.ledger["worker_topology"]["integrator"][field] = value
+                self._write_ledger()
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn(expected_code, {error["code"] for error in result["errors"]})
+                self.ledger["worker_topology"]["integrator"][field] = original
+
     def test_fails_when_single_observation_fanout_gate_is_removed(self) -> None:
         self.optimization_governance["anti_churn"]["single_observation_failure_gate"][
             "canonical_observation_only"
