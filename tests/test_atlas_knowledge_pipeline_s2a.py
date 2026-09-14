@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -1070,6 +1071,151 @@ class StorageRootIntegrationTests(_ImportHarness):
             os.chmod(self._external_storage / "blocked-source", 0o755)
         self.assertEqual(len(found), 1)
         self.assertTrue(found[0].is_relative_to(self.fake_atlas))
+
+    # -- Linked-layout regressions -----------------------------------------
+    # entry.is_dir(follow_symlinks=False) is False for any symlink, so a
+    # naive "keep entries that are directories" filter does not reject a
+    # symlinked source/archive directory -- it silently OMITS it, with no
+    # signal at all. Each test creates a REAL symlink (or, on Windows, a
+    # real NTFS junction) and asserts an explicit refusal, not a filtered
+    # result.
+
+    def _make_real_manifest(self, path: Path, *, archive_id: str, source_name: str, slug: str) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps({"archive_id": archive_id, "source_name": source_name, "slug": slug}),
+            encoding="utf-8",
+        )
+
+    def test_linked_source_directory_is_rejected_not_silently_omitted(self) -> None:
+        env = self._external_storage_env()
+        real_target = self._base / "real-linked-source-target"
+        self._make_real_manifest(
+            real_target / "two" / "IMPORT-MANIFEST.json",
+            archive_id="linked-source--two", source_name="linked-source", slug="two",
+        )
+        try:
+            (self._external_storage / "linked-source").symlink_to(real_target, target_is_directory=True)
+        except OSError:
+            self.skipTest("symlink creation not permitted in this environment")
+        with mock.patch.dict(os.environ, env):
+            with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                _pipeline.discover_import_manifests()
+
+    def test_linked_archive_directory_is_rejected_not_silently_omitted(self) -> None:
+        env = self._external_storage_env()
+        real_target = self._base / "real-linked-archive-target"
+        self._make_real_manifest(
+            real_target / "IMPORT-MANIFEST.json",
+            archive_id="ordinary-source--linked-slug", source_name="ordinary-source", slug="linked-slug",
+        )
+        source_dir = self._external_storage / "ordinary-source"
+        source_dir.mkdir(parents=True)
+        try:
+            (source_dir / "linked-slug").symlink_to(real_target, target_is_directory=True)
+        except OSError:
+            self.skipTest("symlink creation not permitted in this environment")
+        with mock.patch.dict(os.environ, env):
+            with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                _pipeline.discover_import_manifests()
+
+    def test_ordinary_and_linked_archives_together_never_publish_the_ordinary_only_list_as_complete(
+        self,
+    ) -> None:
+        # The exact gap the review demonstrated: a normal archive sits
+        # alongside a linked one. The call must fail entirely -- NOT
+        # succeed with only the ordinary archive, which would look like a
+        # perfectly ordinary, complete one-archive catalog.
+        env = self._external_storage_env()
+        self._make_real_manifest(
+            self._external_storage / "ordinary-source" / "one" / "IMPORT-MANIFEST.json",
+            archive_id="ordinary-source--one", source_name="ordinary-source", slug="one",
+        )
+        real_target = self._base / "real-linked-target"
+        self._make_real_manifest(
+            real_target / "two" / "IMPORT-MANIFEST.json",
+            archive_id="linked-source--two", source_name="linked-source", slug="two",
+        )
+        try:
+            (self._external_storage / "linked-source").symlink_to(real_target, target_is_directory=True)
+        except OSError:
+            self.skipTest("symlink creation not permitted in this environment")
+        with mock.patch.dict(os.environ, env):
+            with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                _pipeline.discover_import_manifests()
+
+    def test_symlinked_manifest_file_is_rejected_without_reading_its_target(self) -> None:
+        env = self._external_storage_env()
+        real_manifest = self._base / "real-manifest.json"
+        real_manifest.write_text(
+            json.dumps({"archive_id": "x--y", "source_name": "x", "slug": "y"}), encoding="utf-8"
+        )
+        archive_dir = self._external_storage / "x" / "y"
+        archive_dir.mkdir(parents=True)
+        try:
+            (archive_dir / "IMPORT-MANIFEST.json").symlink_to(real_manifest)
+        except OSError:
+            self.skipTest("symlink creation not permitted in this environment")
+        with mock.patch.dict(os.environ, env):
+            with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                _pipeline.discover_import_manifests()
+
+    def _junction(self, link_path: Path, target: Path) -> bool:
+        # Real NTFS junction via mklink /J -- unlike symlinks, junctions
+        # do not require SeCreateSymbolicLinkPrivilege, but are still
+        # Windows-only and can fail for other reasons, so this is
+        # defensive-skip exactly like the symlink cases above.
+        if os.name != "nt":
+            return False
+        target.mkdir(parents=True, exist_ok=True)
+        link_path.parent.mkdir(parents=True, exist_ok=True)
+        result = subprocess.run(
+            ["cmd", "/c", "mklink", "/J", str(link_path), str(target)],
+            capture_output=True,
+            text=True,
+        )
+        return result.returncode == 0
+
+    @unittest.skipUnless(os.name == "nt", "junctions are a Windows-only concept")
+    def test_windows_junction_source_directory_is_rejected(self) -> None:
+        env = self._external_storage_env()
+        real_target = self._base / "real-junction-target"
+        self._make_real_manifest(
+            real_target / "two" / "IMPORT-MANIFEST.json",
+            archive_id="junction-source--two", source_name="junction-source", slug="two",
+        )
+        if not self._junction(self._external_storage / "junction-source", real_target):
+            self.skipTest("junction creation not permitted in this environment")
+        with mock.patch.dict(os.environ, env):
+            with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                _pipeline.discover_import_manifests()
+
+    def test_catalog_refresh_is_blocked_and_existing_catalog_left_unchanged_on_a_linked_archive(
+        self,
+    ) -> None:
+        (self.fake_atlas / "docs" / "knowledge").mkdir(parents=True, exist_ok=True)
+        src = self._make_source_folder()
+        env = self._external_storage_env()
+        with mock.patch.dict(os.environ, env):
+            self._import_to_external(src, env)
+            first = _pipeline.update_catalog_doc(dry_run=False)
+        before = _pipeline.catalog_doc_path().read_text(encoding="utf-8")
+        self.assertEqual(first["record_count"], 1)
+
+        real_target = self._base / "real-linked-target-for-catalog"
+        self._make_real_manifest(
+            real_target / "two" / "IMPORT-MANIFEST.json",
+            archive_id="linked-source--two", source_name="linked-source", slug="two",
+        )
+        try:
+            (self._external_storage / "linked-source").symlink_to(real_target, target_is_directory=True)
+        except OSError:
+            self.skipTest("symlink creation not permitted in this environment")
+        with mock.patch.dict(os.environ, env):
+            with self.assertRaises(_pipeline.IncompleteDiscoveryError):
+                _pipeline.update_catalog_doc(dry_run=False)
+        after = _pipeline.catalog_doc_path().read_text(encoding="utf-8")
+        self.assertEqual(before, after)
 
     def test_catalog_refresh_is_blocked_and_existing_catalog_left_unchanged_on_incomplete_discovery(
         self,

@@ -2495,11 +2495,14 @@ class IncompleteDiscoveryError(RuntimeError):
     absence might mean real content is simply unreachable, not that
     nothing was ever imported there; (2) a root that DOES exist (the
     configured root OR the legacy default location) cannot be fully
-    scanned -- an unreadable subdirectory, a permission error, or any
-    other OSError partway through enumeration. The second case applies
-    to every root that is actually present, not only the configured one:
-    an inaccessible legacy tree must not quietly present as "nothing
-    more to find" either. Letting a partial inventory stand in for a
+    scanned -- an unreadable subdirectory, a permission error, any other
+    OSError partway through enumeration, or an UnsupportedArchiveLayoutLinkError
+    (a symlink or Windows junction/reparse point standing in for a source
+    directory, archive directory, or IMPORT-MANIFEST.json itself). The
+    second case applies to every root that is actually present, not only
+    the configured one: an inaccessible or link-bearing legacy tree must
+    not quietly present as "nothing more to find" either. Letting a partial
+    inventory stand in for a
     complete one would silently drop real archives from catalog,
     validation, backfill, and promotion-ranking tooling with no record
     that anything was missed -- exactly the failure mode a configuration
@@ -2517,6 +2520,25 @@ def _storage_root_is_explicitly_configured(*, env: dict[str, str] | None = None)
     return bool(source.get(storage._STORAGE_ROOT_ENV, "").strip())
 
 
+class UnsupportedArchiveLayoutLinkError(RuntimeError):
+    """A source directory, archive directory, or IMPORT-MANIFEST.json
+    itself, at a layout level discover_import_manifests() scanned, is a
+    symlink or Windows junction/reparse point. This module's storage
+    layer never writes one there -- storage.LinkPolicy.REJECT_ALL refuses
+    every link entry before any copy starts (see storage.py) -- so a link
+    appearing in the archive layout means something outside this
+    pipeline's own write path put it there.
+
+    entry.is_dir(follow_symlinks=False) is False for any symlink, so a
+    naive "keep entries that are directories" filter does not reject a
+    linked archive -- it simply omits it from the scan with no signal at
+    all, exactly the silent-inventory-loss failure
+    IncompleteDiscoveryError exists to prevent for unreadable
+    directories, extended here to unsupported link entries. Refused
+    instead; nothing is followed, recreated, or removed -- an operator
+    who put a real link there must resolve it themselves."""
+
+
 def _scan_subdirectories(path: Path) -> list[Path]:
     """A single directory level's immediate subdirectories, sorted by
     name, raising OSError normally on failure.
@@ -2530,12 +2552,29 @@ def _scan_subdirectories(path: Path) -> list[Path]:
     prevent. os.scandir() raises immediately if `path` itself can't be
     opened, and iterating it raises normally on a later entry-level
     failure too -- neither is caught here, so a caller's own try/except
-    OSError sees it."""
+    OSError sees it.
+
+    Every entry is classified with storage._is_reparse_point() -- the
+    same symlink-and-Windows-junction detector the storage layer itself
+    uses, since is_symlink() alone misses a junction -- BEFORE the
+    ordinary is_dir(follow_symlinks=False) filter runs: a junction can
+    pass that filter (it carries the directory attribute alongside the
+    reparse one), so checking link status first is what actually catches
+    it rather than silently walking into it as an ordinary directory. A
+    link entry raises UnsupportedArchiveLayoutLinkError explicitly."""
+    subdirectories: list[Path] = []
     with os.scandir(path) as entries:
-        return sorted(
-            (Path(entry.path) for entry in entries if entry.is_dir(follow_symlinks=False)),
-            key=lambda p: p.name,
-        )
+        for entry in entries:
+            candidate = Path(entry.path)
+            if storage._is_reparse_point(candidate):
+                raise UnsupportedArchiveLayoutLinkError(
+                    f"{candidate} is a symlink or Windows junction/reparse point, "
+                    f"not a plain directory; unsupported in the archive layout"
+                )
+            if entry.is_dir(follow_symlinks=False):
+                subdirectories.append(candidate)
+    subdirectories.sort(key=lambda p: p.name)
+    return subdirectories
 
 
 def _list_import_manifests(root: Path) -> list[Path]:
@@ -2550,6 +2589,11 @@ def _list_import_manifests(root: Path) -> list[Path]:
     for source_dir in _scan_subdirectories(root):
         for archive_dir in _scan_subdirectories(source_dir):
             candidate = archive_dir / "IMPORT-MANIFEST.json"
+            if storage._is_reparse_point(candidate):
+                raise UnsupportedArchiveLayoutLinkError(
+                    f"{candidate} is a symlink or Windows junction/reparse point, "
+                    f"not a plain manifest file; refusing to read through it"
+                )
             if candidate.is_file():
                 manifests.append(candidate)
     return manifests
@@ -2579,10 +2623,18 @@ def discover_import_manifests(*, allow_partial: bool = False) -> list[Path]:
     rather than genuinely never having existed, so the list this function
     would otherwise return cannot be proven complete. Separately, ANY
     root that DOES exist -- configured or legacy -- but cannot be fully
-    scanned (an unreadable subdirectory, or any other OSError partway
-    through enumeration) is always incomplete, regardless of which root
-    it is: an inaccessible legacy tree must not quietly present as
-    "nothing more to find" either. IncompleteDiscoveryError is raised in
+    scanned is always incomplete, regardless of which root it is: an
+    unreadable subdirectory or any other OSError partway through
+    enumeration, AND a symlink or Windows junction/reparse point standing
+    in for a source directory, archive directory, or
+    IMPORT-MANIFEST.json itself (this pipeline's own storage layer never
+    writes one there -- see storage.LinkPolicy.REJECT_ALL -- so one
+    appearing means something outside this pipeline's write path put it
+    there, and silently treating it as "not a directory, so nothing to
+    see here" would omit a real archive with no signal at all, just like
+    an unreadable directory would). An inaccessible or link-bearing
+    legacy tree must not quietly present as "nothing more to find"
+    either. IncompleteDiscoveryError is raised in
     either case instead of silently returning a partial list -- unless
     allow_partial=True, for read-only diagnostics that only want a
     best-effort snapshot rather than an authoritative inventory. The
@@ -2632,7 +2684,7 @@ def discover_import_manifests(*, allow_partial: bool = False) -> list[Path]:
             continue
         try:
             found = sorted(_list_import_manifests(root))
-        except OSError as exc:
+        except (OSError, UnsupportedArchiveLayoutLinkError) as exc:
             if unreadable_root_is_fatal:
                 raise IncompleteDiscoveryError(
                     f"import storage root {root} exists but could not be fully "

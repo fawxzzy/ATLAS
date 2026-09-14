@@ -222,6 +222,39 @@ failure anywhere inside a root discards whatever that same root had
 already found, but a fully readable sibling root is still scanned and
 returned normally.
 
+### A symlink or Windows junction in the archive layout is rejected, not omitted
+
+`os.scandir()`'s error propagation closed the unreadable-directory gap,
+but the entry-classification filter underneath it had a separate
+problem: `entry.is_dir(follow_symlinks=False)` is `False` for *any*
+symlink, so a naive "keep entries that are directories" filter does not
+reject a symlinked source directory, archive directory, or
+`IMPORT-MANIFEST.json` -- it silently **omits** it from the scan, with
+no signal at all, exactly the silent-inventory-loss failure this wave
+exists to prevent. This module's storage layer never writes a link into
+the archive layout itself (`storage.LinkPolicy.REJECT_ALL` refuses every
+link entry before any copy starts), so a link appearing there means
+something outside this pipeline's own write path put it there.
+
+Every entry `_scan_subdirectories()` finds is classified with
+`storage._is_reparse_point()` -- the same symlink-and-Windows-junction
+detector the storage layer itself uses, since `is_symlink()` alone
+misses a junction -- **before** the ordinary `is_dir(follow_symlinks=False)`
+filter runs: a junction carries the directory attribute alongside the
+reparse one, so it can pass that filter and be silently walked into as
+an ordinary directory unless link status is checked first. A link entry
+raises `UnsupportedArchiveLayoutLinkError` immediately, at any of the
+three layout levels (source directory, archive directory, or the
+manifest file itself, which is never read through if it turns out to be
+a symlink). This error is caught in `discover_import_manifests()`'s main
+loop alongside `OSError` and folded into the same
+`IncompleteDiscoveryError` contract above: fatal for authoritative
+discovery (an ordinary archive sitting next to a linked one must never
+publish as if the linked one didn't exist), skippable per-root under
+`allow_partial=True` for read-only diagnostics. Nothing is followed,
+recreated, or removed -- an operator who put a real link there must
+resolve it themselves.
+
 ## `env=` is honored consistently within `import_archive()`
 
 `import_archive(env=...)`'s explicit override, once given, is used for
@@ -240,10 +273,12 @@ invocation would.
 
 ## Tests
 
-`tests/test_atlas_knowledge_pipeline_s2a.py` -- 64 tests. Local: Windows
-64/64 (25 skipped: 20 symlink-privilege, 5 `chmod(0o000)` does not
-restrict read access on Windows), Ubuntu (WSL) 64/64 (0 skipped).
-Combined with the storage suite (106, unchanged): 170 total.
+`tests/test_atlas_knowledge_pipeline_s2a.py` -- 70 tests. Local: Windows
+70/70 (30 skipped: 25 symlink-privilege, 5 `chmod(0o000)` does not
+restrict read access on Windows -- the Windows-only junction test runs
+for real, since junctions don't need elevated privilege), Ubuntu (WSL)
+70/70 (1 skipped: junctions are a Windows-only concept). Combined with
+the storage suite (106, unchanged): 176 total.
 
 - archive resolution follows a configured `ATLAS_IMPORT_STORAGE_ROOT`
   entirely outside the ATLAS checkout; the default (unconfigured) root
@@ -289,6 +324,16 @@ Combined with the storage suite (106, unchanged): 170 total.
   a later sibling can't be scanned, proving there is no partial merge; a
   read-only `allow_partial=True` caller still gets a healthy sibling
   root's results even while the broken root is skipped
+- **linked-layout entries, with a real symlink (and, on Windows, a real
+  NTFS junction via `mklink /J`), not a mock**: a symlinked source
+  directory and a symlinked archive directory each independently raise
+  `IncompleteDiscoveryError` rather than being silently omitted; an
+  ordinary archive sitting next to a linked one never publishes as an
+  apparently-complete one-archive list; a symlinked
+  `IMPORT-MANIFEST.json` itself is rejected without its target ever
+  being read; a Windows junction standing in for a source directory is
+  rejected the same way; a catalog refresh blocked by a linked archive
+  leaves the existing catalog document completely unchanged
 - **downstream consumers, end to end, against a relocated archive**:
   persisted import -> `evaluate_archive()` -> `normalize_archive()` ->
   `update_catalog_doc()` -> `validate_catalog()` (asserting a fully
