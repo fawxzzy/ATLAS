@@ -496,34 +496,30 @@ def validate_runtime_placement_payloads(
         elif component.get("intended_placement") in PUBLIC_PLACEMENTS:
             issues.append(_issue("runtime-placement-public-hosting-forbidden", f"{registry_path}#components/{component_id}", "Do-not-deploy component must not be assigned public hosting.", placement=component.get("intended_placement")))
 
-    authority_invariants = registry.get("governance", {}).get("authority_invariants", [])
-    retired_discordos_contract = any(
-        isinstance(value, str) and "DiscordOS is retired provenance-only" in value
-        for value in authority_invariants
-    )
-    if retired_discordos_contract:
-        for component_id in RETIRED_DISCORDOS_COMPONENTS:
-            component = component_index.get(component_id)
-            path = f"{registry_path}#components/{component_id}"
-            if component is None:
-                issues.append(_issue("runtime-placement-retired-discordos", path, "Retired DiscordOS provenance component is missing."))
-                continue
-            availability = component.get("current_availability")
-            if (
-                component.get("intended_placement") != "no_server/on_demand"
-                or component.get("authority_owner") != "ATLAS root governance (retired provenance only)"
-                or not isinstance(availability, dict)
-                or availability.get("state") != "retired_provenance_only"
-                or "retired provenance only" not in str(component.get("lifecycle", "")).lower()
-                or not str(component.get("activation_deployment_gate", "")).lower().startswith("retired provenance only;")
-            ):
-                issues.append(
-                    _issue(
-                        "runtime-placement-retired-discordos",
-                        path,
-                        "Retired DiscordOS components must remain provenance-only with no hosted placement or operational authority.",
-                    )
+    # Component IDs are the immutable retirement boundary. Prose in the payload
+    # is descriptive evidence and must never enable or disable enforcement.
+    for component_id in RETIRED_DISCORDOS_COMPONENTS:
+        component = component_index.get(component_id)
+        path = f"{registry_path}#components/{component_id}"
+        if component is None:
+            issues.append(_issue("runtime-placement-retired-discordos", path, "Retired DiscordOS provenance component is missing."))
+            continue
+        availability = component.get("current_availability")
+        if (
+            component.get("intended_placement") != "no_server/on_demand"
+            or component.get("authority_owner") != "ATLAS root governance (retired provenance only)"
+            or not isinstance(availability, dict)
+            or availability.get("state") != "retired_provenance_only"
+            or "retired provenance only" not in str(component.get("lifecycle", "")).lower()
+            or not str(component.get("activation_deployment_gate", "")).lower().startswith("retired provenance only;")
+        ):
+            issues.append(
+                _issue(
+                    "runtime-placement-retired-discordos",
+                    path,
+                    "Retired DiscordOS components must remain provenance-only with no hosted placement or operational authority.",
                 )
+            )
 
     activation_sequence = registry.get("activation_sequence")
     if activation_sequence != list(ACTIVATION_SEQUENCE):

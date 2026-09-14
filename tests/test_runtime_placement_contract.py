@@ -182,6 +182,19 @@ class RuntimePlacementContractTests(unittest.TestCase):
         issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
         self.assertIn("runtime-placement-retired-discordos", {issue.category for issue in issues})
 
+        mutated_without_prose = copy.deepcopy(registry)
+        mutated_without_prose["governance"]["authority_invariants"] = []
+        component = next(
+            item for item in mutated_without_prose["components"] if item["id"] == "discordos-runtime"
+        )
+        component["intended_placement"] = "hybrid"
+        component["authority_owner"] = "DiscordOS"
+        component["current_availability"]["state"] = "operational"
+        issues = contract.validate_runtime_placement_payloads(
+            mutated_without_prose, lane_registry, marker_book, root=ROOT
+        )
+        self.assertIn("runtime-placement-retired-discordos", {issue.category for issue in issues})
+
     def test_activation_packet_names_must_be_unique(self) -> None:
         registry, lane_registry, marker_book = _payloads()
         mutated = copy.deepcopy(registry)

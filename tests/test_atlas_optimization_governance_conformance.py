@@ -360,6 +360,16 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
             24,
         )
 
+    def validate_with_max_checkpoint_age(self, value: float) -> dict:
+        return validate_conformance(
+            self.root,
+            self.automations,
+            self.ledger_path,
+            self.manifest_path,
+            self.now,
+            value,
+        )
+
     def test_accepts_exact_four_task_topology_and_baseline(self) -> None:
         result = self.validate()
         self.assertTrue(result["valid"], result["errors"])
@@ -726,6 +736,22 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         result = self.validate()
         self.assertFalse(result["valid"])
         self.assertIn("CHECKPOINT_TIMESTAMP_IN_FUTURE", {error["code"] for error in result["errors"]})
+
+    def test_accepts_bounded_checkpoint_age_limit_at_upper_boundary(self) -> None:
+        result = self.validate_with_max_checkpoint_age(168.0)
+        self.assertTrue(result["valid"], result["errors"])
+        self.assertEqual(168.0, result["checkpoint"]["max_age_hours"])
+
+    def test_rejects_nonfinite_nonpositive_and_excessive_checkpoint_age_limits(self) -> None:
+        for value in (float("inf"), float("-inf"), float("nan"), 0.0, -1.0, 168.0001):
+            with self.subTest(value=value):
+                result = self.validate_with_max_checkpoint_age(value)
+                self.assertFalse(result["valid"])
+                self.assertIn(
+                    "CHECKPOINT_MAX_AGE_INVALID",
+                    {error["code"] for error in result["errors"]},
+                )
+                self.assertIsNone(result["checkpoint"]["max_age_hours"])
 
     def test_malformed_checkpoint_timestamp_returns_structured_invalid(self) -> None:
         self._write_integrator_checkpoint(recorded_at="not-a-timestamp")

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import sys
@@ -30,6 +31,7 @@ COMMON_RELEASE_BASELINE_MARKERS = (
     "positive terminal completion from every named hosted reviewer",
 )
 MAX_CHECKPOINT_FUTURE_SKEW_SECONDS = 300
+MAX_CHECKPOINT_AGE_LIMIT_HOURS = 168.0
 
 
 class ConformanceError(ValueError):
@@ -142,6 +144,18 @@ def validate_conformance(
     def check(condition: bool, code: str, detail: str) -> None:
         if not condition:
             errors.append({"code": code, "detail": detail})
+
+    checkpoint_age_limit_valid = (
+        isinstance(max_checkpoint_age_hours, (int, float))
+        and not isinstance(max_checkpoint_age_hours, bool)
+        and math.isfinite(max_checkpoint_age_hours)
+        and 0 < max_checkpoint_age_hours <= MAX_CHECKPOINT_AGE_LIMIT_HOURS
+    )
+    check(
+        checkpoint_age_limit_valid,
+        "CHECKPOINT_MAX_AGE_INVALID",
+        f"max_checkpoint_age_hours must be finite and within (0, {MAX_CHECKPOINT_AGE_LIMIT_HOURS}]",
+    )
 
     ledger = _load_json(ledger_path)
     manifest = _load_json(manifest_path)
@@ -727,11 +741,12 @@ def validate_conformance(
                 f"future_skew_seconds={future_skew_seconds:.4f}",
             )
             checkpoint_age_hours = max(0.0, (now - checkpoint_time).total_seconds() / 3600)
-            check(
-                checkpoint_age_hours <= max_checkpoint_age_hours,
-                "CHECKPOINT_TOO_OLD",
-                f"age_hours={checkpoint_age_hours:.4f}",
-            )
+            if checkpoint_age_limit_valid:
+                check(
+                    checkpoint_age_hours <= max_checkpoint_age_hours,
+                    "CHECKPOINT_TOO_OLD",
+                    f"age_hours={checkpoint_age_hours:.4f}",
+                )
     else:
         check(False, "CHECKPOINT_TIMESTAMP_MISSING", str(thread_id))
 
@@ -867,7 +882,7 @@ def validate_conformance(
             ),
             "recorded_at": recorded_at,
             "age_hours": round(checkpoint_age_hours, 4) if checkpoint_age_hours is not None else None,
-            "max_age_hours": max_checkpoint_age_hours,
+            "max_age_hours": max_checkpoint_age_hours if checkpoint_age_limit_valid else None,
             "contains_latest_receipt": contains_latest_receipt,
         },
         "writer_authority": {

@@ -598,6 +598,18 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertTrue(any("operational route targets retired component" in item for item in errors))
         self.assertTrue(any("endpoint targets retired component" in item for item in errors))
 
+        hostile_kind_manifest = copy.deepcopy(self.manifest)
+        hostile_component = next(
+            item
+            for item in hostile_kind_manifest["components"]
+            if item["component_id"] == "component.discordos"
+        )
+        hostile_component["kind"] = "embedded-owner-service"
+        hostile_component["standing_task"] = True
+        errors = RECOVERY._retired_routing_errors(hostile_kind_manifest, self.registry)
+        self.assertTrue(any("kind must remain retired-project-provenance" in item for item in errors))
+        self.assertTrue(any("retired component must not be a standing task" in item for item in errors))
+
         hostile_registry = copy.deepcopy(self.registry)
         hostile_claim = next(
             item for item in hostile_registry["unbound_runtime_claims"] if item["title"] == "DiscordOS"
@@ -616,6 +628,15 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertIn("authorize pull-request creation for a retired owner", baseline)
         self.assertIn("`owner.fawxzzyweb`", baseline)
         self.assertIn("`platform.supabase-migration`", baseline)
+
+        runbook = (ROOT / "docs/ops/ATLAS-WORKFLOW-RECOVERY-RUNBOOK.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("owner -> DiscordOS -> owner", runbook)
+        self.assertNotIn("DiscordOS sole-writer routing", runbook)
+        self.assertIn("`component.discordos` is never an execution target or owner callback", runbook)
+        self.assertIn("`owner.fawxzzyweb`", runbook)
+        self.assertIn("`platform.supabase-migration`", runbook)
 
     def test_active_workflow_graph_has_no_main_or_inbox_fanout(self) -> None:
         active_role_ids = {item["role_id"] for item in self.manifest["roles"]}

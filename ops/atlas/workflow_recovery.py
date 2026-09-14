@@ -1156,18 +1156,22 @@ def _validate_relative_ref(reference: str, label: str) -> list[str]:
 def _retired_routing_errors(manifest: dict[str, Any], registry: dict[str, Any]) -> list[str]:
     """Reject every operational route to a retired provenance-only component."""
     errors: list[str] = []
-    retired_components = {
+    retired_components = {"component.discordos"} | {
         component["component_id"]
         for component in manifest["components"]
         if component.get("kind") == "retired-project-provenance"
     }
-    if not retired_components:
-        return errors
+    component_index = {
+        component["component_id"]: component for component in manifest["components"]
+    }
 
-    for component in manifest["components"]:
-        component_id = component["component_id"]
-        if component_id not in retired_components:
+    for component_id in sorted(retired_components):
+        component = component_index.get(component_id)
+        if component is None:
+            errors.append(f"{component_id}: retired component declaration is missing")
             continue
+        if component.get("kind") != "retired-project-provenance":
+            errors.append(f"{component_id}: retired component kind must remain retired-project-provenance")
         if component.get("standing_task") is not False:
             errors.append(f"{component_id}: retired component must not be a standing task")
         recovery = component.get("recovery", "").lower()
