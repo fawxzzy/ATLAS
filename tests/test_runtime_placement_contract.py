@@ -160,6 +160,41 @@ class RuntimePlacementContractTests(unittest.TestCase):
         self.assertEqual("accepted", statuses["owner-export-integration"])
         self.assertIsNone(registry["next_owner_side_activation_packet"])
 
+    def test_retired_discordos_components_are_provenance_only(self) -> None:
+        registry, lane_registry, marker_book = _payloads()
+        components = {component["id"]: component for component in registry["components"]}
+        for component_id in contract.RETIRED_DISCORDOS_COMPONENTS:
+            component = components[component_id]
+            self.assertEqual("no_server/on_demand", component["intended_placement"])
+            self.assertEqual(
+                "ATLAS root governance (retired provenance only)",
+                component["authority_owner"],
+            )
+            self.assertEqual("retired_provenance_only", component["current_availability"]["state"])
+            self.assertIn("retired provenance only", component["lifecycle"].lower())
+            self.assertTrue(component["evidence_refs"])
+
+        mutated = copy.deepcopy(registry)
+        component = next(item for item in mutated["components"] if item["id"] == "discordos-runtime")
+        component["intended_placement"] = "hybrid"
+        component["authority_owner"] = "DiscordOS"
+        component["current_availability"]["state"] = "operational"
+        issues = contract.validate_runtime_placement_payloads(mutated, lane_registry, marker_book, root=ROOT)
+        self.assertIn("runtime-placement-retired-discordos", {issue.category for issue in issues})
+
+        mutated_without_prose = copy.deepcopy(registry)
+        mutated_without_prose["governance"]["authority_invariants"] = []
+        component = next(
+            item for item in mutated_without_prose["components"] if item["id"] == "discordos-runtime"
+        )
+        component["intended_placement"] = "hybrid"
+        component["authority_owner"] = "DiscordOS"
+        component["current_availability"]["state"] = "operational"
+        issues = contract.validate_runtime_placement_payloads(
+            mutated_without_prose, lane_registry, marker_book, root=ROOT
+        )
+        self.assertIn("runtime-placement-retired-discordos", {issue.category for issue in issues})
+
     def test_activation_packet_names_must_be_unique(self) -> None:
         registry, lane_registry, marker_book = _payloads()
         mutated = copy.deepcopy(registry)

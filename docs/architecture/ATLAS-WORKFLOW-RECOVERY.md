@@ -2,7 +2,7 @@
 # ATLAS workflow architecture and recovery
 
 Canonical manifest: `docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json`
-Manifest digest: `sha256:96f12d9b4e4f15a5fcbf7a0ed0b6f0197e59544ca638c2eb3e1ed7c259d0a6e6`
+Manifest digest: `sha256:97f8857d04ba095b23133870efe06c18a3fff8c026c928173e772f60faeaaf3a`
 Runtime seed: `docs/registry/ATLAS-WORKFLOW-LIVE-MAPPING.v1.json`
 
 This view is generated from the versioned manifest. Stable logical role IDs are the contract; Codex thread IDs are replaceable runtime epochs refreshed in the live registry.
@@ -42,7 +42,8 @@ These live or historical runtimes used standing-task prose but lack a current du
 | Runtime | Title | Disposition | Canonical target | Health | Recovery action |
 |---|---|---|---|---|---|
 | `019f52d9-7667-72a3-a5f7-9c0613aedd8f` | ATLAS MAIN | `HISTORICAL_PROGRAM_SURFACE` | `UNBOUND` | `HELD` | `HOLD_NO_CREATE` |
-| `019f6d9d-a192-7a51-8d2d-463494c87d3a` | DiscordOS | `EMBEDDED_COORDINATION_RUNTIME` | `component.discordos` | `HELD` | `IGNORE_FOR_ROLE_CREATION` |
+| `019f6d9d-a192-7a51-8d2d-463494c87d3a` | DiscordOS | `HISTORICAL_PROGRAM_SURFACE` | `UNBOUND` | `HELD` | `HOLD_NO_CREATE` |
+| `019f8bc1-2f78-7d62-91f8-cab4abd673d7` | DiscordOS | `HISTORICAL_PROGRAM_SURFACE` | `UNBOUND` | `HELD` | `HOLD_NO_CREATE` |
 | `019f6dad-8e00-7563-ba96-8b7ceae8fdf9` | GitHub Control Plane | `RELATED_PREDECESSOR_CLAIM` | `atlas.release-control-plane` | `HELD` | `HOLD_NO_CREATE` |
 | `019f6dac-afc1-7551-a47b-37e2dda95f35` | Atlas Control | `HISTORICAL_PROGRAM_SURFACE` | `UNBOUND` | `HELD` | `HOLD_NO_CREATE` |
 | `019f6dac-9488-7923-b596-e7f6bd66dc22` | Atlas Clean & Re-sync | `HISTORICAL_PROGRAM_SURFACE` | `UNBOUND` | `HELD` | `HOLD_NO_CREATE` |
@@ -132,8 +133,8 @@ Every edge below is a logical contract. The sender resolves the current runtime 
 | `owner` | `atlas.workflow-operations` | `owner.fitness` | Only an exact already-authorized Fitness packet may be scheduled. |
 | `owner` | `atlas.workflow-operations` | `owner.mazer` | Only an exact already-authorized Mazer packet may be scheduled. |
 | `owner` | `atlas.workflow-operations` | `owner.socials-os` | Only an exact already-authorized Socials OS packet may be scheduled. |
-| `owner` | `atlas.workflow-operations` | `owner.fawxzzyweb` | Only an exact already-authorized FawxzzyWeb packet may be scheduled. |
-| `control` | `atlas.workflow-operations` | `platform.supabase-migration` | Only an exact already-authorized dependency-bounded platform packet may be scheduled; no provider authority is inferred. |
+| `owner` | `atlas.workflow-operations` | `owner.fawxzzyweb` | Only an exact already-authorized FawxzzyWeb packet may be scheduled. Future project-board product work routes here only after its exact owner contract is proven; no implementation is inferred. |
+| `control` | `atlas.workflow-operations` | `platform.supabase-migration` | Only an exact already-authorized dependency-bounded platform packet may be scheduled. Future master-data work routes here only after its exact data contract is proven; no provider authority or implementation is inferred. |
 | `proof` | `owner.fitness` | `atlas.release-control-plane` | Published Fitness work hands lifecycle monitoring to the control plane. |
 | `proof` | `owner.mazer` | `atlas.release-control-plane` | Published Mazer work hands lifecycle monitoring to the control plane. |
 | `proof` | `owner.socials-os` | `atlas.release-control-plane` | Published Socials work hands lifecycle monitoring to the control plane. |
@@ -147,7 +148,6 @@ Every edge below is a logical contract. The sender resolves the current runtime 
 | `data_event` | `fawxzzy.questions` | `ai.questions` | Unresolved omissions become bounded research envelopes. |
 | `proof` | `ai.questions` | `fawxzzy.questions` | Material research findings return to the requesting Questions owner. |
 | `recovery` | `atlas.workflow-architect` | `atlas.workflow-operations` | Architect supplies a source-proven recovery contract; 01 Ops may reconcile it only under exact existing authority. |
-| `data_event` | `owner.socials-os` | `component.discordos` | Owners emit exact owner exports or BoardEvents; DiscordOS is sole live board writer. |
 | `recovery` | `component.heartbeat-operations` | `atlas.workflow-operations` | Interruption-recovery wake only after separately authorized runtime rebind; unchanged runs are silent. |
 | `recovery` | `component.heartbeat-release` | `atlas.release-control-plane` | Read-only bounded watch; unchanged runs are silent. |
 | `data_event` | `component.service-bus` | `atlas.workflow-operations` | Durable transport exposes exact pending-delivery state for mechanical reconciliation without routine relay. |
@@ -160,7 +160,7 @@ Every edge below is a logical contract. The sender resolves the current runtime 
 | Component | Kind | Standing task? | Recovery rule |
 |---|---|---|---|
 | `component.stack-operator` | `operator-command-surface` | `false` | Restore the registered _stack repository and validate its operator commands before adopting this root recovery command as a wrapper. |
-| `component.discordos` | `embedded-owner-service` | `false` | Recover from owner repository contracts and service state; an optional coordination runtime does not make DiscordOS a required standing conversation. |
+| `component.discordos` | `retired-project-provenance` | `false` | Never select, bind, create, unarchive, activate, schedule, wake, dispatch, or use DiscordOS for pull-request creation. Route future project-board product work to owner.fawxzzyweb and master-data work to platform.supabase-migration only after their exact contracts are proven. |
 | `component.foundation` | `embedded-read-model` | `false` | Rebuild from accepted receipts and canonical registries; never infer completion. |
 | `component.lifeline` | `embedded-supervisor` | `false` | Restore supervisor configuration and validate wake targets without dispatching duplicate work. |
 | `component.playbook-observer` | `embedded-observer` | `false` | Resume read-only observation after root and owner registries are healthy. |

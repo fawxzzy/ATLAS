@@ -259,7 +259,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
             set(item["role_id"] for item in self.manifest["roles"]),
             set(item["role_id"] for item in self.registry["bindings"]),
         )
-        self.assertEqual(9, result["unbound_runtime_claims"])
+        self.assertEqual(10, result["unbound_runtime_claims"])
         self.assertEqual(3, result["manual_questions"])
         self.assertEqual(3, result["answered_manual_questions"])
         self.assertEqual("ARCHIVED", result["bootstrap_source_lifecycle"])
@@ -517,6 +517,126 @@ class WorkflowRecoveryTests(unittest.TestCase):
         )
         self.assertEqual(0, adapter.mutations)
         self.assertFalse(any(item.role_marker == "atlas.main" for item in adapter.threads))
+
+    def test_retired_discordos_is_provenance_only_and_cannot_reactivate(self) -> None:
+        component = next(
+            item
+            for item in self.manifest["components"]
+            if item["component_id"] == "component.discordos"
+        )
+        self.assertEqual("retired-project-provenance", component["kind"])
+        self.assertFalse(component["standing_task"])
+        self.assertEqual([], RECOVERY._retired_routing_errors(self.manifest, self.registry))
+
+        claims = [
+            item
+            for item in self.registry["unbound_runtime_claims"]
+            if item["title"] == "DiscordOS"
+        ]
+        self.assertEqual(2, len(claims))
+        for claim in claims:
+            self.assertIn("retired_component:component.discordos", claim["evidence"])
+            self.assertEqual("HISTORICAL_PROGRAM_SURFACE", claim["disposition"])
+            self.assertIsNone(claim["canonical_target_id"])
+            self.assertEqual("HOLD_NO_CREATE", claim["recovery_action"])
+            self.assertFalse(claim["standing_contract_claim"])
+            self.assertFalse(claim["lifecycle_action_authorized"])
+        self.assertTrue(
+            any("fawxzzy/DiscordOS#110 closed without merge" in claim["evidence"][-1] for claim in claims)
+        )
+
+        operating_model = (ROOT / "docs/atlas-book/03-operating-model.md").read_text(encoding="utf-8")
+        runtime_placement = (ROOT / "docs/atlas-book/16-runtime-placement.md").read_text(encoding="utf-8")
+        current_projection = operating_model + runtime_placement
+        self.assertIn("owner.fawxzzyweb", current_projection)
+        self.assertIn("platform.supabase-migration", current_projection)
+        self.assertIn("retired read-only provenance", operating_model)
+        self.assertIn("Retired provenance only", runtime_placement)
+        self.assertNotIn("DiscordOS is the hosted API/writer", current_projection)
+        self.assertNotIn("DiscordOS is the hosted Discord API and logical writer", current_projection)
+        self.assertNotIn("DiscordOS is the one logical board/publication/readback writer", current_projection)
+
+        plan, adapter = self.plan("healthy.json", mode="apply")
+        self.assertTrue(
+            {claim["runtime_id"] for claim in claims}.isdisjoint(
+                {item["runtime_id"] for item in plan["roles"]}
+            )
+        )
+        self.assertFalse(
+            any(
+                "component.discordos" in {
+                    *role["dependencies"],
+                    *role["upstream_routes"],
+                    *role["downstream_routes"],
+                    role["owner"],
+                }
+                for role in self.manifest["roles"]
+            )
+        )
+        self.assertFalse(
+            any(
+                "component.discordos" in {edge["from"], edge["to"]}
+                for edge in self.manifest["edges"]
+            )
+        )
+        self.assertEqual([], RECOVERY.apply_plan(plan, self.manifest, self.registry, adapter))
+        self.assertEqual(0, adapter.mutations)
+
+        hostile_manifest = copy.deepcopy(self.manifest)
+        hostile_manifest["roles"][0]["dependencies"].append("component.discordos")
+        hostile_manifest["edges"].append(
+            {
+                "edge_id": "owner.operations.retired-discordos",
+                "type": "owner",
+                "from": "atlas.workflow-operations",
+                "to": "component.discordos",
+                "contract": "Historical evidence attempts to reactivate a retired owner.",
+                "runtime_binding": "resolve-by-logical-role-at-send-time",
+            }
+        )
+        errors = RECOVERY._retired_routing_errors(hostile_manifest, self.registry)
+        self.assertTrue(any("operational route targets retired component" in item for item in errors))
+        self.assertTrue(any("endpoint targets retired component" in item for item in errors))
+
+        hostile_kind_manifest = copy.deepcopy(self.manifest)
+        hostile_component = next(
+            item
+            for item in hostile_kind_manifest["components"]
+            if item["component_id"] == "component.discordos"
+        )
+        hostile_component["kind"] = "embedded-owner-service"
+        hostile_component["standing_task"] = True
+        errors = RECOVERY._retired_routing_errors(hostile_kind_manifest, self.registry)
+        self.assertTrue(any("kind must remain retired-project-provenance" in item for item in errors))
+        self.assertTrue(any("retired component must not be a standing task" in item for item in errors))
+
+        hostile_registry = copy.deepcopy(self.registry)
+        hostile_claim = next(
+            item for item in hostile_registry["unbound_runtime_claims"] if item["title"] == "DiscordOS"
+        )
+        hostile_claim["evidence"].remove("retired_component:component.discordos")
+        hostile_claim["standing_contract_claim"] = True
+        errors = RECOVERY._retired_routing_errors(self.manifest, hostile_registry)
+        self.assertTrue(any("must include retired_component:component.discordos" in item for item in errors))
+        self.assertTrue(any("standing_contract_claim must be False" in item for item in errors))
+
+        baseline = (ROOT / "docs/prompts/atlas-workflow/STANDING-BASELINE.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Historical cards,\nbranches, pull requests, receipts", baseline)
+        self.assertIn("cannot\nselect, bind, create, unarchive, activate, schedule, wake, dispatch", baseline)
+        self.assertIn("authorize pull-request creation for a retired owner", baseline)
+        self.assertIn("`owner.fawxzzyweb`", baseline)
+        self.assertIn("`platform.supabase-migration`", baseline)
+
+        runbook = (ROOT / "docs/ops/ATLAS-WORKFLOW-RECOVERY-RUNBOOK.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("owner -> DiscordOS -> owner", runbook)
+        self.assertNotIn("DiscordOS sole-writer routing", runbook)
+        self.assertIn("`component.discordos` is never an execution target or owner callback", runbook)
+        self.assertIn("`owner.fawxzzyweb`", runbook)
+        self.assertIn("`platform.supabase-migration`", runbook)
 
     def test_active_workflow_graph_has_no_main_or_inbox_fanout(self) -> None:
         active_role_ids = {item["role_id"] for item in self.manifest["roles"]}

@@ -173,6 +173,22 @@ def _validate_checkpoint_shape(checkpoint: Any) -> dict[str, Any]:
     return payload
 
 
+def validate_checkpoint(checkpoint: Any) -> dict[str, Any]:
+    """Validate a canonical checkpoint envelope and return its trusted payload."""
+
+    _assert_no_sensitive_material(checkpoint)
+    payload = _validate_checkpoint_shape(checkpoint)
+    expected_digest = _digest(payload)
+    if checkpoint.get("payload_digest") != expected_digest:
+        raise ThreadContextError("Thread context payload digest mismatch")
+    digest_match = PAYLOAD_DIGEST.fullmatch(expected_digest)
+    if digest_match is None:
+        raise ThreadContextError("Malformed thread context checkpoint")
+    if checkpoint.get("checkpoint_id") != f"threadctx_{digest_match.group(1)}":
+        raise ThreadContextError("Thread context checkpoint identity mismatch")
+    return payload
+
+
 def _safe_path_component(value: str, field: str) -> str:
     windows_stem = value.split(".", 1)[0].upper()
     if (
@@ -316,11 +332,8 @@ def persist_checkpoint(
     output_root: Path | None = None,
 ) -> dict[str, Any]:
     root = (output_root or DEFAULT_OUTPUT_ROOT).resolve()
-    _assert_no_sensitive_material(checkpoint)
-    payload = _validate_checkpoint_shape(checkpoint)
-    expected_digest = _digest(payload)
-    if checkpoint.get("payload_digest") != expected_digest:
-        raise ThreadContextError("Thread context payload digest mismatch")
+    payload = validate_checkpoint(checkpoint)
+    expected_digest = checkpoint["payload_digest"]
     digest_match = PAYLOAD_DIGEST.fullmatch(expected_digest)
     if digest_match is None:
         raise ThreadContextError("Malformed thread context checkpoint")

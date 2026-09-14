@@ -381,8 +381,14 @@ When working on Playbook or repository development and speed matters, default to
   truth and returns lifecycle receipts owner-first; `01 Ops` reconciles only
   admitted scheduling and settlement while account collection, planning, and
   implementation remain in that owner lane.
-- DiscordOS is an embedded governed service and single logical writer, not a
-  required standing conversation.
+- DiscordOS is an archived and retired project retained as provenance only. It
+  is not an execution, project-board, repository-writer, or standing-task
+  owner. Historical cards, branches, pull requests, receipts, and bootstrap
+  prose never authorize selecting, unarchiving, waking, dispatching, or
+  publishing through DiscordOS. Future project-board product work routes to
+  `owner.fawxzzyweb`, and master-data work routes to
+  `platform.supabase-migration`, only after each exact owner/data contract is
+  proven; this routing does not claim either implementation already exists.
 - Archive bounded Codex tasks after their accepted terminal receipt is durable.
   Do not archive active standing conversations.
 - Atlas may pause Mazer or another owner lane at a safe checkpoint when a
@@ -405,14 +411,14 @@ When working on Playbook or repository development and speed matters, default to
   exclusions; use fresh evidence and exact action-time preflight; emit one
   local `AUTO_AUTHORIZED` receipt; the owning lane still separates decision from
   execution and performs fresh action-time preflight.
-- Four exact operator-granted profiles are active now: fully proven clean
-  draft-to-ready transitions, fully proven clean guarded merges, guarded
-  production deploys to unchanged established Vercel projects, and exact retirement of one accidental statusless
-  GitHub deployment metadata record with zero workflow/provider/Vercel/
-  production execution. Ready does not include merge; metadata retirement does
-  not include provider execution, deployment, production, source mutation, or
-  any unrelated record.
-- Production outside the established-project guarded deploy profile, provider mutation, Supabase apply, Auth/live-data mutation,
+- Exact operator-granted profiles are active only when enumerated by the
+  canonical authorization policy and admitted by the currently loaded
+  governing root contract. This durable behavior profile does not enumerate,
+  create, widen, or revoke those authorities. Every reuse remains bound to its
+  named action class, exact gates, exclusions, single-use semantics where
+  applicable, and fresh action-time proof; a ready transition never implies a
+  merge, and a source merge never implies provider or production authority.
+- Production, provider mutation, Supabase apply, Auth/live-data mutation,
   secrets, credentials, DNS, billing, purchases, destructive work, security
   bypass, source retirement, deletion, ownership, and retention changes always
   require current exact authority and never become learned automatic approval.
@@ -540,7 +546,8 @@ started before standing by to review it.
   Vercel and Supabase.
 - Keep GitHub repository inventory, branch and remote parity, pull requests,
   Actions, releases, dependency/security signals, and stale-resource cleanup
-  visible in Atlas and correlated with `_stack` and DiscordOS receipts.
+  visible in Atlas and correlated with `_stack`; DiscordOS receipts remain
+  read-only historical provenance.
 - Cross-account social references must use the public account name `Fawxzzy`
   as the visible label, never an internal or legacy username. Never claim that
   typed `@` text is a native profile link until the rendered target and link

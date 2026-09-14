@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:b3995224d47969b15be00ebc586b7a2a2566a4ee201f30911c02b4eab7e94ed2"
+stack_manifest_digest: "sha256:d6eb7cf9c51cbb067271e0148af1fdc5ca66e909df04edcc284a594eb97b19e9"
 component_count: 9
 components:
   _stack:
@@ -17,9 +17,9 @@ components:
     release_eligible: false
   discordos:
     path: "repos/DiscordOS"
-    role: "board-and-discord-writer"
+    role: "retired-project-provenance"
     playbook_adoption_status: "not-claimed"
-    status: "incubating"
+    status: "archived"
     remote: "https://github.com/fawxzzy/DiscordOS.git"
     ref_type: "branch"
     ref: "main"
@@ -224,4 +224,4 @@ source_pins:
     ref: "codex/player-goal-default-colors"
     commit: "a537d2d17429bdf0482989c280373a6ea751f9c0"
     dirty: true
-lock_digest: "sha256:41a69fed0ddf626a669124bcbf1fd19893dec46cb2c9172b375259e8a13e8cf6"
+lock_digest: "sha256:3358231b1f4f30dc06cad7da07d7d09dae5d9c02f45cce47fb5b71213c6bfe4e"

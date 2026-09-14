@@ -1,0 +1,901 @@
+from __future__ import annotations
+
+import json
+import hashlib
+import tempfile
+import unittest
+from datetime import datetime, timezone
+from pathlib import Path
+
+from ops.atlas.persist_thread_context import build_checkpoint
+from ops.atlas.validate_optimization_governance_conformance import validate_conformance
+
+
+class OptimizationGovernanceConformanceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.root = Path(self.temporary.name)
+        self.source_root = Path(__file__).resolve().parents[1]
+        self.automations = self.root / "automations"
+        self.now = datetime(2026, 8, 27, 22, 0, tzinfo=timezone.utc)
+        self.baseline_ref = "docs/prompts/atlas-workflow/STANDING-BASELINE.md"
+        (self.root / self.baseline_ref).parent.mkdir(parents=True)
+        (self.root / self.baseline_ref).write_text(
+            "single non-product-blocking failure observation remains one canonical record\n"
+            "ephemeral reviewer and bounded helper identities form an auxiliary denominator\n"
+            "ephemeral-only identity change must not trigger a material handoff\n"
+            "canonicalize strict same-origin URL paths before exact comparison\n"
+            "validate the immutable expected workspace before Vercel\n"
+            "a diagnostic must never implicitly link or create a provider project\n"
+            "positive terminal completion from every named hosted reviewer\n",
+            encoding="utf-8",
+        )
+        self.optimization_governance_ref = "docs/registry/ATLAS-WORKFLOW-OPTIMIZATION-GOVERNANCE.v1.json"
+        self.common_control_refs = [
+            "docs/memory/decisions/decision-atlas-common-release-safety-controls-r001.json",
+            "ops/atlas/release_safety_controls.py",
+            "tests/test_atlas_release_safety_controls.py",
+        ]
+        self.optimization_governance = {
+            "anti_churn": {
+                "single_observation_failure_gate": {
+                    "canonical_observation_only": True,
+                    "default_state": "recorded-no-fanout-no-promotion-no-implementation",
+                    "escalation_any_of": ["matching recurrence", "product blocking", "bounded cause"],
+                },
+                "census_identity_classes": {
+                    "material_denominator": "standing and user-visible task identities",
+                    "auxiliary_denominator": "ephemeral reviewer and bounded helper identities",
+                    "ephemeral_only_material_delta_handoff": False,
+                },
+                "avoided_amplification_measurement": {
+                    "observed_lower_bound": {
+                        "material_downstream_wakes_or_handoffs": 2,
+                        "downstream_receipts_or_adoptions": 3,
+                    }
+                },
+            },
+            "common_release_safety_controls": {
+                "decision_id": "ACCEPT_BOUNDED_COMMON_CONTROL_R001",
+                "status": "INSTALLED",
+                "local_installation_state": "installed-and-verified-in-canonical-dirty-root",
+                "publication_state": "current-main-candidate-unmerged",
+                "engineering_memory_ref": self.common_control_refs[0],
+                "engineering_memory_seed_ids": [
+                    "seed.pc024.rule",
+                    "seed.fa027.failure",
+                    "seed.pc025.rule",
+                    "seed.fa028.failure",
+                    "seed.hosted-review-quiescence.rule",
+                    "seed.hosted-review-merge-race.failure",
+                ],
+                "implementation_ref": self.common_control_refs[1],
+                "focused_test_ref": self.common_control_refs[2],
+                "pc024": {"status": "INSTALLED"},
+                "pc025": {"status": "INSTALLED", "provider_effects": 0},
+                "hosted_review_quiescence": {
+                    "status": "INSTALLED_LOCAL_PUBLICATION_HELD",
+                    "provider_effects": 0,
+                    "publication_state": "current-main-candidate-unmerged",
+                    "maximum_observation_age_seconds": 60,
+                    "absolute_freshness_ceiling_seconds": 300,
+                },
+            },
+        }
+        optimization_governance_path = self.root / self.optimization_governance_ref
+        optimization_governance_path.parent.mkdir(parents=True, exist_ok=True)
+        optimization_governance_path.write_text(json.dumps(self.optimization_governance), encoding="utf-8")
+        for ref in self.common_control_refs:
+            path = self.root / ref
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("{}\n", encoding="utf-8")
+
+        self.memory_refs = [
+            "docs/registry/ATLAS-ENGINEERING-MEMORY-POLICY.v1.json",
+            "ops/atlas/engineering_memory_gate.mjs",
+        ]
+        self.seam_refs = [
+            "packages/atlas-contracts/schemas/atlas.job-envelope.v2.schema.json",
+            "packages/atlas-contracts/schemas/atlas.execution-receipt.v2.schema.json",
+        ]
+        for ref in self.memory_refs:
+            path = self.root / ref
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("{}\n", encoding="utf-8")
+        for ref in self.seam_refs:
+            path = self.root / ref
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes((self.source_root / ref).read_bytes())
+        (self.root / self.memory_refs[0]).write_text(
+            json.dumps(
+                {
+                    "knowledge_seeds": [
+                        {"id": seed_id, "status": "accepted-atlas-root", "playbook_promotion": "installed-common-control"}
+                        for seed_id in self.optimization_governance["common_release_safety_controls"]["engineering_memory_seed_ids"]
+                    ]
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        self.manifest_path = self.root / "manifest.json"
+        self.manifest = {
+            "roles": [
+                {"role_id": "role.one", "prompt_template": {"fragments": [self.baseline_ref]}},
+                {"role_id": "role.two", "prompt_template": {"fragments": [self.baseline_ref]}},
+            ]
+        }
+        self.manifest_path.write_text(json.dumps(self.manifest), encoding="utf-8")
+
+        self.receipt_ref = "runtime/successor/execution-receipt.json"
+        receipt_path = self.root / self.receipt_ref
+        receipt_path.parent.mkdir(parents=True)
+        receipt_fixture = self.source_root / "packages/atlas-contracts/fixtures/valid/execution-receipt.v2.json"
+        job_fixture = self.source_root / "packages/atlas-contracts/fixtures/valid/job-envelope.v2.json"
+        receipt_path.write_bytes(receipt_fixture.read_bytes())
+        receipt_path.with_name("job-envelope.json").write_bytes(job_fixture.read_bytes())
+        checkpoint_path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
+        checkpoint_path.parent.mkdir(parents=True)
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T21:30:00Z")
+
+        entries = [
+            ("integrator", "Integrator", "thread-integrator", 60, "scope.integrator"),
+            ("census", "Census", "thread-census", 120, "scope.census"),
+            ("failure", "Failure", "thread-failure", 90, "scope.failure"),
+            ("master", "Master", "thread-master", 120, "scope.master"),
+        ]
+        for automation_id, name, thread_id, cadence, _scope in entries:
+            path = self.automations / automation_id / "automation.toml"
+            path.parent.mkdir(parents=True)
+            if cadence % 60 == 0:
+                rrule = f"FREQ=HOURLY;INTERVAL={cadence // 60}"
+            else:
+                rrule = f"FREQ=MINUTELY;INTERVAL={cadence}"
+            path.write_text(
+                "\n".join(
+                    [
+                        f'id = "{automation_id}"',
+                        'kind = "heartbeat"',
+                        f'name = "{name}"',
+                        'prompt = "Do not create any additional task."',
+                        'status = "ACTIVE"',
+                        f'rrule = "{rrule}"',
+                        f'target_thread_id = "{thread_id}"',
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+        self.status_thread_id = "thread-status"
+        self.status_automation_id = "status-refresh"
+        status_automation_path = self.automations / self.status_automation_id / "automation.toml"
+        status_automation_path.parent.mkdir(parents=True)
+        status_automation_path.write_text(
+            "\n".join(
+                [
+                    f'id = "{self.status_automation_id}"',
+                    'kind = "heartbeat"',
+                    'name = "Status Refresh"',
+                    'prompt = "Maintain the single read-only human ATLAS dashboard. Use direct material handoffs as the primary trigger. First perform a cheap identity gate; if none changed, stop without task-listing calls, full checkpoint reads, projection rewrites, or a new checkpoint. Do not dispatch work."',
+                    'status = "ACTIVE"',
+                    'rrule = "FREQ=MINUTELY;INTERVAL=30"',
+                    f'target_thread_id = "{self.status_thread_id}"',
+                ]
+            ),
+            encoding="utf-8",
+        )
+        self.questions_automation_id = "questions"
+        questions_path = self.automations / self.questions_automation_id / "automation.toml"
+        questions_path.parent.mkdir(parents=True)
+        questions_path.write_text(
+            "\n".join(
+                [
+                    f'id = "{self.questions_automation_id}"',
+                    'kind = "heartbeat"',
+                    'name = "Questions"',
+                    'prompt = "Questions is not a scheduler, product owner, status renderer, verifier, or duplicate. First perform a cheap delta gate only and do not call task-listing tools on no delta. Route one compact delta-only message to 00 ATLAS Status when its projection is stale."',
+                    'status = "ACTIVE"',
+                    'rrule = "FREQ=HOURLY;INTERVAL=1"',
+                    'target_thread_id = "thread-questions"',
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        status_root = self.root / "runtime/atlas/status"
+        status_root.mkdir(parents=True)
+        self.status_json_ref = "runtime/atlas/status/active-task-status.json"
+        self.status_markdown_ref = "runtime/atlas/status/active-task-status.md"
+        (self.root / self.status_json_ref).write_text("{}\n", encoding="utf-8")
+        (self.root / self.status_markdown_ref).write_text("status\n", encoding="utf-8")
+        self.status_json_sha = "sha256:" + hashlib.sha256((self.root / self.status_json_ref).read_bytes()).hexdigest()
+        self.status_markdown_sha = "sha256:" + hashlib.sha256((self.root / self.status_markdown_ref).read_bytes()).hexdigest()
+        self.status_checkpoint_ref = f"runtime/atlas/thread-context/{self.status_thread_id}/latest.json"
+        status_checkpoint_path = self.root / self.status_checkpoint_ref
+        status_checkpoint_path.parent.mkdir(parents=True)
+        self._write_status_checkpoint()
+
+        def topology_entry(values: tuple[str, str, str, int, str]) -> dict:
+            automation_id, name, thread_id, cadence, scope = values
+            return {
+                "title": name,
+                "automation_name": name,
+                "thread_id": thread_id,
+                "automation_id": automation_id,
+                "cadence_minutes": cadence,
+                "schedule_status": "ACTIVE",
+                "writer_scope": scope,
+            }
+
+        self.ledger_path = self.root / "ledger.json"
+        self.ledger = {
+            "worker_topology": {
+                "program_task_lock": {
+                    "task_count": 4,
+                    "additional_program_tasks_permitted": False,
+                },
+                "integrator": topology_entry(entries[0]),
+                "bounded_workers": [topology_entry(entry) for entry in entries[1:]],
+            },
+            "operator_visibility_topology": {
+                "task_count": 1,
+                "excluded_from_learning_program": True,
+                "thread_id": self.status_thread_id,
+                "automation": {
+                    "automation_id": self.status_automation_id,
+                    "automation_name": "Status Refresh",
+                    "schedule_status": "ACTIVE",
+                    "cadence_minutes": 30,
+                    "toml_sha256": "sha256:" + hashlib.sha256(status_automation_path.read_bytes()).hexdigest(),
+                    "identity_first_delta_gate": True,
+                },
+                "scope": {
+                    "read_only_projection": True,
+                    "dispatch_allowed": False,
+                    "approval_evaluation_allowed": False,
+                    "state_mutation_allowed": False,
+                },
+                "projection": {
+                    "json_ref": self.status_json_ref,
+                    "json_sha256": self.status_json_sha,
+                    "markdown_ref": self.status_markdown_ref,
+                    "markdown_sha256": self.status_markdown_sha,
+                },
+                "checkpoint": {"ref": self.status_checkpoint_ref},
+                "questions_consumer": {
+                    "automation_id": self.questions_automation_id,
+                    "thread_id": "thread-questions",
+                    "schedule_status": "ACTIVE",
+                    "cadence_minutes": 60,
+                    "toml_sha256": "sha256:" + hashlib.sha256(questions_path.read_bytes()).hexdigest(),
+                    "identity_first_delta_gate": True,
+                    "routes_compact_material_delta_to_status": True,
+                },
+            },
+            "automation": {"latest_active_successor_ref": self.receipt_ref},
+            "active_task_governance_conformance": {
+                "manifest_role_denominator": 2,
+                "engineering_memory_gate_refs": self.memory_refs,
+                "job_receipt_seam_refs": self.seam_refs,
+                "authority_state": {
+                    "product_provider_effects_allowed": False,
+                    "decision_memory_repair_owned_elsewhere": True,
+                },
+                "unknowns": [
+                    {
+                        "status": "UNKNOWN",
+                        "wake_condition": "EXACT_EXTERNAL_READBACK",
+                    }
+                ],
+            },
+            "source_coverage": {
+                "cross_source_tasks_discovered": 10,
+                "metadata_indexed": 9,
+                "inaccessible": 1,
+                "content_reviewed_tasks": 2,
+                "remaining_content_review_tasks": 7,
+                "local_claude_files_pending_metadata_normalization": 3,
+                "vendor_import_files_pending_format_classification": 4,
+                "coverage_claim": "partial-denominator-backed",
+            },
+        }
+        self._write_ledger()
+
+    def tearDown(self) -> None:
+        self.temporary.cleanup()
+
+    def _write_ledger(self) -> None:
+        self.ledger_path.write_text(json.dumps(self.ledger), encoding="utf-8")
+
+    def _write_integrator_checkpoint(
+        self,
+        *,
+        recorded_at: str,
+        receipts: list[str] | None = None,
+        thread_id: str = "thread-integrator",
+        role_id: str = "scope.integrator",
+    ) -> None:
+        checkpoint = build_checkpoint(
+            thread_id=thread_id,
+            role_id=role_id,
+            title="Integrator",
+            state="ACTIVE",
+            summary="Fixture checkpoint",
+            recorded_at=recorded_at,
+            receipts=[self.receipt_ref] if receipts is None else receipts,
+        )
+        path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
+        path.write_text(json.dumps(checkpoint), encoding="utf-8")
+
+    def _write_status_checkpoint(
+        self,
+        *,
+        receipts: list[str] | None = None,
+        thread_id: str | None = None,
+        role_id: str = "atlas.status-projection",
+    ) -> None:
+        checkpoint = build_checkpoint(
+            thread_id=thread_id or self.status_thread_id,
+            role_id=role_id,
+            title="Status Refresh",
+            state="ACTIVE",
+            summary="Fixture status checkpoint",
+            recorded_at="2026-08-27T21:30:00Z",
+            receipts=receipts
+            or [
+                f"{self.status_json_ref}#sha256={self.status_json_sha.removeprefix('sha256:')}",
+                f"{self.status_markdown_ref}#sha256={self.status_markdown_sha.removeprefix('sha256:')}",
+            ],
+        )
+        path = self.root / self.status_checkpoint_ref
+        path.write_text(json.dumps(checkpoint), encoding="utf-8")
+
+    def validate(self) -> dict:
+        return validate_conformance(
+            self.root,
+            self.automations,
+            self.ledger_path,
+            self.manifest_path,
+            self.now,
+            24,
+        )
+
+    def validate_with_max_checkpoint_age(self, value: float) -> dict:
+        return validate_conformance(
+            self.root,
+            self.automations,
+            self.ledger_path,
+            self.manifest_path,
+            self.now,
+            value,
+        )
+
+    def test_accepts_exact_four_task_topology_and_baseline(self) -> None:
+        result = self.validate()
+        self.assertTrue(result["valid"], result["errors"])
+        self.assertEqual(4, result["automation_topology"]["active"])
+        self.assertEqual(1, result["operator_visibility"]["task_count"])
+        self.assertTrue(result["operator_visibility"]["excluded_from_learning_program"])
+        self.assertEqual(2, result["bootstrap_baseline"]["roles_with_baseline"])
+        self.assertEqual(3, result["anti_churn"]["baseline_markers_present"])
+        self.assertEqual("INSTALLED", result["common_release_safety_controls"]["status"])
+        self.assertEqual(
+            "current-main-candidate-unmerged",
+            result["common_release_safety_controls"]["publication_state"],
+        )
+        self.assertEqual(3, result["common_release_safety_controls"]["present_artifact_count"])
+        self.assertEqual(6, result["common_release_safety_controls"]["engineering_memory_seed_count"])
+        self.assertEqual(
+            "INSTALLED_LOCAL_PUBLICATION_HELD",
+            result["common_release_safety_controls"]["hosted_review_quiescence_status"],
+        )
+        self.assertEqual(
+            "current-main-candidate-unmerged",
+            result["common_release_safety_controls"]["hosted_review_quiescence_publication_state"],
+        )
+        self.assertEqual(
+            60,
+            result["common_release_safety_controls"][
+                "hosted_review_quiescence_maximum_observation_age_seconds"
+            ],
+        )
+
+    def test_current_atlas_book_keeps_retired_task_identities_provenance_only(self) -> None:
+        operating_model = (self.source_root / "docs/atlas-book/03-operating-model.md").read_text(encoding="utf-8")
+        runtime_placement = (self.source_root / "docs/atlas-book/16-runtime-placement.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("Discord consumes proof only after that proof exists", operating_model)
+        self.assertNotIn("`00 Authorization` handles genuine operator authority", operating_model)
+        self.assertNotIn("`01 Ops` is the mechanical reconciliation conversation", operating_model)
+        self.assertIn("Authorization governance is embedded in the task that owns the work", operating_model)
+        self.assertIn("Historical DiscordOS interaction-first reliability provenance", runtime_placement)
+
+    def test_authoritative_lane_registry_keeps_discordos_provenance_only(self) -> None:
+        registry = json.loads(
+            (self.source_root / "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        entries = [*registry["lanes"], *registry["backlog_candidates"]]
+        retired_ids = {
+            "lane-discordos-single-writer",
+            "lane-discordos-github-projections",
+            "lane-discordos-command-surface-convergence",
+        }
+        by_id = {entry["id"]: entry for entry in entries}
+        for lane_id in retired_ids:
+            self.assertEqual("retired-provenance-only", by_id[lane_id]["status"])
+            self.assertEqual("atlas-root-governance-provenance-only", by_id[lane_id]["owner"])
+        for entry in entries:
+            if entry.get("status") != "candidate":
+                continue
+            self.assertNotEqual("DiscordOS", entry.get("owner"))
+            self.assertTrue(retired_ids.isdisjoint(entry.get("dependencies", [])), entry["id"])
+
+    def test_fails_when_program_tasks_share_one_thread_identity(self) -> None:
+        integrator_thread = self.ledger["worker_topology"]["integrator"]["thread_id"]
+        self.ledger["worker_topology"]["bounded_workers"][0]["thread_id"] = integrator_thread
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("PROGRAM_TASK_IDENTITY_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_wrong_type_topology_ids_return_structured_invalid(self) -> None:
+        cases = (
+            ("automation_id", ["not", "hashable"], "AUTOMATION_IDENTITY_DRIFT"),
+            ("thread_id", {"not": "hashable"}, "PROGRAM_TASK_IDENTITY_DRIFT"),
+        )
+        for field, value, expected_code in cases:
+            with self.subTest(field=field):
+                original = self.ledger["worker_topology"]["integrator"][field]
+                self.ledger["worker_topology"]["integrator"][field] = value
+                self._write_ledger()
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn(expected_code, {error["code"] for error in result["errors"]})
+                self.ledger["worker_topology"]["integrator"][field] = original
+
+    def test_unhashable_writer_scope_returns_structured_invalid(self) -> None:
+        for value in (["not", "hashable"], {"not": "hashable"}):
+            with self.subTest(value=value):
+                original = self.ledger["worker_topology"]["integrator"]["writer_scope"]
+                self.ledger["worker_topology"]["integrator"]["writer_scope"] = value
+                self._write_ledger()
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn("WRITER_SCOPE_COLLISION", {error["code"] for error in result["errors"]})
+                self.assertEqual(0, result["writer_authority"]["unique_writer_scopes"])
+                self.ledger["worker_topology"]["integrator"]["writer_scope"] = original
+
+    def test_fails_when_single_observation_fanout_gate_is_removed(self) -> None:
+        self.optimization_governance["anti_churn"]["single_observation_failure_gate"][
+            "canonical_observation_only"
+        ] = False
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("SINGLE_OBSERVATION_FANOUT_GATE_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_ephemeral_identity_can_trigger_material_handoff(self) -> None:
+        self.optimization_governance["anti_churn"]["census_identity_classes"][
+            "ephemeral_only_material_delta_handoff"
+        ] = True
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("EPHEMERAL_IDENTITY_HANDOFF_GATE_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_anti_churn_baseline_is_removed(self) -> None:
+        (self.root / self.baseline_ref).write_text("baseline\n", encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("ANTI_CHURN_BASELINE_MISSING", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_common_release_control_is_not_installed(self) -> None:
+        self.optimization_governance["common_release_safety_controls"]["pc025"]["status"] = "PROPOSED"
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("PC025_COMMON_CONTROL_NOT_INSTALLED", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_hosted_review_quiescence_control_is_removed(self) -> None:
+        del self.optimization_governance["common_release_safety_controls"]["hosted_review_quiescence"]
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn(
+            "HOSTED_REVIEW_QUIESCENCE_CONTROL_NOT_INSTALLED",
+            {error["code"] for error in result["errors"]},
+        )
+
+    def test_fails_when_hosted_review_quiescence_publication_state_drifts(self) -> None:
+        self.optimization_governance["common_release_safety_controls"]["hosted_review_quiescence"][
+            "publication_state"
+        ] = "isolated-worktree-source-candidate-uncommitted"
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn(
+            "HOSTED_REVIEW_QUIESCENCE_PUBLICATION_STATE_DRIFT",
+            {error["code"] for error in result["errors"]},
+        )
+
+    def test_fails_when_hosted_review_quiescence_freshness_policy_drifts(self) -> None:
+        self.optimization_governance["common_release_safety_controls"]["hosted_review_quiescence"][
+            "maximum_observation_age_seconds"
+        ] = 3600
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn(
+            "HOSTED_REVIEW_QUIESCENCE_FRESHNESS_POLICY_DRIFT",
+            {error["code"] for error in result["errors"]},
+        )
+
+    def test_missing_common_release_controls_returns_structured_invalid(self) -> None:
+        del self.optimization_governance["common_release_safety_controls"]
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("COMMON_RELEASE_CONTROLS_MISSING", {error["code"] for error in result["errors"]})
+
+    def test_wrong_type_common_release_controls_returns_structured_invalid(self) -> None:
+        self.optimization_governance["common_release_safety_controls"] = []
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("COMMON_RELEASE_CONTROLS_MISSING", {error["code"] for error in result["errors"]})
+
+    def test_unhashable_engineering_memory_seed_id_returns_structured_invalid(self) -> None:
+        seed_ids = self.optimization_governance["common_release_safety_controls"]["engineering_memory_seed_ids"]
+        original = seed_ids[0]
+        for value in (["not", "hashable"], {"not": "hashable"}):
+            with self.subTest(value=value):
+                seed_ids[0] = value
+                (self.root / self.optimization_governance_ref).write_text(
+                    json.dumps(self.optimization_governance), encoding="utf-8"
+                )
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn(
+                    "COMMON_RELEASE_ENGINEERING_MEMORY_PROMOTION_MISSING",
+                    {error["code"] for error in result["errors"]},
+                )
+                seed_ids[0] = original
+
+    def test_rejects_duplicate_engineering_memory_seed_ids(self) -> None:
+        seed_ids = self.optimization_governance["common_release_safety_controls"]["engineering_memory_seed_ids"]
+        seed_ids[-1] = seed_ids[0]
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn(
+            "COMMON_RELEASE_ENGINEERING_MEMORY_PROMOTION_MISSING",
+            {error["code"] for error in result["errors"]},
+        )
+
+    def test_rejects_boolean_anti_churn_measurements(self) -> None:
+        lower_bound = self.optimization_governance["anti_churn"]["avoided_amplification_measurement"][
+            "observed_lower_bound"
+        ]
+        for field in ("material_downstream_wakes_or_handoffs", "downstream_receipts_or_adoptions"):
+            with self.subTest(field=field):
+                original = lower_bound[field]
+                lower_bound[field] = True
+                (self.root / self.optimization_governance_ref).write_text(
+                    json.dumps(self.optimization_governance), encoding="utf-8"
+                )
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn("ANTI_CHURN_MEASUREMENT_INVALID", {error["code"] for error in result["errors"]})
+                lower_bound[field] = original
+
+    def test_malformed_manifest_role_returns_structured_invalid(self) -> None:
+        self.manifest["roles"][1] = ["not", "an", "object"]
+        self.manifest_path.write_text(json.dumps(self.manifest), encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("MANIFEST_ROLE_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_schema_truncated_latest_receipt_and_job(self) -> None:
+        receipt_path = self.root / self.receipt_ref
+        receipt_path.write_text(json.dumps({"contract_version": "atlas.execution-receipt.v2"}), encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("LATEST_RECEIPT_SCHEMA_INVALID", {error["code"] for error in result["errors"]})
+
+        receipt_fixture = self.source_root / "packages/atlas-contracts/fixtures/valid/execution-receipt.v2.json"
+        receipt_path.write_bytes(receipt_fixture.read_bytes())
+        receipt_path.with_name("job-envelope.json").write_text(
+            json.dumps({"contract_version": "atlas.job-envelope.v2"}), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("LATEST_JOB_SCHEMA_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_latest_job_receipt_identity_correlation_drift(self) -> None:
+        receipt_path = self.root / self.receipt_ref
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        job_path = receipt_path.with_name("job-envelope.json")
+        job = json.loads(job_path.read_text(encoding="utf-8"))
+        cases = (
+            ("job_id", "different-job", "LATEST_JOB_RECEIPT_IDENTITY_MISMATCH"),
+            ("component_id", "different-component", "LATEST_JOB_RECEIPT_COMPONENT_MISMATCH"),
+            ("project_id", "different-project", "LATEST_JOB_RECEIPT_PROJECT_MISMATCH"),
+        )
+        for field, value, expected_code in cases:
+            with self.subTest(field=field):
+                original = job[field]
+                job[field] = value
+                job_path.write_text(json.dumps(job), encoding="utf-8")
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn(expected_code, {error["code"] for error in result["errors"]})
+                job[field] = original
+                job_path.write_text(json.dumps(job), encoding="utf-8")
+
+    def test_rejects_boolean_source_coverage_counters(self) -> None:
+        coverage = self.ledger["source_coverage"]
+        for field in (
+            "cross_source_tasks_discovered",
+            "metadata_indexed",
+            "inaccessible",
+            "content_reviewed_tasks",
+            "remaining_content_review_tasks",
+        ):
+            with self.subTest(field=field):
+                original = coverage[field]
+                coverage[field] = True
+                self._write_ledger()
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn("SOURCE_DENOMINATOR_INVALID", {error["code"] for error in result["errors"]})
+                coverage[field] = original
+
+    def test_fails_when_common_release_publication_state_overclaims_current_main(self) -> None:
+        self.optimization_governance["common_release_safety_controls"]["publication_state"] = "installed-current-main"
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn(
+            "COMMON_RELEASE_CONTROL_PUBLICATION_STATE_DRIFT",
+            {error["code"] for error in result["errors"]},
+        )
+
+    def test_fails_when_common_release_control_artifact_is_missing(self) -> None:
+        (self.root / self.common_control_refs[1]).unlink()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("COMMON_RELEASE_CONTROL_ARTIFACT_MISSING", {error["code"] for error in result["errors"]})
+
+    def test_rejects_traversal_common_release_control_reference(self) -> None:
+        self.optimization_governance["common_release_safety_controls"]["implementation_ref"] = "../outside.py"
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("COMMON_RELEASE_CONTROL_REF_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_any_manifest_role_loses_baseline(self) -> None:
+        self.manifest["roles"][1]["prompt_template"]["fragments"] = []
+        self.manifest_path.write_text(json.dumps(self.manifest), encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("ROLE_BASELINE_MISSING", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_live_topology_drifts_from_ledger(self) -> None:
+        path = self.automations / "failure" / "automation.toml"
+        text = path.read_text(encoding="utf-8").replace('status = "ACTIVE"', 'status = "PAUSED"')
+        path.write_text(text, encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("AUTOMATION_STATUS_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_rejects_traversal_automation_identity_path(self) -> None:
+        self.ledger["worker_topology"]["bounded_workers"][0]["automation_id"] = "../escape"
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("AUTOMATION_REF_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_checkpoint_does_not_reference_latest_receipt(self) -> None:
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T21:30:00Z", receipts=[])
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("CHECKPOINT_RECEIPT_STALE", {error["code"] for error in result["errors"]})
+
+    def test_accepts_checkpoint_at_future_clock_skew_boundary(self) -> None:
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T22:05:00Z")
+        result = self.validate()
+        self.assertTrue(result["valid"], result["errors"])
+
+    def test_rejects_checkpoint_beyond_future_clock_skew_window(self) -> None:
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T22:05:01Z")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("CHECKPOINT_TIMESTAMP_IN_FUTURE", {error["code"] for error in result["errors"]})
+
+    def test_accepts_bounded_checkpoint_age_limit_at_upper_boundary(self) -> None:
+        result = self.validate_with_max_checkpoint_age(168.0)
+        self.assertTrue(result["valid"], result["errors"])
+        self.assertEqual(168.0, result["checkpoint"]["max_age_hours"])
+
+    def test_rejects_nonfinite_nonpositive_and_excessive_checkpoint_age_limits(self) -> None:
+        for value in (float("inf"), float("-inf"), float("nan"), 0.0, -1.0, 168.0001):
+            with self.subTest(value=value):
+                result = self.validate_with_max_checkpoint_age(value)
+                self.assertFalse(result["valid"])
+                self.assertIn(
+                    "CHECKPOINT_MAX_AGE_INVALID",
+                    {error["code"] for error in result["errors"]},
+                )
+                self.assertIsNone(result["checkpoint"]["max_age_hours"])
+
+    def test_malformed_checkpoint_timestamp_returns_structured_invalid(self) -> None:
+        self._write_integrator_checkpoint(recorded_at="not-a-timestamp")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("CHECKPOINT_TIMESTAMP_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_checkpoint_payload_digest_drift(self) -> None:
+        checkpoint_path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
+        checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+        checkpoint["payload"]["summary"] = "tampered"
+        checkpoint_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("CHECKPOINT_ENVELOPE_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_checkpoint_from_another_thread(self) -> None:
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T21:30:00Z", thread_id="other-thread")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("CHECKPOINT_THREAD_IDENTITY_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_rejects_checkpoint_from_another_logical_role(self) -> None:
+        self._write_integrator_checkpoint(recorded_at="2026-08-27T21:30:00Z", role_id="other.role")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("CHECKPOINT_ROLE_IDENTITY_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_rejects_absolute_engineering_memory_reference(self) -> None:
+        self.ledger["active_task_governance_conformance"]["engineering_memory_gate_refs"][0] = str(
+            self.root / self.memory_refs[0]
+        )
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("ENGINEERING_MEMORY_GATE_REF_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_traversal_job_receipt_seam_reference(self) -> None:
+        self.ledger["active_task_governance_conformance"]["job_receipt_seam_refs"][0] = "../outside.json"
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("JOB_RECEIPT_SEAM_REF_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_absolute_latest_receipt_reference(self) -> None:
+        self.ledger["automation"]["latest_active_successor_ref"] = str(self.root / self.receipt_ref)
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("LATEST_RECEIPT_REF_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_accepts_content_addressed_latest_receipt_anchor(self) -> None:
+        receipt_path = self.root / self.receipt_ref
+        receipt_sha = hashlib.sha256(receipt_path.read_bytes()).hexdigest()
+        self._write_integrator_checkpoint(
+            recorded_at="2026-08-27T21:30:00Z",
+            receipts=[f"{self.receipt_ref}#sha256={receipt_sha}"],
+        )
+        result = self.validate()
+        self.assertTrue(result["valid"], result["errors"])
+        self.assertTrue(result["checkpoint"]["contains_latest_receipt"])
+
+    def test_fails_when_status_automation_is_missing(self) -> None:
+        (self.automations / self.status_automation_id / "automation.toml").unlink()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("STATUS_AUTOMATION_MISSING", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_status_automation_target_drifts(self) -> None:
+        path = self.automations / self.status_automation_id / "automation.toml"
+        text = path.read_text(encoding="utf-8").replace(
+            f'target_thread_id = "{self.status_thread_id}"', 'target_thread_id = "other-thread"'
+        )
+        path.write_text(text, encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("STATUS_AUTOMATION_TARGET_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_status_identity_gate_is_removed(self) -> None:
+        path = self.automations / self.status_automation_id / "automation.toml"
+        text = path.read_text(encoding="utf-8").replace("cheap identity gate", "bounded comparison")
+        path.write_text(text, encoding="utf-8")
+        self.ledger["operator_visibility_topology"]["automation"]["toml_sha256"] = (
+            "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+        )
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("STATUS_IDENTITY_GATE_MISSING", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_questions_cadence_drifts(self) -> None:
+        path = self.automations / self.questions_automation_id / "automation.toml"
+        text = path.read_text(encoding="utf-8").replace(
+            'rrule = "FREQ=HOURLY;INTERVAL=1"', 'rrule = "FREQ=MINUTELY;INTERVAL=15"'
+        )
+        path.write_text(text, encoding="utf-8")
+        self.ledger["operator_visibility_topology"]["questions_consumer"]["toml_sha256"] = (
+            "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+        )
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("QUESTIONS_AUTOMATION_CADENCE_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_status_projection_hash_drifts(self) -> None:
+        (self.root / self.status_markdown_ref).write_text("changed\n", encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("STATUS_PROJECTION_HASH_DRIFT", {error["code"] for error in result["errors"]})
+
+    def test_rejects_traversal_status_projection_reference(self) -> None:
+        self.ledger["operator_visibility_topology"]["projection"]["json_ref"] = "../outside.json"
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("STATUS_PROJECTION_REF_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_traversal_status_checkpoint_reference(self) -> None:
+        self.ledger["operator_visibility_topology"]["checkpoint"]["ref"] = "../outside.json"
+        self._write_ledger()
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("STATUS_CHECKPOINT_REF_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_status_checkpoint_envelope_drift(self) -> None:
+        checkpoint_path = self.root / self.status_checkpoint_ref
+        checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+        checkpoint["payload"]["summary"] = "tampered"
+        checkpoint_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("STATUS_CHECKPOINT_ENVELOPE_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_fails_when_status_checkpoint_receipt_hash_drifts(self) -> None:
+        self._write_status_checkpoint(
+            receipts=[
+                f"{self.status_json_ref}#sha256={self.status_json_sha.removeprefix('sha256:')}",
+                f"{self.status_markdown_ref}#sha256=wrong",
+            ]
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("STATUS_CHECKPOINT_RECEIPT_HASH_DRIFT", {error["code"] for error in result["errors"]})
+
+
+if __name__ == "__main__":
+    unittest.main()

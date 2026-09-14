@@ -142,7 +142,22 @@ class AtlasMasterProgramTests(unittest.TestCase):
             ["FP-DOS-REC-001", "FP-MZR-REC-001", "FP-FIT-REC-001", "FP-PARITY-RATCHET-001"],
             [packet["id"] for packet in packets],
         )
-        self.assertEqual("FP-DOS-REC-001", admission["next_packet"])
+        self.assertEqual("NONE_HELD_PENDING_EXACT_OWNER_AND_DATA_CONTRACTS", admission["next_packet"])
+        discordos_packet = packets[0]
+        self.assertEqual("TERMINAL_PROVENANCE", discordos_packet["status"])
+        self.assertIn("retired provenance", discordos_packet["owner"])
+        self.assertEqual("NONE_RETIRED_PROVENANCE", discordos_packet["next_packet"])
+        self.assertNotIn("FP-DOS-REC-001", packets[1]["dependencies"])
+        self.assertNotIn("FP-DOS-REC-001", packets[3]["dependencies"])
+        active_routing = json.dumps({
+            "owner": admission["owner"],
+            "dependencies": admission["dependencies"],
+            "serialization": admission["serialization"],
+            "next_packet": admission["next_packet"],
+        })
+        self.assertNotIn("DiscordOS single writer", active_routing)
+        self.assertIn("owner.fawxzzyweb", active_routing)
+        self.assertIn("platform.supabase-migration", active_routing)
         self.assertIn("vercel-production", admission["approval_gates"])
 
         registry = load_json("docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json")
@@ -302,6 +317,25 @@ class AtlasMasterProgramTests(unittest.TestCase):
         index = register["authority_indexes"]["clean_and_resync_lane_registry"]
         self.assertEqual(20, len(index["lane_ids"]))
         self.assertEqual(48, len(index["backlog_ids"]))
+
+    def test_discordos_program_is_terminal_provenance_not_a_live_route(self) -> None:
+        register = load_json("docs/registry/ATLAS-MASTER-PROGRAM-REGISTER.v1.json")
+        discordos = next(
+            program
+            for program in register["programs"]
+            if program["id"] == "program-discordos-board-governance"
+        )
+        serialized = json.dumps(register, sort_keys=True)
+
+        self.assertEqual("stack-root-provenance", discordos["owner"])
+        self.assertEqual("retired-provenance-only", discordos["status"])
+        self.assertEqual("TERMINAL_PROVENANCE", discordos["measurement_status"])
+        self.assertEqual([], discordos["dependencies"])
+        self.assertIn("No live DiscordOS packet", discordos["next_packet"])
+        self.assertIn("owner.fawxzzyweb", register["authority_model"]["retired_owner_rule"])
+        self.assertIn("platform.supabase-migration", register["authority_model"]["retired_owner_rule"])
+        self.assertNotIn("currently admitted DiscordOS board cluster", serialized)
+        self.assertNotIn('"next_packet": "FP-DOS-REC-001"', serialized)
 
 
 if __name__ == "__main__":

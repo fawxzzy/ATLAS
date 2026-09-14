@@ -14,7 +14,7 @@ No new general-purpose ATLAS server is admitted.
 | Surface | Intended placement | Current availability | Authority |
 | --- | --- | --- | --- |
 | Foundation portfolio | Vercel | Available; production UI returned HTTP 200 on 2026-07-16 | Foundation |
-| DiscordOS runtime | Hybrid Vercel, Supabase, and GitHub Actions | Operational; runtime health returned HTTP 200, `ok=true`, and `posture=operational` on 2026-07-16 | DiscordOS |
+| DiscordOS runtime | Historical hybrid Vercel, Supabase, and GitHub Actions placement | Retired provenance only; the 2026-07-16 HTTP 200, `ok=true`, and `posture=operational` observation is historical evidence, not current activation or authority | ATLAS root governance (provenance only) |
 | Playbook CLI | No server / on demand | Available on demand from merged Playbook PR `#27` proof | Playbook |
 | Playbook Observer | Local persistent on `127.0.0.1:4300` | Foreground proof accepted; currently intentionally stopped/restorable with no listener | Playbook |
 | Lifeline | Local persistent supervisor and current-user logon restore | Registered/restorable; task enabled, ready, and last result `0` | Lifeline |
@@ -26,11 +26,12 @@ No new general-purpose ATLAS server is admitted.
 Foundation is the hosted read-only portfolio. Playbook Observer is the private
 local operator cockpit. They must not become competing dashboards.
 
-DiscordOS is the hosted Discord API and logical writer. Vercel owns its public
-edge, Supabase owns durable writer state, and GitHub Actions owns bounded
-scheduled polling. The exact reviewed DiscordOS PR #104 Preview supplies the
-five-scenario interaction-first reliability proof. Production-path adoption
-and real-user coverage remain UNKNOWN because the PR is draft and unmerged.
+DiscordOS is archived and retired. Its historical Vercel, Supabase, GitHub
+Actions, PR #104 Preview, and five-scenario interaction-first observations are
+preserved as read-only provenance; they provide no current writer, dispatch,
+provider, production, or PR authority. Future product-board continuation is
+owned by `owner.fawxzzyweb`, and future master-data work is owned by
+`platform.supabase-migration`, only after their exact contracts are proven.
 
 Cortex refreshes after accepted state changes or digests. It is not a daemon,
 scheduler, or competing execution authority.
@@ -47,8 +48,9 @@ Owner-side activation is serialized in this exact order:
 5. One `_stack` bounded scheduled worker proof — `accepted`.
 6. One event-triggered Cortex refresh — `accepted` from an immutable activation
    event, exact source blobs, and byte-stable replay receipt.
-7. DiscordOS interaction-first reliability review - `accepted` from exact
-   reviewed draft PR #104 Preview evidence without a merge or production claim.
+7. Historical DiscordOS interaction-first reliability provenance - `accepted`
+   only as retained exact draft PR #104 Preview evidence, with no current owner,
+   activation, merge, production, writer, dispatch, or provider authority.
 8. Owner export integration - `accepted` from deterministic Atlas/Cortex
    runtime readback, schema, semantic, and exact replay proof.
 
