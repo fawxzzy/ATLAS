@@ -166,18 +166,104 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def relative_to_atlas(path: Path) -> str:
+# Wave S2A2: the import archive tree (source_dir()/archive_dir() and
+# everything under them) is anchored to storage.import_storage_root(),
+# which is ATLAS-relative by default (ATLAS_IMPORT_STORAGE_ROOT unset)
+# but can be configured to live anywhere, including off the checkout
+# entirely -- exactly like ATLAS_IMPORT_WORK_ROOT already does for
+# transient staging. relative_to_atlas()/resolve_atlas_path() are the one
+# shared pair every manifest, evaluation, receipt, and catalog path
+# round-trips through (100+ call sites) -- rather than touch every one of
+# them individually, this marker teaches the pair a second root, so every
+# existing caller becomes storage-root-aware automatically. When the
+# storage root is at its default (still under atlas_root()), a path under
+# it resolves via the first branch exactly as before and the marker never
+# appears -- fully backward compatible, proven by the existing S2A suite
+# passing unchanged.
+#
+# The marker is a defined reference grammar, not unrestricted path
+# concatenation: resolve_atlas_path() rejects a component that is empty,
+# ".", "..", or contains ":" (a Windows drive letter) or a raw separator
+# (defensive -- Path.parts should never produce one) BEFORE joining it,
+# and separately verifies the fully resolved result still lives under
+# import_storage_root() -- closing both a lexical ".." traversal and a
+# symlink/junction that points outside the root, in one check, regardless
+# of how the escape was attempted. relative_to_atlas() refuses to encode
+# an ordinary ATLAS path whose first component is literally named
+# "@storage-root": since that string would be indistinguishable from a
+# genuine marker reference on decode, treating it as reserved (no real
+# ATLAS directory is named this) is what keeps every accepted encoded
+# reference decoding to the same location it encoded from.
+_STORAGE_ROOT_MARKER = "@storage-root"
+
+
+def _reject_unsafe_storage_reference_component(part: str, *, reference: str) -> None:
+    if not part or part in {".", ".."} or ":" in part or "/" in part or "\\" in part:
+        raise ValueError(
+            f"Invalid {_STORAGE_ROOT_MARKER} reference component {part!r} in {reference!r}"
+        )
+
+
+def relative_to_atlas(path: Path, *, env: dict[str, str] | None = None) -> str:
     root = atlas_root()
     resolved = path.resolve()
-    if not resolved.is_relative_to(root):
+    if resolved.is_relative_to(root):
+        rel = resolved.relative_to(root)
+        if rel.parts and rel.parts[0] == _STORAGE_ROOT_MARKER:
+            raise ValueError(
+                f"{resolved} sits directly under a path component literally named "
+                f"{_STORAGE_ROOT_MARKER!r}, which is reserved for encoding storage-root "
+                f"references and cannot itself be represented as a plain ATLAS-relative path."
+            )
+        return "." if not rel.parts else rel.as_posix()
+    storage_root = storage.import_storage_root(env=env).resolve()
+    try:
+        rel = resolved.relative_to(storage_root)
+    except ValueError:
         raise ValueError(
-            f"Input must already be staged under ATLAS so paths stay ATLAS-relative: {resolved}"
-        )
-    rel = resolved.relative_to(root)
-    return "." if not rel.parts else rel.as_posix()
+            f"Input must already be staged under ATLAS or the configured import "
+            f"storage root so paths stay portable: {resolved}"
+        ) from None
+    if not rel.parts:
+        return _STORAGE_ROOT_MARKER
+    reference = f"{_STORAGE_ROOT_MARKER}/{rel.as_posix()}"
+    # Encoding must refuse exactly what decoding refuses: resolve_atlas_path()
+    # rejects an empty/"."/".."/colon/separator-containing component before
+    # trusting it. Emitting a reference the decoder cannot round-trip would
+    # produce a manifest field that silently stops resolving the moment
+    # anything reads it back -- e.g. an ordinary (on POSIX) filename
+    # containing a literal colon, which a Windows drive-letter reference
+    # also uses, so the grammar must forbid it on both ends alike. Refused
+    # here rather than renaming or omitting the underlying file: the file
+    # itself is untouched, only representing it as a portable reference
+    # fails.
+    for part in rel.parts:
+        _reject_unsafe_storage_reference_component(part, reference=reference)
+    return reference
 
 
-def resolve_atlas_path(path: Path) -> Path:
+def resolve_atlas_path(path: Path, *, env: dict[str, str] | None = None) -> Path:
+    if path.parts and path.parts[0] == _STORAGE_ROOT_MARKER:
+        reference = path.as_posix()
+        storage_root = storage.import_storage_root(env=env).resolve()
+        target = storage_root
+        for part in path.parts[1:]:
+            _reject_unsafe_storage_reference_component(part, reference=reference)
+            target = target / part
+        resolved = target.resolve()
+        # Containment is verified on the RESOLVED path, not the lexical
+        # join: this is what catches a symlink/junction inside the
+        # storage root whose target escapes it, which per-component
+        # rejection above cannot see (each individual component looks
+        # perfectly ordinary; only the resolved destination is wrong).
+        try:
+            ensure_within(storage_root, resolved)
+        except ValueError:
+            raise ValueError(
+                f"{_STORAGE_ROOT_MARKER} reference {reference!r} resolves outside the "
+                f"configured import storage root ({storage_root}): {resolved}"
+            ) from None
+        return resolved
     return path.resolve() if path.is_absolute() else (atlas_root() / path).resolve()
 
 
@@ -222,12 +308,12 @@ def deep_merge(existing: Any, updates: Any) -> Any:
     return merged
 
 
-def source_dir(source_name: str) -> Path:
-    return atlas_root() / "data" / "imports" / "knowledge" / slugify(source_name)
+def source_dir(source_name: str, *, env: dict[str, str] | None = None) -> Path:
+    return storage.import_storage_root(env=env) / slugify(source_name)
 
 
-def archive_dir(source_name: str, slug: str) -> Path:
-    return source_dir(source_name) / slugify(slug)
+def archive_dir(source_name: str, slug: str, *, env: dict[str, str] | None = None) -> Path:
+    return source_dir(source_name, env=env) / slugify(slug)
 
 
 def raw_dir(path: Path) -> Path:
@@ -611,7 +697,29 @@ def import_attempt_record_path(knowledge_dir: Path) -> Path:
     return knowledge_dir / "IMPORT-ATTEMPT.json"
 
 
-def _read_and_validate_attempt_record(path: Path) -> dict[str, Any] | None:
+def _describe_archive_path_lexically(path: Path, *, env: dict[str, str] | None = None) -> str:
+    """Lexical (never-resolves, never-follows-a-symlink) description of
+    `path` for error messages where `path` might itself be a symlink --
+    relative_to_atlas() calls Path.resolve(), which would follow it
+    straight through to wherever it points. `path` is always constructed
+    from archive_dir(...) by this module, so it is always lexically
+    under either atlas_root() or the configured storage root (never
+    resolved, so a symlink at the leaf doesn't change which one)."""
+    try:
+        return path.relative_to(atlas_root()).as_posix()
+    except ValueError:
+        pass
+    storage_root = storage.import_storage_root(env=env)
+    try:
+        rel = path.relative_to(storage_root)
+    except ValueError:
+        return str(path)
+    return _STORAGE_ROOT_MARKER if not rel.parts else f"{_STORAGE_ROOT_MARKER}/{rel.as_posix()}"
+
+
+def _read_and_validate_attempt_record(
+    path: Path, *, env: dict[str, str] | None = None
+) -> dict[str, Any] | None:
     """Return the existing attempt record at `path`, or None if none
     exists. Never opens or reads through a symlink -- checked first, via
     storage's own no-follow primitive, exactly as the write path (see
@@ -621,19 +729,10 @@ def _read_and_validate_attempt_record(path: Path) -> dict[str, Any] | None:
     CorruptAttemptRecordError rather than being silently treated as
     absent or, worse, partially trusted."""
     if storage._lp_is_symlink(path):
-        # relative_to_atlas() calls Path.resolve(), which follows a
-        # symlink straight through to wherever it points -- exactly the
-        # wrong thing to do while reporting that this path IS a symlink,
-        # and it can itself raise (the target may not even be under
-        # atlas_root()) before the real error is ever raised. path is
-        # always exactly knowledge_dir / "IMPORT-ATTEMPT.json" by
-        # construction, so a lexical relative_to() against atlas_root()
-        # describes it without following anything.
-        described = path.relative_to(atlas_root()).as_posix()
         raise CorruptAttemptRecordError(
-            f"{described} is a symlink, not a plain record file. Refusing to "
-            f"read or write through it -- remove it yourself first if you have independently "
-            f"confirmed it is safe to discard."
+            f"{_describe_archive_path_lexically(path, env=env)} is a symlink, not a plain "
+            f"record file. Refusing to read or write through it -- remove it yourself first "
+            f"if you have independently confirmed it is safe to discard."
         )
     if not path.exists():
         return None
@@ -641,17 +740,17 @@ def _read_and_validate_attempt_record(path: Path) -> dict[str, Any] | None:
         record = read_json(path)
     except (OSError, ValueError) as exc:
         raise CorruptAttemptRecordError(
-            f"{relative_to_atlas(path)} could not be read as a valid JSON record: {exc}"
+            f"{relative_to_atlas(path, env=env)} could not be read as a valid JSON record: {exc}"
         ) from exc
     if not isinstance(record, dict) or record.get("contract_version") != ATTEMPT_RECORD_CONTRACT_VERSION:
         raise CorruptAttemptRecordError(
-            f"{relative_to_atlas(path)} is not a recognized attempt record "
+            f"{relative_to_atlas(path, env=env)} is not a recognized attempt record "
             f"(contract_version={(record.get('contract_version') if isinstance(record, dict) else None)!r})"
         )
     for key, expected_type in _ATTEMPT_RECORD_REQUIRED_FIELDS.items():
         if key not in record or not isinstance(record[key], expected_type):
             raise CorruptAttemptRecordError(
-                f"{relative_to_atlas(path)} has a missing or invalid field: {key!r}"
+                f"{relative_to_atlas(path, env=env)} has a missing or invalid field: {key!r}"
             )
     return record
 
@@ -766,8 +865,8 @@ def _relocate_folder_import(
         "materialized_extracted": bool(materialize_extracted),
         "expected_manifest_digest": receipt.get("expected_manifest_digest"),
         "destination_manifest_digest": receipt.get("destination_manifest_digest"),
-        "expected_manifest_ref": relative_to_atlas(expected_manifest_ref_path),
-        "receipt_ref": relative_to_atlas(receipt_path),
+        "expected_manifest_ref": relative_to_atlas(expected_manifest_ref_path, env=env),
+        "receipt_ref": relative_to_atlas(receipt_path, env=env),
         "space_budget_ok": result.space_budget.ok,
         "staging_outside_atlas_root": not work_root.resolve().is_relative_to(atlas_root()),
         "destination_verification_ok": bool((result.destination_verification or {}).get("ok")),
@@ -933,18 +1032,20 @@ def infer_promotion_status(archive_id: str, existing_manifest: dict[str, Any] | 
     return "not_promoted"
 
 
-def build_manifest_artifact_digests(manifest: dict[str, Any], archive_path: Path) -> dict[str, str]:
+def build_manifest_artifact_digests(
+    manifest: dict[str, Any], archive_path: Path, *, env: dict[str, str] | None = None
+) -> dict[str, str]:
     digests: dict[str, str] = {}
     raw_root = raw_dir(archive_path)
     if manifest.get("source_type") == "zip":
         raw_archive_rel = manifest.get("raw_archive_path")
         if isinstance(raw_archive_rel, str):
-            raw_archive = resolve_atlas_path(Path(raw_archive_rel))
+            raw_archive = resolve_atlas_path(Path(raw_archive_rel), env=env)
             if raw_archive.exists():
                 digests["raw_archive"] = file_checksum(raw_archive)
         input_path = manifest.get("input_path")
         if isinstance(input_path, str):
-            input_candidate = resolve_atlas_path(Path(input_path))
+            input_candidate = resolve_atlas_path(Path(input_path), env=env)
             if input_candidate.exists() and input_candidate.is_file():
                 digests["input_source"] = file_checksum(input_candidate)
     else:
@@ -952,7 +1053,7 @@ def build_manifest_artifact_digests(manifest: dict[str, Any], archive_path: Path
             digests["raw_tree"] = tree_digest(raw_root)
         input_path = manifest.get("input_path")
         if isinstance(input_path, str):
-            input_candidate = resolve_atlas_path(Path(input_path))
+            input_candidate = resolve_atlas_path(Path(input_path), env=env)
             if input_candidate.exists() and input_candidate.is_dir():
                 digests["input_source"] = tree_digest(input_candidate)
     return digests
@@ -1642,6 +1743,7 @@ def write_knowledge_receipt(
     promotion_blocked: bool = False,
     promotion_block_reason: str | None = None,
     dry_run: bool,
+    env: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     manifest = read_json(manifest_path(archive_path))
     archive_id = manifest["archive_id"]
@@ -1662,8 +1764,8 @@ def write_knowledge_receipt(
     latest_path = receipt_folder / "latest.json"
     runtime_outputs = []
     if normalized is not None:
-        runtime_outputs.append(relative_to_atlas(normalized_file))
-    runtime_outputs.append(relative_to_atlas(catalog_doc_path()))
+        runtime_outputs.append(relative_to_atlas(normalized_file, env=env))
+    runtime_outputs.append(relative_to_atlas(catalog_doc_path(), env=env))
     validation_payload = validation_results or current_validation_placeholder()
     receipt = {
         "receipt_version": RECEIPT_VERSION,
@@ -1676,14 +1778,14 @@ def write_knowledge_receipt(
         "promotion_blocked": promotion_blocked,
         "promotion_block_reason": promotion_block_reason,
         "paths": {
-            "manifest_path": relative_to_atlas(manifest_path(archive_path)),
-            "evaluation_path": relative_to_atlas(evaluation_path(archive_path))
+            "manifest_path": relative_to_atlas(manifest_path(archive_path), env=env),
+            "evaluation_path": relative_to_atlas(evaluation_path(archive_path), env=env)
             if evaluation is not None
             else None,
             "promotion_doc_path": promotion["path"] if promotion is not None else None,
-            "runtime_catalog_path": relative_to_atlas(normalized_file) if normalized is not None else None,
-            "receipt_path": relative_to_atlas(receipt_path_value),
-            "latest_path": relative_to_atlas(latest_path),
+            "runtime_catalog_path": relative_to_atlas(normalized_file, env=env) if normalized is not None else None,
+            "receipt_path": relative_to_atlas(receipt_path_value, env=env),
+            "latest_path": relative_to_atlas(latest_path, env=env),
         },
         "inputs": {
             "artifact_digests": manifest.get("artifact_digests", {}),
@@ -1743,13 +1845,22 @@ def import_archive(
     if privacy_flag not in PRIVACY_FLAGS:
         raise ValueError(f"Unsupported privacy flag: {privacy_flag}")
     legacy_folder_copy = _legacy_folder_copy_enabled(env=env)
-    input_path = resolve_atlas_path(input_path)
+    # The env this call was given -- if any -- is honored consistently for
+    # every storage-root-relative decision made anywhere in this call
+    # (admission, manifest fields, the attempt record, receipts), not just
+    # for storage.import_work_root(). Silently falling back to real
+    # os.environ partway through would mean a caller's explicit
+    # ATLAS_IMPORT_STORAGE_ROOT override was honored for staging but
+    # ignored for where the archive itself resolves -- a real
+    # inconsistency, not a documented, supported way to mix configuration
+    # sources.
+    input_path = resolve_atlas_path(input_path, env=env)
     if not input_path.exists():
-        raise FileNotFoundError(f"Input path does not exist: {relative_to_atlas(input_path)}")
-    input_path_rel = relative_to_atlas(input_path)
+        raise FileNotFoundError(f"Input path does not exist: {relative_to_atlas(input_path, env=env)}")
+    input_path_rel = relative_to_atlas(input_path, env=env)
     archive_slug = slugify(slug or input_path.stem or input_path.name)
     archive_id_value = f"{slugify(source_name)}--{archive_slug}"
-    knowledge_dir = archive_dir(source_name, archive_slug)
+    knowledge_dir = archive_dir(source_name, archive_slug, env=env)
     detected_type = "zip" if input_path.is_file() and input_path.suffix.lower() == ".zip" else "folder"
     if detected_type not in {"zip", "folder"}:
         raise ValueError("Input must be a directory or a .zip file.")
@@ -1784,7 +1895,7 @@ def import_archive(
     archive_previously_completed = manifest_path(knowledge_dir).exists()
     if archive_previously_completed and not force:
         raise FileExistsError(
-            f"Import destination already exists: {relative_to_atlas(knowledge_dir)}"
+            f"Import destination already exists: {relative_to_atlas(knowledge_dir, env=env)}"
         )
     if archive_previously_completed and force and new_engine_folder_path:
         # Refuse the destructive replacement rather than delete the
@@ -1794,7 +1905,7 @@ def import_archive(
         # here -- see FolderImportReplacementUnsupportedError.
         raise FolderImportReplacementUnsupportedError(
             f"--force cannot yet safely replace the completed archive at "
-            f"{relative_to_atlas(knowledge_dir)} under the storage-convergence "
+            f"{relative_to_atlas(knowledge_dir, env=env)} under the storage-convergence "
             f"folder path (no transactional replacement implemented). Remove "
             f"the existing archive directory yourself first, or set "
             f"ATLAS_IMPORT_LEGACY_FOLDER_COPY=1 to use the prior destructive "
@@ -1831,12 +1942,12 @@ def import_archive(
         # _classify_link_entry(), which classifies a link entry without
         # opening it).
         source_snapshot_digest_value = _source_snapshot_digest(input_path)
-        existing_attempt = _read_and_validate_attempt_record(attempt_record_path)
+        existing_attempt = _read_and_validate_attempt_record(attempt_record_path, env=env)
         if existing_attempt is None:
             if _archive_destination_has_content(knowledge_dir):
                 raise UnownedDestinationError(
-                    f"{relative_to_atlas(raw_dir(knowledge_dir))} and/or "
-                    f"{relative_to_atlas(extracted_dir(knowledge_dir))} already contain content, "
+                    f"{relative_to_atlas(raw_dir(knowledge_dir), env=env)} and/or "
+                    f"{relative_to_atlas(extracted_dir(knowledge_dir), env=env)} already contain content, "
                     f"but there is no IMPORT-MANIFEST.json (completed import) or "
                     f"IMPORT-ATTEMPT.json (proven interrupted attempt) to establish that it "
                     f"belongs to this import. Refusing to resume into it -- verify what is "
@@ -1846,7 +1957,7 @@ def import_archive(
         else:
             expected_attempt = {
                 "archive_id": archive_id_value,
-                "destination": relative_to_atlas(knowledge_dir),
+                "destination": relative_to_atlas(knowledge_dir, env=env),
                 "source_snapshot_digest": source_snapshot_digest_value,
                 "materialize_extracted": folder_materializes_extracted,
             }
@@ -1857,7 +1968,7 @@ def import_archive(
             }
             if mismatches:
                 raise AdmissionIdentityMismatchError(
-                    f"IMPORT-ATTEMPT.json at {relative_to_atlas(knowledge_dir)} does not match "
+                    f"IMPORT-ATTEMPT.json at {relative_to_atlas(knowledge_dir, env=env)} does not match "
                     f"this request: {mismatches}. Refusing to resume into content that may "
                     f"belong to a different source, a changed source, or different import "
                     f"options -- nothing under the destination has been touched."
@@ -1881,9 +1992,9 @@ def import_archive(
         "pipeline_version": PIPELINE_VERSION,
         "no_execute_guarantee": True,
         "paths": {
-            "import_dir": relative_to_atlas(knowledge_dir),
-            "raw_dir": relative_to_atlas(raw_dir(knowledge_dir)),
-            "extracted_dir": relative_to_atlas(extracted_dir(knowledge_dir)),
+            "import_dir": relative_to_atlas(knowledge_dir, env=env),
+            "raw_dir": relative_to_atlas(raw_dir(knowledge_dir), env=env),
+            "extracted_dir": relative_to_atlas(extracted_dir(knowledge_dir), env=env),
         },
         "provenance": {
             "staged_under_atlas": True,
@@ -1903,9 +2014,9 @@ def import_archive(
 
     if detected_type == "zip":
         manifest["checksum"] = file_checksum(input_path)
-        manifest["raw_archive_path"] = f"{relative_to_atlas(raw_dir(knowledge_dir))}/{input_path.name}"
+        manifest["raw_archive_path"] = f"{relative_to_atlas(raw_dir(knowledge_dir), env=env)}/{input_path.name}"
     else:
-        manifest["raw_reference_dir"] = relative_to_atlas(raw_dir(knowledge_dir))
+        manifest["raw_reference_dir"] = relative_to_atlas(raw_dir(knowledge_dir), env=env)
         manifest["folder_import_mode"] = "legacy-double-copy" if legacy_folder_copy else "storage-convergence"
         if legacy_folder_copy:
             # No link-rejection check exists on this path (matches its
@@ -1918,18 +2029,18 @@ def import_archive(
         # verified destination, not the unchecked source -- so a
         # rejected link's content is never read. See _relocate_folder_import.
 
-    operations: list[str] = [f"prepare:{relative_to_atlas(knowledge_dir)}"]
+    operations: list[str] = [f"prepare:{relative_to_atlas(knowledge_dir, env=env)}"]
     if detected_type == "zip":
-        operations.append(f"copy:{relative_to_atlas(raw_dir(knowledge_dir) / input_path.name)}")
-        operations.append(f"extract:{relative_to_atlas(extracted_dir(knowledge_dir))}")
+        operations.append(f"copy:{relative_to_atlas(raw_dir(knowledge_dir) / input_path.name, env=env)}")
+        operations.append(f"extract:{relative_to_atlas(extracted_dir(knowledge_dir), env=env)}")
     elif legacy_folder_copy:
-        operations.append(f"copytree:{relative_to_atlas(raw_dir(knowledge_dir))}")
-        operations.append(f"copytree:{relative_to_atlas(extracted_dir(knowledge_dir))}")
+        operations.append(f"copytree:{relative_to_atlas(raw_dir(knowledge_dir), env=env)}")
+        operations.append(f"copytree:{relative_to_atlas(extracted_dir(knowledge_dir), env=env)}")
     else:
-        operations.append(f"relocate:{relative_to_atlas(raw_dir(knowledge_dir))}")
+        operations.append(f"relocate:{relative_to_atlas(raw_dir(knowledge_dir), env=env)}")
         if folder_materializes_extracted:
-            operations.append(f"materialize-extracted:{relative_to_atlas(extracted_dir(knowledge_dir))}")
-    operations.append(f"write:{relative_to_atlas(manifest_path(knowledge_dir))}")
+            operations.append(f"materialize-extracted:{relative_to_atlas(extracted_dir(knowledge_dir), env=env)}")
+    operations.append(f"write:{relative_to_atlas(manifest_path(knowledge_dir), env=env)}")
 
     if not dry_run:
         # Destructive delete-then-recreate is preserved only for the
@@ -1993,7 +2104,7 @@ def import_archive(
                     {
                         "contract_version": ATTEMPT_RECORD_CONTRACT_VERSION,
                         "archive_id": manifest["archive_id"],
-                        "destination": relative_to_atlas(knowledge_dir),
+                        "destination": relative_to_atlas(knowledge_dir, env=env),
                         "source_snapshot_digest": source_snapshot_digest_value,
                         "materialize_extracted": folder_materializes_extracted,
                         "recorded_at": utc_now(),
@@ -2013,7 +2124,7 @@ def import_archive(
                 env=env,
             )
             manifest["raw_entries"] = build_raw_entries(raw_dir(knowledge_dir))
-        manifest["artifact_digests"] = build_manifest_artifact_digests(manifest, knowledge_dir)
+        manifest["artifact_digests"] = build_manifest_artifact_digests(manifest, knowledge_dir, env=env)
         manifest["extracted_snapshot_digest"] = extracted_snapshot_digest(knowledge_dir)
         if not extracted_dir(knowledge_dir).exists():
             manifest["raw_snapshot_digest"] = tree_digest(raw_dir(knowledge_dir))
@@ -2023,6 +2134,7 @@ def import_archive(
             action="import",
             validation_results=None,
             dry_run=False,
+            env=env,
         )
     else:
         manifest["artifact_digests"] = {}
@@ -2034,7 +2146,7 @@ def import_archive(
         "archive_id": manifest["archive_id"],
         "pipeline_version": PIPELINE_VERSION,
         "no_execute_guarantee": True,
-        "import_dir": relative_to_atlas(knowledge_dir),
+        "import_dir": relative_to_atlas(knowledge_dir, env=env),
         "manifest": manifest,
         "planned_operations": operations,
     }
@@ -2351,9 +2463,263 @@ def normalize_archive(*, archive_path: Path, dry_run: bool, force: bool) -> dict
     return entry | {"dry_run": dry_run, "output_path": relative_to_atlas(output_path), "manifest": manifest}
 
 
-def discover_import_manifests() -> list[Path]:
-    root = atlas_root() / "data" / "imports" / "knowledge"
-    return sorted(root.glob("*/*/IMPORT-MANIFEST.json"))
+class DuplicateArchiveIdentityError(RuntimeError):
+    """The same archive_id (the manifest's own declared identity, not just
+    the directory names it happens to sit under) exists as a real, distinct
+    manifest under two different roots discover_import_manifests() scanned.
+    Silently preferring one would hide the other from every downstream
+    consumer (catalog, validation, backfill, ranking) without any record
+    that it happened. Refused instead -- an operator must resolve the
+    collision explicitly (this never moves or deletes anything itself)."""
+
+
+class ArchiveIdentityLayoutMismatchError(RuntimeError):
+    """A manifest's own declared identity (source_name/slug, slugified)
+    does not match the directory layout discover_import_manifests() found
+    it under. archive_dir()/source_dir() guarantee this always agrees for
+    anything this pipeline itself wrote; disagreement means the manifest or
+    its containing directories were edited or moved out of band, and
+    trusting either side over the other (directory layout for dedup, or
+    the manifest's declared archive_id for identity) without checking the
+    other could let a tampered or relocated manifest silently collide with,
+    or shadow, a different archive. Refused instead -- nothing is renamed,
+    moved, or chosen on the caller's behalf."""
+
+
+class IncompleteDiscoveryError(RuntimeError):
+    """A root discover_import_manifests() scanned could not be proven
+    fully enumerated, so the manifest list it would otherwise return
+    cannot be trusted as complete. Two distinct situations raise this:
+    (1) the EXPLICITLY configured import storage root
+    (ATLAS_IMPORT_STORAGE_ROOT) is missing or not a directory -- its
+    absence might mean real content is simply unreachable, not that
+    nothing was ever imported there; (2) a root that DOES exist (the
+    configured root OR the legacy default location) cannot be fully
+    scanned -- an unreadable subdirectory, a permission error, any other
+    OSError partway through enumeration, or an UnsupportedArchiveLayoutLinkError
+    (a symlink or Windows junction/reparse point standing in for a source
+    directory, archive directory, or IMPORT-MANIFEST.json itself). The
+    second case applies to every root that is actually present, not only
+    the configured one: an inaccessible or link-bearing legacy tree must
+    not quietly present as "nothing more to find" either. Letting a partial
+    inventory stand in for a
+    complete one would silently drop real archives from catalog,
+    validation, backfill, and promotion-ranking tooling with no record
+    that anything was missed -- exactly the failure mode a configuration
+    change (not a real migration) must never cause. Raised instead of
+    returning a partial list. A caller that only needs a best-effort,
+    read-only snapshot (diagnostics, not authoritative publication) may
+    pass allow_partial=True to opt out. The narrower "missing entirely"
+    case never applies to an unconfigured default root that simply has
+    not been created yet (the normal, first-use case), since then there
+    is nothing "configured" to be unavailable."""
+
+
+def _storage_root_is_explicitly_configured(*, env: dict[str, str] | None = None) -> bool:
+    source = env if env is not None else os.environ
+    return bool(source.get(storage._STORAGE_ROOT_ENV, "").strip())
+
+
+class UnsupportedArchiveLayoutLinkError(RuntimeError):
+    """A source directory, archive directory, or IMPORT-MANIFEST.json
+    itself, at a layout level discover_import_manifests() scanned, is a
+    symlink or Windows junction/reparse point. This module's storage
+    layer never writes one there -- storage.LinkPolicy.REJECT_ALL refuses
+    every link entry before any copy starts (see storage.py) -- so a link
+    appearing in the archive layout means something outside this
+    pipeline's own write path put it there.
+
+    entry.is_dir(follow_symlinks=False) is False for any symlink, so a
+    naive "keep entries that are directories" filter does not reject a
+    linked archive -- it simply omits it from the scan with no signal at
+    all, exactly the silent-inventory-loss failure
+    IncompleteDiscoveryError exists to prevent for unreadable
+    directories, extended here to unsupported link entries. Refused
+    instead; nothing is followed, recreated, or removed -- an operator
+    who put a real link there must resolve it themselves."""
+
+
+def _scan_subdirectories(path: Path) -> list[Path]:
+    """A single directory level's immediate subdirectories, sorted by
+    name, raising OSError normally on failure.
+
+    Deliberately os.scandir(), not Path.iterdir()/Path.glob(): pathlib's
+    glob() silently swallows an OSError raised while descending into an
+    unreadable subdirectory (documented CPython behavior, confirmed
+    against the exact Python version this project's hosted CI runs) --
+    a whole subtree can vanish from a glob() result with no signal at
+    all, which is exactly the failure IncompleteDiscoveryError exists to
+    prevent. os.scandir() raises immediately if `path` itself can't be
+    opened, and iterating it raises normally on a later entry-level
+    failure too -- neither is caught here, so a caller's own try/except
+    OSError sees it.
+
+    Every entry is classified with storage._is_reparse_point() -- the
+    same symlink-and-Windows-junction detector the storage layer itself
+    uses, since is_symlink() alone misses a junction -- BEFORE the
+    ordinary is_dir(follow_symlinks=False) filter runs: a junction can
+    pass that filter (it carries the directory attribute alongside the
+    reparse one), so checking link status first is what actually catches
+    it rather than silently walking into it as an ordinary directory. A
+    link entry raises UnsupportedArchiveLayoutLinkError explicitly."""
+    subdirectories: list[Path] = []
+    with os.scandir(path) as entries:
+        for entry in entries:
+            candidate = Path(entry.path)
+            if storage._is_reparse_point(candidate):
+                raise UnsupportedArchiveLayoutLinkError(
+                    f"{candidate} is a symlink or Windows junction/reparse point, "
+                    f"not a plain directory; unsupported in the archive layout"
+                )
+            if entry.is_dir(follow_symlinks=False):
+                subdirectories.append(candidate)
+    subdirectories.sort(key=lambda p: p.name)
+    return subdirectories
+
+
+def _list_import_manifests(root: Path) -> list[Path]:
+    """Bounded, error-propagating enumeration of root's known three-level
+    layout: root / source_dir / archive_dir / IMPORT-MANIFEST.json.
+
+    Deliberately NOT a recursive walk -- archive payloads (raw/,
+    extracted/) can be arbitrarily large and deep, and discovery only
+    needs the manifest layout two levels below root, not another pass
+    over every file inside every archive."""
+    manifests: list[Path] = []
+    for source_dir in _scan_subdirectories(root):
+        for archive_dir in _scan_subdirectories(source_dir):
+            candidate = archive_dir / "IMPORT-MANIFEST.json"
+            if storage._is_reparse_point(candidate):
+                raise UnsupportedArchiveLayoutLinkError(
+                    f"{candidate} is a symlink or Windows junction/reparse point, "
+                    f"not a plain manifest file; refusing to read through it"
+                )
+            if candidate.is_file():
+                manifests.append(candidate)
+    return manifests
+
+
+def discover_import_manifests(*, allow_partial: bool = False) -> list[Path]:
+    """Enumerate every IMPORT-MANIFEST.json this ATLAS installation knows
+    about.
+
+    Reads BOTH the configured storage root (storage.import_storage_root())
+    and the legacy default location
+    (atlas_root()/data/imports/knowledge) whenever they differ.
+    ATLAS_IMPORT_STORAGE_ROOT changes where NEW archives are written; it
+    must never make an archive already sitting at the previous default
+    location invisible to discovery, since nothing has actually migrated
+    it there -- doing so would let a configuration change silently drop
+    existing entries from the catalog, validation, backfill, and
+    promotion-ranking tooling that all consume this list. When the two
+    roots are the same physical location (the common, unconfigured
+    case), only one is scanned -- exactly the previous, single-root
+    behavior, proven unchanged by the existing test suite.
+
+    A missing/unconfigured default root is a normal, empty first-use
+    inventory, not an error. But an EXPLICITLY configured root
+    (ATLAS_IMPORT_STORAGE_ROOT set) that is missing or not a directory is
+    different: its absence might mean real content is simply unreachable
+    rather than genuinely never having existed, so the list this function
+    would otherwise return cannot be proven complete. Separately, ANY
+    root that DOES exist -- configured or legacy -- but cannot be fully
+    scanned is always incomplete, regardless of which root it is: an
+    unreadable subdirectory or any other OSError partway through
+    enumeration, AND a symlink or Windows junction/reparse point standing
+    in for a source directory, archive directory, or
+    IMPORT-MANIFEST.json itself (this pipeline's own storage layer never
+    writes one there -- see storage.LinkPolicy.REJECT_ALL -- so one
+    appearing means something outside this pipeline's write path put it
+    there, and silently treating it as "not a directory, so nothing to
+    see here" would omit a real archive with no signal at all, just like
+    an unreadable directory would). An inaccessible or link-bearing
+    legacy tree must not quietly present as "nothing more to find"
+    either. IncompleteDiscoveryError is raised in
+    either case instead of silently returning a partial list -- unless
+    allow_partial=True, for read-only diagnostics that only want a
+    best-effort snapshot rather than an authoritative inventory. The
+    granularity of that best-effort view is per ROOT, not per
+    subdirectory: a scan failure anywhere inside a root discards
+    whatever that same root had already found (nothing under a root
+    that could not be fully trusted is reported), but a fully readable
+    sibling root is still scanned and returned normally.
+
+    Identity is the manifest's OWN declared (source_name, slug) --
+    slugified, exactly as source_dir()/archive_dir() derive it -- not the
+    literal directory names discover_import_manifests() happened to find
+    it under; those two must always agree for anything this pipeline
+    itself wrote, and ArchiveIdentityLayoutMismatchError is raised if they
+    do not. If two different roots each hold a manifest claiming the same
+    resulting archive_id, that is a genuine collision, not something safe
+    to resolve by silently preferring one -- DuplicateArchiveIdentityError
+    is raised instead.
+    """
+    configured_root = storage.import_storage_root()
+    legacy_root = atlas_root() / "data" / "imports" / "knowledge"
+    same_physical_root = legacy_root.resolve() == configured_root.resolve()
+    roots = [configured_root]
+    if not same_physical_root:
+        roots.append(legacy_root)
+    explicitly_configured = _storage_root_is_explicitly_configured()
+
+    by_identity: dict[str, Path] = {}
+    manifests: list[Path] = []
+    for root in roots:
+        is_configured_root = root == configured_root
+        missing_root_is_fatal = is_configured_root and explicitly_configured and not allow_partial
+        unreadable_root_is_fatal = not allow_partial
+        if not root.exists():
+            if missing_root_is_fatal:
+                raise IncompleteDiscoveryError(
+                    f"configured import storage root {root} does not exist; "
+                    f"discovery cannot be proven complete"
+                )
+            continue
+        if not root.is_dir():
+            if missing_root_is_fatal:
+                raise IncompleteDiscoveryError(
+                    f"configured import storage root {root} is not a directory; "
+                    f"discovery cannot be proven complete"
+                )
+            continue
+        try:
+            found = sorted(_list_import_manifests(root))
+        except (OSError, UnsupportedArchiveLayoutLinkError) as exc:
+            if unreadable_root_is_fatal:
+                raise IncompleteDiscoveryError(
+                    f"import storage root {root} exists but could not be fully "
+                    f"enumerated: {exc}"
+                ) from exc
+            continue
+        for manifest_file in found:
+            source_dir_name = manifest_file.parent.parent.name
+            slug_dir_name = manifest_file.parent.name
+            manifest = read_json(manifest_file)
+            source_name = manifest.get("source_name")
+            slug = manifest.get("slug")
+            archive_id = manifest.get("archive_id")
+            if (
+                not isinstance(source_name, str)
+                or not isinstance(slug, str)
+                or not isinstance(archive_id, str)
+                or slugify(source_name) != source_dir_name
+                or slugify(slug) != slug_dir_name
+            ):
+                raise ArchiveIdentityLayoutMismatchError(
+                    f"{manifest_file} declares source_name={source_name!r} slug={slug!r} "
+                    f"archive_id={archive_id!r}, which does not match its directory "
+                    f"layout ({source_dir_name}/{slug_dir_name})"
+                )
+            existing = by_identity.get(archive_id)
+            if existing is not None:
+                if existing.resolve() == manifest_file.resolve():
+                    continue  # the same physical file, reached via both roots
+                raise DuplicateArchiveIdentityError(
+                    f"archive_id {archive_id!r} exists at both {existing} and {manifest_file}"
+                )
+            by_identity[archive_id] = manifest_file
+            manifests.append(manifest_file)
+    return sorted(manifests)
 
 
 def build_catalog_record(manifest_file: Path) -> dict[str, Any]:
