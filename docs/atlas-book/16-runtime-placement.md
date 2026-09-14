@@ -48,8 +48,9 @@ Owner-side activation is serialized in this exact order:
 5. One `_stack` bounded scheduled worker proof — `accepted`.
 6. One event-triggered Cortex refresh — `accepted` from an immutable activation
    event, exact source blobs, and byte-stable replay receipt.
-7. DiscordOS interaction-first reliability review - `accepted` from exact
-   reviewed draft PR #104 Preview evidence without a merge or production claim.
+7. Historical DiscordOS interaction-first reliability provenance - `accepted`
+   only as retained exact draft PR #104 Preview evidence, with no current owner,
+   activation, merge, production, writer, dispatch, or provider authority.
 8. Owner export integration - `accepted` from deterministic Atlas/Cortex
    runtime readback, schema, semantic, and exact replay proof.
 

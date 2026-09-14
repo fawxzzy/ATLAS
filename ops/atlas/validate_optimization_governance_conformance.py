@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from ops.atlas.persist_thread_context import ThreadContextError, validate_checkpoint
+from ops.atlas.ui_standards.validate import validate_json_schema
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -86,6 +87,14 @@ def _root_relative_path(atlas_root: Path, ref: Any) -> Path | None:
     except ValueError:
         return None
     return candidate
+
+
+def _schema_validation_errors(instance: dict[str, Any], schema_path: Path) -> list[str]:
+    try:
+        schema = _load_json(schema_path)
+    except ConformanceError as error:
+        return [f"schema unavailable or invalid: {error}"]
+    return validate_json_schema(instance, schema)
 
 
 def _rrule_minutes(rrule: str) -> int | None:
@@ -447,8 +456,10 @@ def validate_conformance(
     observed_lower_bound = avoided.get("observed_lower_bound", {}) if isinstance(avoided, dict) else {}
     check(
         isinstance(observed_lower_bound.get("material_downstream_wakes_or_handoffs"), int)
+        and not isinstance(observed_lower_bound.get("material_downstream_wakes_or_handoffs"), bool)
         and observed_lower_bound.get("material_downstream_wakes_or_handoffs") >= 0
         and isinstance(observed_lower_bound.get("downstream_receipts_or_adoptions"), int)
+        and not isinstance(observed_lower_bound.get("downstream_receipts_or_adoptions"), bool)
         and observed_lower_bound.get("downstream_receipts_or_adoptions") >= 0,
         "ANTI_CHURN_MEASUREMENT_INVALID",
         str(observed_lower_bound),
@@ -548,13 +559,14 @@ def validate_conformance(
     )
     seed_id_set = set(seed_ids) if valid_seed_ids else set()
     check(
-        valid_seed_ids and len(seed_ids) == 6 and seed_id_set <= observed_seed_ids,
+        valid_seed_ids and len(seed_ids) == 6 and len(seed_id_set) == 6 and seed_id_set <= observed_seed_ids,
         "COMMON_RELEASE_ENGINEERING_MEMORY_PROMOTION_MISSING",
         ",".join(sorted(seed_id_set - observed_seed_ids)) if valid_seed_ids else "invalid seed list",
     )
     covered_roles: list[str] = []
-    for role in roles:
+    for role_index, role in enumerate(roles):
         if not isinstance(role, dict):
+            check(False, "MANIFEST_ROLE_INVALID", f"roles[{role_index}] must be an object")
             continue
         role_id = role.get("role_id")
         fragments = role.get("prompt_template", {}).get("fragments", [])
@@ -618,6 +630,57 @@ def validate_conformance(
         latest_job.get("contract_version") == "atlas.job-envelope.v2",
         "LATEST_JOB_CONTRACT_DRIFT",
         str(latest_job_path),
+    )
+    receipt_schema_path = _root_relative_path(
+        atlas_root,
+        "packages/atlas-contracts/schemas/atlas.execution-receipt.v2.schema.json",
+    )
+    job_schema_path = _root_relative_path(
+        atlas_root,
+        "packages/atlas-contracts/schemas/atlas.job-envelope.v2.schema.json",
+    )
+    receipt_schema_errors = (
+        _schema_validation_errors(latest_receipt, receipt_schema_path)
+        if receipt_schema_path is not None and receipt_schema_path.is_file()
+        else ["receipt schema is missing"]
+    )
+    job_schema_errors = (
+        _schema_validation_errors(latest_job, job_schema_path)
+        if job_schema_path is not None and job_schema_path.is_file()
+        else ["job schema is missing"]
+    )
+    check(
+        not receipt_schema_errors,
+        "LATEST_RECEIPT_SCHEMA_INVALID",
+        "; ".join(receipt_schema_errors),
+    )
+    check(
+        not job_schema_errors,
+        "LATEST_JOB_SCHEMA_INVALID",
+        "; ".join(job_schema_errors),
+    )
+    check(
+        latest_receipt.get("job_id") == latest_job.get("job_id"),
+        "LATEST_JOB_RECEIPT_IDENTITY_MISMATCH",
+        f"receipt={latest_receipt.get('job_id')} job={latest_job.get('job_id')}",
+    )
+    check(
+        latest_receipt.get("component_id") == latest_job.get("component_id"),
+        "LATEST_JOB_RECEIPT_COMPONENT_MISMATCH",
+        f"receipt={latest_receipt.get('component_id')} job={latest_job.get('component_id')}",
+    )
+    check(
+        latest_receipt.get("project_id") == latest_job.get("project_id"),
+        "LATEST_JOB_RECEIPT_PROJECT_MISMATCH",
+        f"receipt={latest_receipt.get('project_id')} job={latest_job.get('project_id')}",
+    )
+    check(
+        latest_job.get("expected_receipt_version") == latest_receipt.get("contract_version"),
+        "LATEST_JOB_RECEIPT_VERSION_MISMATCH",
+        (
+            f"expected={latest_job.get('expected_receipt_version')} "
+            f"actual={latest_receipt.get('contract_version')}"
+        ),
     )
 
     integrator = entries[0]

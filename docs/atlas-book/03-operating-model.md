@@ -66,24 +66,27 @@ Canonical flow:
 1. owner repo or owner lane generates proof
 2. `_stack` executes governed deploy actions where required
 3. release or proof receipts are recorded in the owner surface
-4. Discord consumes proof only after that proof exists
+4. the admitted owner surface consumes proof only after that proof exists;
+   product-board continuation belongs to `owner.fawxzzyweb`, while master-data
+   continuation belongs to `platform.supabase-migration`
 5. ATLAS root records cross-repo consequence
 6. Playbook extracts reusable doctrine afterward
 
 ## Standing Project Command Surfaces
 
-The intended operator-facing command surfaces are long-lived governed
-conversations:
+The intended operator-facing command surfaces combine retained conversations
+with embedded governed capabilities:
 
 - `00 Questions` is the pinned general-purpose conversation for questions, status,
   planning, architecture, and explicitly requested bounded work.
-- `00 Authorization` handles genuine operator authority and external-evidence
-  decisions. Repeated eligible low-risk approvals are learned under the
-  canonical authorization policy.
-- `01 Ops` is the mechanical reconciliation conversation. It schedules only
-  exact already-authorized work, enforces collisions and leases, and settles
-  owner-returning receipts without owning architecture, product, lifecycle, or
-  exceptional-priority decisions.
+- Authorization governance is embedded in the task that owns the work. The
+  archived `00 Authorization` task and `manual.messages` identity remain
+  compatibility provenance only; repeated eligible low-risk approvals are
+  learned under the canonical authorization policy.
+- Operations reconciliation is an embedded capability in the originating task.
+  It schedules only exact already-authorized work through the canonical
+  scheduler, enforces collisions and leases, and settles owner-returning
+  receipts without recreating the retired `01 Ops` task.
 - `Fitness` is created when the operational-preparation closeout proves the
   Fitness resume gates below.
 - The existing `Mazer` conversation is retained. When its resume gates pass,
@@ -117,16 +120,19 @@ the existing `Mazer` conversation a current context-and-resume packet. Each
 conversation owns project intent and review; each bounded outcome still
 receives a separate Codex task through `_stack`.
 
-`00 Questions`, `00 Authorization`, `01 Ops`, `Fitness`, and `Mazer` are durable command surfaces. Bounded
-execution tasks are disposable work surfaces: after a terminal result is
-accepted and its receipt is durable, archive the task to keep the workstation
-clean. Never archive an active or intentionally persistent owner conversation.
+`00 Questions`, `Fitness`, and `Mazer` are durable conversation surfaces.
+Authorization and operations remain durable embedded capabilities, while their
+retired historical task identities stay provenance-only. Bounded execution
+tasks are disposable work surfaces: after a terminal result is accepted and
+its receipt is durable, archive the task to keep the workstation clean. Never
+archive an active or intentionally persistent owner conversation.
 
 When canonical Atlas truth requires a stable workspace-registration window,
-`01 Ops` may enforce an exactly authorized pause at an owner's nearest safe
-checkpoint. The pause receipt must preserve branches, worktrees, uncommitted
-files, servers, board state, and the exact resume action. Resume requires an
-exact owner or authority packet after the serialized root window closes.
+the originating task's embedded operations capability may enforce an exactly
+authorized pause at an owner's nearest safe checkpoint. The pause receipt must
+preserve branches, worktrees, uncommitted files, servers, board state, and the
+exact resume action. Resume requires an exact owner or authority packet after
+the serialized root window closes.
 
 Every substantive conversation turn persists a compact secret-free checkpoint
 under `runtime/atlas/thread-context/`. Every cross-thread message explicitly

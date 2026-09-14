@@ -15,6 +15,7 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
         self.root = Path(self.temporary.name)
+        self.source_root = Path(__file__).resolve().parents[1]
         self.automations = self.root / "automations"
         self.now = datetime(2026, 8, 27, 22, 0, tzinfo=timezone.utc)
         self.baseline_ref = "docs/prompts/atlas-workflow/STANDING-BASELINE.md"
@@ -97,10 +98,14 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
             "packages/atlas-contracts/schemas/atlas.job-envelope.v2.schema.json",
             "packages/atlas-contracts/schemas/atlas.execution-receipt.v2.schema.json",
         ]
-        for ref in [*self.memory_refs, *self.seam_refs]:
+        for ref in self.memory_refs:
             path = self.root / ref
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("{}\n", encoding="utf-8")
+        for ref in self.seam_refs:
+            path = self.root / ref
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes((self.source_root / ref).read_bytes())
         (self.root / self.memory_refs[0]).write_text(
             json.dumps(
                 {
@@ -125,10 +130,10 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
         self.receipt_ref = "runtime/successor/execution-receipt.json"
         receipt_path = self.root / self.receipt_ref
         receipt_path.parent.mkdir(parents=True)
-        receipt_path.write_text(json.dumps({"contract_version": "atlas.execution-receipt.v2"}), encoding="utf-8")
-        receipt_path.with_name("job-envelope.json").write_text(
-            json.dumps({"contract_version": "atlas.job-envelope.v2"}), encoding="utf-8"
-        )
+        receipt_fixture = self.source_root / "packages/atlas-contracts/fixtures/valid/execution-receipt.v2.json"
+        job_fixture = self.source_root / "packages/atlas-contracts/fixtures/valid/job-envelope.v2.json"
+        receipt_path.write_bytes(receipt_fixture.read_bytes())
+        receipt_path.with_name("job-envelope.json").write_bytes(job_fixture.read_bytes())
         checkpoint_path = self.root / "runtime/atlas/thread-context/thread-integrator/latest.json"
         checkpoint_path.parent.mkdir(parents=True)
         self._write_integrator_checkpoint(recorded_at="2026-08-27T21:30:00Z")
@@ -385,6 +390,39 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
             ],
         )
 
+    def test_current_atlas_book_keeps_retired_task_identities_provenance_only(self) -> None:
+        operating_model = (self.source_root / "docs/atlas-book/03-operating-model.md").read_text(encoding="utf-8")
+        runtime_placement = (self.source_root / "docs/atlas-book/16-runtime-placement.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("Discord consumes proof only after that proof exists", operating_model)
+        self.assertNotIn("`00 Authorization` handles genuine operator authority", operating_model)
+        self.assertNotIn("`01 Ops` is the mechanical reconciliation conversation", operating_model)
+        self.assertIn("Authorization governance is embedded in the task that owns the work", operating_model)
+        self.assertIn("Historical DiscordOS interaction-first reliability provenance", runtime_placement)
+
+    def test_authoritative_lane_registry_keeps_discordos_provenance_only(self) -> None:
+        registry = json.loads(
+            (self.source_root / "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        entries = [*registry["lanes"], *registry["backlog_candidates"]]
+        retired_ids = {
+            "lane-discordos-single-writer",
+            "lane-discordos-github-projections",
+            "lane-discordos-command-surface-convergence",
+        }
+        by_id = {entry["id"]: entry for entry in entries}
+        for lane_id in retired_ids:
+            self.assertEqual("retired-provenance-only", by_id[lane_id]["status"])
+            self.assertEqual("atlas-root-governance-provenance-only", by_id[lane_id]["owner"])
+        for entry in entries:
+            if entry.get("status") != "candidate":
+                continue
+            self.assertNotEqual("DiscordOS", entry.get("owner"))
+            self.assertTrue(retired_ids.isdisjoint(entry.get("dependencies", [])), entry["id"])
+
     def test_fails_when_program_tasks_share_one_thread_identity(self) -> None:
         integrator_thread = self.ledger["worker_topology"]["integrator"]["thread_id"]
         self.ledger["worker_topology"]["bounded_workers"][0]["thread_id"] = integrator_thread
@@ -531,6 +569,79 @@ class OptimizationGovernanceConformanceTests(unittest.TestCase):
                     {error["code"] for error in result["errors"]},
                 )
                 seed_ids[0] = original
+
+    def test_rejects_duplicate_engineering_memory_seed_ids(self) -> None:
+        seed_ids = self.optimization_governance["common_release_safety_controls"]["engineering_memory_seed_ids"]
+        seed_ids[-1] = seed_ids[0]
+        (self.root / self.optimization_governance_ref).write_text(
+            json.dumps(self.optimization_governance), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn(
+            "COMMON_RELEASE_ENGINEERING_MEMORY_PROMOTION_MISSING",
+            {error["code"] for error in result["errors"]},
+        )
+
+    def test_rejects_boolean_anti_churn_measurements(self) -> None:
+        lower_bound = self.optimization_governance["anti_churn"]["avoided_amplification_measurement"][
+            "observed_lower_bound"
+        ]
+        for field in ("material_downstream_wakes_or_handoffs", "downstream_receipts_or_adoptions"):
+            with self.subTest(field=field):
+                original = lower_bound[field]
+                lower_bound[field] = True
+                (self.root / self.optimization_governance_ref).write_text(
+                    json.dumps(self.optimization_governance), encoding="utf-8"
+                )
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn("ANTI_CHURN_MEASUREMENT_INVALID", {error["code"] for error in result["errors"]})
+                lower_bound[field] = original
+
+    def test_malformed_manifest_role_returns_structured_invalid(self) -> None:
+        self.manifest["roles"][1] = ["not", "an", "object"]
+        self.manifest_path.write_text(json.dumps(self.manifest), encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("MANIFEST_ROLE_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_schema_truncated_latest_receipt_and_job(self) -> None:
+        receipt_path = self.root / self.receipt_ref
+        receipt_path.write_text(json.dumps({"contract_version": "atlas.execution-receipt.v2"}), encoding="utf-8")
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("LATEST_RECEIPT_SCHEMA_INVALID", {error["code"] for error in result["errors"]})
+
+        receipt_fixture = self.source_root / "packages/atlas-contracts/fixtures/valid/execution-receipt.v2.json"
+        receipt_path.write_bytes(receipt_fixture.read_bytes())
+        receipt_path.with_name("job-envelope.json").write_text(
+            json.dumps({"contract_version": "atlas.job-envelope.v2"}), encoding="utf-8"
+        )
+        result = self.validate()
+        self.assertFalse(result["valid"])
+        self.assertIn("LATEST_JOB_SCHEMA_INVALID", {error["code"] for error in result["errors"]})
+
+    def test_rejects_latest_job_receipt_identity_correlation_drift(self) -> None:
+        receipt_path = self.root / self.receipt_ref
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        job_path = receipt_path.with_name("job-envelope.json")
+        job = json.loads(job_path.read_text(encoding="utf-8"))
+        cases = (
+            ("job_id", "different-job", "LATEST_JOB_RECEIPT_IDENTITY_MISMATCH"),
+            ("component_id", "different-component", "LATEST_JOB_RECEIPT_COMPONENT_MISMATCH"),
+            ("project_id", "different-project", "LATEST_JOB_RECEIPT_PROJECT_MISMATCH"),
+        )
+        for field, value, expected_code in cases:
+            with self.subTest(field=field):
+                original = job[field]
+                job[field] = value
+                job_path.write_text(json.dumps(job), encoding="utf-8")
+                result = self.validate()
+                self.assertFalse(result["valid"])
+                self.assertIn(expected_code, {error["code"] for error in result["errors"]})
+                job[field] = original
+                job_path.write_text(json.dumps(job), encoding="utf-8")
 
     def test_rejects_boolean_source_coverage_counters(self) -> None:
         coverage = self.ledger["source_coverage"]
