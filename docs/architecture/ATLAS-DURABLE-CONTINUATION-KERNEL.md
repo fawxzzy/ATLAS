@@ -41,9 +41,12 @@ The production-shaped adapter exposes only `start_existing_turn`; it has no
 thread-creation method. Its command surface is `codex exec resume <thread>` and
 it correlates the separate `thread.started` and `turn.started` JSONL lifecycle
 records. Host acknowledgement is persisted separately from owner execution
-truth. The bounded post-trigger readback then requires at least one non-reasoning
-owner item and a newly persisted, digest-valid checkpoint for the same owner
-thread before the outbox becomes `CONFIRMED`. Missing turns, zero-output turns,
+truth. A `turn.started` identity is required to be a nonempty string of at most
+256 characters before acknowledgement can mutate the outbox. The bounded
+post-trigger readback then requires at least one non-reasoning owner item and a
+newly persisted canonical `atlas.thread-context-checkpoint.v1` latest, immutable,
+and index record for the same owner thread before the outbox becomes `CONFIRMED`.
+Missing turns, zero-output turns,
 and missing or unchanged checkpoints become exact `RECONCILE_ONLY` dead letters;
 they are never blind-resubmitted. Prompt/model output and checkpoint content are
 never stored in the outbox; only structural counts and checkpoint identities are

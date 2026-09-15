@@ -25,6 +25,7 @@ from ops.atlas.atlasd import (
     _fixture_demo,
 )
 from ops.atlas.continuation_stop_hook import main as stop_hook_main
+from ops.atlas.persist_thread_context import build_checkpoint, persist_checkpoint
 
 
 class HostileMapping(dict):
@@ -114,29 +115,31 @@ class DurableContinuationKernelTests(unittest.TestCase):
             **kwargs,
         )
 
-    def write_checkpoint(self, marker):
-        root = Path(self.tmp.name) / "thread-context"
-        directory = root / "thread-existing"
-        directory.mkdir(parents=True, exist_ok=True)
-        payload = {"thread_id": "thread-existing", "summary": marker}
-        digest = "sha256:" + hashlib.sha256(
-            json.dumps(
-                payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-            ).encode("utf-8")
-        ).hexdigest()
-        checkpoint_id = "threadctx_" + digest.removeprefix("sha256:")
-        (directory / "latest.json").write_text(
-            json.dumps(
-                {
-                    "schema": "atlas.thread-context-checkpoint.v1",
-                    "checkpoint_id": checkpoint_id,
-                    "payload_digest": digest,
-                    "payload": payload,
-                }
-            ),
-            encoding="utf-8",
+    def write_checkpoint(
+        self,
+        marker,
+        *,
+        thread_id="thread-existing",
+        root_name="thread-context",
+    ):
+        root = Path(self.tmp.name) / root_name
+        checkpoint = build_checkpoint(
+            thread_id=thread_id,
+            role_id="owner.test",
+            title="Test owner",
+            state="ACTIVE",
+            summary=marker,
+            recorded_at="2026-09-15T00:00:00Z",
+            done=["Prior work is durable."],
+            now=["Owner continuation is active."],
+            next_items=["Finalize exact owner readback."],
+            decisions=[],
+            blockers=[],
+            receipts=["receipt:test"],
+            source_refs=["source:test"],
         )
-        return root, checkpoint_id
+        persist_checkpoint(checkpoint, output_root=root)
+        return root, checkpoint["checkpoint_id"]
 
     def process_states(self, trigger_key):
         packet_id = self.runtime.db.execute(
@@ -679,42 +682,120 @@ class DurableContinuationKernelTests(unittest.TestCase):
         self.assertIsNone(self.runtime.lease_continuation_trigger(worker_id="second"))
 
     def test_filesystem_checkpoint_probe_accepts_only_same_thread_digest_valid_checkpoint(self):
-        checkpoint_root = Path(self.tmp.name) / "thread-context"
         thread_id = "019fa784-ca4e-7832-8c78-2ace8cab84ac"
-        thread_root = checkpoint_root / thread_id
-        thread_root.mkdir(parents=True)
-        payload = {"thread_id": thread_id, "summary": "bounded"}
-        digest = "sha256:" + hashlib.sha256(
-            json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
-        ).hexdigest()
-        checkpoint_id = "threadctx_" + digest.removeprefix("sha256:")
-        (thread_root / "latest.json").write_text(
-            json.dumps(
-                {
-                    "schema": "atlas.thread-context-checkpoint.v1",
-                    "checkpoint_id": checkpoint_id,
-                    "payload_digest": digest,
-                    "payload": payload,
-                }
-            ),
-            encoding="utf-8",
+        checkpoint_root, checkpoint_id = self.write_checkpoint(
+            "bounded",
+            thread_id=thread_id,
+            root_name="checkpoint-probe-valid",
         )
         probe = FilesystemCheckpointProbe(checkpoint_root)
         self.assertEqual(checkpoint_id, probe(thread_id))
         self.assertIsNone(probe("../" + thread_id))
-        payload["thread_id"] = "thread-other"
-        (thread_root / "latest.json").write_text(
+
+        def canonical_digest(payload):
+            return "sha256:" + hashlib.sha256(
+                json.dumps(
+                    payload,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                    ensure_ascii=False,
+                ).encode("utf-8")
+            ).hexdigest()
+
+        def resign(checkpoint):
+            digest = canonical_digest(checkpoint["payload"])
+            checkpoint["payload_digest"] = digest
+            checkpoint["checkpoint_id"] = "threadctx_" + digest.removeprefix("sha256:")
+
+        mutations = {
+            "wrong-schema": lambda checkpoint: checkpoint.__setitem__(
+                "schema", "atlas.thread-context-checkpoint.v0"
+            ),
+            "wrong-content-class": lambda checkpoint: checkpoint["payload"].__setitem__(
+                "content_class", "RAW_TRANSCRIPT"
+            ),
+            "wrong-policy": lambda checkpoint: checkpoint["payload"].__setitem__(
+                "sensitive_material_policy", "ALLOW"
+            ),
+            "wrong-state": lambda checkpoint: checkpoint["payload"].__setitem__(
+                "state", "RUNNING"
+            ),
+            "wrong-field-type": lambda checkpoint: checkpoint["payload"].__setitem__(
+                "done", "not-a-list"
+            ),
+            "missing-field": lambda checkpoint: checkpoint["payload"].pop("now"),
+            "wrong-thread": lambda checkpoint: checkpoint["payload"].__setitem__(
+                "thread_id", "thread-other"
+            ),
+        }
+        for label, mutate in mutations.items():
+            with self.subTest(label=label):
+                root, _ = self.write_checkpoint(
+                    "bounded",
+                    thread_id=thread_id,
+                    root_name=f"checkpoint-probe-{label}",
+                )
+                latest = root / thread_id / "latest.json"
+                checkpoint = json.loads(latest.read_text(encoding="utf-8"))
+                mutate(checkpoint)
+                resign(checkpoint)
+                latest.write_text(json.dumps(checkpoint), encoding="utf-8")
+                self.assertIsNone(FilesystemCheckpointProbe(root)(thread_id))
+
+        incomplete_root = Path(self.tmp.name) / "checkpoint-probe-incomplete"
+        incomplete_dir = incomplete_root / thread_id
+        incomplete_dir.mkdir(parents=True)
+        incomplete_payload = {"thread_id": thread_id, "summary": "bounded"}
+        incomplete_digest = canonical_digest(incomplete_payload)
+        (incomplete_dir / "latest.json").write_text(
             json.dumps(
                 {
                     "schema": "atlas.thread-context-checkpoint.v1",
-                    "checkpoint_id": checkpoint_id,
-                    "payload_digest": digest,
-                    "payload": payload,
+                    "checkpoint_id": "threadctx_"
+                    + incomplete_digest.removeprefix("sha256:"),
+                    "payload_digest": incomplete_digest,
+                    "payload": incomplete_payload,
                 }
             ),
             encoding="utf-8",
         )
-        self.assertIsNone(probe(thread_id))
+        self.assertIsNone(FilesystemCheckpointProbe(incomplete_root)(thread_id))
+
+        digest_root, _ = self.write_checkpoint(
+            "bounded", thread_id=thread_id, root_name="checkpoint-probe-digest"
+        )
+        digest_latest = digest_root / thread_id / "latest.json"
+        digest_checkpoint = json.loads(digest_latest.read_text(encoding="utf-8"))
+        digest_checkpoint["payload_digest"] = "sha256:" + "0" * 64
+        digest_latest.write_text(json.dumps(digest_checkpoint), encoding="utf-8")
+        self.assertIsNone(FilesystemCheckpointProbe(digest_root)(thread_id))
+
+        identity_root, _ = self.write_checkpoint(
+            "bounded", thread_id=thread_id, root_name="checkpoint-probe-identity"
+        )
+        identity_latest = identity_root / thread_id / "latest.json"
+        identity_checkpoint = json.loads(identity_latest.read_text(encoding="utf-8"))
+        identity_checkpoint["checkpoint_id"] = "threadctx_" + "0" * 64
+        identity_latest.write_text(json.dumps(identity_checkpoint), encoding="utf-8")
+        self.assertIsNone(FilesystemCheckpointProbe(identity_root)(thread_id))
+
+        immutable_root, immutable_id = self.write_checkpoint(
+            "bounded", thread_id=thread_id, root_name="checkpoint-probe-immutable"
+        )
+        (immutable_root / thread_id / f"{immutable_id}.json").unlink()
+        self.assertIsNone(FilesystemCheckpointProbe(immutable_root)(thread_id))
+
+        index_root, _ = self.write_checkpoint(
+            "bounded", thread_id=thread_id, root_name="checkpoint-probe-index"
+        )
+        index_path = index_root / "index.json"
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+        index["threads"][0]["state"] = "WAITING"
+        index["index_digest"] = canonical_digest(
+            {"schema": index["schema"], "threads": index["threads"]}
+        )
+        index_path.write_text(json.dumps(index), encoding="utf-8")
+        self.assertIsNone(FilesystemCheckpointProbe(index_root)(thread_id))
 
     def test_restart_requeues_unsent_lease_and_dispatches_once(self):
         committed = self.commit()
@@ -1511,6 +1592,124 @@ class DurableContinuationKernelTests(unittest.TestCase):
         self.assertEqual("completed", result.status)
         self.assertEqual(1, result.visible_item_count)
 
+    def test_codex_stream_turn_id_bound_precedes_acknowledgement(self):
+        def run(turn_id):
+            lifecycle = (
+                json.dumps(
+                    {"type": "thread.started", "thread_id": "thread-existing"}
+                )
+                + "\n"
+                + json.dumps({"type": "turn.started", "turn_id": turn_id})
+                + "\n"
+                + json.dumps(
+                    {"type": "item.completed", "item": {"type": "agent_message"}}
+                )
+                + "\n"
+                + json.dumps({"type": "turn.completed"})
+                + "\n"
+            ).encode("utf-8")
+
+            class Process:
+                def __init__(self):
+                    self.stdout = io.BytesIO(lifecycle)
+
+                def wait(self, timeout=None):
+                    return 0
+
+                def terminate(self):
+                    pass
+
+                def kill(self):
+                    pass
+
+            acknowledgements = []
+            adapter = CodexPersistentThreadAdapter(
+                popen_factory=lambda *args, **kwargs: Process()
+            )
+            try:
+                result = adapter.start_existing_turn(
+                    thread_id="thread-existing",
+                    trigger_key="trg_x",
+                    continuation_input="{}",
+                    acknowledge=lambda thread_id, candidate: acknowledgements.append(
+                        (thread_id, candidate)
+                    ),
+                )
+            except TriggerReadbackFailure as error:
+                return error, acknowledgements
+            return result, acknowledgements
+
+        accepted, acknowledgements = run("t" * 256)
+        self.assertEqual("completed", accepted.status)
+        self.assertEqual([("thread-existing", "t" * 256)], acknowledgements)
+
+        rejected, acknowledgements = run("t" * 257)
+        self.assertEqual("APP_READBACK_FAILED", rejected.failure_code)
+        self.assertEqual([], acknowledgements)
+
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key,
+            worker_id="worker",
+        )
+        with self.assertRaisesRegex(ValueError, "structural limit"):
+            self.runtime.acknowledge_continuation_trigger(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="t" * 257,
+                checkpoint_before_id=None,
+            )
+        row = self.runtime.db.execute(
+            "SELECT state,thread_id,turn_id,trigger_ack_at FROM continuation_outbox "
+            "WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(("DISPATCHED", None, None, None), tuple(row))
+
+    def test_codex_stream_invalid_turn_identity_never_acknowledges_candidate(self):
+        invalid_lifecycles = (
+            [
+                {"type": "thread.started", "thread_id": "thread-existing"},
+                {"type": "turn.started", "turn_id": 7},
+            ],
+            [
+                {"type": "turn.started", "turn_id": "turn-before-thread"},
+                {"type": "thread.started", "thread_id": "thread-existing"},
+            ],
+        )
+        for events in invalid_lifecycles:
+            with self.subTest(events=events):
+                lifecycle = "".join(json.dumps(event) + "\n" for event in events).encode(
+                    "utf-8"
+                )
+
+                class Process:
+                    def __init__(self):
+                        self.stdout = io.BytesIO(lifecycle)
+
+                    def wait(self, timeout=None):
+                        return 0
+
+                    def terminate(self):
+                        pass
+
+                    def kill(self):
+                        pass
+
+                acknowledgements = []
+                adapter = CodexPersistentThreadAdapter(
+                    popen_factory=lambda *args, **kwargs: Process()
+                )
+                with self.assertRaises(TriggerReadbackFailure):
+                    adapter.start_existing_turn(
+                        thread_id="thread-existing",
+                        trigger_key="trg_x",
+                        continuation_input="{}",
+                        acknowledge=lambda *identity: acknowledgements.append(identity),
+                    )
+                self.assertEqual([], acknowledgements)
+
     def test_codex_stream_rejects_oversized_record_before_enqueue(self):
         class Process:
             stdout = io.BytesIO(b"x" * 65_537)
@@ -1640,13 +1839,16 @@ class DurableContinuationKernelTests(unittest.TestCase):
             )
 
         adapter = CodexPersistentThreadAdapter(runner=runner)
+        acknowledgements = []
         while invalid_stdout:
             with self.assertRaises(ValueError):
                 adapter.start_existing_turn(
                     thread_id="thread-existing",
                     trigger_key="trg_x",
                     continuation_input="{}",
+                    acknowledge=lambda *identity: acknowledgements.append(identity),
                 )
+            self.assertEqual([], acknowledgements)
 
     def test_codex_adapter_rejects_wrong_thread_and_non_object_jsonl(self):
         responses = [

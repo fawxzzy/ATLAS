@@ -1484,6 +1484,8 @@ class AtlasRuntime:
         """Persist host acknowledgement without claiming owner execution truth."""
         if not thread_id.strip() or not turn_id.strip():
             raise ValueError("thread_id and turn_id are required")
+        if len(turn_id) > 256:
+            raise ValueError("turn_id exceeds structural limit")
         if checkpoint_before_id is not None and not _THREAD_CONTEXT_ID.fullmatch(
             checkpoint_before_id
         ):

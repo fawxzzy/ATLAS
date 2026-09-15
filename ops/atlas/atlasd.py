@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
-import hashlib
 import json
 import math
 import os
@@ -28,6 +27,13 @@ if __package__ in {None, ""}:
 
 from ops.atlas.atlas_runtime import AtlasRuntime
 from ops.atlas.atlas_watchdog import AtlasWatchdog, DEFAULT_FALLBACK_SECONDS
+from ops.atlas.persist_thread_context import (
+    ThreadContextError,
+    _digest as _thread_context_digest,
+    _load_index as _load_thread_context_index,
+    _safe_path_component as _safe_thread_context_path_component,
+    _validate_checkpoint_shape,
+)
 
 
 def _positive_float(value: str) -> float:
@@ -98,28 +104,58 @@ class FilesystemCheckpointProbe:
             or "\0" in thread_id
         ):
             return None
-        path = (self.root / thread_id / "latest.json").resolve()
         try:
+            _safe_thread_context_path_component(thread_id, "thread_id")
+            path = (self.root / thread_id / "latest.json").resolve()
             path.relative_to(self.root)
             raw = path.read_bytes()
             if len(raw) > 262_144:
                 return None
             checkpoint = json.loads(raw)
-        except (OSError, ValueError, json.JSONDecodeError):
+            payload = _validate_checkpoint_shape(checkpoint)
+        except (OSError, ValueError, json.JSONDecodeError, ThreadContextError):
             return None
-        if not isinstance(checkpoint, dict) or checkpoint.get("schema") != "atlas.thread-context-checkpoint.v1":
+        if payload["thread_id"] != thread_id:
             return None
-        payload = checkpoint.get("payload")
-        if not isinstance(payload, dict) or payload.get("thread_id") != thread_id:
-            return None
-        digest = "sha256:" + hashlib.sha256(
-            json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-        ).hexdigest()
+        digest = _thread_context_digest(payload)
         checkpoint_id = checkpoint.get("checkpoint_id")
         if (
             checkpoint.get("payload_digest") != digest
             or checkpoint_id != "threadctx_" + digest.removeprefix("sha256:")
         ):
+            return None
+        try:
+            immutable_path = (path.parent / f"{checkpoint_id}.json").resolve()
+            immutable_path.relative_to(self.root)
+            immutable = json.loads(immutable_path.read_bytes())
+            if immutable != checkpoint:
+                return None
+            index = _load_thread_context_index(self.root / "index.json")
+        except (OSError, ValueError, json.JSONDecodeError, ThreadContextError):
+            return None
+        if set(index) != {"schema", "threads", "index_digest"}:
+            return None
+        expected_index_digest = _thread_context_digest(
+            {"schema": index["schema"], "threads": index["threads"]}
+        )
+        if index.get("index_digest") != expected_index_digest:
+            return None
+        records = [
+            record
+            for record in index["threads"]
+            if isinstance(record, dict) and record.get("thread_id") == thread_id
+        ]
+        expected_record = {
+            "thread_id": thread_id,
+            "logical_role_id": payload["logical_role_id"],
+            "visible_title": payload["visible_title"],
+            "state": payload["state"],
+            "recorded_at": payload["recorded_at"],
+            "checkpoint_id": checkpoint_id,
+            "payload_digest": digest,
+            "latest_ref": f"runtime/atlas/thread-context/{thread_id}/latest.json",
+        }
+        if records != [expected_record]:
             return None
         return checkpoint_id
 
@@ -351,6 +387,7 @@ class CodexPersistentThreadAdapter:
                         or seen_turn is not None
                         or not isinstance(candidate, str)
                         or not candidate.strip()
+                        or len(candidate) > 256
                     ):
                         raise TriggerReadbackFailure(
                             "APP_READBACK_FAILED", "existing-thread trigger identity is ambiguous"
@@ -473,6 +510,7 @@ class CodexPersistentThreadAdapter:
                 if (
                     not isinstance(candidate_turn, str)
                     or not candidate_turn.strip()
+                    or len(candidate_turn) > 256
                     or has_thread_id
                 ):
                     raise ValueError("existing-thread trigger returned malformed lifecycle records")
