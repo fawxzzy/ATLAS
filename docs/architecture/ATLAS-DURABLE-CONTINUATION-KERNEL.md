@@ -93,9 +93,18 @@ The production existing-thread command streams lifecycle records. It has a
 execution deadline for bounded output, `turn.completed`, and checkpoint proof.
 The acknowledgement atomically replaces the short deadline with the execution
 deadline; startup recovery distinguishes an unacknowledged ambiguity from an
-acknowledged execution timeout.
+acknowledged execution timeout. Matching observed turn identity never extends
+or bypasses that execution deadline; an acknowledged row without completed
+output and checkpoint proof becomes `APP_READBACK_FAILED` / `RECONCILE_ONLY`
+once the deadline passes.
 Either timeout is non-echoing `APP_READBACK_FAILED` and cannot become a
 replayable capacity claim.
+
+Process lifecycle projection is also state-bound. The event-driven ingress seam
+records `STARTED` only inside a transaction that still observes the exact trigger
+as acknowledged and `DISPATCHED`. A synchronously confirmed, blocked, failed, or
+otherwise terminal dispatch already owns its `EXITED` or `FAILED` event and can
+never receive a later contradictory `STARTED` event.
 
 ## Authorization, cost, and conflicts
 

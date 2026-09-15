@@ -138,6 +138,21 @@ class DurableContinuationKernelTests(unittest.TestCase):
         )
         return root, checkpoint_id
 
+    def process_states(self, trigger_key):
+        packet_id = self.runtime.db.execute(
+            "SELECT packet_id FROM continuation_outbox WHERE trigger_key=?",
+            (trigger_key,),
+        ).fetchone()["packet_id"]
+        rows = self.runtime.db.execute(
+            "SELECT payload FROM events WHERE kind='CONTINUATION_PROCESS' ORDER BY rowid"
+        ).fetchall()
+        payloads = [json.loads(row["payload"]) for row in rows]
+        return [
+            payload["process_state"]
+            for payload in payloads
+            if payload["packet_id"] == packet_id
+        ]
+
     def test_atomic_terminal_successor_claim_and_outbox(self):
         result = self.commit()
         self.assertEqual(result.successor_packet_id, "packet-2")
@@ -822,6 +837,74 @@ class DurableContinuationKernelTests(unittest.TestCase):
             self.runtime.reconcile_continuation_startup(now=execution_deadline + 1),
         )
 
+    def test_observed_acknowledged_turn_cannot_bypass_execution_deadline(self):
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key,
+            worker_id="worker",
+            confirmation_seconds=30,
+        )
+        self.runtime.acknowledge_continuation_trigger(
+            trigger_key=committed.trigger_key,
+            thread_id="thread-existing",
+            turn_id="turn-observed",
+            checkpoint_before_id="threadctx_" + "a" * 64,
+            execution_seconds=1800,
+        )
+        deadline = self.runtime.db.execute(
+            "SELECT confirmation_deadline FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()[0]
+        observed = {
+            committed.trigger_key: {
+                "thread_id": "thread-existing",
+                "turn_id": "turn-observed",
+            }
+        }
+        self.assertEqual(
+            (),
+            self.runtime.reconcile_continuation_startup(
+                observed_turns=observed, now=deadline - 1
+            ),
+        )
+        self.assertEqual(
+            "DISPATCHED",
+            self.runtime.db.execute(
+                "SELECT state FROM continuation_outbox WHERE trigger_key=?",
+                (committed.trigger_key,),
+            ).fetchone()[0],
+        )
+        self.assertIn(
+            {
+                "trigger_key": committed.trigger_key,
+                "action": "DEAD_LETTER_EXECUTION_TIMEOUT",
+            },
+            self.runtime.reconcile_continuation_startup(
+                observed_turns=observed, now=deadline + 1
+            ),
+        )
+        row = self.runtime.db.execute(
+            "SELECT state,error_class,readback_class,retry_class FROM continuation_outbox "
+            "WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(
+            (
+                "DEAD_LETTER",
+                "APP_READBACK_FAILED",
+                "APP_READBACK_FAILED",
+                "RECONCILE_ONLY",
+            ),
+            tuple(row),
+        )
+        self.assertEqual(
+            (),
+            self.runtime.reconcile_continuation_startup(
+                observed_turns=observed, now=deadline + 2
+            ),
+        )
+
     def test_wrong_turn_identity_does_not_mutate_dispatched_row(self):
         committed = self.commit()
         lease = self.runtime.lease_continuation_trigger(worker_id="worker")
@@ -935,6 +1018,95 @@ class DurableContinuationKernelTests(unittest.TestCase):
         self.assertEqual(1, row["visible_item_count"])
         self.assertEqual(before, row["checkpoint_before_id"])
         self.assertEqual(after, row["checkpoint_after_id"])
+        self.assertEqual(["STARTING", "EXITED"], self.process_states(result["dispatch"]["trigger_key"]))
+        self.assertIsNone(
+            self.runtime.db.execute(
+                "SELECT event_id FROM events WHERE event_id='ingress:accepted'"
+            ).fetchone()
+        )
+
+    def test_event_worker_blocked_dispatch_never_records_started_after_exit(self):
+        committed = self.commit()
+        before = "threadctx_" + "a" * 64
+        after = "threadctx_" + "b" * 64
+        worker = EventDrivenContinuationWorker(
+            self.runtime,
+            InspectingAdapter(self.runtime, visible_item_count=0),
+            guard_path=Path(self.tmp.name) / "event-worker-blocked.lock",
+            checkpoint_probe=SequenceCheckpointProbe(before, after),
+        )
+        result = worker.handle_event(event_id="blocked-ingress", worker_id="worker")
+        self.assertEqual("blocked", result["dispatch"]["status"])
+        self.assertEqual("APP_READBACK_NO_OUTPUT", result["dispatch"]["failure_code"])
+        self.assertEqual(["STARTING", "EXITED"], self.process_states(committed.trigger_key))
+        self.assertIsNone(
+            self.runtime.db.execute(
+                "SELECT event_id FROM events WHERE event_id='blocked-ingress:accepted'"
+            ).fetchone()
+        )
+
+    def test_event_worker_failed_dispatch_never_records_started_after_failure(self):
+        committed = self.commit()
+        worker = EventDrivenContinuationWorker(
+            self.runtime,
+            NoTurnAdapter(),
+            guard_path=Path(self.tmp.name) / "event-worker-failed.lock",
+            checkpoint_probe=SequenceCheckpointProbe("threadctx_" + "a" * 64),
+        )
+        result = worker.handle_event(event_id="failed-ingress", worker_id="worker")
+        self.assertEqual("blocked", result["dispatch"]["status"])
+        self.assertEqual("APP_READBACK_NO_TURN", result["dispatch"]["failure_code"])
+        self.assertEqual(["STARTING", "FAILED"], self.process_states(committed.trigger_key))
+        self.assertIsNone(
+            self.runtime.db.execute(
+                "SELECT event_id FROM events WHERE event_id='failed-ingress:accepted'"
+            ).fetchone()
+        )
+
+    def test_event_worker_records_started_only_for_atomic_acknowledged_running_postimage(self):
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.record_continuation_process_event(
+            event_id=f"process:{committed.trigger_key}:starting",
+            owner_id="owner.test",
+            packet_id="packet-2",
+            process_state="STARTING",
+        )
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key,
+            worker_id="worker",
+        )
+        self.runtime.acknowledge_continuation_trigger(
+            trigger_key=committed.trigger_key,
+            thread_id="thread-existing",
+            turn_id="turn-running",
+            checkpoint_before_id="threadctx_" + "a" * 64,
+        )
+        worker = EventDrivenContinuationWorker(
+            self.runtime,
+            FixtureTriggerAdapter(),
+            guard_path=Path(self.tmp.name) / "event-worker-running.lock",
+            checkpoint_probe=SequenceCheckpointProbe(),
+        )
+        dispatch = {
+            "trigger_key": committed.trigger_key,
+            "packet_id": "packet-2",
+            "thread_id": "thread-existing",
+            "turn_id": "turn-running",
+            "status": "running",
+        }
+        with mock.patch(
+            "ops.atlas.atlasd.ContinuationDispatcher.dispatch_one",
+            return_value=dispatch,
+        ):
+            result = worker.handle_event(event_id="running-ingress", worker_id="worker")
+        self.assertEqual(dispatch, result["dispatch"])
+        self.assertEqual(["STARTING", "STARTED"], self.process_states(committed.trigger_key))
+        self.assertIsNotNone(
+            self.runtime.db.execute(
+                "SELECT event_id FROM events WHERE event_id='running-ingress:accepted'"
+            ).fetchone()
+        )
 
     def test_post_invocation_retryable_label_is_forced_to_dead_letter(self):
         committed = self.commit()

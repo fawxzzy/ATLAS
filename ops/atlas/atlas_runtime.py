@@ -1832,7 +1832,8 @@ class AtlasRuntime:
                                 "action": "DEAD_LETTER_UNPROVEN_READBACK",
                             }
                         )
-                elif row["confirmation_deadline"] is not None and row["confirmation_deadline"] <= now:
+                        continue
+                if row["confirmation_deadline"] is not None and row["confirmation_deadline"] <= now:
                     acknowledged = row["trigger_ack_at"] is not None
                     self.db.execute(
                         "UPDATE continuation_outbox SET state='DEAD_LETTER',"
@@ -2098,6 +2099,52 @@ class AtlasRuntime:
                 raise RuntimeError("Stop-hook trigger claim was lost")
             self.db.execute("COMMIT")
             return {"decision": "block", "reason": reason}
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def record_continuation_process_started_if_running(
+        self,
+        *,
+        event_id: str,
+        trigger_key: str,
+        packet_id: str,
+    ) -> bool:
+        """Record STARTED only while one exact acknowledged trigger is running."""
+        if not event_id.strip() or not trigger_key.strip() or not packet_id.strip():
+            raise ValueError("event, trigger, and packet identities are required")
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT owner_id,packet_id,state,trigger_ack_at FROM continuation_outbox "
+                "WHERE trigger_key=?",
+                (trigger_key,),
+            ).fetchone()
+            if not row or row["packet_id"] != packet_id:
+                raise ValueError("process acceptance does not match durable trigger identity")
+            if row["state"] != "DISPATCHED" or row["trigger_ack_at"] is None:
+                self.db.execute("COMMIT")
+                return False
+            payload = {
+                "owner_id": row["owner_id"],
+                "packet_id": packet_id,
+                "process_state": "STARTED",
+                "process_id_present": False,
+            }
+            digest = self.digest(payload)
+            existing = self.db.execute(
+                "SELECT payload_digest FROM events WHERE event_id=?", (event_id,)
+            ).fetchone()
+            self._record_event(
+                event_id=event_id,
+                digest=digest,
+                task_id=packet_id,
+                kind="CONTINUATION_PROCESS",
+                payload=payload,
+                now=time.time(),
+            )
+            self.db.execute("COMMIT")
+            return existing is None
         except Exception:
             self.db.execute("ROLLBACK")
             raise

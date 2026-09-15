@@ -1,6 +1,6 @@
 {
   "schema": "atlas.durable-continuation-kernel.v1",
-  "contract_version": "1.0.3",
+  "contract_version": "1.0.4",
   "lifecycle_state": "SOURCE_ONLY_UNINSTALLED",
   "authority_store": "ops/atlas/atlas_runtime.py",
   "database": {
@@ -55,6 +55,9 @@
     "trigger_acknowledgement_timeout_seconds": 30,
     "owner_execution_timeout_seconds": 1800,
     "acknowledgement_replaces_trigger_deadline": true,
+    "observed_turn_bypasses_execution_deadline": false,
+    "process_started_requires": "ATOMIC_ACKNOWLEDGED_DISPATCHED_POSTIMAGE",
+    "terminal_process_state_can_be_reopened": false,
     "owner_execution_confirmation": {
       "requires_visible_item": true,
       "requires_advanced_valid_checkpoint": true,

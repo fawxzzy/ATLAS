@@ -762,15 +762,14 @@ class EventDrivenContinuationWorker:
                 checkpoint_probe=self.checkpoint_probe,
             ).dispatch_one(worker_id=worker_id)
             if dispatch:
-                self.runtime.record_continuation_process_event(
+                trigger_key = dispatch.get("trigger_key")
+                packet_id = dispatch.get("packet_id")
+                if not isinstance(trigger_key, str) or not isinstance(packet_id, str):
+                    raise ValueError("dispatch result is missing durable trigger identity")
+                self.runtime.record_continuation_process_started_if_running(
                     event_id=f"{event_id}:accepted",
-                    owner_id=self.runtime.db.execute(
-                        "SELECT owner_id FROM continuation_outbox WHERE trigger_key=?",
-                        (dispatch["trigger_key"],),
-                    ).fetchone()["owner_id"],
-                    packet_id=dispatch["packet_id"],
-                    process_state="STARTED",
-                    process_id=None,
+                    trigger_key=trigger_key,
+                    packet_id=packet_id,
                 )
             return {"event_id": event_id, "recovery": recovery, "dispatch": dispatch}
 
