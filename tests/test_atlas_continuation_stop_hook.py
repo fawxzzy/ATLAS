@@ -256,8 +256,8 @@ class DurableContinuationKernelTests(unittest.TestCase):
             ("DISPATCHED", "STOP_HOOK", before),
         )
 
-    def test_stop_hook_resolves_official_session_id_and_honors_active_guard(self):
-        self.commit()
+    def test_stop_hook_active_guard_retains_unidentified_attempt_for_reconciliation(self):
+        committed = self.commit()
         checkpoint_root, before = self.write_checkpoint("before")
         args = [
             "--database",
@@ -287,14 +287,22 @@ class DurableContinuationKernelTests(unittest.TestCase):
         self.assertEqual(json.loads(guarded.getvalue()), {})
         row = self.runtime.db.execute(
             "SELECT state,readback_class,visible_item_count,checkpoint_before_id,"
-            "checkpoint_after_id FROM continuation_outbox"
+            "checkpoint_after_id,turn_id FROM continuation_outbox"
         ).fetchone()
         self.assertEqual(
-            ("CONFIRMED", "OWNER_EXECUTION_CONFIRMED", 1, before, after), tuple(row)
+            ("DISPATCHED", None, None, before, None, None), tuple(row)
+        )
+        deadline = self.runtime.db.execute(
+            "SELECT confirmation_deadline FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()[0]
+        self.assertIn(
+            {"trigger_key": committed.trigger_key, "action": "DEAD_LETTER_AMBIGUOUS"},
+            self.runtime.reconcile_continuation_startup(now=deadline + 1),
         )
 
-    def test_stop_hook_guard_dead_letters_missing_visible_output(self):
-        self.commit()
+    def test_stop_hook_guard_without_identity_never_classifies_visible_output(self):
+        committed = self.commit()
         checkpoint_root, _ = self.write_checkpoint("before")
         args = [
             "--database",
@@ -317,12 +325,101 @@ class DurableContinuationKernelTests(unittest.TestCase):
         ), redirect_stdout(io.StringIO()):
             stop_hook_main(args)
         row = self.runtime.db.execute(
+            "SELECT state,error_class,retry_class,readback_class,visible_item_count,turn_id "
+            "FROM continuation_outbox"
+        ).fetchone()
+        self.assertEqual(
+            ("DISPATCHED", None, None, None, None, None), tuple(row)
+        )
+        deadline = self.runtime.db.execute(
+            "SELECT confirmation_deadline FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()[0]
+        self.runtime.reconcile_continuation_startup(now=deadline + 1)
+        row = self.runtime.db.execute(
             "SELECT state,error_class,retry_class FROM continuation_outbox"
         ).fetchone()
         self.assertEqual(
-            ("DEAD_LETTER", "APP_READBACK_NO_OUTPUT", "RECONCILE_ONLY"), tuple(row)
+            ("DEAD_LETTER", "APP_READBACK_FAILED", "RECONCILE_ONLY"), tuple(row)
         )
-        self.assertIsNone(self.runtime.lease_continuation_trigger(worker_id="second"))
+
+    def test_stop_hook_finalization_requires_exact_trigger_thread_and_turn(self):
+        committed = self.commit()
+        _, before = self.write_checkpoint("before")
+        self.assertEqual(
+            "block",
+            self.runtime.stop_hook_decision(
+                owner_id="owner.test",
+                thread_id="thread-existing",
+                checkpoint_before_id=before,
+            )["decision"],
+        )
+        _, after = self.write_checkpoint("after")
+        for kwargs in (
+            {"trigger_key": "", "thread_id": "thread-existing", "turn_id": "turn-exact"},
+            {"trigger_key": "missing", "thread_id": "thread-existing", "turn_id": "turn-exact"},
+            {"trigger_key": committed.trigger_key, "thread_id": "wrong", "turn_id": "turn-exact"},
+        ):
+            with self.subTest(kwargs=kwargs), self.assertRaises((KeyError, ValueError)):
+                self.runtime.finalize_stop_hook_continuation(
+                    **kwargs, visible_item_count=1, checkpoint_after_id=after
+                )
+            row = self.runtime.db.execute(
+                "SELECT state,turn_id,trigger_ack_at,checkpoint_after_id "
+                "FROM continuation_outbox WHERE trigger_key=?",
+                (committed.trigger_key,),
+            ).fetchone()
+            self.assertEqual(("DISPATCHED", None, None, None), tuple(row))
+
+        self.runtime.acknowledge_continuation_trigger(
+            trigger_key=committed.trigger_key,
+            thread_id="thread-existing",
+            turn_id="turn-exact",
+            checkpoint_before_id=before,
+        )
+        with self.assertRaisesRegex(ValueError, "does not match"):
+            self.runtime.finalize_stop_hook_continuation(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="turn-wrong",
+                visible_item_count=1,
+                checkpoint_after_id=after,
+            )
+        row = self.runtime.db.execute(
+            "SELECT state,turn_id,checkpoint_after_id FROM continuation_outbox "
+            "WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(("DISPATCHED", "turn-exact", None), tuple(row))
+        self.assertEqual(
+            "OWNER_EXECUTION_CONFIRMED",
+            self.runtime.finalize_stop_hook_continuation(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="turn-exact",
+                visible_item_count=1,
+                checkpoint_after_id=after,
+            ),
+        )
+
+    def test_database_allows_only_one_open_trigger_per_owner_thread(self):
+        self.commit()
+        pack = self.runtime.create_context_pack(
+            {"summary": "third", "source_refs": ["receipt:third"]}
+        )
+        self.runtime.register_continuation_packet(
+            packet_id="packet-3",
+            owner_id="owner.test",
+            conflict_key="repo:c",
+            context_pack_id=pack,
+        )
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.runtime.db.execute(
+                "INSERT INTO continuation_outbox(trigger_key,owner_id,binding_epoch,packet_id,"
+                "context_pack_id,payload_digest,state,created_at,updated_at) "
+                "VALUES('second-open','owner.test',1,'packet-3',?,'digest','PENDING',1,1)",
+                (pack,),
+            )
 
     def test_stop_hook_unbound_malformed_and_unavailable_allow_stop(self):
         for payload in ({"session_id": "unknown"}, [], {"session_id": ""}):
@@ -471,6 +568,46 @@ class DurableContinuationKernelTests(unittest.TestCase):
                 "retry_class",
             }.issubset(columns)
         )
+
+    def test_migration_fails_closed_on_ambiguous_legacy_open_owner_rows(self):
+        database = Path(self.tmp.name) / "ambiguous-legacy.db"
+        connection = sqlite3.connect(database)
+        connection.execute(
+            "CREATE TABLE continuation_outbox (trigger_key TEXT PRIMARY KEY,owner_id TEXT NOT NULL,"
+            "binding_epoch INTEGER NOT NULL,packet_id TEXT NOT NULL,context_pack_id TEXT NOT NULL,"
+            "payload_digest TEXT NOT NULL,state TEXT NOT NULL,attempt_count INTEGER NOT NULL DEFAULT 0,"
+            "lease_owner TEXT,leased_until REAL,dispatched_at REAL,confirmation_deadline REAL,"
+            "delivery_method TEXT,thread_id TEXT,turn_id TEXT,error_class TEXT,"
+            "created_at REAL NOT NULL,updated_at REAL NOT NULL)"
+        )
+        connection.executemany(
+            "INSERT INTO continuation_outbox(trigger_key,owner_id,binding_epoch,packet_id,"
+            "context_pack_id,payload_digest,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,1,1)",
+            (
+                ("legacy-a", "owner.legacy", 1, "packet-a", "pack-a", "digest-a", "PENDING"),
+                ("legacy-b", "owner.legacy", 1, "packet-b", "pack-b", "digest-b", "DISPATCHED"),
+            ),
+        )
+        connection.commit()
+        connection.close()
+        with self.assertRaisesRegex(RuntimeError, "ambiguous legacy continuation state"):
+            AtlasRuntime(database)
+        probe = sqlite3.connect(database)
+        try:
+            self.assertIsNone(
+                probe.execute(
+                    "SELECT name FROM sqlite_master WHERE type='index' "
+                    "AND name='continuation_one_open_owner_thread'"
+                ).fetchone()
+            )
+            self.assertEqual(
+                2,
+                probe.execute(
+                    "SELECT COUNT(*) FROM continuation_outbox WHERE owner_id='owner.legacy'"
+                ).fetchone()[0],
+            )
+        finally:
+            probe.close()
 
     def test_owner_dispatch_dead_letters_no_output_without_replay(self):
         committed = self.commit()

@@ -1,6 +1,6 @@
 {
   "schema": "atlas.durable-continuation-kernel.v1",
-  "contract_version": "1.0.2",
+  "contract_version": "1.0.3",
   "lifecycle_state": "SOURCE_ONLY_UNINSTALLED",
   "authority_store": "ops/atlas/atlas_runtime.py",
   "database": {
@@ -34,7 +34,11 @@
   "trigger_delivery": {
     "semantics": "AT_LEAST_ONCE_TRIGGER_EXACTLY_ONCE_STATE",
     "same_session_accelerator": "CODEX_STOP_HOOK_DECISION_BLOCK",
-    "same_session_completion_proof": "STRUCTURAL_OUTPUT_PLUS_ADVANCED_VALID_CHECKPOINT",
+    "same_session_completion_proof": "AUTHORITATIVE_TRIGGER_AND_TURN_PLUS_STRUCTURAL_OUTPUT_AND_ADVANCED_VALID_CHECKPOINT",
+    "supported_stop_event_can_finalize": false,
+    "unsupported_stop_event_disposition": "RETAIN_SENT_UNCONFIRMED_FOR_BOUNDED_RECONCILIATION",
+    "open_trigger_cardinality": "ONE_PER_UNIQUE_OWNER_THREAD",
+    "ambiguous_legacy_open_state": "MIGRATION_FAILS_CLOSED",
     "delivery_transports_mutually_exclusive": true,
     "sent_unconfirmed_persisted_before_external_effect": true,
     "trigger_acknowledgement_separate_from_owner_execution_truth": true,

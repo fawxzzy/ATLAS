@@ -60,12 +60,16 @@ transport. In one SQLite transaction it consumes one `PENDING` row into the
 sent-unconfirmed `DISPATCHED` state, binds `delivery_method=STOP_HOOK`, and then
 returns only `decision=block` plus packet, context-pack, and trigger identities.
 The external dispatcher can therefore never lease that trigger. The decision
-requires a digest-valid baseline checkpoint. On the guarded follow-up Stop event,
-the existing hook records a structural non-empty assistant-output count and a
-new digest-valid checkpoint for the same bound thread, then uses the same durable
-acknowledgement/finalization seam as external dispatch. Missing output or an
-unchanged checkpoint dead-letters the row `RECONCILE_ONLY`. Unbound, malformed,
-or unavailable hook evidence returns `{}` and permits the session to stop.
+requires a digest-valid baseline checkpoint. Finalization additionally requires
+an authoritative event-bound trigger key and host turn identity that exactly
+match the dispatched row. The currently supported Stop event supplies neither,
+so its guarded follow-up returns `{}` and retains the sent-unconfirmed attempt
+for bounded startup/readback reconciliation. It never selects a row by owner,
+synthesizes a turn identity from checkpoint state, or claims completion from
+structural output alone. A future supported transport may use the existing exact
+acknowledgement/finalization seam only after supplying both identities. Unbound,
+malformed, or unavailable hook evidence likewise returns `{}` and permits the
+session to stop.
 
 Startup recovery is an explicit one-shot call:
 
@@ -101,6 +105,9 @@ remain blocked with no outbox row. Conflict claims are unique; one blocked lane
 does not prevent another owner/conflict group from advancing. Claim release and
 startup reconciliation deterministically promote one dependency-ready waiter
 per free conflict key, atomically creating its claim and unique outbox trigger.
+The database also permits at most one open outbox trigger per uniquely bound
+owner/thread. Migration fails closed when legacy state contains multiple open
+rows for one owner instead of guessing which attempt is authoritative.
 Exact settlement replay recovers blocked successor identity from durable packet
 state even when authorization, cost, or conflict intentionally produced no
 outbox row.

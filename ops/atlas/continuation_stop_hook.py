@@ -44,12 +44,10 @@ def decide(
         thread_id = owner["thread_id"]
         checkpoint_id = FilesystemCheckpointProbe(checkpoint_root)(thread_id)
         if finalize_active:
-            runtime.finalize_stop_hook_continuation(
-                owner_id=owner_id,
-                thread_id=thread_id,
-                visible_item_count=visible_item_count,
-                checkpoint_after_id=checkpoint_id,
-            )
+            # The supported Stop event contains no authoritative ATLAS trigger
+            # key or host turn identity. Retain the sent-unconfirmed attempt for
+            # bounded startup/readback reconciliation; never select an owner row
+            # or synthesize a turn identity from checkpoint state.
             return {}
         return runtime.stop_hook_decision(
             owner_id=owner_id,

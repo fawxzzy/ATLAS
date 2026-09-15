@@ -321,6 +321,24 @@ class AtlasRuntime:
                     self.db.execute(
                         f"ALTER TABLE continuation_outbox ADD COLUMN {column} {definition}"
                     )
+            ambiguous_open_owner = self.db.execute(
+                "SELECT owner_id,COUNT(*) AS open_count FROM continuation_outbox "
+                "WHERE state IN ('PENDING','LEASED','DISPATCHED') GROUP BY owner_id "
+                "HAVING COUNT(*)>1 ORDER BY owner_id LIMIT 1"
+            ).fetchone()
+            if ambiguous_open_owner:
+                raise RuntimeError(
+                    "ambiguous legacy continuation state has multiple open triggers "
+                    f"for owner {ambiguous_open_owner['owner_id']}"
+                )
+            # Owner bindings have a unique thread_id, so one open owner row also
+            # enforces one open owner/thread trigger. Create the index while the
+            # migration writer lock is held and fail closed on legacy ambiguity.
+            self.db.execute(
+                "CREATE UNIQUE INDEX IF NOT EXISTS continuation_one_open_owner_thread "
+                "ON continuation_outbox(owner_id) "
+                "WHERE state IN ('PENDING','LEASED','DISPATCHED')"
+            )
             watchdog_columns = {
                 row["name"]
                 for row in self.db.execute("PRAGMA table_info(watchdog_runs)")
@@ -2087,33 +2105,51 @@ class AtlasRuntime:
     def finalize_stop_hook_continuation(
         self,
         *,
-        owner_id: str,
+        trigger_key: str,
         thread_id: str,
+        turn_id: str,
         visible_item_count: int,
         checkpoint_after_id: str | None,
     ) -> str | None:
-        """Finalize one same-session Stop continuation from structural proof only."""
+        """Finalize one Stop continuation from exact event-bound correlation."""
+        if (
+            not isinstance(trigger_key, str)
+            or not trigger_key.strip()
+            or not isinstance(thread_id, str)
+            or not thread_id.strip()
+            or not isinstance(turn_id, str)
+            or not turn_id.strip()
+        ):
+            raise ValueError("trigger_key, thread_id, and turn_id are required")
         row = self.db.execute(
-            "SELECT trigger_key,checkpoint_before_id FROM continuation_outbox "
-            "WHERE owner_id=? AND thread_id=? AND state='DISPATCHED' "
-            "AND delivery_method='STOP_HOOK' ORDER BY dispatched_at DESC LIMIT 1",
-            (owner_id, thread_id),
+            "SELECT x.trigger_key,x.thread_id,x.turn_id,x.checkpoint_before_id,"
+            "x.delivery_method,x.state,o.thread_id AS expected_thread "
+            "FROM continuation_outbox x JOIN continuation_owners o ON o.owner_id=x.owner_id "
+            "WHERE x.trigger_key=?",
+            (trigger_key,),
         ).fetchone()
         if not row:
-            return None
+            raise KeyError("trigger is absent")
+        if (
+            row["state"] != "DISPATCHED"
+            or row["delivery_method"] != "STOP_HOOK"
+            or row["expected_thread"] != thread_id
+            or row["thread_id"] != thread_id
+            or (row["turn_id"] is not None and row["turn_id"] != turn_id)
+        ):
+            raise ValueError("Stop-hook event identity does not match the dispatched trigger")
         if checkpoint_after_id is not None and not _THREAD_CONTEXT_ID.fullmatch(
             checkpoint_after_id
         ):
             raise ValueError("checkpoint_after_id is invalid")
-        turn_id = "stop-hook:" + (checkpoint_after_id or "missing-checkpoint")
         self.acknowledge_continuation_trigger(
-            trigger_key=row["trigger_key"],
+            trigger_key=trigger_key,
             thread_id=thread_id,
             turn_id=turn_id,
             checkpoint_before_id=row["checkpoint_before_id"],
         )
         return self.finalize_continuation_owner_readback(
-            trigger_key=row["trigger_key"],
+            trigger_key=trigger_key,
             thread_id=thread_id,
             turn_id=turn_id,
             visible_item_count=visible_item_count,

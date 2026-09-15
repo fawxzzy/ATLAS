@@ -816,8 +816,9 @@ def _fixture_demo(runtime: AtlasRuntime, *, restart: bool = False) -> dict[str, 
     stop_hook_readback_class = None
     if not restart:
         stop_hook_readback_class = runtime.finalize_stop_hook_continuation(
-            owner_id="fixture.owner",
+            trigger_key=committed.trigger_key,
             thread_id="fixture-thread",
+            turn_id="fixture-turn",
             visible_item_count=1,
             checkpoint_after_id=checkpoint_after,
         )
