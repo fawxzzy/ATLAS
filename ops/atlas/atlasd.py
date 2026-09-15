@@ -12,6 +12,7 @@ import dataclasses
 import json
 import math
 import os
+import queue
 import subprocess
 import sys
 import threading
@@ -24,8 +25,16 @@ from typing import Callable, Mapping, Protocol
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from ops.atlas.atlas_runtime import AtlasRuntime
+from ops.atlas.atlas_runtime import AtlasRuntime, validate_continuation_turn_id
 from ops.atlas.atlas_watchdog import AtlasWatchdog, DEFAULT_FALLBACK_SECONDS
+from ops.atlas.persist_thread_context import (
+    ThreadContextError,
+    _digest as _thread_context_digest,
+    _exclusive_file_lock as _exclusive_thread_context_lock,
+    _load_index as _load_thread_context_index,
+    _safe_path_component as _safe_thread_context_path_component,
+    _validate_checkpoint_shape,
+)
 
 
 def _positive_float(value: str) -> float:
@@ -59,11 +68,107 @@ class TriggerReadback:
     thread_id: str
     turn_id: str
     status: str
+    visible_item_count: int = 0
+
+
+class TriggerReadbackFailure(ValueError):
+    """A closed host-readback failure safe to persist without payload echo."""
+
+    def __init__(self, failure_code: str, message: str) -> None:
+        super().__init__(message)
+        self.failure_code = (
+            failure_code
+            if failure_code
+            in {
+                "APP_READBACK_NO_TURN",
+                "APP_READBACK_NO_OUTPUT",
+                "APP_READBACK_NO_CHECKPOINT",
+                "APP_READBACK_FAILED",
+            }
+            else "APP_READBACK_FAILED"
+        )
+
+
+class FilesystemCheckpointProbe:
+    """Read one validated compact owner checkpoint identity, never its content."""
+
+    def __init__(self, root: str | Path) -> None:
+        self.root = Path(root).resolve()
+
+    def __call__(self, thread_id: str) -> str | None:
+        if (
+            not thread_id
+            or len(thread_id) > 128
+            or thread_id in {".", ".."}
+            or "/" in thread_id
+            or "\\" in thread_id
+            or "\0" in thread_id
+        ):
+            return None
+        try:
+            _safe_thread_context_path_component(thread_id, "thread_id")
+            path = (self.root / thread_id / "latest.json").resolve()
+            path.relative_to(self.root)
+            lock_path = (self.root / ".thread-context.lock").resolve()
+            lock_path.relative_to(self.root)
+            with _exclusive_thread_context_lock(lock_path):
+                raw = path.read_bytes()
+                if len(raw) > 262_144:
+                    return None
+                checkpoint = json.loads(raw)
+                payload = _validate_checkpoint_shape(checkpoint)
+                if payload["thread_id"] != thread_id:
+                    return None
+                digest = _thread_context_digest(payload)
+                checkpoint_id = checkpoint.get("checkpoint_id")
+                if (
+                    checkpoint.get("payload_digest") != digest
+                    or checkpoint_id != "threadctx_" + digest.removeprefix("sha256:")
+                ):
+                    return None
+                immutable_path = (path.parent / f"{checkpoint_id}.json").resolve()
+                immutable_path.relative_to(self.root)
+                immutable = json.loads(immutable_path.read_bytes())
+                if immutable != checkpoint:
+                    return None
+                index = _load_thread_context_index(self.root / "index.json")
+        except (OSError, ValueError, json.JSONDecodeError, ThreadContextError):
+            return None
+        if set(index) != {"schema", "threads", "index_digest"}:
+            return None
+        expected_index_digest = _thread_context_digest(
+            {"schema": index["schema"], "threads": index["threads"]}
+        )
+        if index.get("index_digest") != expected_index_digest:
+            return None
+        records = [
+            record
+            for record in index["threads"]
+            if isinstance(record, dict) and record.get("thread_id") == thread_id
+        ]
+        expected_record = {
+            "thread_id": thread_id,
+            "logical_role_id": payload["logical_role_id"],
+            "visible_title": payload["visible_title"],
+            "state": payload["state"],
+            "recorded_at": payload["recorded_at"],
+            "checkpoint_id": checkpoint_id,
+            "payload_digest": digest,
+            "latest_ref": f"runtime/atlas/thread-context/{thread_id}/latest.json",
+        }
+        if records != [expected_record]:
+            return None
+        return checkpoint_id
 
 
 class TriggerAdapter(Protocol):
     def start_existing_turn(
-        self, *, thread_id: str, trigger_key: str, continuation_input: str
+        self,
+        *,
+        thread_id: str,
+        trigger_key: str,
+        continuation_input: str,
+        acknowledge: Callable[[str, str], None] | None = None,
     ) -> TriggerReadback: ...
 
 
@@ -77,15 +182,31 @@ def _closed_trigger_readback(value: object, *, expected_thread_id: str) -> Trigg
         status = value["status"]
     except Exception as exc:
         raise ValueError("trigger adapter readback fields are unavailable") from None
-    if not all(isinstance(item, str) and item.strip() for item in (thread_id, turn_id, status)):
+    if not all(isinstance(item, str) and item.strip() for item in (thread_id, status)):
         raise ValueError("trigger adapter readback fields must be non-empty strings")
-    if len(thread_id) > 256 or len(turn_id) > 256 or len(status) > 32:
+    try:
+        turn_id = validate_continuation_turn_id(turn_id)
+    except ValueError:
+        raise ValueError("trigger adapter readback exceeds structural limits") from None
+    if len(thread_id) > 256 or len(status) > 32:
         raise ValueError("trigger adapter readback exceeds structural limits")
     if thread_id != expected_thread_id:
         raise ValueError("trigger adapter returned the wrong thread")
     if status not in {"accepted", "completed", "in_progress"}:
         raise ValueError("trigger adapter returned an unsupported status")
-    return TriggerReadback(thread_id=thread_id, turn_id=turn_id, status=status)
+    visible_item_count = value.get("visible_item_count", 0)
+    if (
+        isinstance(visible_item_count, bool)
+        or not isinstance(visible_item_count, int)
+        or visible_item_count < 0
+    ):
+        raise ValueError("trigger adapter visible item count is invalid")
+    return TriggerReadback(
+        thread_id=thread_id,
+        turn_id=turn_id,
+        status=status,
+        visible_item_count=visible_item_count,
+    )
 
 
 class CodexPersistentThreadAdapter:
@@ -99,13 +220,230 @@ class CodexPersistentThreadAdapter:
         self,
         *,
         executable: str = "codex",
-        runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
+        runner: Callable[..., subprocess.CompletedProcess[str]] | None = None,
+        popen_factory: Callable[..., subprocess.Popen[str]] = subprocess.Popen,
+        acknowledgement_timeout_seconds: float = 30,
+        execution_timeout_seconds: float = 1800,
     ) -> None:
+        for label, value, maximum in (
+            ("acknowledgement", acknowledgement_timeout_seconds, 300),
+            ("execution", execution_timeout_seconds, 7200),
+        ):
+            if (
+                not isinstance(value, (int, float))
+                or isinstance(value, bool)
+                or not math.isfinite(value)
+                or value <= 0
+                or value > maximum
+            ):
+                raise ValueError(
+                    f"{label} timeout must be finite and between 0 and {maximum} seconds"
+                )
         self.executable = executable
         self.runner = runner
+        self.popen_factory = popen_factory
+        self.acknowledgement_timeout_seconds = float(acknowledgement_timeout_seconds)
+        self.execution_timeout_seconds = float(execution_timeout_seconds)
+
+    @staticmethod
+    def _stop_process(process: subprocess.Popen[str]) -> None:
+        try:
+            process.terminate()
+            process.wait(timeout=2)
+        except Exception:
+            try:
+                process.kill()
+            except Exception:
+                pass
+
+    def _run_streaming(
+        self,
+        command: list[str],
+        *,
+        expected_thread_id: str,
+        acknowledge: Callable[[str, str], None] | None,
+    ) -> tuple[subprocess.CompletedProcess[str], bool]:
+        process = self.popen_factory(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=False,
+            bufsize=0,
+        )
+        if process.stdout is None:
+            self._stop_process(process)
+            raise TriggerReadbackFailure(
+                "APP_READBACK_FAILED", "existing-thread trigger has no lifecycle stream"
+            )
+        lines: queue.Queue[bytes | None] = queue.Queue(maxsize=1)
+        stream_errors: list[TriggerReadbackFailure] = []
+        cancelled = threading.Event()
+
+        def bounded_put(value: bytes | None) -> bool:
+            while not cancelled.is_set():
+                try:
+                    lines.put(value, timeout=0.1)
+                    return True
+                except queue.Full:
+                    continue
+            return False
+
+        def read_lines() -> None:
+            try:
+                byte_count = 0
+                record_count = 0
+                while True:
+                    remaining = 65_536 - byte_count
+                    line = process.stdout.readline(remaining + 1)
+                    if not line:
+                        break
+                    if isinstance(line, str):
+                        line = line.encode("utf-8")
+                    if len(line) > remaining:
+                        stream_errors.append(
+                            TriggerReadbackFailure(
+                                "APP_READBACK_FAILED",
+                                "existing-thread trigger readback is oversized",
+                            )
+                        )
+                        break
+                    byte_count += len(line)
+                    record_count += 1
+                    if record_count > 64:
+                        stream_errors.append(
+                            TriggerReadbackFailure(
+                                "APP_READBACK_FAILED",
+                                "existing-thread trigger returned too many records",
+                            )
+                        )
+                        break
+                    if not bounded_put(line):
+                        return
+            except Exception:
+                stream_errors.append(
+                    TriggerReadbackFailure(
+                        "APP_READBACK_FAILED",
+                        "existing-thread trigger lifecycle stream failed",
+                    )
+                )
+            finally:
+                bounded_put(None)
+
+        reader = threading.Thread(
+            target=read_lines,
+            daemon=True,
+            name="atlas-continuation-readback",
+        )
+        reader.start()
+        acknowledgement_deadline = time.monotonic() + self.acknowledgement_timeout_seconds
+        execution_deadline: float | None = None
+        acknowledged = False
+        seen_thread: str | None = None
+        seen_turn: str | None = None
+        buffered: list[str] = []
+        try:
+            while True:
+                deadline = execution_deadline or acknowledgement_deadline
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise TriggerReadbackFailure(
+                        "APP_READBACK_FAILED",
+                        "existing-thread trigger lifecycle deadline expired",
+                    )
+                try:
+                    line = lines.get(timeout=remaining)
+                except queue.Empty:
+                    raise TriggerReadbackFailure(
+                        "APP_READBACK_FAILED",
+                        "existing-thread trigger lifecycle deadline expired",
+                    ) from None
+                if line is None:
+                    if stream_errors:
+                        raise stream_errors[0]
+                    break
+                try:
+                    decoded = line.decode("utf-8")
+                except UnicodeDecodeError:
+                    raise TriggerReadbackFailure(
+                        "APP_READBACK_FAILED", "existing-thread trigger lifecycle is malformed"
+                    ) from None
+                buffered.append(decoded)
+                try:
+                    event = json.loads(decoded)
+                except (TypeError, json.JSONDecodeError):
+                    raise TriggerReadbackFailure(
+                        "APP_READBACK_FAILED", "existing-thread trigger lifecycle is malformed"
+                    ) from None
+                if not isinstance(event, dict):
+                    raise TriggerReadbackFailure(
+                        "APP_READBACK_FAILED", "existing-thread trigger lifecycle is malformed"
+                    )
+                if event.get("type") == "thread.started":
+                    candidate = event.get("thread_id")
+                    if seen_thread is not None or candidate != expected_thread_id:
+                        raise TriggerReadbackFailure(
+                            "APP_READBACK_FAILED", "existing-thread trigger identity is ambiguous"
+                        )
+                    seen_thread = candidate
+                elif event.get("type") == "turn.started":
+                    candidate = event.get("turn_id")
+                    try:
+                        candidate = validate_continuation_turn_id(candidate)
+                    except ValueError:
+                        raise TriggerReadbackFailure(
+                            "APP_READBACK_FAILED", "existing-thread trigger identity is ambiguous"
+                        ) from None
+                    if seen_thread != expected_thread_id or seen_turn is not None:
+                        raise TriggerReadbackFailure(
+                            "APP_READBACK_FAILED", "existing-thread trigger identity is ambiguous"
+                        )
+                    seen_turn = candidate
+                    if acknowledge is not None:
+                        acknowledge(expected_thread_id, candidate)
+                    acknowledged = True
+                    execution_deadline = time.monotonic() + self.execution_timeout_seconds
+            try:
+                return_code = process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                raise TriggerReadbackFailure(
+                    "APP_READBACK_FAILED", "existing-thread trigger did not close its stream"
+                ) from None
+            reader.join(timeout=2)
+            if reader.is_alive():
+                raise TriggerReadbackFailure(
+                    "APP_READBACK_FAILED", "existing-thread trigger stream did not terminate"
+                )
+            return (
+                subprocess.CompletedProcess(
+                    args=command,
+                    returncode=return_code,
+                    stdout="".join(buffered),
+                    stderr="",
+                ),
+                acknowledged,
+            )
+        except Exception:
+            cancelled.set()
+            self._stop_process(process)
+            try:
+                process.stdout.close()
+            except Exception:
+                pass
+            while True:
+                try:
+                    lines.get_nowait()
+                except queue.Empty:
+                    break
+            reader.join(timeout=2)
+            raise
 
     def start_existing_turn(
-        self, *, thread_id: str, trigger_key: str, continuation_input: str
+        self,
+        *,
+        thread_id: str,
+        trigger_key: str,
+        continuation_input: str,
+        acknowledge: Callable[[str, str], None] | None = None,
     ) -> TriggerReadback:
         if not thread_id.strip() or not trigger_key.strip() or not continuation_input.strip():
             raise ValueError("existing thread, trigger key, and continuation input are required")
@@ -114,11 +452,31 @@ class CodexPersistentThreadAdapter:
             f"ATLAS_TRIGGER={trigger_key}\n{continuation_input}",
             "--json",
         ]
-        result = self.runner(
-            command, check=False, capture_output=True, text=True, encoding="utf-8"
-        )
+        acknowledged = False
+        if self.runner is None:
+            result, acknowledged = self._run_streaming(
+                command,
+                expected_thread_id=thread_id,
+                acknowledge=acknowledge,
+            )
+        else:
+            try:
+                result = self.runner(
+                    command,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    timeout=self.execution_timeout_seconds,
+                )
+            except subprocess.TimeoutExpired:
+                raise TriggerReadbackFailure(
+                    "APP_READBACK_FAILED", "existing-thread trigger readback timed out"
+                ) from None
         if result.returncode != 0:
-            raise RuntimeError("existing-thread trigger command failed")
+            raise TriggerReadbackFailure(
+                "APP_READBACK_FAILED", "existing-thread trigger command failed"
+            )
         if len(result.stdout.encode("utf-8")) > 65_536:
             raise ValueError("existing-thread trigger readback exceeds 65536 bytes")
         candidates: list[dict[str, object]] = []
@@ -137,6 +495,8 @@ class CodexPersistentThreadAdapter:
 
         thread_started: list[tuple[int, str]] = []
         turn_started: list[tuple[int, str]] = []
+        turn_completed: list[int] = []
+        visible_item_indexes: list[int] = []
         for index, item in enumerate(candidates):
             event_type = item.get("type")
             has_thread_id = "thread_id" in item
@@ -151,29 +511,56 @@ class CodexPersistentThreadAdapter:
                     raise ValueError("existing-thread trigger returned malformed lifecycle records")
                 thread_started.append((index, candidate_thread))
             elif event_type == "turn.started":
-                candidate_turn = item.get("turn_id")
-                if (
-                    not isinstance(candidate_turn, str)
-                    or not candidate_turn.strip()
-                    or has_thread_id
-                ):
+                try:
+                    candidate_turn = validate_continuation_turn_id(item.get("turn_id"))
+                except ValueError:
+                    raise ValueError(
+                        "existing-thread trigger returned malformed lifecycle records"
+                    ) from None
+                if has_thread_id:
                     raise ValueError("existing-thread trigger returned malformed lifecycle records")
                 turn_started.append((index, candidate_turn))
+            elif event_type == "turn.completed":
+                turn_completed.append(index)
+            elif event_type == "item.completed":
+                completed_item = item.get("item")
+                item_type = completed_item.get("type") if isinstance(completed_item, dict) else None
+                if isinstance(item_type, str) and item_type not in {"reasoning"}:
+                    visible_item_indexes.append(index)
             elif has_thread_id or has_turn_id:
                 raise ValueError("existing-thread trigger returned wrong lifecycle record types")
 
+        if len(thread_started) == 0 or len(turn_started) == 0:
+            raise TriggerReadbackFailure(
+                "APP_READBACK_NO_TURN", "existing-thread trigger returned no correlated turn"
+            )
         if (
             len(thread_started) != 1
             or len(turn_started) != 1
             or thread_started[0][0] >= turn_started[0][0]
             or thread_started[0][1] != thread_id
+            or len(turn_completed) != 1
+            or turn_completed[0] <= turn_started[0][0]
         ):
-            raise ValueError("existing-thread trigger requires one correlated readback")
+            raise TriggerReadbackFailure(
+                "APP_READBACK_FAILED", "existing-thread trigger requires one correlated readback"
+            )
+        if any(
+            index <= turn_started[0][0] or index >= turn_completed[0]
+            for index in visible_item_indexes
+        ):
+            raise TriggerReadbackFailure(
+                "APP_READBACK_FAILED",
+                "existing-thread trigger returned an out-of-window owner item",
+            )
         normalized = {
             "thread_id": thread_id,
             "turn_id": turn_started[0][1],
-            "status": "accepted",
+            "status": "completed",
+            "visible_item_count": len(visible_item_indexes),
         }
+        if acknowledge is not None and not acknowledged:
+            acknowledge(thread_id, turn_started[0][1])
         return _closed_trigger_readback(normalized, expected_thread_id=thread_id)
 
 
@@ -184,21 +571,44 @@ class FixtureTriggerAdapter:
         self.calls: list[tuple[str, str]] = []
 
     def start_existing_turn(
-        self, *, thread_id: str, trigger_key: str, continuation_input: str
+        self,
+        *,
+        thread_id: str,
+        trigger_key: str,
+        continuation_input: str,
+        acknowledge: Callable[[str, str], None] | None = None,
     ) -> TriggerReadback:
         self.calls.append((thread_id, trigger_key))
         turn_id = "turn_" + trigger_key.removeprefix("trg_")[:24]
-        return TriggerReadback(thread_id=thread_id, turn_id=turn_id, status="accepted")
+        if acknowledge is not None:
+            acknowledge(thread_id, turn_id)
+        return TriggerReadback(
+            thread_id=thread_id,
+            turn_id=turn_id,
+            status="completed",
+            visible_item_count=1,
+        )
 
 
 class ContinuationDispatcher:
     """One-shot outbox dispatcher. It has no loop, timer, or task creation seam."""
 
-    def __init__(self, runtime: AtlasRuntime, adapter: TriggerAdapter) -> None:
+    def __init__(
+        self,
+        runtime: AtlasRuntime,
+        adapter: TriggerAdapter,
+        *,
+        checkpoint_probe: Callable[[str], str | None] | None = None,
+    ) -> None:
+        if checkpoint_probe is None and not isinstance(adapter, FixtureTriggerAdapter):
+            raise ValueError(
+                "production continuation dispatch requires a checkpoint probe"
+            )
         self.runtime = runtime
         self.adapter = adapter
+        self.checkpoint_probe = checkpoint_probe
 
-    def dispatch_one(self, *, worker_id: str) -> dict[str, str] | None:
+    def dispatch_one(self, *, worker_id: str) -> dict[str, object] | None:
         item = self.runtime.lease_continuation_trigger(worker_id=worker_id)
         if item is None:
             return None
@@ -213,6 +623,34 @@ class ContinuationDispatcher:
             sort_keys=True,
             separators=(",", ":"),
         )
+        checkpoint_before = (
+            self.checkpoint_probe(item.thread_id) if self.checkpoint_probe is not None else None
+        )
+        if self.checkpoint_probe is not None and checkpoint_before is None:
+            self.runtime.fail_continuation_trigger(
+                trigger_key=item.trigger_key,
+                worker_id=worker_id,
+                error_class="APP_READBACK_NO_CHECKPOINT",
+            )
+            return {
+                "trigger_key": item.trigger_key,
+                "packet_id": item.packet_id,
+                "thread_id": item.thread_id,
+                "status": "blocked",
+                "failure_code": "APP_READBACK_NO_CHECKPOINT",
+                "retry_class": "RECONCILE_ONLY",
+            }
+
+        def acknowledge(thread_id: str, turn_id: str) -> None:
+            self.runtime.acknowledge_continuation_trigger(
+                trigger_key=item.trigger_key,
+                thread_id=thread_id,
+                turn_id=turn_id,
+                checkpoint_before_id=checkpoint_before,
+                execution_seconds=float(
+                    getattr(self.adapter, "execution_timeout_seconds", 1800)
+                ),
+            )
         try:
             self.runtime.record_continuation_process_event(
                 event_id=f"process:{item.trigger_key}:starting",
@@ -229,21 +667,68 @@ class ContinuationDispatcher:
                 thread_id=item.thread_id,
                 trigger_key=item.trigger_key,
                 continuation_input=continuation_input,
+                acknowledge=acknowledge if self.checkpoint_probe is not None else None,
             )
-            self.runtime.confirm_continuation_trigger(
-                trigger_key=item.trigger_key,
-                thread_id=readback.thread_id,
-                turn_id=readback.turn_id,
-            )
+            if self.checkpoint_probe is None:
+                self.runtime.confirm_continuation_trigger(
+                    trigger_key=item.trigger_key,
+                    thread_id=readback.thread_id,
+                    turn_id=readback.turn_id,
+                )
+                readback_class = "TRIGGER_CONFIRMED_COMPATIBILITY"
+                checkpoint_after = None
+            else:
+                self.runtime.acknowledge_continuation_trigger(
+                    trigger_key=item.trigger_key,
+                    thread_id=readback.thread_id,
+                    turn_id=readback.turn_id,
+                    checkpoint_before_id=checkpoint_before,
+                )
+                checkpoint_after = self.checkpoint_probe(item.thread_id)
+                readback_class = self.runtime.finalize_continuation_owner_readback(
+                    trigger_key=item.trigger_key,
+                    thread_id=readback.thread_id,
+                    turn_id=readback.turn_id,
+                    visible_item_count=readback.visible_item_count,
+                    checkpoint_after_id=checkpoint_after,
+                )
             self.runtime.record_continuation_process_event(
                 event_id=f"process:{item.trigger_key}:exited",
                 owner_id=item.owner_id,
                 packet_id=item.packet_id,
                 process_state="EXITED",
             )
-            return dataclasses.asdict(readback) | {
+            result: dict[str, object] = dataclasses.asdict(readback) | {
                 "trigger_key": item.trigger_key,
                 "packet_id": item.packet_id,
+                "readback_class": readback_class,
+            }
+            if checkpoint_after is not None:
+                result["checkpoint_id"] = checkpoint_after
+            if readback_class != "OWNER_EXECUTION_CONFIRMED" and self.checkpoint_probe is not None:
+                result["status"] = "blocked"
+                result["failure_code"] = readback_class
+                result["retry_class"] = "RECONCILE_ONLY"
+            return result
+        except TriggerReadbackFailure as exc:
+            self.runtime.fail_continuation_trigger(
+                trigger_key=item.trigger_key,
+                worker_id=worker_id,
+                error_class=exc.failure_code,
+            )
+            self.runtime.record_continuation_process_event(
+                event_id=f"process:{item.trigger_key}:failed",
+                owner_id=item.owner_id,
+                packet_id=item.packet_id,
+                process_state="FAILED",
+            )
+            return {
+                "trigger_key": item.trigger_key,
+                "packet_id": item.packet_id,
+                "thread_id": item.thread_id,
+                "status": "blocked",
+                "failure_code": exc.failure_code,
+                "retry_class": "RECONCILE_ONLY",
             }
         except Exception:
             # The adapter may have accepted the turn before readback failed.
@@ -310,11 +795,17 @@ class EventDrivenContinuationWorker:
     """Handle one explicit ingress or one-shot timer event; never polls."""
 
     def __init__(
-        self, runtime: AtlasRuntime, adapter: TriggerAdapter, *, guard_path: str | Path
+        self,
+        runtime: AtlasRuntime,
+        adapter: TriggerAdapter,
+        *,
+        guard_path: str | Path,
+        checkpoint_probe: Callable[[str], str | None],
     ) -> None:
         self.runtime = runtime
         self.adapter = adapter
         self.guard_path = Path(guard_path)
+        self.checkpoint_probe = checkpoint_probe
 
     def handle_event(self, *, event_id: str, worker_id: str) -> dict[str, object]:
         with SingleInstanceGuard(self.guard_path):
@@ -323,19 +814,20 @@ class EventDrivenContinuationWorker:
             # reconciliation explicitly with observed_turns; this event seam
             # deliberately performs recovery without inventing liveness.
             recovery = self.runtime.reconcile_continuation_startup()
-            dispatch = ContinuationDispatcher(self.runtime, self.adapter).dispatch_one(
-                worker_id=worker_id
-            )
+            dispatch = ContinuationDispatcher(
+                self.runtime,
+                self.adapter,
+                checkpoint_probe=self.checkpoint_probe,
+            ).dispatch_one(worker_id=worker_id)
             if dispatch:
-                self.runtime.record_continuation_process_event(
+                trigger_key = dispatch.get("trigger_key")
+                packet_id = dispatch.get("packet_id")
+                if not isinstance(trigger_key, str) or not isinstance(packet_id, str):
+                    raise ValueError("dispatch result is missing durable trigger identity")
+                self.runtime.record_continuation_process_started_if_running(
                     event_id=f"{event_id}:accepted",
-                    owner_id=self.runtime.db.execute(
-                        "SELECT owner_id FROM continuation_outbox WHERE trigger_key=?",
-                        (dispatch["trigger_key"],),
-                    ).fetchone()["owner_id"],
-                    packet_id=dispatch["packet_id"],
-                    process_state="STARTED",
-                    process_id=None,
+                    trigger_key=trigger_key,
+                    packet_id=packet_id,
                 )
             return {"event_id": event_id, "recovery": recovery, "dispatch": dispatch}
 
@@ -371,9 +863,22 @@ def _fixture_demo(runtime: AtlasRuntime, *, restart: bool = False) -> dict[str, 
         terminal_receipt={"event_id": "fixture-terminal-A", "result": "SEALED"},
         expected_owner_revision=1,
     )
+    checkpoint_before = "threadctx_" + "a" * 64
+    checkpoint_after = "threadctx_" + "b" * 64
     decision = {} if restart else runtime.stop_hook_decision(
-        owner_id="fixture.owner", thread_id="fixture-thread"
+        owner_id="fixture.owner",
+        thread_id="fixture-thread",
+        checkpoint_before_id=checkpoint_before,
     )
+    stop_hook_readback_class = None
+    if not restart:
+        stop_hook_readback_class = runtime.finalize_stop_hook_continuation(
+            trigger_key=committed.trigger_key,
+            thread_id="fixture-thread",
+            turn_id="fixture-turn",
+            visible_item_count=1,
+            checkpoint_after_id=checkpoint_after,
+        )
     recovery: tuple[dict[str, str], ...] = ()
     active_runtime = runtime
     if restart:
@@ -395,6 +900,7 @@ def _fixture_demo(runtime: AtlasRuntime, *, restart: bool = False) -> dict[str, 
         "successor_packet": committed.successor_packet_id,
         "trigger_key": committed.trigger_key,
         "stop_hook_decision": decision,
+        "stop_hook_readback_class": stop_hook_readback_class,
         "recovery": recovery,
         "dispatch": dispatch,
         "provider_actions": 0,
@@ -450,9 +956,12 @@ def main(argv: list[str] | None = None) -> int:
                 "reconciliation": runtime.reconcile_continuation_startup(),
             }
         elif args.command == "continuation-dispatch":
-            dispatch = ContinuationDispatcher(runtime, CodexPersistentThreadAdapter()).dispatch_one(
-                worker_id="atlasd-one-shot"
-            )
+            checkpoint_root = Path(__file__).resolve().parents[2] / "runtime" / "atlas" / "thread-context"
+            dispatch = ContinuationDispatcher(
+                runtime,
+                CodexPersistentThreadAdapter(),
+                checkpoint_probe=FilesystemCheckpointProbe(checkpoint_root),
+            ).dispatch_one(worker_id="atlasd-one-shot")
             output = _health(runtime) | {
                 "continuation": runtime.continuation_status(),
                 "dispatch": dispatch,

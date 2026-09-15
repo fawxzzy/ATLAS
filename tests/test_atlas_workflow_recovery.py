@@ -54,6 +54,7 @@ WORKFLOW_PR_PATHS = [
     "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
     "docs/runbooks/ATLAS-OPERATOR-NOTIFICATION-IDEMPOTENCY.md",
     "ops/atlas/atlas_runtime.py",
+    "ops/atlas/continuation_stop_hook.py",
     "ops/atlas/atlas_watchdog.py",
     "ops/atlas/atlasd.py",
     "ops/atlas/authorization_policy.py",
@@ -67,6 +68,7 @@ WORKFLOW_PR_PATHS = [
     "schemas/atlas.workflow.*.json",
     "tests/fixtures/atlas-workflow-recovery/**",
     "tests/test_atlas_runtime.py",
+    "tests/test_atlas_continuation_stop_hook.py",
     "tests/test_atlas_authorization_policy.py",
     "tests/test_atlas_codex_context.py",
     "tests/test_atlas_thread_context.py",
@@ -110,7 +112,7 @@ EXPECTED_WORKFLOW = {
                 },
                 {
                     "name": "Run workflow, authorization, and context tests",
-                    "run": "python -m unittest tests.test_atlas_runtime tests.test_atlas_watchdog tests.test_atlasd tests.test_atlas_workflow_recovery tests.test_atlas_authorization_policy tests.test_atlas_thread_context -v",
+                    "run": "python -m unittest tests.test_atlas_runtime tests.test_atlas_continuation_stop_hook tests.test_atlas_watchdog tests.test_atlasd tests.test_atlas_workflow_recovery tests.test_atlas_authorization_policy tests.test_atlas_thread_context -v",
                 },
                 {
                     "name": "Validate canonical envelope fixture",
