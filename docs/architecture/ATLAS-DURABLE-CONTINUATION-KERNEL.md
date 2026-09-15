@@ -40,22 +40,38 @@ sent-unconfirmed, and only then calls a `TriggerAdapter`.
 The production-shaped adapter exposes only `start_existing_turn`; it has no
 thread-creation method. Its command surface is `codex exec resume <thread>` and
 it correlates the separate `thread.started` and `turn.started` JSONL lifecycle
-records before reducing readback to `{thread_id, turn_id, status}`. Missing,
-wrong, or multiple lifecycle identities remain sent-unconfirmed rather than
-being treated as retryable. Prompt/model output is never stored.
+records. Host acknowledgement is persisted separately from owner execution
+truth. The bounded post-trigger readback then requires at least one non-reasoning
+owner item and a newly persisted, digest-valid checkpoint for the same owner
+thread before the outbox becomes `CONFIRMED`. Missing turns, zero-output turns,
+and missing or unchanged checkpoints become exact `RECONCILE_ONLY` dead letters;
+they are never blind-resubmitted. Prompt/model output and checkpoint content are
+never stored in the outbox; only structural counts and checkpoint identities are
+retained.
+
+Every production dispatcher, including the event-driven ingress seam, must carry
+that checkpoint probe. The compatibility confirmation path is fixture-only.
+Startup recovery cannot promote a sent row from bare thread/turn identity; without
+the complete acknowledgement, output-count, and advanced-checkpoint proof it
+dead-letters the row as unproven readback.
 
 The Stop hook is same-session acceleration and a mutually exclusive delivery
 transport. In one SQLite transaction it consumes one `PENDING` row into the
 sent-unconfirmed `DISPATCHED` state, binds `delivery_method=STOP_HOOK`, and then
 returns only `decision=block` plus packet, context-pack, and trigger identities.
-The external dispatcher can therefore never lease that trigger. Unbound,
-malformed, or unavailable hook evidence returns `{}` and permits the session to
-stop.
+The external dispatcher can therefore never lease that trigger. The decision
+requires a digest-valid baseline checkpoint. On the guarded follow-up Stop event,
+the existing hook records a structural non-empty assistant-output count and a
+new digest-valid checkpoint for the same bound thread, then uses the same durable
+acknowledgement/finalization seam as external dispatch. Missing output or an
+unchanged checkpoint dead-letters the row `RECONCILE_ONLY`. Unbound, malformed,
+or unavailable hook evidence returns `{}` and permits the session to stop.
 
 Startup recovery is an explicit one-shot call:
 
 - expired unsent leases return to `PENDING`;
-- exact sent readback becomes `CONFIRMED`;
+- bare sent thread/turn readback dead-letters as unproven `RECONCILE_ONLY`;
+- an exact acknowledged running turn remains `DISPATCHED` until its execution deadline;
 - sent-but-unconfirmed work past its deadline becomes an ambiguity dead letter;
 - desired active compute without direct turn evidence becomes
   `UNEXPECTED_IDLE` / `RESUMABLE_QUEUED`.
@@ -67,6 +83,15 @@ outbox recovery but cannot create a duplicate continuation turn.
 
 No background scanner is started. Process startup, a local event, or an
 explicit operator command invokes one reconciliation pass.
+The production existing-thread command streams lifecycle records. It has a
+30-second trigger-acknowledgement deadline through the correlated
+`thread.started`/`turn.started` pair, followed by a separate 1,800-second owner
+execution deadline for bounded output, `turn.completed`, and checkpoint proof.
+The acknowledgement atomically replaces the short deadline with the execution
+deadline; startup recovery distinguishes an unacknowledged ambiguity from an
+acknowledged execution timeout.
+Either timeout is non-echoing `APP_READBACK_FAILED` and cannot become a
+replayable capacity claim.
 
 ## Authorization, cost, and conflicts
 
@@ -84,6 +109,12 @@ Capacity and token exhaustion are resumable queued states. Identity mismatch,
 hostile readback, and sent-without-confirmation ambiguity fail closed.
 Capacity is never inferred after an adapter invocation begins: lost readback
 remains sent-unconfirmed and cannot be leased again.
+
+The application-level cause of a silent accepted turn may remain unknown. The
+kernel records the narrower observable boundary as `APP_READBACK_NO_TURN`,
+`APP_READBACK_NO_OUTPUT`, `APP_READBACK_NO_CHECKPOINT`, or
+`APP_READBACK_FAILED`; each preserves the exact failed outbox row with
+`retry_class=RECONCILE_ONLY`.
 
 ## Context and privacy
 

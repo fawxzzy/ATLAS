@@ -42,6 +42,7 @@ CONTINUATION_OBSERVED_STATES = {
     "UNKNOWN",
 }
 RESUMABLE_TRIGGER_FAILURES = {"CAPACITY_EXHAUSTED", "TOKEN_EXHAUSTED"}
+_THREAD_CONTEXT_ID = re.compile(r"^threadctx_[0-9a-f]{64}$")
 _CONTEXT_FORBIDDEN_KEYS = {
     "api_key", "credential", "password", "prompt", "raw", "secret", "token",
     "transcript", "user_content", "output",
@@ -120,11 +121,23 @@ class AtlasRuntime:
         Path(self.database).parent.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(self.database, timeout=30, isolation_level=None)
         self.db.row_factory = sqlite3.Row
-        self.db.execute("PRAGMA journal_mode=WAL")
-        self.db.execute("PRAGMA synchronous=FULL")
-        self.db.execute("PRAGMA foreign_keys=ON")
-        self.db.execute("PRAGMA busy_timeout=5000")
-        self._init_schema()
+        try:
+            self.db.execute("PRAGMA busy_timeout=5000")
+            deadline = time.monotonic() + 5
+            while True:
+                try:
+                    self.db.execute("PRAGMA journal_mode=WAL")
+                    break
+                except sqlite3.OperationalError as exc:
+                    if "locked" not in str(exc).casefold() or time.monotonic() >= deadline:
+                        raise
+                    time.sleep(0.05)
+            self.db.execute("PRAGMA synchronous=FULL")
+            self.db.execute("PRAGMA foreign_keys=ON")
+            self._init_schema()
+        except Exception:
+            self.db.close()
+            raise
 
     def close(self) -> None:
         self.db.close()
@@ -255,6 +268,12 @@ class AtlasRuntime:
               thread_id TEXT,
               turn_id TEXT,
               error_class TEXT,
+              trigger_ack_at REAL,
+              readback_class TEXT,
+              visible_item_count INTEGER,
+              checkpoint_before_id TEXT,
+              checkpoint_after_id TEXT,
+              retry_class TEXT,
               created_at REAL NOT NULL,
               updated_at REAL NOT NULL
             );
@@ -273,21 +292,47 @@ class AtlasRuntime:
             );
             """
         )
-        columns = {row["name"] for row in self.db.execute("PRAGMA table_info(tasks)")}
-        if "depends_on" not in columns:
-            self.db.execute("ALTER TABLE tasks ADD COLUMN depends_on TEXT NOT NULL DEFAULT '[]'")
-        outbox_columns = {
-            row["name"] for row in self.db.execute("PRAGMA table_info(continuation_outbox)")
-        }
-        if "delivery_method" not in outbox_columns:
-            self.db.execute("ALTER TABLE continuation_outbox ADD COLUMN delivery_method TEXT")
-        watchdog_columns = {
-            row["name"] for row in self.db.execute("PRAGMA table_info(watchdog_runs)")
-        }
-        if "expires_at" not in watchdog_columns:
-            # A pre-migration in-progress run has no trustworthy issued expiry.
-            # Leave it fail-closed until its owner explicitly abandons it.
-            self.db.execute("ALTER TABLE watchdog_runs ADD COLUMN expires_at REAL")
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            # Re-read every preimage only after acquiring the migration writer lock.
+            # Concurrent constructors therefore cannot race the additive ALTERs.
+            columns = {row["name"] for row in self.db.execute("PRAGMA table_info(tasks)")}
+            if "depends_on" not in columns:
+                self.db.execute(
+                    "ALTER TABLE tasks ADD COLUMN depends_on TEXT NOT NULL DEFAULT '[]'"
+                )
+            outbox_columns = {
+                row["name"]
+                for row in self.db.execute("PRAGMA table_info(continuation_outbox)")
+            }
+            if "delivery_method" not in outbox_columns:
+                self.db.execute(
+                    "ALTER TABLE continuation_outbox ADD COLUMN delivery_method TEXT"
+                )
+            for column, definition in (
+                ("trigger_ack_at", "REAL"),
+                ("readback_class", "TEXT"),
+                ("visible_item_count", "INTEGER"),
+                ("checkpoint_before_id", "TEXT"),
+                ("checkpoint_after_id", "TEXT"),
+                ("retry_class", "TEXT"),
+            ):
+                if column not in outbox_columns:
+                    self.db.execute(
+                        f"ALTER TABLE continuation_outbox ADD COLUMN {column} {definition}"
+                    )
+            watchdog_columns = {
+                row["name"]
+                for row in self.db.execute("PRAGMA table_info(watchdog_runs)")
+            }
+            if "expires_at" not in watchdog_columns:
+                # A pre-migration in-progress run has no trustworthy issued expiry.
+                # Leave it fail-closed until its owner explicitly abandons it.
+                self.db.execute("ALTER TABLE watchdog_runs ADD COLUMN expires_at REAL")
+            self.db.execute("COMMIT")
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
         self.db.executescript(
             """
             CREATE TRIGGER IF NOT EXISTS watchdog_in_progress_requires_expiry_insert
@@ -1409,6 +1454,197 @@ class AtlasRuntime:
             self.db.execute("ROLLBACK")
             raise
 
+    def acknowledge_continuation_trigger(
+        self,
+        *,
+        trigger_key: str,
+        thread_id: str,
+        turn_id: str,
+        checkpoint_before_id: str | None,
+        execution_seconds: float = 1800,
+    ) -> bool:
+        """Persist host acknowledgement without claiming owner execution truth."""
+        if not thread_id.strip() or not turn_id.strip():
+            raise ValueError("thread_id and turn_id are required")
+        if checkpoint_before_id is not None and not _THREAD_CONTEXT_ID.fullmatch(
+            checkpoint_before_id
+        ):
+            raise ValueError("checkpoint_before_id is invalid")
+        if (
+            not isinstance(execution_seconds, (int, float))
+            or isinstance(execution_seconds, bool)
+            or not math.isfinite(execution_seconds)
+            or execution_seconds <= 0
+            or execution_seconds > 7200
+        ):
+            raise ValueError("execution_seconds must be finite and between 0 and 7200")
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT x.*,o.thread_id AS expected_thread FROM continuation_outbox x "
+                "JOIN continuation_owners o ON o.owner_id=x.owner_id WHERE x.trigger_key=?",
+                (trigger_key,),
+            ).fetchone()
+            if not row:
+                raise KeyError("trigger is absent")
+            if thread_id != row["expected_thread"]:
+                raise ValueError("turn acknowledgement thread identity mismatch")
+            if row["state"] != "DISPATCHED":
+                if (
+                    row["state"] in {"CONFIRMED", "DEAD_LETTER"}
+                    and row["thread_id"] == thread_id
+                    and row["turn_id"] == turn_id
+                    and row["checkpoint_before_id"] == checkpoint_before_id
+                ):
+                    self.db.execute("COMMIT")
+                    return False
+                raise ValueError("only DISPATCHED triggers may be acknowledged")
+            if row["trigger_ack_at"] is not None:
+                if (
+                    row["thread_id"] != thread_id
+                    or row["turn_id"] != turn_id
+                    or row["checkpoint_before_id"] != checkpoint_before_id
+                ):
+                    raise ValueError("trigger acknowledgement cannot be rebound")
+                self.db.execute("COMMIT")
+                return False
+            duplicate = self.db.execute(
+                "SELECT trigger_key FROM continuation_outbox WHERE thread_id=? AND turn_id=? "
+                "AND trigger_key<>?",
+                (thread_id, turn_id, trigger_key),
+            ).fetchone()
+            if duplicate:
+                raise ValueError("turn is already correlated to another trigger")
+            self.db.execute(
+                "UPDATE continuation_outbox SET thread_id=?,turn_id=?,trigger_ack_at=?,"
+                "checkpoint_before_id=?,readback_class='TRIGGER_ACKNOWLEDGED',"
+                "confirmation_deadline=?,updated_at=? "
+                "WHERE trigger_key=?",
+                (
+                    thread_id,
+                    turn_id,
+                    now,
+                    checkpoint_before_id,
+                    now + execution_seconds,
+                    now,
+                    trigger_key,
+                ),
+            )
+            self.db.execute("COMMIT")
+            return True
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
+    def finalize_continuation_owner_readback(
+        self,
+        *,
+        trigger_key: str,
+        thread_id: str,
+        turn_id: str,
+        visible_item_count: int,
+        checkpoint_after_id: str | None,
+    ) -> str:
+        """Confirm useful owner execution or dead-letter one exact readback failure."""
+        if isinstance(visible_item_count, bool) or not isinstance(visible_item_count, int):
+            raise ValueError("visible_item_count must be an integer")
+        if visible_item_count < 0:
+            raise ValueError("visible_item_count must be non-negative")
+        if checkpoint_after_id is not None and not _THREAD_CONTEXT_ID.fullmatch(
+            checkpoint_after_id
+        ):
+            raise ValueError("checkpoint_after_id is invalid")
+        now = time.time()
+        self.db.execute("BEGIN IMMEDIATE")
+        try:
+            row = self.db.execute(
+                "SELECT x.*,o.thread_id AS expected_thread FROM continuation_outbox x "
+                "JOIN continuation_owners o ON o.owner_id=x.owner_id WHERE x.trigger_key=?",
+                (trigger_key,),
+            ).fetchone()
+            if not row:
+                raise KeyError("trigger is absent")
+            if (
+                thread_id != row["expected_thread"]
+                or row["thread_id"] != thread_id
+                or row["turn_id"] != turn_id
+                or row["trigger_ack_at"] is None
+            ):
+                raise ValueError("owner readback does not match trigger acknowledgement")
+            checkpoint_advanced = (
+                checkpoint_after_id is not None
+                and checkpoint_after_id != row["checkpoint_before_id"]
+            )
+            if visible_item_count == 0:
+                readback_class = "APP_READBACK_NO_OUTPUT"
+            elif not checkpoint_advanced:
+                readback_class = "APP_READBACK_NO_CHECKPOINT"
+            else:
+                readback_class = "OWNER_EXECUTION_CONFIRMED"
+            if row["state"] in {"CONFIRMED", "DEAD_LETTER"}:
+                if (
+                    row["readback_class"] != readback_class
+                    or row["visible_item_count"] != visible_item_count
+                    or row["checkpoint_after_id"] != checkpoint_after_id
+                ):
+                    raise ValueError("terminal owner readback cannot be rebound")
+                self.db.execute("COMMIT")
+                return readback_class
+            if row["state"] != "DISPATCHED":
+                raise ValueError("only DISPATCHED triggers may finalize owner readback")
+            if readback_class == "OWNER_EXECUTION_CONFIRMED":
+                self.db.execute(
+                    "UPDATE continuation_outbox SET state='CONFIRMED',readback_class=?,"
+                    "visible_item_count=?,checkpoint_after_id=?,error_class=NULL,retry_class=NULL,"
+                    "updated_at=? WHERE trigger_key=?",
+                    (
+                        readback_class,
+                        visible_item_count,
+                        checkpoint_after_id,
+                        now,
+                        trigger_key,
+                    ),
+                )
+                self.db.execute(
+                    "UPDATE continuation_packets SET state='ACTIVE',updated_at=? WHERE packet_id=?",
+                    (now, row["packet_id"]),
+                )
+                self.db.execute(
+                    "UPDATE continuation_owners SET desired_state='ACTIVE_COMPUTE',"
+                    "observed_state='ACTIVE_COMPUTE',active_turn_id=?,evidence_at=?,updated_at=? "
+                    "WHERE owner_id=?",
+                    (turn_id, now, now, row["owner_id"]),
+                )
+            else:
+                self.db.execute(
+                    "UPDATE continuation_outbox SET state='DEAD_LETTER',readback_class=?,"
+                    "visible_item_count=?,checkpoint_after_id=?,error_class=?,"
+                    "retry_class='RECONCILE_ONLY',updated_at=? WHERE trigger_key=?",
+                    (
+                        readback_class,
+                        visible_item_count,
+                        checkpoint_after_id,
+                        readback_class,
+                        now,
+                        trigger_key,
+                    ),
+                )
+                self.db.execute(
+                    "UPDATE continuation_packets SET state='DEAD_LETTER',updated_at=? WHERE packet_id=?",
+                    (now, row["packet_id"]),
+                )
+                self.db.execute(
+                    "UPDATE continuation_owners SET desired_state='WAITING_EXTERNAL',"
+                    "observed_state='UNKNOWN',active_turn_id=NULL,updated_at=? WHERE owner_id=?",
+                    (now, row["owner_id"]),
+                )
+            self.db.execute("COMMIT")
+            return readback_class
+        except Exception:
+            self.db.execute("ROLLBACK")
+            raise
+
     def confirm_continuation_trigger(
         self, *, trigger_key: str, thread_id: str, turn_id: str
     ) -> bool:
@@ -1474,29 +1710,42 @@ class AtlasRuntime:
             ).fetchone()
             if not row:
                 raise KeyError("trigger is absent")
+            sent = row["state"] == "DISPATCHED" or row["dispatched_at"] is not None
+            if sent and error_class in RESUMABLE_TRIGGER_FAILURES:
+                error_class = "APP_READBACK_FAILED"
             if row["state"] in {"CONFIRMED", "DEAD_LETTER"}:
                 if row["error_class"] == error_class or row["state"] == "CONFIRMED":
                     self.db.execute("COMMIT")
                     return row["state"]
                 raise ValueError("terminal trigger state cannot regress")
+            if row["state"] not in {"LEASED", "DISPATCHED"}:
+                raise ValueError("only leased or dispatched triggers may fail")
             if row["state"] == "LEASED" and row["lease_owner"] != worker_id:
                 raise KeyError("trigger lease worker mismatch")
-            resumable = error_class in RESUMABLE_TRIGGER_FAILURES
+            resumable = not sent and error_class in RESUMABLE_TRIGGER_FAILURES
             state = "PENDING" if resumable else "DEAD_LETTER"
             packet_state = "RESUMABLE_QUEUED" if resumable else "DEAD_LETTER"
             desired = "QUEUED" if resumable else "WAITING_EXTERNAL"
+            observed = "EXPECTED_IDLE" if resumable else "UNKNOWN"
             self.db.execute(
                 "UPDATE continuation_outbox SET state=?,error_class=?,lease_owner=NULL,leased_until=NULL,"
                 "updated_at=? WHERE trigger_key=?",
                 (state, error_class, now, trigger_key),
             )
+            if not resumable:
+                self.db.execute(
+                    "UPDATE continuation_outbox SET readback_class=?,retry_class='RECONCILE_ONLY' "
+                    "WHERE trigger_key=?",
+                    (error_class, trigger_key),
+                )
             self.db.execute(
                 "UPDATE continuation_packets SET state=?,updated_at=? WHERE packet_id=?",
                 (packet_state, now, row["packet_id"]),
             )
             self.db.execute(
-                "UPDATE continuation_owners SET desired_state=?,observed_state='EXPECTED_IDLE',"
-                "updated_at=? WHERE owner_id=?", (desired, now, row["owner_id"]),
+                "UPDATE continuation_owners SET desired_state=?,observed_state=?,"
+                "updated_at=? WHERE owner_id=?",
+                (desired, observed, now, row["owner_id"]),
             )
             self.db.execute("COMMIT")
             return state
@@ -1540,24 +1789,37 @@ class AtlasRuntime:
                     turn_id = str(observed.get("turn_id") or "")
                     if thread_id != row["expected_thread"] or not turn_id:
                         raise ValueError("startup readback identity is missing or mismatched")
-                    self.db.execute(
-                        "UPDATE continuation_outbox SET state='CONFIRMED',thread_id=?,turn_id=?,updated_at=? "
-                        "WHERE trigger_key=?", (thread_id, turn_id, now, row["trigger_key"]),
-                    )
-                    self.db.execute(
-                        "UPDATE continuation_packets SET state='ACTIVE',updated_at=? WHERE packet_id=?",
-                        (now, row["packet_id"]),
-                    )
-                    self.db.execute(
-                        "UPDATE continuation_owners SET desired_state='ACTIVE_COMPUTE',"
-                        "observed_state='ACTIVE_COMPUTE',active_turn_id=?,evidence_at=?,updated_at=? "
-                        "WHERE owner_id=?", (turn_id, now, now, row["owner_id"]),
-                    )
-                    actions.append({"trigger_key": row["trigger_key"], "action": "CONFIRMED_READBACK"})
+                    if row["trigger_ack_at"] is not None:
+                        if row["thread_id"] != thread_id or row["turn_id"] != turn_id:
+                            raise ValueError("startup acknowledgement identity is mismatched")
+                    else:
+                        self.db.execute(
+                            "UPDATE continuation_outbox SET state='DEAD_LETTER',thread_id=?,turn_id=?,"
+                            "error_class='APP_READBACK_FAILED',readback_class='APP_READBACK_FAILED',"
+                            "retry_class='RECONCILE_ONLY',updated_at=? WHERE trigger_key=?",
+                            (thread_id, turn_id, now, row["trigger_key"]),
+                        )
+                        self.db.execute(
+                            "UPDATE continuation_packets SET state='DEAD_LETTER',updated_at=? WHERE packet_id=?",
+                            (now, row["packet_id"]),
+                        )
+                        self.db.execute(
+                            "UPDATE continuation_owners SET desired_state='WAITING_EXTERNAL',"
+                            "observed_state='UNKNOWN',active_turn_id=NULL,updated_at=? WHERE owner_id=?",
+                            (now, row["owner_id"]),
+                        )
+                        actions.append(
+                            {
+                                "trigger_key": row["trigger_key"],
+                                "action": "DEAD_LETTER_UNPROVEN_READBACK",
+                            }
+                        )
                 elif row["confirmation_deadline"] is not None and row["confirmation_deadline"] <= now:
+                    acknowledged = row["trigger_ack_at"] is not None
                     self.db.execute(
                         "UPDATE continuation_outbox SET state='DEAD_LETTER',"
-                        "error_class='SENT_UNCONFIRMED_AMBIGUITY',updated_at=? WHERE trigger_key=?",
+                        "error_class='APP_READBACK_FAILED',readback_class='APP_READBACK_FAILED',"
+                        "retry_class='RECONCILE_ONLY',updated_at=? WHERE trigger_key=?",
                         (now, row["trigger_key"]),
                     )
                     self.db.execute(
@@ -1569,7 +1831,16 @@ class AtlasRuntime:
                         "observed_state='UNKNOWN',updated_at=? WHERE owner_id=?",
                         (now, row["owner_id"]),
                     )
-                    actions.append({"trigger_key": row["trigger_key"], "action": "DEAD_LETTER_AMBIGUOUS"})
+                    actions.append(
+                        {
+                            "trigger_key": row["trigger_key"],
+                            "action": (
+                                "DEAD_LETTER_EXECUTION_TIMEOUT"
+                                if acknowledged
+                                else "DEAD_LETTER_AMBIGUOUS"
+                            ),
+                        }
+                    )
 
             actions.extend(self._promote_waiting_conflicts(now=now))
 
@@ -1754,6 +2025,7 @@ class AtlasRuntime:
     def stop_hook_decision(
         self, *, owner_id: str, thread_id: str | None = None,
         confirmation_seconds: float = 30,
+        checkpoint_before_id: str | None = None,
     ) -> dict[str, str]:
         """Atomically consume one trigger for the Stop transport.
 
@@ -1763,6 +2035,10 @@ class AtlasRuntime:
         """
         if not owner_id.strip() or not math.isfinite(confirmation_seconds) or confirmation_seconds <= 0:
             raise ValueError("owner and positive confirmation window are required")
+        if checkpoint_before_id is None:
+            return {}
+        if not _THREAD_CONTEXT_ID.fullmatch(checkpoint_before_id):
+            raise ValueError("checkpoint_before_id is invalid")
         now = time.time()
         self.db.execute("BEGIN IMMEDIATE")
         try:
@@ -1789,8 +2065,16 @@ class AtlasRuntime:
             changed = self.db.execute(
                 "UPDATE continuation_outbox SET state='DISPATCHED',attempt_count=attempt_count+1,"
                 "dispatched_at=?,confirmation_deadline=?,delivery_method='STOP_HOOK',"
-                "thread_id=?,updated_at=? WHERE trigger_key=? AND state='PENDING'",
-                (now, now + confirmation_seconds, owner["thread_id"], now, row["trigger_key"]),
+                "thread_id=?,checkpoint_before_id=?,updated_at=? "
+                "WHERE trigger_key=? AND state='PENDING'",
+                (
+                    now,
+                    now + confirmation_seconds,
+                    owner["thread_id"],
+                    checkpoint_before_id,
+                    now,
+                    row["trigger_key"],
+                ),
             ).rowcount
             if changed != 1:
                 raise RuntimeError("Stop-hook trigger claim was lost")
@@ -1799,6 +2083,42 @@ class AtlasRuntime:
         except Exception:
             self.db.execute("ROLLBACK")
             raise
+
+    def finalize_stop_hook_continuation(
+        self,
+        *,
+        owner_id: str,
+        thread_id: str,
+        visible_item_count: int,
+        checkpoint_after_id: str | None,
+    ) -> str | None:
+        """Finalize one same-session Stop continuation from structural proof only."""
+        row = self.db.execute(
+            "SELECT trigger_key,checkpoint_before_id FROM continuation_outbox "
+            "WHERE owner_id=? AND thread_id=? AND state='DISPATCHED' "
+            "AND delivery_method='STOP_HOOK' ORDER BY dispatched_at DESC LIMIT 1",
+            (owner_id, thread_id),
+        ).fetchone()
+        if not row:
+            return None
+        if checkpoint_after_id is not None and not _THREAD_CONTEXT_ID.fullmatch(
+            checkpoint_after_id
+        ):
+            raise ValueError("checkpoint_after_id is invalid")
+        turn_id = "stop-hook:" + (checkpoint_after_id or "missing-checkpoint")
+        self.acknowledge_continuation_trigger(
+            trigger_key=row["trigger_key"],
+            thread_id=thread_id,
+            turn_id=turn_id,
+            checkpoint_before_id=row["checkpoint_before_id"],
+        )
+        return self.finalize_continuation_owner_readback(
+            trigger_key=row["trigger_key"],
+            thread_id=thread_id,
+            turn_id=turn_id,
+            visible_item_count=visible_item_count,
+            checkpoint_after_id=checkpoint_after_id,
+        )
 
     def get(self, task_id: str) -> Task | None:
         row = self.db.execute("SELECT * FROM tasks WHERE task_id=?", (task_id,)).fetchone()

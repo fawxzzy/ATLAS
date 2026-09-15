@@ -1,6 +1,6 @@
 {
   "schema": "atlas.durable-continuation-kernel.v1",
-  "contract_version": "1.0.1",
+  "contract_version": "1.0.2",
   "lifecycle_state": "SOURCE_ONLY_UNINSTALLED",
   "authority_store": "ops/atlas/atlas_runtime.py",
   "database": {
@@ -34,16 +34,36 @@
   "trigger_delivery": {
     "semantics": "AT_LEAST_ONCE_TRIGGER_EXACTLY_ONCE_STATE",
     "same_session_accelerator": "CODEX_STOP_HOOK_DECISION_BLOCK",
+    "same_session_completion_proof": "STRUCTURAL_OUTPUT_PLUS_ADVANCED_VALID_CHECKPOINT",
     "delivery_transports_mutually_exclusive": true,
     "sent_unconfirmed_persisted_before_external_effect": true,
+    "trigger_acknowledgement_separate_from_owner_execution_truth": true,
     "jsonl_lifecycle_correlation": [
       "thread.started",
-      "turn.started"
+      "turn.started",
+      "item.completed",
+      "turn.completed"
     ],
     "unbound_stop_hook_result": {},
     "startup_reconciliation": "EVENT_DRIVEN_ONE_SHOT",
     "polling": false,
-    "sent_unconfirmed": "DEAD_LETTER_AMBIGUITY"
+    "sent_unconfirmed": "DEAD_LETTER_AMBIGUITY",
+    "trigger_acknowledgement_timeout_seconds": 30,
+    "owner_execution_timeout_seconds": 1800,
+    "acknowledgement_replaces_trigger_deadline": true,
+    "owner_execution_confirmation": {
+      "requires_visible_item": true,
+      "requires_advanced_valid_checkpoint": true,
+      "required_on_event_driven_ingress": true,
+      "startup_bare_turn_identity_can_confirm": false,
+      "failure_codes": [
+        "APP_READBACK_NO_TURN",
+        "APP_READBACK_NO_OUTPUT",
+        "APP_READBACK_NO_CHECKPOINT",
+        "APP_READBACK_FAILED"
+      ],
+      "failure_retry_class": "RECONCILE_ONLY"
+    }
   },
   "liveness": {
     "desired": [
@@ -88,7 +108,12 @@
     "readback_allowlist": [
       "thread_id",
       "turn_id",
-      "status"
+      "status",
+      "visible_item_count",
+      "checkpoint_before_id",
+      "checkpoint_after_id",
+      "readback_class",
+      "retry_class"
     ]
   },
   "installation": {

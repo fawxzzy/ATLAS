@@ -1,7 +1,11 @@
+import concurrent.futures
+import hashlib
 import io
 import json
+import sqlite3
 import subprocess
 import tempfile
+import threading
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -12,9 +16,13 @@ from ops.atlas.atlasd import (
     CodexPersistentThreadAdapter,
     ContinuationDispatcher,
     EventDrivenContinuationWorker,
+    FilesystemCheckpointProbe,
     FixtureTriggerAdapter,
     SingleInstanceGuard,
+    TriggerReadback,
+    TriggerReadbackFailure,
     _closed_trigger_readback,
+    _fixture_demo,
 )
 from ops.atlas.continuation_stop_hook import main as stop_hook_main
 
@@ -33,6 +41,48 @@ class AcceptedThenLostAdapter:
     def start_existing_turn(self, **kwargs):
         self.calls += 1
         raise RuntimeError("readback lost after external acceptance")
+
+
+class SequenceCheckpointProbe:
+    def __init__(self, *values):
+        self.values = list(values)
+
+    def __call__(self, thread_id):
+        if thread_id != "thread-existing":
+            raise AssertionError("checkpoint probe used the wrong owner thread")
+        return self.values.pop(0)
+
+
+class InspectingAdapter:
+    def __init__(self, runtime, *, visible_item_count=1):
+        self.runtime = runtime
+        self.visible_item_count = visible_item_count
+
+    def start_existing_turn(
+        self, *, thread_id, trigger_key, continuation_input, acknowledge=None
+    ):
+        row = self.runtime.db.execute(
+            "SELECT state,trigger_ack_at FROM continuation_outbox WHERE trigger_key=?",
+            (trigger_key,),
+        ).fetchone()
+        if not row or row["state"] != "DISPATCHED" or row["trigger_ack_at"] is not None:
+            raise AssertionError("outbox and sent-unconfirmed state must precede host trigger")
+        return TriggerReadback(
+            thread_id=thread_id,
+            turn_id="turn-observed",
+            status="completed",
+            visible_item_count=self.visible_item_count,
+        )
+
+
+class NoTurnAdapter:
+    def start_existing_turn(self, **kwargs):
+        raise TriggerReadbackFailure("APP_READBACK_NO_TURN", "no correlated owner turn")
+
+
+class HostileRetryableReadbackAdapter:
+    def start_existing_turn(self, **kwargs):
+        raise TriggerReadbackFailure("CAPACITY_EXHAUSTED", "forged retryable readback")
 
 
 class DurableContinuationKernelTests(unittest.TestCase):
@@ -63,6 +113,30 @@ class DurableContinuationKernelTests(unittest.TestCase):
             expected_owner_revision=1,
             **kwargs,
         )
+
+    def write_checkpoint(self, marker):
+        root = Path(self.tmp.name) / "thread-context"
+        directory = root / "thread-existing"
+        directory.mkdir(parents=True, exist_ok=True)
+        payload = {"thread_id": "thread-existing", "summary": marker}
+        digest = "sha256:" + hashlib.sha256(
+            json.dumps(
+                payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+            ).encode("utf-8")
+        ).hexdigest()
+        checkpoint_id = "threadctx_" + digest.removeprefix("sha256:")
+        (directory / "latest.json").write_text(
+            json.dumps(
+                {
+                    "schema": "atlas.thread-context-checkpoint.v1",
+                    "checkpoint_id": checkpoint_id,
+                    "payload_digest": digest,
+                    "payload": payload,
+                }
+            ),
+            encoding="utf-8",
+        )
+        return root, checkpoint_id
 
     def test_atomic_terminal_successor_claim_and_outbox(self):
         result = self.commit()
@@ -150,10 +224,21 @@ class DurableContinuationKernelTests(unittest.TestCase):
 
     def test_same_session_stop_hook_excludes_one_shot_dispatch(self):
         committed = self.commit()
+        checkpoint_root, before = self.write_checkpoint("before")
         stdin = io.StringIO(json.dumps({"owner_id": "owner.test"}))
         stdout = io.StringIO()
         with mock.patch("sys.stdin", stdin), redirect_stdout(stdout):
-            self.assertEqual(stop_hook_main(["--database", str(self.database)]), 0)
+            self.assertEqual(
+                stop_hook_main(
+                    [
+                        "--database",
+                        str(self.database),
+                        "--checkpoint-root",
+                        str(checkpoint_root),
+                    ]
+                ),
+                0,
+            )
         decision = json.loads(stdout.getvalue())
         self.assertEqual(decision["decision"], "block")
         self.assertIn(committed.trigger_key, decision["reason"])
@@ -162,24 +247,82 @@ class DurableContinuationKernelTests(unittest.TestCase):
         self.assertIsNone(readback)
         self.assertEqual(adapter.calls, [])
         row = self.runtime.db.execute(
-            "SELECT state,delivery_method FROM continuation_outbox WHERE trigger_key=?",
+            "SELECT state,delivery_method,checkpoint_before_id FROM continuation_outbox "
+            "WHERE trigger_key=?",
             (committed.trigger_key,),
         ).fetchone()
-        self.assertEqual((row["state"], row["delivery_method"]), ("DISPATCHED", "STOP_HOOK"))
+        self.assertEqual(
+            (row["state"], row["delivery_method"], row["checkpoint_before_id"]),
+            ("DISPATCHED", "STOP_HOOK", before),
+        )
 
     def test_stop_hook_resolves_official_session_id_and_honors_active_guard(self):
         self.commit()
+        checkpoint_root, before = self.write_checkpoint("before")
+        args = [
+            "--database",
+            str(self.database),
+            "--checkpoint-root",
+            str(checkpoint_root),
+        ]
         stdout = io.StringIO()
         with mock.patch("sys.stdin", io.StringIO(json.dumps({"session_id": "thread-existing"}))), redirect_stdout(stdout):
-            stop_hook_main(["--database", str(self.database)])
+            stop_hook_main(args)
         self.assertEqual(json.loads(stdout.getvalue())["decision"], "block")
+        _, after = self.write_checkpoint("after")
         guarded = io.StringIO()
         with mock.patch(
             "sys.stdin",
-            io.StringIO(json.dumps({"session_id": "thread-existing", "stop_hook_active": True})),
+            io.StringIO(
+                json.dumps(
+                    {
+                        "session_id": "thread-existing",
+                        "stop_hook_active": True,
+                        "last_assistant_message": "structurally present",
+                    }
+                )
+            ),
         ), redirect_stdout(guarded):
-            stop_hook_main(["--database", str(self.database)])
+            stop_hook_main(args)
         self.assertEqual(json.loads(guarded.getvalue()), {})
+        row = self.runtime.db.execute(
+            "SELECT state,readback_class,visible_item_count,checkpoint_before_id,"
+            "checkpoint_after_id FROM continuation_outbox"
+        ).fetchone()
+        self.assertEqual(
+            ("CONFIRMED", "OWNER_EXECUTION_CONFIRMED", 1, before, after), tuple(row)
+        )
+
+    def test_stop_hook_guard_dead_letters_missing_visible_output(self):
+        self.commit()
+        checkpoint_root, _ = self.write_checkpoint("before")
+        args = [
+            "--database",
+            str(self.database),
+            "--checkpoint-root",
+            str(checkpoint_root),
+        ]
+        with mock.patch(
+            "sys.stdin", io.StringIO(json.dumps({"session_id": "thread-existing"}))
+        ), redirect_stdout(io.StringIO()):
+            stop_hook_main(args)
+        self.write_checkpoint("after")
+        with mock.patch(
+            "sys.stdin",
+            io.StringIO(
+                json.dumps(
+                    {"session_id": "thread-existing", "stop_hook_active": True}
+                )
+            ),
+        ), redirect_stdout(io.StringIO()):
+            stop_hook_main(args)
+        row = self.runtime.db.execute(
+            "SELECT state,error_class,retry_class FROM continuation_outbox"
+        ).fetchone()
+        self.assertEqual(
+            ("DEAD_LETTER", "APP_READBACK_NO_OUTPUT", "RECONCILE_ONLY"), tuple(row)
+        )
+        self.assertIsNone(self.runtime.lease_continuation_trigger(worker_id="second"))
 
     def test_stop_hook_unbound_malformed_and_unavailable_allow_stop(self):
         for payload in ({"session_id": "unknown"}, [], {"session_id": ""}):
@@ -197,7 +340,11 @@ class DurableContinuationKernelTests(unittest.TestCase):
     def test_accepted_then_lost_readback_is_never_retried(self):
         committed = self.commit()
         adapter = AcceptedThenLostAdapter()
-        dispatcher = ContinuationDispatcher(self.runtime, adapter)
+        dispatcher = ContinuationDispatcher(
+            self.runtime,
+            adapter,
+            checkpoint_probe=SequenceCheckpointProbe("threadctx_" + "a" * 64),
+        )
         with self.assertRaisesRegex(RuntimeError, "readback lost"):
             dispatcher.dispatch_one(worker_id="fixture")
         row = self.runtime.db.execute(
@@ -212,6 +359,210 @@ class DurableContinuationKernelTests(unittest.TestCase):
             now=row["confirmation_deadline"] + 1
         )
         self.assertIn({"trigger_key": committed.trigger_key, "action": "DEAD_LETTER_AMBIGUOUS"}, actions)
+
+    def test_owner_dispatch_requires_output_and_advanced_checkpoint_after_ack(self):
+        committed = self.commit()
+        before = "threadctx_" + "a" * 64
+        after = "threadctx_" + "b" * 64
+        result = ContinuationDispatcher(
+            self.runtime,
+            InspectingAdapter(self.runtime),
+            checkpoint_probe=SequenceCheckpointProbe(before, after),
+        ).dispatch_one(worker_id="fixture")
+        self.assertEqual("OWNER_EXECUTION_CONFIRMED", result["readback_class"])
+        self.assertEqual(after, result["checkpoint_id"])
+        row = self.runtime.db.execute(
+            "SELECT state,trigger_ack_at,readback_class,visible_item_count,"
+            "checkpoint_before_id,checkpoint_after_id,retry_class "
+            "FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual("CONFIRMED", row["state"])
+        self.assertIsNotNone(row["trigger_ack_at"])
+        self.assertEqual("OWNER_EXECUTION_CONFIRMED", row["readback_class"])
+        self.assertEqual(1, row["visible_item_count"])
+        self.assertEqual(before, row["checkpoint_before_id"])
+        self.assertEqual(after, row["checkpoint_after_id"])
+        self.assertIsNone(row["retry_class"])
+        self.assertFalse(
+            self.runtime.acknowledge_continuation_trigger(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="turn-observed",
+                checkpoint_before_id=before,
+            )
+        )
+        with self.assertRaisesRegex(ValueError, "only DISPATCHED"):
+            self.runtime.acknowledge_continuation_trigger(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="turn-observed",
+                checkpoint_before_id="threadctx_" + "c" * 64,
+            )
+        self.assertEqual(
+            "OWNER_EXECUTION_CONFIRMED",
+            self.runtime.finalize_continuation_owner_readback(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="turn-observed",
+                visible_item_count=1,
+                checkpoint_after_id=after,
+            ),
+        )
+        with self.assertRaisesRegex(ValueError, "cannot be rebound"):
+            self.runtime.finalize_continuation_owner_readback(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="turn-observed",
+                visible_item_count=2,
+                checkpoint_after_id=after,
+            )
+
+    def test_concurrent_pre_migration_constructors_serialize_additive_columns(self):
+        database = Path(self.tmp.name) / "pre-migration.db"
+        connection = sqlite3.connect(database)
+        connection.execute(
+            """
+            CREATE TABLE continuation_outbox (
+              trigger_key TEXT PRIMARY KEY,
+              owner_id TEXT NOT NULL,
+              binding_epoch INTEGER NOT NULL,
+              packet_id TEXT NOT NULL,
+              context_pack_id TEXT NOT NULL,
+              payload_digest TEXT NOT NULL,
+              state TEXT NOT NULL,
+              attempt_count INTEGER NOT NULL DEFAULT 0,
+              lease_owner TEXT,
+              leased_until REAL,
+              dispatched_at REAL,
+              confirmation_deadline REAL,
+              delivery_method TEXT,
+              thread_id TEXT,
+              turn_id TEXT,
+              error_class TEXT,
+              created_at REAL NOT NULL,
+              updated_at REAL NOT NULL
+            )
+            """
+        )
+        connection.commit()
+        connection.close()
+
+        def open_and_close(_):
+            runtime = AtlasRuntime(database)
+            runtime.close()
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            list(executor.map(open_and_close, range(4)))
+        connection = sqlite3.connect(database)
+        try:
+            columns = {
+                row[1] for row in connection.execute("PRAGMA table_info(continuation_outbox)")
+            }
+        finally:
+            connection.close()
+        self.assertTrue(
+            {
+                "trigger_ack_at",
+                "readback_class",
+                "visible_item_count",
+                "checkpoint_before_id",
+                "checkpoint_after_id",
+                "retry_class",
+            }.issubset(columns)
+        )
+
+    def test_owner_dispatch_dead_letters_no_output_without_replay(self):
+        committed = self.commit()
+        result = ContinuationDispatcher(
+            self.runtime,
+            InspectingAdapter(self.runtime, visible_item_count=0),
+            checkpoint_probe=SequenceCheckpointProbe(
+                "threadctx_" + "a" * 64,
+                "threadctx_" + "b" * 64,
+            ),
+        ).dispatch_one(worker_id="fixture")
+        self.assertEqual("APP_READBACK_NO_OUTPUT", result["failure_code"])
+        row = self.runtime.db.execute(
+            "SELECT state,error_class,retry_class FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(
+            ("DEAD_LETTER", "APP_READBACK_NO_OUTPUT", "RECONCILE_ONLY"), tuple(row)
+        )
+        self.assertIsNone(self.runtime.lease_continuation_trigger(worker_id="second"))
+
+    def test_owner_dispatch_dead_letters_unchanged_checkpoint(self):
+        committed = self.commit()
+        checkpoint = "threadctx_" + "a" * 64
+        result = ContinuationDispatcher(
+            self.runtime,
+            InspectingAdapter(self.runtime),
+            checkpoint_probe=SequenceCheckpointProbe(checkpoint, checkpoint),
+        ).dispatch_one(worker_id="fixture")
+        self.assertEqual("APP_READBACK_NO_CHECKPOINT", result["failure_code"])
+        row = self.runtime.db.execute(
+            "SELECT state,error_class,retry_class FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(
+            ("DEAD_LETTER", "APP_READBACK_NO_CHECKPOINT", "RECONCILE_ONLY"), tuple(row)
+        )
+
+    def test_owner_dispatch_dead_letters_missing_turn_without_replay(self):
+        committed = self.commit()
+        result = ContinuationDispatcher(
+            self.runtime,
+            NoTurnAdapter(),
+            checkpoint_probe=SequenceCheckpointProbe("threadctx_" + "a" * 64),
+        ).dispatch_one(worker_id="fixture")
+        self.assertEqual("APP_READBACK_NO_TURN", result["failure_code"])
+        row = self.runtime.db.execute(
+            "SELECT state,error_class,retry_class FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(
+            ("DEAD_LETTER", "APP_READBACK_NO_TURN", "RECONCILE_ONLY"), tuple(row)
+        )
+        self.assertIsNone(self.runtime.lease_continuation_trigger(worker_id="second"))
+
+    def test_filesystem_checkpoint_probe_accepts_only_same_thread_digest_valid_checkpoint(self):
+        checkpoint_root = Path(self.tmp.name) / "thread-context"
+        thread_id = "019fa784-ca4e-7832-8c78-2ace8cab84ac"
+        thread_root = checkpoint_root / thread_id
+        thread_root.mkdir(parents=True)
+        payload = {"thread_id": thread_id, "summary": "bounded"}
+        digest = "sha256:" + hashlib.sha256(
+            json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        checkpoint_id = "threadctx_" + digest.removeprefix("sha256:")
+        (thread_root / "latest.json").write_text(
+            json.dumps(
+                {
+                    "schema": "atlas.thread-context-checkpoint.v1",
+                    "checkpoint_id": checkpoint_id,
+                    "payload_digest": digest,
+                    "payload": payload,
+                }
+            ),
+            encoding="utf-8",
+        )
+        probe = FilesystemCheckpointProbe(checkpoint_root)
+        self.assertEqual(checkpoint_id, probe(thread_id))
+        self.assertIsNone(probe("../" + thread_id))
+        payload["thread_id"] = "thread-other"
+        (thread_root / "latest.json").write_text(
+            json.dumps(
+                {
+                    "schema": "atlas.thread-context-checkpoint.v1",
+                    "checkpoint_id": checkpoint_id,
+                    "payload_digest": digest,
+                    "payload": payload,
+                }
+            ),
+            encoding="utf-8",
+        )
+        self.assertIsNone(probe(thread_id))
 
     def test_restart_requeues_unsent_lease_and_dispatches_once(self):
         committed = self.commit()
@@ -237,6 +588,102 @@ class DurableContinuationKernelTests(unittest.TestCase):
         ).fetchone()
         actions = self.runtime.reconcile_continuation_startup(now=row["confirmation_deadline"] + 1)
         self.assertIn({"trigger_key": committed.trigger_key, "action": "DEAD_LETTER_AMBIGUOUS"}, actions)
+
+    def test_startup_bare_turn_identity_is_dead_lettered_not_confirmed(self):
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key, worker_id="worker"
+        )
+        actions = self.runtime.reconcile_continuation_startup(
+            observed_turns={
+                committed.trigger_key: {
+                    "thread_id": "thread-existing",
+                    "turn_id": "turn-observed",
+                }
+            }
+        )
+        self.assertIn(
+            {
+                "trigger_key": committed.trigger_key,
+                "action": "DEAD_LETTER_UNPROVEN_READBACK",
+            },
+            actions,
+        )
+        row = self.runtime.db.execute(
+            "SELECT state,error_class,readback_class,retry_class,trigger_ack_at,"
+            "visible_item_count,checkpoint_before_id,checkpoint_after_id "
+            "FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(
+            (
+                "DEAD_LETTER",
+                "APP_READBACK_FAILED",
+                "APP_READBACK_FAILED",
+                "RECONCILE_ONLY",
+                None,
+                None,
+                None,
+                None,
+            ),
+            tuple(row),
+        )
+        self.assertIsNone(self.runtime.lease_continuation_trigger(worker_id="second"))
+
+    def test_acknowledgement_replaces_trigger_deadline_with_execution_deadline(self):
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key,
+            worker_id="worker",
+            confirmation_seconds=30,
+        )
+        initial_deadline = self.runtime.db.execute(
+            "SELECT confirmation_deadline FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()[0]
+        self.runtime.acknowledge_continuation_trigger(
+            trigger_key=committed.trigger_key,
+            thread_id="thread-existing",
+            turn_id="turn-observed",
+            checkpoint_before_id="threadctx_" + "a" * 64,
+            execution_seconds=1800,
+        )
+        execution_deadline = self.runtime.db.execute(
+            "SELECT confirmation_deadline FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()[0]
+        self.assertGreater(execution_deadline, initial_deadline + 1700)
+        self.assertNotIn(
+            {
+                "trigger_key": committed.trigger_key,
+                "action": "DEAD_LETTER_AMBIGUOUS",
+            },
+            self.runtime.reconcile_continuation_startup(
+                observed_turns={
+                    committed.trigger_key: {
+                        "thread_id": "thread-existing",
+                        "turn_id": "turn-observed",
+                    }
+                },
+                now=initial_deadline + 1,
+            ),
+        )
+        self.assertEqual(
+            "DISPATCHED",
+            self.runtime.db.execute(
+                "SELECT state FROM continuation_outbox WHERE trigger_key=?",
+                (committed.trigger_key,),
+            ).fetchone()[0],
+        )
+        self.assertIn(
+            {
+                "trigger_key": committed.trigger_key,
+                "action": "DEAD_LETTER_EXECUTION_TIMEOUT",
+            },
+            self.runtime.reconcile_continuation_startup(now=execution_deadline + 1),
+        )
 
     def test_wrong_turn_identity_does_not_mutate_dispatched_row(self):
         committed = self.commit()
@@ -315,7 +762,10 @@ class DurableContinuationKernelTests(unittest.TestCase):
         dispatcher = ContinuationDispatcher(self.runtime, adapter)
         self.assertIsNotNone(dispatcher.dispatch_one(worker_id="first"))
         worker = EventDrivenContinuationWorker(
-            self.runtime, adapter, guard_path=Path(self.tmp.name) / "event-worker.lock"
+            self.runtime,
+            adapter,
+            guard_path=Path(self.tmp.name) / "event-worker.lock",
+            checkpoint_probe=SequenceCheckpointProbe(),
         )
         result = worker.handle_event(event_id="second-ingress", worker_id="second")
         self.assertEqual(result["recovery"], ())
@@ -324,6 +774,47 @@ class DurableContinuationKernelTests(unittest.TestCase):
         owner = self.runtime.continuation_status()["owners"][0]
         self.assertEqual(owner["desired_state"], "ACTIVE_COMPUTE")
         self.assertEqual(owner["observed_state"], "ACTIVE_COMPUTE")
+
+    def test_event_worker_requires_owner_execution_probe(self):
+        self.commit()
+        before = "threadctx_" + "a" * 64
+        after = "threadctx_" + "b" * 64
+        worker = EventDrivenContinuationWorker(
+            self.runtime,
+            InspectingAdapter(self.runtime),
+            guard_path=Path(self.tmp.name) / "event-worker-proof.lock",
+            checkpoint_probe=SequenceCheckpointProbe(before, after),
+        )
+        result = worker.handle_event(event_id="ingress", worker_id="worker")
+        self.assertEqual(
+            "OWNER_EXECUTION_CONFIRMED", result["dispatch"]["readback_class"]
+        )
+        row = self.runtime.db.execute(
+            "SELECT state,trigger_ack_at,visible_item_count,checkpoint_before_id,"
+            "checkpoint_after_id FROM continuation_outbox"
+        ).fetchone()
+        self.assertEqual("CONFIRMED", row["state"])
+        self.assertIsNotNone(row["trigger_ack_at"])
+        self.assertEqual(1, row["visible_item_count"])
+        self.assertEqual(before, row["checkpoint_before_id"])
+        self.assertEqual(after, row["checkpoint_after_id"])
+
+    def test_post_invocation_retryable_label_is_forced_to_dead_letter(self):
+        committed = self.commit()
+        result = ContinuationDispatcher(
+            self.runtime,
+            HostileRetryableReadbackAdapter(),
+            checkpoint_probe=SequenceCheckpointProbe("threadctx_" + "a" * 64),
+        ).dispatch_one(worker_id="worker")
+        self.assertEqual("APP_READBACK_FAILED", result["failure_code"])
+        row = self.runtime.db.execute(
+            "SELECT state,error_class,retry_class FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(
+            ("DEAD_LETTER", "APP_READBACK_FAILED", "RECONCILE_ONLY"), tuple(row)
+        )
+        self.assertIsNone(self.runtime.lease_continuation_trigger(worker_id="second"))
 
     def test_released_conflict_promotes_one_waiter_once(self):
         self.runtime.register_continuation_owner(
@@ -434,6 +925,58 @@ class DurableContinuationKernelTests(unittest.TestCase):
         self.assertEqual(state, "DEAD_LETTER")
         self.assertIsNone(self.runtime.lease_continuation_trigger(worker_id="other"))
 
+    def test_sent_capacity_label_is_nonreplayable_and_owner_state_unknown(self):
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key, worker_id="worker"
+        )
+        state = self.runtime.fail_continuation_trigger(
+            trigger_key=committed.trigger_key,
+            worker_id="unrelated-worker",
+            error_class="CAPACITY_EXHAUSTED",
+        )
+        self.assertEqual("DEAD_LETTER", state)
+        row = self.runtime.db.execute(
+            "SELECT state,error_class,retry_class FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(
+            ("DEAD_LETTER", "APP_READBACK_FAILED", "RECONCILE_ONLY"), tuple(row)
+        )
+        self.assertEqual(
+            "DEAD_LETTER",
+            self.runtime.fail_continuation_trigger(
+                trigger_key=committed.trigger_key,
+                worker_id="another-unrelated-worker",
+                error_class="CAPACITY_EXHAUSTED",
+            ),
+        )
+        row_after_retry = self.runtime.db.execute(
+            "SELECT state,error_class,retry_class FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(tuple(row), tuple(row_after_retry))
+        owner = self.runtime.db.execute(
+            "SELECT desired_state,observed_state FROM continuation_owners WHERE owner_id='owner.test'"
+        ).fetchone()
+        self.assertEqual(("WAITING_EXTERNAL", "UNKNOWN"), tuple(owner))
+        self.assertIsNone(self.runtime.lease_continuation_trigger(worker_id="second"))
+
+    def test_same_session_fixture_demo_uses_stop_hook_proof_path(self):
+        database = Path(self.tmp.name) / "fixture-demo.db"
+        runtime = AtlasRuntime(database)
+        try:
+            result = _fixture_demo(runtime)
+            self.assertEqual("same_session", result["mode"])
+            self.assertEqual("block", result["stop_hook_decision"]["decision"])
+            self.assertEqual(
+                "OWNER_EXECUTION_CONFIRMED", result["stop_hook_readback_class"]
+            )
+            self.assertIsNone(result["dispatch"])
+        finally:
+            runtime.close()
+
     def test_conflicting_scope_serializes_while_independent_scope_advances(self):
         other = AtlasRuntime(Path(self.tmp.name) / "other.db")
         try:
@@ -522,6 +1065,12 @@ class DurableContinuationKernelTests(unittest.TestCase):
                     + "\n"
                     + json.dumps({"type": "turn.started", "turn_id": "turn-1"})
                     + "\n"
+                    + json.dumps(
+                        {"type": "item.completed", "item": {"type": "agent_message"}}
+                    )
+                    + "\n"
+                    + json.dumps({"type": "turn.completed"})
+                    + "\n"
                 ),
                 stderr="",
             ),
@@ -549,12 +1098,161 @@ class DurableContinuationKernelTests(unittest.TestCase):
             thread_id="thread-existing", trigger_key="trg_x", continuation_input="{}"
         )
         self.assertEqual(result.turn_id, "turn-1")
+        self.assertEqual(result.status, "completed")
+        self.assertEqual(result.visible_item_count, 1)
         self.assertEqual(commands[0][1:3], ["exec", "resume"])
         self.assertNotIn("thread/start", commands[0])
         with self.assertRaises(ValueError):
             adapter.start_existing_turn(
                 thread_id="thread-existing", trigger_key="trg_x", continuation_input="{}"
             )
+
+    def test_codex_adapter_rejects_visible_item_outside_correlated_turn(self):
+        stdout = (
+            json.dumps({"type": "item.completed", "item": {"type": "agent_message"}})
+            + "\n"
+            + json.dumps({"type": "thread.started", "thread_id": "thread-existing"})
+            + "\n"
+            + json.dumps({"type": "turn.started", "turn_id": "turn-1"})
+            + "\n"
+            + json.dumps({"type": "turn.completed"})
+            + "\n"
+        )
+
+        def runner(command, **kwargs):
+            return subprocess.CompletedProcess(
+                args=command, returncode=0, stdout=stdout, stderr=""
+            )
+
+        adapter = CodexPersistentThreadAdapter(runner=runner)
+        with self.assertRaisesRegex(TriggerReadbackFailure, "out-of-window"):
+            adapter.start_existing_turn(
+                thread_id="thread-existing",
+                trigger_key="trg_x",
+                continuation_input="{}",
+            )
+
+    def test_codex_adapter_timeout_is_closed_nonretryable_readback(self):
+        def runner(command, **kwargs):
+            raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+
+        adapter = CodexPersistentThreadAdapter(
+            runner=runner, execution_timeout_seconds=1
+        )
+        with self.assertRaises(TriggerReadbackFailure) as error:
+            adapter.start_existing_turn(
+                thread_id="thread-existing",
+                trigger_key="trg_x",
+                continuation_input="{}",
+            )
+        self.assertEqual("APP_READBACK_FAILED", error.exception.failure_code)
+        self.assertNotIn("trg_x", str(error.exception))
+
+    def test_codex_stream_acknowledges_before_owner_execution_completes(self):
+        acknowledged = threading.Event()
+        lifecycle = [
+                json.dumps(
+                    {"type": "thread.started", "thread_id": "thread-existing"}
+                )
+                + "\n",
+                json.dumps({"type": "turn.started", "turn_id": "turn-1"}) + "\n",
+                json.dumps(
+                    {
+                        "type": "item.completed",
+                        "item": {"type": "agent_message"},
+                    }
+                )
+                + "\n",
+                json.dumps({"type": "turn.completed"}) + "\n",
+            ]
+
+        class GatedLifecycle:
+            index = 0
+
+            def readline(self, size=-1):
+                if self.index == 2:
+                    if not acknowledged.wait(timeout=1):
+                        raise AssertionError("owner execution was read before trigger acknowledgement")
+                if self.index >= len(lifecycle):
+                    return b""
+                line = lifecycle[self.index].encode("utf-8")
+                self.index += 1
+                return line[:size] if size >= 0 else line
+
+        class Process:
+            stdout = GatedLifecycle()
+
+            def wait(self, timeout=None):
+                return 0
+
+            def terminate(self):
+                pass
+
+            def kill(self):
+                pass
+
+        adapter = CodexPersistentThreadAdapter(popen_factory=lambda *args, **kwargs: Process())
+        result = adapter.start_existing_turn(
+            thread_id="thread-existing",
+            trigger_key="trg_x",
+            continuation_input="{}",
+            acknowledge=lambda thread_id, turn_id: acknowledged.set(),
+        )
+        self.assertTrue(acknowledged.is_set())
+        self.assertEqual("completed", result.status)
+        self.assertEqual(1, result.visible_item_count)
+
+    def test_codex_stream_rejects_oversized_record_before_enqueue(self):
+        class Process:
+            stdout = io.BytesIO(b"x" * 65_537)
+
+            def wait(self, timeout=None):
+                return 0
+
+            def terminate(self):
+                pass
+
+            def kill(self):
+                pass
+
+        adapter = CodexPersistentThreadAdapter(popen_factory=lambda *args, **kwargs: Process())
+        with self.assertRaisesRegex(TriggerReadbackFailure, "oversized"):
+            adapter.start_existing_turn(
+                thread_id="thread-existing",
+                trigger_key="trg_x",
+                continuation_input="{}",
+            )
+
+    def test_codex_stream_rejection_joins_reader_thread(self):
+        class Process:
+            def __init__(self):
+                self.stdout = io.BytesIO(b"{malformed}\n{}\n")
+
+            def wait(self, timeout=None):
+                return 0
+
+            def terminate(self):
+                pass
+
+            def kill(self):
+                pass
+
+        adapter = CodexPersistentThreadAdapter(
+            popen_factory=lambda *args, **kwargs: Process()
+        )
+        for _ in range(10):
+            with self.assertRaises(TriggerReadbackFailure):
+                adapter.start_existing_turn(
+                    thread_id="thread-existing",
+                    trigger_key="trg_x",
+                    continuation_input="{}",
+                )
+        self.assertFalse(
+            any(
+                thread.name == "atlas-continuation-readback" and thread.is_alive()
+                for thread in threading.enumerate()
+            )
+        )
 
     def test_codex_adapter_rejects_missing_duplicate_wrong_type_and_malformed_lifecycle(self):
         invalid_stdout = [
