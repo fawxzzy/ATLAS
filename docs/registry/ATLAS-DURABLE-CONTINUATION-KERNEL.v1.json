@@ -1,6 +1,6 @@
 {
   "schema": "atlas.durable-continuation-kernel.v1",
-  "contract_version": "1.0.5",
+  "contract_version": "1.0.6",
   "lifecycle_state": "SOURCE_ONLY_UNINSTALLED",
   "authority_store": "ops/atlas/atlas_runtime.py",
   "database": {
@@ -56,6 +56,7 @@
     "owner_execution_timeout_seconds": 1800,
     "acknowledgement_replaces_trigger_deadline": true,
     "turn_id_max_characters_before_acknowledgement": 256,
+    "turn_id_validator_scope": "ALL_DURABLE_TRANSITIONS_AND_RECONCILIATION_SEAMS",
     "observed_turn_bypasses_execution_deadline": false,
     "process_started_requires": "ATOMIC_ACKNOWLEDGED_DISPATCHED_POSTIMAGE",
     "terminal_process_state_can_be_reopened": false,
@@ -64,6 +65,8 @@
       "requires_advanced_valid_checkpoint": true,
       "checkpoint_schema": "atlas.thread-context-checkpoint.v1",
       "checkpoint_requires_canonical_latest_immutable_and_index_records": true,
+      "checkpoint_triplet_read_lock": ".thread-context.lock",
+      "missing_baseline_dispatch_effect": "ZERO_HOST_INVOCATIONS",
       "required_on_event_driven_ingress": true,
       "startup_bare_turn_identity_can_confirm": false,
       "failure_codes": [

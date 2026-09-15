@@ -533,6 +533,36 @@ class DurableContinuationKernelTests(unittest.TestCase):
                 checkpoint_after_id=after,
             )
 
+    def test_owner_dispatch_blocks_before_adapter_when_baseline_is_unavailable(self):
+        committed = self.commit()
+        adapter = AcceptedThenLostAdapter()
+        result = ContinuationDispatcher(
+            self.runtime,
+            adapter,
+            checkpoint_probe=SequenceCheckpointProbe(None),
+        ).dispatch_one(worker_id="fixture")
+        self.assertEqual("APP_READBACK_NO_CHECKPOINT", result["failure_code"])
+        self.assertEqual(0, adapter.calls)
+        row = self.runtime.db.execute(
+            "SELECT state,dispatched_at,thread_id,turn_id,trigger_ack_at,error_class,"
+            "readback_class,retry_class FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(
+            (
+                "DEAD_LETTER",
+                None,
+                None,
+                None,
+                None,
+                "APP_READBACK_NO_CHECKPOINT",
+                "APP_READBACK_NO_CHECKPOINT",
+                "RECONCILE_ONLY",
+            ),
+            tuple(row),
+        )
+        self.assertEqual([], self.process_states(committed.trigger_key))
+
     def test_concurrent_pre_migration_constructors_serialize_additive_columns(self):
         database = Path(self.tmp.name) / "pre-migration.db"
         connection = sqlite3.connect(database)
@@ -797,6 +827,45 @@ class DurableContinuationKernelTests(unittest.TestCase):
         index_path.write_text(json.dumps(index), encoding="utf-8")
         self.assertIsNone(FilesystemCheckpointProbe(index_root)(thread_id))
 
+    def test_filesystem_checkpoint_probe_holds_canonical_lock_across_triplet_read(self):
+        thread_id = "019fa784-ca4e-7832-8c78-2ace8cab84ac"
+        root, before = self.write_checkpoint(
+            "before", thread_id=thread_id, root_name="checkpoint-probe-lock"
+        )
+        validation_entered = threading.Event()
+        allow_probe_to_finish = threading.Event()
+        writer_finished = threading.Event()
+        from ops.atlas import atlasd as atlasd_module
+
+        original_validate = atlasd_module._validate_checkpoint_shape
+
+        def blocking_validate(checkpoint):
+            validation_entered.set()
+            if not allow_probe_to_finish.wait(timeout=2):
+                raise AssertionError("probe validation gate timed out")
+            return original_validate(checkpoint)
+
+        def write_after():
+            try:
+                return self.write_checkpoint(
+                    "after", thread_id=thread_id, root_name="checkpoint-probe-lock"
+                )
+            finally:
+                writer_finished.set()
+
+        with mock.patch(
+            "ops.atlas.atlasd._validate_checkpoint_shape", side_effect=blocking_validate
+        ), concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            probe_future = executor.submit(FilesystemCheckpointProbe(root), thread_id)
+            self.assertTrue(validation_entered.wait(timeout=1))
+            writer_future = executor.submit(write_after)
+            self.assertFalse(writer_finished.wait(timeout=0.1))
+            allow_probe_to_finish.set()
+            self.assertEqual(before, probe_future.result(timeout=2))
+            _, after = writer_future.result(timeout=2)
+        self.assertNotEqual(before, after)
+        self.assertEqual(after, FilesystemCheckpointProbe(root)(thread_id))
+
     def test_restart_requeues_unsent_lease_and_dispatches_once(self):
         committed = self.commit()
         leased = self.runtime.lease_continuation_trigger(worker_id="crashed", lease_seconds=0.01)
@@ -863,6 +932,59 @@ class DurableContinuationKernelTests(unittest.TestCase):
             tuple(row),
         )
         self.assertIsNone(self.runtime.lease_continuation_trigger(worker_id="second"))
+
+    def test_startup_turn_id_boundary_is_validated_before_any_mutation(self):
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key, worker_id="worker"
+        )
+        before = tuple(
+            self.runtime.db.execute(
+                "SELECT state,thread_id,turn_id,error_class,readback_class,retry_class "
+                "FROM continuation_outbox WHERE trigger_key=?",
+                (committed.trigger_key,),
+            ).fetchone()
+        )
+        with self.assertRaisesRegex(ValueError, "structural limit"):
+            self.runtime.reconcile_continuation_startup(
+                observed_turns={
+                    committed.trigger_key: {
+                        "thread_id": "thread-existing",
+                        "turn_id": "t" * 257,
+                    }
+                }
+            )
+        after = tuple(
+            self.runtime.db.execute(
+                "SELECT state,thread_id,turn_id,error_class,readback_class,retry_class "
+                "FROM continuation_outbox WHERE trigger_key=?",
+                (committed.trigger_key,),
+            ).fetchone()
+        )
+        self.assertEqual(before, after)
+        actions = self.runtime.reconcile_continuation_startup(
+            observed_turns={
+                committed.trigger_key: {
+                    "thread_id": "thread-existing",
+                    "turn_id": "t" * 256,
+                }
+            }
+        )
+        self.assertIn(
+            {
+                "trigger_key": committed.trigger_key,
+                "action": "DEAD_LETTER_UNPROVEN_READBACK",
+            },
+            actions,
+        )
+        self.assertEqual(
+            "t" * 256,
+            self.runtime.db.execute(
+                "SELECT turn_id FROM continuation_outbox WHERE trigger_key=?",
+                (committed.trigger_key,),
+            ).fetchone()[0],
+        )
 
     def test_acknowledgement_replaces_trigger_deadline_with_execution_deadline(self):
         committed = self.commit()
@@ -1001,6 +1123,117 @@ class DurableContinuationKernelTests(unittest.TestCase):
                 "SELECT state FROM continuation_outbox WHERE trigger_key=?", (committed.trigger_key,)
             ).fetchone()["state"],
             "DISPATCHED",
+        )
+
+    def test_direct_confirmation_turn_id_boundary_is_atomic(self):
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key, worker_id="worker"
+        )
+        with self.assertRaisesRegex(ValueError, "structural limit"):
+            self.runtime.confirm_continuation_trigger(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="t" * 257,
+            )
+        row = self.runtime.db.execute(
+            "SELECT state,thread_id,turn_id FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(("DISPATCHED", None, None), tuple(row))
+        self.assertTrue(
+            self.runtime.confirm_continuation_trigger(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="t" * 256,
+            )
+        )
+
+    def test_owner_readback_turn_id_boundary_is_atomic(self):
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key, worker_id="worker"
+        )
+        turn_id = "t" * 256
+        before_checkpoint = "threadctx_" + "a" * 64
+        after_checkpoint = "threadctx_" + "b" * 64
+        self.runtime.acknowledge_continuation_trigger(
+            trigger_key=committed.trigger_key,
+            thread_id="thread-existing",
+            turn_id=turn_id,
+            checkpoint_before_id=before_checkpoint,
+        )
+        before = tuple(
+            self.runtime.db.execute(
+                "SELECT state,readback_class,visible_item_count,checkpoint_after_id "
+                "FROM continuation_outbox WHERE trigger_key=?",
+                (committed.trigger_key,),
+            ).fetchone()
+        )
+        with self.assertRaisesRegex(ValueError, "structural limit"):
+            self.runtime.finalize_continuation_owner_readback(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="t" * 257,
+                visible_item_count=1,
+                checkpoint_after_id=after_checkpoint,
+            )
+        after = tuple(
+            self.runtime.db.execute(
+                "SELECT state,readback_class,visible_item_count,checkpoint_after_id "
+                "FROM continuation_outbox WHERE trigger_key=?",
+                (committed.trigger_key,),
+            ).fetchone()
+        )
+        self.assertEqual(before, after)
+        self.assertEqual(
+            "OWNER_EXECUTION_CONFIRMED",
+            self.runtime.finalize_continuation_owner_readback(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id=turn_id,
+                visible_item_count=1,
+                checkpoint_after_id=after_checkpoint,
+            ),
+        )
+
+    def test_stop_hook_finalization_turn_id_boundary_is_atomic(self):
+        committed = self.commit()
+        _, before_checkpoint = self.write_checkpoint("before")
+        self.assertEqual(
+            "block",
+            self.runtime.stop_hook_decision(
+                owner_id="owner.test",
+                thread_id="thread-existing",
+                checkpoint_before_id=before_checkpoint,
+            )["decision"],
+        )
+        _, after_checkpoint = self.write_checkpoint("after")
+        with self.assertRaisesRegex(ValueError, "structural limit"):
+            self.runtime.finalize_stop_hook_continuation(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="t" * 257,
+                visible_item_count=1,
+                checkpoint_after_id=after_checkpoint,
+            )
+        row = self.runtime.db.execute(
+            "SELECT state,thread_id,turn_id,trigger_ack_at FROM continuation_outbox "
+            "WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(("DISPATCHED", "thread-existing", None, None), tuple(row))
+        self.assertEqual(
+            "OWNER_EXECUTION_CONFIRMED",
+            self.runtime.finalize_stop_hook_continuation(
+                trigger_key=committed.trigger_key,
+                thread_id="thread-existing",
+                turn_id="t" * 256,
+                visible_item_count=1,
+                checkpoint_after_id=after_checkpoint,
+            ),
         )
 
     def test_capacity_exhaustion_is_resumable(self):

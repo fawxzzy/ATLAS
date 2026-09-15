@@ -25,11 +25,12 @@ from typing import Callable, Mapping, Protocol
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from ops.atlas.atlas_runtime import AtlasRuntime
+from ops.atlas.atlas_runtime import AtlasRuntime, validate_continuation_turn_id
 from ops.atlas.atlas_watchdog import AtlasWatchdog, DEFAULT_FALLBACK_SECONDS
 from ops.atlas.persist_thread_context import (
     ThreadContextError,
     _digest as _thread_context_digest,
+    _exclusive_file_lock as _exclusive_thread_context_lock,
     _load_index as _load_thread_context_index,
     _safe_path_component as _safe_thread_context_path_component,
     _validate_checkpoint_shape,
@@ -108,29 +109,29 @@ class FilesystemCheckpointProbe:
             _safe_thread_context_path_component(thread_id, "thread_id")
             path = (self.root / thread_id / "latest.json").resolve()
             path.relative_to(self.root)
-            raw = path.read_bytes()
-            if len(raw) > 262_144:
-                return None
-            checkpoint = json.loads(raw)
-            payload = _validate_checkpoint_shape(checkpoint)
-        except (OSError, ValueError, json.JSONDecodeError, ThreadContextError):
-            return None
-        if payload["thread_id"] != thread_id:
-            return None
-        digest = _thread_context_digest(payload)
-        checkpoint_id = checkpoint.get("checkpoint_id")
-        if (
-            checkpoint.get("payload_digest") != digest
-            or checkpoint_id != "threadctx_" + digest.removeprefix("sha256:")
-        ):
-            return None
-        try:
-            immutable_path = (path.parent / f"{checkpoint_id}.json").resolve()
-            immutable_path.relative_to(self.root)
-            immutable = json.loads(immutable_path.read_bytes())
-            if immutable != checkpoint:
-                return None
-            index = _load_thread_context_index(self.root / "index.json")
+            lock_path = (self.root / ".thread-context.lock").resolve()
+            lock_path.relative_to(self.root)
+            with _exclusive_thread_context_lock(lock_path):
+                raw = path.read_bytes()
+                if len(raw) > 262_144:
+                    return None
+                checkpoint = json.loads(raw)
+                payload = _validate_checkpoint_shape(checkpoint)
+                if payload["thread_id"] != thread_id:
+                    return None
+                digest = _thread_context_digest(payload)
+                checkpoint_id = checkpoint.get("checkpoint_id")
+                if (
+                    checkpoint.get("payload_digest") != digest
+                    or checkpoint_id != "threadctx_" + digest.removeprefix("sha256:")
+                ):
+                    return None
+                immutable_path = (path.parent / f"{checkpoint_id}.json").resolve()
+                immutable_path.relative_to(self.root)
+                immutable = json.loads(immutable_path.read_bytes())
+                if immutable != checkpoint:
+                    return None
+                index = _load_thread_context_index(self.root / "index.json")
         except (OSError, ValueError, json.JSONDecodeError, ThreadContextError):
             return None
         if set(index) != {"schema", "threads", "index_digest"}:
@@ -181,9 +182,13 @@ def _closed_trigger_readback(value: object, *, expected_thread_id: str) -> Trigg
         status = value["status"]
     except Exception as exc:
         raise ValueError("trigger adapter readback fields are unavailable") from None
-    if not all(isinstance(item, str) and item.strip() for item in (thread_id, turn_id, status)):
+    if not all(isinstance(item, str) and item.strip() for item in (thread_id, status)):
         raise ValueError("trigger adapter readback fields must be non-empty strings")
-    if len(thread_id) > 256 or len(turn_id) > 256 or len(status) > 32:
+    try:
+        turn_id = validate_continuation_turn_id(turn_id)
+    except ValueError:
+        raise ValueError("trigger adapter readback exceeds structural limits") from None
+    if len(thread_id) > 256 or len(status) > 32:
         raise ValueError("trigger adapter readback exceeds structural limits")
     if thread_id != expected_thread_id:
         raise ValueError("trigger adapter returned the wrong thread")
@@ -382,13 +387,13 @@ class CodexPersistentThreadAdapter:
                     seen_thread = candidate
                 elif event.get("type") == "turn.started":
                     candidate = event.get("turn_id")
-                    if (
-                        seen_thread != expected_thread_id
-                        or seen_turn is not None
-                        or not isinstance(candidate, str)
-                        or not candidate.strip()
-                        or len(candidate) > 256
-                    ):
+                    try:
+                        candidate = validate_continuation_turn_id(candidate)
+                    except ValueError:
+                        raise TriggerReadbackFailure(
+                            "APP_READBACK_FAILED", "existing-thread trigger identity is ambiguous"
+                        ) from None
+                    if seen_thread != expected_thread_id or seen_turn is not None:
                         raise TriggerReadbackFailure(
                             "APP_READBACK_FAILED", "existing-thread trigger identity is ambiguous"
                         )
@@ -506,13 +511,13 @@ class CodexPersistentThreadAdapter:
                     raise ValueError("existing-thread trigger returned malformed lifecycle records")
                 thread_started.append((index, candidate_thread))
             elif event_type == "turn.started":
-                candidate_turn = item.get("turn_id")
-                if (
-                    not isinstance(candidate_turn, str)
-                    or not candidate_turn.strip()
-                    or len(candidate_turn) > 256
-                    or has_thread_id
-                ):
+                try:
+                    candidate_turn = validate_continuation_turn_id(item.get("turn_id"))
+                except ValueError:
+                    raise ValueError(
+                        "existing-thread trigger returned malformed lifecycle records"
+                    ) from None
+                if has_thread_id:
                     raise ValueError("existing-thread trigger returned malformed lifecycle records")
                 turn_started.append((index, candidate_turn))
             elif event_type == "turn.completed":
@@ -621,6 +626,21 @@ class ContinuationDispatcher:
         checkpoint_before = (
             self.checkpoint_probe(item.thread_id) if self.checkpoint_probe is not None else None
         )
+        if self.checkpoint_probe is not None and checkpoint_before is None:
+            self.runtime.fail_continuation_trigger(
+                trigger_key=item.trigger_key,
+                worker_id=worker_id,
+                error_class="APP_READBACK_NO_CHECKPOINT",
+            )
+            return {
+                "trigger_key": item.trigger_key,
+                "packet_id": item.packet_id,
+                "thread_id": item.thread_id,
+                "status": "blocked",
+                "failure_code": "APP_READBACK_NO_CHECKPOINT",
+                "retry_class": "RECONCILE_ONLY",
+            }
+
         def acknowledge(thread_id: str, turn_id: str) -> None:
             self.runtime.acknowledge_continuation_trigger(
                 trigger_key=item.trigger_key,

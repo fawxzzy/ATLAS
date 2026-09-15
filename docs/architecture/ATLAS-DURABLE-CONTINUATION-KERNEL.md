@@ -52,6 +52,15 @@ they are never blind-resubmitted. Prompt/model output and checkpoint content are
 never stored in the outbox; only structural counts and checkpoint identities are
 retained.
 
+The checkpoint probe acquires the same canonical `.thread-context.lock` used by
+the checkpoint writer and validates latest, immutable, and index records while
+holding that lock. An unavailable or inconsistent baseline is terminal before
+the dispatcher records a sent boundary or invokes the host adapter, so it can
+never be reinterpreted later as checkpoint advancement. Every host turn identity
+passes one shared nonempty 256-character validator before acknowledgement,
+confirmation, Stop-hook finalization, startup reconciliation, or any related
+durable state transition.
+
 Every production dispatcher, including the event-driven ingress seam, must carry
 that checkpoint probe. The compatibility confirmation path is fixture-only.
 Startup recovery cannot promote a sent row from bare thread/turn identity; without

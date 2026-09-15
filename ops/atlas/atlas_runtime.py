@@ -49,6 +49,16 @@ _CONTEXT_FORBIDDEN_KEYS = {
 }
 _DRIVE_RELATIVE_PATH = re.compile(r"^[A-Za-z]:[^\\/].*")
 _PROTOTYPE_POLLUTION_KEYS = {"__proto__", "constructor", "prototype"}
+MAX_CONTINUATION_TURN_ID_LENGTH = 256
+
+
+def validate_continuation_turn_id(value: object) -> str:
+    """Return one exact bounded turn identity before any durable transition."""
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("turn_id is required")
+    if len(value) > MAX_CONTINUATION_TURN_ID_LENGTH:
+        raise ValueError("turn_id exceeds structural limit")
+    return value
 
 
 @dataclass(frozen=True)
@@ -1482,10 +1492,9 @@ class AtlasRuntime:
         execution_seconds: float = 1800,
     ) -> bool:
         """Persist host acknowledgement without claiming owner execution truth."""
-        if not thread_id.strip() or not turn_id.strip():
-            raise ValueError("thread_id and turn_id are required")
-        if len(turn_id) > 256:
-            raise ValueError("turn_id exceeds structural limit")
+        if not isinstance(thread_id, str) or not thread_id.strip():
+            raise ValueError("thread_id is required")
+        turn_id = validate_continuation_turn_id(turn_id)
         if checkpoint_before_id is not None and not _THREAD_CONTEXT_ID.fullmatch(
             checkpoint_before_id
         ):
@@ -1567,6 +1576,7 @@ class AtlasRuntime:
         checkpoint_after_id: str | None,
     ) -> str:
         """Confirm useful owner execution or dead-letter one exact readback failure."""
+        turn_id = validate_continuation_turn_id(turn_id)
         if isinstance(visible_item_count, bool) or not isinstance(visible_item_count, int):
             raise ValueError("visible_item_count must be an integer")
         if visible_item_count < 0:
@@ -1669,8 +1679,9 @@ class AtlasRuntime:
         self, *, trigger_key: str, thread_id: str, turn_id: str
     ) -> bool:
         """Validate correlation before the irreversible state transition."""
-        if not thread_id.strip() or not turn_id.strip():
-            raise ValueError("thread_id and turn_id are required")
+        if not isinstance(thread_id, str) or not thread_id.strip():
+            raise ValueError("thread_id is required")
+        turn_id = validate_continuation_turn_id(turn_id)
         now = time.time()
         self.db.execute("BEGIN IMMEDIATE")
         try:
@@ -1782,6 +1793,18 @@ class AtlasRuntime:
         """One event-driven startup pass; it never starts a timer or polling loop."""
         liveness_collected = observed_turns is not None
         observed_turns = observed_turns or {}
+        validated_observed_turns: dict[str, dict[str, str]] = {}
+        for trigger_key, observed in observed_turns.items():
+            if not isinstance(observed, Mapping):
+                raise ValueError("startup readback must be an object")
+            thread_id = observed.get("thread_id")
+            if not isinstance(thread_id, str) or not thread_id.strip():
+                raise ValueError("startup readback thread identity is required")
+            validated_observed_turns[str(trigger_key)] = {
+                "thread_id": thread_id,
+                "turn_id": validate_continuation_turn_id(observed.get("turn_id")),
+            }
+        observed_turns = validated_observed_turns
         now = time.time() if now is None else now
         actions: list[dict[str, str]] = []
         self.db.execute("BEGIN IMMEDIATE")
@@ -1805,8 +1828,8 @@ class AtlasRuntime:
             for row in dispatched:
                 observed = observed_turns.get(row["trigger_key"])
                 if observed:
-                    thread_id = str(observed.get("thread_id") or "")
-                    turn_id = str(observed.get("turn_id") or "")
+                    thread_id = observed["thread_id"]
+                    turn_id = observed["turn_id"]
                     if thread_id != row["expected_thread"] or not turn_id:
                         raise ValueError("startup readback identity is missing or mismatched")
                     if row["trigger_ack_at"] is not None:
@@ -2166,10 +2189,9 @@ class AtlasRuntime:
             or not trigger_key.strip()
             or not isinstance(thread_id, str)
             or not thread_id.strip()
-            or not isinstance(turn_id, str)
-            or not turn_id.strip()
         ):
-            raise ValueError("trigger_key, thread_id, and turn_id are required")
+            raise ValueError("trigger_key and thread_id are required")
+        turn_id = validate_continuation_turn_id(turn_id)
         row = self.db.execute(
             "SELECT x.trigger_key,x.thread_id,x.turn_id,x.checkpoint_before_id,"
             "x.delivery_method,x.state,o.thread_id AS expected_thread "
