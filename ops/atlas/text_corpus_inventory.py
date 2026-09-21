@@ -209,7 +209,7 @@ PINNED_SOURCE_SPECS = (
         component_id="atlas-root",
         repository_owner="fawxzzy",
         repository_name="ATLAS",
-        pinned_commit="59fb0bbad0054a725004746c29492c3abf4f08e3",
+        pinned_commit="78a906240cf6c8a5fc1967cbf9d797df62cfa1f5",
         authority_tier="atlas_inventory_adoption_owner",
         expected_remote="github.com/fawxzzy/atlas",
     ),

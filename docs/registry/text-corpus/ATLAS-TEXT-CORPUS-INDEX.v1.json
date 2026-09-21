@@ -1,6 +1,6 @@
 {
   "aggregate": {
-    "aggregate_digest": "sha256:bb0643928f4967a5477920cc42359f51b82596adf73dc9afa2f2824d760a4b3b",
+    "aggregate_digest": "sha256:de52cdad0b0a58ea0c82cd05248021f587d6e501a6d810d19edc247281e51855",
     "available_source_count": 2,
     "counts": {
       "excluded": 416,
@@ -11,8 +11,8 @@
         "SECRET_SURFACE": 1,
         "UNSUPPORTED_MEDIA_TYPE": 34
       },
-      "included": 4875,
-      "total": 5291,
+      "included": 4932,
+      "total": 5348,
       "unknown": 0
     },
     "source_count": 2
@@ -21,7 +21,7 @@
     {
       "authority_tier": "atlas_inventory_adoption_owner",
       "availability": "available",
-      "component_digest": "sha256:a43f6b75fd7338cca54fb0b2f1121b187a05f2031148631d0bee1e21e7056fed",
+      "component_digest": "sha256:050e3f134b31762c05907f3fb8081f15d3b26380976f681506880b1ac45cc47d",
       "component_id": "atlas-root",
       "counts": {
         "excluded": 60,
@@ -30,14 +30,14 @@
           "MUTABLE_RUNTIME_SURFACE": 24,
           "UNSUPPORTED_MEDIA_TYPE": 25
         },
-        "included": 3431,
-        "total": 3491,
+        "included": 3488,
+        "total": 3548,
         "unknown": 0
       },
-      "pinned_commit": "59fb0bbad0054a725004746c29492c3abf4f08e3",
+      "pinned_commit": "78a906240cf6c8a5fc1967cbf9d797df62cfa1f5",
       "shard_ref": "docs/registry/text-corpus/components/atlas-root.v1.json",
       "source_id": "github:fawxzzy/ATLAS",
-      "tree_oid": "7ac23ac04e60115eeaa5adc659e1e54c12dcedb4",
+      "tree_oid": "7c97730a86a32a127f77339ac18f3221d5ddf64f",
       "unknown_reason": null
     },
     {
