@@ -6,6 +6,7 @@ import sqlite3
 import subprocess
 import tempfile
 import threading
+import time
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -1039,6 +1040,83 @@ class DurableContinuationKernelTests(unittest.TestCase):
             },
             self.runtime.reconcile_continuation_startup(now=execution_deadline + 1),
         )
+
+    def test_expired_trigger_cannot_be_acknowledged_or_extend_deadline(self):
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key, worker_id="worker", confirmation_seconds=30,
+        )
+        expired = time.time() - 1
+        self.runtime.db.execute(
+            "UPDATE continuation_outbox SET confirmation_deadline=? WHERE trigger_key=?",
+            (expired, committed.trigger_key),
+        )
+        with self.assertRaisesRegex(ValueError, "acknowledgement deadline expired"):
+            self.runtime.acknowledge_continuation_trigger(
+                trigger_key=committed.trigger_key, thread_id="thread-existing",
+                turn_id="late-turn", checkpoint_before_id="threadctx_" + "a" * 64,
+            )
+        row = self.runtime.db.execute(
+            "SELECT state,trigger_ack_at,confirmation_deadline FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(("DISPATCHED", None, expired), tuple(row))
+
+    def test_expired_execution_cannot_finalize_valid_result(self):
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key, worker_id="worker", confirmation_seconds=30,
+        )
+        before = "threadctx_" + "a" * 64
+        after = "threadctx_" + "b" * 64
+        self.runtime.acknowledge_continuation_trigger(
+            trigger_key=committed.trigger_key, thread_id="thread-existing",
+            turn_id="observed-turn", checkpoint_before_id=before,
+        )
+        expired = time.time() - 1
+        self.runtime.db.execute(
+            "UPDATE continuation_outbox SET confirmation_deadline=? WHERE trigger_key=?",
+            (expired, committed.trigger_key),
+        )
+        with self.assertRaisesRegex(ValueError, "owner execution deadline expired"):
+            self.runtime.finalize_continuation_owner_readback(
+                trigger_key=committed.trigger_key, thread_id="thread-existing",
+                turn_id="observed-turn", visible_item_count=1, checkpoint_after_id=after,
+            )
+        row = self.runtime.db.execute(
+            "SELECT state,confirmation_deadline FROM continuation_outbox WHERE trigger_key=?",
+            (committed.trigger_key,),
+        ).fetchone()
+        self.assertEqual(("DISPATCHED", expired), tuple(row))
+
+    def test_unexpired_exact_result_confirms_once_and_rejects_rebind(self):
+        committed = self.commit()
+        lease = self.runtime.lease_continuation_trigger(worker_id="worker")
+        self.runtime.mark_continuation_trigger_dispatched(
+            trigger_key=lease.trigger_key, worker_id="worker", confirmation_seconds=30,
+        )
+        before = "threadctx_" + "a" * 64
+        after = "threadctx_" + "b" * 64
+        self.assertTrue(self.runtime.acknowledge_continuation_trigger(
+            trigger_key=committed.trigger_key, thread_id="thread-existing",
+            turn_id="observed-turn", checkpoint_before_id=before,
+        ))
+        self.assertEqual("OWNER_EXECUTION_CONFIRMED", self.runtime.finalize_continuation_owner_readback(
+            trigger_key=committed.trigger_key, thread_id="thread-existing",
+            turn_id="observed-turn", visible_item_count=1, checkpoint_after_id=after,
+        ))
+        self.assertEqual("OWNER_EXECUTION_CONFIRMED", self.runtime.finalize_continuation_owner_readback(
+            trigger_key=committed.trigger_key, thread_id="thread-existing",
+            turn_id="observed-turn", visible_item_count=1, checkpoint_after_id=after,
+        ))
+        with self.assertRaisesRegex(ValueError, "terminal owner readback cannot be rebound"):
+            self.runtime.finalize_continuation_owner_readback(
+                trigger_key=committed.trigger_key, thread_id="thread-existing",
+                turn_id="observed-turn", visible_item_count=1,
+                checkpoint_after_id="threadctx_" + "c" * 64,
+            )
 
     def test_observed_acknowledged_turn_cannot_bypass_execution_deadline(self):
         committed = self.commit()

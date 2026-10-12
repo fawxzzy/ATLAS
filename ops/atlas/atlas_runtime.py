@@ -1538,6 +1538,8 @@ class AtlasRuntime:
                     raise ValueError("trigger acknowledgement cannot be rebound")
                 self.db.execute("COMMIT")
                 return False
+            if row["confirmation_deadline"] is None or row["confirmation_deadline"] <= now:
+                raise ValueError("trigger acknowledgement deadline expired")
             duplicate = self.db.execute(
                 "SELECT trigger_key FROM continuation_outbox WHERE thread_id=? AND turn_id=? "
                 "AND trigger_key<>?",
@@ -1623,6 +1625,8 @@ class AtlasRuntime:
                 return readback_class
             if row["state"] != "DISPATCHED":
                 raise ValueError("only DISPATCHED triggers may finalize owner readback")
+            if row["confirmation_deadline"] is None or row["confirmation_deadline"] <= now:
+                raise ValueError("owner execution deadline expired")
             if readback_class == "OWNER_EXECUTION_CONFIRMED":
                 self.db.execute(
                     "UPDATE continuation_outbox SET state='CONFIRMED',readback_class=?,"
