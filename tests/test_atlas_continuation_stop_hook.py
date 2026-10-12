@@ -122,6 +122,7 @@ class DurableContinuationKernelTests(unittest.TestCase):
         *,
         thread_id="thread-existing",
         root_name="thread-context",
+        source_refs=None,
     ):
         root = Path(self.tmp.name) / root_name
         checkpoint = build_checkpoint(
@@ -137,7 +138,7 @@ class DurableContinuationKernelTests(unittest.TestCase):
             decisions=[],
             blockers=[],
             receipts=["receipt:test"],
-            source_refs=["source:test"],
+            source_refs=["source:test"] if source_refs is None else source_refs,
         )
         persist_checkpoint(checkpoint, output_root=root)
         return root, checkpoint["checkpoint_id"]
@@ -711,6 +712,55 @@ class DurableContinuationKernelTests(unittest.TestCase):
             ("DEAD_LETTER", "APP_READBACK_NO_TURN", "RECONCILE_ONLY"), tuple(row)
         )
         self.assertIsNone(self.runtime.lease_continuation_trigger(worker_id="second"))
+
+    def test_empty_source_refs_cannot_prove_owner_execution(self):
+        root, before = self.write_checkpoint("before", root_name="source-proof")
+        probe = FilesystemCheckpointProbe(root)
+        self.assertEqual(before, probe("thread-existing"))
+        self.commit()
+        _, after = self.write_checkpoint(
+            "after", root_name="source-proof", source_refs=[]
+        )
+        self.assertNotEqual(before, after)
+        self.assertIsNone(probe("thread-existing"))
+        adapter = mock.Mock(wraps=InspectingAdapter(self.runtime))
+        result = ContinuationDispatcher(
+            self.runtime, adapter, checkpoint_probe=probe
+        ).dispatch_one(worker_id="worker")
+        self.assertEqual("APP_READBACK_NO_CHECKPOINT", result["failure_code"])
+        adapter.start_existing_turn.assert_not_called()
+        row = self.runtime.db.execute(
+            "SELECT state,readback_class FROM continuation_outbox"
+        ).fetchone()
+        self.assertNotEqual("CONFIRMED", row["state"])
+
+    def test_empty_source_refs_after_owner_turn_cannot_confirm(self):
+        root, before = self.write_checkpoint("before", root_name="after-source-proof")
+        self.commit()
+        probe = FilesystemCheckpointProbe(root)
+        self.assertEqual(before, probe("thread-existing"))
+
+        class WritingAdapter(InspectingAdapter):
+            def start_existing_turn(adapter_self, **kwargs):
+                readback = super().start_existing_turn(**kwargs)
+                self.write_checkpoint(
+                    "after", root_name="after-source-proof", source_refs=[]
+                )
+                return readback
+
+        result = ContinuationDispatcher(
+            self.runtime, WritingAdapter(self.runtime), checkpoint_probe=probe
+        ).dispatch_one(worker_id="worker")
+        self.assertEqual("APP_READBACK_NO_CHECKPOINT", result["readback_class"])
+        self.assertEqual("blocked", result["status"])
+        row = self.runtime.db.execute(
+            "SELECT state,readback_class,visible_item_count,checkpoint_before_id,"
+            "checkpoint_after_id FROM continuation_outbox"
+        ).fetchone()
+        self.assertEqual(
+            ("DEAD_LETTER", "APP_READBACK_NO_CHECKPOINT", 1, before, None),
+            tuple(row),
+        )
 
     def test_filesystem_checkpoint_probe_accepts_only_same_thread_digest_valid_checkpoint(self):
         thread_id = "019fa784-ca4e-7832-8c78-2ace8cab84ac"

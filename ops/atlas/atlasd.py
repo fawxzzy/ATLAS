@@ -119,6 +119,8 @@ class FilesystemCheckpointProbe:
                 payload = _validate_checkpoint_shape(checkpoint)
                 if payload["thread_id"] != thread_id:
                     return None
+                if not payload["source_refs"]:
+                    return None
                 digest = _thread_context_digest(payload)
                 checkpoint_id = checkpoint.get("checkpoint_id")
                 if (
