@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import io
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -22,6 +24,61 @@ class StackRepoInventoryTests(unittest.TestCase):
             patcher = patch(f"ops.atlas.awareness.{name}", return_value=value)
             patcher.start()
             self.addCleanup(patcher.stop)
+
+    def test_cli_writes_the_exact_selected_manifest_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "stack.yaml").write_text(json.dumps({"repo_registry": {"stack": {"path": "."}}}))
+            selected = root / "selected.yaml"
+            selected.write_text(json.dumps({"repo_registry": {
+                "stack": {"path": "."}, "selected": {"path": "repos/selected"},
+            }}))
+            json_output = root / "result.json"
+            markdown_output = root / "result.md"
+            output = io.StringIO()
+            with patch.object(repo_inventory_module, "_initiative_index", return_value=({}, "fixture-digest")), \
+                 patch.object(repo_inventory_module, "load_lockfile", return_value={"components": {}, "excluded_surfaces": {}}), \
+                 patch.object(repo_inventory_module, "build_repo_inventory", wraps=build_repo_inventory) as build, \
+                 redirect_stdout(output):
+                result = repo_inventory_module.main([
+                    "--stack-file", str(selected), "--json-output", str(json_output),
+                    "--markdown-output", str(markdown_output),
+                ])
+            self.assertEqual(result, 0)
+            persisted = json.loads(json_output.read_text())
+            receipt = json.loads(output.getvalue())
+            self.assertEqual({r["logical_id"] for r in persisted["repos"]}, {"stack", "selected"})
+            self.assertEqual(receipt["repo_count"], persisted["repo_count"])
+            self.assertEqual(receipt["content_digest"], persisted["content_digest"])
+            self.assertEqual(persisted["stack_manifest_ref"], "selected.yaml")
+            self.assertEqual(markdown_output.read_text(), repo_inventory_module.render_repo_inventory_markdown(persisted))
+            self.assertEqual(build.call_count, 1)
+
+    def test_explicit_empty_config_does_not_fall_back_to_default_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "stack.yaml").write_text(json.dumps({"repo_registry": {"unselected": {"path": "."}}}))
+            with patch.object(repo_inventory_module, "_initiative_index", return_value=({}, "fixture-digest")):
+                payload = build_repo_inventory(root=root, config={}, lock_payload={})
+            self.assertEqual(payload["repos"], [])
+
+    def test_cli_dry_run_does_not_write_and_builds_once(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            selected = root / "selected.yaml"
+            selected.write_text(json.dumps({"repo_registry": {"stack": {"path": "."}}}))
+            json_output, markdown_output = root / "result.json", root / "result.md"
+            with patch.object(repo_inventory_module, "_initiative_index", return_value=({}, "fixture-digest")), \
+                 patch.object(repo_inventory_module, "load_lockfile", return_value={"components": {}, "excluded_surfaces": {}}), \
+                 patch.object(repo_inventory_module, "build_repo_inventory", wraps=build_repo_inventory) as build, \
+                 redirect_stdout(io.StringIO()):
+                self.assertEqual(repo_inventory_module.main([
+                    "--stack-file", str(selected), "--json-output", str(json_output),
+                    "--markdown-output", str(markdown_output), "--dry-run",
+                ]), 0)
+            self.assertFalse(json_output.exists())
+            self.assertFalse(markdown_output.exists())
+            self.assertEqual(build.call_count, 1)
 
     def test_excluded_presence_uses_current_paths_and_preserves_provenance(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
