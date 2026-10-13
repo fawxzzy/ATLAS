@@ -475,7 +475,7 @@ def apply_repo_generated_state_cleanup(
     repo_path: Path,
     repo_rel: str,
     repo_info: dict[str, Any],
-    execute: bool = True,
+    execute: bool = False,
     run_command: Any = subprocess.run,
 ) -> tuple[list[Finding], set[str]]:
     validation_config = repo_info.get("validation")
@@ -3127,7 +3127,7 @@ def build_findings(
     lock_file_override: Path | None = None,
     allow_missing_locked_repos: bool = False,
     required_present_repo_ids: set[str] | None = None,
-    run_generated_state_cleanup: bool = True,
+    run_generated_state_cleanup: bool = False,
 ) -> list[Finding]:
     root = stack_file.parent.resolve()
     findings: list[Finding] = []
@@ -3983,7 +3983,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--ratchet", action="store_true")
     parser.add_argument("--allow-missing-locked-repos", action="store_true")
     parser.add_argument("--require-present-repo-id", action="append", default=[])
-    parser.add_argument(
+    cleanup_options = parser.add_mutually_exclusive_group()
+    cleanup_options.add_argument(
+        "--run-generated-state-cleanup",
+        action="store_true",
+        help="Execute already-admitted owner generated-state cleanup commands before validation.",
+    )
+    cleanup_options.add_argument(
         "--skip-generated-state-cleanup",
         action="store_true",
         help="Validate owner repositories without executing their generated-state cleanup commands.",
@@ -4009,13 +4015,9 @@ def main(argv: list[str] | None = None) -> int:
         world_model_attention_path = root / "runtime" / "state" / "atlas" / "world-model.attention.latest.json"
         descriptor_root = root / "runtime" / "cortex" / "artifacts"
         should_refresh_runtime = bool(args.refresh_runtime_artifacts)
-        if should_refresh_runtime or not any(legacy_backfill_root.glob("*.json")):
+        if should_refresh_runtime:
             backfill_legacy_runtime_artifacts(root=root)
-        if not args.allow_missing_locked_repos and (
-            should_refresh_runtime
-            or not world_model_snapshot_path.exists()
-            or not world_model_attention_path.exists()
-        ):
+        if should_refresh_runtime and not args.allow_missing_locked_repos:
             write_world_model_state(
                 descriptor_root=descriptor_root,
                 root=root,
@@ -4037,7 +4039,7 @@ def main(argv: list[str] | None = None) -> int:
                     config,
                     lock_file_override=lock_file,
                     allow_missing_locked_repos=bool(args.allow_missing_locked_repos),
-                    run_generated_state_cleanup=not bool(args.skip_generated_state_cleanup),
+                    run_generated_state_cleanup=bool(args.run_generated_state_cleanup),
                     required_present_repo_ids={
                         str(repo_id).strip()
                         for repo_id in args.require_present_repo_id

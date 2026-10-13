@@ -384,7 +384,7 @@ def build_repo_inventory(
             {
                 "surface_id": surface_id,
                 "local_path": surface_coordinate,
-                "present": bool(surface.get("present", False)),
+                "present": (base_root / surface_coordinate).exists(),
                 "trust_class": str(surface.get("trust_class", "")),
                 "release_eligible": bool(surface.get("release_eligible", False)),
                 "reason": str(surface.get("reason", "")),
