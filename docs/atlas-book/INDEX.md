@@ -1,21 +1,26 @@
 # ATLAS Book Index
 
-Quick summary: Revision 68 puts Fitness and its required shared sign-in and handoff path first. Use the owner repo for implementation, the existing Codex task for execution, and the master plus receipts to check the result.
+Quick summary: Revision 69 puts Fitness and its required shared sign-in and handoff path first. Use the owner repo for implementation, the existing Codex task for execution, and the master plus receipts to check the result.
 
 ## Current map
 
 | Scope | Current operating choice | Authority |
 |---|---|---|
 | Fitness product and shared Supabase account/handoff | **CORE NOW** | [Fitness repo](../../repos/fawxzzy-fitness/README.md); existing protected Supabase owner for account and migration effects |
-| ATLAS coordination, exact task/result delivery, and minimal Book navigation | **CORE NOW** | [Root rules](../../AGENTS.md), [stack map](../../stack.yaml), [master revision 68](../../runtime/atlas/continuity/ACE_DURABLE_MASTER_PLAN.md) |
+| ATLAS coordination, exact task/result delivery, and minimal Book navigation | **CORE NOW** | [Root rules](../../AGENTS.md), [stack map](../../stack.yaml), [master revision 69](../../runtime/atlas/continuity/ACE_DURABLE_MASTER_PLAN.md) |
 | Playbook's demonstrated Fitness caller | **CORE NOW**, limited to evidenced value | [Playbook repo](../../repos/playbook/README.md) |
-| `_stack` Fitness deploy wrappers and identity preflight | **UNKNOWN** in master revision 68; source audit recommends **KEEP FROZEN** pending publication | [_stack repo](../../repos/_stack/README.md); activation needs a current owner need and exact preflight |
+| `_stack` Fitness deploy wrappers and identity preflight | **KEEP FROZEN** in master revision 69; preserve optional wrapper and identity preflight | [_stack repo](../../repos/_stack/README.md); activation needs a current owner need and exact preflight |
 | Foundation, Lifeline, Mazer features, Registry expansion, Playbook expansion, usage pacing expansion | **KEEP FROZEN** | Preserve current owners and receipts; reopen on a concrete Fitness dependency |
 | Standalone Cortex and future research | **TODO LATER** | No current Fitness acceptance dependency established |
 | Completed historical helpers and stale board claims | **ARCHIVE / RETIRE only after exact owner and retention check** | No deletion or task archive follows from this map |
 
-These are scope choices, not claims that every product acceptance gate has passed. Historical Book pages below describe earlier states; the [master](../../runtime/atlas/continuity/ACE_DURABLE_MASTER_PLAN.md), current owner repo, and exact accepted receipts govern current status. The `_stack` source audit is preserved in the originating task's `fitness-stack-dependency-r001-20261013.md`; its wrapper is available but not proven required by the latest accepted Fitness release. The master publisher has not yet incorporated this source-audit recommendation.
+These are scope choices, not claims that every product acceptance gate has passed. Historical Book pages below describe earlier states; the [master](../../runtime/atlas/continuity/ACE_DURABLE_MASTER_PLAN.md), current owner repo, and exact accepted receipts govern current status. The `_stack` source audit is preserved in the originating task's `fitness-stack-dependency-r001-20261013.md`; its wrapper is available but not proven required by the latest accepted Fitness release. Master revision 69 accepts that frozen disposition.
 
+## Fitness operating dependencies
+
+- [Fitness CI](../../repos/fawxzzy-fitness/.github/workflows/ci.yml) builds in the product repo. Accepted release source and the `fitness.fawxzzy.com` Vercel binding are recorded in the [retained cutover postimage](../../runtime/atlas/continuity/platform-supabase-fitness-retained-cutover-r001-20261012-postimage.json); its retained rollback deployment was not invoked.
+- [Account handoff source](../../repos/fawxzzy-fitness/src/lib/account-portal.ts) sends Fitness users to `account.fawxzzy.com`. The [portal production postimage](../../runtime/atlas/continuity/platform-supabase-portal-pr76-production-r001-20261012-postimage.json) binds that domain to the retained website Vercel project. [Fitness Auth actions](../../repos/fawxzzy-fitness/src/app/auth/actions.ts) call Supabase Auth for recovery. Current DNS operator and recovery-email delivery/SMTP provider are **UNKNOWN** from these source and receipt checks.
+- [Billing routes](../../repos/fawxzzy-fitness/src/app/api/billing/checkout/route.ts) use Stripe; [entitlement logic](../../repos/fawxzzy-fitness/src/lib/billing/pro-access.ts) reads Stripe and Supabase records. This establishes a source dependency, not a live checkout or payment acceptance. Current Stripe configuration and end-to-end entitlement proof remain **UNKNOWN** here; the protected Supabase owner retains actual app acceptance.
 ## One task and result path
 
 1. Start from one concrete Fitness intent. Check the [master](../../runtime/atlas/continuity/ACE_DURABLE_MASTER_PLAN.md) and [root rules](../../AGENTS.md), then identify the existing product or shared-service owner. Keep protected owner work with that owner.
