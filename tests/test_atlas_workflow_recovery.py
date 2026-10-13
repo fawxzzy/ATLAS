@@ -2251,6 +2251,52 @@ os._exit(97)
                 observation_now=self.observation_now(),
             )
 
+    def test_canonical_desktop_observation_accepts_retained_history_or_active_only(self) -> None:
+        observation = self.observation()
+        current = RECOVERY.validate_desktop_observation(
+            observation, observation, self.manifest, self.registry,
+            now=self.observation_now(),
+        )
+        self.assertEqual("PASS", current["status"])
+
+        active_only = copy.deepcopy(observation)
+        historical = {
+            role["role_id"] for role in self.manifest["roles"]
+            if role["lifecycle_class"] == "historical"
+        }
+        active_only["payload"]["entries"] = [
+            entry for entry in active_only["payload"]["entries"]
+            if entry["role_id"] not in historical
+        ]
+        active_only["payload"]["required_role_count"] = len(active_only["payload"]["entries"])
+        self.resign_observation(active_only)
+        result = RECOVERY.validate_desktop_observation(
+            active_only, active_only, self.manifest, self.registry,
+            now=self.observation_now(),
+        )
+        self.assertEqual("PASS", result["status"])
+        self.assertEqual(len(self.manifest["roles"]) - len(historical), result["role_count"])
+
+        missing_active = copy.deepcopy(active_only)
+        missing_active["payload"]["entries"].pop(0)
+        missing_active["payload"]["required_role_count"] = len(missing_active["payload"]["entries"])
+        self.resign_observation(missing_active)
+        with self.assertRaisesRegex(RECOVERY.ValidationFailure, "missing required roles"):
+            RECOVERY.validate_desktop_observation(
+                missing_active, missing_active, self.manifest, self.registry,
+                now=self.observation_now(),
+            )
+
+        wrong_historical = copy.deepcopy(observation)
+        entry = next(item for item in wrong_historical["payload"]["entries"] if item["role_id"] == "owner.fitness")
+        entry["runtime_thread_id"] = "unretained-runtime"
+        self.resign_observation(wrong_historical)
+        with self.assertRaisesRegex(RECOVERY.ValidationFailure, "not a retained historical epoch"):
+            RECOVERY.validate_desktop_observation(
+                wrong_historical, wrong_historical, self.manifest, self.registry,
+                now=self.observation_now(),
+            )
+
     def test_desktop_observation_rejects_malformed_identity_denominator_and_digest(self) -> None:
         cases: list[tuple[str, dict, str, bool]] = []
 
@@ -2259,12 +2305,13 @@ os._exit(97)
         cases.append(("pin", pin, "expected const 'UNKNOWN'", True))
 
         missing = self.observation()
-        missing["payload"]["entries"].pop()
+        missing["payload"]["entries"].pop(0)
         cases.append(("missing-role", missing, "missing required roles", True))
 
         partial = self.observation()
-        partial["payload"]["entries"].pop()
-        partial["payload"]["required_role_count"] = 12
+        for _ in range(4):
+            partial["payload"]["entries"].pop(0)
+        partial["payload"]["required_role_count"] = 9
         cases.append(("partial-denominator", partial, "partial or over-complete role denominator", True))
 
         duplicate_role = self.observation()
@@ -2527,6 +2574,19 @@ class HistoricalRoleRecoveryTests(unittest.TestCase):
         ))
         self.assertEqual("HELD", self.role_plan()["health"])
         self.assertEqual([], self.role_plan()["actions"])
+
+    def test_renamed_retained_epoch_cannot_reactivate_without_role_marker(self) -> None:
+        binding = next(item for item in self.registry["bindings"] if item["role_id"] == "owner.fitness")
+        retired_id = binding["related_epochs"][1]["runtime_id"]
+        self.adapter.threads.append(RECOVERY.ThreadRecord(
+            thread_id=retired_id, title="Renamed task", status="idle",
+            cwd="ATLAS_ROOT", archived=False, pinned=False,
+            preview="retained epoch", role_marker=None,
+        ))
+        result = self.role_plan()
+        self.assertEqual("RETIRED_TASK_STILL_ACTIVE", result["decision"])
+        self.assertEqual("HELD", result["health"])
+        self.assertEqual([], result["actions"])
 
     def test_historical_pending_creation_outcomes_are_not_replayed(self) -> None:
         for collection in [self.adapter.unresolved_creation_intents, self.adapter.retained_creation_bindings]:

@@ -978,19 +978,25 @@ def _validate_desktop_observation_receipt(
     entries = payload["entries"]
     roles = {item["role_id"]: item for item in manifest["roles"]}
     bindings = {item["role_id"]: item for item in registry["bindings"]}
-    expected_role_ids = set(roles)
+    # Historical roles have no current runtime to observe. Older signed
+    # captures may retain their archived epochs, but current captures need
+    # only cover every standing role.
+    expected_role_ids = {
+        role_id for role_id, role in roles.items()
+        if role["lifecycle_class"] != "historical"
+    }
     observed_role_ids = [item["role_id"] for item in entries]
     observed_runtime_ids = [item["runtime_thread_id"] for item in entries]
 
-    if payload["required_role_count"] != len(expected_role_ids):
+    if payload["required_role_count"] != len(entries):
         errors.append(
-            "required role count does not match the manifest denominator: "
-            f"{payload['required_role_count']} != {len(expected_role_ids)}"
+            "required role count does not match the observed denominator: "
+            f"{payload['required_role_count']} != {len(entries)}"
         )
-    if len(entries) != len(expected_role_ids):
+    if len(entries) < len(expected_role_ids) or len(entries) > len(roles):
         errors.append(
             "partial or over-complete role denominator: "
-            f"{len(entries)} != {len(expected_role_ids)}"
+            f"{len(entries)} outside {len(expected_role_ids)}..{len(roles)}"
         )
     duplicate_roles = sorted(
         role_id for role_id, count in Counter(observed_role_ids).items() if count > 1
@@ -1004,7 +1010,7 @@ def _validate_desktop_observation_receipt(
         errors.append("duplicate runtime entries: " + ", ".join(duplicate_runtimes))
     observed_role_set = set(observed_role_ids)
     missing_roles = sorted(expected_role_ids - observed_role_set)
-    unknown_roles = sorted(observed_role_set - expected_role_ids)
+    unknown_roles = sorted(observed_role_set - set(roles))
     if missing_roles:
         errors.append("missing required roles: " + ", ".join(missing_roles))
     if unknown_roles:
@@ -1045,7 +1051,16 @@ def _validate_desktop_observation_receipt(
         role = roles[role_id]
         binding = bindings[role_id]
         expected_runtime_id = binding["current_runtime_id"]
-        if expected_runtime_id is None:
+        if role["lifecycle_class"] == "historical":
+            retained_ids = {item["runtime_id"] for item in binding["related_epochs"]}
+            # The frozen dated fixture predates retirement, when this epoch
+            # was still the current binding. Canonical retired bindings have
+            # no current runtime and use related_epochs only.
+            if expected_runtime_id is not None:
+                retained_ids.add(expected_runtime_id)
+            if entry["runtime_thread_id"] not in retained_ids:
+                errors.append(f"{role_id}: runtime is not a retained historical epoch")
+        elif expected_runtime_id is None:
             errors.append(f"{role_id}: durable registry has no current runtime to observe")
         elif entry["runtime_thread_id"] != expected_runtime_id:
             errors.append(
@@ -2110,7 +2125,10 @@ def build_recovery_plan(
 
         current = by_id.get(current_id) if current_id else None
         if role["lifecycle_class"] == "historical":
-            claimants = [item for item in threads if _role_claims(role, item)]
+            claimants = [
+                item for item in threads
+                if item.thread_id in related_ids or _role_claims(role, item)
+            ]
             if role_id in adapter.unresolved_creation_intents or role_id in adapter.retained_creation_bindings:
                 health, decision = "BLOCKED", "RETIRED_TASK_CREATION_OUTCOME_UNKNOWN"
             elif binding["archived"] is not True or current_id is not None:
