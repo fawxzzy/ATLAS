@@ -1,7 +1,7 @@
 {
   "schema": "atlas.workflow.runtime-registry.v1",
   "manifest_ref": "docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json",
-  "manifest_digest": "sha256:96f12d9b4e4f15a5fcbf7a0ed0b6f0197e59544ca638c2eb3e1ed7c259d0a6e6",
+  "manifest_digest": "sha256:dee53f8932b7752cfafa820a6fafd8ecf0ee945c56e70f9aaddfdfb01c7f3530",
   "observed_at": "2026-07-30",
   "observation_precision": "day",
   "discovery": {
@@ -110,38 +110,36 @@
     },
     {
       "role_id": "owner.fitness",
-      "current_runtime_id": "019f58c4-4a9e-7af3-bb3e-06e199884027",
-      "runtime_status": "notLoaded",
-      "health": "DEGRADED",
-      "archived": null,
+      "current_runtime_id": null,
+      "runtime_status": "historical",
+      "health": "HELD",
+      "archived": true,
       "title": "Fitness",
       "cwd": "ATLAS_ROOT",
-      "evidence": ["task-tool search readback", "codex-session://2026/07/12/019f58c4-4a9e-7af3-bb3e-06e199884027", "archive and pin state unproven"],
-      "related_epochs": []
+      "evidence": ["task-tool search readback", "codex-session://2026/07/12/019f58c4-4a9e-7af3-bb3e-06e199884027", "archive and pin state unproven", "Exact six-epoch archived task-service readback and retained Oct5 custody; receipt sha256:d08abba66ea513a4addbab65c4e403451c5eb7a96741be06e076a779ed7ed78b"],
+      "related_epochs": [{"runtime_id": "019f58c4-4a9e-7af3-bb3e-06e199884027", "relationship": "predecessor", "status": "archived"}, {"runtime_id": "019fa7b7-6777-7ee3-b575-e7d94ce874a3", "relationship": "retired-successor", "status": "archived"}]
     },
     {
       "role_id": "owner.mazer",
-      "current_runtime_id": "019f61a0-6b80-7913-b479-f75f2a8a5b77",
-      "runtime_status": "notLoaded",
-      "health": "DEGRADED",
-      "archived": null,
+      "current_runtime_id": null,
+      "runtime_status": "historical",
+      "health": "HELD",
+      "archived": true,
       "title": "Mazer",
       "cwd": "ATLAS_ROOT",
-      "evidence": ["task-tool search readback", "replacement standing-owner bootstrap explicitly replaces approval-blocked surface", "archive and pin state unproven"],
-      "related_epochs": [
-        {"runtime_id": "019f52e6-3b96-78b0-adb4-946b475f4ba6", "relationship": "preserved-approval-checkpoint-predecessor", "status": "notLoaded-archived-session-evidence"}
-      ]
+      "evidence": ["task-tool search readback", "replacement standing-owner bootstrap explicitly replaces approval-blocked surface", "archive and pin state unproven", "Exact six-epoch archived task-service readback and retained Oct5 custody; receipt sha256:d08abba66ea513a4addbab65c4e403451c5eb7a96741be06e076a779ed7ed78b"],
+      "related_epochs": [{"runtime_id": "019f52e6-3b96-78b0-adb4-946b475f4ba6", "relationship": "preserved-approval-checkpoint-predecessor", "status": "notLoaded-archived-session-evidence"}, {"runtime_id": "019f61a0-6b80-7913-b479-f75f2a8a5b77", "relationship": "predecessor", "status": "archived"}, {"runtime_id": "019fa791-8d17-7c83-9c61-3e3c687e9dd7", "relationship": "retired-successor", "status": "archived"}]
     },
     {
       "role_id": "owner.socials-os",
-      "current_runtime_id": "019f62b0-6fbe-79f0-9c47-a0942feb0825",
-      "runtime_status": "active",
-      "health": "DEGRADED",
-      "archived": false,
+      "current_runtime_id": null,
+      "runtime_status": "historical",
+      "health": "HELD",
+      "archived": true,
       "title": "Socials OS",
       "cwd": "SOCIALS_OS_OWNER_PROJECT",
-      "evidence": ["task-tool direct readback", "codex-session://2026/07/14/019f62b0-6fbe-79f0-9c47-a0942feb0825", "pin state unavailable through app-server discovery"],
-      "related_epochs": []
+      "evidence": ["task-tool direct readback", "codex-session://2026/07/14/019f62b0-6fbe-79f0-9c47-a0942feb0825", "pin state unavailable through app-server discovery", "Exact six-epoch archived task-service readback and retained Oct5 custody; receipt sha256:d08abba66ea513a4addbab65c4e403451c5eb7a96741be06e076a779ed7ed78b"],
+      "related_epochs": [{"runtime_id": "019f62b0-6fbe-79f0-9c47-a0942feb0825", "relationship": "predecessor", "status": "archived"}, {"runtime_id": "019fa784-ca4e-7832-8c78-2ace8cab84ac", "relationship": "retired-successor", "status": "archived"}]
     },
     {
       "role_id": "owner.fawxzzyweb",

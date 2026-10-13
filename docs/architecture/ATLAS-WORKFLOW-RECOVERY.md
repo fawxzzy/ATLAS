@@ -2,7 +2,7 @@
 # ATLAS workflow architecture and recovery
 
 Canonical manifest: `docs/registry/ATLAS-WORKFLOW-MANIFEST.v1.json`
-Manifest digest: `sha256:96f12d9b4e4f15a5fcbf7a0ed0b6f0197e59544ca638c2eb3e1ed7c259d0a6e6`
+Manifest digest: `sha256:dee53f8932b7752cfafa820a6fafd8ecf0ee945c56e70f9aaddfdfb01c7f3530`
 Runtime seed: `docs/registry/ATLAS-WORKFLOW-LIVE-MAPPING.v1.json`
 
 This view is generated from the versioned manifest. Stable logical role IDs are the contract; Codex thread IDs are replaceable runtime epochs refreshed in the live registry.
@@ -29,9 +29,9 @@ This view is generated from the versioned manifest. Stable logical role IDs are 
 | `manual.messages` | 00 Authorization | Non-blocking operator authority queue with stable requests, learned low-risk authorization, answer suppression, expiry, and owner-first route-back receipts. | `atlas.authorization-ledger` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f70b7-fad4-74d2-90e3-e5f34c6fab06` | `DEGRADED` |
 | `ai.questions` | AI QUESTIONS | Agent-generated research, omission, and deep-investigation intake that converts findings into bounded Atlas packets. | `read-only` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f79de-76cd-7062-9d8b-1b9f5fd6a8ba` | `DEGRADED` |
 | `fawxzzy.messages` | FAWXZZY MESSAGES | Notification-only operator surface for concise material progress, blocker, usage, and attention updates. | `atlas.notification-ledger` | `create_if_missing` | `gpt-5.6-sol/medium` | `019f58c4-6d0b-7dc0-a4e3-9f6335f381e1` | `DEGRADED` |
-| `owner.fitness` | Fitness | Standing owner command surface for the Fitness repository, board projection, and governed product continuity. | `repo.fitness` | `manual_gate` | `gpt-5.6-sol/high` | `019f58c4-4a9e-7af3-bb3e-06e199884027` | `DEGRADED` |
-| `owner.mazer` | Mazer | Standing owner command surface for the Mazer repository and its governed implementation continuity. | `repo.mazer` | `reuse_only` | `gpt-5.6-sol/high` | `019f61a0-6b80-7913-b479-f75f2a8a5b77` | `DEGRADED` |
-| `owner.socials-os` | Socials OS | Standing owner command surface for append-only social analytics, content planning, and governed social account work. | `repo.socials-os` | `create_if_missing` | `gpt-5.6-sol/high` | `019f62b0-6fbe-79f0-9c47-a0942feb0825` | `DEGRADED` |
+| `owner.fitness` | Fitness | Dormant product-owner provenance; retained repository and coordinator custody own any separately admitted remainder. | `repo.fitness` | `manual_gate` | `gpt-5.6-sol/high` | `MISSING` | `HELD` |
+| `owner.mazer` | Mazer | Dormant product-owner provenance; retained repository and coordinator custody own any separately admitted remainder. | `repo.mazer` | `manual_gate` | `gpt-5.6-sol/high` | `MISSING` | `HELD` |
+| `owner.socials-os` | Socials OS | Dormant product-owner provenance; retained repository and coordinator custody own any separately admitted remainder. | `repo.socials-os` | `manual_gate` | `gpt-5.6-sol/high` | `MISSING` | `HELD` |
 | `owner.fawxzzyweb` | FawxzzyWeb | Standing owner command surface for the FawxzzyWeb repository, account portal, and governed distribution work. | `repo.fawxzzyweb` | `create_if_missing` | `gpt-5.6-sol/high` | `019f7614-e612-77d0-b99b-ed1b0d277d1d` | `DEGRADED` |
 | `platform.supabase-migration` | FawxzzyPlatform — Supabase Migration | Standing domain coordinator for the governed cross-owner FawxzzyPlatform and Supabase consolidation program. | `program.fawxzzy-platform` | `manual_gate` | `gpt-5.6-sol/xhigh` | `019f6dad-2cc3-7551-a47d-4b8c912c51ef` | `DEGRADED` |
 
@@ -66,7 +66,7 @@ Answered questions are suppressed from repetition. Transport acceptance does not
 0. **SERIAL** — `manifest-and-schema-validation`, `git-and-writer-preflight`, `live-discovery`. Gate: manifest valid, exact authority ownership preserved, discovery complete or UNKNOWN preserved
 1. **SERIAL** — `atlas.workflow-operations`. Gate: 01 Ops unique, readable, and constrained to mechanical reconciliation under existing authority
 2. **PARALLEL** — `manual.messages`, `fawxzzy.questions`, `ai.questions`, `fawxzzy.messages`. Gate: decision, question, research, and notification contracts resolve directly by logical role
-3. **PARALLEL** — `atlas.release-control-plane`, `atlas.workflow-architect`, `owner.fitness`, `owner.mazer`, `owner.socials-os`, `owner.fawxzzyweb`, `platform.supabase-migration`. Gate: each unique binding is idle or safely queued; writer scopes do not collide
+3. **PARALLEL** — `atlas.release-control-plane`, `atlas.workflow-architect`, `owner.fawxzzyweb`, `platform.supabase-migration`. Gate: each unique binding is idle or safely queued; writer scopes do not collide
 4. **SERIAL** — `atlas.inbox`, `historical-main-readback`, `embedded-service-readback`, `topology-health-report`. Gate: compatibility history and embedded services are readable without creating, binding, activating, scheduling, or targeting atlas.main
 
 Serialization rules:
@@ -129,25 +129,15 @@ Every edge below is a logical contract. The sender resolves the current runtime 
 | `decision` | `atlas.workflow-architect` | `manual.messages` | MANUAL_REQUIRED changes become stable questions; silence is not approval. |
 | `decision` | `manual.messages` | `atlas.workflow-architect` | Answered architecture decisions return once to their exact source owner. |
 | `notification` | `atlas.workflow-operations` | `fawxzzy.messages` | Material mechanical blocker or recovery notification only; no decision ownership. |
-| `owner` | `atlas.workflow-operations` | `owner.fitness` | Only an exact already-authorized Fitness packet may be scheduled. |
-| `owner` | `atlas.workflow-operations` | `owner.mazer` | Only an exact already-authorized Mazer packet may be scheduled. |
-| `owner` | `atlas.workflow-operations` | `owner.socials-os` | Only an exact already-authorized Socials OS packet may be scheduled. |
 | `owner` | `atlas.workflow-operations` | `owner.fawxzzyweb` | Only an exact already-authorized FawxzzyWeb packet may be scheduled. |
 | `control` | `atlas.workflow-operations` | `platform.supabase-migration` | Only an exact already-authorized dependency-bounded platform packet may be scheduled; no provider authority is inferred. |
-| `proof` | `owner.fitness` | `atlas.release-control-plane` | Published Fitness work hands lifecycle monitoring to the control plane. |
-| `proof` | `owner.mazer` | `atlas.release-control-plane` | Published Mazer work hands lifecycle monitoring to the control plane. |
-| `proof` | `owner.socials-os` | `atlas.release-control-plane` | Published Socials work hands lifecycle monitoring to the control plane. |
 | `proof` | `owner.fawxzzyweb` | `atlas.release-control-plane` | Published FawxzzyWeb work hands lifecycle monitoring to the control plane. |
 | `proof` | `atlas.workflow-architect` | `atlas.release-control-plane` | Published workflow source receives one independent exact-head review. |
-| `proof` | `atlas.release-control-plane` | `owner.fitness` | Fitness review and CI results return owner-first. |
-| `proof` | `atlas.release-control-plane` | `owner.mazer` | Mazer review and CI results return owner-first. |
-| `proof` | `atlas.release-control-plane` | `owner.socials-os` | Socials OS review and CI results return owner-first. |
 | `proof` | `atlas.release-control-plane` | `owner.fawxzzyweb` | FawxzzyWeb review and CI results return owner-first. |
 | `proof` | `atlas.release-control-plane` | `atlas.workflow-architect` | Workflow-source review and CI results return owner-first. |
 | `data_event` | `fawxzzy.questions` | `ai.questions` | Unresolved omissions become bounded research envelopes. |
 | `proof` | `ai.questions` | `fawxzzy.questions` | Material research findings return to the requesting Questions owner. |
 | `recovery` | `atlas.workflow-architect` | `atlas.workflow-operations` | Architect supplies a source-proven recovery contract; 01 Ops may reconcile it only under exact existing authority. |
-| `data_event` | `owner.socials-os` | `component.discordos` | Owners emit exact owner exports or BoardEvents; DiscordOS is sole live board writer. |
 | `recovery` | `component.heartbeat-operations` | `atlas.workflow-operations` | Interruption-recovery wake only after separately authorized runtime rebind; unchanged runs are silent. |
 | `recovery` | `component.heartbeat-release` | `atlas.release-control-plane` | Read-only bounded watch; unchanged runs are silent. |
 | `data_event` | `component.service-bus` | `atlas.workflow-operations` | Durable transport exposes exact pending-delivery state for mechanical reconciliation without routine relay. |

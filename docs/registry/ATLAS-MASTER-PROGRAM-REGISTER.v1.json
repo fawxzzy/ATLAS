@@ -43,7 +43,7 @@
       "recovered or imported proposal prose"
     ],
     "unknown_rule": "Unavailable or denied evidence remains UNKNOWN, never zero or healthy.",
-    "owner_lane_rule": "Fitness, Mazer, Socials OS, and FawxzzyWeb remain independent standing owner lanes.",
+    "owner_lane_rule": "Fitness, Mazer, Socials OS, and FawxzzyWeb remain independent logical product lanes. The retired Fitness/Mazer/Socials standing tasks are historical custody only; current work resolves to its separately admitted existing owner without automatic reactivation. Preserve the current FawxzzyWeb owner and exclusive writer boundaries.",
     "single_writer_rule": "At most one ATLAS root writer, one owner-repository writer, and one logical DiscordOS board writer."
   },
   "measurement_policy": {
@@ -450,9 +450,9 @@
     },
     {
       "id": "program-owner-lane-fitness",
-      "title": "Fitness standing owner lane",
+      "title": "Fitness product custody and on-demand work",
       "owner": "Fitness",
-      "authority": "Fitness owner repository, task, CI, runtime, Supabase, and accepted receipts",
+      "authority": "Fitness owner-repository evidence, exact accepted receipts and existing coordinator custody; current work uses its separately admitted existing owner, including the human-assigned Web/board recovery owner. Archived Fitness standing tasks confer no dispatch, source or provider authority.",
       "scope": "Preserve Fitness as an independent product lane and platform-seed owner; root indexes only shared contracts and parity dependencies.",
       "dependencies": [
         "owner routing for owner mutation"
@@ -475,15 +475,15 @@
         "Fitness owner truth remains current and isolated.",
         "Shared improvements promote through explicit contracts."
       ],
-      "status": "independent-standing-owner-lane",
-      "next_packet": "FP-FIT-REC-001 after earlier serialized recovery packets.",
+      "status": "historical-owner-custody-no-standing-dispatch",
+      "next_packet": "No standing-task packet. Current Fitness and shared-account work stays with its separately admitted existing owner under coordinator custody; never reactivate archived owner.fitness epochs.",
       "measurement_status": "OWNER_AUTHORITY"
     },
     {
       "id": "program-owner-lane-mazer",
-      "title": "Mazer standing owner lane",
+      "title": "Mazer product custody and on-demand work",
       "owner": "Mazer",
-      "authority": "Mazer owner repository, standing task, CI, runtime, Supabase, and accepted receipts",
+      "authority": "Mazer owner-repository evidence, exact accepted receipts and existing coordinator custody; current shared-account work stays with its separately admitted existing protected owner. Archived Mazer standing tasks confer no dispatch, source or provider authority.",
       "scope": "Preserve Mazer product independence while governing platform identity/data migration and separately approval-gated retirement or deletion.",
       "dependencies": [
         "owner routing for owner mutation"
@@ -506,15 +506,15 @@
         "Mazer owner truth remains current and isolated.",
         "Retirement and deletion remain separately approved after migration proof."
       ],
-      "status": "independent-standing-owner-lane",
-      "next_packet": "FP-MZR-REC-001 after FP-DOS-REC-001.",
+      "status": "historical-owner-custody-no-standing-dispatch",
+      "next_packet": "No standing-task packet. Current Mazer shared-account work stays with its separately admitted existing owner under coordinator custody; never reactivate archived owner.mazer epochs or replay legacy retirement attempts.",
       "measurement_status": "OWNER_AUTHORITY"
     },
     {
       "id": "program-owner-lane-socials-os",
-      "title": "Socials OS standing owner lane",
+      "title": "Socials OS historical product custody",
       "owner": "Socials OS",
-      "authority": "Socials OS owner repository, standing task, account readback, and accepted receipts",
+      "authority": "Socials OS retained owner-repository evidence, exact accepted receipts and existing coordinator custody. Archived Socials standing tasks confer no dispatch, source, provider or social-account authority; any future work needs a separately admitted on-demand owner.",
       "scope": "Preserve Socials OS as independent and non-root-blocking; platform work may define scoped identity or integration contracts but cannot mutate social accounts.",
       "dependencies": [
         "owner routing for owner mutation"
@@ -534,8 +534,8 @@
         "Owner truth remains isolated and receipt-backed.",
         "No social-account mutation is inferred from root governance."
       ],
-      "status": "independent-standing-owner-lane",
-      "next_packet": "Resolve from the Socials OS standing owner task.",
+      "status": "historical-owner-custody-no-standing-dispatch",
+      "next_packet": "No standing-task packet. Preserve historical Socials product custody; future product work needs a separately admitted on-demand owner. Current four-board work stays with existing board/Web owners; never reactivate archived owner.socials-os epochs.",
       "measurement_status": "OWNER_AUTHORITY"
     },
     {

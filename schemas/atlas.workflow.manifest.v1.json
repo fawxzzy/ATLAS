@@ -191,7 +191,7 @@
         "role_id": { "$ref": "#/$defs/roleId" },
         "human_title": { "type": "string", "minLength": 1 },
         "purpose": { "type": "string", "minLength": 1 },
-        "lifecycle_class": { "enum": ["standing", "bounded"] },
+        "lifecycle_class": {"enum": ["standing", "bounded", "historical"]},
         "authority": { "$ref": "#/$defs/stringList" },
         "prohibited_actions": { "$ref": "#/$defs/stringList" },
         "inputs": { "$ref": "#/$defs/stringList" },
