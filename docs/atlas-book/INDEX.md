@@ -1,109 +1,28 @@
 # ATLAS Book Index
 
-## Purpose
+Quick summary: Revision 68 puts Fitness and its required shared sign-in and handoff path first. Use the owner repo for implementation, the existing Codex task for execution, and the master plus receipts to check the result.
 
-The ATLAS Book is the first durable truth-map structure for the stack after the current convergence work.
+## Current map
 
-It is meant to answer:
+| Scope | Current operating choice | Authority |
+|---|---|---|
+| Fitness product and shared Supabase account/handoff | **CORE NOW** | [Fitness repo](../../repos/fawxzzy-fitness/README.md); existing protected Supabase owner for account and migration effects |
+| ATLAS coordination, exact task/result delivery, and minimal Book navigation | **CORE NOW** | [Root rules](../../AGENTS.md), [stack map](../../stack.yaml), [master revision 68](../../runtime/atlas/continuity/ACE_DURABLE_MASTER_PLAN.md) |
+| Playbook's demonstrated Fitness caller | **CORE NOW**, limited to evidenced value | [Playbook repo](../../repos/playbook/README.md) |
+| `_stack` Fitness deploy wrappers and identity preflight | **UNKNOWN** in master revision 68; source audit recommends **KEEP FROZEN** pending publication | [_stack repo](../../repos/_stack/README.md); activation needs a current owner need and exact preflight |
+| Foundation, Lifeline, Mazer features, Registry expansion, Playbook expansion, usage pacing expansion | **KEEP FROZEN** | Preserve current owners and receipts; reopen on a concrete Fitness dependency |
+| Standalone Cortex and future research | **TODO LATER** | No current Fitness acceptance dependency established |
+| Completed historical helpers and stale board claims | **ARCHIVE / RETIRE only after exact owner and retention check** | No deletion or task archive follows from this map |
 
-- what the stack currently looks like
-- which lanes are active, paused, or approval-gated
-- which surface owns what
-- how work should flow between Fitness, Discord, `_stack`, Playbook, and ATLAS
-- where the important receipts live
+These are scope choices, not claims that every product acceptance gate has passed. Historical Book pages below describe earlier states; the [master](../../runtime/atlas/continuity/ACE_DURABLE_MASTER_PLAN.md), current owner repo, and exact accepted receipts govern current status. The `_stack` source audit is preserved in the originating task's `fitness-stack-dependency-r001-20261013.md`; its wrapper is available but not proven required by the latest accepted Fitness release. The master publisher has not yet incorporated this source-audit recommendation.
 
-## Sections
+## One task and result path
 
-1. [Current State](01-current-state.md)
-2. [Lanes And Markers](02-lanes-and-markers.md)
-3. [Operating Model](03-operating-model.md)
-4. [Approval Gates](04-approval-gates.md)
-5. [Receipt Index](05-receipt-index.md)
-6. [System Ownership](06-system-ownership.md)
-7. [Contracts And Seams](07-contracts-and-seams.md)
-8. [Workflow Recipes](08-workflow-recipes.md)
-9. [Automation And Command Candidates](09-automation-and-command-candidates.md)
-10. [Failure Modes And Recovery](10-failure-modes-and-recovery.md)
-11. [Current System Map / Graph](11-system-map-graph.md)
-12. [Restart And Handoff Guide](12-restart-and-handoff-guide.md)
-13. [Vision And Endgames](13-vision-and-endgames.md)
-14. [Lane Split Execution](14-lane-split-execution.md)
-15. [Lifeline](15-lifeline.md)
-16. [Runtime Placement](16-runtime-placement.md)
-17. [Creation OS Target Architecture](17-creation-os-target-architecture.md)
+1. Start from one concrete Fitness intent. Check the [master](../../runtime/atlas/continuity/ACE_DURABLE_MASTER_PLAN.md) and [root rules](../../AGENTS.md), then identify the existing product or shared-service owner. Keep protected owner work with that owner.
+2. Send one bounded packet to the existing Codex owner task through the current ATLAS task route. Check the exact task, lease, and delivery correlation before a wake. Do not create a parallel writer for the same effect.
+3. The owner works in its repo, runs focused verification and review, and records the actual command, result, and limits in its receipt. Git/CI and provider readback supply source and delivery evidence; a wrapper's presence alone is not invocation.
+4. Reconcile that receipt into the [master](../../runtime/atlas/continuity/ACE_DURABLE_MASTER_PLAN.md) only through its designated publisher. If a result blocks, preserve its exact failure and resume the same owner at a safe boundary. Use [Restart and Handoff](12-restart-and-handoff-guide.md) for older context.
 
-## Current Emphasis
+## Reference pages
 
-This seed structure reflects:
-
-- docs-first convergence
-- explicit approval gates before mutation
-- the Fitness / Discord / ATLAS lane split model
-- DiscordOS separation planning without implementation
-- Fitness Supabase profile/data hygiene closed at `100%` with Discord and Music Sesh boundaries transferred to DiscordOS separation
-
-The next expansion layer captures:
-
-- ownership by system
-- cross-system contracts and seams
-- approval-gated boundaries that must not be bypassed
-
-The current expansion layer also adds:
-
-- reusable workflow recipes
-- allowed owner surfaces
-- proof, receipt, and approval expectations by workflow
-
-The next expansion layer adds:
-
-- repeated operator tasks worth tracking
-- candidate `_stack`, Playbook, and Discord command surfaces
-- automation boundaries that should remain human-reviewed or approval-gated
-
-The current expansion layer now also adds:
-
-- first safe automation candidates
-- explicit "never automate directly" rules
-- linkage from repeated work to the AI automation lanes
-
-The next expansion layer now adds:
-
-- common stack failure modes
-- bounded recovery playbooks
-- lane and receipt ownership for recovery work
-
-The current expansion layer now also adds:
-
-- a cross-system map for repos, runtime, Supabase, Vercel, and approvals
-- a machine-readable appendix for lane status, blockers, and next packages
-
-The current expansion layer also now adds:
-
-- a restart path for new chats
-- exact approval phrases and handoff format
-- current recommended next packages
-
-The current expansion layer now also adds:
-
-- lane endgames
-- blocker-aware future alignment
-- a shared test for when the split is actually working
-
-The current expansion layer now also adds:
-
-- lane reopen checklists
-- blocker and receipt expectations by lane
-- first safe package guidance for actual split execution
-
-The current closeout layer now also adds:
-
-- green normal-validation confirmation after stack and registry repair
-- bounded classification for branch/worktree, tmp, helper Vercel, and Fitness residue pressure
-- a narrow next-package ladder toward 100 instead of another broad convergence pass
-
-The current target-architecture layer now also adds:
-
-- a human-directed Creation OS product definition and software-builder wedge
-- deterministic builder and conversational creative loop separation
-- a backend-neutral bootstrap pointer and memory-tier contract
-- unmeasured staged roadmap candidates without changing marker percentages
+The existing sections remain historical and topical references: [Current State](01-current-state.md), [Lanes and Markers](02-lanes-and-markers.md), [Operating Model](03-operating-model.md), [Approval Gates](04-approval-gates.md), [Receipt Index](05-receipt-index.md), [System Ownership](06-system-ownership.md), [Contracts and Seams](07-contracts-and-seams.md), [Workflow Recipes](08-workflow-recipes.md), [Automation Candidates](09-automation-and-command-candidates.md), [Failure Modes and Recovery](10-failure-modes-and-recovery.md), [System Map](11-system-map-graph.md), [Restart and Handoff](12-restart-and-handoff-guide.md), [Vision](13-vision-and-endgames.md), [Lane Split](14-lane-split-execution.md), [Lifeline](15-lifeline.md), [Runtime Placement](16-runtime-placement.md), and [Creation OS Target](17-creation-os-target-architecture.md).
