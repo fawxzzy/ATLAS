@@ -225,9 +225,11 @@ def build_repo_inventory(
     root: Path | None = None,
     config: dict[str, Any] | None = None,
     lock_payload: dict[str, Any] | None = None,
+    stack_file: Path | None = None,
 ) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
-    stack_config = config or load_stack_config(base_root / "stack.yaml")
+    manifest_path = stack_file or base_root / "stack.yaml"
+    stack_config = config if config is not None else load_stack_config(manifest_path)
     resolved_lock_path = default_lockfile_path(stack_config, base_root)
     loaded_lock = lock_payload
     if loaded_lock is None and resolved_lock_path.exists():
@@ -384,7 +386,7 @@ def build_repo_inventory(
             {
                 "surface_id": surface_id,
                 "local_path": surface_coordinate,
-                "present": bool(surface.get("present", False)),
+                "present": (base_root / surface_coordinate).exists(),
                 "trust_class": str(surface.get("trust_class", "")),
                 "release_eligible": bool(surface.get("release_eligible", False)),
                 "reason": str(surface.get("reason", "")),
@@ -394,7 +396,7 @@ def build_repo_inventory(
 
     body = {
         "schema_version": REPO_INVENTORY_SCHEMA_VERSION,
-        "stack_manifest_ref": atlas_relative(base_root / "stack.yaml", root=base_root),
+        "stack_manifest_ref": atlas_relative(manifest_path, root=base_root),
         "stack_manifest_digest": stable_json_digest(stack_config),
         "stack_lock_ref": atlas_relative(resolved_lock_path, root=base_root),
         "stack_lock_digest": loaded_lock.get("lock_digest"),
@@ -599,9 +601,11 @@ def write_repo_inventory(
     root: Path | None = None,
     json_output: Path | None = None,
     markdown_output: Path | None = None,
+    payload: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     base_root = (root or atlas_root()).resolve()
-    payload = build_repo_inventory(root=base_root)
+    if payload is None:
+        payload = build_repo_inventory(root=base_root)
     resolved_json_output = resolve_atlas_path(json_output or DEFAULT_JSON_OUTPUT, root=base_root)
     resolved_markdown_output = resolve_atlas_path(markdown_output or DEFAULT_MARKDOWN_OUTPUT, root=base_root)
     resolved_json_output.parent.mkdir(parents=True, exist_ok=True)
@@ -624,10 +628,11 @@ def main(argv: list[str] | None = None) -> int:
     stack_file = resolve_atlas_path(args.stack_file)
     root = stack_file.parent.resolve()
     config = load_stack_config(stack_file)
-    payload = build_repo_inventory(root=root, config=config)
+    payload = build_repo_inventory(root=root, config=config, stack_file=stack_file)
     if not args.dry_run:
         write_repo_inventory(
             root=root,
+            payload=payload,
             json_output=Path(args.json_output) if args.json_output else DEFAULT_JSON_OUTPUT,
             markdown_output=Path(args.markdown_output) if args.markdown_output else DEFAULT_MARKDOWN_OUTPUT,
         )

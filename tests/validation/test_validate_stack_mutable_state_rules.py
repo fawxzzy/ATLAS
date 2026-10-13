@@ -223,6 +223,7 @@ class ValidateStackMutableStateRulesTests(unittest.TestCase):
                     }
                 }
             },
+            execute=True,
             run_command=runner,
         )
 
@@ -255,6 +256,7 @@ class ValidateStackMutableStateRulesTests(unittest.TestCase):
                     }
                 }
             },
+            execute=True,
             run_command=runner,
         )
 
@@ -323,6 +325,7 @@ class ValidateStackMutableStateRulesTests(unittest.TestCase):
                     }
                 }
             },
+            execute=True,
             run_command=lambda *_args, **_kwargs: SimpleNamespace(returncode=1, stdout="", stderr="cleanup failed"),
         )
 
@@ -382,6 +385,7 @@ class ValidateStackMutableStateRulesTests(unittest.TestCase):
                     }
                 }
             },
+            execute=True,
             run_command=lambda *_args, **_kwargs: SimpleNamespace(returncode=0, stdout="", stderr=""),
         )
 
@@ -401,6 +405,79 @@ class ValidateStackMutableStateRulesTests(unittest.TestCase):
                 {"node_modules": False},
                 mutable_surface_warning_map(root, suppressed_paths=suppressed_paths),
             )
+
+
+
+
+class ValidateStackObservationDefaultsTests(unittest.TestCase):
+    def test_direct_cleanup_helper_defaults_to_no_command(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "node_modules").mkdir()
+            calls = []
+            def runner(*args, **kwargs):
+                calls.append(args)
+                return SimpleNamespace(returncode=0, stdout="", stderr="")
+            findings, _ = apply_repo_generated_state_cleanup(
+                repo_id="playbook", repo_path=root, repo_rel="repos/playbook",
+                repo_info={"validation": {"generated_state_cleanup": {
+                    "command": "fixture cleanup", "paths": ["node_modules"]}}},
+                run_command=runner,
+            )
+            self.assertEqual([], calls)
+            self.assertEqual([], findings)
+            self.assertTrue((root / "node_modules").exists())
+
+    def run_cli(self, flags):
+        import contextlib
+        import io
+        from ops.validation import validate_stack as validator
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            stack = root / "stack.yaml"
+            stack.write_text("repo_registry: {}\n", encoding="utf-8")
+            with contextlib.ExitStack() as stack_context:
+                mocks = {name: stack_context.enter_context(patch.object(validator, name))
+                         for name in ["backfill_legacy_runtime_artifacts", "write_world_model_state",
+                                      "register_artifact_descriptors", "emit_validation_observations"]}
+                findings = stack_context.enter_context(patch.object(validator, "build_findings", return_value=[]))
+                stack_context.enter_context(contextlib.redirect_stdout(io.StringIO()))
+                result = validator.main(["--stack-file", str(stack), "--output-dir", str(root / "reports"), *flags])
+                self.assertEqual(0, result)
+                self.assertTrue((root / "reports/stack-validation.latest.json").exists())
+                return findings.call_args.kwargs, {name: value.call_count for name, value in mocks.items()}
+
+    def test_default_cli_does_not_run_cleanup_or_initialize_missing_runtime(self) -> None:
+        kwargs, calls = self.run_cli([])
+        self.assertFalse(kwargs["run_generated_state_cleanup"])
+        for name in ["backfill_legacy_runtime_artifacts", "write_world_model_state", "register_artifact_descriptors"]:
+            self.assertEqual(0, calls[name])
+
+    def test_legacy_skip_flag_remains_read_only(self) -> None:
+        kwargs, calls = self.run_cli(["--skip-generated-state-cleanup"])
+        self.assertFalse(kwargs["run_generated_state_cleanup"])
+        self.assertEqual(0, calls["backfill_legacy_runtime_artifacts"])
+
+    def test_explicit_cleanup_flag_reaches_existing_admitted_hook_only(self) -> None:
+        kwargs, calls = self.run_cli(["--run-generated-state-cleanup"])
+        self.assertTrue(kwargs["run_generated_state_cleanup"])
+        self.assertEqual(0, calls["write_world_model_state"])
+
+    def test_explicit_refresh_flag_can_initialize_runtime(self) -> None:
+        kwargs, calls = self.run_cli(["--refresh-runtime-artifacts"])
+        self.assertFalse(kwargs["run_generated_state_cleanup"])
+        for name in ["backfill_legacy_runtime_artifacts", "write_world_model_state", "register_artifact_descriptors"]:
+            self.assertEqual(1, calls[name])
+
+    def test_conflicting_cleanup_flags_rejected_before_any_work(self) -> None:
+        import contextlib
+        import io
+        from ops.validation import validate_stack as validator
+        with patch.object(validator, "load_stack_config") as loader, contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as caught:
+                validator.main(["--run-generated-state-cleanup", "--skip-generated-state-cleanup"])
+        self.assertEqual(2, caught.exception.code)
+        loader.assert_not_called()
 
 
 if __name__ == "__main__":
