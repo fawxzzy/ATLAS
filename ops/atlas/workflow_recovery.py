@@ -36,6 +36,7 @@ CREATION_JOURNAL_SCHEMA_REF = "schemas/atlas.workflow.creation-journal.v1.json"
 GENERATED_VIEW_REF = "docs/architecture/ATLAS-WORKFLOW-RECOVERY.md"
 DEFAULT_RUNTIME_REF = "runtime/atlas/workflow-recovery"
 DESKTOP_OBSERVATION_FIXTURE_REF = "tests/fixtures/atlas-workflow-recovery/valid-desktop-observation.json"
+DESKTOP_OBSERVATION_FIXTURE_REGISTRY_REF = "tests/fixtures/atlas-workflow-recovery/desktop-observation-registry.json"
 OPERATIONS_ROLE_ID = "atlas.workflow-operations"
 LEGACY_MAIN_ROLE_ID = "atlas.main"
 LEGACY_MAIN_RUNTIME_ID = "019f52d9-7667-72a3-a5f7-9c0613aedd8f"
@@ -1168,6 +1169,15 @@ def validate_repository(
     _assert_schema(decisions, DECISION_REGISTRY_SCHEMA_REF, "decision registry")
     _assert_schema(bootstrap_continuity, "schemas/atlas.continuity.handoff.v1.json", "bootstrap continuity handoff")
     observation_fixture = _load_json(ROOT / DESKTOP_OBSERVATION_FIXTURE_REF)
+    observation_fixture_registry = _load_json(ROOT / DESKTOP_OBSERVATION_FIXTURE_REGISTRY_REF)
+    _assert_schema(observation_fixture_registry, REGISTRY_SCHEMA_REF, "desktop observation fixture registry")
+    if observation_fixture_registry["manifest_digest"] != _sha256_file(manifest_path):
+        raise ValidationFailure("desktop observation fixture registry manifest digest mismatch")
+    fixture_role_ids = [item["role_id"] for item in observation_fixture_registry["bindings"]]
+    manifest_role_ids = [item["role_id"] for item in manifest["roles"]]
+    if (len(fixture_role_ids) != len(set(fixture_role_ids))
+            or set(fixture_role_ids) != set(manifest_role_ids)):
+        raise ValidationFailure("desktop observation fixture registry role set mismatch")
     observation_fixture_now = _parse_utc_timestamp(
         observation_fixture["payload"]["captured_at"],
         "desktop observation fixture captured_at",
@@ -1176,7 +1186,7 @@ def validate_repository(
         observation_fixture,
         observation_fixture,
         manifest,
-        registry,
+        observation_fixture_registry,
         now=observation_fixture_now,
     )
 
@@ -1197,6 +1207,12 @@ def validate_repository(
         errors.append("atlas.main is immutable legacy history and cannot remain a recoverable role")
 
     for role in roles:
+        if role["lifecycle_class"] == "historical" and role["creation_policy"] != "manual_gate":
+            errors.append(f"{role['role_id']}: historical task must use manual_gate creation policy")
+        if role["lifecycle_class"] == "historical" and any(
+            role["role_id"] in phase["members"] for phase in manifest["boot"]["phases"]
+        ):
+            errors.append(f"{role['role_id']}: historical task cannot remain in active bootstrap")
         prompt_text = ""
         for reference in role["prompt_template"]["fragments"]:
             errors.extend(_validate_relative_ref(reference, f"{role['role_id']} prompt"))
@@ -1228,6 +1244,9 @@ def validate_repository(
             errors.append(f"{edge['edge_id']}: unknown from node {edge['from']}")
         if edge["to"] not in known_nodes:
             errors.append(f"{edge['edge_id']}: unknown to node {edge['to']}")
+        historical_ids = {role["role_id"] for role in roles if role["lifecycle_class"] == "historical"}
+        if edge["from"] in historical_ids or edge["to"] in historical_ids:
+            errors.append(f"{edge['edge_id']}: historical task cannot remain an operational edge")
     if len(edge_ids) != len(set(edge_ids)):
         errors.append("topology edge IDs are not unique")
 
@@ -1238,6 +1257,12 @@ def validate_repository(
             f"missing={sorted(set(role_ids) - set(binding_ids))} "
             f"extra={sorted(set(binding_ids) - set(role_ids))}"
         )
+    historical_roles = {role["role_id"] for role in roles if role["lifecycle_class"] == "historical"}
+    for binding in registry["bindings"]:
+        if binding["role_id"] in historical_roles and (
+            binding["archived"] is not True or binding["current_runtime_id"] is not None
+        ):
+            errors.append(f"{binding['role_id']}: historical task must be archived without runtime destination")
     current_ids = [
         item["current_runtime_id"]
         for item in registry["bindings"]
@@ -2084,6 +2109,27 @@ def build_recovery_plan(
             continue
 
         current = by_id.get(current_id) if current_id else None
+        if role["lifecycle_class"] == "historical":
+            claimants = [item for item in threads if _role_claims(role, item)]
+            if role_id in adapter.unresolved_creation_intents or role_id in adapter.retained_creation_bindings:
+                health, decision = "BLOCKED", "RETIRED_TASK_CREATION_OUTCOME_UNKNOWN"
+            elif binding["archived"] is not True or current_id is not None:
+                health, decision = "BLOCKED", "RETIRED_TASK_BINDING_DRIFT"
+            elif any(item.archived is False or item.active is True for item in claimants):
+                health, decision = "HELD", "RETIRED_TASK_STILL_ACTIVE"
+            elif any(item.archived is None for item in claimants):
+                health, decision = "UNKNOWN", "RETIRED_TASK_ARCHIVE_READBACK_UNKNOWN"
+            else:
+                health, decision = "HEALTHY", "RETIRED_TASK_ARCHIVED_NO_RUNTIME_REQUIRED"
+            results.append({
+                "role_id": role_id, "runtime_id": current_id,
+                "health": health, "decision": decision, "actions": [],
+                "reasons": ["historical custody grants no create, repair, pin, bootstrap or reactivation"],
+                "active": current.active if current else None,
+                "archived": current.archived if current else binding["archived"],
+                "pinned": current.pinned if current else None,
+            })
+            continue
         reconciled_create_intent = False
         create_intent = adapter.unresolved_creation_intents.get(role_id)
         if create_intent is not None:

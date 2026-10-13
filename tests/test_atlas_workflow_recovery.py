@@ -224,6 +224,11 @@ class WorkflowRecoveryTests(unittest.TestCase):
     def observation(self) -> dict:
         return RECOVERY._load_json(FIXTURES / "valid-desktop-observation.json")
 
+    def observation_registry(self) -> dict:
+        # The dated thirteen-role capture retains its original runtime IDs;
+        # canonical historical routing must not be reactivated for this fixture.
+        return RECOVERY._load_json(ROOT / RECOVERY.DESKTOP_OBSERVATION_FIXTURE_REGISTRY_REF)
+
     def observation_now(self) -> dt.datetime:
         return RECOVERY._parse_utc_timestamp(
             self.observation()["payload"]["captured_at"],
@@ -247,7 +252,7 @@ class WorkflowRecoveryTests(unittest.TestCase):
             observation,
             current or observation,
             self.manifest,
-            self.registry,
+            self.observation_registry(),
             now=now or self.observation_now(),
         )
 
@@ -535,7 +540,10 @@ class WorkflowRecoveryTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(first["plan_digest"], second["plan_digest"])
         self.assertEqual(0, first["summary"]["create_count"])
-        self.assertTrue(all(item["decision"] == "REUSE_NO_CHANGE" for item in first["roles"]))
+        historical_ids = {role["role_id"] for role in self.manifest["roles"] if role["lifecycle_class"] == "historical"}
+        for item in first["roles"]:
+            expected = "RETIRED_TASK_ARCHIVED_NO_RUNTIME_REQUIRED" if item["role_id"] in historical_ids else "REUSE_NO_CHANGE"
+            self.assertEqual(expected, item["decision"])
 
     def test_missing_task_plans_one_create_without_archive(self) -> None:
         plan, _ = self.plan("missing-task.json")
@@ -1912,7 +1920,12 @@ os._exit(97)
             mode="apply",
             deterministic=True,
         )
-        self.assertTrue(all("PROVE_PIN_STATE" in item["actions"] for item in plan["roles"]))
+        historical = {role["role_id"] for role in self.manifest["roles"] if role["lifecycle_class"] == "historical"}
+        for item in plan["roles"]:
+            if item["role_id"] in historical:
+                self.assertEqual([], item["actions"])
+            else:
+                self.assertIn("PROVE_PIN_STATE", item["actions"])
         with self.assertRaises(RECOVERY.WorkflowRecoveryError):
             RECOVERY._preflight_apply(plan, adapter)
 
@@ -2344,7 +2357,7 @@ os._exit(97)
         adapter.capabilities = {**adapter.capabilities, "read_pin": False, "set_pin": False}
         first, _, _ = RECOVERY.build_recovery_plan(
             self.manifest,
-            self.registry,
+            self.observation_registry(),
             adapter,
             mode="apply",
             deterministic=True,
@@ -2354,7 +2367,7 @@ os._exit(97)
         )
         second, _, _ = RECOVERY.build_recovery_plan(
             self.manifest,
-            self.registry,
+            self.observation_registry(),
             adapter,
             mode="apply",
             deterministic=True,
@@ -2370,7 +2383,12 @@ os._exit(97)
         )
         self.assertTrue(all(item["pinned"] is None for item in first["roles"]))
         self.assertTrue(all("SET_PIN" not in item["actions"] for item in first["roles"]))
-        self.assertTrue(all("PROVE_PIN_STATE" in item["actions"] for item in first["roles"]))
+        historical = {role["role_id"] for role in self.manifest["roles"] if role["lifecycle_class"] == "historical"}
+        for item in first["roles"]:
+            if item["role_id"] in historical:
+                self.assertEqual([], item["actions"])
+            else:
+                self.assertIn("PROVE_PIN_STATE", item["actions"])
         with self.assertRaises(RECOVERY.WorkflowRecoveryError):
             RECOVERY._preflight_apply(first, adapter)
 
@@ -2383,7 +2401,7 @@ os._exit(97)
         self.resign_observation(later)
         later_plan, _, _ = RECOVERY.build_recovery_plan(
             self.manifest,
-            self.registry,
+            self.observation_registry(),
             adapter,
             mode="apply",
             deterministic=True,
@@ -2408,7 +2426,7 @@ os._exit(97)
         adapter = self.adapter("healthy.json")
         active_plan, _, _ = RECOVERY.build_recovery_plan(
             self.manifest,
-            self.registry,
+            self.observation_registry(),
             adapter,
             mode="apply",
             deterministic=True,
@@ -2427,7 +2445,7 @@ os._exit(97)
         mismatch_observation = self.observation()
         mismatch_plan, _, _ = RECOVERY.build_recovery_plan(
             self.manifest,
-            self.registry,
+            self.observation_registry(),
             missing_adapter,
             mode="dry-run",
             deterministic=True,
@@ -2464,6 +2482,109 @@ os._exit(97)
         self.assertEqual(2, exit_code)
         self.assertIn("read-only dry-run input", stderr.getvalue())
 
+
+class HistoricalRoleRecoveryTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.manifest = RECOVERY._load_json(ROOT / RECOVERY.MANIFEST_REF)
+        self.registry = RECOVERY._load_json(ROOT / RECOVERY.REGISTRY_REF)
+        self.adapter = RECOVERY.FixtureAdapter(
+            self.manifest, self.registry, RECOVERY._load_json(FIXTURES / "healthy.json")
+        )
+
+    def role_plan(self, role_id="owner.fitness") -> dict:
+        plan, _, _ = RECOVERY.build_recovery_plan(
+            self.manifest, self.registry, self.adapter, mode="apply", deterministic=True
+        )
+        return next(item for item in plan["roles"] if item["role_id"] == role_id)
+
+    def test_retired_product_roles_require_no_runtime_or_mutation(self) -> None:
+        for role_id in ["owner.fitness", "owner.mazer", "owner.socials-os"]:
+            result = self.role_plan(role_id)
+            self.assertEqual("HEALTHY", result["health"])
+            self.assertEqual("RETIRED_TASK_ARCHIVED_NO_RUNTIME_REQUIRED", result["decision"])
+            self.assertIsNone(result["runtime_id"])
+            self.assertEqual([], result["actions"])
+        self.assertEqual(0, self.adapter.mutations)
+
+    def test_historical_claimant_live_or_unknown_is_never_repaired(self) -> None:
+        for archived, expected in [(False, "HELD"), (None, "UNKNOWN")]:
+            with self.subTest(archived=archived):
+                self.adapter.threads.append(RECOVERY.ThreadRecord(
+                    thread_id="fixture-retired-claimant", title="Fitness", status="idle",
+                    cwd="ATLAS_ROOT", archived=archived, pinned=False,
+                    preview="fixture only", role_marker="owner.fitness",
+                ))
+                result = self.role_plan()
+                self.assertEqual(expected, result["health"])
+                self.assertEqual([], result["actions"])
+                self.adapter.threads.pop()
+
+    def test_historical_active_claimant_is_held_even_if_archived(self) -> None:
+        self.adapter.threads.append(RECOVERY.ThreadRecord(
+            thread_id="fixture-retired-active", title="Fitness", status="active",
+            cwd="ATLAS_ROOT", archived=True, pinned=True,
+            preview="fixture only", role_marker="owner.fitness",
+        ))
+        self.assertEqual("HELD", self.role_plan()["health"])
+        self.assertEqual([], self.role_plan()["actions"])
+
+    def test_historical_pending_creation_outcomes_are_not_replayed(self) -> None:
+        for collection in [self.adapter.unresolved_creation_intents, self.adapter.retained_creation_bindings]:
+            collection["owner.fitness"] = "fixture-retained-outcome"
+            result = self.role_plan()
+            self.assertEqual("RETIRED_TASK_CREATION_OUTCOME_UNKNOWN", result["decision"])
+            self.assertEqual([], result["actions"])
+            collection.clear()
+
+    def test_historical_binding_override_cannot_reactivate(self) -> None:
+        self.adapter.binding_overrides["owner.fitness"] = "fixture-override"
+        self.assertEqual("RETIRED_TASK_BINDING_DRIFT", self.role_plan()["decision"])
+        self.assertEqual([], self.role_plan()["actions"])
+
+    def test_historical_creation_boot_and_binding_counterexamples_fail_validation(self) -> None:
+        for category in ["creation", "bootstrap", "runtime", "archive"]:
+            with self.subTest(category=category):
+                manifest = copy.deepcopy(self.manifest)
+                registry = copy.deepcopy(self.registry)
+                role = next(x for x in manifest["roles"] if x["role_id"] == "owner.fitness")
+                binding = next(x for x in registry["bindings"] if x["role_id"] == "owner.fitness")
+                if category == "creation":
+                    role["creation_policy"] = "create_if_missing"
+                elif category == "bootstrap":
+                    manifest["boot"]["phases"][3]["members"].append("owner.fitness")
+                elif category == "runtime":
+                    binding["current_runtime_id"] = "fixture-runtime"
+                else:
+                    binding["archived"] = False
+                loader = RECOVERY._load_json
+                def changed(path):
+                    if path == ROOT / RECOVERY.MANIFEST_REF:
+                        return manifest
+                    if path == ROOT / RECOVERY.REGISTRY_REF:
+                        return registry
+                    return loader(path)
+                with mock.patch.object(RECOVERY, "_load_json", side_effect=changed):
+                    with self.assertRaises(RECOVERY.ValidationFailure):
+                        RECOVERY.validate_repository(check_generated=False)
+
+    def test_frozen_fixture_requires_exact_digest_and_complete_thirteen_roles(self) -> None:
+        frozen = RECOVERY._load_json(ROOT / RECOVERY.DESKTOP_OBSERVATION_FIXTURE_REGISTRY_REF)
+        self.assertEqual(13, len(frozen["bindings"]))
+        self.assertEqual({x["role_id"] for x in self.manifest["roles"]}, {x["role_id"] for x in frozen["bindings"]})
+        for category in ["digest", "missing", "duplicate"]:
+            fixture = copy.deepcopy(frozen)
+            if category == "digest":
+                fixture["manifest_digest"] = "sha256:" + "0" * 64
+            elif category == "missing":
+                fixture["bindings"].pop()
+            else:
+                fixture["bindings"].append(copy.deepcopy(fixture["bindings"][0]))
+            loader = RECOVERY._load_json
+            def changed(path):
+                return fixture if path == ROOT / RECOVERY.DESKTOP_OBSERVATION_FIXTURE_REGISTRY_REF else loader(path)
+            with mock.patch.object(RECOVERY, "_load_json", side_effect=changed):
+                with self.assertRaises(RECOVERY.ValidationFailure):
+                    RECOVERY.validate_repository()
 
 if __name__ == "__main__":
     unittest.main()
