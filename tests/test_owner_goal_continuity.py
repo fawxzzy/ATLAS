@@ -1,7 +1,10 @@
 """Regression cases for false whole-Goal blocks and all-stop decisions."""
 
+import copy
+import hashlib
 import json
 import re
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -9,6 +12,17 @@ from ops.atlas.assess_owner_goal_continuity import SCHEMA, assess_audit, goal_po
 
 
 REF = "runtime/atlas/continuity/proof.json#sha256=" + "a" * 64
+
+
+def attach_prior(case: dict, prior: dict, root: Path, name: str = "prior.json") -> None:
+    relative = Path("runtime/atlas/continuity") / name
+    path = root / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    raw = (json.dumps(prior, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    path.write_bytes(raw)
+    case["prior_fingerprint"] = prior["fingerprint"]
+    case["prior_assessment"] = prior
+    case["prior_assessment_ref"] = relative.as_posix() + "#sha256=" + hashlib.sha256(raw).hexdigest()
 
 
 def audit() -> dict:
@@ -134,7 +148,97 @@ class GoalContinuityTests(unittest.TestCase):
         self.assertFalse(result["owners"][0]["owner_wake_allowed"])
         self.assertTrue(result["owners"][0]["native_goal_resume_required"])
         self.assertEqual(result["owners"][0]["resume_action"], "MANUAL_RESUME_REQUIRED")
+        self.assertEqual(result["owners"][0]["resume_control"], "Resume goal")
         self.assertFalse(result["authorizes_execution"])
+
+    def test_blocked_goal_changed_unblock_condition_requires_manual_resume(self) -> None:
+        case = audit()
+        case["owners"][0]["goal_state"] = "BLOCKED"
+        prior = assess_audit(case)
+        self.assertEqual(prior["decision"], "GENUINE_ALL_STOP")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            attach_prior(case, prior, root)
+            case["owners"][0]["obligations"][0]["hold"]["unblock_condition"] = "Current Fitness actor and app session rechecked"
+            result = assess_audit(case, evidence_root=root)
+            owner = result["owners"][0]
+            self.assertTrue(result["changed_since_prior"])
+            self.assertEqual(result["decision"], "BLOCKED_GOAL_MANUAL_RESUME_REQUIRED")
+            self.assertEqual(owner["thread_id"], "platform-thread")
+            self.assertEqual(owner["decision"], "BLOCKED_GOAL_UNBLOCK_CONDITION_CHANGED")
+            self.assertTrue(owner["native_goal_resume_required"])
+            self.assertEqual(owner["resume_action"], "MANUAL_RESUME_REQUIRED")
+            self.assertEqual(owner["resume_control"], "Resume goal")
+            self.assertEqual(result["manual_resume_required_owners"], [
+                {"role_id": "platform.supabase-migration", "thread_id": "platform-thread", "control": "Resume goal"}
+            ])
+            self.assertFalse(owner["owner_wake_allowed"])
+            self.assertFalse(result["authorizes_execution"])
+            attach_prior(case, result, root, "next.json")
+            repeated = assess_audit(case, evidence_root=root)
+            self.assertFalse(repeated["changed_since_prior"])
+            self.assertEqual(repeated["owners"][0]["resume_action"], "NONE")
+
+    def test_blocked_hold_change_without_prior_comparison_fails_closed(self) -> None:
+        case = audit()
+        case["owners"][0]["goal_state"] = "BLOCKED"
+        prior = assess_audit(case)
+        case["prior_fingerprint"] = prior["fingerprint"]
+        case["owners"][0]["obligations"][0]["hold"]["unblock_condition"] = "Changed unblock condition"
+        result = assess_audit(case)
+        self.assertEqual(result["decision"], "ALL_STOP_UNPROVEN")
+        self.assertIn("prior_blocked_hold_comparison", result["owners"][0]["missing"])
+        self.assertFalse(result["authorizes_execution"])
+        case["prior_fingerprint"] = result["fingerprint"]
+        self.assertEqual(assess_audit(case)["decision"], "ALL_STOP_UNPROVEN")
+
+    def test_owner_thread_change_changes_fingerprint(self) -> None:
+        case = audit()
+        prior = assess_audit(case)
+        case["prior_fingerprint"] = prior["fingerprint"]
+        case["owners"][0]["thread_id"] = "new-owner-thread"
+        result = assess_audit(case)
+        self.assertTrue(result["changed_since_prior"])
+        self.assertNotEqual(result["fingerprint"], prior["fingerprint"])
+
+    def test_tampered_prior_assessment_cannot_hide_blocked_hold_change(self) -> None:
+        case = audit()
+        case["owners"][0]["goal_state"] = "BLOCKED"
+        prior = assess_audit(case)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            attach_prior(case, copy.deepcopy(prior), root)
+            case["prior_assessment"]["owners"][0]["holds"][0]["unblock_condition"] = "Forged current condition"
+            case["owners"][0]["obligations"][0]["hold"]["unblock_condition"] = "Forged current condition"
+            result = assess_audit(case, evidence_root=root)
+            self.assertEqual(result["decision"], "ALL_STOP_UNPROVEN")
+            self.assertIn("prior_blocked_hold_comparison", result["owners"][0]["missing"])
+
+    def test_changed_blocked_hold_does_not_hide_another_owners_admitted_work(self) -> None:
+        case = audit()
+        case["owners"][0]["goal_state"] = "BLOCKED"
+        second = copy.deepcopy(case["owners"][0])
+        second.update({"role_id": "owner.web", "thread_id": "web-thread", "goal_state": "ACTIVE"})
+        case["coverage"]["role_ids"].append("owner.web")
+        case["owners"].append(second)
+        prior = assess_audit(case)
+        second["obligations"][0].update({"admission": "ADMITTED", "admission_ref": REF, "authority_ref": REF})
+        second["obligations"][0].pop("hold")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            attach_prior(case, prior, root)
+            case["owners"][0]["obligations"][0]["hold"]["unblock_condition"] = "Changed condition"
+            result = assess_audit(case, evidence_root=root)
+            self.assertEqual(result["decision"], "ADMITTED_WORK_REQUIRES_OWNER_ACTION")
+            self.assertEqual(result["owners"][1]["decision"], "WAKE_ELIGIBLE_OWNER")
+            self.assertEqual(result["owners"][0]["resume_action"], "MANUAL_RESUME_REQUIRED")
+            self.assertEqual(result["manual_resume_required_owners"], [
+                {"role_id": "platform.supabase-migration", "thread_id": "platform-thread", "control": "Resume goal"}
+            ])
+            case.pop("prior_assessment_ref")
+            missing = assess_audit(case, evidence_root=root)
+            self.assertEqual(missing["decision"], "ADMITTED_WORK_REQUIRES_OWNER_ACTION")
+            self.assertIn("prior_blocked_hold_comparison", missing["owners"][0]["missing"])
 
     def test_omitted_scope_lane_and_unproven_hold_cannot_block_goal(self) -> None:
         missing_lane = audit()

@@ -1,7 +1,10 @@
 """Read-only gate for whole-Goal blocks and an all-owner stop.
 
 The caller supplies independently verified native Goal, task, scope, and
-obligation evidence. This module never changes a Goal or dispatches work.
+obligation evidence. A repeated blocked-Goal audit also supplies the prior
+assessment and its source reference, so a changed hold condition can be
+distinguished from an unrelated fingerprint change. This module never changes
+a Goal or dispatches work.
 """
 
 from __future__ import annotations
@@ -9,6 +12,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -39,6 +43,30 @@ def _text(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip()) and value != "UNKNOWN"
 
 
+def _verified_prior_assessment(audit: dict[str, Any], root: Path) -> dict[str, Any] | None:
+    """Bind a caller-supplied prior snapshot to local content-addressed evidence."""
+    ref = audit.get("prior_assessment_ref")
+    if not isinstance(ref, str):
+        return None
+    match = re.fullmatch(
+        r"((?:runtime/atlas/continuity|tmp/atlas)/[A-Za-z0-9._/-]+\.json)#sha256=([0-9a-f]{64})",
+        ref,
+    )
+    if not match or ".." in Path(match[1]).parts:
+        return None
+    try:
+        path = (root / match[1]).resolve(strict=True)
+        if not path.is_relative_to(root.resolve(strict=True)) or not path.is_file():
+            return None
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != match[2]:
+            return None
+        prior = json.loads(raw)
+    except (OSError, ValueError, json.JSONDecodeError):
+        return None
+    return prior if isinstance(prior, dict) and prior == audit.get("prior_assessment") else None
+
+
 def _fingerprint(
     owners: list[dict[str, Any]], coverage_scope: str, program_ref: str,
     ready_target_gaps: list[str], ready_target_rechecks: list[str],
@@ -48,6 +76,7 @@ def _fingerprint(
     owner_material = [
         {
             "role_id": owner["role_id"],
+            "thread_id": owner["thread_id"],
             "goal_state": owner["goal_state"],
             "decision": owner["decision"],
             "route_issues": sorted(owner["route_issues"]),
@@ -181,6 +210,7 @@ def assess_owner(owner: dict[str, Any], *, require_independent_candidate_search:
         result["native_goal_resume_required"] = owner["goal_state"] == "BLOCKED"
         if result["native_goal_resume_required"]:
             result["resume_action"] = "MANUAL_RESUME_REQUIRED"
+            result["resume_control"] = "Resume goal"
         if owner["task_state"] == "active" or owner.get("equivalent_delivery_active") is True:
             result["decision"] = "IN_PROGRESS_NO_DUPLICATE_WAKE"
         elif owner["task_state"] == "idle" and owner.get("equivalent_delivery_active") is False:
@@ -214,7 +244,7 @@ def assess_owner(owner: dict[str, Any], *, require_independent_candidate_search:
     return result
 
 
-def assess_audit(audit: dict[str, Any]) -> dict[str, Any]:
+def assess_audit(audit: dict[str, Any], *, evidence_root: Path | None = None) -> dict[str, Any]:
     policy = goal_policy()
     if audit.get("schema") != SCHEMA or not isinstance(audit.get("owners"), list) or not audit["owners"]:
         raise ValueError("expected a nonempty atlas.owner-goal-continuity-audit.v1 owners list")
@@ -294,6 +324,50 @@ def assess_audit(audit: dict[str, Any]) -> dict[str, Any]:
         ready_target_gaps, ready_target_rechecks, program_decision,
         program_coverage_valid, require_independent_candidate_search,
     )
+    prior_fingerprint = audit.get("prior_fingerprint")
+    if _text(prior_fingerprint):
+        blocked = [owner for owner in owners if owner["goal_state"] == "BLOCKED"
+                   and not owner["admitted_ids"] and owner["holds"]]
+        if blocked:
+            prior = _verified_prior_assessment(
+                audit, evidence_root or Path(__file__).resolve().parents[2]
+            )
+            prior_owners = prior.get("owners") if isinstance(prior, dict) else None
+            prior_valid = (
+                prior.get("schema") == "atlas.owner-goal-continuity-assessment.v1"
+                and prior.get("fingerprint") == prior_fingerprint
+                and isinstance(prior_owners, list)
+                and all(isinstance(item, dict) and _text(item.get("role_id"))
+                        and isinstance(item.get("holds"), list) for item in prior_owners)
+                and len({item["role_id"] for item in prior_owners}) == len(prior_owners)
+                and {item["role_id"] for item in prior_owners} == set(roles)
+                and all(
+                    all(isinstance(hold, dict) and _text(hold.get("id"))
+                        and _text(hold.get("unblock_condition")) for hold in item["holds"])
+                    and len({hold["id"] for hold in item["holds"]}) == len(item["holds"])
+                    for item in prior_owners
+                )
+            ) if isinstance(prior, dict) else False
+            if prior_valid:
+                prior_by_role = {item["role_id"]: item for item in prior_owners}
+                for owner in blocked:
+                    previous = prior_by_role[owner["role_id"]]["holds"]
+                    old_conditions = {item["id"]: item["unblock_condition"] for item in previous}
+                    new_conditions = {item["id"]: item["unblock_condition"] for item in owner["holds"]}
+                    if old_conditions != new_conditions:
+                        owner["native_goal_resume_required"] = True
+                        owner["resume_action"] = "MANUAL_RESUME_REQUIRED"
+                        owner["resume_control"] = "Resume goal"
+                        owner["owner_wake_allowed"] = False
+                        owner["decision"] = "BLOCKED_GOAL_UNBLOCK_CONDITION_CHANGED"
+                        if program_decision in {"GENUINE_ALL_STOP", "ALL_INCLUDED_OWNERS_BLOCKED", "ALL_STOP_UNPROVEN"}:
+                            program_decision = "BLOCKED_GOAL_MANUAL_RESUME_REQUIRED"
+            if not prior_valid:
+                for owner in blocked:
+                    owner["missing"].append("prior_blocked_hold_comparison")
+                    owner["decision"] = "HOLD_DELTA_EVIDENCE_REQUIRED"
+                if program_decision in {"GENUINE_ALL_STOP", "ALL_INCLUDED_OWNERS_BLOCKED"}:
+                    program_decision = "ALL_STOP_UNPROVEN"
     return {
         "schema": "atlas.owner-goal-continuity-assessment.v1",
         "policy_id": policy["policy_id"],
@@ -306,6 +380,11 @@ def assess_audit(audit: dict[str, Any]) -> dict[str, Any]:
         "ready_target_gaps": ready_target_gaps,
         "ready_target_rechecks": ready_target_rechecks,
         "owners": owners,
+        "manual_resume_required_owners": [
+            {"role_id": owner["role_id"], "thread_id": owner["thread_id"],
+             "control": "Resume goal"}
+            for owner in owners if owner["resume_action"] == "MANUAL_RESUME_REQUIRED"
+        ],
         "authorizes_execution": False,
     }
 
