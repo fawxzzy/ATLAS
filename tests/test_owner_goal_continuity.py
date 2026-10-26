@@ -137,6 +137,40 @@ class GoalContinuityTests(unittest.TestCase):
         self.assertEqual(result["owners"][0]["decision"], "WAKE_ELIGIBLE_OWNER")
         self.assertTrue(result["owners"][0]["owner_wake_allowed"])
 
+    def test_incomplete_other_obligation_preserves_blocked_goals_admitted_work(self) -> None:
+        case = audit()
+        owner = case["owners"][0]
+        owner["goal_state"] = "BLOCKED"
+        owner["obligations"][0].update(
+            {"admission": "ADMITTED", "admission_ref": REF, "authority_ref": REF})
+        owner["obligations"][0].pop("hold")
+        owner["obligations"][1]["admission"] = "UNKNOWN"
+        owner["obligations"][1].pop("hold")
+        result = assess_audit(case)
+        assessed = result["owners"][0]
+        self.assertEqual(result["decision"], "ADMITTED_WORK_REQUIRES_OWNER_ACTION")
+        self.assertEqual(assessed["decision"], "BLOCKED_GOAL_HAS_ADMITTED_WORK")
+        self.assertEqual(assessed["admitted_ids"], ["DOD-06"])
+        self.assertIn("obligation_evidence:DOD-09", assessed["missing"])
+        self.assertEqual(assessed["resume_action"], "MANUAL_RESUME_REQUIRED")
+        self.assertFalse(assessed["owner_wake_allowed"])
+        self.assertFalse(result["authorizes_execution"])
+
+    def test_invalid_prior_proof_changes_fingerprint_then_stabilizes(self) -> None:
+        case = audit()
+        case["owners"][0]["goal_state"] = "BLOCKED"
+        prior = assess_audit(case)
+        case["prior_fingerprint"] = prior["fingerprint"]
+        invalid = assess_audit(case)
+        self.assertEqual(invalid["decision"], "ALL_STOP_UNPROVEN")
+        self.assertIn("prior_blocked_hold_comparison", invalid["owners"][0]["missing"])
+        self.assertNotEqual(invalid["fingerprint"], prior["fingerprint"])
+        self.assertTrue(invalid["changed_since_prior"])
+        case["prior_fingerprint"] = invalid["fingerprint"]
+        repeated = assess_audit(case)
+        self.assertEqual(repeated["fingerprint"], invalid["fingerprint"])
+        self.assertFalse(repeated["changed_since_prior"])
+
     def test_blocked_goal_with_admitted_work_requires_resume_and_owner_action(self) -> None:
         case = audit()
         owner = case["owners"][0]

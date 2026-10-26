@@ -199,7 +199,10 @@ def assess_owner(owner: dict[str, Any], *, require_independent_candidate_search:
 
     if unknown:
         missing.extend(f"obligation_evidence:{identity}" for identity in unknown)
-        return result
+        # Incomplete evidence cannot prove a whole-Goal stop. It also cannot
+        # hide independently admitted work or a blocked Goal's Resume action.
+        if not result["admitted_ids"]:
+            return result
     if owner["goal_state"] == "COMPLETE" and len(complete) != len(expected):
         result["decision"] = "INCONSISTENT_GOAL_COMPLETION"
         return result
@@ -318,13 +321,14 @@ def assess_audit(audit: dict[str, Any], *, evidence_root: Path | None = None) ->
             program_decision = "ALL_INCLUDED_OWNERS_BLOCKED"
     else:
         program_decision = "COMPLETION_REVIEW_REQUIRED"
-    fingerprint = _fingerprint(
+    baseline_fingerprint = _fingerprint(
         owners, coverage.get("scope") if coverage_valid else "UNKNOWN",
         audit.get("program_ref") if program_coverage_valid and _text(audit.get("program_ref")) else "UNKNOWN",
         ready_target_gaps, ready_target_rechecks, program_decision,
         program_coverage_valid, require_independent_candidate_search,
     )
     prior_fingerprint = audit.get("prior_fingerprint")
+    prior_evidence_invalid = False
     if _text(prior_fingerprint):
         blocked = [owner for owner in owners if owner["goal_state"] == "BLOCKED"
                    and not owner["admitted_ids"] and owner["holds"]]
@@ -363,11 +367,24 @@ def assess_audit(audit: dict[str, Any], *, evidence_root: Path | None = None) ->
                         if program_decision in {"GENUINE_ALL_STOP", "ALL_INCLUDED_OWNERS_BLOCKED", "ALL_STOP_UNPROVEN"}:
                             program_decision = "BLOCKED_GOAL_MANUAL_RESUME_REQUIRED"
             if not prior_valid:
+                prior_evidence_invalid = True
                 for owner in blocked:
                     owner["missing"].append("prior_blocked_hold_comparison")
                     owner["decision"] = "HOLD_DELTA_EVIDENCE_REQUIRED"
                 if program_decision in {"GENUINE_ALL_STOP", "ALL_INCLUDED_OWNERS_BLOCKED"}:
                     program_decision = "ALL_STOP_UNPROVEN"
+    # A changed hold condition is already in the baseline material. Its
+    # one-time Resume notification must not churn a genuinely repeated input.
+    # Invalid prior evidence, however, changes the actual decision and must
+    # change the fingerprint even when the hold condition itself is unchanged.
+    fingerprint = (
+        _fingerprint(
+            owners, coverage.get("scope") if coverage_valid else "UNKNOWN",
+            audit.get("program_ref") if program_coverage_valid and _text(audit.get("program_ref")) else "UNKNOWN",
+            ready_target_gaps, ready_target_rechecks, program_decision,
+            program_coverage_valid, require_independent_candidate_search,
+        ) if prior_evidence_invalid else baseline_fingerprint
+    )
     return {
         "schema": "atlas.owner-goal-continuity-assessment.v1",
         "policy_id": policy["policy_id"],
