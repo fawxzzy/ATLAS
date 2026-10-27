@@ -33,7 +33,7 @@ $ErrorActionPreference = 'Stop'
 
 # This source packet cannot execute a live action. The live key-binding and
 # sealing primitives below are source for later ACTION review. SealLive refuses
-# before opening the DPAPI vault because no approved private handoff exists.
+# before marker or vault access; source integration does not admit a live action.
 # Synthetic actions use fixed public vectors; no file supplies key or code.
 $domain = 'ATLAS|Supabase|MasterArchiveKeyCapsule|v1'
 $capsuleSchema = 'atlas.supabase.master-archive-key-capsule.v1'
@@ -182,10 +182,39 @@ function Assert-ExactKeys {
 }
 
 function Confirm-OfflineCodeHandoff {
-  param([byte[]]$Code)
-  # There is no reviewed user-only display and re-entry primitive yet. A
-  # terminal, log, environment variable, file or chat output is not one.
-  throw 'PRIVATE_USER_ONLY_HANDOFF_NOT_INSTALLED'
+  param([byte[]]$Code, [switch]$Interactive)
+  if (-not $Interactive) { throw 'PRIVATE_HANDOFF_INTERACTIVE_OPT_IN_REQUIRED' }
+  if ($null -eq $Code -or $Code.Length -ne 32) { throw 'RECOVERY_CODE_SHAPE_REJECTED' }
+  # This source-library call is not an ACTION authority boundary. The future
+  # installed wrapper must admit the action and pin both complete source files.
+  $handoffPath = Join-Path $PSScriptRoot 'private_recovery_code_handoff_r001.ps1'
+  Assert-NoReparsePoint $handoffPath
+  if (-not [System.IO.File]::Exists($handoffPath)) { throw 'PRIVATE_HANDOFF_SOURCE_REQUIRED' }
+  $handoffStream = [System.IO.File]::Open($handoffPath,
+    [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read,
+    [System.IO.FileShare]::Read)
+  try {
+    if ($handoffStream.Length -le 0 -or $handoffStream.Length -gt 65536) {
+      throw 'PRIVATE_HANDOFF_SOURCE_IDENTITY_REJECTED'
+    }
+    [byte[]]$handoffBytes = [byte[]]::new([int]$handoffStream.Length)
+    $offset = 0
+    while ($offset -lt $handoffBytes.Length) {
+      $count = $handoffStream.Read($handoffBytes, $offset, $handoffBytes.Length - $offset)
+      if ($count -le 0) { throw 'PRIVATE_HANDOFF_SOURCE_IDENTITY_REJECTED' }
+      $offset += $count
+    }
+    if ($handoffStream.ReadByte() -ne -1) { throw 'PRIVATE_HANDOFF_SOURCE_IDENTITY_REJECTED' }
+  } finally { $handoffStream.Dispose() }
+  if ((Get-Sha256Hex $handoffBytes) -cne '42fb3478f11d5b805e662b760ad0a9c869abd0307e9b96fbbce073d17286fd38') {
+    throw 'PRIVATE_HANDOFF_SOURCE_IDENTITY_REJECTED'
+  }
+  # Hash and execute the same public source bytes; do not reopen the path.
+  . ([scriptblock]::Create([System.Text.Encoding]::UTF8.GetString($handoffBytes)))
+  $confirmed = @(Invoke-PrivateRecoveryCodeHandoff -RecoveryCode $Code -Interactive)
+  if ($confirmed.Count -ne 1 -or $confirmed[0] -isnot [bool] -or -not $confirmed[0]) {
+    throw 'PRIVATE_USER_ONLY_HANDOFF_NOT_CONFIRMED'
+  }
 }
 
 function Seal-HostBoundKey {
@@ -474,7 +503,7 @@ function Invoke-HostBoundLiveBridge {
     $paths = New-OneUseLiveMarker -CapsuleDirectory $directory -Context $context -Guard $guard
     $codeBytes = [byte[]]::new(32)
     [System.Security.Cryptography.RandomNumberGenerator]::Fill($codeBytes)
-    Confirm-OfflineCodeHandoff -Code $codeBytes
+    Confirm-OfflineCodeHandoff -Code $codeBytes -Interactive
     $vault = Join-Path $atlasRoot 'secrets\local\supabase-offsite-recovery'
     $blobPath = Join-Path $vault 'archive-master-key.dpapi'
     $descriptorPath = Join-Path $vault 'archive-master-key.descriptor.json'

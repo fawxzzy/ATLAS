@@ -108,6 +108,90 @@ class SyntheticCapsuleTests(unittest.TestCase):
     def ps_path(path: Path) -> str:
         return "'" + str(path).replace("'", "''") + "'"
 
+    def handoff_fixture(self, display_body: str, *, drift: bool = False, padding: int = 0) -> Path:
+        """Substitute only a public-vector display in an isolated source fixture."""
+        helper_path = SCRIPT.with_name("private_recovery_code_handoff_r001.ps1")
+        helper = helper_path.read_bytes()
+        source = SCRIPT.read_text(encoding="utf-8")
+        pinned = hashlib.sha256(helper).hexdigest()
+        self.assertEqual(source.count(pinned), 1)
+        mock = (
+            "\nfunction Show-PrivateRecoveryCodeDialog {\n"
+            "param([byte[]]$Code,[switch]$Interactive)\n"
+            "$expected=[byte[]](0..31)\n"
+            "if (-not [System.Security.Cryptography.CryptographicOperations]::FixedTimeEquals($expected,$Code)) "
+            "{ throw 'TEST_PUBLIC_VECTOR_ONLY' }\n"
+            + display_body + "\n}\n"
+        ).encode("utf-8")
+        fixture_helper = helper + mock + (b"\n#" + b"x" * padding if padding else b"")
+        if not drift:
+            source = source.replace(pinned, hashlib.sha256(fixture_helper).hexdigest())
+        folder = Path(tempfile.mkdtemp(prefix="handoff-source-", dir=self.root)) / "ops" / "atlas"
+        folder.mkdir(parents=True)
+        bridge = folder / SCRIPT.name
+        bridge.write_text(source, encoding="utf-8")
+        (folder / helper_path.name).write_bytes(fixture_helper)
+        return bridge
+
+    def invoke_handoff_fixture(self, bridge: Path, *, interactive: bool = True) -> subprocess.CompletedProcess[str]:
+        # Load definitions through an existing fixed-vector/no-vault action.
+        load = (
+            f"$null = . {self.ps_path(bridge)} -Action VerifyHostCoreSynthetic "
+            f"-FixtureRoot {self.ps_path(self.root)} -AttemptId '{ATTEMPT}' "
+            f"-ProjectRef '{PROJECT}' -DescriptorSha256 '{DESCRIPTOR_SHA}' "
+            f"-ArchiveSha256 '{ARCHIVE_SHA}'; "
+        )
+        opt_in = " -Interactive" if interactive else ""
+        return self.powershell(
+            load + "$ErrorActionPreference='Stop'; try { "
+            f"Confirm-OfflineCodeHandoff -Code ([byte[]](0..31)){opt_in}; 'CONFIRMED' "
+            "} catch { $_.Exception.Message; exit 7 }"
+        )
+
+    def test_integrated_handoff_confirmation_emits_no_material(self) -> None:
+        result = self.invoke_handoff_fixture(self.handoff_fixture("return $true"))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), "CONFIRMED")
+        self.assertFalse(self.capsule.exists())
+        self.assertFalse(self.host_marker.exists())
+
+    def test_integrated_handoff_cancel_or_affinity_fault_stops_before_capsule(self) -> None:
+        for body, reason in (
+            ("return $false", "PRIVATE_USER_ONLY_HANDOFF_NOT_CONFIRMED"),
+            ("throw 'CAPTURE_AFFINITY_REJECTED'", "CAPTURE_AFFINITY_REJECTED"),
+            ("$true; 'unexpected pipeline output'", "PRIVATE_USER_ONLY_HANDOFF_NOT_CONFIRMED"),
+        ):
+            with self.subTest(reason=reason):
+                # Each variant has its own isolated fixture directory.
+                result = self.invoke_handoff_fixture(self.handoff_fixture(body))
+                self.assertEqual(result.returncode, 7, result.stderr)
+                self.assertEqual(result.stdout.strip(), reason)
+                self.assertFalse(self.capsule.exists())
+                self.assertFalse(self.host_marker.exists())
+
+    def test_integrated_handoff_requires_opt_in_before_display(self) -> None:
+        result = self.invoke_handoff_fixture(
+            self.handoff_fixture("throw 'TEST_DISPLAY_MUST_NOT_RUN'"), interactive=False,
+        )
+        self.assertEqual(result.returncode, 7, result.stderr)
+        self.assertEqual(result.stdout.strip(), "PRIVATE_HANDOFF_INTERACTIVE_OPT_IN_REQUIRED")
+
+    def test_integrated_handoff_rejects_companion_source_drift_before_ui(self) -> None:
+        result = self.invoke_handoff_fixture(
+            self.handoff_fixture("throw 'TEST_DISPLAY_MUST_NOT_RUN'", drift=True),
+        )
+        self.assertEqual(result.returncode, 7, result.stderr)
+        self.assertEqual(result.stdout.strip(), "PRIVATE_HANDOFF_SOURCE_IDENTITY_REJECTED")
+        self.assertFalse(self.capsule.exists())
+
+    def test_integrated_handoff_rejects_oversized_companion_before_read_or_ui(self) -> None:
+        result = self.invoke_handoff_fixture(
+            self.handoff_fixture("throw 'TEST_DISPLAY_MUST_NOT_RUN'", padding=65536),
+        )
+        self.assertEqual(result.returncode, 7, result.stderr)
+        self.assertEqual(result.stdout.strip(), "PRIVATE_HANDOFF_SOURCE_IDENTITY_REJECTED")
+        self.assertFalse(self.capsule.exists())
+
     def test_seal_and_verify_use_authenticated_synthetic_context(self) -> None:
         sealed = self.seal()
         self.assertEqual(sealed["result"], "SYNTHETIC_CAPSULE_SEALED")
