@@ -1,7 +1,10 @@
-"""Read only the actual Codex executor's current native turn.
+"""Read a named Codex owner's current native turn from the task service.
 
 This narrow adapter supplies evidence to the Goal assessor. It cannot send a
 task message, resume a Goal, dispatch work, or perform a provider effect.
+Environment values and caller-supplied MCP metadata are lookup hints, not
+proof of the invoking process's identity. The assessor separately requires a
+host-recorded owner-origin item bound to the exact audit and program.
 """
 
 from __future__ import annotations
@@ -196,7 +199,7 @@ class CodexNativeReadbackClient:
 
 
 def read_current_native_turn(caller: str, turn_id: str) -> dict[str, Any]:
-    """Return supported read_thread evidence for this real executor, once."""
+    """Return supported read_thread evidence for the named owner, once."""
     caller = _exact_uuid(caller, "CALLER")
     turn_id = _exact_uuid(turn_id, "TURN")
     if os.environ.get("CODEX_THREAD_ID") != caller or os.environ.get("CODEX_TURN_ID") not in (None, "", turn_id):

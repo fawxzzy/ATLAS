@@ -437,7 +437,12 @@ def _read_current_native_turn(caller: str, turn_id: str) -> dict[str, Any]:
     return read_current_native_turn(caller, turn_id)
 
 
-def _verify_native_turn(caller: str, turn_id: str) -> None:
+def _origin_marker(audit: dict[str, Any], caller: str, turn_id: str, program_sha: str) -> str:
+    audit_sha = hashlib.sha256(json.dumps(audit, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    return f"ATLAS_GOAL_SELF_AUDIT_ORIGIN:{caller}:{turn_id}:{program_sha}:{audit_sha}"
+
+
+def _verify_native_turn(caller: str, turn_id: str, origin_item_id: str, marker: str) -> None:
     if (os.environ.get("CODEX_THREAD_ID") != caller
             or os.environ.get("CODEX_TURN_ID") not in (None, "", turn_id)):
         raise ValueError("SELF_AUDIT_EXECUTOR_IDENTITY_DRIFT")
@@ -451,6 +456,20 @@ def _verify_native_turn(caller: str, turn_id: str) -> None:
             or not isinstance(turns, list) or len(turns) != 1 or not isinstance(turns[0], dict)
             or turns[0].get("id") != turn_id or turns[0].get("status") != "inProgress"):
         raise ValueError("SELF_AUDIT_CURRENT_NATIVE_TURN_UNVERIFIED")
+    items = turns[0].get("items")
+    if not isinstance(items, list):
+        raise ValueError("SELF_AUDIT_OWNER_ORIGIN_UNVERIFIED")
+    matching = [item for item in items if isinstance(item, dict) and item.get("id") == origin_item_id]
+    if len(matching) != 1:
+        raise ValueError("SELF_AUDIT_OWNER_ORIGIN_UNVERIFIED")
+    item = matching[0]
+    command = item.get("command")
+    expected = f"Write-Output '{marker}'"
+    if (item.get("type") != "commandExecution" or item.get("status") != "completed"
+            or type(item.get("exitCode")) is not int or item["exitCode"] != 0
+            or not isinstance(command, str)
+            or re.fullmatch(r'"[^"\r\n]*\\pwsh\.exe" -Command "' + re.escape(expected) + r'"', command) is None):
+        raise ValueError("SELF_AUDIT_OWNER_ORIGIN_UNVERIFIED")
 
 
 def _verify_program(audit: dict[str, Any], caller: str, role: str) -> str:
@@ -512,8 +531,9 @@ def _verify_program(audit: dict[str, Any], caller: str, role: str) -> str:
     return match[2]
 
 
-def assess_current_owner_audit(audit: dict[str, Any], *, current_owner_turn: str) -> dict[str, Any]:
-    """Exclude only the verified caller's read-only assessing turn, never work.
+def assess_current_owner_audit(audit: dict[str, Any], *, current_owner_turn: str,
+                               owner_origin_item: str) -> dict[str, Any]:
+    """Exclude only a host-recorded owner-origin assessing turn, never work.
 
     This explicit entry point is for a current owner, not an external watch.
     Native and program state are checked on both sides of classification. No
@@ -521,6 +541,8 @@ def assess_current_owner_audit(audit: dict[str, Any], *, current_owner_turn: str
     """
     caller = _uuid(os.environ.get("CODEX_THREAD_ID"), "CALLER")
     turn_id = _uuid(current_owner_turn, "TURN")
+    if not re.fullmatch(r"exec-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", owner_origin_item):
+        raise ValueError("SELF_AUDIT_OWNER_ORIGIN_ITEM_INVALID")
     if os.environ.get("CODEX_TURN_ID") not in (None, "", turn_id):
         raise ValueError("SELF_AUDIT_EXECUTOR_TURN_MISMATCH")
     owners = audit.get("owners")
@@ -534,13 +556,16 @@ def assess_current_owner_audit(audit: dict[str, Any], *, current_owner_turn: str
     # Snapshot the caller's evidence so it cannot be changed during verification.
     snapshot = json.loads(json.dumps(audit))
     program_sha = _verify_program(snapshot, caller, owners[0]["role_id"])
-    _verify_native_turn(caller, turn_id)
+    marker = _origin_marker(snapshot, caller, turn_id, program_sha)
+    _verify_native_turn(caller, turn_id, owner_origin_item, marker)
     result = _assess_audit(snapshot, current_audit_thread=caller)
-    _verify_native_turn(caller, turn_id)
+    _verify_native_turn(caller, turn_id, owner_origin_item, marker)
     if _verify_program(snapshot, caller, owners[0]["role_id"]) != program_sha or audit != snapshot:
         raise ValueError("SELF_AUDIT_EVIDENCE_DRIFT")
     result["current_owner_self_audit"] = {
         "thread_id": caller, "turn_id": turn_id, "program_sha256": program_sha,
+        "owner_origin_item_id": owner_origin_item,
+        "owner_origin_marker_sha256": hashlib.sha256(marker.encode("utf-8")).hexdigest(),
         "excluded_activity": "CURRENT_READ_ONLY_ASSESSING_TURN_ONLY",
         "native_and_program_rechecked": True,
     }
@@ -551,10 +576,24 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("audit", type=Path, help="verified owner audit JSON")
     parser.add_argument("--current-owner-turn", help="explicit self-audit: exact current native turn UUID")
+    parser.add_argument("--owner-origin-item", help="completed native owner command item recording the exact audit marker")
+    parser.add_argument("--prepare-owner-origin", help="print the read-only owner marker command for this native turn, without assessing")
     args = parser.parse_args()
     try:
         audit = json.loads(args.audit.read_text(encoding="utf-8"))
-        result = (assess_current_owner_audit(audit, current_owner_turn=args.current_owner_turn)
+        if args.prepare_owner_origin is not None:
+            caller = _uuid(os.environ.get("CODEX_THREAD_ID"), "CALLER")
+            turn = _uuid(args.prepare_owner_origin, "TURN")
+            owners = audit.get("owners")
+            if (not isinstance(owners, list) or len(owners) != 1 or not isinstance(owners[0], dict)
+                    or owners[0].get("thread_id") != caller
+                    or not _text(owners[0].get("role_id"))):
+                raise ValueError("SELF_AUDIT_EXACT_OWNER_SUBSET_REQUIRED")
+            program_sha = _verify_program(audit, caller, owners[0]["role_id"])
+            print("Write-Output '" + _origin_marker(audit, caller, turn, program_sha) + "'")
+            return 0
+        result = (assess_current_owner_audit(audit, current_owner_turn=args.current_owner_turn,
+                                             owner_origin_item=args.owner_origin_item or "")
                   if args.current_owner_turn is not None else assess_audit(audit))
     except (ValueError, OSError, RuntimeError, subprocess.SubprocessError) as error:
         print(json.dumps({"decision": "AUDIT_VALIDATION_HOLD", "reason": str(error), "authorizes_execution": False}, sort_keys=True))

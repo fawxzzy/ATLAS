@@ -400,6 +400,7 @@ class GoalContinuityTests(unittest.TestCase):
 CALLER = "01a16bc3-fe20-7fa0-b09d-2397622478e8"
 TURN = "01a17b50-408f-7870-869f-06294b2db68d"
 OTHER = "01a16bbf-57f9-7f12-9c70-94c41430b9b3"
+ORIGIN_ITEM = "exec-11111111-1111-4111-8111-111111111111"
 
 
 class CurrentOwnerAuditTests(unittest.TestCase):
@@ -420,10 +421,20 @@ class CurrentOwnerAuditTests(unittest.TestCase):
             write()
             with patch.object(assessor, "PROGRAM_PATH", path), patch.dict("os.environ", {"CODEX_THREAD_ID": CALLER}, clear=True), \
                     patch.object(assessor, "_read_current_native_turn", return_value=native) as read:
+                self.native = native
                 yield case, program, native, read, write, path
 
-    def run_self(self, case):
-        return assessor.assess_current_owner_audit(case, current_owner_turn=TURN)
+    def run_self(self, case, turn=TURN):
+        marker = assessor._origin_marker(case, CALLER, turn, case["program_ref"].split("#sha256=")[1])
+        item = {
+            "id": ORIGIN_ITEM, "type": "commandExecution", "status": "completed", "exitCode": 0,
+            "cwd": str(assessor.POLICY_PATH.parents[2]),
+            "command": '"C:\\native\\pwsh.exe" -Command "Write-Output \'' + marker + '\'"',
+        }
+        if self.native.get("turns"):
+            self.native["turns"][0]["items"] = [item]
+        return assessor.assess_current_owner_audit(case, current_owner_turn=turn,
+                                                   owner_origin_item=ORIGIN_ITEM)
 
     def test_current_owner_can_assess_all_held_scope_without_claiming_program_stop(self):
         with self.verified() as (case, _, _, read, _, _):
@@ -434,6 +445,51 @@ class CurrentOwnerAuditTests(unittest.TestCase):
             self.assertFalse(result["owners"][0]["owner_wake_allowed"])
             self.assertEqual(read.call_count, 2)
             self.assertEqual(result["current_owner_self_audit"]["turn_id"], TURN)
+            self.assertEqual(result["current_owner_self_audit"]["owner_origin_item_id"], ORIGIN_ITEM)
+
+    def test_mutable_environment_and_active_turn_without_host_origin_fail_closed(self):
+        with self.verified() as (case, _, native, read, _, _):
+            self.run_self(case)
+            native["turns"][0]["items"] = []
+            with self.assertRaisesRegex(ValueError, "OWNER_ORIGIN_UNVERIFIED"):
+                assessor.assess_current_owner_audit(case, current_owner_turn=TURN,
+                                                   owner_origin_item=ORIGIN_ITEM)
+            self.assertEqual(read.call_count, 3)
+
+    def test_owner_origin_binds_exact_audit_program_turn_and_native_item(self):
+        with self.verified() as (case, _, native, _, _, _):
+            self.run_self(case)
+            item = native["turns"][0]["items"][0]
+            for mutate in (
+                lambda: item.update(type="mcpToolCall"),
+                lambda: item.update(status="inProgress"),
+                lambda: item.update(exitCode=1),
+                lambda: item.update(command=item["command"] + "; Write-Output forged"),
+                lambda: item.update(command=item["command"].replace("ATLAS_GOAL_SELF_AUDIT_ORIGIN:", "FORGED:")),
+            ):
+                with self.subTest(mutate=mutate):
+                    original = copy.deepcopy(item)
+                    mutate()
+                    with self.assertRaisesRegex(ValueError, "OWNER_ORIGIN_UNVERIFIED"):
+                        assessor.assess_current_owner_audit(case, current_owner_turn=TURN,
+                                                           owner_origin_item=ORIGIN_ITEM)
+                    item.clear(); item.update(original)
+            changed = copy.deepcopy(case)
+            changed["owners"][0]["same_hold_turns"] += 1
+            with self.assertRaisesRegex(ValueError, "OWNER_ORIGIN_UNVERIFIED"):
+                assessor.assess_current_owner_audit(changed, current_owner_turn=TURN,
+                                                   owner_origin_item=ORIGIN_ITEM)
+            with self.assertRaisesRegex(ValueError, "OWNER_ORIGIN_UNVERIFIED"):
+                assessor.assess_current_owner_audit(case, current_owner_turn=TURN,
+                                                   owner_origin_item="exec-22222222-2222-4222-8222-222222222222")
+
+    def test_origin_is_bound_to_native_owner_turn_not_process_working_directory(self):
+        with self.verified() as (case, _, native, _, _, _):
+            self.run_self(case)
+            native["turns"][0]["items"][0]["cwd"] = "C:\\"
+            result = assessor.assess_current_owner_audit(case, current_owner_turn=TURN,
+                                                          owner_origin_item=ORIGIN_ITEM)
+            self.assertEqual(result["owners"][0]["decision"], "WHOLE_GOAL_BLOCK_PROVEN")
 
     def test_self_audit_preserves_published_changed_blocked_hold_gate(self):
         with self.verified() as (case, *_):
@@ -637,7 +693,7 @@ class CurrentOwnerAuditTests(unittest.TestCase):
         with self.verified() as (case, _, native, _, _, _):
             first = self.run_self(case)
             native["turns"][0]["id"] = OTHER
-            second = assessor.assess_current_owner_audit(case, current_owner_turn=OTHER)
+            second = self.run_self(case, turn=OTHER)
             self.assertEqual(first["fingerprint"], second["fingerprint"])
 
 
@@ -715,7 +771,7 @@ class NativeReadbackBridgeTests(unittest.TestCase):
             second.join.assert_called_once()
             process.stderr.close.assert_called_once()
 
-    def test_bridge_call_uses_actual_executor_identity(self):
+    def test_bridge_uses_named_owner_lookup_hint(self):
         client = native_readback.CodexNativeReadbackClient()
         with patch.dict("os.environ", {"CODEX_THREAD_ID": CALLER, "CODEX_TURN_ID": TURN}, clear=True), \
                 patch.object(client, "_request", return_value={"content": [{"type": "text", "text": "{}"}]}) as request:
