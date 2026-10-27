@@ -1,0 +1,191 @@
+{
+  "schema": "atlas.autonomous-engineering-governance.v1",
+  "version": 1,
+  "status": "accepted",
+  "adopted_at": "2026-08-12T00:00:00Z",
+  "purpose": "Increase verified engineering throughput by standardizing the existing task/result seam, risk-scaled verification, execution-truth claims, and governance placement without introducing another scheduler or queue.",
+  "source_evidence": [
+    {
+      "name": "ATLAS_AUTONOMOUS_ENGINEERING_FINAL_CODEX_HANDOFF.md",
+      "source_class": "operator-supplied-deep-research",
+      "bytes": 31510,
+      "sha256": "42e65c79d0189bbcac9b511a146b1cba24ddb410ccc5da14bc7abe84eaead641"
+    },
+    {
+      "path": "docs/memory/profiles/zachariah_workflow_profile.md",
+      "source_class": "operator-workflow-profile"
+    }
+  ],
+  "canonical_contracts": {
+    "task": "atlas.job-envelope.v2",
+    "result": "atlas.execution-receipt.v2",
+    "policy": "Do not create a parallel task/result protocol. Extend these contracts additively and preserve v2 compatibility.",
+    "new_producer_profile": "autonomous-engineering-governance-v1"
+  },
+  "operator_output_contract": {
+    "required_prefix": "Quick summary:",
+    "maximum_summary_lines": 2,
+    "audience": "Zac",
+    "applies_to": [
+      "commentary",
+      "status",
+      "final_answer",
+      "handoff",
+      "human_readable_receipt",
+      "research_report",
+      "plan",
+      "review",
+      "blocker_report"
+    ],
+    "content": "State the changed or known outcome, current activity, and most important next boundary in plain language.",
+    "machine_readable_exception": "Do not prepend text to a strict schema-only payload. Use the canonical summary field when available and put the human Quick summary in the surrounding AI message.",
+    "exact_content_exception": "Do not rewrite code, patches, hashes, or exact authorization phrases.",
+    "propagation": "Applies to ATLAS-governed tasks through AGENTS.md and the canonical workflow profile; external AI sessions require exported ATLAS governance context."
+  },
+  "risk_classes": {
+    "green": {
+      "description": "Local, reversible, isolated, non-secret, no external effect.",
+      "verification_floor": "affected",
+      "operator_gate": false
+    },
+    "amber": {
+      "description": "Shared boundary, provider read, migration source, integration contract, or elevated operational effect.",
+      "verification_floor": "boundary",
+      "operator_gate": "policy-and-effect-dependent"
+    },
+    "red": {
+      "description": "Production, live-data write, secret access, destructive action, unknown or paid cost, ownership/retention change, or irreversible effect.",
+      "verification_floor": "full-plus-independent-proof",
+      "operator_gate": true
+    }
+  },
+  "execution_truth": {
+    "designed": "A bounded design exists; no implementation or runtime claim.",
+    "source-proven": "Implementation exists and deterministic source verification passed; no installation or runtime claim.",
+    "installed": "The capability is installed at the declared boundary with installation evidence; no current activity claim.",
+    "running": "A current process or host execution is directly observed; no durable queue-drain claim.",
+    "active": "Current trigger, dispatch, owner execution, receipt, and successor processing are proven for the declared scope.",
+    "queued": "Canonical dependency-ready work exists but execution has not started.",
+    "blocked": "A structured blocker names the failed predicate, evidence, retryability, and next gate.",
+    "complete": "Acceptance criteria and required verification are proven with evidence references; no required work remains in scope."
+  },
+  "autonomy_acceptance": {
+    "required_chain": [
+      "canonical-ready-work",
+      "supported-trigger",
+      "single-writer-dispatch",
+      "bounded-owner-execution",
+      "structured-receipt",
+      "deterministic-reducer",
+      "next-eligible-work-dispatch-or-exact-terminal-blocker"
+    ],
+    "restart_requirement": "The chain must resume after host restart without a human continuation message.",
+    "current_default_claim": "RESUMABLE_NOT_AUTONOMOUS_UNTIL_ACCEPTANCE_PROVEN"
+  },
+  "goal_continuity": {
+    "policy_id": "ATLAS-GOAL-CONTINUITY-V1",
+    "scope": "A governed owner Goal retains its full accepted obligation set until every obligation has terminal acceptance evidence. Bounded tasks need a Goal only when their own contract requires one.",
+    "truth": "Native owner Goal and task readback outrank chat prose, timer firing, checkpoint, and cross-task projection. Unavailable cross-task Goal state is UNKNOWN.",
+    "work_selection": "At each safe continuation, reconcile the current owner, writer, admitted packets, receipts, and every unfinished obligation; advance all independently eligible work while waiting on a separate blocker or decision. Do not duplicate an active owner turn or replay a settled effect.",
+    "whole_goal_block": {
+      "minimum_same_hold_turns": 3,
+      "require_independent_candidate_search": true,
+      "held_obligation_proof": "Each HELD obligation needs source-linked independent_candidate_search with disposition NO_ADMITTED_CANDIDATE and candidate_count 0, plus an exact hold and unblock condition.",
+      "coverage": "A whole-Goal stop requires the full accepted obligation set, current native owner and monitoring route, no active equivalent delivery, no independent admitted work, and the current scheduler READY-target coverage. An empty READY queue or Boolean independent_checked alone is insufficient.",
+      "effect": "The read-only assessor can prove a stop condition; it never blocks a native Goal, dispatches, or grants execution authority."
+    },
+    "blocked_goal_recovery": {
+      "changed_evidence": "When a blocked Goal gains admitted work or its exact unblock condition changes, reassess all remaining obligations and surface MANUAL_RESUME_REQUIRED with the owner chat and native Resume goal control if no supported native resume interface exists.",
+      "current_native_resume_capability": "UNSUPPORTED_FROM_CROSS_TASK_API",
+      "message_boundary": "A task message or heartbeat does not restore native Goal pursuit. Verify Pursuing goal and a new owner turn after a supported or operator-controlled resume.",
+      "quiet_boundary": "Keep a genuinely unchanged all-held Goal quiet after its exact disposition and required operator action were reported; silence is not progress."
+    },
+    "completion": "Mark a Goal COMPLETE only after every accepted obligation has a terminal acceptance reference, owner/route/receipt state is reconciled, and no required work remains. Keep source-proven, installed, running, active, and complete distinct.",
+    "autonomy_claim": "Do not claim unattended autonomy from configured heartbeats or a single trigger. Prove the autonomy_acceptance chain, owner continuation, and host-restart recovery without a human continuation message; retain the native blocked-Goal resume limitation explicitly.",
+    "assessor_ref": "ops/atlas/assess_owner_goal_continuity.py"
+  },
+  "governance_placement": [
+    {
+      "class": "DELETE",
+      "items": [
+        "duplicate supervisor conversations",
+        "parallel task/result protocols",
+        "status-only polling loops",
+        "duplicate package or unchanged blocker rechecks"
+      ]
+    },
+    {
+      "class": "TASK_ENVELOPE",
+      "items": [
+        "objective and dependency identity",
+        "owner repository and exact path/command/environment scope",
+        "workspace identity and immutable base",
+        "risk, cost, limits, authority, verification strategy, and artifact references"
+      ]
+    },
+    {
+      "class": "HOOK",
+      "items": [
+        "context checkpoint before handoff",
+        "settlement-triggered next-work evaluation",
+        "single-writer lease validation",
+        "receipt-driven reducer and outbox"
+      ]
+    },
+    {
+      "class": "CI",
+      "items": [
+        "deterministic contract validation",
+        "risk-scaled affected/boundary/full verification",
+        "migration/RLS/Auth regression gates",
+        "artifact and executable-semantics digest verification"
+      ]
+    },
+    {
+      "class": "RLS",
+      "items": [
+        "row ownership and owner-only data access",
+        "service-role separation",
+        "deny-by-default exposed-schema policy"
+      ]
+    },
+    {
+      "class": "RED_APPROVAL",
+      "items": [
+        "production deployment or write",
+        "Supabase apply or live-data/Auth mutation",
+        "secret or credential access",
+        "destructive, ownership, retention, unknown-cost, or paid effects"
+      ]
+    },
+    {
+      "class": "DOCUMENTATION",
+      "items": [
+        "operator preferences",
+        "architecture rationale",
+        "non-executable product intent",
+        "manual recovery and incident procedure"
+      ]
+    }
+  ],
+  "metrics": {
+    "end_to_end_completion_rate": "completed jobs divided by admitted jobs",
+    "autonomous_continuation_rate": "successor clusters started without a human continuation message divided by eligible successor clusters",
+    "governance_tax_ratio": "governance wait seconds divided by total wall-clock seconds",
+    "retry_amplification": "total attempts divided by terminal jobs",
+    "verification_reuse_rate": "cache-valid verification steps divided by reusable verification steps",
+    "human_interventions_per_cluster": "operator interventions divided by terminal work clusters",
+    "tokens_per_verified_change": "model tokens divided by proof-backed changed units",
+    "time_to_first_useful_artifact": "seconds from admission to first evidence-bearing artifact"
+  },
+  "platform_boundaries": {
+    "music_sesh": "SEPARATE_PRODUCT_AND_DATABASE_DOMAIN",
+    "fitness": "APP_OWNED",
+    "mazer": "APP_OWNED_PAUSED_UNLESS_EXPLICITLY_RESUMED",
+    "identity_groups": "SIX_GROUPS_QUARANTINED",
+    "supabase_access": "RETAIN_OWNER_ONLY_ACCESS",
+    "supabase_production_writer": "ONE_WRITER_REQUIRED; installation must be independently proven",
+    "provider_mutation": "RED_APPROVAL",
+    "production": "RED_APPROVAL"
+  }
+}
