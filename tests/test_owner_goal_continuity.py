@@ -530,6 +530,58 @@ class CurrentOwnerAuditTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "SELF_AUDIT_(OWNER_READY_WORK|EQUIVALENT_DELIVERY_ACTIVE)"):
                     self.run_self(case)
 
+    def test_every_scheduler_ready_state_blocks_self_audit(self):
+        from ops.atlas.autonomous_lane_scheduler import READY_STATES
+
+        self.assertEqual(READY_STATES, {"READY", "ADMITTED", "QUEUED"})
+        for state in READY_STATES:
+            with self.subTest(state=state), self.verified() as (case, program, _, _, write, _):
+                program["standing_packets"].append({
+                    "packet_id": "P-ready", "logical_role_id": case["owners"][0]["role_id"],
+                    "runtime_thread_id": OTHER, "state": state})
+                write()
+                with self.assertRaisesRegex(ValueError, "SELF_AUDIT_OWNER_READY_WORK"):
+                    self.run_self(case)
+
+    def test_owner_return_correlates_delegated_packet_and_active_delivery(self):
+        target = {"thread_id": OTHER, "logical_role_id": "owner.other"}
+        owner_return = {"thread_id": CALLER, "logical_role_id": "owner.workflow-operations"}
+        for lane in ("packet", "active_leases", "delivery_intents"):
+            with self.subTest(lane=lane), self.verified() as (case, program, _, _, write, _):
+                packet = {"packet_id": "P-delegated", "state": "BLOCKED",
+                          "execution_target": target}
+                if lane == "packet":
+                    packet.update(state="ADMITTED", owner_return=owner_return)
+                program["standing_packets"].append(packet)
+                if lane != "packet":
+                    program[lane].append({"packet_id": "P-delegated",
+                                          "execution_target": target,
+                                          "owner_return": owner_return})
+                write()
+                with self.assertRaisesRegex(
+                        ValueError, "SELF_AUDIT_(OWNER_READY_WORK|EQUIVALENT_DELIVERY_ACTIVE)"):
+                    self.run_self(case)
+
+    def test_malformed_owner_return_fails_closed(self):
+        with self.verified() as (case, program, _, _, write, _):
+            program["standing_packets"].append({
+                "packet_id": "P-unknown", "state": "QUEUED",
+                "execution_target": {"thread_id": OTHER}, "owner_return": "unknown"})
+            write()
+            with self.assertRaisesRegex(ValueError, "SELF_AUDIT_WORK_OWNER_UNKNOWN"):
+                self.run_self(case)
+
+    def test_active_delegated_packet_without_lease_cannot_prove_hold(self):
+        with self.verified() as (case, program, _, _, write, _):
+            program["standing_packets"].append({
+                "packet_id": "P-active", "state": "ACTIVE",
+                "execution_target": {"thread_id": OTHER, "logical_role_id": "owner.other"},
+                "owner_return": {"thread_id": CALLER,
+                                 "logical_role_id": "owner.workflow-operations"}})
+            write()
+            with self.assertRaisesRegex(ValueError, "SELF_AUDIT_EQUIVALENT_DELIVERY_ACTIVE"):
+                self.run_self(case)
+
     def test_separate_owner_work_does_not_suppress_current_owner_hold(self):
         with self.verified() as (case, program, _, _, write, _):
             program["standing_packets"].append({"packet_id": "P2", "logical_role_id": "owner.other", "runtime_thread_id": OTHER, "state": "READY"})

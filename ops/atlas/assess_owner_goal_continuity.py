@@ -454,6 +454,10 @@ def _verify_native_turn(caller: str, turn_id: str) -> None:
 
 
 def _verify_program(audit: dict[str, Any], caller: str, role: str) -> str:
+    if __package__ in (None, ""):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from ops.atlas.autonomous_lane_scheduler import READY_STATES
+
     ref = audit.get("program_ref")
     match = re.fullmatch(r"tmp/atlas/autonomous-work-program\.json(?:#revision=(\d+))?#sha256=([0-9a-f]{64})",
                          ref if isinstance(ref, str) else "")
@@ -469,11 +473,12 @@ def _verify_program(audit: dict[str, Any], caller: str, role: str) -> str:
 
     def relevant(record: dict[str, Any]) -> bool:
         targets = [record]
-        target = record.get("execution_target")
-        if target is not None:
-            if not isinstance(target, dict):
-                raise ValueError("SELF_AUDIT_WORK_OWNER_UNKNOWN")
-            targets.append(target)
+        for key in ("execution_target", "owner_return"):
+            target = record.get(key)
+            if target is not None:
+                if not isinstance(target, dict):
+                    raise ValueError("SELF_AUDIT_WORK_OWNER_UNKNOWN")
+                targets.append(target)
         roles = [t.get(k) for t in targets for k in ("logical_role_id", "role_id", "target_role_id") if _text(t.get(k))]
         threads = [t.get(k) for t in targets for k in ("runtime_thread_id", "thread_id", "target_thread_id") if _text(t.get(k))]
         if not roles and not threads:
@@ -486,8 +491,11 @@ def _verify_program(audit: dict[str, Any], caller: str, role: str) -> str:
                 or packet["packet_id"] in packets):
             raise ValueError("SELF_AUDIT_PACKET_CORRELATION_UNKNOWN")
         packets[packet["packet_id"]] = packet
-        if packet.get("state") == "READY" and relevant(packet):
+        state = str(packet.get("state") or "").upper()
+        if state in READY_STATES and relevant(packet):
             raise ValueError("SELF_AUDIT_OWNER_READY_WORK")
+        if state == "ACTIVE" and relevant(packet):
+            raise ValueError("SELF_AUDIT_EQUIVALENT_DELIVERY_ACTIVE")
     for key in ("active_leases", "delivery_intents"):
         for record in program[key]:
             if not isinstance(record, dict) or record.get("packet_id") not in packets:
@@ -497,7 +505,8 @@ def _verify_program(audit: dict[str, Any], caller: str, role: str) -> str:
             # its packet. Explicit record targets also count, including drift.
             has_target = any(_text(record.get(k)) for k in
                              ("logical_role_id", "role_id", "target_role_id", "runtime_thread_id", "thread_id", "target_thread_id"))
-            has_target = has_target or record.get("execution_target") is not None
+            has_target = (has_target or record.get("execution_target") is not None
+                          or record.get("owner_return") is not None)
             if relevant(packet) or (has_target and relevant(record)):
                 raise ValueError("SELF_AUDIT_EQUIVALENT_DELIVERY_ACTIVE")
     return match[2]
