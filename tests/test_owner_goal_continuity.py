@@ -4,11 +4,17 @@ import copy
 import hashlib
 import json
 import re
+import subprocess
 import tempfile
 import unittest
+from contextlib import contextmanager
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 from ops.atlas.assess_owner_goal_continuity import SCHEMA, assess_audit, goal_policy
+from ops.atlas import assess_owner_goal_continuity as assessor
+from ops.atlas import codex_native_goal_readback as native_readback
 
 
 REF = "runtime/atlas/continuity/proof.json#sha256=" + "a" * 64
@@ -389,6 +395,318 @@ class GoalContinuityTests(unittest.TestCase):
         self.assertNotEqual(strict["fingerprint"], assess_audit(case)["fingerprint"])
         case["owners"][0]["obligations"][0]["independent_candidate_search"]["candidate_count"] = 1
         self.assertEqual(assess_audit(case)["decision"], "ALL_STOP_UNPROVEN")
+
+
+CALLER = "01a16bc3-fe20-7fa0-b09d-2397622478e8"
+TURN = "01a17b50-408f-7870-869f-06294b2db68d"
+OTHER = "01a16bbf-57f9-7f12-9c70-94c41430b9b3"
+
+
+class CurrentOwnerAuditTests(unittest.TestCase):
+    @contextmanager
+    def verified(self):
+        case = audit()
+        case["coverage"]["scope"] = "owner_subset"
+        case["owners"][0].update(thread_id=CALLER, task_state="active")
+        program = {"revision": 9, "standing_packets": [], "active_leases": [], "delivery_intents": []}
+        native = {"thread": {"id": CALLER, "kind": "codex", "hostId": "local", "status": {"type": "active"}},
+                  "turns": [{"id": TURN, "status": "inProgress"}]}
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "program.json"
+            def write():
+                raw = json.dumps(program).encode()
+                path.write_bytes(raw)
+                case["program_ref"] = "tmp/atlas/autonomous-work-program.json#revision=9#sha256=" + hashlib.sha256(raw).hexdigest()
+            write()
+            with patch.object(assessor, "PROGRAM_PATH", path), patch.dict("os.environ", {"CODEX_THREAD_ID": CALLER}, clear=True), \
+                    patch.object(assessor, "_read_current_native_turn", return_value=native) as read:
+                yield case, program, native, read, write, path
+
+    def run_self(self, case):
+        return assessor.assess_current_owner_audit(case, current_owner_turn=TURN)
+
+    def test_current_owner_can_assess_all_held_scope_without_claiming_program_stop(self):
+        with self.verified() as (case, _, _, read, _, _):
+            result = self.run_self(case)
+            self.assertEqual(result["decision"], "ALL_INCLUDED_OWNERS_BLOCKED")
+            self.assertEqual(result["owners"][0]["decision"], "WHOLE_GOAL_BLOCK_PROVEN")
+            self.assertFalse(result["authorizes_execution"])
+            self.assertFalse(result["owners"][0]["owner_wake_allowed"])
+            self.assertEqual(read.call_count, 2)
+            self.assertEqual(result["current_owner_self_audit"]["turn_id"], TURN)
+
+    def test_self_audit_preserves_published_changed_blocked_hold_gate(self):
+        with self.verified() as (case, *_):
+            case["owners"][0]["goal_state"] = "BLOCKED"
+            prior = self.run_self(case)
+            case["prior_fingerprint"] = prior["fingerprint"]
+            case["owners"][0]["obligations"][0]["hold"]["unblock_condition"] = "Changed condition"
+            with patch.object(assessor, "_verified_prior_assessment", return_value=prior):
+                changed = self.run_self(case)
+            self.assertEqual(changed["decision"], "BLOCKED_GOAL_MANUAL_RESUME_REQUIRED")
+            self.assertEqual(changed["owners"][0]["decision"], "BLOCKED_GOAL_UNBLOCK_CONDITION_CHANGED")
+            self.assertEqual(changed["owners"][0]["resume_action"], "MANUAL_RESUME_REQUIRED")
+            self.assertFalse(changed["authorizes_execution"])
+            without_prior_proof = self.run_self(case)
+            self.assertEqual(without_prior_proof["decision"], "ALL_STOP_UNPROVEN")
+            self.assertIn("prior_blocked_hold_comparison", without_prior_proof["owners"][0]["missing"])
+
+    def test_default_external_watch_ignores_serialized_self_audit_claim(self):
+        with self.verified() as (case, *_):
+            case["current_owner_self_audit"] = {"thread_id": CALLER, "turn_id": TURN, "verified": True}
+            self.assertEqual(assess_audit(case)["decision"], "OWNER_WORK_IN_PROGRESS")
+
+    def test_self_audit_preserves_all_existing_scope_and_hold_gates(self):
+        mutations = [
+            lambda c: c["owners"][0].update(goal_state="UNKNOWN"),
+            lambda c: c["owners"][0].update(same_hold_turns=2),
+            lambda c: c["owners"][0]["obligations"].pop(),
+            lambda c: c["owners"][0]["obligations"][0].pop("independent_candidate_search"),
+            lambda c: c["owners"][0]["obligations"][0]["independent_candidate_search"].update(candidate_count=1),
+            lambda c: c["owners"][0].update(monitoring_route_state="UNKNOWN"),
+            lambda c: c["owners"][0].update(equivalent_delivery_active=True),
+            lambda c: c["owners"][0]["obligations"][0].update(admission="ADMITTED", admission_ref=REF, authority_ref=REF),
+        ]
+        for mutate in mutations:
+            with self.subTest(mutation=mutate), self.verified() as (case, *_):
+                mutate(case)
+                result = self.run_self(case)
+                self.assertNotEqual(result["owners"][0]["decision"], "WHOLE_GOAL_BLOCK_PROVEN")
+                self.assertFalse(result["authorizes_execution"])
+
+    def test_requires_actual_caller_and_exact_single_owner_subset(self):
+        with self.verified() as (case, *_):
+            for value in ("", "forged", OTHER):
+                with self.subTest(caller=value), patch.dict("os.environ", {"CODEX_THREAD_ID": value}, clear=True):
+                    with self.assertRaisesRegex(ValueError, "SELF_AUDIT_"):
+                        self.run_self(case)
+            for mutate in (lambda c: c["coverage"].update(scope="complete_critical_path"),
+                           lambda c: c["owners"].append(copy.deepcopy(c["owners"][0])),
+                           lambda c: c["owners"][0].update(task_state="idle")):
+                wrong = copy.deepcopy(case); mutate(wrong)
+                with self.assertRaisesRegex(ValueError, "EXACT_OWNER_SUBSET_REQUIRED"):
+                    self.run_self(wrong)
+            with patch.dict("os.environ", {"CODEX_TURN_ID": OTHER}):
+                with self.assertRaisesRegex(ValueError, "EXECUTOR_TURN_MISMATCH"):
+                    self.run_self(case)
+
+    def test_native_foreign_stale_idle_or_unavailable_readback_fails_closed(self):
+        mutations = [lambda n: n["thread"].update(id=OTHER), lambda n: n["thread"].update(hostId="remote"),
+                     lambda n: n["thread"].update(kind="chatgpt"), lambda n: n["thread"]["status"].update(type="idle"),
+                     lambda n: n["turns"][0].update(id=OTHER), lambda n: n["turns"][0].update(status="completed"),
+                     lambda n: n.update(turns=[])]
+        for mutate in mutations:
+            with self.subTest(mutation=mutate), self.verified() as (case, _, native, _, _, _):
+                mutate(native)
+                with self.assertRaisesRegex(ValueError, "CURRENT_NATIVE_TURN_UNVERIFIED"):
+                    self.run_self(case)
+        with self.verified() as (case, _, native, read, _, _):
+            stale = copy.deepcopy(native); stale["turns"][0]["status"] = "completed"
+            read.side_effect = [native, stale]
+            with self.assertRaisesRegex(ValueError, "CURRENT_NATIVE_TURN_UNVERIFIED"):
+                self.run_self(case)
+
+    def test_requires_exact_current_canonical_program_and_rechecks_drift(self):
+        with self.verified() as (case, _, _, _, _, path):
+            path.write_text("{}")
+            with self.assertRaisesRegex(ValueError, "CURRENT_PROGRAM_DRIFT"):
+                self.run_self(case)
+        with self.verified() as (case, _, native, read, _, path):
+            def drift(*args):
+                path.write_text("{}")
+                return native
+            read.side_effect = drift
+            with self.assertRaisesRegex(ValueError, "CURRENT_PROGRAM_DRIFT"):
+                self.run_self(case)
+
+    def test_current_owner_ready_packet_lease_and_intent_cannot_be_excluded(self):
+        for lane in ("ready", "active_leases", "delivery_intents"):
+            with self.subTest(lane=lane), self.verified() as (case, program, _, _, write, _):
+                program["standing_packets"].append({"packet_id": "P1", "logical_role_id": case["owners"][0]["role_id"],
+                                                    "runtime_thread_id": OTHER, "state": "READY" if lane == "ready" else "BLOCKED"})
+                if lane != "ready":
+                    program[lane].append({"packet_id": "P1"})
+                write()
+                with self.assertRaisesRegex(ValueError, "SELF_AUDIT_(OWNER_READY_WORK|EQUIVALENT_DELIVERY_ACTIVE)"):
+                    self.run_self(case)
+
+    def test_separate_owner_work_does_not_suppress_current_owner_hold(self):
+        with self.verified() as (case, program, _, _, write, _):
+            program["standing_packets"].append({"packet_id": "P2", "logical_role_id": "owner.other", "runtime_thread_id": OTHER, "state": "READY"})
+            program["active_leases"].append({"packet_id": "P2"})
+            program["delivery_intents"].append({"packet_id": "P2"})
+            write()
+            self.assertEqual(self.run_self(case)["decision"], "ALL_INCLUDED_OWNERS_BLOCKED")
+            program["standing_packets"][0]["execution_target"] = {"thread_id": CALLER}
+            write()
+            with self.assertRaisesRegex(ValueError, "OWNER_READY_WORK"):
+                self.run_self(case)
+
+    def test_unknown_active_owner_or_packet_correlation_cannot_prove_hold(self):
+        for mutation in (lambda p: p["standing_packets"].append({"packet_id": "P", "state": "READY"}),
+                         lambda p: p["active_leases"].append({"packet_id": "missing"}),
+                         lambda p: p["delivery_intents"].append({"packet_id": "missing"})):
+            with self.verified() as (case, program, _, _, write, _):
+                mutation(program); write()
+                with self.assertRaisesRegex(ValueError, "SELF_AUDIT_(WORK_OWNER_UNKNOWN|PACKET_CORRELATION_UNKNOWN)"):
+                    self.run_self(case)
+
+    def test_changed_input_during_verification_is_rejected(self):
+        with self.verified() as (case, _, native, read, _, _):
+            def mutate(*args):
+                case["owners"][0]["same_hold_turns"] = 99
+                return native
+            read.side_effect = mutate
+            with self.assertRaisesRegex(ValueError, "EVIDENCE_DRIFT"):
+                self.run_self(case)
+
+    def test_executor_drift_is_rejected(self):
+        import os
+        with self.verified() as (case, _, native, read, _, _):
+            def mutate(*args):
+                os.environ["CODEX_THREAD_ID"] = OTHER
+                return native
+            read.side_effect = mutate
+            with self.assertRaisesRegex(ValueError, "EXECUTOR_IDENTITY_DRIFT"):
+                self.run_self(case)
+
+    def test_cli_invalid_self_mode_reports_hold_and_nonzero_exit(self):
+        import io
+        from contextlib import redirect_stdout
+        with self.verified() as (case, *_), tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "audit.json"; path.write_text(json.dumps(case))
+            with patch("sys.argv", ["assessor", str(path), "--current-owner-turn", "forged"]), redirect_stdout(io.StringIO()) as output:
+                self.assertEqual(assessor.main(), 2)
+            result = json.loads(output.getvalue())
+            self.assertEqual(result["decision"], "AUDIT_VALIDATION_HOLD")
+            self.assertFalse(result["authorizes_execution"])
+
+    def test_semantic_fingerprint_excludes_current_native_turn_metadata(self):
+        with self.verified() as (case, _, native, _, _, _):
+            first = self.run_self(case)
+            native["turns"][0]["id"] = OTHER
+            second = assessor.assess_current_owner_audit(case, current_owner_turn=OTHER)
+            self.assertEqual(first["fingerprint"], second["fingerprint"])
+
+
+class NativeReadbackBridgeTests(unittest.TestCase):
+    @contextmanager
+    def mocked_lifecycle(self):
+        process = Mock()
+        process.stdin = Mock()
+        process.stdout = Mock()
+        process.stderr = Mock()
+        first, second = Mock(), Mock()
+        client = native_readback.CodexNativeReadbackClient()
+        with patch.object(client, "_command", return_value=(["node", "server.mjs"], Path("."))), \
+                patch.object(native_readback.subprocess, "Popen", return_value=process), \
+                patch.object(native_readback, "threading",
+                             SimpleNamespace(Thread=Mock(side_effect=[first, second]))), \
+                patch.object(client, "_write"):
+            yield client, process, first, second
+
+    def test_second_reader_start_failure_cleans_owned_helper(self):
+        with self.mocked_lifecycle() as (client, process, first, second):
+            second.start.side_effect = RuntimeError("second reader failed")
+            with self.assertRaisesRegex(RuntimeError, "second reader failed"):
+                client.__enter__()
+            self.assertIsNone(client.process)
+            process.stdin.close.assert_called_once()
+            process.wait.assert_called_once()
+            first.join.assert_called_once()
+            second.join.assert_not_called()
+            process.stdout.close.assert_called_once()
+            process.stderr.close.assert_called_once()
+
+    def test_init_failure_and_normal_close_are_bounded_and_idempotent(self):
+        with self.mocked_lifecycle() as (client, process, first, second), \
+                patch.object(client, "_request", side_effect=native_readback.NativeReadbackError("init")):
+            with self.assertRaises(native_readback.NativeReadbackError):
+                client.__enter__()
+            process.wait.assert_called_once()
+            first.join.assert_called_once()
+            second.join.assert_called_once()
+            process.stdin.close.assert_called_once()
+        with self.mocked_lifecycle() as (client, process, first, second), \
+                patch.object(client, "_request", return_value={}):
+            self.assertIs(client.__enter__(), client)
+            client.__exit__(None, None, None)
+            client.__exit__(None, None, None)
+            process.wait.assert_called_once()
+            first.join.assert_called_once()
+            second.join.assert_called_once()
+            process.stdin.close.assert_called_once()
+
+    def test_close_timeout_terminates_then_joins_and_closes(self):
+        with self.mocked_lifecycle() as (client, process, first, second), \
+                patch.object(client, "_request", return_value={}):
+            process.wait.side_effect = [subprocess.TimeoutExpired("node", 2), 0]
+            client.__enter__()
+            client.__exit__(None, None, None)
+            self.assertEqual(process.wait.call_count, 2)
+            process.terminate.assert_called_once()
+            first.join.assert_called_once()
+            second.join.assert_called_once()
+            process.stdout.close.assert_called_once()
+
+    def test_second_close_timeout_kills_only_owned_helper(self):
+        with self.mocked_lifecycle() as (client, process, first, second), \
+                patch.object(client, "_request", return_value={}):
+            process.wait.side_effect = [subprocess.TimeoutExpired("node", 2),
+                                        subprocess.TimeoutExpired("node", 2), 0]
+            client.__enter__()
+            client.__exit__(None, None, None)
+            self.assertEqual(process.wait.call_count, 3)
+            process.terminate.assert_called_once()
+            process.kill.assert_called_once()
+            first.join.assert_called_once()
+            second.join.assert_called_once()
+            process.stderr.close.assert_called_once()
+
+    def test_bridge_call_uses_actual_executor_identity(self):
+        client = native_readback.CodexNativeReadbackClient()
+        with patch.dict("os.environ", {"CODEX_THREAD_ID": CALLER, "CODEX_TURN_ID": TURN}, clear=True), \
+                patch.object(client, "_request", return_value={"content": [{"type": "text", "text": "{}"}]}) as request:
+            client.read_current_thread(CALLER, TURN)
+        method, payload = request.call_args.args
+        self.assertEqual(method, "tools/call")
+        self.assertEqual(payload["name"], "read_thread")
+        self.assertEqual(payload["arguments"]["threadId"], CALLER)
+        self.assertEqual(payload["_meta"]["openai/threadId"], CALLER)
+        self.assertEqual(payload["_meta"]["openai/turnId"], TURN)
+        self.assertTrue(payload["_meta"]["openai/toolCallId"].startswith("goal-readback-"))
+
+    def test_bridge_rejects_missing_executor_before_transport(self):
+        client = native_readback.CodexNativeReadbackClient()
+        with patch.dict("os.environ", {}, clear=True), \
+                patch.object(client, "_request") as request:
+            with self.assertRaises(native_readback.NativeReadbackError):
+                client.read_current_thread(CALLER, TURN)
+            request.assert_not_called()
+        with patch.dict("os.environ", {}, clear=True), \
+                patch.object(native_readback, "CodexNativeReadbackClient") as helper:
+            with self.assertRaises(native_readback.NativeReadbackError):
+                native_readback.read_current_native_turn(CALLER, TURN)
+            helper.assert_not_called()
+
+    def test_readback_decodes_supported_tool_payload(self):
+        native = {"thread": {"id": CALLER}, "turns": [{"id": TURN}]}
+
+        class FakeClient:
+            def __enter__(self):
+                return self
+
+            def read_current_thread(self, caller, turn_id):
+                self.caller = caller
+                self.turn_id = turn_id
+                return native
+
+            def __exit__(self, *args):
+                return None
+
+        with patch.dict("os.environ", {"CODEX_THREAD_ID": CALLER}, clear=True), \
+                patch.object(native_readback, "CodexNativeReadbackClient", FakeClient):
+            self.assertEqual(assessor._read_current_native_turn(CALLER, TURN), native)
 
 
 if __name__ == "__main__":
