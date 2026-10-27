@@ -12,9 +12,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
 
 SCHEMA = "atlas.owner-goal-continuity-audit.v1"
@@ -22,6 +26,7 @@ ADMISSIONS = {"ADMITTED", "HELD", "COMPLETE", "UNKNOWN"}
 GOAL_STATES = {"ACTIVE", "BLOCKED", "COMPLETE", "UNKNOWN"}
 TASK_STATES = {"active", "idle", "unknown"}
 POLICY_PATH = Path(__file__).resolve().parents[2] / "docs/registry/ATLAS-AUTONOMOUS-ENGINEERING-GOVERNANCE.v1.json"
+PROGRAM_PATH = Path(__file__).resolve().parents[2] / "tmp/atlas/autonomous-work-program.json"
 
 
 def goal_policy() -> dict[str, Any]:
@@ -100,7 +105,8 @@ def _fingerprint(
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
 
 
-def assess_owner(owner: dict[str, Any], *, require_independent_candidate_search: bool | None = None) -> dict[str, Any]:
+def assess_owner(owner: dict[str, Any], *, require_independent_candidate_search: bool | None = None,
+                 _current_audit_thread: str | None = None) -> dict[str, Any]:
     """Classify one exact accepted Goal scope without granting execution."""
     policy = goal_policy()
     require_independent_candidate_search = (
@@ -227,7 +233,8 @@ def assess_owner(owner: dict[str, Any], *, require_independent_candidate_search:
         else:
             missing.append("delivery_deduplication")
         return result
-    if owner["task_state"] == "active" or owner.get("equivalent_delivery_active") is True:
+    if ((owner["task_state"] == "active" and owner["thread_id"] != _current_audit_thread)
+            or owner.get("equivalent_delivery_active") is True):
         result["decision"] = "IN_PROGRESS_NO_DUPLICATE_WAKE"
         return result
     if len(result["holds"]) + len(complete) != len(expected):
@@ -248,6 +255,12 @@ def assess_owner(owner: dict[str, Any], *, require_independent_candidate_search:
 
 
 def assess_audit(audit: dict[str, Any], *, evidence_root: Path | None = None) -> dict[str, Any]:
+    """External-watch assessment; serialized self-audit claims never change activity."""
+    return _assess_audit(audit, evidence_root=evidence_root)
+
+
+def _assess_audit(audit: dict[str, Any], *, evidence_root: Path | None = None,
+                  current_audit_thread: str | None = None) -> dict[str, Any]:
     policy = goal_policy()
     if audit.get("schema") != SCHEMA or not isinstance(audit.get("owners"), list) or not audit["owners"]:
         raise ValueError("expected a nonempty atlas.owner-goal-continuity-audit.v1 owners list")
@@ -258,7 +271,8 @@ def assess_audit(audit: dict[str, Any], *, evidence_root: Path | None = None) ->
         or audit.get("require_independent_candidate_search") is True
     )
     owners = [
-        assess_owner(owner, require_independent_candidate_search=require_independent_candidate_search)
+        assess_owner(owner, require_independent_candidate_search=require_independent_candidate_search,
+                     _current_audit_thread=current_audit_thread)
         for owner in audit["owners"]
     ]
     roles = [owner["role_id"] for owner in owners]
@@ -406,12 +420,185 @@ def assess_audit(audit: dict[str, Any], *, evidence_root: Path | None = None) ->
     }
 
 
+def _uuid(value: Any, label: str) -> str:
+    try:
+        if not isinstance(value, str) or str(UUID(value)) != value:
+            raise ValueError()
+    except (ValueError, AttributeError):
+        raise ValueError(f"SELF_AUDIT_INVALID_{label}") from None
+    return value
+
+
+def _read_current_native_turn(caller: str, turn_id: str) -> dict[str, Any]:
+    if __package__ in (None, ""):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from ops.atlas.codex_native_goal_readback import read_current_native_turn
+
+    return read_current_native_turn(caller, turn_id)
+
+
+def _origin_marker(audit: dict[str, Any], caller: str, turn_id: str, program_sha: str) -> str:
+    audit_sha = hashlib.sha256(json.dumps(audit, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    return f"ATLAS_GOAL_SELF_AUDIT_ORIGIN:{caller}:{turn_id}:{program_sha}:{audit_sha}"
+
+
+def _verify_native_turn(caller: str, turn_id: str, origin_item_id: str, marker: str) -> None:
+    if (os.environ.get("CODEX_THREAD_ID") != caller
+            or os.environ.get("CODEX_TURN_ID") not in (None, "", turn_id)):
+        raise ValueError("SELF_AUDIT_EXECUTOR_IDENTITY_DRIFT")
+    payload = _read_current_native_turn(caller, turn_id)
+    thread = payload.get("thread", {})
+    turns = payload.get("turns")
+    if (not isinstance(thread, dict) or thread.get("id") != caller
+            or thread.get("kind") != "codex" or thread.get("hostId") != "local"
+            or thread.get("archived") is True
+            or not isinstance(thread.get("status"), dict) or thread["status"].get("type") != "active"
+            or not isinstance(turns, list) or len(turns) != 1 or not isinstance(turns[0], dict)
+            or turns[0].get("id") != turn_id or turns[0].get("status") != "inProgress"):
+        raise ValueError("SELF_AUDIT_CURRENT_NATIVE_TURN_UNVERIFIED")
+    items = turns[0].get("items")
+    if not isinstance(items, list):
+        raise ValueError("SELF_AUDIT_OWNER_ORIGIN_UNVERIFIED")
+    matching = [item for item in items if isinstance(item, dict) and item.get("id") == origin_item_id]
+    if len(matching) != 1:
+        raise ValueError("SELF_AUDIT_OWNER_ORIGIN_UNVERIFIED")
+    item = matching[0]
+    command = item.get("command")
+    expected = f"Write-Output '{marker}'"
+    if (item.get("type") != "commandExecution" or item.get("status") != "completed"
+            or type(item.get("exitCode")) is not int or item["exitCode"] != 0
+            or not isinstance(command, str)
+            or re.fullmatch(r'"[^"\r\n]*\\pwsh\.exe" -Command "' + re.escape(expected) + r'"', command) is None):
+        raise ValueError("SELF_AUDIT_OWNER_ORIGIN_UNVERIFIED")
+
+
+def _verify_program(audit: dict[str, Any], caller: str, role: str) -> str:
+    if __package__ in (None, ""):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from ops.atlas.autonomous_lane_scheduler import READY_STATES
+
+    ref = audit.get("program_ref")
+    match = re.fullmatch(r"tmp/atlas/autonomous-work-program\.json(?:#revision=(\d+))?#sha256=([0-9a-f]{64})",
+                         ref if isinstance(ref, str) else "")
+    raw = PROGRAM_PATH.read_bytes()
+    if not match or hashlib.sha256(raw).hexdigest() != match[2]:
+        raise ValueError("SELF_AUDIT_CURRENT_PROGRAM_DRIFT")
+    program = json.loads(raw)
+    if (type(program.get("revision")) is not int
+            or (match[1] is not None and int(match[1]) != program["revision"])
+            or any(not isinstance(program.get(k), list) for k in
+                   ("standing_packets", "active_leases", "delivery_intents"))):
+        raise ValueError("SELF_AUDIT_CURRENT_PROGRAM_UNVERIFIED")
+
+    def relevant(record: dict[str, Any]) -> bool:
+        targets = [record]
+        for key in ("execution_target", "owner_return"):
+            target = record.get(key)
+            if target is not None:
+                if not isinstance(target, dict):
+                    raise ValueError("SELF_AUDIT_WORK_OWNER_UNKNOWN")
+                targets.append(target)
+        roles = [t.get(k) for t in targets for k in ("logical_role_id", "role_id", "target_role_id") if _text(t.get(k))]
+        threads = [t.get(k) for t in targets for k in ("runtime_thread_id", "thread_id", "target_thread_id") if _text(t.get(k))]
+        if not roles and not threads:
+            raise ValueError("SELF_AUDIT_WORK_OWNER_UNKNOWN")
+        return role in roles or caller in threads
+
+    packets = {}
+    for packet in program["standing_packets"]:
+        if (not isinstance(packet, dict) or not _text(packet.get("packet_id"))
+                or packet["packet_id"] in packets):
+            raise ValueError("SELF_AUDIT_PACKET_CORRELATION_UNKNOWN")
+        packets[packet["packet_id"]] = packet
+        state = str(packet.get("state") or "").upper()
+        if state in READY_STATES and relevant(packet):
+            raise ValueError("SELF_AUDIT_OWNER_READY_WORK")
+        if state == "ACTIVE" and relevant(packet):
+            raise ValueError("SELF_AUDIT_EQUIVALENT_DELIVERY_ACTIVE")
+    for key in ("active_leases", "delivery_intents"):
+        for record in program[key]:
+            if not isinstance(record, dict) or record.get("packet_id") not in packets:
+                raise ValueError("SELF_AUDIT_PACKET_CORRELATION_UNKNOWN")
+            packet = packets[record["packet_id"]]
+            # The packet supplies ownership when the active record only names
+            # its packet. Explicit record targets also count, including drift.
+            has_target = any(_text(record.get(k)) for k in
+                             ("logical_role_id", "role_id", "target_role_id", "runtime_thread_id", "thread_id", "target_thread_id"))
+            has_target = (has_target or record.get("execution_target") is not None
+                          or record.get("owner_return") is not None)
+            if relevant(packet) or (has_target and relevant(record)):
+                raise ValueError("SELF_AUDIT_EQUIVALENT_DELIVERY_ACTIVE")
+    return match[2]
+
+
+def assess_current_owner_audit(audit: dict[str, Any], *, current_owner_turn: str,
+                               owner_origin_item: str) -> dict[str, Any]:
+    """Exclude only a host-recorded owner-origin assessing turn, never work.
+
+    This explicit entry point is for a current owner, not an external watch.
+    Native and program state are checked on both sides of classification. No
+    serialized capability or audit JSON flag can select this path implicitly.
+    """
+    caller = _uuid(os.environ.get("CODEX_THREAD_ID"), "CALLER")
+    turn_id = _uuid(current_owner_turn, "TURN")
+    if not re.fullmatch(r"exec-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", owner_origin_item):
+        raise ValueError("SELF_AUDIT_OWNER_ORIGIN_ITEM_INVALID")
+    if os.environ.get("CODEX_TURN_ID") not in (None, "", turn_id):
+        raise ValueError("SELF_AUDIT_EXECUTOR_TURN_MISMATCH")
+    owners = audit.get("owners")
+    coverage = audit.get("coverage", {})
+    if (not isinstance(owners, list) or len(owners) != 1 or not isinstance(owners[0], dict)
+            or owners[0].get("thread_id") != caller or owners[0].get("task_state") != "active"
+            or not _text(owners[0].get("role_id")) or not isinstance(coverage, dict)
+            or coverage.get("scope") != "owner_subset"
+            or coverage.get("role_ids") != [owners[0]["role_id"]]):
+        raise ValueError("SELF_AUDIT_EXACT_OWNER_SUBSET_REQUIRED")
+    # Snapshot the caller's evidence so it cannot be changed during verification.
+    snapshot = json.loads(json.dumps(audit))
+    program_sha = _verify_program(snapshot, caller, owners[0]["role_id"])
+    marker = _origin_marker(snapshot, caller, turn_id, program_sha)
+    _verify_native_turn(caller, turn_id, owner_origin_item, marker)
+    result = _assess_audit(snapshot, current_audit_thread=caller)
+    _verify_native_turn(caller, turn_id, owner_origin_item, marker)
+    if _verify_program(snapshot, caller, owners[0]["role_id"]) != program_sha or audit != snapshot:
+        raise ValueError("SELF_AUDIT_EVIDENCE_DRIFT")
+    result["current_owner_self_audit"] = {
+        "thread_id": caller, "turn_id": turn_id, "program_sha256": program_sha,
+        "owner_origin_item_id": owner_origin_item,
+        "owner_origin_marker_sha256": hashlib.sha256(marker.encode("utf-8")).hexdigest(),
+        "excluded_activity": "CURRENT_READ_ONLY_ASSESSING_TURN_ONLY",
+        "native_and_program_rechecked": True,
+    }
+    return result
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("audit", type=Path, help="verified owner audit JSON")
+    parser.add_argument("--current-owner-turn", help="explicit self-audit: exact current native turn UUID")
+    parser.add_argument("--owner-origin-item", help="completed native owner command item recording the exact audit marker")
+    parser.add_argument("--prepare-owner-origin", help="print the read-only owner marker command for this native turn, without assessing")
     args = parser.parse_args()
-    audit = json.loads(args.audit.read_text(encoding="utf-8"))
-    print(json.dumps(assess_audit(audit), sort_keys=True))
+    try:
+        audit = json.loads(args.audit.read_text(encoding="utf-8"))
+        if args.prepare_owner_origin is not None:
+            caller = _uuid(os.environ.get("CODEX_THREAD_ID"), "CALLER")
+            turn = _uuid(args.prepare_owner_origin, "TURN")
+            owners = audit.get("owners")
+            if (not isinstance(owners, list) or len(owners) != 1 or not isinstance(owners[0], dict)
+                    or owners[0].get("thread_id") != caller
+                    or not _text(owners[0].get("role_id"))):
+                raise ValueError("SELF_AUDIT_EXACT_OWNER_SUBSET_REQUIRED")
+            program_sha = _verify_program(audit, caller, owners[0]["role_id"])
+            print("Write-Output '" + _origin_marker(audit, caller, turn, program_sha) + "'")
+            return 0
+        result = (assess_current_owner_audit(audit, current_owner_turn=args.current_owner_turn,
+                                             owner_origin_item=args.owner_origin_item or "")
+                  if args.current_owner_turn is not None else assess_audit(audit))
+    except (ValueError, OSError, RuntimeError, subprocess.SubprocessError) as error:
+        print(json.dumps({"decision": "AUDIT_VALIDATION_HOLD", "reason": str(error), "authorizes_execution": False}, sort_keys=True))
+        return 2
+    print(json.dumps(result, sort_keys=True))
     return 0
 
 
