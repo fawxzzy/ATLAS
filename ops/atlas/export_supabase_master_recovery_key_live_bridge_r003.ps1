@@ -206,7 +206,7 @@ function Confirm-OfflineCodeHandoff {
     }
     if ($handoffStream.ReadByte() -ne -1) { throw 'PRIVATE_HANDOFF_SOURCE_IDENTITY_REJECTED' }
   } finally { $handoffStream.Dispose() }
-  if ((Get-Sha256Hex $handoffBytes) -cne '42fb3478f11d5b805e662b760ad0a9c869abd0307e9b96fbbce073d17286fd38') {
+  if ((Get-Sha256Hex $handoffBytes) -cne '6abeca63858f43464cf23494dbc016b496fb19c2db9a934078d48ed6549dc794') {
     throw 'PRIVATE_HANDOFF_SOURCE_IDENTITY_REJECTED'
   }
   # Hash and execute the same public source bytes; do not reopen the path.
@@ -475,9 +475,12 @@ function Write-NewLiveCapsule {
 function Invoke-HostBoundLiveBridge {
   param([string]$Attempt, [string]$Project, [string]$DescriptorDigest,
         [string]$ArchiveDigest)
-  # This routine is dormant in the source packet. Dot-sourcing the script can
-  # expose functions; it is not an authority boundary. A separately reviewed
-  # installed wrapper must prove exact ACTION grant and source identity first.
+  # This source packet is not executable authority. Fail closed here as well as
+  # at the script entry point because dot-sourcing exposes this function.
+  throw 'LIVE_ACTION_NOT_ADMITTED_PRIVATE_HANDOFF_NOT_INSTALLED'
+
+  # Retained for a separately admitted implementation that proves the exact
+  # ACTION grant, installed source identity, and live-action preimages.
   Assert-HexDigest $DescriptorDigest
   Assert-HexDigest $ArchiveDigest
   if ($Project -cnotmatch '^[a-z0-9]{8,32}$') { throw 'Project identity drift.' }

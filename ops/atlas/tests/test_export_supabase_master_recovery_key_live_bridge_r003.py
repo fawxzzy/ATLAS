@@ -336,6 +336,54 @@ class SyntheticCapsuleTests(unittest.TestCase):
         self.assertIn("LIVE_ACTION_NOT_ADMITTED_PRIVATE_HANDOFF_NOT_INSTALLED", checked.stderr)
         self.assertFalse(self.capsule.exists())
 
+    def test_dot_sourced_live_bridge_refuses_before_host_access(self) -> None:
+        denial = "LIVE_ACTION_NOT_ADMITTED_PRIVATE_HANDOFF_NOT_INSTALLED"
+        script = f"""
+$ErrorActionPreference = 'Stop'
+$sourceError = $null
+try {{
+  . {self.ps_path(SCRIPT)} -Action 'SealLive' -FixtureRoot {self.ps_path(self.root)} `
+    -AttemptId '{ATTEMPT}' -ProjectRef '{PROJECT}' `
+    -DescriptorSha256 '{DESCRIPTOR_SHA}' -ArchiveSha256 '{ARCHIVE_SHA}'
+}} catch {{ $sourceError = $_.Exception.Message }}
+if ($sourceError -cne '{denial}') {{ throw 'Top-level live action did not fail closed.' }}
+$protectedCalls = [System.Collections.Generic.List[string]]::new()
+function Record-ProtectedCall([string]$Name) {{
+  [void]$protectedCalls.Add($Name)
+  throw "PROTECTED_HELPER_REACHED:$Name"
+}}
+function Assert-HexDigest {{ Record-ProtectedCall 'Assert-HexDigest' }}
+function Assert-ExactKeys {{ Record-ProtectedCall 'Assert-ExactKeys' }}
+function New-PrivatePathGuard {{ Record-ProtectedCall 'New-PrivatePathGuard' }}
+function Assert-PrivateCapsuleDirectory {{ Record-ProtectedCall 'Assert-PrivateCapsuleDirectory' }}
+function Confirm-OfflineCodeHandoff {{ Record-ProtectedCall 'Confirm-OfflineCodeHandoff' }}
+function Seal-HostBoundKey {{ Record-ProtectedCall 'Seal-HostBoundKey' }}
+function New-OneUseLiveMarker {{ Record-ProtectedCall 'New-OneUseLiveMarker' }}
+function Write-NewLiveCapsule {{ Record-ProtectedCall 'Write-NewLiveCapsule' }}
+function New-PrivateFileStream {{ Record-ProtectedCall 'New-PrivateFileStream' }}
+function Assert-PrivateFileAcl {{ Record-ProtectedCall 'Assert-PrivateFileAcl' }}
+function Assert-PinnedFileContent {{ Record-ProtectedCall 'Assert-PinnedFileContent' }}
+function Assert-NoReparsePoint {{ Record-ProtectedCall 'Assert-NoReparsePoint' }}
+function Get-Sha256Hex {{ Record-ProtectedCall 'Get-Sha256Hex' }}
+$callError = $null
+try {{
+  Invoke-HostBoundLiveBridge -Attempt '{ATTEMPT}' -Project '{PROJECT}' `
+    -DescriptorDigest '{DESCRIPTOR_SHA}' -ArchiveDigest '{ARCHIVE_SHA}'
+}} catch {{ $callError = $_.Exception.Message }}
+if ($callError -cne '{denial}') {{ throw 'Dot-sourced live bridge did not fail closed.' }}
+if ($protectedCalls.Count -ne 0) {{
+  throw "Direct live bridge reached protected helpers: $($protectedCalls -join ',')"
+}}
+if (Test-Path -LiteralPath {self.ps_path(self.root / 'capsules')}) {{
+  throw 'Direct live bridge call created a capsule directory.'
+}}
+'DIRECT_LIVE_BRIDGE_REFUSED_BEFORE_PROTECTED_HELPERS_OR_WRITES'
+"""
+        checked = self.powershell(script)
+        self.assertEqual(checked.returncode, 0, checked.stderr)
+        self.assertIn("DIRECT_LIVE_BRIDGE_REFUSED_BEFORE_PROTECTED_HELPERS_OR_WRITES", checked.stdout)
+        self.assertFalse((self.root / "capsules").exists())
+
     def test_wrong_code_rejects_without_emitting_material(self) -> None:
         self.seal()
         verified = self.invoke("VerifySynthetic", wrong_code=True)
