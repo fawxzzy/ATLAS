@@ -241,3 +241,11 @@ That preserves human review and keeps orchestration explainable.
 - moving active repos
 - promoting recommendations into automatic orchestration
 - any queue runner that can mutate multiple repos without review
+
+## Status update 2026-11-12 (Claude-only era)
+
+- Codex was retired 2026-11-05. The session-executor role listed for `Codex` in the Component Roles table above is now held by Claude Code. The contract and the ownership split are unchanged; the Codex-named sections above are kept as written history.
+- As of 2026-11-12 Playbook (public repo `fawxzzy/playbook`) `main` is `0809b38e`, its packages are at 0.55.0, and CI is green on that commit.
+- The ATLAS-side Playbook pin in `docs/registry/STACK-REPO-INVENTORY.json` (`14fce442` on `codex/atlas-knowledge-candidate-v2-consumer`) is stale. Re-pinning it is a separate admitted change because the pin is mirrored in `stack.lock.yaml`, `ops/atlas/knowledge_candidate_adoption.mjs`, `tests/test_atlas_knowledge_candidate_adoption.mjs`, `docs/audits/STACK-REPO-INVENTORY.md`, and the atlas project-board owner export.
+- The Playbook adoption matrix (`ops/atlas/playbook_adoption_matrix.py`) has not been re-run against current Playbook `main`; its current state is UNKNOWN.
+- The "Reconciled through 2026-07-17" paragraph under Runtime Placement Boundary is not re-reconciled by this update.
