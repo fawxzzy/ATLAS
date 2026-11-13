@@ -329,13 +329,13 @@
       "playbook_adoption_owner_ref": "",
       "status": "active",
       "remote_url": "https://github.com/fawxzzy/playbook.git",
-      "pinned_commit": "14fce44268084bcaaab6d189b6ef18eb7a992faf",
-      "current_commit": "14fce44268084bcaaab6d189b6ef18eb7a992faf",
+      "pinned_commit": "ab385d97841cb0f31ee4a0b9002267651f73b9e7",
+      "current_commit": "ab385d97841cb0f31ee4a0b9002267651f73b9e7",
       "pinned_ref_type": "branch",
-      "pinned_ref": "codex/atlas-knowledge-candidate-v2-consumer",
+      "pinned_ref": "main",
       "current_ref_type": "branch",
-      "current_ref": "codex/atlas-knowledge-candidate-v2-consumer",
-      "branch": "codex/atlas-knowledge-candidate-v2-consumer",
+      "current_ref": "main",
+      "branch": "main",
       "dirty": false,
       "root_blocking": true,
       "dirty_blocks_root": false,
@@ -673,5 +673,5 @@
       "visibility_mode": "metadata_only"
     }
   ],
-  "content_digest": "sha256:0815714911cbe7647cba76cea64077aa0849c06bc9f384dc51114efc2bca7291"
+  "content_digest": "sha256:fbb6e897d919383bc1fba94f8ac1a88fcdb0201e8398c3a802a5bde5ffa04c13"
 }

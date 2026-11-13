@@ -22,7 +22,7 @@ Operational rule:
 - Excluded surface count: `16`
 - Stack manifest: `stack.yaml`
 - Stack lock: `stack.lock.yaml`
-- Inventory digest: `sha256:0815714911cbe7647cba76cea64077aa0849c06bc9f384dc51114efc2bca7291`
+- Inventory digest: `sha256:fbb6e897d919383bc1fba94f8ac1a88fcdb0201e8398c3a802a5bde5ffa04c13`
 
 ## Managed Repos
 
@@ -35,7 +35,7 @@ Operational rule:
 | lifeline | repos/lifeline | - | - | - | local-operator | - | codex/path-discipline-warning-slice-lifeline | 54eeb56006099235723b60ce44de8a65e4c85889 | 54eeb56006099235723b60ce44de8a65e4c85889 | False | True | False | trusted | True | - |
 | mazer | repos/mazer | - | - | - | application | - | codex/player-goal-default-colors | - | a537d2d17429bdf0482989c280373a6ea751f9c0 | True | False | False | adjacent | False | initiative:initiative-mazer-d2-learning-scorer |
 | nat1-games | repos/Nat1-Games/nat1-games | - | - | - | application | - | codex/path-discipline-warning-slice-nat1 | 404460d3717fab389407582048a9b9f228f26d39 | 404460d3717fab389407582048a9b9f228f26d39 | False | True | False | trusted | False | - |
-| playbook | repos/playbook | - | - | - | governance-runtime | - | codex/atlas-knowledge-candidate-v2-consumer | 14fce44268084bcaaab6d189b6ef18eb7a992faf | 14fce44268084bcaaab6d189b6ef18eb7a992faf | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization<br>initiative:initiative-fawxzzy-tech-plan-convergence |
+| playbook | repos/playbook | - | - | - | governance-runtime | - | main | ab385d97841cb0f31ee4a0b9002267651f73b9e7 | ab385d97841cb0f31ee4a0b9002267651f73b9e7 | False | True | False | trusted | True | initiative:continuity-manifest-atlas-owned-repo-naming-canonicalization<br>initiative:initiative-fawxzzy-tech-plan-convergence |
 | playbook-demo | repos/playbook-demo/playbook-demo | - | - | - | demo | - | main | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | 4d0444bcb14c3470fe0913a21c8739f0791a1827 | False | True | False | trusted | False | - |
 | socials-os | repos/socials-os | - | - | - | analytics-data-system | - | codex/fitness-walkthrough-v2 | - | d9cc13717cf5e63a069bb46577a2267f9161396f | False | False | False | adjacent | False | - |
 | stack | . | - | - | - | operator-layer | - | codex/fawxzzyweb-identity-compat | - | 82a0fda9127899b26ec5b3071b7f710d58279031 | True | True | True | trusted | False | - |

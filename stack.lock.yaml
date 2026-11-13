@@ -70,8 +70,8 @@ components:
     status: "active"
     remote: "https://github.com/fawxzzy/playbook.git"
     ref_type: "branch"
-    ref: "codex/atlas-knowledge-candidate-v2-consumer"
-    commit: "14fce44268084bcaaab6d189b6ef18eb7a992faf"
+    ref: "main"
+    commit: "ab385d97841cb0f31ee4a0b9002267651f73b9e7"
     dirty: false
     trust_class: "trusted"
     release_eligible: true
@@ -224,4 +224,4 @@ source_pins:
     ref: "codex/player-goal-default-colors"
     commit: "a537d2d17429bdf0482989c280373a6ea751f9c0"
     dirty: true
-lock_digest: "sha256:41a69fed0ddf626a669124bcbf1fd19893dec46cb2c9172b375259e8a13e8cf6"
+lock_digest: "sha256:eb8c1e67328e17a54cc9b2e3109c7c3b7f956ed3548b89f81002d37143768e80"
