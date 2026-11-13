@@ -1,5 +1,7 @@
 ﻿# Playbook Ingest Pipeline
 
+> Not the Playbook product. This document is about the ingest of third-party playbook content packs. For the Playbook repo (fawxzzy/playbook) and its ATLAS wiring see ATLAS-CORTEX-PLAYBOOK-CODEX.md.
+
 This document defines the stack-owned ingest path for third-party playbooks and other external playbook content packs.
 
 ## Design Goal

@@ -1,5 +1,7 @@
 # Pass 2.5 Promotion Notes
 
+> Not the Playbook product. This document is about the Fitness App Theme V1.1 promotion pass (Pass 2.5). For the Playbook repo (fawxzzy/playbook) and its ATLAS wiring see ATLAS-CORTEX-PLAYBOOK-CODEX.md.
+
 Current lane
 - Main work: App Theme V1.1 semantic-lane coverage plus visual validation.
 - Preview deploys may proceed after local verification.
