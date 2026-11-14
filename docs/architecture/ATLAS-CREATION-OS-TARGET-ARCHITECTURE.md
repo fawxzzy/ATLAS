@@ -1,6 +1,6 @@
 # Atlas Creation OS Target Architecture
 
-- Status: **RECONCILED TARGET**
+- Status: **RECONCILED TARGET, scope ratified 2026-11-14** (scope only; no authority granted)
 - Date: 2026-07-16
 - Research basis: [governed external import](../../data/imports/creation-os/deep-research-2026-07-16/IMPORT-MANIFEST.json)
 - Reconciliation: [Creation OS research decision report](../audits/ATLAS-CREATION-OS-RESEARCH-RECONCILIATION-2026-07-16.md)
@@ -10,6 +10,14 @@
 **RECONCILED TARGET** - Atlas is a human-directed creation operating system
 that turns intent into governed, verifiable software and artifacts while
 preserving durable context, explicit ownership, and final human authority.
+
+## Execution agent
+
+**RATIFIED SCOPE** - Claude Code is the only active execution agent. Codex is
+retired. Coordination surface is the FawxzzyWeb `/projects` board plus
+per-project profiles and ledgers; the DiscordOS layer is removed. Historical
+references to Codex or DiscordOS elsewhere in this document describe the
+2026-07-16 reconciliation baseline and are not live.
 
 ## Phase-one wedge
 
@@ -26,13 +34,35 @@ app, and tool builder with:
 Voice is a high-value interaction surface, not a separate authority system.
 The deterministic builder loop remains the path from intent to accepted change.
 
+## Supported artifact classes
+
+**RATIFIED SCOPE** - phase-one artifact classes, taken from what the stack
+actually ships:
+
+1. web apps and PWAs in TypeScript (Next.js: Fitness, FawxzzyWeb; Vite: Mazer);
+2. TypeScript/Node libraries and CLIs (Playbook);
+3. docs, registries, and data files with schema validation (ATLAS registry,
+   board exports).
+
+Everything else (native apps, game engines, XR, device control) is unsupported
+in phase one.
+
+## Supported repository classes
+
+**RATIFIED SCOPE** - GitHub-hosted repositories owned by the fawxzzy
+organization that have CI and a per-project profile (`~/.claude/profiles/`).
+Deploys go only to Vercel through the deploy pacer. Database changes go only
+through the hard-stop SQL process. Repositories without CI or a profile are out
+of scope until given one.
+
 ## Phase-one non-goals
 
 **REJECTED/NOT ADOPTED NOW**:
 
 - a monolithic AGI or one agent that owns every system;
 - training a custom foundation model;
-- replacing proven ChatGPT or Codex transport before replacement parity exists;
+- introducing a second execution agent in phase one (Codex is retired; Claude
+  Code is the only active execution agent);
 - deploying a new general-purpose Atlas server;
 - selecting or deploying PostgreSQL, Qdrant, Neo4j, Redis, MinIO, Temporal,
   LangGraph, LiveKit, OPA, Cosign, or equivalent infrastructure merely because
@@ -43,6 +73,14 @@ The deterministic builder loop remains the path from intent to accepted change.
 - automatic production deployment, external mutation, purchasing, or physical
   actuation;
 - moving owner-repository implementation truth into Atlas root.
+
+## Not decided here (UNKNOWN)
+
+Success thresholds, kill criteria, budget, schedule, team size, and realtime
+transport remain UNKNOWN. A phase-one review date and one measurable threshold
+would turn this scope statement into a commitment; they are not added here.
+
+Ratified by Zac, 2026-11-14. Scope only; no authority granted.
 
 ## Current truth and target ownership
 
@@ -56,7 +94,7 @@ monolith.
 | Atlas Contracts interoperability | **VERIFIED CURRENT ATLAS** - versioned identity, job, context, lease, evidence, receipt, board, marker, knowledge-candidate, and approval semantics | Shared meanings stay Atlas-owned; owner extensions do not redefine them |
 | Cortex intelligence and context | **VERIFIED CURRENT ATLAS** - root-owned advisory context, routing, synthesis, replay, and read models | No scheduling, owner mutation, deployment, board write, or final approval authority |
 | `_stack` execution | **VERIFIED CURRENT ATLAS** - governed workspace/action routing, operator commands, event normalization, and deploy entrypoints | Execution capability does not create production approval or product truth |
-| DiscordOS coordination | **VERIFIED CURRENT ATLAS** - one logical board, publication, and readback writer | Does not infer Git, test, deploy, or product truth from prose |
+| DiscordOS coordination | **HISTORICAL (removed 2026-11-14)** - was one logical board, publication, and readback writer | Does not infer Git, test, deploy, or product truth from prose |
 | Owner repositories and domain planes | **VERIFIED CURRENT ATLAS** - product, code, runtime, release, and domain truth | Each owner remains authoritative for its implementation and proof |
 | Creation OS product surface | **RECONCILED TARGET** - composes the layers above into one builder and creative experience | Must preserve every existing authority boundary and acceptance gate |
 
@@ -274,7 +312,7 @@ The pipeline must:
 - an ApprovalRecord carries explicit authority for sensitive action;
 - owner contracts determine who may change owner truth;
 - production deploy approval is current-thread, per project, and per deploy;
-- DiscordOS remains one logical external writer;
+- DiscordOS (removed 2026-11-14) was one logical external writer;
 - execution receipts prove outcomes but do not self-approve them.
 
 Therefore full local host capability is not external mutation authority,
