@@ -6,7 +6,7 @@
   "display_name": "FawxzzyWeb",
   "public_origin": "https://fawxzzy.com",
   "repo_id": "trove",
-  "repo_path": "repos/trove",
+  "repo_path": "repos/FawxzzyWeb",
   "adapter_id": "trove.web",
   "criticality": "medium",
   "tags": [

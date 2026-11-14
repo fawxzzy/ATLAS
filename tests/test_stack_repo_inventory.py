@@ -125,7 +125,7 @@ class StackRepoInventoryTests(unittest.TestCase):
         inventory = build_repo_inventory(root=self.root)
         trove = next(item for item in inventory["repos"] if item["logical_id"] == "trove")
 
-        self.assertEqual("repos/trove", trove["local_path"])
+        self.assertEqual("repos/FawxzzyWeb", trove["local_path"])
         self.assertEqual("FawxzzyWeb", trove["operational_identity"]["display_name"])
         self.assertEqual("fawxzzyweb", trove["operational_identity"]["vercel_project"])
         self.assertEqual("https://fawxzzy.com", trove["operational_identity"]["public_origin"])

@@ -4,12 +4,12 @@ Status: current root compatibility contract
 
 ## Authority
 
-ATLAS consumes the owner terminal receipt at `repos/trove/docs/fawxzzyweb-dependency-packet.md` from owner commit `5ee0da707d3c25fe1dd63473d128e22bf37fa071`. Owner implementation and production truth remain owner-controlled; this root contract does not redefine them.
+ATLAS consumes the owner terminal receipt at `repos/FawxzzyWeb/docs/fawxzzyweb-dependency-packet.md` from owner commit `5ee0da707d3c25fe1dd63473d128e22bf37fa071`. Owner implementation and production truth remain owner-controlled; this root contract does not redefine them.
 
 The canonical root authority is `stack.yaml#repo_registry.trove.identity`:
 
 - stable logical repo ID: `trove`
-- stable local path: `repos/trove`
+- stable local path: `repos/FawxzzyWeb` (the checkout moved from `repos/trove`; logical ID `trove` is unchanged)
 - current display/product name: `FawxzzyWeb`
 - historical display alias: `Trove`
 - GitHub repository: `fawxzzy/FawxzzyWeb`
@@ -22,7 +22,7 @@ The canonical root authority is `stack.yaml#repo_registry.trove.identity`:
 
 ## Compatibility behavior
 
-Current producers and consumers emit `FawxzzyWeb`, `fawxzzyweb`, and `https://fawxzzy.com`. Historical inputs may resolve through the declared aliases, but resolution is explicit and fails closed for unknown identity values. Stable machine coordinates remain `trove`, `repos/trove`, `trove.web`, `trove.home-smoke`, and the Lifeline service key `trove/prod`.
+Current producers and consumers emit `FawxzzyWeb`, `fawxzzyweb`, and `https://fawxzzy.com`. Historical inputs may resolve through the declared aliases, but resolution is explicit and fails closed for unknown identity values. Stable machine coordinates remain `trove`, `repos/FawxzzyWeb`, `trove.web`, `trove.home-smoke`, and the Lifeline service key `trove/prod`.
 
 The Lifeline topology manifest projects the canonical identity from `stack.yaml`; it is not a second authority. No Lifeline deploy, restart, provider change, service-key rename, or owner-side activation is required by this compatibility-only root change.
 
@@ -40,5 +40,5 @@ Root-side board metadata is limited to stable owner ID `trove` and current displ
 
 1. Owner export and DiscordOS admission: add a deterministic FawxzzyWeb owner roadmap export in the owner repository, merge it, then run the serialized DiscordOS board admission and exact readback. Recompute the active owner-board denominator from live admitted exports; it may move from 13 to 14.
 2. GitHub Control-Plane producer: implement a deterministic collector for the GitHub registry from declared root/owner authority, test idempotent output, then refresh the registry and its dependent cleanup projection through that producer.
-3. Local path move preflight: separately inventory all `repos/trove` readers and migration/rollback effects. Any move remains explicitly approval-gated and is not authorized by this contract.
+3. Local path move: the checkout now lives at `repos/FawxzzyWeb` and the registry, branding manifest and QA adapters follow it. Any further move remains explicitly approval-gated and is not authorized by this contract.
 4. Lifeline/Foundation activation: open only if a real owner/runtime consumer cannot dual-read the manifest contract. Preserve `trove/prod` and require owner-side proof before any restart or deployment.

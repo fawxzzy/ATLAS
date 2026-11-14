@@ -183,7 +183,7 @@ repo_registry:
     status: unmanaged
     root_blocking: false
   trove:
-    path: repos/trove
+    path: repos/FawxzzyWeb
     role: application
     status: active
     identity:
@@ -213,10 +213,6 @@ repo_registry:
     path: repos/Nat1-Games/nat1-games
     role: application
     status: incubating
-  playbook-demo:
-    path: repos/playbook-demo/playbook-demo
-    role: demo
-    status: demo
 
 subsystem_registry:
   cortex:
@@ -291,7 +287,6 @@ stack_lock:
     - trove
     - stream
     - nat1-games
-    - playbook-demo
   source_pin_repo_ids:
     - fitness
     - mazer
@@ -318,9 +313,6 @@ stack_lock:
       trust_class: trusted
       release_eligible: false
     nat1-games:
-      trust_class: trusted
-      release_eligible: false
-    playbook-demo:
       trust_class: trusted
       release_eligible: false
     mazer:
