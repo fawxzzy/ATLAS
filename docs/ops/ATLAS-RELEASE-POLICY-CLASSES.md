@@ -34,7 +34,7 @@ not re-read in this pass.
 | ATLAS | 0 / 0 | Atlas Stack Generator: success | not in lock (root) | no-release | Stack root; gate is `validate_stack` with a zero-delta rule. |
 | FawxzzyWeb (`trove`) | 0 / 0 | CI: in progress (previous runs success) | true | deploy-surface | Profile `web` defines checks, aliases and rollback. |
 | mazer | 0 / 0 | Verify: in progress (previous run success) | source-pin, no flag | deploy-surface | Profile `mazer` defines checks, alias and rollback. |
-| fawxzzy-fitness | 0 / 38 tags | fitness-event-contracts: success | source-pin, no flag | deploy-surface | Profile `fitness`; meaning of the tags is unverified. |
+| fawxzzy-fitness | 0 / 35 tags | fitness-event-contracts: success | source-pin, no flag | deploy-surface | Profile `fitness`; meaning of the tags is unverified. |
 | playbook | 2 / 2 (latest v0.54.1) | ci / Playbook CI: in progress (demo-refresh success) | true | library-publish | Only repo with real GitHub releases. |
 | fawxzzy-platform | 0 / 0 | contracts: success (2026-11-11) | not in lock | undecided | Needs a profile or a recorded no-release reason. |
 | socials-os | 0 / 0 | verify: success (2026-10-15) | not in lock | undecided | Stale run; no profile. |
