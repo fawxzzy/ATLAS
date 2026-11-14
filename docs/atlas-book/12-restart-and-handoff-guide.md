@@ -726,6 +726,19 @@ Use this hierarchy:
 
 If something important only exists in chat, package it into the book or a receipt before treating it as durable truth.
 
+Current override (source hierarchy normalization, card `lane-source-hierarchy-doc-normalization`): the list above is a retrieval order for restarting a lane, not an evidence order. Where any document in this book or under `docs/ops` reads as if it ranks truth sources differently, the accepted eight-level source-of-truth hierarchy in `docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md` (section "Source-of-truth hierarchy") governs:
+
+1. current executable/local owner evidence and timestamped authenticated read-only external responses for their respective planes (Git/provider evidence first)
+2. `stack.yaml` for declared topology and policy
+3. the current validation receipt for health
+4. the Atlas Book marker surface, only when backed by an accepted receipt and continuity manifest
+5. continuity and restart indexes, as projections only (checkpoints and liveness never outrank levels 1-3)
+6. current owner-repository evidence for owner product and code truth
+7. chat, delegation, and handoffs, as intent and routing evidence only
+8. historical and archive documents, as provenance only
+
+No lower level overwrites a higher one by looking newer or by being marked `100%`. Missing or unverifiable evidence stays `UNKNOWN`; it is never promoted to a pass. Older dated passes quoted in this guide keep their original wording as provenance; this note overrides them without rewriting them. The deterministic document inventory and per-document classification that the card still requires (denominator is `null`) are not yet established.
+
 Interpretation:
 
 - GPT/Codex workers are ephemeral reasoning surfaces
