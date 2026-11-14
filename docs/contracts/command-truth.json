@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "1.0",
+  "scope": "consumer",
+  "note": "Consumer-side command truth for ATLAS. Command definitions are owned by fawxzzy/playbook; this file records only the ladders ATLAS follows.",
+  "bootstrapLadder": ["ai-context", "ai-contract", "context"],
+  "remediationLoop": ["verify", "plan", "apply", "verify"]
+}
