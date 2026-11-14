@@ -22,7 +22,7 @@ class OperationalIdentityTests(unittest.TestCase):
         identity = load_operational_identity(ROOT, "trove")
 
         self.assertEqual("trove", identity["logical_id"])
-        self.assertEqual("repos/trove", identity["local_path"])
+        self.assertEqual("repos/FawxzzyWeb", identity["local_path"])
         self.assertEqual("FawxzzyWeb", identity["display_name"])
         self.assertEqual("fawxzzy/FawxzzyWeb", identity["github_repository"])
         self.assertEqual("fawxzzyweb", identity["vercel_project"])

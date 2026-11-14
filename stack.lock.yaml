@@ -1,7 +1,7 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:b3995224d47969b15be00ebc586b7a2a2566a4ee201f30911c02b4eab7e94ed2"
-component_count: 9
+stack_manifest_digest: "sha256:ce9ed128428960f88e784f500e71890bf83c2fec360bf6d3e734b0f1c74624c6"
+component_count: 8
 components:
   _stack:
     path: "repos/_stack"
@@ -75,18 +75,6 @@ components:
     dirty: false
     trust_class: "trusted"
     release_eligible: true
-  playbook-demo:
-    path: "repos/playbook-demo/playbook-demo"
-    role: "demo"
-    playbook_adoption_status: ""
-    status: "demo"
-    remote: "https://github.com/ZachariahRedfield/playbook-demo.git"
-    ref_type: "branch"
-    ref: "main"
-    commit: "4d0444bcb14c3470fe0913a21c8739f0791a1827"
-    dirty: false
-    trust_class: "trusted"
-    release_eligible: false
   stream:
     path: "repos/stream"
     role: "application"
@@ -100,15 +88,15 @@ components:
     trust_class: "trusted"
     release_eligible: false
   trove:
-    path: "repos/trove"
+    path: "repos/FawxzzyWeb"
     role: "application"
     playbook_adoption_status: ""
     status: "active"
     remote: "https://github.com/fawxzzy/FawxzzyWeb.git"
-    ref_type: "branch"
-    ref: "codex/path-discipline-warning-slice-trove"
-    commit: "908fed4618aaf0bc869989e515ecacc410f47883"
-    dirty: false
+    ref_type: "commit"
+    ref: "6f77084faefecc6a1b8bb190bd2ece23aec8b76e"
+    commit: "6f77084faefecc6a1b8bb190bd2ece23aec8b76e"
+    dirty: true
     trust_class: "trusted"
     release_eligible: true
 excluded_surfaces:
@@ -174,7 +162,7 @@ excluded_surfaces:
     reason: "Local Playbook Codex checkout remains an adjacent non-canonical helper surface outside the governed stack member set."
   repo_backups_archive_surface:
     path: "repos/repo-backups"
-    present: true
+    present: false
     trust_class: "trusted"
     release_eligible: false
     reason: "Legacy bundle and patch backup drop remains visible for recovery provenance but is not a source repo surface and should converge on packages/bundles and packages/patches."
@@ -198,13 +186,13 @@ excluded_surfaces:
     reason: "Token-bearing Verta checkout remains quarantined and untrusted until scrub and rotation are complete."
   zachariah_redfield_adjacent_checkout:
     path: "repos/ZachariahRedfield"
-    present: true
+    present: false
     trust_class: "adjacent"
     release_eligible: false
     reason: "ZachariahRedfield checkout is an adjacent unmanaged repo and is outside the governed ATLAS release surface."
   zachariahredfield_adjacent_checkout:
     path: "repos/ZachariahRedfield"
-    present: true
+    present: false
     trust_class: "adjacent"
     release_eligible: false
     reason: "Local ZachariahRedfield checkout remains an adjacent personal repo root and is not part of the governed stack member set."
@@ -215,13 +203,18 @@ source_pins:
     remote: "https://github.com/fawxzzy/fawxzzy-fitness.git"
     ref_type: "branch"
     ref: "main"
-    commit: "da4d71afaecb19f470ce60ba182776d9fb0589e1"
+    commit: "06db3f234ee0b90c00b32507351fe1d902661bdf"
     dirty: false
   mazer:
     path: "repos/mazer"
     remote: "https://github.com/fawxzzy/mazer.git"
-    ref_type: "branch"
-    ref: "codex/player-goal-default-colors"
-    commit: "a537d2d17429bdf0482989c280373a6ea751f9c0"
+    ref_type: "commit"
+    ref: "1670c8afc2b3166bab983b4dd33647ced1912a52"
+    commit: "1670c8afc2b3166bab983b4dd33647ced1912a52"
     dirty: true
-lock_digest: "sha256:eb8c1e67328e17a54cc9b2e3109c7c3b7f956ed3548b89f81002d37143768e80"
+refresh_scope:
+  mode: "scoped"
+  baseline_ref: "0dfcce829aaa7e5beb7339e591068c036f5c6705"
+  repo_ids:
+    trove: true
+lock_digest: "sha256:69b94bc9d6bfba316b4bdf200711ee07507a47d213e0085eb52d6d23bb273d52"
