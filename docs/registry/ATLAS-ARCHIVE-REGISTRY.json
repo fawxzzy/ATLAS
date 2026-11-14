@@ -93,6 +93,88 @@
         "This surface remains protected by the standing Verta trust gate.",
         "Derivative doctrine may be promoted only after rewrite into owner-repo truth with explicit provenance."
       ]
+    },
+    {
+      "surface_id": "hard_pill_to_swallow_zip",
+      "path": "repos/Hard Pill To Swallow.zip",
+      "present": true,
+      "surface_kind": "media_archive",
+      "verification_state": "direct_current_surface",
+      "trust_class": "adjacent",
+      "release_eligible": false,
+      "owner_scope": "stack_root",
+      "retention_reason": "operator_kept_archive_package",
+      "canonical_destination": null,
+      "recommended_action": "keep_in_place_metadata_only",
+      "disposition": "KEEP",
+      "owner": "operator",
+      "size_bytes": 158714160,
+      "sha256": "f292a552c445fc92ef5ac75c6e0bedb38959da63f9ef92d788a0aab710561b94",
+      "notes": [
+        "registered 2026-11-14 by Zac's chat approval; nothing moved or deleted"
+      ]
+    },
+    {
+      "surface_id": "realm_blade_zip",
+      "path": "repos/Realm Blade.zip",
+      "present": true,
+      "surface_kind": "media_archive",
+      "verification_state": "direct_current_surface",
+      "trust_class": "adjacent",
+      "release_eligible": false,
+      "owner_scope": "stack_root",
+      "retention_reason": "operator_kept_archive_package",
+      "canonical_destination": null,
+      "recommended_action": "keep_in_place_metadata_only",
+      "disposition": "KEEP",
+      "owner": "operator",
+      "size_bytes": 1850154322,
+      "sha256": "e8bfda6f243892e5b17250130a391d47a9d84591d3a0606d3bef7aa5a80e35fa",
+      "notes": [
+        "registered 2026-11-14 by Zac's chat approval; nothing moved or deleted"
+      ]
+    },
+    {
+      "surface_id": "logan_olson_custom_workout_setup_docx",
+      "path": "packages/logan-olson-custom-workout-setup.docx",
+      "present": true,
+      "surface_kind": "personal_document",
+      "verification_state": "direct_current_surface",
+      "trust_class": "adjacent",
+      "release_eligible": false,
+      "owner_scope": "stack_root",
+      "retention_reason": "operator_kept_archive_package",
+      "canonical_destination": null,
+      "recommended_action": "keep_in_place_metadata_only",
+      "disposition": "KEEP",
+      "owner": "operator",
+      "size_bytes": 47457,
+      "sha256": "6038ba67a7da60e2df9028d01ca2d22793c2d15217063fd4a30d209b20b40e7b",
+      "notes": [
+        "registered 2026-11-14 by Zac's chat approval; nothing moved or deleted"
+      ]
+    },
+    {
+      "surface_id": "fitness_closeout_2026_06_18_snapshot",
+      "path": "packages/snapshots/fitness-closeout-2026-06-18",
+      "present": true,
+      "surface_kind": "source_snapshot_directory",
+      "verification_state": "direct_current_surface",
+      "trust_class": "adjacent",
+      "release_eligible": false,
+      "owner_scope": "stack_root",
+      "retention_reason": "operator_kept_archive_package",
+      "canonical_destination": null,
+      "recommended_action": "keep_in_place_metadata_only",
+      "disposition": "KEEP",
+      "owner": "operator",
+      "size_bytes": 196427366,
+      "sha256": "da89ed87d9c0fff7b1650c21b47f7343e9146e56f3d998303f831a49fb26018a",
+      "file_count": 1456,
+      "sha256_method": "sha256 of the concatenation of the sorted per-file sha256 hex digests",
+      "notes": [
+        "registered 2026-11-14 by Zac's chat approval; nothing moved or deleted"
+      ]
     }
   ]
 }

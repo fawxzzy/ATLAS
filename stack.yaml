@@ -243,6 +243,8 @@ archives:
   media:
     - repos/Realm Blade
     - repos/Hard Pill To Swallow
+    - packages/logan-olson-custom-workout-setup.docx
+    - packages/snapshots/fitness-closeout-2026-06-18
   zip_snapshot_root: packages/snapshots
   zip_snapshots:
     - repos/CORTEX-AND-PLAYBOOK-20260408.zip
