@@ -1,6 +1,8 @@
 # ATLAS Book Index
 
-Quick summary: Revision 69 puts Fitness and its required shared sign-in and handoff path first. Use the owner repo for implementation, the existing Codex task for execution, and the master plus receipts to check the result.
+Quick summary: Revision 69 (closeout pointer added 2026-11-15) puts Fitness and its required shared sign-in and handoff path first. Use the owner repo for implementation, the existing Codex task for execution, and the master plus receipts to check the result.
+
+Latest dated state: see [2026-11-14 closeout](01-current-state.md#2026-11-14-closeout).
 
 ## Current map
 

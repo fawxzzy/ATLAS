@@ -1,5 +1,20 @@
 # Current State
 
+## 2026-11-14 closeout
+
+Dated override for the ATLAS stack closeout. Earlier sections below are historical and are not rewritten. Evidence is Git/GitHub first; items marked UNKNOWN or OPEN stay that way.
+
+- Board: all 36 ATLAS Stack board cards are archived (PR #236, squash `b1f39f63`). 26 are completed-archived with completion records; 10 are archived without a completion claim (4 superseded, 4 deferred with reopen triggers, and 2 deferred-with-trigger: `lane-fitness-critical-secret-containment` and `lane-security-containment`). Deferred-with-trigger cards are not completed.
+- Merged this closeout: PRs #229 to #236 (receipts in [05-receipt-index.md](05-receipt-index.md)).
+- Governance: rulesets `main-governance` are active on 5 repos (ATLAS, Fitness, Mazer, FawxzzyWeb, Playbook). Dependabot alerts are enabled on those repos; ATLAS's own alert count is UNKNOWN.
+- Branch and worktree retention: 499 remote merged branches were deleted only after verified all-refs bundles. Linked worktrees were retired export-first; worktrees with unpushed or credential-like content are held by design.
+- Stack manifest: `stack.yaml` now points `trove` at `repos/FawxzzyWeb` and no longer lists `playbook-demo` (PR #234). `stack.lock.yaml` pins reflect local checkout state, not necessarily origin. The stack repo inventory was regenerated with its own exporter as a point-in-time local snapshot.
+- Playbook: the repo's Playbook verify passes on the 5 governed repos; no config PR was needed.
+- Supabase: leaked-password protection is OFF and plan-gated (organization is on the Free plan; the setting needs Pro or above). An earlier owner-attested "ON" was wrong and was corrected after a dashboard readback. Accepted until the plan changes.
+- Supabase key rotation is in progress, not complete: a replacement secret key exists, but the old secret key and the legacy service-role JWT remain enabled, consumer environments have not all been swapped, and the Fitness secret-scanning alert remains open. Which projects still use the old key is UNKNOWN.
+- EXIT-05 is OPEN. It is gated on Fitness DOD06 and DOD07 signed-in checks and the DOD25 14-day observation window.
+- `lane-source-hierarchy-doc-normalization`: the source-hierarchy override in [12-restart-and-handoff-guide.md](12-restart-and-handoff-guide.md) landed (PR #229), but the deterministic document inventory and per-document classification are not present in the repo. The lane stays open; no completion is claimed.
+
 ## 2026-07-17 runtime owner-export integration override
 
 - DiscordOS selector step 7 is accepted from draft, unmerged PR #104 at exact reviewed head `c62b31e76ac0c401b0213dcd3537df86e1ab371c` and READY Preview `dpl_7zBA8ggFEATvj7tRFeS2oYf5NWXP`; this does not claim merge, production adoption, or real-user coverage.
