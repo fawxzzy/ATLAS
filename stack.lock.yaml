@@ -1,6 +1,6 @@
 schema_version: "atlas.stack.lock.v1"
 stack_manifest_path: "stack.yaml"
-stack_manifest_digest: "sha256:ce9ed128428960f88e784f500e71890bf83c2fec360bf6d3e734b0f1c74624c6"
+stack_manifest_digest: "sha256:cd4acab103f60ea18b07980073c1b803174e167adc748dd64f7d7043bb1915e6"
 component_count: 8
 components:
   _stack:
@@ -80,7 +80,7 @@ components:
     role: "application"
     playbook_adoption_status: ""
     status: "incubating"
-    remote: null
+    remote: "https://github.com/fawxzzy/stream.git"
     ref_type: "branch"
     ref: "main"
     commit: "43769ba86d4c6ebc419ab9e7847c3843460a094f"
@@ -214,7 +214,7 @@ source_pins:
     dirty: true
 refresh_scope:
   mode: "scoped"
-  baseline_ref: "0dfcce829aaa7e5beb7339e591068c036f5c6705"
+  baseline_ref: "f91bf265c5ddbc465c463c7358aecc36c862a960"
   repo_ids:
-    trove: true
-lock_digest: "sha256:69b94bc9d6bfba316b4bdf200711ee07507a47d213e0085eb52d6d23bb273d52"
+    stream: true
+lock_digest: "sha256:8c78fe174eeafac9e922b15aa856b643678055c6649692c202539405522f90f0"

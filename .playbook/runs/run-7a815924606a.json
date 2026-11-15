@@ -1,0 +1,44 @@
+{
+  "checkpoints": [
+    {
+      "created_at": "2026-11-15T00:13:29.369Z",
+      "id": "checkpoint-001",
+      "label": "verify:passed",
+      "step_id": "step-001"
+    }
+  ],
+  "created_at": "2026-11-15T00:13:29.367Z",
+  "frozen": false,
+  "id": "run-7a815924606a",
+  "intent": {
+    "constraints": [
+      "deterministic-cli-only-writes"
+    ],
+    "goal": "verify repository governance",
+    "id": "intent-a79d481da19f",
+    "requested_by": "user",
+    "scope": [
+      "repository"
+    ]
+  },
+  "steps": [
+    {
+      "evidence": [],
+      "id": "step-001",
+      "inputs": {
+        "policyMode": false,
+        "verificationMode": "governance-only"
+      },
+      "kind": "verify",
+      "outputs": {
+        "failures": 0,
+        "localVerificationStatus": null,
+        "ok": true,
+        "verificationMode": "governance-only",
+        "warnings": 1
+      },
+      "status": "passed"
+    }
+  ],
+  "version": 1
+}

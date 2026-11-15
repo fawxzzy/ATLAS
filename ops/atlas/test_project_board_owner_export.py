@@ -65,11 +65,11 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         self.assertEqual(len(marker_ids), 6)
         for card in atlas["cards"]:
             if card["record"]["card_id"] in marker_ids:
-                self.assertIn(card["record"]["lifecycle"], {"planning", "completed"})
+                self.assertIn(card["record"]["lifecycle"], {"planning", "completed", "archived"})
             parent_id = card["relationships"]["parent_card_id"]
             if parent_id is not None:
                 self.assertIn(parent_id, cards_by_id)
-                self.assertIn(cards_by_id[parent_id]["record"]["lifecycle"], {"planning", "completed"})
+                self.assertIn(cards_by_id[parent_id]["record"]["lifecycle"], {"planning", "completed", "archived"})
 
     def test_atlas_backlog_excludes_owner_repo_implementation_records(self) -> None:
         registry = json.loads((ROOT / REGISTRY_REF).read_text(encoding="utf-8"))
@@ -153,6 +153,51 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         self.assertEqual([], readback["status_boundaries"]["blocked"])
         self.assertEqual([], readback["status_boundaries"]["stale"])
         self.assertTrue(readback["status_boundaries"]["unknown"])
+
+    def test_board_close_archives_every_card_except_the_two_waiting_on_zac(self) -> None:
+        atlas = build_project_board_owner_exports()["atlas"]
+        cards = {card["record"]["card_id"]: card for card in atlas["cards"]}
+        waiting = {"lane-fitness-critical-secret-containment", "lane-security-containment"}
+        self.assertEqual(waiting, {cid for cid, card in cards.items() if card["record"]["lifecycle"] != "archived"})
+        for cid in waiting:
+            self.assertEqual("planning", cards[cid]["record"]["lifecycle"])
+            self.assertEqual(1, len(cards[cid]["content"]["blockers"]))
+            self.assertIn(cards[cid]["record"]["extensions"]["board_disposition"], {"waiting-on-zac", "queued-last"})
+        archived = [card for cid, card in cards.items() if cid not in waiting]
+        self.assertEqual(34, len(archived))
+        for card in archived:
+            extensions = card["record"]["extensions"]
+            self.assertEqual("archived", card["record"]["lifecycle"])
+            self.assertTrue(extensions["board_reason"])
+            if extensions["board_disposition"] == "completed-archived":
+                self.assertTrue(extensions["completion_record"]["artifact"])
+                self.assertTrue(extensions["completion_record"]["completed_on"])
+            else:
+                self.assertEqual("archived", extensions["board_disposition"])
+                self.assertIsNone(extensions["completion_record"])
+                self.assertNotIn("Completed ", " ".join(card["content"]["discoveries"]))
+
+    def test_board_projection_fails_closed_on_incomplete_dispositions(self) -> None:
+        registry = json.loads((ROOT / REGISTRY_REF).read_text(encoding="utf-8"))
+        broken_cases = {
+            "archived-without-reason": ("lane-codex-execution-contracts", {"reason": None}),
+            "archived-with-completion": ("lane-codex-execution-contracts", {"completion_record": {"completed_on": "2026-11-14", "artifact": "x"}}),
+            "completed-without-artifact": ("lane-dependabot-visibility", {"completion_record": {"completed_on": "2026-11-14"}}),
+            "pending-without-note": ("lane-security-containment", {"pending_note": None}),
+        }
+        for name, (record_id, patch) in broken_cases.items():
+            candidate = copy.deepcopy(registry)
+            record = next(item for item in [*candidate["lanes"], *candidate["backlog_candidates"]] if item["id"] == record_id)
+            for key, value in patch.items():
+                if value is None:
+                    record["board"].pop(key, None)
+                else:
+                    record["board"][key] = value
+            with tempfile.TemporaryDirectory() as temp_dir:
+                registry_path = Path(temp_dir) / "registry.json"
+                registry_path.write_text(json.dumps(candidate), encoding="utf-8")
+                with self.subTest(name), self.assertRaises(ProjectBoardOwnerExportError):
+                    build_project_board_owner_exports(registry_path=registry_path)
 
     def test_registry_book_status_conflict_fails_closed(self) -> None:
         registry = json.loads((ROOT / REGISTRY_REF).read_text(encoding="utf-8"))

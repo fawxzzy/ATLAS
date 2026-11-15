@@ -44,6 +44,11 @@ CORTEX_RECORD_IDS = (
     "lane-cortex-boundary-decision",
 )
 NON_EXECUTABLE_LIFECYCLES = frozenset({"intake", "planning", "completed", "archived", "blocked"})
+# Optional per-record `board` object in the lanes registry. It overrides only the board
+# projection (lifecycle, reason, completion record, pending note); `status`, percentages and
+# denominators stay owned by the marker/audit flow and are never changed by it.
+BOARD_DISPOSITIONS = frozenset({"archived", "completed-archived", "waiting-on-zac", "queued-last"})
+BOARD_LIFECYCLES = frozenset({"archived"})
 
 
 class ProjectBoardOwnerExportError(RuntimeError):
@@ -228,6 +233,57 @@ def _record_lifecycle(source_status: str, *, marker_parent: bool) -> str:
     raise ProjectBoardOwnerExportError(f"Unsupported registry status: {source_status}")
 
 
+def _board_projection(record: dict[str, Any]) -> dict[str, Any] | None:
+    board = record.get("board")
+    if board is None:
+        return None
+    record_id = record.get("id", "<unknown>")
+    if not isinstance(board, dict):
+        raise ProjectBoardOwnerExportError(f"{record_id}.board must be an object when present.")
+    disposition = board.get("disposition")
+    if disposition not in BOARD_DISPOSITIONS:
+        raise ProjectBoardOwnerExportError(f"{record_id}.board.disposition must be one of {sorted(BOARD_DISPOSITIONS)}.")
+    lifecycle = board.get("lifecycle")
+    if lifecycle is not None and lifecycle not in BOARD_LIFECYCLES:
+        raise ProjectBoardOwnerExportError(f"{record_id}.board.lifecycle must be one of {sorted(BOARD_LIFECYCLES)} when present.")
+    if disposition in {"archived", "completed-archived"}:
+        if lifecycle != "archived":
+            raise ProjectBoardOwnerExportError(f"{record_id}.board must set lifecycle archived for disposition {disposition}.")
+        if not isinstance(board.get("reason"), str) or not board["reason"]:
+            raise ProjectBoardOwnerExportError(f"{record_id}.board.reason is required for archived cards.")
+        if not isinstance(board.get("decided_on"), str) or not board["decided_on"]:
+            raise ProjectBoardOwnerExportError(f"{record_id}.board.decided_on is required for archived cards.")
+    if disposition == "completed-archived":
+        completion = board.get("completion_record")
+        if not isinstance(completion, dict) or not completion.get("completed_on") or not completion.get("artifact"):
+            raise ProjectBoardOwnerExportError(
+                f"{record_id}.board.completion_record needs completed_on and artifact for completed-archived cards."
+            )
+    if disposition == "archived" and "completion_record" in board:
+        raise ProjectBoardOwnerExportError(f"{record_id}.board must not carry a completion_record when archived without completion.")
+    if disposition in {"waiting-on-zac", "queued-last"}:
+        if lifecycle is not None:
+            raise ProjectBoardOwnerExportError(f"{record_id}.board must not set a lifecycle while {disposition}.")
+        if not isinstance(board.get("pending_note"), str) or not board["pending_note"]:
+            raise ProjectBoardOwnerExportError(f"{record_id}.board.pending_note is required while {disposition}.")
+    return board
+
+
+def _board_discoveries(board: dict[str, Any] | None) -> list[str]:
+    if board is None:
+        return []
+    disposition = board["disposition"]
+    if disposition == "archived":
+        return [f"Archived {board['decided_on']}: {board['reason']}"]
+    if disposition == "completed-archived":
+        completion = board["completion_record"]
+        return [
+            f"Completed {completion['completed_on']}: {completion['artifact']}",
+            f"Archived {board['decided_on']}: {board['reason']}",
+        ]
+    return []
+
+
 def _as_string_list(record: dict[str, Any], field: str) -> list[str]:
     value = record.get(field, [])
     if not isinstance(value, list) or any(not isinstance(item, str) or not item for item in value):
@@ -247,7 +303,10 @@ def _export_card(
 ) -> dict[str, Any]:
     record_id = str(record["id"])
     source_status = str(record.get("status"))
+    board = _board_projection(record)
     lifecycle = _record_lifecycle(source_status, marker_parent=marker_parent)
+    if board is not None and board.get("lifecycle"):
+        lifecycle = str(board["lifecycle"])
     if marker_parent and lifecycle not in NON_EXECUTABLE_LIFECYCLES:
         raise ProjectBoardOwnerExportError(f"Marker parent {record_id} became executable without an epic contract.")
     source_ref = f"{REGISTRY_REF}#{record_id}"
@@ -284,7 +343,19 @@ def _export_card(
                 "completed_units": record.get("completed_units"),
                 "denominator": denominator,
                 "projection_role": projection_role,
-                "seed_disposition": "completed" if lifecycle == "completed" else "current",
+                "seed_disposition": (
+                    "completed" if lifecycle == "completed" else "archived" if lifecycle == "archived" else "current"
+                ),
+                **(
+                    {
+                        "board_disposition": board["disposition"],
+                        "board_reason": board.get("reason"),
+                        "board_decided_on": board.get("decided_on"),
+                        "completion_record": board.get("completion_record"),
+                    }
+                    if board is not None
+                    else {}
+                ),
             },
         },
         "source": {
@@ -300,9 +371,10 @@ def _export_card(
             "discoveries": [
                 "Priority is unresolved in the owner source and remains explicitly null.",
                 *(["This record is a non-executable marker parent; child outcomes remain separate."] if marker_parent else []),
+                *_board_discoveries(board),
             ],
             "next_actions": [],
-            "blockers": [],
+            "blockers": [board["pending_note"]] if board is not None and board.get("pending_note") else [],
             "evidence": _as_string_list(record, "evidence_sources"),
         },
         "relationships": {

@@ -1,0 +1,34 @@
+{
+  "artifact": "playbook.artifact",
+  "checksum": "e521d80fb3829666b0987b293d1294d3bf0b4df8f6a1a81f13766af09f928ca4",
+  "data": {
+    "baselineRef": "origin/main",
+    "findings": [
+      {
+        "evidenceHash": "85b5ae9d612abce7fdc2b2a1dbc8e412ee0f1e40929534b02170272adff44fc2",
+        "evidenceRefs": [
+          "playbook.config.json not found; using defaults (this is not an error). Add playbook.config.json for explicit settings and .playbookignore to tune scan scope."
+        ],
+        "findingId": "verify.finding:f0b038241320e443f380c45ff152cc2c4e434e72e4a0f7ff2bab829fbcdb646f",
+        "firstSeenAt": "2026-11-15T00:13:29.361Z",
+        "lastSeenAt": "2026-11-15T00:13:29.361Z",
+        "normalizedLocation": "playbook.config.json not found; using defaults (this is not an error). Add playbook.config.json for explicit settings and .playbookignore to tune scan scope.",
+        "ruleId": "config-missing",
+        "state": "new"
+      }
+    ],
+    "generatedAt": "2026-11-15T00:13:29.361Z",
+    "kind": "playbook-verify-finding-state",
+    "resolved": [],
+    "schemaVersion": "1.0",
+    "summary": {
+      "existing": 0,
+      "ignored": 0,
+      "new": 1,
+      "resolved": 0,
+      "total": 1
+    }
+  },
+  "generated_at": "2026-11-15T00:13:29.361Z",
+  "version": 1
+}

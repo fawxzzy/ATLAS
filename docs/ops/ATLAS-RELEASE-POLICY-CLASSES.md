@@ -36,14 +36,20 @@ not re-read in this pass.
 | mazer | 0 / 0 | Verify: in progress (previous run success) | source-pin, no flag | deploy-surface | Profile `mazer` defines checks, alias and rollback. |
 | fawxzzy-fitness | 0 / 35 tags | fitness-event-contracts: success | source-pin, no flag | deploy-surface | Profile `fitness`; meaning of the tags is unverified. |
 | playbook | 2 / 2 (latest v0.54.1) | ci / Playbook CI: in progress (demo-refresh success) | true | library-publish | Only repo with real GitHub releases. |
-| fawxzzy-platform | 0 / 0 | contracts: success (2026-11-11) | not in lock | undecided | Needs a profile or a recorded no-release reason. |
-| socials-os | 0 / 0 | verify: success (2026-10-15) | not in lock | undecided | Stale run; no profile. |
+| fawxzzy-platform | 0 / 0 | contracts: success (2026-11-11) | not in lock | no-release | Contracts/library repo, no deployable artifact: private package (`private: true`), a single `contracts` workflow, no deploy or release workflow, no releases. Provider changes land through owner migrations, not releases. Revisit if it gains a deploy surface or a published package. |
+| socials-os | 0 / 0 | verify: success (2026-10-15) | not in lock | no-release | Stale and unmanaged: no main commit since 2026-10-15, `verify` is the only workflow, no release profile or deploy surface (stack status `unmanaged`). Revisit if revived. |
 | _stack | 0 / 0 | `_stack verify`: success (2026-08-21) | false | no-release | Frozen; run is stale. |
 | lifeline | 0 / 0 | Dependabot Updates: success (2026-09-01, not a CI verdict) | true | no-release while frozen | Flag contradicts freeze; no CI verdict read. |
 | foundation | 0 / 0 | Foundation CI: success (2026-07-15) | true | no-release while frozen | Flag contradicts freeze; run is four months old. |
 
 Owner acceptance of each row is **PENDING**. Fitness, Mazer, FawxzzyWeb and
 Playbook sessions own their own rows; this table is a proposal until they accept.
+
+The two rows that were `undecided` in PR #233 were classed `no-release` on
+2026-11-14 in the Atlas Stack board-close change, after a read-only `gh repo view`,
+release list, commit list, workflow list and `package.json` read of each repo.
+This records a reason only; it grants no release authority and is subject to the
+same owner acceptance as the other rows.
 
 ## `release_eligible` reconciliation
 
@@ -62,6 +68,6 @@ automation must not treat Lifeline or Foundation as shippable on the strength of
 
 ## Not verified
 
-Branch protection on all ten repos; whether any non-latest main workflow is
+Branch protection on all ten repos (the two no-release rows above rest on the reads named there, not on an owner statement); whether any non-latest main workflow is
 failing; the meaning of the Fitness tags; the full text of the authorization
 policy beyond gate and class names.
