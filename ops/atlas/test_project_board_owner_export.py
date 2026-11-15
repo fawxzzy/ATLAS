@@ -154,28 +154,43 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         self.assertEqual([], readback["status_boundaries"]["stale"])
         self.assertTrue(readback["status_boundaries"]["unknown"])
 
-    def test_board_close_archives_every_card_except_the_two_waiting_on_zac(self) -> None:
+    def test_board_close_archives_every_card(self) -> None:
         atlas = build_project_board_owner_exports()["atlas"]
-        cards = {card["record"]["card_id"]: card for card in atlas["cards"]}
-        waiting = {"lane-fitness-critical-secret-containment", "lane-security-containment"}
-        self.assertEqual(waiting, {cid for cid, card in cards.items() if card["record"]["lifecycle"] != "archived"})
-        for cid in waiting:
-            self.assertEqual("planning", cards[cid]["record"]["lifecycle"])
-            self.assertEqual(1, len(cards[cid]["content"]["blockers"]))
-            self.assertIn(cards[cid]["record"]["extensions"]["board_disposition"], {"waiting-on-zac", "queued-last"})
-        archived = [card for cid, card in cards.items() if cid not in waiting]
-        self.assertEqual(34, len(archived))
-        for card in archived:
+        self.assertEqual(36, len(atlas["cards"]))
+        completed = 0
+        archived_only = 0
+        for card in atlas["cards"]:
             extensions = card["record"]["extensions"]
-            self.assertEqual("archived", card["record"]["lifecycle"])
+            self.assertEqual("archived", card["record"]["lifecycle"], card["record"]["card_id"])
             self.assertTrue(extensions["board_reason"])
+            self.assertEqual([], card["content"]["blockers"])
             if extensions["board_disposition"] == "completed-archived":
+                completed += 1
                 self.assertTrue(extensions["completion_record"]["artifact"])
                 self.assertTrue(extensions["completion_record"]["completed_on"])
             else:
+                archived_only += 1
                 self.assertEqual("archived", extensions["board_disposition"])
                 self.assertIsNone(extensions["completion_record"])
+                self.assertTrue(
+                    extensions["board_reason"].startswith(("archived:", "superseded:", "deferred:", "folded into")),
+                    card["record"]["card_id"],
+                )
                 self.assertNotIn("Completed ", " ".join(card["content"]["discoveries"]))
+        self.assertEqual(26, completed)
+        self.assertEqual(10, archived_only)
+
+    def test_open_secret_alert_cards_are_archived_as_deferred_not_completed(self) -> None:
+        atlas = build_project_board_owner_exports()["atlas"]
+        cards = {card["record"]["card_id"]: card for card in atlas["cards"]}
+        for cid in ("lane-fitness-critical-secret-containment", "lane-security-containment"):
+            extensions = cards[cid]["record"]["extensions"]
+            self.assertEqual("archived", extensions["board_disposition"])
+            self.assertTrue(extensions["board_reason"].startswith("archived:"))
+            self.assertIn("alert #1", extensions["board_reason"])
+            self.assertIsNone(extensions["completion_record"])
+        advisor = cards["lane-supabase-security-advisor-remediation"]["record"]["extensions"]
+        self.assertIn("leaked-password protection is OFF", advisor["completion_record"]["artifact"])
 
     def test_board_projection_fails_closed_on_incomplete_dispositions(self) -> None:
         registry = json.loads((ROOT / REGISTRY_REF).read_text(encoding="utf-8"))
@@ -183,7 +198,7 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
             "archived-without-reason": ("lane-codex-execution-contracts", {"reason": None}),
             "archived-with-completion": ("lane-codex-execution-contracts", {"completion_record": {"completed_on": "2026-11-14", "artifact": "x"}}),
             "completed-without-artifact": ("lane-dependabot-visibility", {"completion_record": {"completed_on": "2026-11-14"}}),
-            "pending-without-note": ("lane-security-containment", {"pending_note": None}),
+            "archived-without-decided-on": ("lane-security-containment", {"decided_on": None}),
         }
         for name, (record_id, patch) in broken_cases.items():
             candidate = copy.deepcopy(registry)

@@ -1,11 +1,11 @@
 {
   "contract_version": "atlas.project-board.owner-export.v1",
-  "export_id": "pbe_atlas_1c856f55a493",
+  "export_id": "pbe_atlas_3c512bee851c",
   "project_id": "atlas",
   "board_id": "discordos:project-feedback:atlas",
   "owner": "stack-root",
   "adapter_id": "atlas-full-system-registry-v1",
-  "source_revision": "sha256:1c856f55a493ea21864644abaada673aa14ad598f372fa61954e7facc1de4331",
+  "source_revision": "sha256:3c512bee851c1d196681ad29c65d8d6cc63b0a57f96cfc67c4293a18847f1624",
   "generated_at": "2026-07-17T06:07:21Z",
   "sources": [
     {
@@ -13,7 +13,7 @@
       "kind": "json",
       "repository": "atlas-root",
       "path": "docs/registry/ATLAS-FULL-SYSTEM-REEVALUATION-LANES.json",
-      "revision": "sha256:0f454365eaa7cd0a73eab8ee0f49efde844aab577185d74ff6c55e14206a9f68",
+      "revision": "sha256:1ab9c6024dd24b249e496e3d43054f24b36dc44f668be23378983f1179b6c917",
       "observed_at": "2026-07-17T06:07:21Z"
     },
     {
@@ -1064,7 +1064,7 @@
         "title": "Fitness Critical secret containment",
         "description": "Contain, rotate, and verify published alert #1 without exposing its value.",
         "card_type": "reliability",
-        "lifecycle": "planning",
+        "lifecycle": "archived",
         "priority": null,
         "owner": "operator-security",
         "dependencies": [],
@@ -1084,9 +1084,9 @@
             "basis": "containment, rotation, verification"
           },
           "projection_role": "stack-coordination",
-          "seed_disposition": "current",
-          "board_disposition": "waiting-on-zac",
-          "board_reason": null,
+          "seed_disposition": "archived",
+          "board_disposition": "archived",
+          "board_reason": "archived: rotation in progress, owner Zac + Fitness. New secret key created 2026-11-14; old secret key and legacy service_role JWT key not yet revoked; secret-scanning alert #1 still open. Trigger to reopen/complete: Vercel envs swapped, old keys revoked, alert dismissed.",
           "board_decided_on": "2026-11-14",
           "completion_record": null
         }
@@ -1104,12 +1104,11 @@
           "Three proofs are accepted; history and closure remain separate decisions"
         ],
         "discoveries": [
-          "Priority is unresolved in the owner source and remains explicitly null."
+          "Priority is unresolved in the owner source and remains explicitly null.",
+          "Archived 2026-11-14: archived: rotation in progress, owner Zac + Fitness. New secret key created 2026-11-14; old secret key and legacy service_role JWT key not yet revoked; secret-scanning alert #1 still open. Trigger to reopen/complete: Vercel envs swapped, old keys revoked, alert dismissed."
         ],
         "next_actions": [],
-        "blockers": [
-          "Pending Zac: rotate or dismiss the Fitness secret-scanning alert #1 (credential). ATLAS then re-reads alert state and resolution only and closes this card as completed with a readback. Intentionally not archived by the board-close PR."
-        ],
+        "blockers": [],
         "evidence": [
           "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json"
         ]
@@ -2214,7 +2213,7 @@
         "title": "Security containment",
         "description": "Non-additive umbrella for four separately measured child-lane closeouts: Critical Fitness secret containment, Supabase advisor remediation, sensitive runtime residue containment, and Fitness dependency security.",
         "card_type": "reliability",
-        "lifecycle": "planning",
+        "lifecycle": "archived",
         "priority": null,
         "owner": "operator-security",
         "dependencies": [
@@ -2239,9 +2238,9 @@
             "basis": "Critical Fitness secret containment, Supabase advisor remediation, sensitive runtime residue containment, and Fitness dependency security; child denominators remain separate"
           },
           "projection_role": "stack-coordination",
-          "seed_disposition": "current",
-          "board_disposition": "queued-last",
-          "board_reason": null,
+          "seed_disposition": "archived",
+          "board_disposition": "archived",
+          "board_reason": "archived: roll-up not closed; open child = Fitness secret alert #1 (see lane-fitness-critical-secret-containment); leaked-password protection accepted as plan-gated. Trigger: alert #1 dismissed and legacy keys disabled",
           "board_decided_on": "2026-11-14",
           "completion_record": null
         }
@@ -2262,12 +2261,11 @@
         ],
         "discoveries": [
           "Priority is unresolved in the owner source and remains explicitly null.",
-          "This record is a non-executable marker parent; child outcomes remain separate."
+          "This record is a non-executable marker parent; child outcomes remain separate.",
+          "Archived 2026-11-14: archived: roll-up not closed; open child = Fitness secret alert #1 (see lane-fitness-critical-secret-containment); leaked-password protection accepted as plan-gated. Trigger: alert #1 dismissed and legacy keys disabled"
         ],
         "next_actions": [],
-        "blockers": [
-          "Pending: roll-up card, closes last. It completes only when its child lanes (Fitness secret containment, Supabase advisor remediation, sensitive runtime residue containment, Fitness dependency security, per the 2026-11-14 decision) are all complete and one read re-confirms. Not archived by the board-close PR because the Fitness secret containment child is still open."
-        ],
+        "blockers": [],
         "evidence": [
           "docs/registry/GITHUB-CONTROL-PLANE-REGISTRY.json",
           "docs/audits/ATLAS-FULL-SYSTEM-OPENING-AUDIT-2026-07-12.md"
@@ -2601,11 +2599,11 @@
           "projection_role": "stack-coordination",
           "seed_disposition": "archived",
           "board_disposition": "completed-archived",
-          "board_reason": "completed per decision 2026-11-14: Zac chose disposition table for 16 warnings + leaked-password protection ON (Zac flips dashboard setting); no SQL; close completed after advisors re-read shows 0 errors and leaked-pw warning gone",
+          "board_reason": "completed per decision 2026-11-14: dispositions recorded for the 16 advisor warnings; leaked-password protection is plan-gated (Free plan) and accepted, not enabled",
           "board_decided_on": "2026-11-14",
           "completion_record": {
             "completed_on": "2026-11-14",
-            "artifact": "advisor dispositions report 2026-11-14; leaked-password protection ON attested by Zac, not independently re-read by ATLAS"
+            "artifact": "advisor dispositions report 2026-11-14 (local report, not committed); leaked-password protection is OFF and is plan-gated (Supabase Free plan, verified in dashboard 2026-11-14); accepted: revisit when the org moves to Pro"
           }
         }
       },
@@ -2623,8 +2621,8 @@
         ],
         "discoveries": [
           "Priority is unresolved in the owner source and remains explicitly null.",
-          "Completed 2026-11-14: advisor dispositions report 2026-11-14; leaked-password protection ON attested by Zac, not independently re-read by ATLAS",
-          "Archived 2026-11-14: completed per decision 2026-11-14: Zac chose disposition table for 16 warnings + leaked-password protection ON (Zac flips dashboard setting); no SQL; close completed after advisors re-read shows 0 errors and leaked-pw warning gone"
+          "Completed 2026-11-14: advisor dispositions report 2026-11-14 (local report, not committed); leaked-password protection is OFF and is plan-gated (Supabase Free plan, verified in dashboard 2026-11-14); accepted: revisit when the org moves to Pro",
+          "Archived 2026-11-14: completed per decision 2026-11-14: dispositions recorded for the 16 advisor warnings; leaked-password protection is plan-gated (Free plan) and accepted, not enabled"
         ],
         "next_actions": [],
         "blockers": [],
