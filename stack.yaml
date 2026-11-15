@@ -209,6 +209,9 @@ repo_registry:
     path: repos/stream
     role: application
     status: incubating
+    # Private GitHub repository fawxzzy/stream (published 2026-11-14). Recorded for provenance only:
+    # no CI, release or deploy wiring, and release_eligible stays false in stack_lock.
+    remote: https://github.com/fawxzzy/stream.git
   nat1-games:
     path: repos/Nat1-Games/nat1-games
     role: application

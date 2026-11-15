@@ -65,11 +65,11 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         self.assertEqual(len(marker_ids), 6)
         for card in atlas["cards"]:
             if card["record"]["card_id"] in marker_ids:
-                self.assertIn(card["record"]["lifecycle"], {"planning", "completed"})
+                self.assertIn(card["record"]["lifecycle"], {"planning", "completed", "archived"})
             parent_id = card["relationships"]["parent_card_id"]
             if parent_id is not None:
                 self.assertIn(parent_id, cards_by_id)
-                self.assertIn(cards_by_id[parent_id]["record"]["lifecycle"], {"planning", "completed"})
+                self.assertIn(cards_by_id[parent_id]["record"]["lifecycle"], {"planning", "completed", "archived"})
 
     def test_atlas_backlog_excludes_owner_repo_implementation_records(self) -> None:
         registry = json.loads((ROOT / REGISTRY_REF).read_text(encoding="utf-8"))
@@ -153,6 +153,66 @@ class ProjectBoardOwnerExportTests(unittest.TestCase):
         self.assertEqual([], readback["status_boundaries"]["blocked"])
         self.assertEqual([], readback["status_boundaries"]["stale"])
         self.assertTrue(readback["status_boundaries"]["unknown"])
+
+    def test_board_close_archives_every_card(self) -> None:
+        atlas = build_project_board_owner_exports()["atlas"]
+        self.assertEqual(36, len(atlas["cards"]))
+        completed = 0
+        archived_only = 0
+        for card in atlas["cards"]:
+            extensions = card["record"]["extensions"]
+            self.assertEqual("archived", card["record"]["lifecycle"], card["record"]["card_id"])
+            self.assertTrue(extensions["board_reason"])
+            self.assertEqual([], card["content"]["blockers"])
+            if extensions["board_disposition"] == "completed-archived":
+                completed += 1
+                self.assertTrue(extensions["completion_record"]["artifact"])
+                self.assertTrue(extensions["completion_record"]["completed_on"])
+            else:
+                archived_only += 1
+                self.assertEqual("archived", extensions["board_disposition"])
+                self.assertIsNone(extensions["completion_record"])
+                self.assertTrue(
+                    extensions["board_reason"].startswith(("archived:", "superseded:", "deferred:", "folded into")),
+                    card["record"]["card_id"],
+                )
+                self.assertNotIn("Completed ", " ".join(card["content"]["discoveries"]))
+        self.assertEqual(26, completed)
+        self.assertEqual(10, archived_only)
+
+    def test_open_secret_alert_cards_are_archived_as_deferred_not_completed(self) -> None:
+        atlas = build_project_board_owner_exports()["atlas"]
+        cards = {card["record"]["card_id"]: card for card in atlas["cards"]}
+        for cid in ("lane-fitness-critical-secret-containment", "lane-security-containment"):
+            extensions = cards[cid]["record"]["extensions"]
+            self.assertEqual("archived", extensions["board_disposition"])
+            self.assertTrue(extensions["board_reason"].startswith("archived:"))
+            self.assertIn("alert #1", extensions["board_reason"])
+            self.assertIsNone(extensions["completion_record"])
+        advisor = cards["lane-supabase-security-advisor-remediation"]["record"]["extensions"]
+        self.assertIn("leaked-password protection is OFF", advisor["completion_record"]["artifact"])
+
+    def test_board_projection_fails_closed_on_incomplete_dispositions(self) -> None:
+        registry = json.loads((ROOT / REGISTRY_REF).read_text(encoding="utf-8"))
+        broken_cases = {
+            "archived-without-reason": ("lane-codex-execution-contracts", {"reason": None}),
+            "archived-with-completion": ("lane-codex-execution-contracts", {"completion_record": {"completed_on": "2026-11-14", "artifact": "x"}}),
+            "completed-without-artifact": ("lane-dependabot-visibility", {"completion_record": {"completed_on": "2026-11-14"}}),
+            "archived-without-decided-on": ("lane-security-containment", {"decided_on": None}),
+        }
+        for name, (record_id, patch) in broken_cases.items():
+            candidate = copy.deepcopy(registry)
+            record = next(item for item in [*candidate["lanes"], *candidate["backlog_candidates"]] if item["id"] == record_id)
+            for key, value in patch.items():
+                if value is None:
+                    record["board"].pop(key, None)
+                else:
+                    record["board"][key] = value
+            with tempfile.TemporaryDirectory() as temp_dir:
+                registry_path = Path(temp_dir) / "registry.json"
+                registry_path.write_text(json.dumps(candidate), encoding="utf-8")
+                with self.subTest(name), self.assertRaises(ProjectBoardOwnerExportError):
+                    build_project_board_owner_exports(registry_path=registry_path)
 
     def test_registry_book_status_conflict_fails_closed(self) -> None:
         registry = json.loads((ROOT / REGISTRY_REF).read_text(encoding="utf-8"))
